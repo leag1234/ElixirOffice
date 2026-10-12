@@ -1,0 +1,1471 @@
+From 1fa7e5554c5f0a4941487b77c474f82623b16fea Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:28:57 +0200
+Subject: [PATCH 3/7] feat(documenteditor): Word-like title bar with command
+ search
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- File name (without extension, like Word) followed by the save state:
+  Saved, Saving… (spinning), Not saved when autosave is off, Offline;
+  it follows the editor save actions and the Save button state.
+- Clicking the name opens a flyout: rename the file in place when the
+  host supports it (same rename event as before), its location, Open
+  file location and Version history.
+- Centred "Search (Alt+Q)" box, Alt+Q (Ctrl+Option+Q on macOS) focuses
+  it like in Word. It searches the ribbon commands - every button of
+  the ribbon tabs and the items of their menus, with their tab and group
+  - and runs the chosen one by switching to its tab and clicking it, so
+  "table" opens the Insert > Table grid. Suggested actions when empty;
+  Find and Replace in the document as the last entries. Arrow keys,
+  Enter and Esc work as in Word.
+- Tab row: Comments button (toggles the comments pane), the Editing /
+  Reviewing / Viewing mode drop-down and an accent Share button (host
+  sharing, or the Share page of the File menu); the magnifier and the
+  open-location buttons give way to the search box and the flyout.
+
+Alt+Q opened the chat panel before; the chat stays in the Review tab.
+Strings in en and the 11 UI languages.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/elixir-chrome/Backstage.js       |   2 +-
+ .../main/app/elixir-chrome/CommandIndex.js    | 173 ++++++++
+ .../main/app/elixir-chrome/Controller.js      |  60 ++-
+ .../main/app/elixir-chrome/TitleBar.js        | 420 ++++++++++++++++++
+ apps/documenteditor/main/locale/de.json       |  24 +
+ apps/documenteditor/main/locale/en.json       |  24 +
+ apps/documenteditor/main/locale/es.json       |  24 +
+ apps/documenteditor/main/locale/fr.json       |  24 +
+ apps/documenteditor/main/locale/it.json       |  24 +
+ apps/documenteditor/main/locale/ja.json       |  24 +
+ apps/documenteditor/main/locale/nl.json       |  24 +
+ apps/documenteditor/main/locale/pl.json       |  24 +
+ apps/documenteditor/main/locale/pt-pt.json    |  24 +
+ apps/documenteditor/main/locale/pt.json       |  24 +
+ apps/documenteditor/main/locale/ru.json       |  24 +
+ apps/documenteditor/main/locale/zh.json       |  24 +
+ .../main/resources/less/elixir-chrome.less    | 279 ++++++++++++
+ 17 files changed, 1220 insertions(+), 2 deletions(-)
+ create mode 100644 apps/documenteditor/main/app/elixir-chrome/CommandIndex.js
+ create mode 100644 apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+
+diff --git a/apps/documenteditor/main/app/elixir-chrome/Backstage.js b/apps/documenteditor/main/app/elixir-chrome/Backstage.js
+index 8011f36864..616f2ad6de 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/Backstage.js
++++ b/apps/documenteditor/main/app/elixir-chrome/Backstage.js
+@@ -264,7 +264,7 @@ define([
+ 
+         canShare: function () {
+             var mode = this.mode, h = this.hostConfig();
+-            return !!(mode && !mode.isOffline && (mode.canRequestSharingSettings || mode.sharingSettingsUrl || h.shareUrl || this.fm.panels['rights'] && this.fm.miAccess && this.fm.document && this.fm.document.info && this.fm.document.info.sharingSettings && this.fm.document.info.sharingSettings.length));
++            return !!(mode && !mode.isOffline && (mode.canRequestSharingSettings || mode.sharingSettingsUrl || h.shareUrl || this.fm.panels && this.fm.panels['rights'] && this.fm.miAccess && this.fm.document && this.fm.document.info && this.fm.document.info.sharingSettings && this.fm.document.info.sharingSettings.length));
+         },
+ 
+         select: function (action) { this.fm.selectMenu(action); },
+diff --git a/apps/documenteditor/main/app/elixir-chrome/CommandIndex.js b/apps/documenteditor/main/app/elixir-chrome/CommandIndex.js
+new file mode 100644
+index 0000000000..4a592d994a
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-chrome/CommandIndex.js
+@@ -0,0 +1,173 @@
++/*
++ * ElixirOffice window chrome: command index for the title bar search
++ * (Word's "Search (Alt+Q)" / "Tell me").
++ *
++ * Every Common.UI.Button is remembered through a WeakRef when it is created;
++ * the index keeps the ones that live in the ribbon (#toolbar) and their menu
++ * items, with the ribbon tab and group they belong to. Running a command
++ * switches to its tab and clicks the control, so the result is exactly what
++ * the ribbon does (dialogs, menus, galleries).
++ *
++ * Licensed under the GNU AGPL v3 like the rest of web-apps.
++ */
++define([
++    'core',
++    'common/main/lib/component/Button'
++], function () {
++    'use strict';
++
++    var registry = [];
++    var hasWeakRef = typeof window.WeakRef === 'function';
++
++    // remember the buttons as they are created (before the ribbon is built)
++    (function hookButtons() {
++        var proto = Common.UI.Button && Common.UI.Button.prototype;
++        if (!proto || proto._elxIndexed) return;
++        proto._elxIndexed = true;
++        var init = proto.initialize;
++        proto.initialize = function () {
++            var r = init.apply(this, arguments);
++            registry.push(hasWeakRef ? new WeakRef(this) : this);
++            if (registry.length > 4000) prune();
++            return r;
++        };
++    })();
++
++    function prune() {
++        registry = registry.filter(function (ref) {
++            var b = hasWeakRef ? ref.deref() : ref;
++            return b && b.cmpEl && document.body.contains(b.cmpEl[0]) || (b && !b.rendered);
++        });
++    }
++
++    var fold = function (s) {
++        s = (s || '').toString().toLowerCase();
++        return s.normalize ? s.normalize('NFD').replace(/[̀-ͯ]/g, '') : s;
++    };
++    var clean = function (s) {
++        if (!s || typeof s !== 'string') return '';
++        return s.replace(/<[^>]*>/g, ' ').replace(/\s*\((?:[^()]*(?:Ctrl|Alt|Shift|⌘|⌥|⇧|F\d)[^()]*)\)\s*$/i, '')
++            .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
++    };
++    var hintOf = function (o) {
++        var h = o && (o.options ? o.options.hint : o.hint);
++        if (_.isArray(h)) h = h[0];
++        return clean(typeof h === 'string' ? h : '');
++    };
++
++    var CommandIndex = {
++        build: function (toolbar) {
++            var cmds = [], seen = {};
++            var tabCaption = function (tab) {
++                var $a = toolbar && toolbar.$el ? toolbar.$el.find('.ribtab > a[data-tab="' + tab + '"]') : $();
++                return $a.length ? $.trim($a.text()) : '';
++            };
++            // ribbon group label (DE.Views.Toolbar.groupLabelText): the key sits on the first group of a run
++            var groupLabel = function ($el) {
++                var $g = $el.closest('.group'), key = $g.attr('data-group');
++                for (var $p = $g.prev(); !key && $p.length && !$p.hasClass('separator'); $p = $p.prev())
++                    key = $p.attr('data-group');
++                return key && toolbar && toolbar.groupLabelText ? (toolbar.groupLabelText(key) || '') : '';
++            };
++            var add = function (c) {
++                var key = fold(c.label) + '|' + c.tab + '|' + (c.parent || '');
++                if (!c.label || seen[key]) return;
++                seen[key] = true;
++                c.text = fold([c.label, c.hint, c.parent, c.group, c.tabCaption].join(' '));
++                cmds.push(c);
++            };
++            registry.forEach(function (ref) {
++                var b = hasWeakRef ? ref.deref() : ref;
++                if (!b || !b.cmpEl || !b.cmpEl.length) return;
++                var $panel = b.cmpEl.closest('#toolbar section.panel[data-tab]');
++                if (!$panel.length) return;
++                var tab = $panel.attr('data-tab');
++                if (tab === 'file') return;
++                var caption = clean(b.options && b.options.caption || b.caption),
++                    hint = hintOf(b),
++                    label = hint || caption;
++                if (!label) return;
++                var base = { btn: b, tab: tab, tabCaption: tabCaption(tab), group: groupLabel(b.cmpEl), hint: caption !== label ? caption : '' };
++                add(_.extend({ label: label }, base));
++                var menu = b.menu;
++                if (menu && typeof menu === 'object' && menu.items) {
++                    menu.items.forEach(function (item) {
++                        if (!item || item.menu || item.options && (item.options.caption === '--' || item.options.template)) return;
++                        var ic = clean(item.caption || item.options && item.options.caption);
++                        if (!ic || ic === '--') return;
++                        add(_.extend({}, base, { label: ic, parent: label, item: item, hint: '' }));
++                    });
++                }
++            });
++            this.cmds = cmds;
++            return cmds;
++        },
++
++        search: function (query, limit) {
++            var words = fold(query).split(/\s+/).filter(Boolean);
++            if (!words.length || !this.cmds) return [];
++            var res = [];
++            this.cmds.forEach(function (c) {
++                var l = fold(c.label), score = 0;
++                for (var i = 0; i < words.length; i++) {
++                    var w = words[i], idx = c.text.indexOf(w);
++                    if (idx < 0) return;
++                    if (l.indexOf(w) === 0) score += 6;
++                    else if (new RegExp('(^|[\\s\\-/])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(l)) score += 4;
++                    else if (l.indexOf(w) > 0) score += 2;
++                    else score += 1;
++                }
++                if (c.item) score -= 0.5;
++                if (isDisabled(c)) score -= 3;
++                res.push({ c: c, s: score });
++            });
++            res.sort(function (a, b) { return b.s - a.s || a.c.label.length - b.c.label.length; });
++            return res.slice(0, limit || 8).map(function (r) { return r.c; });
++        },
++
++        isDisabled: function (c) { return isDisabled(c); },
++
++        run: function (c, toolbar) {
++            if (!c || isDisabled(c)) return false;
++            var b = c.btn;
++            if (toolbar && c.tab && toolbar.setTab) {
++                if (toolbar.isTabActive ? !toolbar.isTabActive(c.tab) : true) toolbar.setTab(c.tab);
++            }
++            var click = function ($el) { $el && $el[0] && $el[0].click(); };
++            _.defer(function () {
++                if (c.item) {
++                    var item = c.item;
++                    var openAndPick = function () {
++                        if (item.rendered && item.$el && item.$el.is(':visible')) { click(item.$el.find('> a')); return true; }
++                        return false;
++                    };
++                    var $toggle = b.cmpEl.find('[data-toggle=dropdown]').last();
++                    if (!$toggle.length) $toggle = b.cmpEl.find('button').last();
++                    click($toggle);
++                    setTimeout(function () {
++                        if (!openAndPick()) {
++                            // menu not shown (e.g. folded ribbon): fire the item like a click would
++                            item.trigger('click', item, {});
++                            b.menu && !b.menu.rendered && b.menu.trigger('item:click', b.menu, item, {});
++                        }
++                    }, 60);
++                } else {
++                    var $btn = b.cmpEl.is('button') ? b.cmpEl : b.cmpEl.find('button').first();
++                    if (b.menu && !b.split) $btn = b.cmpEl.find('[data-toggle=dropdown]').first().length ? b.cmpEl.find('[data-toggle=dropdown]').first() : $btn;
++                    click($btn);
++                }
++            });
++            return true;
++        }
++    };
++
++    function isDisabled(c) {
++        var b = c.btn;
++        if (!b || (b.isDisabled && b.isDisabled())) return true;
++        if (c.item && c.item.isDisabled && c.item.isDisabled()) return true;
++        return false;
++    }
++
++    window.ElixirCommandIndex = CommandIndex;
++    return CommandIndex;
++});
+diff --git a/apps/documenteditor/main/app/elixir-chrome/Controller.js b/apps/documenteditor/main/app/elixir-chrome/Controller.js
+index 15cd38c39e..045fd7919f 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/Controller.js
++++ b/apps/documenteditor/main/app/elixir-chrome/Controller.js
+@@ -11,7 +11,9 @@
+ define([
+     'core',
+     'documenteditor/main/app/elixir-chrome/Icons',
+-    'documenteditor/main/app/elixir-chrome/Backstage'
++    'documenteditor/main/app/elixir-chrome/CommandIndex',
++    'documenteditor/main/app/elixir-chrome/Backstage',
++    'documenteditor/main/app/elixir-chrome/TitleBar'
+ ], function () {
+     'use strict';
+ 
+@@ -22,8 +24,15 @@ define([
+             this.addListeners({
+                 'FileMenu': {
+                     'render:after': function () { me.backstage && me.backstage.onRender(); }
++                },
++                'LeftMenu': {
++                    'comments:show': function () { me.titleBar && me.titleBar.setCommentsPressed(true); },
++                    'comments:hide': function () { me.titleBar && me.titleBar.setCommentsPressed(false); }
+                 }
+             });
++            Common.NotificationCenter.on('app:ready', function (mode) {
++                _.defer(function () { me.onAppReady(mode); });
++            });
+         },
+ 
+         onLaunch: function () {
+@@ -31,6 +40,55 @@ define([
+             this.fileMenu = lm && lm.leftMenu && lm.leftMenu.menuFile;
+             if (this.fileMenu)
+                 this.backstage = new DE.Views.ElixirBackstage({ controller: this, menu: this.fileMenu });
++            this.titleBar = new DE.Views.ElixirTitleBar({ controller: this });
++        },
++
++        onAppReady: function (mode) {
++            this.mode = mode;
++            this.titleBar.setup(mode);
++        },
++
++        leftMenu: function () {
++            var lm = this.getApplication().getController('LeftMenu');
++            return lm && lm.leftMenu;
++        },
++
++        canShare: function () {
++            if (this.backstage) {
++                this.backstage.mode = (this.fileMenu && this.fileMenu.mode) || this.mode || {};
++                return this.backstage.canShare();
++            }
++            return false;
++        },
++
++        openBackstage: function (panel) {
++            var lm = this.leftMenu();
++            if (!lm) return;
++            lm.showMenu('file');
++            panel && this.fileMenu && this.fileMenu.selectMenu(panel);
++        },
++
++        toggleComments: function () {
++            var lm = this.leftMenu();
++            if (!lm || !lm.btnComments) return;
++            if (lm.btnComments.pressed) {
++                lm.btnComments.toggle(false);
++                lm.onBtnMenuClick(lm.btnComments);
++                Common.NotificationCenter.trigger('layout:changed', 'leftmenu');
++                Common.NotificationCenter.trigger('edit:complete');
++            } else {
++                lm.showMenu('comments');
++            }
++        },
++
++        findInDocument: function (text, replace) {
++            var lmc = this.getApplication().getController('LeftMenu');
++            if (!lmc) return;
++            lmc.onShowHideSearch(true, text);
++            if (replace) {
++                var panel = lmc.leftMenu && lmc.leftMenu.panelSearch;
++                setTimeout(function () { panel && panel.focus && panel.focus('replace'); }, 100);
++            }
+         }
+     });
+ });
+diff --git a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+new file mode 100644
+index 0000000000..21e92d13eb
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+@@ -0,0 +1,420 @@
++/*
++ * ElixirOffice window chrome: Word-like title bar.
++ *
++ * - file name with the save state ("Saved" / "Saving…") and a flyout to rename
++ *   the file (when the host supports it), see its location and version history;
++ * - centred "Search (Alt+Q)" box that runs ribbon commands (CommandIndex) and
++ *   falls back to Find in the document;
++ * - on the tab row: Comments, the Editing / Reviewing / Viewing mode, Share.
++ *
++ * Built on the upstream header (Common.Views.Header) instance, which keeps its
++ * own buttons and events.
++ *
++ * Licensed under the GNU AGPL v3 like the rest of web-apps.
++ */
++define([
++    'core',
++    'documenteditor/main/app/elixir-chrome/Icons',
++    'documenteditor/main/app/elixir-chrome/CommandIndex'
++], function () {
++    'use strict';
++
++    var Icons = window.ElixirChromeIcons, Index = window.ElixirCommandIndex;
++    var esc = function (s) { return Common.Utils.String.htmlEncode(s === undefined || s === null ? '' : String(s)); };
++    var isMac = Common.Utils.isMac;
++
++    var STRINGS = {
++        txtSaved: 'Saved',
++        txtSaving: 'Saving…',
++        txtNotSaved: 'Not saved',
++        txtOffline: 'Offline',
++        txtSavedTip: 'All changes are saved',
++        txtFileName: 'File name',
++        txtLocation: 'Location',
++        txtOpenLocation: 'Open file location',
++        txtVersionHistory: 'Version history',
++        txtRenameHint: 'Press Enter to rename the file',
++        txtInvalidName: 'A file name cannot contain any of these characters:',
++        txtSearch: 'Search',
++        txtSearchPlaceholder: 'Search ({0})',
++        txtSearchLabel: 'Search for commands and in the document',
++        txtActions: 'Actions',
++        txtSuggested: 'Suggested actions',
++        txtFindInDoc: 'Find in document',
++        txtFindText: 'Find “{0}”',
++        txtReplaceText: 'Replace “{0}”…',
++        txtNoCommand: 'No matching command',
++        txtComments: 'Comments',
++        txtCommentsTip: 'Show comments',
++        txtShare: 'Share',
++        txtShareTip: 'Share this document'
++    };
++
++    DE.Views.ElixirTitleBar = Backbone.View.extend(_.extend({
++
++        initialize: function (options) {
++            this.controller = options.controller;
++            this.state = { modified: false, saving: false, offline: false };
++        },
++
++        icon: function (name, size, cls) { return Icons ? Icons.svg(name, size, cls) : ''; },
++        shortcut: function () { return isMac ? '⌃⌥Q' : 'Alt+Q'; },
++
++        setup: function (mode) {
++            var main = DE.getController('Main');
++            this.mode = mode || main.appOptions || {};
++            this.api = main.api;
++            this.header = DE.getController('Viewport').header;
++            this.toolbar = DE.getController('Toolbar').toolbar;
++            this.$title = $('#box-document-title');
++            if (!this.$title.length || !this.header || this.ready) return;
++            this.ready = true;
++            $('body').addClass('elx-chrome');
++            this.$title.addClass('elx-titlebar');
++
++            this.renderDocName();
++            this.renderSearch();
++            this.renderRight();
++            this.bindSaveState();
++            this.bindShortcut();
++        },
++
++        hostConfig: function () {
++            var main = DE.getController('Main');
++            return (main && main.editorConfig && main.editorConfig.elixir) || {};
++        },
++
++        // ---- file name, save state, flyout ------------------------------------------------
++
++        renderDocName: function () {
++            var me = this, header = this.header;
++            var $box = $('#id-box-doc-name');
++            if (!$box.length) return;
++            $box.addClass('elx-docname-box');
++            this.$doc = $('<button type="button" class="elx-docname" aria-haspopup="dialog" aria-expanded="false">' +
++                '<span class="elx-docname-text"></span>' +
++                '<span class="elx-docstate" aria-live="polite"><span class="elx-docstate-ic"></span><span class="elx-docstate-txt"></span></span>' +
++                '<span class="elx-docname-chev">' + this.icon('chevron-down', 20) + '</span></button>');
++            $box.append(this.$doc);
++            this.$doc.on('click', function (e) { me.toggleFlyout(); e.stopPropagation(); });
++
++            // follow the upstream caption updates (rename, meta, modified flag)
++            var setCaption = header.setDocumentCaption, setChanged = header.setDocumentChanged;
++            header.setDocumentCaption = function () { var r = setCaption.apply(this, arguments); me.updateName(); return r; };
++            header.setDocumentChanged = function () { var r = setChanged.apply(this, arguments); me.updateName(); return r; };
++            this.updateName();
++            this.updateState();
++        },
++
++        caption: function () {
++            return (this.header && this.header.getDocumentCaption && this.header.getDocumentCaption()) || '';
++        },
++
++        splitName: function (name) {
++            var i = name.lastIndexOf('.');
++            return i > 0 ? { base: name.substring(0, i), ext: name.substring(i) } : { base: name, ext: '' };
++        },
++
++        updateName: function () {
++            if (!this.$doc) return;
++            var name = this.caption();
++            this.$doc.find('.elx-docname-text').text(this.splitName(name).base);
++            this.$doc.attr('title', name);
++        },
++
++        bindSaveState: function () {
++            var me = this, api = this.api;
++            if (!api) return;
++            var A = Asc.c_oAscAsyncAction;
++            // "unsaved changes" = what the editor still has to send (the Save button state)
++            var refresh = function () {
++                me.state.modified = api.asc_isDocumentCanSave ? !!api.asc_isDocumentCanSave() : !!(api.isDocumentModified && api.isDocumentModified());
++                me.updateState();
++            };
++            api.asc_registerCallback('asc_onDocumentModifiedChanged', refresh);
++            api.asc_registerCallback('asc_onDocumentCanSaveChanged', refresh);
++            var isSave = function (id) { return id === A.Save || id === A.ForceSaveButton || id === A.ForceSaveTimeout; };
++            api.asc_registerCallback('asc_onStartAction', function (type, id) {
++                if (isSave(id)) { me.state.saving = true; me.updateState(); }
++            });
++            api.asc_registerCallback('asc_onEndAction', function (type, id) {
++                if (isSave(id)) { me.state.saving = false; refresh(); }
++            });
++            api.asc_registerCallback('asc_onCoAuthoringDisconnect', function () { me.state.offline = true; me.updateState(); });
++            Common.NotificationCenter.on('api:disconnect', function () { me.state.offline = true; me.updateState(); });
++        },
++
++        updateState: function () {
++            if (!this.$doc) return;
++            var s = this.state, mode = this.mode || {}, me = this;
++            var $st = this.$doc.find('.elx-docstate');
++            if (!mode.isEdit) { $st.hide(); return; }
++            var autosave = Common.Utils.InternalSettings.get('de-settings-autosave');
++            autosave = autosave === undefined || autosave === null ? true : !!autosave;
++            var key = s.offline ? 'offline' : (s.saving || s.modified && autosave) ? 'saving' : s.modified ? 'unsaved' : 'saved';
++            clearTimeout(this._stateTimer);
++            var apply = function () {
++                var txt = { saved: me.txtSaved, saving: me.txtSaving, unsaved: me.txtNotSaved, offline: me.txtOffline }[key];
++                var ic = { saved: 'saved', saving: 'saving', unsaved: 'unsaved', offline: 'unsaved' }[key];
++                $st.show().attr('data-state', key).attr('title', key === 'saved' ? me.txtSavedTip : txt);
++                $st.find('.elx-docstate-ic').html(me.icon(ic, 20));
++                $st.find('.elx-docstate-txt').text(txt);
++            };
++            // "Saved" settles a moment after the last change, like Word
++            if (key === 'saved' && $st.attr('data-state') === 'saving') this._stateTimer = setTimeout(apply, 700);
++            else apply();
++        },
++
++        toggleFlyout: function () {
++            this.$flyout && this.$flyout.is(':visible') ? this.closeFlyout() : this.openFlyout();
++        },
++
++        openFlyout: function () {
++            var me = this, mode = this.mode || {}, h = this.hostConfig();
++            var name = this.caption(), parts = this.splitName(name);
++            var canRename = !!(mode.canRename && !mode.isDesktopApp && !this.header.readOnly);
++            Common.UI.Menu.Manager.hideAll();
++            this.closeSearch();
++            if (!this.$flyout) {
++                this.$flyout = $('<div class="elx-flyout elx-docflyout" role="dialog"></div>').appendTo(document.body);
++                $(document).on('mousedown.elxfly', function (e) {
++                    if (me.$flyout && me.$flyout.is(':visible') && !$(e.target).closest('.elx-docflyout, .elx-docname').length) me.closeFlyout();
++                });
++            }
++            var html =
++                '<label class="elx-fly-label" for="elx-fname">' + esc(this.txtFileName) + '</label>' +
++                '<div class="elx-fname-row"><input id="elx-fname" type="text" class="form-control" spellcheck="false" autocomplete="off" value="' + esc(parts.base) + '"' + (canRename ? '' : ' disabled') + '>' +
++                    '<span class="elx-fname-ext">' + esc(parts.ext) + '</span></div>' +
++                (canRename ? '<div class="elx-fly-hint">' + esc(this.txtRenameHint) + '</div>' : '') +
++                (h.folder ? '<div class="elx-fly-label">' + esc(this.txtLocation) + '</div><div class="elx-fly-loc">' + this.icon('folder', 20) + '<span>' + esc(h.folder) + '</span></div>' : '') +
++                '<div class="elx-fly-actions">' +
++                    (mode.canBack ? '<button type="button" class="elx-fly-link" data-act="location">' + this.icon('open', 20) + '<span>' + esc(this.txtOpenLocation) + '</span></button>' : '') +
++                    (mode.canUseHistory && !mode.isDisconnected ? '<button type="button" class="elx-fly-link" data-act="history">' + this.icon('history', 20) + '<span>' + esc(this.txtVersionHistory) + '</span></button>' : '') +
++                '</div>';
++            this.$flyout.html(html);
++            var off = this.$doc.offset();
++            var left = Common.UI.isRTL() ? Math.max(8, off.left + this.$doc.outerWidth() - 320) : Math.max(8, off.left);
++            this.$flyout.css({ top: off.top + this.$doc.outerHeight() + 6, left: left }).show();
++            this.$doc.attr('aria-expanded', 'true');
++            this.api && this.api.asc_enableKeyEvents(false);
++
++            var $in = this.$flyout.find('#elx-fname');
++            var commit = function () {
++                var v = $.trim($in.val());
++                if (!canRename || !v || v === parts.base) return true;
++                if (/[\t*+:"<>?|\\/]/.test(v)) {
++                    me.$flyout.find('.elx-fly-hint').addClass('error').text(me.txtInvalidName + ' *+:"<>?|\\/');
++                    return false;
++                }
++                me.header.fireEvent('rename', [v]);
++                me.header.setDocumentCaption(v + parts.ext);
++                return true;
++            };
++            $in.on('keydown', function (e) {
++                e.stopPropagation();
++                if (e.keyCode === Common.UI.Keys.RETURN) { commit() && me.closeFlyout(true); }
++                else if (e.keyCode === Common.UI.Keys.ESC) { me.closeFlyout(true); }
++            });
++            canRename && setTimeout(function () { $in.focus().select(); }, 30);
++            this.$flyout.find('[data-act=location]').on('click', function () { me.closeFlyout(true); Common.NotificationCenter.trigger('goback'); });
++            this.$flyout.find('[data-act=history]').on('click', function () {
++                me.closeFlyout(true);
++                DE.getController('LeftMenu').clickMenuFileItem(null, 'history');
++            });
++            this.$flyout.on('keydown', function (e) { if (e.keyCode === Common.UI.Keys.ESC) me.closeFlyout(true); });
++        },
++
++        closeFlyout: function (focusDoc) {
++            if (!this.$flyout) return;
++            this.$flyout.hide();
++            this.$doc && this.$doc.attr('aria-expanded', 'false');
++            this.api && this.api.asc_enableKeyEvents(true);
++            focusDoc && Common.NotificationCenter.trigger('edit:complete');
++        },
++
++        // ---- search box -------------------------------------------------------------------
++
++        renderSearch: function () {
++            var me = this;
++            var ph = Common.Utils.String.format(this.txtSearchPlaceholder, this.shortcut());
++            this.$search = $('<div class="elx-search" role="search">' +
++                '<span class="elx-search-ic">' + this.icon('search', 20) + '</span>' +
++                '<input type="text" class="elx-search-input" spellcheck="false" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="elx-search-pop" placeholder="' + esc(ph) + '" aria-label="' + esc(this.txtSearchLabel) + '">' +
++                '<div id="elx-search-pop" class="elx-search-pop" role="listbox" style="display:none;"></div></div>');
++            this.$title.append(this.$search);
++            this.$input = this.$search.find('input');
++            this.$pop = this.$search.find('.elx-search-pop');
++
++            this.$input.on('focus', function () { me.openSearch(); });
++            this.$input.on('input', function () { me.renderResults(); });
++            this.$input.on('keydown', function (e) { me.onSearchKey(e); });
++            this.$input.on('blur', function () { setTimeout(function () { if (!me.$search[0].contains(document.activeElement)) me.closeSearch(); }, 120); });
++            this.$pop.on('mousedown', function (e) { e.preventDefault(); });
++            this.$pop.on('click', '.elx-sr', function () { me.runResult($(this).index('.elx-search-pop .elx-sr')); });
++            this.$pop.on('mousemove', '.elx-sr', function () { me.highlight($(this).index('.elx-search-pop .elx-sr')); });
++        },
++
++        bindShortcut: function () {
++            var me = this;
++            // Word's Alt+Q (Ctrl+Option+Q on macOS, the editor's convention for Alt shortcuts);
++            // captured before the editor's own handlers
++            window.addEventListener('keydown', function (e) {
++                var q = e.keyCode === 81 || e.code === 'KeyQ';
++                if (!q) return;
++                var hit = isMac ? (e.ctrlKey && e.altKey && !e.metaKey && !e.shiftKey) : (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey);
++                if (!hit) return;
++                e.preventDefault();
++                e.stopImmediatePropagation();
++                me.focusSearch();
++            }, true);
++        },
++
++        focusSearch: function () {
++            if (!this.$input) return;
++            var fm = DE.getController('LeftMenu').leftMenu.menuFile;
++            fm && fm.isVisible() && fm.hide();
++            Common.UI.Menu.Manager.hideAll();
++            this.$input.focus().select();
++        },
++
++        openSearch: function () {
++            this.api && this.api.asc_enableKeyEvents(false);
++            Index.build(this.toolbar);
++            this.$search.addClass('open');
++            this.renderResults();
++        },
++
++        closeSearch: function () {
++            if (!this.$search || !this.$search.hasClass('open')) return;
++            this.$search.removeClass('open');
++            this.$pop.hide();
++            this.$input.attr('aria-expanded', 'false');
++            this.api && this.api.asc_enableKeyEvents(true);
++        },
++
++        suggestions: function () {
++            var tb = this.toolbar || {}, list = [];
++            var want = [tb.btnInsertTable, tb.btnsPageBreak && tb.btnsPageBreak[0], tb.btnInsertShape, tb.btnInsertText, tb.btnPageMargins, tb.btnColumns];
++            want.forEach(function (b) {
++                if (!b) return;
++                var c = _.find(Index.cmds || [], function (c) { return c.btn === b && !c.item; });
++                c && list.push(c);
++            });
++            return list;
++        },
++
++        renderResults: function () {
++            var q = $.trim(this.$input.val()), me = this, html = '';
++            var cmds = q ? Index.search(q, 7) : this.suggestions();
++            this.results = [];
++            if (cmds.length) {
++                html += '<div class="elx-sg">' + esc(q ? this.txtActions : this.txtSuggested) + '</div>';
++                cmds.forEach(function (c) {
++                    var dis = Index.isDisabled(c);
++                    me.results.push({ type: 'cmd', c: c });
++                    var where = [c.tabCaption, c.group, c.item ? c.parent : ''].filter(Boolean).join(' › ');
++                    html += '<div class="elx-sr' + (dis ? ' disabled' : '') + '" role="option" id="elx-sr-' + (me.results.length - 1) + '">' +
++                        '<span class="elx-sr-ic">' + me.cmdIcon(c) + '</span>' +
++                        '<span class="elx-sr-label">' + esc(c.label) + '</span>' +
++                        (where ? '<span class="elx-sr-where">' + esc(where) + '</span>' : '') + '</div>';
++                });
++            } else if (q) {
++                html += '<div class="elx-sg">' + esc(this.txtActions) + '</div><div class="elx-sr-empty">' + esc(this.txtNoCommand) + '</div>';
++            }
++            if (q) {
++                html += '<div class="elx-sg">' + esc(this.txtFindInDoc) + '</div>';
++                this.results.push({ type: 'find', q: q });
++                html += '<div class="elx-sr" role="option" id="elx-sr-' + (this.results.length - 1) + '"><span class="elx-sr-ic">' + this.icon('search', 20) + '</span><span class="elx-sr-label">' + esc(Common.Utils.String.format(this.txtFindText, q)) + '</span></div>';
++                if (this.mode && this.mode.isEdit) {
++                    this.results.push({ type: 'replace', q: q });
++                    html += '<div class="elx-sr" role="option" id="elx-sr-' + (this.results.length - 1) + '"><span class="elx-sr-ic">' + this.icon('rename', 20) + '</span><span class="elx-sr-label">' + esc(Common.Utils.String.format(this.txtReplaceText, q)) + '</span></div>';
++                }
++            }
++            this.$pop.html(html).toggle(!!html);
++            this.$input.attr('aria-expanded', html ? 'true' : 'false');
++            // first enabled command is the default, like Word; otherwise Find
++            var first = _.findIndex(this.results, function (r) { return r.type !== 'cmd' || !Index.isDisabled(r.c); });
++            this.highlight(first < 0 ? 0 : first);
++        },
++
++        cmdIcon: function (c) {
++            var $ic = c.btn && c.btn.cmpEl ? c.btn.cmpEl.find('svg.icon, i.icon, .icon').first() : $();
++            if ($ic.length) {
++                var $cl = $ic.clone();
++                $cl.removeAttr('id').addClass('elx-sr-cmdicon');
++                return $('<div>').append($cl).html();
++            }
++            return this.icon('more', 20);
++        },
++
++        highlight: function (i) {
++            var $rows = this.$pop.find('.elx-sr');
++            if (!$rows.length) { this.active = -1; return; }
++            i = Math.max(0, Math.min(i, $rows.length - 1));
++            this.active = i;
++            $rows.removeClass('active').eq(i).addClass('active');
++            this.$input.attr('aria-activedescendant', 'elx-sr-' + i);
++        },
++
++        onSearchKey: function (e) {
++            var K = Common.UI.Keys;
++            e.stopPropagation();
++            if (e.keyCode === K.DOWN) { this.highlight((this.active || 0) + 1); e.preventDefault(); }
++            else if (e.keyCode === K.UP) { this.highlight((this.active || 0) - 1); e.preventDefault(); }
++            else if (e.keyCode === K.RETURN) { this.runResult(this.active); e.preventDefault(); }
++            else if (e.keyCode === K.ESC) {
++                e.preventDefault();
++                if (this.$input.val()) { this.$input.val(''); this.renderResults(); }
++                else { this.closeSearch(); this.$input.blur(); Common.NotificationCenter.trigger('edit:complete'); }
++            }
++        },
++
++        runResult: function (i) {
++            var r = this.results && this.results[i];
++            if (!r) return;
++            if (r.type === 'cmd' && Index.isDisabled(r.c)) return;
++            this.$input.val('');
++            this.closeSearch();
++            this.$input.blur();
++            if (r.type === 'cmd') {
++                Index.run(r.c, this.toolbar);
++            } else {
++                this.controller.findInDocument(r.q, r.type === 'replace');
++            }
++        },
++
++        // ---- tab row: Comments, mode, Share ------------------------------------------------
++
++        renderRight: function () {
++            var me = this, mode = this.mode || {}, header = this.header;
++            var $right = $('#box-right-btn-group');
++            if (!$right.length) return;
++            $right.addClass('elx-right');
++            var mkBtn = function (cls, icon, caption, hint) {
++                var $b = $('<button type="button" class="btn btn-header elx-hbtn ' + cls + '">' + me.icon(icon, 20) + '<span class="caption">' + esc(caption) + '</span></button>');
++                $b.attr('data-hint', '0').attr('data-hint-direction', 'bottom').attr('data-hint-offset', 'big');
++                hint && $b.tooltip({ title: hint, placement: 'cursor' });
++                return $b;
++            };
++            if (mode.canViewComments && mode.canCoAuthoring !== false) {
++                var $set = $('<div class="hedset elx-hedset-comments"></div>');
++                this.$comments = mkBtn('elx-btn-comments', 'comment', this.txtComments, this.txtCommentsTip);
++                $set.append(this.$comments);
++                $right.find('[data-layout-name="header-editMode"]').before($set);
++                this.$comments.on('click', function () { me.controller.toggleComments(); });
++            }
++            if (!header.btnShare && this.controller.canShare()) {
++                this.$share = mkBtn('elx-btn-share', 'share', this.txtShare, this.txtShareTip);
++                $right.find('#slot-btn-share').show().empty().append(this.$share);
++                this.$share.on('click', function () { me.controller.openBackstage('elx-share'); });
++            } else if (header.btnShare) {
++                header.btnShare.cmpEl.addClass('elx-btn-share');
++            }
++        },
++
++        setCommentsPressed: function (pressed) {
++            this.$comments && this.$comments.toggleClass('active', !!pressed).attr('aria-pressed', !!pressed);
++        }
++
++    }, STRINGS, DE.Views.ElixirTitleBar || {}));
++});
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 42bbea0673..408a4aa3f2 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Frühere Versionen anzeigen und wiederherstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Für dieses Dokument ist kein Versionsverlauf verfügbar.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gestern, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Aktionen",
++  "DE.Views.ElixirTitleBar.txtComments": "Kommentare",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Kommentare anzeigen",
++  "DE.Views.ElixirTitleBar.txtFileName": "Dateiname",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Im Dokument suchen",
++  "DE.Views.ElixirTitleBar.txtFindText": "„{0}“ suchen",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Ein Dateiname darf keines dieser Zeichen enthalten:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Speicherort",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Kein passender Befehl",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Nicht gespeichert",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Dateispeicherort öffnen",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Drücken Sie die Eingabetaste, um die Datei umzubenennen",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "„{0}“ ersetzen…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Gespeichert",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Alle Änderungen wurden gespeichert",
++  "DE.Views.ElixirTitleBar.txtSaving": "Wird gespeichert…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Suchen",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Nach Befehlen und im Dokument suchen",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Suchen ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Freigeben",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Dieses Dokument freigeben",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Vorgeschlagene Aktionen",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Versionsverlauf",
+   "DE.Views.FileMenu.ariaFileMenu": "Dateimenü",
+   "DE.Views.FileMenu.btnBackCaption": "Dateispeicherort öffnen",
+   "DE.Views.FileMenu.btnCloseEditor": "Datei schließen",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 2657a2449f..8d51699aad 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2781,6 +2781,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "View and restore previous versions.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Version history is not available for this document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Yesterday, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Actions",
++  "DE.Views.ElixirTitleBar.txtComments": "Comments",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Show comments",
++  "DE.Views.ElixirTitleBar.txtFileName": "File name",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Find in document",
++  "DE.Views.ElixirTitleBar.txtFindText": "Find “{0}”",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "A file name cannot contain any of these characters:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Location",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "No matching command",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Not saved",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Open file location",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Press Enter to rename the file",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Replace “{0}”…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Saved",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "All changes are saved",
++  "DE.Views.ElixirTitleBar.txtSaving": "Saving…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Search",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Search for commands and in the document",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Search ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Share",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Share this document",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Suggested actions",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Version history",
+   "DE.Views.FileMenu.ariaFileMenu": "File menu",
+   "DE.Views.FileMenu.btnBackCaption": "Open File Location",
+   "DE.Views.FileMenu.btnCloseEditor": "Close File",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index ad35eeb65f..98cdbce1ab 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver y restaurar versiones anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "El historial de versiones no está disponible para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ayer, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Acciones",
++  "DE.Views.ElixirTitleBar.txtComments": "Comentarios",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentarios",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nombre de archivo",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Buscar en el documento",
++  "DE.Views.ElixirTitleBar.txtFindText": "Buscar \"{0}\"",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "El nombre de archivo no puede contener ninguno de estos caracteres:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Ubicación",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Ningún comando coincidente",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Sin guardar",
++  "DE.Views.ElixirTitleBar.txtOffline": "Sin conexión",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Abrir ubicación de archivo",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Presione Entrar para cambiar el nombre del archivo",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Reemplazar \"{0}\"…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Guardado",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Se guardaron todos los cambios",
++  "DE.Views.ElixirTitleBar.txtSaving": "Guardando…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Buscar",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Buscar comandos y en el documento",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Buscar ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Compartir",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Compartir este documento",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Acciones sugeridas",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Historial de versiones",
+   "DE.Views.FileMenu.ariaFileMenu": "Menú Archivo",
+   "DE.Views.FileMenu.btnBackCaption": "Abrir ubicación del archivo",
+   "DE.Views.FileMenu.btnCloseEditor": "Cerrar archivo",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 23208da0b8..93dc69a27d 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Afficher et restaurer les versions précédentes.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "L'historique des versions n'est pas disponible pour ce document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Hier, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Actions",
++  "DE.Views.ElixirTitleBar.txtComments": "Commentaires",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Afficher les commentaires",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nom du fichier",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Rechercher dans le document",
++  "DE.Views.ElixirTitleBar.txtFindText": "Rechercher « {0} »",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Un nom de fichier ne peut contenir aucun de ces caractères :",
++  "DE.Views.ElixirTitleBar.txtLocation": "Emplacement",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Aucune commande correspondante",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Non enregistré",
++  "DE.Views.ElixirTitleBar.txtOffline": "Hors connexion",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Ouvrir l'emplacement du fichier",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Appuyez sur Entrée pour renommer le fichier",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Remplacer « {0} »…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Enregistré",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Toutes les modifications sont enregistrées",
++  "DE.Views.ElixirTitleBar.txtSaving": "Enregistrement…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Rechercher",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Rechercher des commandes et dans le document",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Rechercher ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Partager",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Partager ce document",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Actions suggérées",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Historique des versions",
+   "DE.Views.FileMenu.ariaFileMenu": "Menu Fichier",
+   "DE.Views.FileMenu.btnBackCaption": "Ouvrir l'emplacement du fichier",
+   "DE.Views.FileMenu.btnCloseEditor": "Fermer le fichier",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 0d204aa067..d33aad34a3 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Visualizza e ripristina le versioni precedenti.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "La cronologia versioni non è disponibile per questo documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ieri, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Azioni",
++  "DE.Views.ElixirTitleBar.txtComments": "Commenti",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostra commenti",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nome file",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Trova nel documento",
++  "DE.Views.ElixirTitleBar.txtFindText": "Trova \"{0}\"",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Il nome file non può contenere questi caratteri:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Percorso",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Nessun comando corrispondente",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Non salvato",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Apri percorso file",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Premi Invio per rinominare il file",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Sostituisci \"{0}\"…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Salvato",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Tutte le modifiche sono state salvate",
++  "DE.Views.ElixirTitleBar.txtSaving": "Salvataggio…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Cerca",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Cerca comandi e nel documento",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Cerca ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Condividi",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Condividi questo documento",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Azioni suggerite",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Cronologia versioni",
+   "DE.Views.FileMenu.ariaFileMenu": "Menù del file",
+   "DE.Views.FileMenu.btnBackCaption": "Apri percorso del file",
+   "DE.Views.FileMenu.btnCloseEditor": "Chiudi il file",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index eef9f34402..79b16ef388 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2755,6 +2755,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "以前のバージョンを表示して復元します。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "この文書ではバージョン履歴を利用できません。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨日 {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "操作",
++  "DE.Views.ElixirTitleBar.txtComments": "コメント",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "コメントを表示",
++  "DE.Views.ElixirTitleBar.txtFileName": "ファイル名",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "文書内を検索",
++  "DE.Views.ElixirTitleBar.txtFindText": "「{0}」を検索",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "ファイル名には次の文字は使用できません:",
++  "DE.Views.ElixirTitleBar.txtLocation": "場所",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "一致するコマンドはありません",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "未保存",
++  "DE.Views.ElixirTitleBar.txtOffline": "オフライン",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "ファイルの場所を開く",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Enter キーを押すとファイル名が変更されます",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "「{0}」を置換…",
++  "DE.Views.ElixirTitleBar.txtSaved": "保存済み",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "すべての変更が保存されました",
++  "DE.Views.ElixirTitleBar.txtSaving": "保存中…",
++  "DE.Views.ElixirTitleBar.txtSearch": "検索",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "コマンドと文書内を検索",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "検索 ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "共有",
++  "DE.Views.ElixirTitleBar.txtShareTip": "この文書を共有",
++  "DE.Views.ElixirTitleBar.txtSuggested": "提案された操作",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "バージョン履歴",
+   "DE.Views.FileMenu.ariaFileMenu": "ファイルメニュー",
+   "DE.Views.FileMenu.btnBackCaption": "ファイルの場所を開く",
+   "DE.Views.FileMenu.btnCloseEditor": "ファイルを閉じる",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index 6dd27bb241..cbe7d453d1 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -2067,6 +2067,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Eerdere versies bekijken en herstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Versiegeschiedenis is niet beschikbaar voor dit document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gisteren, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Acties",
++  "DE.Views.ElixirTitleBar.txtComments": "Opmerkingen",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Opmerkingen weergeven",
++  "DE.Views.ElixirTitleBar.txtFileName": "Bestandsnaam",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Zoeken in document",
++  "DE.Views.ElixirTitleBar.txtFindText": "\"{0}\" zoeken",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Een bestandsnaam mag geen van deze tekens bevatten:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Locatie",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Geen overeenkomende opdracht",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Niet opgeslagen",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Bestandslocatie openen",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Druk op Enter om de naam te wijzigen",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "\"{0}\" vervangen…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Opgeslagen",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Alle wijzigingen zijn opgeslagen",
++  "DE.Views.ElixirTitleBar.txtSaving": "Opslaan…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Zoeken",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Zoeken naar opdrachten en in het document",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Zoeken ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Delen",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Dit document delen",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Voorgestelde acties",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Versiegeschiedenis",
+   "DE.Views.FileMenu.btnBackCaption": "Open bestandslocatie",
+   "DE.Views.FileMenu.btnCloseEditor": "Bestand sluiten",
+   "DE.Views.FileMenu.btnCloseMenuCaption": "Menu sluiten",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index 3acdf55b74..eee60280bf 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -2250,6 +2250,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Wyświetl i przywróć poprzednie wersje.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Historia wersji nie jest dostępna dla tego dokumentu.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Wczoraj, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Akcje",
++  "DE.Views.ElixirTitleBar.txtComments": "Komentarze",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Pokaż komentarze",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nazwa pliku",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Znajdź w dokumencie",
++  "DE.Views.ElixirTitleBar.txtFindText": "Znajdź „{0}”",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Nazwa pliku nie może zawierać żadnego z tych znaków:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Lokalizacja",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Brak pasujących poleceń",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Nie zapisano",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Otwórz lokalizację pliku",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Naciśnij Enter, aby zmienić nazwę pliku",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Zamień „{0}”…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Zapisano",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Wszystkie zmiany zostały zapisane",
++  "DE.Views.ElixirTitleBar.txtSaving": "Zapisywanie…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Wyszukaj",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Wyszukaj polecenia i tekst w dokumencie",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Wyszukaj ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Udostępnij",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Udostępnij ten dokument",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Sugerowane akcje",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Historia wersji",
+   "DE.Views.FileMenu.ariaFileMenu": "Menu plik",
+   "DE.Views.FileMenu.btnBackCaption": "Otwórz lokalizację pliku",
+   "DE.Views.FileMenu.btnCloseEditor": "Zamknij plik",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index ca2d331314..9967615783 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -2108,6 +2108,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Ações",
++  "DE.Views.ElixirTitleBar.txtComments": "Comentários",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentários",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nome do ficheiro",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Localizar no documento",
++  "DE.Views.ElixirTitleBar.txtFindText": "Localizar \"{0}\"",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "O nome do ficheiro não pode conter nenhum destes carateres:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Localização",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Nenhum comando correspondente",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Não guardado",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Abrir localização do ficheiro",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Prima Enter para mudar o nome do ficheiro",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Substituir \"{0}\"…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Guardado",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Todas as alterações foram guardadas",
++  "DE.Views.ElixirTitleBar.txtSaving": "A guardar…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Pesquisar",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Pesquisar comandos e no documento",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Pesquisar ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Partilhar",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Partilhar este documento",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Ações sugeridas",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Histórico de versões",
+   "DE.Views.FileMenu.btnBackCaption": "Abrir localização do ficheiro",
+   "DE.Views.FileMenu.btnCloseEditor": "Fechar ficheiro",
+   "DE.Views.FileMenu.btnCloseMenuCaption": "Fechar menu",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index 2bf6307f48..4d0b5c3e2e 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2770,6 +2770,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Exibir e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Ações",
++  "DE.Views.ElixirTitleBar.txtComments": "Comentários",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentários",
++  "DE.Views.ElixirTitleBar.txtFileName": "Nome do arquivo",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Localizar no documento",
++  "DE.Views.ElixirTitleBar.txtFindText": "Localizar \"{0}\"",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "O nome do arquivo não pode conter nenhum destes caracteres:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Local",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Nenhum comando correspondente",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Não salvo",
++  "DE.Views.ElixirTitleBar.txtOffline": "Offline",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Abrir local do arquivo",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Pressione Enter para renomear o arquivo",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Substituir \"{0}\"…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Salvo",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Todas as alterações foram salvas",
++  "DE.Views.ElixirTitleBar.txtSaving": "Salvando…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Pesquisar",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Pesquisar comandos e no documento",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Pesquisar ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Compartilhar",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Compartilhar este documento",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Ações sugeridas",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Histórico de versões",
+   "DE.Views.FileMenu.ariaFileMenu": "Menu Arquivo",
+   "DE.Views.FileMenu.btnBackCaption": "Abrir Local do Arquivo",
+   "DE.Views.FileMenu.btnCloseEditor": "Fechar Arquivo",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 4c2b698699..3c85965cfb 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Просмотр и восстановление предыдущих версий.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Журнал версий недоступен для этого документа.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Вчера, {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "Действия",
++  "DE.Views.ElixirTitleBar.txtComments": "Примечания",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "Показать примечания",
++  "DE.Views.ElixirTitleBar.txtFileName": "Имя файла",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "Найти в документе",
++  "DE.Views.ElixirTitleBar.txtFindText": "Найти «{0}»",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "Имя файла не может содержать следующие символы:",
++  "DE.Views.ElixirTitleBar.txtLocation": "Расположение",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "Нет подходящих команд",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "Не сохранено",
++  "DE.Views.ElixirTitleBar.txtOffline": "Нет подключения",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "Открыть расположение файла",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "Нажмите ВВОД, чтобы переименовать файл",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "Заменить «{0}»…",
++  "DE.Views.ElixirTitleBar.txtSaved": "Сохранено",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "Все изменения сохранены",
++  "DE.Views.ElixirTitleBar.txtSaving": "Сохранение…",
++  "DE.Views.ElixirTitleBar.txtSearch": "Поиск",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "Поиск команд и текста в документе",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "Поиск ({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "Поделиться",
++  "DE.Views.ElixirTitleBar.txtShareTip": "Поделиться документом",
++  "DE.Views.ElixirTitleBar.txtSuggested": "Рекомендуемые действия",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "Журнал версий",
+   "DE.Views.FileMenu.ariaFileMenu": "Меню Файл",
+   "DE.Views.FileMenu.btnBackCaption": "Открыть расположение файла",
+   "DE.Views.FileMenu.btnCloseEditor": "Закрыть файл",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index f10ae8a3de..246919e48b 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2771,6 +2771,30 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "查看和还原以前的版本。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "此文档没有可用的版本历史记录。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨天 {0}",
++  "DE.Views.ElixirTitleBar.txtActions": "操作",
++  "DE.Views.ElixirTitleBar.txtComments": "批注",
++  "DE.Views.ElixirTitleBar.txtCommentsTip": "显示批注",
++  "DE.Views.ElixirTitleBar.txtFileName": "文件名",
++  "DE.Views.ElixirTitleBar.txtFindInDoc": "在文档中查找",
++  "DE.Views.ElixirTitleBar.txtFindText": "查找“{0}”",
++  "DE.Views.ElixirTitleBar.txtInvalidName": "文件名不能包含以下任何字符：",
++  "DE.Views.ElixirTitleBar.txtLocation": "位置",
++  "DE.Views.ElixirTitleBar.txtNoCommand": "没有匹配的命令",
++  "DE.Views.ElixirTitleBar.txtNotSaved": "未保存",
++  "DE.Views.ElixirTitleBar.txtOffline": "脱机",
++  "DE.Views.ElixirTitleBar.txtOpenLocation": "打开文件位置",
++  "DE.Views.ElixirTitleBar.txtRenameHint": "按 Enter 重命名文件",
++  "DE.Views.ElixirTitleBar.txtReplaceText": "替换“{0}”…",
++  "DE.Views.ElixirTitleBar.txtSaved": "已保存",
++  "DE.Views.ElixirTitleBar.txtSavedTip": "所有更改均已保存",
++  "DE.Views.ElixirTitleBar.txtSaving": "正在保存…",
++  "DE.Views.ElixirTitleBar.txtSearch": "搜索",
++  "DE.Views.ElixirTitleBar.txtSearchLabel": "搜索命令和文档内容",
++  "DE.Views.ElixirTitleBar.txtSearchPlaceholder": "搜索({0})",
++  "DE.Views.ElixirTitleBar.txtShare": "共享",
++  "DE.Views.ElixirTitleBar.txtShareTip": "共享此文档",
++  "DE.Views.ElixirTitleBar.txtSuggested": "建议的操作",
++  "DE.Views.ElixirTitleBar.txtVersionHistory": "版本历史记录",
+   "DE.Views.FileMenu.ariaFileMenu": "文件菜单",
+   "DE.Views.FileMenu.btnBackCaption": "打开文件所在位置",
+   "DE.Views.FileMenu.btnCloseEditor": "关闭文件",
+diff --git a/apps/documenteditor/main/resources/less/elixir-chrome.less b/apps/documenteditor/main/resources/less/elixir-chrome.less
+index ad0bb4a06d..28710aa58a 100644
+--- a/apps/documenteditor/main/resources/less/elixir-chrome.less
++++ b/apps/documenteditor/main/resources/less/elixir-chrome.less
+@@ -547,3 +547,282 @@ svg.elx-icon {
+         .d { color: var(--text-secondary); margin-top: 2px; }
+     }
+ }
++
++// ---------------------------------------------------------------------------
++// Title bar (#box-document-title): file name + save state, centred search
++// ---------------------------------------------------------------------------
++body.elx-chrome {
++    #box-document-title.elx-titlebar {
++        position: relative;
++
++        #id-box-doc-name.elx-docname-box {
++            justify-content: flex-start !important;
++            padding: 0 4px !important;
++            min-width: 0;
++            flex-basis: auto !important;
++        }
++        #title-doc-name { display: none !important; }
++    }
++
++    .elx-docname {
++        display: inline-flex;
++        align-items: center;
++        gap: 6px;
++        max-width: calc(50% - 250px);
++        min-width: 0;
++        height: 28px;
++        padding: 0 6px 0 8px;
++        border: 0;
++        border-radius: 4px;
++        background: transparent;
++        color: var(--text-toolbar-header);
++        font-size: 12px;
++        line-height: 28px;
++        white-space: nowrap;
++        cursor: pointer;
++
++        .elx-docname-text {
++            overflow: hidden;
++            text-overflow: ellipsis;
++            font-weight: 600;
++            min-width: 0;
++        }
++        .elx-docstate {
++            display: inline-flex;
++            align-items: center;
++            gap: 4px;
++            flex-shrink: 0;
++            color: var(--text-secondary);
++            font-weight: 400;
++
++            &::before {
++                content: '';
++                width: 1px;
++                height: 14px;
++                margin-right: 4px;
++                background: var(--border-divider);
++            }
++            .elx-icon { width: 16px; height: 16px; }
++            &[data-state=saving] .elx-icon { animation: elx-spin 1.2s linear infinite; }
++            &[data-state=unsaved], &[data-state=offline] { color: var(--text-normal); }
++        }
++        .elx-docname-chev {
++            display: inline-flex;
++            color: var(--icon-toolbar-header);
++            .elx-icon { width: 16px; height: 16px; }
++        }
++        &:hover, &[aria-expanded=true] { background-color: var(--highlight-header-button-hover); }
++        &:focus { outline: none; }
++        &:focus-visible { box-shadow: 0 0 0 2px @elx-accent; }
++    }
++
++    // centred search box
++    .elx-search {
++        position: absolute;
++        top: 50%;
++        left: 50%;
++        transform: translate(-50%, -50%);
++        width: ~"min(480px, 34vw)";
++        z-index: 2;
++
++        .elx-search-ic {
++            position: absolute;
++            left: 8px;
++            top: 4px;
++            color: var(--icon-toolbar-header);
++            pointer-events: none;
++            .elx-icon { width: 16px; height: 16px; margin-top: 2px; }
++        }
++        .elx-search-input {
++            width: 100%;
++            height: 28px;
++            padding: 0 10px 0 32px;
++            border: 1px solid var(--border-regular-control);
++            border-radius: 4px;
++            background: var(--background-normal);
++            color: var(--text-normal);
++            font-size: 13px;
++            outline: none;
++
++            &::placeholder { color: var(--text-secondary); opacity: 1; }
++            &:hover { border-color: var(--text-tertiary); }
++        }
++        &.open .elx-search-input {
++            border-color: @elx-accent;
++            border-radius: 4px 4px 0 0;
++            box-shadow: 0 0 0 1px @elx-accent inset;
++        }
++    }
++
++    .elx-search-pop {
++        position: absolute;
++        top: 100%;
++        left: 0;
++        right: 0;
++        max-height: 70vh;
++        overflow-y: auto;
++        padding: 4px 0 6px;
++        border: 1px solid var(--border-regular-control);
++        border-top: 0;
++        border-radius: 0 0 8px 8px;
++        background: var(--background-normal);
++        box-shadow: 0 8px 16px rgba(0, 0, 0, .14), 0 0 2px rgba(0, 0, 0, .12);
++        color: var(--text-normal);
++        font-size: 13px;
++
++        .elx-sg {
++            padding: 8px 14px 4px;
++            font-size: 11px;
++            font-weight: 600;
++            color: var(--text-secondary);
++        }
++        .elx-sr {
++            display: flex;
++            align-items: center;
++            gap: 10px;
++            height: 34px;
++            margin: 0 4px;
++            padding: 0 10px;
++            border-radius: 4px;
++            cursor: pointer;
++
++            .elx-sr-ic {
++                display: inline-flex;
++                align-items: center;
++                justify-content: center;
++                width: 20px;
++                height: 20px;
++                flex-shrink: 0;
++                color: var(--icon-normal);
++                overflow: hidden;
++
++                svg.icon, .elx-sr-cmdicon { width: 20px; height: 20px; fill: var(--icon-normal); }
++                i.icon { transform: scale(.84); }
++            }
++            .elx-sr-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++            .elx-sr-where { flex-shrink: 0; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--text-secondary); }
++
++            &.active { background-color: var(--highlight-button-hover); }
++            &.disabled { opacity: .45; cursor: default; }
++        }
++        .elx-sr-empty { padding: 6px 14px; color: var(--text-secondary); }
++    }
++
++    // tab row: Comments, Editing mode, Share like Word
++    #box-right-btn-group.elx-right {
++        align-items: center;
++
++        .elx-hedset-comments { margin-right: 4px; }
++        .btn-header.elx-hbtn {
++            display: inline-flex;
++            align-items: center;
++            gap: 6px;
++            width: auto;
++            height: 28px;
++            margin: 0 2px;
++            padding: 0 10px 0 8px;
++            border-radius: 4px;
++            font-size: 12px;
++            color: var(--text-toolbar-header);
++
++            .elx-icon { color: var(--icon-toolbar-header); }
++            .caption { font-size: 12px; line-height: 28px; }
++            &.active { background-color: var(--highlight-header-button-pressed); }
++        }
++        .btn-header.elx-btn-comments {
++            border: 1px solid var(--border-regular-control);
++        }
++        .btn-header.elx-btn-share,
++        .btn-header-share.elx-btn-share {
++            background-color: @elx-accent;
++            color: #fff;
++            border: 0;
++            margin-left: 6px;
++
++            .elx-icon, svg.icon { color: #fff; fill: #fff; }
++            .caption { color: #fff; }
++            &:hover { filter: brightness(.94); background-color: @elx-accent; }
++            &:active { filter: brightness(.88); }
++        }
++        // the title bar search replaces the magnifier, the file name flyout has "Open file location"
++        #slot-btn-search, #slot-btn-back { display: none !important; }
++        .btn-header.btn-header-pdf-mode {
++            border: 1px solid var(--border-regular-control);
++            border-radius: 4px;
++        }
++    }
++
++    // avatar like Word: round, at the far right of the title bar
++    #box-document-title .btn-current-user,
++    #box-document-title .slot-btn-user-name {
++        .color-user-name {
++            width: 28px;
++            height: 28px;
++            line-height: 28px;
++            border-radius: 50%;
++            font-size: 11px;
++            background-size: cover;
++        }
++    }
++}
++
++.elx-flyout {
++    position: absolute;
++    z-index: 10000;
++    width: 320px;
++    padding: 16px;
++    border-radius: 8px;
++    background: var(--background-normal);
++    color: var(--text-normal);
++    box-shadow: 0 8px 24px rgba(0, 0, 0, .18), 0 0 2px rgba(0, 0, 0, .14);
++    font-size: 12px;
++
++    .elx-fly-label {
++        display: block;
++        margin: 10px 0 4px;
++        font-weight: 600;
++        color: var(--text-secondary);
++        font-size: 11px;
++        &:first-child { margin-top: 0; }
++    }
++    .elx-fname-row {
++        display: flex;
++        align-items: center;
++        gap: 4px;
++        input { flex: 1 1 auto; height: 28px; font-size: 13px; }
++        .elx-fname-ext { color: var(--text-secondary); }
++    }
++    .elx-fly-hint { margin-top: 4px; color: var(--text-tertiary); font-size: 11px; &.error { color: var(--text-error, #c4314b); } }
++    .elx-fly-loc { display: flex; align-items: center; gap: 8px; color: var(--text-normal); .elx-icon { color: var(--icon-normal); } }
++    .elx-fly-actions {
++        margin-top: 12px;
++        padding-top: 8px;
++        border-top: 1px solid var(--border-divider);
++        &:empty { display: none; }
++    }
++    .elx-fly-link {
++        display: flex;
++        align-items: center;
++        gap: 8px;
++        width: 100%;
++        height: 32px;
++        padding: 0 8px;
++        border: 0;
++        border-radius: 4px;
++        background: none;
++        color: var(--text-normal);
++        font-size: 12px;
++        text-align: left;
++        cursor: pointer;
++        .elx-icon { color: var(--icon-normal); }
++        &:hover { background-color: var(--highlight-button-hover); }
++    }
++}
++
++@keyframes elx-spin { to { transform: rotate(360deg); } }
++
++.rtl body.elx-chrome, body.elx-chrome.rtl {
++    .elx-search .elx-search-ic { left: auto; right: 8px; }
++    .elx-search .elx-search-input { padding: 0 32px 0 10px; }
++    .elx-docname .elx-docstate::before { margin-right: 0; margin-left: 4px; }
++}
+-- 
+2.43.0
+

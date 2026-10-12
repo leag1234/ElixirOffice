@@ -1,0 +1,47 @@
+# Ribbon group labels (PE.Views.SlideRibbon), PowerPoint vocabulary
+# key | en | fr | de | es | it | pt | pt-pt | nl | ru | pl | ja | zh
+@prefix PE.Views.SlideRibbon.
+txtGroupUndo | Undo | Annuler | Rückgängig | Deshacer | Annulla | Desfazer | Anular | Ongedaan maken | Отменить | Cofnij | 元に戻す | 撤消
+txtGroupClipboard | Clipboard | Presse-papiers | Zwischenablage | Portapapeles | Appunti | Área de Transferência | Área de Transferência | Klembord | Буфер обмена | Schowek | クリップボード | 剪贴板
+txtGroupSlides | Slides | Diapositives | Folien | Diapositivas | Diapositive | Slides | Diapositivos | Dia's | Слайды | Slajdy | スライド | 幻灯片
+txtGroupFont | Font | Police | Schriftart | Fuente | Carattere | Fonte | Tipo de Letra | Lettertype | Шрифт | Czcionka | フォント | 字体
+txtGroupParagraph | Paragraph | Paragraphe | Absatz | Párrafo | Paragrafo | Parágrafo | Parágrafo | Alinea | Абзац | Akapit | 段落 | 段落
+txtGroupDrawing | Drawing | Dessin | Zeichnung | Dibujo | Disegno | Desenho | Desenho | Tekenen | Рисование | Rysowanie | 図形描画 | 绘图
+txtGroupEditing | Editing | Modification | Bearbeiten | Edición | Modifica | Edição | Edição | Bewerken | Редактирование | Edytowanie | 編集 | 编辑
+txtGroupTables | Tables | Tableaux | Tabellen | Tablas | Tabelle | Tabelas | Tabelas | Tabellen | Таблицы | Tabele | 表 | 表格
+txtGroupImages | Images | Images | Bilder | Imágenes | Immagini | Imagens | Imagens | Afbeeldingen | Изображения | Obrazy | 画像 | 图像
+txtGroupIllustrations | Illustrations | Illustrations | Illustrationen | Ilustraciones | Illustrazioni | Ilustrações | Ilustrações | Illustraties | Иллюстрации | Ilustracje | 図 | 插图
+txtGroupLinks | Links | Liens | Links | Vínculos | Collegamenti | Links | Ligações | Koppelingen | Ссылки | Linki | リンク | 链接
+txtGroupComments | Comments | Commentaires | Kommentare | Comentarios | Commenti | Comentários | Comentários | Opmerkingen | Примечания | Komentarze | コメント | 批注
+txtGroupText | Text | Texte | Text | Texto | Testo | Texto | Texto | Tekst | Текст | Tekst | テキスト | 文本
+txtGroupSymbols | Symbols | Symboles | Symbole | Símbolos | Simboli | Símbolos | Símbolos | Symbolen | Символы | Symbole | 記号と特殊文字 | 符号
+txtGroupMedia | Media | Média | Medien | Multimedia | Elementi multimediali | Mídia | Multimédia | Media | Мультимедиа | Multimedia | メディア | 媒体
+txtGroupThemes | Themes | Thèmes | Designs | Temas | Temi | Temas | Temas | Thema's | Темы | Motywy | テーマ | 主题
+txtGroupVariants | Variants | Variantes | Varianten | Variantes | Varianti | Variantes | Variantes | Varianten | Варианты | Warianty | バリエーション | 变体
+txtGroupCustomize | Customize | Personnaliser | Anpassen | Personalizar | Personalizza | Personalizar | Personalizar | Aanpassen | Настроить | Dostosowywanie | ユーザー設定 | 自定义
+txtGroupPreview | Preview | Aperçu | Vorschau | Vista previa | Anteprima | Visualizar | Pré-visualizar | Voorbeeld | Просмотр | Podgląd | プレビュー | 预览
+txtGroupTransition | Transition to This Slide | Accès à cette diapositive | Übergang zu dieser Folie | Transición a esta diapositiva | Transizione a questa diapositiva | Transição para este Slide | Transição para Este Diapositivo | Overgang naar deze dia | Переход к этому слайду | Przejście do tego slajdu | 画面切り替え | 切换到此幻灯片
+txtGroupTiming | Timing | Minutage | Anzeigedauer | Intervalos | Intervallo | Intervalo | Temporização | Timing | Время показа слайдов | Chronometraż | タイミング | 计时
+txtGroupAnimation | Animation | Animation | Animation | Animación | Animazione | Animação | Animação | Animatie | Анимация | Animacja | アニメーション | 动画
+txtGroupAdvAnimation | Advanced Animation | Animation avancée | Erweiterte Animation | Animación avanzada | Animazione avanzata | Animação Avançada | Animação Avançada | Geavanceerde animatie | Расширенная анимация | Animacja zaawansowana | アニメーションの詳細設定 | 高级动画
+txtGroupStartShow | Start Slide Show | Démarrage du diaporama | Bildschirmpräsentation starten | Iniciar presentación con diapositivas | Avvia presentazione | Iniciar Apresentação de Slides | Iniciar Apresentação de Diapositivos | Diavoorstelling starten | Начать слайд-шоу | Rozpoczynanie pokazu slajdów | スライド ショーの開始 | 开始放映幻灯片
+txtGroupSetUp | Set Up | Configuration | Einrichten | Configurar | Imposta | Configurar | Configurar | Instellen | Настройка | Konfigurowanie | 設定 | 设置
+txtGroupMonitors | Monitors | Écrans | Bildschirme | Monitores | Monitor | Monitores | Monitores | Beeldschermen | Мониторы | Monitory | モニター | 监视器
+txtGroupProofing | Proofing | Vérification | Dokumentprüfung | Revisión | Strumenti di correzione | Revisão de Texto | Verificação | Controle | Правописание | Sprawdzanie | 文章校正 | 校对
+txtGroupCollaboration | Collaboration | Collaboration | Zusammenarbeit | Colaboración | Collaborazione | Colaboração | Colaboração | Samenwerking | Совместная работа | Współpraca | 共同作業 | 协作
+txtGroupProtect | Protect | Protéger | Schützen | Proteger | Proteggi | Proteger | Proteger | Beveiligen | Защитить | Chroń | 保護 | 保护
+txtGroupHistory | History | Historique | Verlauf | Historial | Cronologia | Histórico | Histórico | Geschiedenis | История | Historia | 履歴 | 历史记录
+txtGroupChat | Chat | Conversation | Chat | Chat | Chat | Chat | Chat | Chat | Чат | Czat | チャット | 聊天
+txtGroupCompare | Compare | Comparer | Vergleichen | Comparar | Confronta | Comparar | Comparar | Vergelijken | Сравнить | Porównaj | 比較 | 比较
+txtGroupPresViews | Presentation Views | Modes de présentation | Präsentationsansichten | Vistas de presentación | Visualizzazioni presentazione | Modos de Exibição de Apresentação | Vistas de Apresentação | Presentatieweergaven | Режимы просмотра презентации | Widoki prezentacji | プレゼンテーションの表示 | 演示文稿视图
+txtGroupMasterViews | Master Views | Modes masques | Masteransichten | Vistas Patrón | Visualizzazioni master | Modos de Exibição Mestres | Vistas de Modelo Global | Modelweergaven | Режимы образцов | Widoki wzorców | マスター表示 | 母版视图
+txtGroupShow | Show | Afficher | Anzeigen | Mostrar | Mostra | Mostrar | Mostrar | Weergeven | Показать | Pokazywanie | 表示 | 显示
+txtGroupZoom | Zoom | Zoom | Zoom | Zoom | Zoom | Zoom | Zoom | In-/uitzoomen | Масштаб | Powiększenie | ズーム | 缩放
+txtGroupAppearance | Appearance | Apparence | Darstellung | Apariencia | Aspetto | Aparência | Aspeto | Weergave | Внешний вид | Wygląd | 外観 | 外观
+txtGroupWindow | Window | Fenêtre | Fenster | Ventana | Finestra | Janela | Janela | Venster | Окно | Okno | ウィンドウ | 窗口
+txtGroupMacros | Macros | Macros | Makros | Macros | Macro | Macros | Macros | Macro's | Макросы | Makra | マクロ | 宏
+txtGroupTools | Tools | Outils | Werkzeuge | Herramientas | Strumenti | Ferramentas | Ferramentas | Hulpmiddelen | Инструменты | Narzędzia | ツール | 工具
+txtGroupDrawingTools | Drawing Tools | Outils de dessin | Zeichentools | Herramientas de dibujo | Strumenti di disegno | Ferramentas de Desenho | Ferramentas de Desenho | Tekenhulpmiddelen | Инструменты рисования | Narzędzia do rysowania | 描画ツール | 绘图工具
+txtGroupEdit | Edit Master | Modifier le masque | Master bearbeiten | Editar patrón | Modifica master | Editar Mestre | Editar Modelo Global | Model bewerken | Изменить образец | Edytowanie wzorca | マスターの編集 | 编辑母版
+txtGroupMaster | Master Layout | Mise en page du masque | Masterlayout | Diseño del patrón | Layout master | Layout Mestre | Esquema do Modelo Global | Modelindeling | Макет образца | Układ wzorca | マスター レイアウト | 母版版式
+txtGroupClose | Close | Fermer | Schließen | Cerrar | Chiudi | Fechar | Fechar | Sluiten | Закрыть | Zamknij | 閉じる | 关闭

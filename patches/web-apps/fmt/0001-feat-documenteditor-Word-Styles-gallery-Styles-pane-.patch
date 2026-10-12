@@ -1,0 +1,2458 @@
+From f20b7727ace15949c768c87107c4963e8b0fe85a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:24:07 +0200
+Subject: [PATCH 1/6] feat(documenteditor): Word Styles gallery, Styles pane
+ and Modify Style
+
+New DE.Controllers.WordFormatting (hooks: its declaration in app.js and
+app_dev.js, the gallery item size and template in the Toolbar view, a
+data-launcher on the Styles group):
+- Styles gallery like Word: "AaBbCcDd" previews (84x40) with the style
+  name below, Word's list and order (Normal, No Spacing, Heading 1-2,
+  Title, Subtitle, emphasis, Strong, Quote, ..., Heading 3+ once the
+  level above is used), live preview on hover: the style is applied
+  inside a group action and reverted on leave, so nothing is saved,
+  sent to co-authors or added to the undo stack;
+- expanded gallery: Create a Style, Clear Formatting, Apply Styles...;
+  Modify... in the item menu;
+- Styles pane (Ctrl+Alt+Shift+S, Styles group launcher): floating
+  pane at the right with Clear All, the styles and their type, the
+  current style highlighted, a menu per style (Update to Match
+  Selection, Modify..., Delete.../Revert to Default), Show Preview,
+  New Style and Clear Formatting;
+- Apply Styles box (style name with completion, Reapply, Modify...,
+  Styles pane) and Modify Style / Create New Style from Formatting
+  dialog (name, type, based on, next style, font, size, bold, italic,
+  underline, colour, alignment, line spacing, spacing before, indent,
+  preview, Add to the Styles gallery, Format > Font...).
+Uses the sdkjs gallery options, style preview and style modification
+APIs. Strings in en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/documenteditor/main/app.js               |   2 +
+ .../main/app/controller/WordFormatting.js     | 446 ++++++++++++
+ .../main/app/template/Toolbar.template        |   2 +-
+ .../main/app/view/StylesPane.js               | 646 ++++++++++++++++++
+ apps/documenteditor/main/app/view/Toolbar.js  |   3 +-
+ apps/documenteditor/main/app_dev.js           |   2 +
+ apps/documenteditor/main/locale/de.json       |  54 ++
+ apps/documenteditor/main/locale/en.json       |  54 ++
+ apps/documenteditor/main/locale/es.json       |  54 ++
+ apps/documenteditor/main/locale/fr.json       |  54 ++
+ apps/documenteditor/main/locale/it.json       |  54 ++
+ apps/documenteditor/main/locale/ja.json       |  54 ++
+ apps/documenteditor/main/locale/nl.json       |  54 ++
+ apps/documenteditor/main/locale/pl.json       |  54 ++
+ apps/documenteditor/main/locale/pt-pt.json    |  54 ++
+ apps/documenteditor/main/locale/pt.json       |  54 ++
+ apps/documenteditor/main/locale/ru.json       |  54 ++
+ apps/documenteditor/main/locale/zh.json       |  54 ++
+ .../main/resources/less/app.less              |   1 +
+ .../main/resources/less/word-formatting.less  | 251 +++++++
+ 20 files changed, 1999 insertions(+), 2 deletions(-)
+ create mode 100644 apps/documenteditor/main/app/controller/WordFormatting.js
+ create mode 100644 apps/documenteditor/main/app/view/StylesPane.js
+ create mode 100644 apps/documenteditor/main/resources/less/word-formatting.less
+
+diff --git a/apps/documenteditor/main/app.js b/apps/documenteditor/main/app.js
+index 9c4c6243d4..8a1380cb84 100644
+--- a/apps/documenteditor/main/app.js
++++ b/apps/documenteditor/main/app.js
+@@ -157,6 +157,7 @@ require([
+             ,'Common.Controllers.Protection'
+             ,'Common.Controllers.Shortcuts'
+             ,'Common.Controllers.ElixirAI'
++            ,'WordFormatting'
+         ]
+     });
+ 
+@@ -202,6 +203,7 @@ require([
+                 ,'common/main/lib/controller/Protection'
+                 ,'common/main/lib/controller/Shortcuts'
+                 ,'common/main/lib/elixir-ai/Controller'
++                ,'documenteditor/main/app/controller/WordFormatting'
+                 ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'common/main/lib/controller/Draw'
+             ], function() {
+diff --git a/apps/documenteditor/main/app/controller/WordFormatting.js b/apps/documenteditor/main/app/controller/WordFormatting.js
+new file mode 100644
+index 0000000000..2bcf95b57b
+--- /dev/null
++++ b/apps/documenteditor/main/app/controller/WordFormatting.js
+@@ -0,0 +1,446 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * DE.Controllers.WordFormatting: Word-like formatting on the Home tab of the document editor.
++ *  - Styles gallery: Word's list and order, "AaBbCcDd" previews with the style name below, live
++ *    preview on hover, Create a Style / Clear Formatting / Apply Styles in the expanded gallery,
++ *    Modify... in the item menu;
++ *  - Styles pane (Ctrl+Alt+Shift+S and the Styles group launcher), Apply Styles box,
++ *    Modify Style dialog.
++ * It only listens to the Toolbar view and the api; the hooks are its declaration in app.js and
++ * app_dev.js.
++ */
++
++define([
++    'core',
++    'documenteditor/main/app/view/StylesPane'
++], function () {
++    'use strict';
++
++    // size of a gallery preview (CSS px); the item adds the style name below it
++    var GALLERY_PREVIEW_W = 84,
++        GALLERY_PREVIEW_H = 40;
++
++    DE.Controllers.WordFormatting = Backbone.Controller.extend(_.extend({
++        initialize: function () {
++            var me = this;
++            this._preview = {timer: 0, endTimer: 0, active: false, name: null};
++            this.addListeners({
++                'Toolbar': {
++                    'render:before': function (toolbar) { me.onToolbarRenderBefore(toolbar); },
++                    'render:after': function (toolbar) { me.onToolbarRenderAfter(toolbar); },
++                    'group:launcher': function (group) { me.onGroupLauncher(group); }
++                }
++            });
++            Common.NotificationCenter.on('app:ready', this.onAppReady.bind(this));
++        },
++
++        onLaunch: function () {},
++
++        getApi: function () {
++            var main = this.getApplication().getController('Main');
++            return main && main.api;
++        },
++
++        appOptions: function () {
++            var main = this.getApplication().getController('Main');
++            return (main && main.appOptions) || {};
++        },
++
++        canEdit: function () {
++            var o = this.appOptions();
++            return !!(o.isEdit && !o.isEditMailMerge && !o.isEditDiagram && !o.isEditOle);
++        },
++
++        translate: function (name) {
++            var main = this.getApplication().getController('Main');
++            return (main && main.translationTable && main.translationTable[name]) || name;
++        },
++
++        // ---------------------------------------------------------------- toolbar wiring
++        onToolbarRenderBefore: function (toolbar) {
++            this.toolbar = toolbar;
++            var api = this.getApi();
++            if (api && api.asc_SetStyleGalleryOptions)
++                api.asc_SetStyleGalleryOptions({wordLike: true, previewText: 'AaBbCcDd', width: GALLERY_PREVIEW_W, height: GALLERY_PREVIEW_H});
++        },
++
++        onToolbarRenderAfter: function (toolbar) {
++            this.toolbar = toolbar;
++            if (!this.canEdit() || !toolbar.listStyles) return;
++            this.bindGalleryPreview(toolbar.listStyles);
++            this.extendGalleryMenus(toolbar);
++        },
++
++        onAppReady: function () {
++            var api = this.getApi(), me = this;
++            if (!api || !this.canEdit()) return;
++            this.api = api;
++            api.asc_UpdateStyleGallery && api.asc_UpdateStyleGallery();
++            api.asc_registerCallback('asc_onParaStyleName', function (name) {
++                me._currentStyle = name;
++                me.stylesPane && me.stylesPane.isVisible() && me.stylesPane.setCurrent(name);
++                me.applyStylesDlg && me.applyStylesDlg.isVisible() && me.applyStylesDlg.setCurrent(name);
++                me.checkHeadingLevels(name);
++            });
++            api.asc_registerCallback('asc_onInitEditorStyles', function () {
++                me.stylesPane && me.stylesPane.isVisible() && me.refreshStylesPane();
++            });
++            var keymap = {};
++            keymap['command+alt+shift+s,ctrl+alt+shift+s'] = function (e) {
++                if (!me.isEditingAllowed()) return true;
++                me.toggleStylesPane();
++                e && e.preventDefault && e.preventDefault();
++                return false;
++            };
++            Common.util.Shortcuts.delegateShortcuts({shortcuts: keymap});
++        },
++
++        isEditingAllowed: function () {
++            return this.canEdit() && this.toolbar && this.toolbar.listStyles && !this.toolbar.listStyles.isDisabled();
++        },
++
++        // Word shows Heading N+1 in the gallery once Heading N is used: regenerate when a heading
++        // level appears that the gallery does not show the next level for.
++        checkHeadingLevels: function (name) {
++            var m = /^heading ([1-8])$/i.exec(name || '');
++            if (!m || !this.toolbar || !this.toolbar.listStyles || !this.api) return;
++            var next = 'Heading ' + (parseInt(m[1]) + 1),
++                store = this.toolbar.listStyles.menuPicker.store;
++            if (store.length && !store.find(function (r) { return (r.get('title') || '').toLowerCase() === next.toLowerCase(); })) {
++                var me = this;
++                clearTimeout(this._regenTimer);
++                this._regenTimer = setTimeout(function () { me.api.asc_UpdateStyleGallery && me.api.asc_UpdateStyleGallery(); }, 300);
++            }
++        },
++
++        onGroupLauncher: function (group) {
++            _.isArray(group) && (group = group[0]);
++            if (group === 'styles' && this.isEditingAllowed())
++                this.toggleStylesPane(true);
++        },
++
++        // ---------------------------------------------------------------- live preview
++        bindGalleryPreview: function (ls) {
++            var me = this;
++            var recordOf = function (el) {
++                var id = $(el).find('.style').attr('id');
++                if (!id) return null;
++                return ls.menuPicker.store.findWhere({id: id}) || (ls.fieldPicker.store && ls.fieldPicker.store.findWhere({id: id}));
++            };
++            ls.cmpEl.on('mouseenter', '.item', function (e) {
++                if (ls.isDisabled() || me._preview.suspended) return;
++                var rec = recordOf(e.currentTarget);
++                rec && me.schedulePreview(rec.get('title'));
++            });
++            ls.cmpEl.on('mouseleave', '.item', function () { me.scheduleEndPreview(); });
++            ls.cmpEl.on('mouseleave', function () { me.scheduleEndPreview(); });
++            // before the click applies the style for real
++            ls.cmpEl.on('mousedown', function () { me.endPreview(); });
++            ls.openButton.menu.on('hide:before', function () { me.endPreview(); });
++            ls.on('contextmenu', function () { me.endPreview(); });
++            // keyboard, wheel or a click anywhere end it too
++            var stop = function () { me._preview.active && me.endPreview(); };
++            document.addEventListener('keydown', stop, true);
++            document.addEventListener('wheel', stop, true);
++        },
++
++        schedulePreview: function (name) {
++            var me = this, p = this._preview;
++            clearTimeout(p.timer);
++            clearTimeout(p.endTimer);
++            p.timer = setTimeout(function () { me.startPreview(name); }, p.active ? 80 : 300);
++        },
++
++        scheduleEndPreview: function () {
++            var me = this, p = this._preview;
++            clearTimeout(p.timer);
++            clearTimeout(p.endTimer);
++            p.endTimer = setTimeout(function () { me.endPreview(); }, 120);
++        },
++
++        startPreview: function (name) {
++            var api = this.api || this.getApi(), p = this._preview;
++            if (!api || !api.asc_StartStylePreview) return;
++            if (p.active && p.name === name) return;
++            p.active = !!api.asc_StartStylePreview(name);
++            p.name = p.active ? name : null;
++        },
++
++        endPreview: function () {
++            var api = this.api || this.getApi(), p = this._preview;
++            clearTimeout(p.timer);
++            clearTimeout(p.endTimer);
++            if (p.active) {
++                p.active = false;
++                p.name = null;
++                api && api.asc_EndStylePreview && api.asc_EndStylePreview();
++            }
++        },
++
++        // ---------------------------------------------------------------- gallery menus
++        extendGalleryMenus: function (toolbar) {
++            var me = this, ls = toolbar.listStyles, menu = ls.openButton.menu;
++            // expanded gallery: Create a Style / Clear Formatting / Apply Styles...
++            toolbar.listStylesAdditionalMenuItem && toolbar.listStylesAdditionalMenuItem.setCaption(this.textCreateStyle);
++            toolbar.listStylesAdditionalMenuItem && toolbar.listStylesAdditionalMenuItem.setIconCls && toolbar.listStylesAdditionalMenuItem.setIconCls('menu__icon btn-style-new');
++            this.mnuGalleryClear = new Common.UI.MenuItem({caption: this.textClearFormatting, iconCls: 'menu__icon btn-clearstyle'});
++            this.mnuGalleryApply = new Common.UI.MenuItem({caption: this.textApplyStyles, iconCls: 'menu__icon btn-style-apply'});
++            menu.addItem(this.mnuGalleryClear);
++            menu.addItem(this.mnuGalleryApply);
++            this.mnuGalleryClear.on('click', function () {
++                me.api && me.api.ClearFormating();
++                Common.NotificationCenter.trigger('edit:complete', toolbar);
++            });
++            this.mnuGalleryApply.on('click', function () { me.showApplyStyles(); });
++
++            // item menu: Modify...
++            if (toolbar.styleMenu) {
++                this.mnuStyleModify = new Common.UI.MenuItem({caption: this.textModify});
++                toolbar.styleMenu.addItem(this.mnuStyleModify);
++                this.mnuStyleModify.on('click', function (item) {
++                    var name = toolbar.styleMenu.items[0] && toolbar.styleMenu.items[0].styleTitle;
++                    name && me.showModifyStyle(name);
++                });
++                toolbar.styleMenu.on('show:before', function () {
++                    // shown for an item only (the first item is visible for an item)
++                    me.mnuStyleModify.setVisible(toolbar.styleMenu.items[0].isVisible());
++                });
++            }
++        },
++
++        // ---------------------------------------------------------------- style lists
++        getStyleList: function () {
++            var api = this.api, me = this;
++            if (!api || !api.asc_GetStylesArray) return [];
++            var used = {};
++            _.each(api.asc_getAllUsedParagraphStyles ? api.asc_getAllUsedParagraphStyles() : [], function (s) { used[s.get_Name()] = true; });
++            var res = [];
++            _.each(api.asc_GetStylesArray(), function (s) {
++                var type = s.get_Type();
++                if (type !== Asc.c_oAscStyleType.Paragraph && type !== Asc.c_oAscStyleType.Character) return;
++                var name = s.get_Name();
++                if (!s.get_QFormat() && !used[name]) return;
++                var prio = s.get_UIPriority();
++                (prio === undefined || prio === null || prio < 0) && (prio = (name === 'Normal') ? 0 : 99);
++                res.push({
++                    name: name,
++                    caption: me.translate(name),
++                    type: type === Asc.c_oAscStyleType.Character ? 'c' : 'p',
++                    prio: prio,
++                    isDefault: !!api.asc_IsStyleDefault(name),
++                    isChanged: !!(api.asc_IsStyleDefault(name) && api.asc_IsDefaultStyleChanged(name))
++                });
++            });
++            res.sort(function (a, b) {
++                return a.prio !== b.prio ? a.prio - b.prio : a.caption.localeCompare(b.caption, undefined, {numeric: true, sensitivity: 'base'});
++            });
++            return res;
++        },
++
++        previewCss: function (name) {
++            var info = this.api.asc_GetStyleForModify ? this.api.asc_GetStyleForModify(name) : null,
++                tp = info && info.TextPr;
++            if (!tp) return '';
++            var css = [];
++            tp.FontName && css.push('font-family: &quot;' + Common.Utils.String.htmlEncode(tp.FontName) + '&quot;');
++            tp.FontSize && css.push('font-size: ' + Math.min(Math.max(tp.FontSize, 8), 16) + 'pt');
++            tp.Bold && css.push('font-weight: bold');
++            tp.Italic && css.push('font-style: italic');
++            tp.Underline && css.push('text-decoration: underline');
++            tp.SmallCaps && css.push('font-variant: small-caps');
++            tp.Caps && css.push('text-transform: uppercase');
++            var c = tp.Color;
++            c && c.get_auto && !c.get_auto() && css.push('color: #' + Common.Utils.ThemeColor.getHexColor(c.get_r(), c.get_g(), c.get_b()));
++            return css.join('; ');
++        },
++
++        // ---------------------------------------------------------------- Styles pane
++        toggleStylesPane: function (show) {
++            if (this.stylesPane && this.stylesPane.isVisible()) {
++                if (show !== true) this.stylesPane.close();
++                return;
++            }
++            var me = this;
++            this.stylesPane = new DE.Views.StylesPane({
++                handler: function (action, record) { me.onStylesPaneAction(action, record); }
++            });
++            this.stylesPane.on('close', function () { me.stylesPane = null; });
++            this.stylesPane.show();
++            this.refreshStylesPane();
++        },
++
++        refreshStylesPane: function () {
++            if (!this.stylesPane) return;
++            var me = this, list = this.getStyleList(), preview = this.stylesPane.isPreview();
++            _.each(list, function (s) { s.preview = preview ? me.previewCss(s.name) : ''; });
++            this.stylesPane.setStyles(list, this._currentStyle);
++        },
++
++        onStylesPaneAction: function (action, record) {
++            var api = this.api, me = this, name = record ? record.get('name') : null;
++            if (!api) return;
++            switch (action) {
++                case 'apply':
++                    if (record.get('isClear')) {
++                        api.ClearFormating();
++                        api.put_Style('Normal');
++                    } else
++                        api.put_Style(name);
++                    Common.NotificationCenter.trigger('edit:complete', this.toolbar);
++                    break;
++                case 'refresh':
++                    this.refreshStylesPane();
++                    break;
++                case 'clear':
++                    api.ClearFormating();
++                    Common.NotificationCenter.trigger('edit:complete', this.toolbar);
++                    break;
++                case 'new':
++                    this.showNewStyle();
++                    break;
++                case 'update':
++                    var style = api.asc_GetStyleFromFormatting();
++                    style.put_Name(name);
++                    api.asc_AddNewStyle(style);
++                    break;
++                case 'modify':
++                    this.showModifyStyle(name);
++                    break;
++                case 'delete':
++                    Common.UI.warning({
++                        msg: Common.Utils.String.format(this.textDeleteConfirm, record.get('caption')),
++                        buttons: ['yes', 'no'],
++                        primary: 'yes',
++                        callback: function (btn) { btn === 'yes' && api.asc_RemoveStyle(name); }
++                    });
++                    break;
++                case 'revert':
++                    api.asc_RemoveStyle(name);
++                    break;
++                case 'pane':
++                    this.toggleStylesPane(true);
++                    break;
++            }
++        },
++
++        // ---------------------------------------------------------------- Apply Styles box
++        showApplyStyles: function () {
++            if (this.applyStylesDlg && this.applyStylesDlg.isVisible()) {
++                this.applyStylesDlg.setCurrent(this._currentStyle);
++                return;
++            }
++            var me = this;
++            this.applyStylesDlg = new DE.Views.ApplyStylesDialog({
++                styles: this.getStyleList(),
++                handler: function (action, name) {
++                    if (action === 'apply') {
++                        me.api.put_Style(name);
++                    } else if (action === 'modify') {
++                        me.showModifyStyle(name);
++                    } else if (action === 'pane') {
++                        me.toggleStylesPane(true);
++                    }
++                }
++            });
++            this.applyStylesDlg.on('close', function () { me.applyStylesDlg = null; });
++            this.applyStylesDlg.show();
++            this.applyStylesDlg.setCurrent(this._currentStyle);
++        },
++
++        // ---------------------------------------------------------------- Modify / New Style
++        getFontStore: function () {
++            if (!this.fontStore && this.toolbar && this.toolbar.cmbFontName) {
++                this.fontStore = new Common.Collections.Fonts();
++                this.fontStore.add(_.filter(_.map(this.toolbar.cmbFontName.store.toJSON(), _.clone), function (f) { return !f.cloneid; }));
++            }
++            return this.fontStore;
++        },
++
++        showModifyStyle: function (name) {
++            var api = this.api, me = this;
++            var info = api && api.asc_GetStyleForModify ? api.asc_GetStyleForModify(name) : null;
++            if (!info) return;
++            info.Caption = this.translate(info.Name);
++            this.openStyleDialog(info, false, function (changes) {
++                !_.isEmpty(changes) && api.asc_ModifyStyle(name, changes);
++            });
++        },
++
++        showNewStyle: function () {
++            var api = this.api, me = this;
++            if (!api) return;
++            var base = this._currentStyle || 'Normal',
++                info = {
++                    Name: '', Caption: this.findFreeStyleName(), Type: Asc.c_oAscStyleType.Paragraph, BasedOn: base, Next: null,
++                    IsDefault: false, QFormat: true,
++                    TextPr: api.asc_GetFontDialogProps ? api.asc_GetFontDialogProps() : {},
++                    ParaPr: {}
++                };
++            this.openStyleDialog(info, true, function (changes, dlgName) {
++                var title = dlgName || info.Caption,
++                    style = api.asc_GetStyleFromFormatting();
++                style.put_Name(title);
++                style.get_Link() && style.get_Link().put_Name(title + '_character');
++                style.put_Next(changes.Next || null);
++                api.asc_AddNewStyle(style);
++                delete changes.Name;
++                delete changes.Next;
++                !_.isEmpty(changes) && api.asc_ModifyStyle(title, changes);
++            });
++        },
++
++        findFreeStyleName: function () {
++            var names = {};
++            _.each(this.getStyleList(), function (s) { names[s.name.toLowerCase()] = true; });
++            for (var i = 1; i < 1000; i++)
++                if (!names[(this.textStyleN + i).toLowerCase()]) return this.textStyleN + i;
++            return this.textStyleN;
++        },
++
++        openStyleDialog: function (info, isNew, onOk) {
++            var me = this, list = this.getStyleList();
++            var dlg = new DE.Views.ModifyStyleDialog({
++                isNew: isNew,
++                styleInfo: info,
++                styleNames: _.filter(list, function (s) { return s.type === 'p'; }),
++                fontStore: this.getFontStore(),
++                handler: function (result, changes) {
++                    if (result === 'font') {
++                        me.openFontDialogForStyle(dlg, changes);
++                        return;
++                    }
++                    if (result === 'ok') {
++                        var name = this.inputName ? this.inputName.getValue().trim() : '';
++                        onOk(changes || {}, name);
++                    }
++                    Common.NotificationCenter.trigger('edit:complete', me.toolbar);
++                }
++            });
++            dlg.show();
++        },
++
++        // Format > Font... of the Modify Style dialog (the Font dialog comes with the Font group)
++        openFontDialogForStyle: function (dlg, textPr) {
++            if (!DE.Views.FontDialog) return;
++            var me = this;
++            (new DE.Views.FontDialog({
++                props: textPr,
++                fontStore: this.getFontStore(),
++                api: this.api,
++                styleMode: true,
++                handler: function (result, props) {
++                    result === 'ok' && props && dlg.applyTextProps(props);
++                }
++            })).show();
++        },
++
++        textCreateStyle: 'Create a Style',
++        textClearFormatting: 'Clear Formatting',
++        textApplyStyles: 'Apply Styles...',
++        textModify: 'Modify...',
++        textDeleteConfirm: 'Do you want to delete the style {0} from the document?',
++        textStyleN: 'Style'
++    }, DE.Controllers.WordFormatting || {}));
++});
+diff --git a/apps/documenteditor/main/app/template/Toolbar.template b/apps/documenteditor/main/app/template/Toolbar.template
+index 2eda661c10..f46b4e292f 100644
+--- a/apps/documenteditor/main/app/template/Toolbar.template
++++ b/apps/documenteditor/main/app/template/Toolbar.template
+@@ -80,7 +80,7 @@
+                     </div>
+                 </div>
+                 <div class="separator long"></div>
+-                <div class="group small flex field-styles" id="slot-field-styles" style="min-width: 151px;width: 100%; " data-group-width="100%" data-group="styles"></div>
++                <div class="group small flex field-styles" id="slot-field-styles" style="min-width: 151px;width: 100%; " data-group-width="100%" data-group="styles" data-launcher="styles"></div>
+                 <div class="separator long"></div>
+                 <div class="group small group-editing" data-group="editing">
+                     <div class="elset">
+diff --git a/apps/documenteditor/main/app/view/StylesPane.js b/apps/documenteditor/main/app/view/StylesPane.js
+new file mode 100644
+index 0000000000..ff3c66aa12
+--- /dev/null
++++ b/apps/documenteditor/main/app/view/StylesPane.js
+@@ -0,0 +1,646 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Word-like style windows of the document editor:
++ *  - DE.Views.StylesPane: the Styles pane (Ctrl+Alt+Shift+S, Styles group launcher), a floating
++ *    non-modal window listing the styles, with the current one highlighted, a menu per style
++ *    (Update to Match Selection, Modify, Delete/Revert) and New Style;
++ *  - DE.Views.ApplyStylesDialog: Word's "Apply Styles" box (style name with completion, Reapply,
++ *    Modify, Styles pane);
++ *  - DE.Views.ModifyStyleDialog: Word's "Modify Style" dialog (name, based on, next style,
++ *    formatting, preview, Add to the Styles gallery, Format > Font...).
++ * The controller is DE.Controllers.WordFormatting.
++ */
++
++define([
++    'common/main/lib/component/Window',
++    'common/main/lib/component/ComboBox',
++    'common/main/lib/component/ListView'
++], function () { 'use strict';
++
++    var enc = function (s) { return Common.Utils.String.htmlEncode(s || ''); };
++
++    // ---------------------------------------------------------------------------------------------
++    DE.Views.StylesPane = Common.UI.Window.extend(_.extend({
++        options: {
++            width: 260,
++            height: 520,
++            modal: false,
++            resizable: true,
++            minwidth: 220,
++            minheight: 280,
++            cls: 'modal-dlg word-styles-pane',
++            id: 'window-word-styles-pane',
++            buttons: null
++        },
++
++        initialize: function (options) {
++            _.extend(this.options, {title: this.txtTitle}, options || {});
++            this.options.tpl = [
++                '<div class="box word-styles-pane-box">',
++                    '<div class="word-styles-list"></div>',
++                    '<div class="word-styles-options">',
++                        '<div class="word-styles-chk-preview"></div>',
++                    '</div>',
++                    '<div class="word-styles-footer">',
++                        '<div class="word-styles-btn-new"></div>',
++                        '<div class="word-styles-btn-clear"></div>',
++                    '</div>',
++                '</div>'
++            ].join('');
++            this.handler = options.handler;
++            Common.UI.Window.prototype.initialize.call(this, this.options);
++        },
++
++        render: function () {
++            Common.UI.Window.prototype.render.call(this);
++            var me = this, $win = this.getChild();
++
++            this.list = new Common.UI.ListView({
++                el: $win.find('.word-styles-list'),
++                store: new Common.UI.DataViewStore(),
++                tabindex: 1,
++                cls: 'word-styles-listview',
++                itemTemplate: _.template([
++                    '<div id="<%= id %>" class="word-style-row<% if (isClear) { %> clear-all<% } %>" data-name="<%= Common.Utils.String.htmlEncode(name) %>">',
++                        '<span class="word-style-name"<% if (preview) { %> style="<%= preview %>"<% } %>><%= Common.Utils.String.htmlEncode(caption) %></span>',
++                        '<span class="word-style-type"><%= glyph %></span>',
++                        '<% if (!isClear) { %><button type="button" class="word-style-menu-btn" tabindex="-1" aria-label="<%= Common.Utils.String.htmlEncode(caption) %>"><span class="caret"></span></button><% } %>',
++                    '</div>'
++                ].join(''))
++            });
++            this.list.on('item:click', function (view, itemView, record) {
++                if (me._menuClick) { me._menuClick = false; return; }
++                me.fire('apply', record);
++            });
++            this.list.on('entervalue', function () {
++                var rec = me.list.getSelectedRec();
++                rec && me.fire('apply', rec);
++            });
++            $win.find('.word-styles-list').on('mousedown', '.word-style-menu-btn', function (e) {
++                me._menuClick = true;
++                var name = $(e.currentTarget).closest('.word-style-row').attr('data-name');
++                var rec = me.list.store.findWhere({name: name});
++                rec && me.showStyleMenu(rec, e.currentTarget);
++                e.preventDefault();
++            });
++            $win.find('.word-styles-list').on('contextmenu', '.word-style-row', function (e) {
++                var name = $(e.currentTarget).attr('data-name');
++                var rec = me.list.store.findWhere({name: name});
++                rec && !rec.get('isClear') && me.showStyleMenu(rec, e.currentTarget);
++                e.preventDefault();
++                return false;
++            });
++
++            this.chPreview = new Common.UI.CheckBox({
++                el: $win.find('.word-styles-chk-preview'),
++                labelText: this.txtShowPreview,
++                value: Common.localStorage.getBool('de-word-styles-preview', false)
++            });
++            this.chPreview.on('change', function (field, value) {
++                Common.localStorage.setBool('de-word-styles-preview', value === 'checked' || value === true);
++                me.fire('refresh');
++            });
++
++            this.btnNew = new Common.UI.Button({
++                parentEl: $win.find('.word-styles-btn-new'),
++                cls: 'btn-toolbar',
++                iconCls: 'toolbar__icon btn-style-new',
++                hint: this.txtNewStyle
++            });
++            this.btnNew.on('click', function () { me.fire('new'); });
++            this.btnClear = new Common.UI.Button({
++                parentEl: $win.find('.word-styles-btn-clear'),
++                cls: 'btn-toolbar',
++                iconCls: 'toolbar__icon btn-clearstyle',
++                hint: this.txtClearAll
++            });
++            this.btnClear.on('click', function () { me.fire('clear'); });
++
++            this.styleMenu = new Common.UI.Menu({
++                menuAlign: 'tl-bl',
++                items: [
++                    {caption: this.txtUpdate, value: 'update'},
++                    {caption: this.txtModify, value: 'modify'},
++                    {caption: '--'},
++                    {caption: this.txtDelete, value: 'delete'},
++                    {caption: this.txtRevert, value: 'revert'}
++                ]
++            });
++            this.styleMenu.on('item:click', function (menu, item) {
++                me.fire(item.value, menu.record);
++            });
++
++            this.on('resize', function () { me.updateListHeight(); });
++        },
++
++        show: function () {
++            Common.UI.Window.prototype.show.apply(this, arguments);
++            this.positionAtRight();
++            this.updateListHeight();
++        },
++
++        positionAtRight: function () {
++            var w = this.getWidth ? this.getWidth() : this.options.width,
++                left = Math.max(0, Common.Utils.innerWidth() - w - 48),
++                top = Math.max(0, Math.min(150, Common.Utils.innerHeight() - this.options.height - 40));
++            this.setPosition(left, top);
++        },
++
++        updateListHeight: function () {
++            var $win = this.getChild(),
++                h = $win.find('.body').height() - $win.find('.word-styles-options').outerHeight(true) - $win.find('.word-styles-footer').outerHeight(true) - 16;
++            $win.find('.word-styles-list').css('height', Math.max(80, h));
++            this.list.scroller && this.list.scroller.update({alwaysVisibleY: true});
++        },
++
++        fire: function (action, record) {
++            this.handler && this.handler.call(this, action, record);
++        },
++
++        isPreview: function () {
++            return this.chPreview && this.chPreview.getValue() === 'checked';
++        },
++
++        // styles: [{name, caption, type: 'p'|'c'|'l', isDefault, preview (css)}]
++        setStyles: function (styles, current) {
++            var arr = [{id: Common.UI.getId(), name: '', caption: this.txtClearAll, glyph: '', isClear: true, preview: ''}].concat(_.map(styles, function (s) {
++                return _.extend({id: Common.UI.getId(), glyph: s.type === 'c' ? 'a' : (s.type === 'l' ? '¶a' : '¶'), isClear: false, preview: ''}, s);
++            }));
++            this.list.store.reset(arr);
++            this.setCurrent(current);
++        },
++
++        setCurrent: function (name) {
++            this._current = name;
++            if (!this.list) return;
++            var rec = name ? this.list.store.findWhere({name: name}) : null;
++            if (rec) {
++                this.list.selectRecord(rec, true);
++                this.list.scrollToRecord(rec);
++            } else
++                this.list.deselectAll(true);
++        },
++
++        showStyleMenu: function (record, anchor) {
++            var menu = this.styleMenu, me = this;
++            menu.record = record;
++            menu.items[0].setCaption(Common.Utils.String.format(this.txtUpdateTo, record.get('caption')));
++            menu.items[3].setCaption(Common.Utils.String.format(this.txtDeleteNamed, record.get('caption')));
++            menu.items[3].setVisible(!record.get('isDefault'));
++            menu.items[4].setVisible(!!record.get('isDefault'));
++            menu.items[4].setDisabled(!record.get('isChanged'));
++            var $c = this.getChild().find('.word-styles-menu-container');
++            if (!$c.length) {
++                $c = $('<div class="word-styles-menu-container" style="position: absolute; z-index: 10000;"><div class="dropdown-toggle" data-toggle="dropdown"></div></div>');
++                this.getChild().append($c);
++                menu.render($c);
++            }
++            var off = $(anchor).offset(), woff = this.getChild().offset();
++            $c.css({left: off.left - woff.left, top: off.top - woff.top + $(anchor).outerHeight()});
++            setTimeout(function () { menu.show(); }, 0);
++        },
++
++        getFocusedComponents: function () {
++            return [this.list, this.chPreview, this.btnNew, this.btnClear];
++        },
++
++        getDefaultFocusableComponent: function () {
++            return this.list;
++        },
++
++        txtTitle: 'Styles',
++        txtClearAll: 'Clear All',
++        txtShowPreview: 'Show Preview',
++        txtNewStyle: 'New Style',
++        txtUpdate: 'Update to Match Selection',
++        txtUpdateTo: 'Update {0} to Match Selection',
++        txtModify: 'Modify...',
++        txtDelete: 'Delete...',
++        txtDeleteNamed: 'Delete {0}...',
++        txtRevert: 'Revert to Default'
++    }, DE.Views.StylesPane || {}));
++
++    // ---------------------------------------------------------------------------------------------
++    DE.Views.ApplyStylesDialog = Common.UI.Window.extend(_.extend({
++        options: {
++            width: 280,
++            modal: false,
++            cls: 'modal-dlg word-apply-styles',
++            id: 'window-word-apply-styles',
++            buttons: null
++        },
++
++        initialize: function (options) {
++            _.extend(this.options, {title: this.txtTitle}, options || {});
++            this.options.tpl = [
++                '<div class="box">',
++                    '<label class="input-label">' + this.txtStyleName + '</label>',
++                    '<div class="word-apply-style-name input-group-nr" style="width: 100%;"></div>',
++                    '<div class="word-apply-buttons">',
++                        '<button type="button" class="btn btn-text-default word-apply-reapply">' + this.txtReapply + '</button>',
++                        '<button type="button" class="btn btn-text-default word-apply-modify">' + this.txtModify + '</button>',
++                        '<div class="word-apply-pane"></div>',
++                    '</div>',
++                '</div>'
++            ].join('');
++            this.handler = options.handler;
++            this.styles = options.styles || [];
++            Common.UI.Window.prototype.initialize.call(this, this.options);
++        },
++
++        render: function () {
++            Common.UI.Window.prototype.render.call(this);
++            var me = this, $win = this.getChild();
++            this.cmbStyle = new Common.UI.ComboBox({
++                el: $win.find('.word-apply-style-name'),
++                cls: 'input-group-nr',
++                menuStyle: 'min-width: 100%; max-height: 260px;',
++                editable: true,
++                data: _.map(this.styles, function (s) { return {value: s.name, displayValue: s.caption}; })
++            });
++            this.cmbStyle.on('selected', function (combo, record) { me.fire('apply', record.value); });
++            this.cmbStyle.on('changed:after', function (combo, record) {
++                var name = me.resolve(record && record.value !== undefined ? record.value : combo.getRawValue());
++                name && me.fire('apply', name);
++            });
++            this.cmbStyle._input && this.cmbStyle._input.on('keyup', function (e) {
++                if (e.keyCode === Common.UI.Keys.RETURN) {
++                    var name = me.resolve(me.cmbStyle.getRawValue());
++                    name && me.fire('apply', name);
++                }
++            });
++            $win.find('.word-apply-reapply').on('click', function () {
++                var name = me.resolve(me.cmbStyle.getRawValue());
++                name && me.fire('apply', name);
++            });
++            $win.find('.word-apply-modify').on('click', function () {
++                var name = me.resolve(me.cmbStyle.getRawValue());
++                name && me.fire('modify', name);
++            });
++            this.btnPane = new Common.UI.Button({
++                parentEl: $win.find('.word-apply-pane'),
++                cls: 'btn-toolbar',
++                iconCls: 'toolbar__icon btn-styles-pane',
++                hint: this.txtStylesPane
++            });
++            this.btnPane.on('click', function () { me.fire('pane'); });
++        },
++
++        // display name or style name -> style name
++        resolve: function (text) {
++            text = (text || '').trim().toLowerCase();
++            if (!text) return null;
++            var s = _.find(this.styles, function (s) { return s.caption.toLowerCase() === text || s.name.toLowerCase() === text; }) ||
++                    _.find(this.styles, function (s) { return s.caption.toLowerCase().indexOf(text) === 0; });
++            return s ? s.name : null;
++        },
++
++        setCurrent: function (name) {
++            var s = _.findWhere(this.styles, {name: name});
++            this.cmbStyle && this.cmbStyle.setValue(name, s ? s.caption : name);
++        },
++
++        fire: function (action, value) {
++            this.handler && this.handler.call(this, action, value);
++        },
++
++        getFocusedComponents: function () {
++            return [this.cmbStyle, this.btnPane];
++        },
++
++        getDefaultFocusableComponent: function () {
++            return this.cmbStyle;
++        },
++
++        txtTitle: 'Apply Styles',
++        txtStyleName: 'Style Name:',
++        txtReapply: 'Reapply',
++        txtModify: 'Modify...',
++        txtStylesPane: 'Styles (Ctrl+Alt+Shift+S)'
++    }, DE.Views.ApplyStylesDialog || {}));
++
++    // ---------------------------------------------------------------------------------------------
++    DE.Views.ModifyStyleDialog = Common.UI.Window.extend(_.extend({
++        options: {
++            width: 540,
++            cls: 'modal-dlg word-modify-style',
++            id: 'window-word-modify-style',
++            buttons: ['ok', 'cancel']
++        },
++
++        initialize: function (options) {
++            _.extend(this.options, {title: options.isNew ? this.txtNewTitle : this.txtTitle}, options || {});
++            var t = this;
++            this.options.tpl = [
++                '<div class="box">',
++                    '<div class="word-ms-section">' + t.txtProperties + '</div>',
++                    '<table class="word-ms-props"><tbody>',
++                        '<tr><td><label>' + t.txtName + '</label></td><td><div class="word-ms-name"></div></td></tr>',
++                        '<tr><td><label>' + t.txtType + '</label></td><td><div class="word-ms-type input-group-nr"></div></td></tr>',
++                        '<tr><td><label>' + t.txtBasedOn + '</label></td><td><div class="word-ms-basedon input-group-nr"></div></td></tr>',
++                        '<tr><td><label>' + t.txtNext + '</label></td><td><div class="word-ms-next input-group-nr"></div></td></tr>',
++                    '</tbody></table>',
++                    '<div class="word-ms-section">' + t.txtFormatting + '</div>',
++                    '<div class="word-ms-row">',
++                        '<div class="word-ms-font"></div><div class="word-ms-size"></div>',
++                        '<div class="word-ms-bold"></div><div class="word-ms-italic"></div><div class="word-ms-underline"></div>',
++                        '<div class="word-ms-color"></div>',
++                    '</div>',
++                    '<div class="word-ms-row">',
++                        '<div class="word-ms-al-left"></div><div class="word-ms-al-center"></div><div class="word-ms-al-right"></div><div class="word-ms-al-just"></div>',
++                        '<div class="word-ms-sep"></div>',
++                        '<div class="word-ms-ls-1"></div><div class="word-ms-ls-15"></div><div class="word-ms-ls-2"></div>',
++                        '<div class="word-ms-sep"></div>',
++                        '<div class="word-ms-sp-more"></div><div class="word-ms-sp-less"></div>',
++                        '<div class="word-ms-sep"></div>',
++                        '<div class="word-ms-ind-dec"></div><div class="word-ms-ind-inc"></div>',
++                    '</div>',
++                    '<div class="word-ms-preview"><div class="word-ms-preview-before">' + _.times(6, function () { return t.txtPrevParagraph; }).join(' ') + '</div>',
++                        '<div class="word-ms-preview-text">' + _.times(8, function () { return t.txtSample; }).join(' ') + '</div>',
++                        '<div class="word-ms-preview-after">' + _.times(6, function () { return t.txtNextParagraph; }).join(' ') + '</div></div>',
++                    '<div class="word-ms-row word-ms-bottom">',
++                        '<div class="word-ms-qformat"></div>',
++                        '<div class="word-ms-onlydoc"></div>',
++                        '<div class="word-ms-format"></div>',
++                    '</div>',
++                '</div>'
++            ].join('');
++            this.styleInfo = options.styleInfo || {};
++            this.styleNames = options.styleNames || [];
++            this.fontStore = options.fontStore;
++            this.handler = options.handler;
++            this.textChanges = {};
++            this.paraChanges = {};
++            Common.UI.Window.prototype.initialize.call(this, this.options);
++        },
++
++        render: function () {
++            Common.UI.Window.prototype.render.call(this);
++            var me = this, $win = this.getChild(), info = this.styleInfo,
++                tp = info.TextPr || {}, pp = info.ParaPr || {};
++
++            this.inputName = new Common.UI.InputField({
++                el: $win.find('.word-ms-name'), style: 'width: 100%;', allowBlank: false,
++                value: info.Caption || info.Name || '', disabled: !!info.IsDefault
++            });
++            this.cmbType = new Common.UI.ComboBox({
++                el: $win.find('.word-ms-type'), cls: 'input-group-nr', editable: false, disabled: true, menuStyle: 'min-width: 100%;',
++                data: [{value: 1, displayValue: this.txtParagraph}, {value: 4, displayValue: this.txtCharacter}]
++            });
++            this.cmbType.setValue(info.Type === 4 ? 4 : 1);
++            var names = [{value: '', displayValue: this.txtNoStyle}].concat(_.map(this.styleNames, function (s) { return {value: s.name, displayValue: s.caption}; }));
++            this.cmbBasedOn = new Common.UI.ComboBox({
++                el: $win.find('.word-ms-basedon'), cls: 'input-group-nr', editable: false, menuStyle: 'min-width: 100%; max-height: 220px;',
++                data: _.filter(names, function (n) { return n.value !== info.Name; })
++            });
++            this.cmbBasedOn.setValue(info.BasedOn || '');
++            this.cmbBasedOn.on('selected', function (c, r) { me.basedOn = r.value; });
++            this.cmbNext = new Common.UI.ComboBox({
++                el: $win.find('.word-ms-next'), cls: 'input-group-nr', editable: false, menuStyle: 'min-width: 100%; max-height: 220px;',
++                data: _.filter(names, function (n) { return n.value !== ''; }), disabled: info.Type === 4
++            });
++            this.cmbNext.setValue(info.Next || info.Name);
++            this.cmbNext.on('selected', function (c, r) { me.next = r.value; });
++
++            this.cmbFont = new Common.UI.ComboBoxFonts({
++                el: $win.find('.word-ms-font'), cls: 'input-group-nr', style: 'width: 160px;',
++                menuCls: 'scrollable-menu', menuStyle: 'min-width: 100%; max-height: 270px;',
++                store: new Common.Collections.Fonts(), recent: 0, hint: this.txtFont
++            });
++            this.cmbFont.on('selected', function (c, r) { me.setText('FontName', r.name); });
++            var sizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
++            this.cmbSize = new Common.UI.ComboBox({
++                el: $win.find('.word-ms-size'), cls: 'input-group-nr', style: 'width: 60px;', menuStyle: 'min-width: 60px; max-height: 220px;',
++                editable: true, data: _.map(sizes, function (v) { return {value: v, displayValue: '' + v}; })
++            });
++            this.cmbSize.on('selected', function (c, r) { me.setText('FontSize', r.value); });
++            this.cmbSize.on('changed:after', function (c, r) {
++                var v = parseFloat(String(r && r.value !== undefined ? r.value : c.getRawValue()).replace(',', '.'));
++                v > 0 && v <= 1638 && me.setText('FontSize', Math.round(v * 2) / 2);
++            });
++            var tbtn = function (cls, icon, hint, toggle, group) {
++                var b = new Common.UI.Button({parentEl: $win.find(cls), cls: 'btn-toolbar', iconCls: 'toolbar__icon ' + icon, hint: hint, enableToggle: !!toggle, toggleGroup: group, allowDepress: !group});
++                return b;
++            };
++            this.btnBold = tbtn('.word-ms-bold', 'btn-bold', this.txtBold, true);
++            this.btnItalic = tbtn('.word-ms-italic', 'btn-italic', this.txtItalic, true);
++            this.btnUnderline = tbtn('.word-ms-underline', 'btn-underline', this.txtUnderline, true);
++            this.btnBold.on('toggle', function (b, s) { me.setText('Bold', s); });
++            this.btnItalic.on('toggle', function (b, s) { me.setText('Italic', s); });
++            this.btnUnderline.on('toggle', function (b, s) { me.setText('Underline', s); });
++            this.btnColor = new Common.UI.ButtonColored({
++                parentEl: $win.find('.word-ms-color'), cls: 'btn-toolbar', iconCls: 'toolbar__icon btn-fontcolor',
++                hint: this.txtColor, auto: true, color: '000000', menu: true
++            });
++            this.btnColor.setMenu();
++            this.mnuColor = this.btnColor.getPicker();
++            this.btnColor.on('color:select', function (b, color) { me.setText('Color', Common.Utils.ThemeColor.getRgbColor(color)); });
++            this.btnColor.on('auto:select', function () { var c = new Asc.asc_CColor(); c.put_auto(true); me.setText('Color', c); });
++
++            var al = [['.word-ms-al-left', 'btn-align-left', this.txtLeft, 1], ['.word-ms-al-center', 'btn-align-center', this.txtCenter, 2],
++                      ['.word-ms-al-right', 'btn-align-right', this.txtRight, 0], ['.word-ms-al-just', 'btn-align-just', this.txtJustify, 3]];
++            this.alignButtons = _.map(al, function (a) {
++                var b = tbtn(a[0], a[1], a[2], true, 'word-ms-align');
++                b.on('toggle', function (btn, s) { s && me.setPara('Jc', a[3]); });
++                b.jc = a[3];
++                return b;
++            });
++            var ls = [['.word-ms-ls-1', '1', 1], ['.word-ms-ls-15', '1.5', 1.5], ['.word-ms-ls-2', '2', 2]];
++            this.lineButtons = _.map(ls, function (a) {
++                var b = new Common.UI.Button({parentEl: $win.find(a[0]), cls: 'btn-toolbar word-ms-ls', caption: a[1], hint: me.txtLineSpacing + ' ' + a[1], enableToggle: true, toggleGroup: 'word-ms-ls', allowDepress: false});
++                b.on('toggle', function (btn, s) { s && me.setPara('Line', a[2]); });
++                b.line = a[2];
++                return b;
++            });
++            this.btnSpMore = tbtn('.word-ms-sp-more', 'btn-para-space-more', this.txtSpaceMore);
++            this.btnSpLess = tbtn('.word-ms-sp-less', 'btn-para-space-less', this.txtSpaceLess);
++            this.btnSpMore.on('click', function () { me.setPara('Before', Math.min(558.8, (me.curBefore() || 0) + 12 * 25.4 / 72)); });
++            this.btnSpLess.on('click', function () { me.setPara('Before', Math.max(0, (me.curBefore() || 0) - 12 * 25.4 / 72)); });
++            this.btnIndDec = tbtn('.word-ms-ind-dec', 'btn-decoffset', this.txtIndentDec);
++            this.btnIndInc = tbtn('.word-ms-ind-inc', 'btn-incoffset', this.txtIndentInc);
++            this.btnIndDec.on('click', function () { me.setPara('IndLeft', Math.max(0, (me.curIndent() || 0) - 12.7)); });
++            this.btnIndInc.on('click', function () { me.setPara('IndLeft', (me.curIndent() || 0) + 12.7); });
++
++            this.chQFormat = new Common.UI.CheckBox({el: $win.find('.word-ms-qformat'), labelText: this.txtAddToGallery, value: info.QFormat !== false});
++            this.chQFormat.on('change', function (f, v) { me.qformat = (v === 'checked' || v === true); });
++            this.radioDoc = new Common.UI.RadioBox({el: $win.find('.word-ms-onlydoc'), name: 'word-ms-scope', labelText: this.txtOnlyDoc, checked: true});
++
++            this.btnFormat = new Common.UI.Button({
++                parentEl: $win.find('.word-ms-format'), cls: 'btn-text-menu-default', caption: this.txtFormat,
++                menu: new Common.UI.Menu({items: [{caption: this.txtFontDlg, value: 'font'}, {caption: this.txtParagraphDlg, value: 'paragraph', disabled: true}]})
++            });
++            this.btnFormat.menu.on('item:click', function (menu, item) {
++                item.value === 'font' && me.handler && me.handler.call(me, 'font', me.getTextPr());
++            });
++
++            // initial values
++            this.textPr = _.clone(tp);
++            this.paraPr = _.clone(pp);
++            this.btnBold.toggle(!!tp.Bold, true);
++            this.btnItalic.toggle(!!tp.Italic, true);
++            this.btnUnderline.toggle(!!tp.Underline, true);
++            this.cmbSize.setValue(tp.FontSize || '');
++            _.each(this.alignButtons, function (b) { b.toggle(b.jc === pp.Jc, true); });
++            _.each(this.lineButtons, function (b) { b.toggle(pp.LineRule === Asc.linerule_Auto && Math.abs((pp.Line || 0) - b.line) < 0.01, true); });
++            this.setColorButton(tp.Color);
++            if (info.Type === 4) {
++                _.each(this.alignButtons.concat(this.lineButtons, [this.btnSpMore, this.btnSpLess, this.btnIndDec, this.btnIndInc]), function (b) { b.setDisabled(true); });
++            }
++            this.afterRender();
++        },
++
++        afterRender: function () {
++            this.mnuColor.updateColors(Common.Utils.ThemeColor.getEffectColors(), Common.Utils.ThemeColor.getStandartColors());
++            if (this.fontStore) {
++                this.cmbFont.fillFonts(this.fontStore);
++                var name = this.textPr.FontName;
++                var rec = name ? this.fontStore.findWhere({name: name}) : null;
++                rec ? this.cmbFont.selectRecord(rec) : this.cmbFont.setValue(name || '');
++            }
++            this.updatePreview();
++        },
++
++        setColorButton: function (color) {
++            if (!color || (color.get_auto && color.get_auto())) {
++                this.btnColor.setAutoColor(true);
++                this.mnuColor.clearSelection();
++                return;
++            }
++            var clr = color.get_type() == Asc.c_oAscColor.COLOR_TYPE_SCHEME ?
++                {color: Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b()), effectValue: color.get_value()} :
++                Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b());
++            this.btnColor.setAutoColor(false);
++            this.btnColor.setColor(typeof clr === 'object' ? clr.color : clr);
++            Common.Utils.ThemeColor.selectPickerColorByEffect(clr, this.mnuColor);
++        },
++
++        curBefore: function () { return this.paraPr.Before; },
++        curIndent: function () { return this.paraPr.IndLeft; },
++
++        setText: function (key, value) {
++            this.textChanges[key] = value;
++            this.textPr[key] = value;
++            this.updatePreview();
++        },
++
++        setPara: function (key, value) {
++            this.paraChanges[key] = value;
++            this.paraPr[key] = value;
++            if (key === 'Line') {
++                this.paraChanges.LineRule = Asc.linerule_Auto;
++                this.paraPr.LineRule = Asc.linerule_Auto;
++            }
++            this.updatePreview();
++        },
++
++        // merge values from the Font dialog
++        applyTextProps: function (props) {
++            var me = this;
++            _.each(props, function (v, k) { if (v !== undefined) me.setText(k, v); });
++            this.btnBold.toggle(!!this.textPr.Bold, true);
++            this.btnItalic.toggle(!!this.textPr.Italic, true);
++            this.btnUnderline.toggle(!!this.textPr.Underline, true);
++            this.cmbSize.setValue(this.textPr.FontSize || '');
++            this.textPr.FontName && this.cmbFont.setValue(this.textPr.FontName);
++            this.setColorButton(this.textPr.Color);
++        },
++
++        getTextPr: function () { return _.clone(this.textPr); },
++
++        updatePreview: function () {
++            var tp = this.textPr, pp = this.paraPr, css = {};
++            css['font-family'] = tp.FontName ? '"' + tp.FontName + '"' : '';
++            css['font-size'] = tp.FontSize ? Math.min(tp.FontSize, 28) + 'pt' : '';
++            css['font-weight'] = tp.Bold ? 'bold' : 'normal';
++            css['font-style'] = tp.Italic ? 'italic' : 'normal';
++            var deco = [];
++            tp.Underline && deco.push('underline');
++            (tp.Strikeout || tp.DStrikeout) && deco.push('line-through');
++            css['text-decoration'] = deco.join(' ') || 'none';
++            css['font-variant'] = tp.SmallCaps ? 'small-caps' : 'normal';
++            css['text-transform'] = tp.Caps ? 'uppercase' : 'none';
++            var c = tp.Color;
++            css['color'] = (c && c.get_auto && !c.get_auto()) ? '#' + Common.Utils.ThemeColor.getHexColor(c.get_r(), c.get_g(), c.get_b()) : '';
++            if (this.styleInfo.Type !== 4) {
++                css['text-align'] = ({0: 'right', 1: 'left', 2: 'center', 3: 'justify'})[pp.Jc] || 'left';
++                css['line-height'] = (pp.LineRule === Asc.linerule_Auto && pp.Line) ? String(Math.max(1, pp.Line) * 1.2) : '';
++                css['margin-left'] = pp.IndLeft ? Math.min(pp.IndLeft, 60) + 'mm' : '';
++            }
++            this.getChild().find('.word-ms-preview-text').css(css);
++        },
++
++        getChanges: function () {
++            var res = {}, name = this.inputName.getValue().trim();
++            if (!this.styleInfo.IsDefault && name && name !== (this.styleInfo.Caption || this.styleInfo.Name)) res.Name = name;
++            if (this.basedOn !== undefined) res.BasedOn = this.basedOn;
++            if (this.next !== undefined) res.Next = this.next;
++            if (this.qformat !== undefined) res.QFormat = this.qformat;
++            if (!_.isEmpty(this.textChanges)) res.TextPr = this.textChanges;
++            if (!_.isEmpty(this.paraChanges)) res.ParaPr = this.paraChanges;
++            return res;
++        },
++
++        onBtnClick: function (event) {
++            this._handleInput(event.currentTarget.attributes['result'].value);
++        },
++
++        onPrimary: function () {
++            this._handleInput('ok');
++            return false;
++        },
++
++        _handleInput: function (state) {
++            if (state === 'ok' && !this.styleInfo.IsDefault && this.inputName.getValue().trim() === '') {
++                this.inputName.focus();
++                return;
++            }
++            this.handler && this.handler.call(this, state, state === 'ok' ? this.getChanges() : null);
++            this.close();
++        },
++
++        getFocusedComponents: function () {
++            return [this.inputName, this.cmbBasedOn, this.cmbNext, this.cmbFont, this.cmbSize, this.btnBold, this.btnItalic, this.btnUnderline, this.btnColor,
++                this.chQFormat, this.btnFormat].concat(this.getFooterButtons());
++        },
++
++        getDefaultFocusableComponent: function () {
++            return this.styleInfo.IsDefault ? this.cmbBasedOn : this.inputName;
++        },
++
++        txtTitle: 'Modify Style',
++        txtNewTitle: 'Create New Style from Formatting',
++        txtProperties: 'Properties',
++        txtName: 'Name:',
++        txtType: 'Style type:',
++        txtBasedOn: 'Style based on:',
++        txtNext: 'Style for following paragraph:',
++        txtParagraph: 'Paragraph',
++        txtCharacter: 'Character',
++        txtNoStyle: '(no style)',
++        txtFormatting: 'Formatting',
++        txtFont: 'Font',
++        txtBold: 'Bold',
++        txtItalic: 'Italic',
++        txtUnderline: 'Underline',
++        txtColor: 'Font Color',
++        txtLeft: 'Align Left',
++        txtCenter: 'Center',
++        txtRight: 'Align Right',
++        txtJustify: 'Justify',
++        txtLineSpacing: 'Line spacing',
++        txtSpaceMore: 'Increase Paragraph Spacing',
++        txtSpaceLess: 'Decrease Paragraph Spacing',
++        txtIndentDec: 'Decrease Indent',
++        txtIndentInc: 'Increase Indent',
++        txtPrevParagraph: 'Previous Paragraph',
++        txtSample: 'Sample Text',
++        txtNextParagraph: 'Following Paragraph',
++        txtAddToGallery: 'Add to the Styles gallery',
++        txtOnlyDoc: 'Only in this document',
++        txtFormat: 'Format',
++        txtFontDlg: 'Font...',
++        txtParagraphDlg: 'Paragraph...'
++    }, DE.Views.ModifyStyleDialog || {}));
++});
+diff --git a/apps/documenteditor/main/app/view/Toolbar.js b/apps/documenteditor/main/app/view/Toolbar.js
+index 207680a6cd..817906ecad 100644
+--- a/apps/documenteditor/main/app/view/Toolbar.js
++++ b/apps/documenteditor/main/app/view/Toolbar.js
+@@ -1792,7 +1792,7 @@ define([
+                         caption: me.textStyleMenuNew
+                     });
+ 
+-                    var itemWidth = 104,
++                    var itemWidth = 84,  // Word-like gallery, see DE.Controllers.WordFormatting
+                         itemHeight = 40;
+                     this.listStyles = new Common.UI.ComboDataView({
+                         cls: 'combo-styles',
+@@ -1812,6 +1812,7 @@ define([
+                         itemTemplate: _.template([
+                             '<div class="style" id="<%= id %>">',
+                                 '<div style="background-image: url(<%= imageUrl %>); width: ' + itemWidth + 'px; height: ' + itemHeight + 'px;"></div>',
++                                '<div class="style-label"><%= Common.Utils.String.htmlEncode(typeof tip !== "undefined" && tip ? tip : title) %></div>',
+                             '</div>'
+                         ].join('')),
+                         beforeOpenHandler: function (e) {
+diff --git a/apps/documenteditor/main/app_dev.js b/apps/documenteditor/main/app_dev.js
+index 2ce8db5480..ac1a2a575f 100644
+--- a/apps/documenteditor/main/app_dev.js
++++ b/apps/documenteditor/main/app_dev.js
+@@ -147,6 +147,7 @@ require([
+             ,'Common.Controllers.Protection'
+             ,'Common.Controllers.Shortcuts'
+             ,'Common.Controllers.ElixirAI'
++            ,'WordFormatting'
+         ]
+     });
+ 
+@@ -192,6 +193,7 @@ require([
+                 ,'common/main/lib/controller/Protection'
+                 ,'common/main/lib/controller/Shortcuts'
+                 ,'common/main/lib/elixir-ai/Controller'
++                ,'documenteditor/main/app/controller/WordFormatting'
+                 ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'common/main/lib/controller/Draw'
+             ], function() {
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 27c3b17879..48c09a2d8c 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Seite anpassen",
+   "DE.Controllers.Viewport.textFitWidth": "Breite anpassen",
+   "DE.Controllers.Viewport.txtDarkMode": "Dunkelmodus",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Formatvorlagen übernehmen...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Formatierung löschen",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Formatvorlage erstellen",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Möchten Sie die Formatvorlage {0} aus dem Dokument löschen?",
++  "DE.Controllers.WordFormatting.textModify": "Ändern...",
++  "DE.Controllers.WordFormatting.textStyleN": "Formatvorlage",
++  "DE.Views.ApplyStylesDialog.txtModify": "Ändern...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Erneut übernehmen",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Formatvorlagenname:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Formatvorlagen (Strg+Alt+Umschalt+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Formatvorlagen übernehmen",
+   "DE.Views.BookmarksDialog.textAdd": "Hinzufügen",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Link hinzufügen und abrufen",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Lesezeichenname",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Zu den vorherigen Rekord",
+   "DE.Views.MailMergeSettings.txtUntitled": "Unbenannt",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Merge ist fehlgeschlagen",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Zum Formatvorlagenkatalog hinzufügen",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Formatvorlage basiert auf:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Fett",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Zentriert",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Zeichen",
++  "DE.Views.ModifyStyleDialog.txtColor": "Schriftfarbe",
++  "DE.Views.ModifyStyleDialog.txtFont": "Schriftart",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Schriftart...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Format",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formatierung",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Einzug verkleinern",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Einzug vergrößern",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Kursiv",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Blocksatz",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Linksbündig",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Zeilenabstand",
++  "DE.Views.ModifyStyleDialog.txtName": "Name:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Neue Formatvorlage aus Formatierung erstellen",
++  "DE.Views.ModifyStyleDialog.txtNext": "Formatvorlage für Folgeabsatz:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Folgeabsatz",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(keine Formatvorlage)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Nur in diesem Dokument",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Absatz",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Absatz...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Vorheriger Absatz",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Eigenschaften",
++  "DE.Views.ModifyStyleDialog.txtRight": "Rechtsbündig",
++  "DE.Views.ModifyStyleDialog.txtSample": "Beispieltext",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Absatzabstand verkleinern",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Absatzabstand vergrößern",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Formatvorlage ändern",
++  "DE.Views.ModifyStyleDialog.txtType": "Formatvorlagentyp:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Unterstrichen",
+   "DE.Views.Navigation.strNavigate": "Überschriften",
+   "DE.Views.Navigation.txtClosePanel": "Überschriften schließen",
+   "DE.Views.Navigation.txtCollapse": "Alle einklappen",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Dieses Feld ist erforderlich",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Das Feld darf nicht leer sein",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Gleich wie der neu erstellte Stil",
++  "DE.Views.StylesPane.txtClearAll": "Alle löschen",
++  "DE.Views.StylesPane.txtDelete": "Löschen...",
++  "DE.Views.StylesPane.txtDeleteNamed": "{0} löschen...",
++  "DE.Views.StylesPane.txtModify": "Ändern...",
++  "DE.Views.StylesPane.txtNewStyle": "Neue Formatvorlage",
++  "DE.Views.StylesPane.txtRevert": "Auf Standard zurücksetzen",
++  "DE.Views.StylesPane.txtShowPreview": "Vorschau anzeigen",
++  "DE.Views.StylesPane.txtTitle": "Formatvorlagen",
++  "DE.Views.StylesPane.txtUpdate": "Aktualisieren, um der Auswahl zu entsprechen",
++  "DE.Views.StylesPane.txtUpdateTo": "{0} aktualisieren, um der Auswahl zu entsprechen",
+   "DE.Views.TableFormulaDialog.textBookmark": "Lesezeichen einfügen",
+   "DE.Views.TableFormulaDialog.textFormat": "Zahlenformat",
+   "DE.Views.TableFormulaDialog.textFormula": "Formula",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 42c891ff61..31254d55dd 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2126,6 +2126,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Fit to Page",
+   "DE.Controllers.Viewport.textFitWidth": "Fit to Width",
+   "DE.Controllers.Viewport.txtDarkMode": "Dark mode",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Apply Styles...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Clear Formatting",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Create a Style",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Do you want to delete the style {0} from the document?",
++  "DE.Controllers.WordFormatting.textModify": "Modify...",
++  "DE.Controllers.WordFormatting.textStyleN": "Style",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modify...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Reapply",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Style Name:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Styles (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Apply Styles",
+   "DE.Views.BookmarksDialog.textAdd": "Add",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Add & Get Link",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Bookmark name",
+@@ -3397,6 +3408,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "To previous record",
+   "DE.Views.MailMergeSettings.txtUntitled": "Untitled",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Starting merge failed",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Add to the Styles gallery",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Style based on:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Bold",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Center",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Character",
++  "DE.Views.ModifyStyleDialog.txtColor": "Font Color",
++  "DE.Views.ModifyStyleDialog.txtFont": "Font",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Font...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Format",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formatting",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Decrease Indent",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Increase Indent",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Italic",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Justify",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Align Left",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Line spacing",
++  "DE.Views.ModifyStyleDialog.txtName": "Name:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Create New Style from Formatting",
++  "DE.Views.ModifyStyleDialog.txtNext": "Style for following paragraph:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Following Paragraph",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(no style)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Only in this document",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Paragraph",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Paragraph...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Previous Paragraph",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Properties",
++  "DE.Views.ModifyStyleDialog.txtRight": "Align Right",
++  "DE.Views.ModifyStyleDialog.txtSample": "Sample Text",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Decrease Paragraph Spacing",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Increase Paragraph Spacing",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modify Style",
++  "DE.Views.ModifyStyleDialog.txtType": "Style type:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Underline",
+   "DE.Views.Navigation.strNavigate": "Headings",
+   "DE.Views.Navigation.txtClosePanel": "Close headings",
+   "DE.Views.Navigation.txtCollapse": "Collapse all",
+@@ -3801,6 +3845,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "This field is required",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Field must not be empty",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Same as created new style",
++  "DE.Views.StylesPane.txtClearAll": "Clear All",
++  "DE.Views.StylesPane.txtDelete": "Delete...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Delete {0}...",
++  "DE.Views.StylesPane.txtModify": "Modify...",
++  "DE.Views.StylesPane.txtNewStyle": "New Style",
++  "DE.Views.StylesPane.txtRevert": "Revert to Default",
++  "DE.Views.StylesPane.txtShowPreview": "Show Preview",
++  "DE.Views.StylesPane.txtTitle": "Styles",
++  "DE.Views.StylesPane.txtUpdate": "Update to Match Selection",
++  "DE.Views.StylesPane.txtUpdateTo": "Update {0} to Match Selection",
+   "DE.Views.TableFormulaDialog.textBookmark": "Paste bookmark",
+   "DE.Views.TableFormulaDialog.textFormat": "Number format",
+   "DE.Views.TableFormulaDialog.textFormula": "Formula",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index 2069bf5d41..6618c0ff9d 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar a la página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar al ancho",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo oscuro",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar estilos...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Borrar formato",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Crear un estilo",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "¿Desea eliminar el estilo {0} del documento?",
++  "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Volver a aplicar",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nombre de estilo:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Estilos (Ctrl+Alt+Mayús+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Aplicar estilos",
+   "DE.Views.BookmarksDialog.textAdd": "Añadir",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Añadir y obtener enlace",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nombre del marcador",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Registro anterior",
+   "DE.Views.MailMergeSettings.txtUntitled": "Sin título",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "No se ha podido realizar la combinación",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Agregar a la galería de estilos",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Estilo basado en:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Negrita",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Centrar",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Carácter",
++  "DE.Views.ModifyStyleDialog.txtColor": "Color de fuente",
++  "DE.Views.ModifyStyleDialog.txtFont": "Fuente",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Fuente...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Formato",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formato",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Disminuir sangría",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Aumentar sangría",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Cursiva",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Justificar",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Alinear a la izquierda",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Interlineado",
++  "DE.Views.ModifyStyleDialog.txtName": "Nombre:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Crear nuevo estilo a partir del formato",
++  "DE.Views.ModifyStyleDialog.txtNext": "Estilo del párrafo siguiente:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Párrafo siguiente",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(sin estilo)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Solo en este documento",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Párrafo",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Párrafo...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Párrafo anterior",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Propiedades",
++  "DE.Views.ModifyStyleDialog.txtRight": "Alinear a la derecha",
++  "DE.Views.ModifyStyleDialog.txtSample": "Texto de ejemplo",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Reducir espacio entre párrafos",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Aumentar espacio entre párrafos",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modificar estilo",
++  "DE.Views.ModifyStyleDialog.txtType": "Tipo de estilo:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Subrayado",
+   "DE.Views.Navigation.strNavigate": "Títulos",
+   "DE.Views.Navigation.txtClosePanel": "Cerrar títulos",
+   "DE.Views.Navigation.txtCollapse": "Desplegar todo",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Este campo es obligatorio",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "El campo no puede estar vacío",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Igual que el nuevo estilo creado",
++  "DE.Views.StylesPane.txtClearAll": "Borrar todo",
++  "DE.Views.StylesPane.txtDelete": "Eliminar...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Eliminar {0}...",
++  "DE.Views.StylesPane.txtModify": "Modificar...",
++  "DE.Views.StylesPane.txtNewStyle": "Nuevo estilo",
++  "DE.Views.StylesPane.txtRevert": "Restablecer valores predeterminados",
++  "DE.Views.StylesPane.txtShowPreview": "Mostrar vista previa",
++  "DE.Views.StylesPane.txtTitle": "Estilos",
++  "DE.Views.StylesPane.txtUpdate": "Actualizar para que coincida con la selección",
++  "DE.Views.StylesPane.txtUpdateTo": "Actualizar {0} para que coincida con la selección",
+   "DE.Views.TableFormulaDialog.textBookmark": "Pegar marcador",
+   "DE.Views.TableFormulaDialog.textFormat": "Formato de número",
+   "DE.Views.TableFormulaDialog.textFormula": "Fórmula",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 7c89feb40e..fef8eb5115 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajuster à la page",
+   "DE.Controllers.Viewport.textFitWidth": "Ajuster à la largeur",
+   "DE.Controllers.Viewport.txtDarkMode": "Mode sombre",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Appliquer les styles...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Effacer la mise en forme",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Créer un style",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Voulez-vous supprimer le style {0} du document ?",
++  "DE.Controllers.WordFormatting.textModify": "Modifier...",
++  "DE.Controllers.WordFormatting.textStyleN": "Style",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modifier...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Réappliquer",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nom du style :",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Styles (Ctrl+Alt+Maj+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Appliquer les styles",
+   "DE.Views.BookmarksDialog.textAdd": "Ajouter",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Ajouter et obtenir un lien",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nom du signet",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "A l'enregistrement précédent",
+   "DE.Views.MailMergeSettings.txtUntitled": "Sans titre",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Fusion a échoué",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Ajouter à la galerie de styles",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Style basé sur :",
++  "DE.Views.ModifyStyleDialog.txtBold": "Gras",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Centrer",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Caractère",
++  "DE.Views.ModifyStyleDialog.txtColor": "Couleur de police",
++  "DE.Views.ModifyStyleDialog.txtFont": "Police",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Police...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Format",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Mise en forme",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Diminuer le retrait",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Augmenter le retrait",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Italique",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Justifier",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Aligner à gauche",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Interligne",
++  "DE.Views.ModifyStyleDialog.txtName": "Nom :",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Créer un style à partir de la mise en forme",
++  "DE.Views.ModifyStyleDialog.txtNext": "Style du paragraphe suivant :",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Paragraphe suivant",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(aucun style)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Uniquement dans ce document",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Paragraphe",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Paragraphe...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Paragraphe précédent",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Propriétés",
++  "DE.Views.ModifyStyleDialog.txtRight": "Aligner à droite",
++  "DE.Views.ModifyStyleDialog.txtSample": "Exemple de texte",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Réduire l'espacement des paragraphes",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Augmenter l'espacement des paragraphes",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modifier le style",
++  "DE.Views.ModifyStyleDialog.txtType": "Type de style :",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Souligné",
+   "DE.Views.Navigation.strNavigate": "Titres",
+   "DE.Views.Navigation.txtClosePanel": "Fermer les titres",
+   "DE.Views.Navigation.txtCollapse": "Réduire tout",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Ce champ est obligatoire",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Le champ ne doit pas être vide",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Identique au nouveau style créé",
++  "DE.Views.StylesPane.txtClearAll": "Effacer tout",
++  "DE.Views.StylesPane.txtDelete": "Supprimer...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Supprimer {0}...",
++  "DE.Views.StylesPane.txtModify": "Modifier...",
++  "DE.Views.StylesPane.txtNewStyle": "Nouveau style",
++  "DE.Views.StylesPane.txtRevert": "Rétablir la valeur par défaut",
++  "DE.Views.StylesPane.txtShowPreview": "Afficher l'aperçu",
++  "DE.Views.StylesPane.txtTitle": "Styles",
++  "DE.Views.StylesPane.txtUpdate": "Mettre à jour pour correspondre à la sélection",
++  "DE.Views.StylesPane.txtUpdateTo": "Mettre à jour {0} pour correspondre à la sélection",
+   "DE.Views.TableFormulaDialog.textBookmark": "Insérer le signet",
+   "DE.Views.TableFormulaDialog.textFormat": "Format de nombre",
+   "DE.Views.TableFormulaDialog.textFormula": "Formule",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 42c1e03aae..98ca041dd3 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Adatta alla pagina",
+   "DE.Controllers.Viewport.textFitWidth": "Adatta alla larghezza",
+   "DE.Controllers.Viewport.txtDarkMode": "Modalità scura",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Applica stili...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Cancella formattazione",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Crea uno stile",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Eliminare lo stile {0} dal documento?",
++  "DE.Controllers.WordFormatting.textModify": "Modifica...",
++  "DE.Controllers.WordFormatting.textStyleN": "Stile",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modifica...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Riapplica",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nome stile:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Stili (CTRL+ALT+MAIUSC+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Applica stili",
+   "DE.Views.BookmarksDialog.textAdd": "Aggiungi",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Aggiungi e ottieni link",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nome segnalibro",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Alla nota precedente",
+   "DE.Views.MailMergeSettings.txtUntitled": "Senza titolo",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Avvio unione fallito",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Aggiungi alla raccolta Stili",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Stile basato su:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Grassetto",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Al centro",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Carattere",
++  "DE.Views.ModifyStyleDialog.txtColor": "Colore carattere",
++  "DE.Views.ModifyStyleDialog.txtFont": "Carattere",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Carattere...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Formato",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formattazione",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Riduci rientro",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Aumenta rientro",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Corsivo",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Giustifica",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Allinea a sinistra",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Interlinea",
++  "DE.Views.ModifyStyleDialog.txtName": "Nome:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Crea nuovo stile dalla formattazione",
++  "DE.Views.ModifyStyleDialog.txtNext": "Stile paragrafo successivo:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Paragrafo successivo",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(nessuno stile)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Solo in questo documento",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Paragrafo",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Paragrafo...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Paragrafo precedente",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Proprietà",
++  "DE.Views.ModifyStyleDialog.txtRight": "Allinea a destra",
++  "DE.Views.ModifyStyleDialog.txtSample": "Testo di esempio",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Riduci spaziatura paragrafo",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Aumenta spaziatura paragrafo",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modifica stile",
++  "DE.Views.ModifyStyleDialog.txtType": "Tipo stile:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Sottolineato",
+   "DE.Views.Navigation.strNavigate": "Intestazioni",
+   "DE.Views.Navigation.txtClosePanel": "Chiudi le intestazioni",
+   "DE.Views.Navigation.txtCollapse": "Contrai tutto",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Questo campo è obbligatorio",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Il campo non dev'essere vuoto",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Come il nuovo stile creato",
++  "DE.Views.StylesPane.txtClearAll": "Cancella tutto",
++  "DE.Views.StylesPane.txtDelete": "Elimina...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Elimina {0}...",
++  "DE.Views.StylesPane.txtModify": "Modifica...",
++  "DE.Views.StylesPane.txtNewStyle": "Nuovo stile",
++  "DE.Views.StylesPane.txtRevert": "Ripristina predefinito",
++  "DE.Views.StylesPane.txtShowPreview": "Mostra anteprima",
++  "DE.Views.StylesPane.txtTitle": "Stili",
++  "DE.Views.StylesPane.txtUpdate": "Aggiorna in base alla selezione",
++  "DE.Views.StylesPane.txtUpdateTo": "Aggiorna {0} in base alla selezione",
+   "DE.Views.TableFormulaDialog.textBookmark": "Incolla segnalibro",
+   "DE.Views.TableFormulaDialog.textFormat": "Formato del numero",
+   "DE.Views.TableFormulaDialog.textFormula": "Formula",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index 4940b6d2f0..7631560d74 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2102,6 +2102,17 @@
+   "DE.Controllers.Viewport.textFitPage": "ページに合わせる",
+   "DE.Controllers.Viewport.textFitWidth": "幅を合わせる",
+   "DE.Controllers.Viewport.txtDarkMode": "ダークモード",
++  "DE.Controllers.WordFormatting.textApplyStyles": "スタイルの適用...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "書式のクリア",
++  "DE.Controllers.WordFormatting.textCreateStyle": "スタイルの作成",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "文書からスタイル {0} を削除しますか?",
++  "DE.Controllers.WordFormatting.textModify": "変更...",
++  "DE.Controllers.WordFormatting.textStyleN": "スタイル",
++  "DE.Views.ApplyStylesDialog.txtModify": "変更...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "再適用",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "スタイル名:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "スタイル (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "スタイルの適用",
+   "DE.Views.BookmarksDialog.textAdd": "追加",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "リンクの追加＆取得",
+   "DE.Views.BookmarksDialog.textBookmarkName": "ブックマーク名",
+@@ -3371,6 +3382,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "以前の記録へ",
+   "DE.Views.MailMergeSettings.txtUntitled": "無題",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "マージの開始に失敗しました",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "スタイル ギャラリーに追加",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "基準にするスタイル:",
++  "DE.Views.ModifyStyleDialog.txtBold": "太字",
++  "DE.Views.ModifyStyleDialog.txtCenter": "中央揃え",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "文字",
++  "DE.Views.ModifyStyleDialog.txtColor": "フォントの色",
++  "DE.Views.ModifyStyleDialog.txtFont": "フォント",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "フォント...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "書式",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "書式",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "インデントを減らす",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "インデントを増やす",
++  "DE.Views.ModifyStyleDialog.txtItalic": "斜体",
++  "DE.Views.ModifyStyleDialog.txtJustify": "両端揃え",
++  "DE.Views.ModifyStyleDialog.txtLeft": "左揃え",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "行間",
++  "DE.Views.ModifyStyleDialog.txtName": "名前:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "書式から新しいスタイルを作成",
++  "DE.Views.ModifyStyleDialog.txtNext": "次の段落のスタイル:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "次の段落",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(スタイルなし)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "この文書のみ",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "段落",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "段落...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "前の段落",
++  "DE.Views.ModifyStyleDialog.txtProperties": "プロパティ",
++  "DE.Views.ModifyStyleDialog.txtRight": "右揃え",
++  "DE.Views.ModifyStyleDialog.txtSample": "サンプル テキスト",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "段落前の間隔を狭くする",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "段落前の間隔を広くする",
++  "DE.Views.ModifyStyleDialog.txtTitle": "スタイルの変更",
++  "DE.Views.ModifyStyleDialog.txtType": "種類:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "下線",
+   "DE.Views.Navigation.strNavigate": "見出し",
+   "DE.Views.Navigation.txtClosePanel": "見出しを閉じる",
+   "DE.Views.Navigation.txtCollapse": "すべてを折りたたむ",
+@@ -3775,6 +3819,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "この項目は必須です",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "フィールドは空にできません。",
+   "DE.Views.StyleTitleDialog.txtSameAs": "新規作成したスタイルと同じ",
++  "DE.Views.StylesPane.txtClearAll": "すべてクリア",
++  "DE.Views.StylesPane.txtDelete": "削除...",
++  "DE.Views.StylesPane.txtDeleteNamed": "{0} の削除...",
++  "DE.Views.StylesPane.txtModify": "変更...",
++  "DE.Views.StylesPane.txtNewStyle": "新しいスタイル",
++  "DE.Views.StylesPane.txtRevert": "既定に戻す",
++  "DE.Views.StylesPane.txtShowPreview": "プレビューを表示する",
++  "DE.Views.StylesPane.txtTitle": "スタイル",
++  "DE.Views.StylesPane.txtUpdate": "選択個所と一致するように更新する",
++  "DE.Views.StylesPane.txtUpdateTo": "選択個所と一致するように {0} を更新する",
+   "DE.Views.TableFormulaDialog.textBookmark": "ブックマークの貼り付け",
+   "DE.Views.TableFormulaDialog.textFormat": "数値の書式",
+   "DE.Views.TableFormulaDialog.textFormula": "数式",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index a5da5505b5..430517f23d 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -1501,6 +1501,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Aan pagina aanpassen",
+   "DE.Controllers.Viewport.textFitWidth": "Aan breedte aanpassen",
+   "DE.Controllers.Viewport.txtDarkMode": "Donkere modus",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Stijlen toepassen...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Opmaak wissen",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Een stijl maken",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Wilt u de stijl {0} uit het document verwijderen?",
++  "DE.Controllers.WordFormatting.textModify": "Wijzigen...",
++  "DE.Controllers.WordFormatting.textStyleN": "Stijl",
++  "DE.Views.ApplyStylesDialog.txtModify": "Wijzigen...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Opnieuw toepassen",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Stijlnaam:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Stijlen (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Stijlen toepassen",
+   "DE.Views.BookmarksDialog.textAdd": "Toevoegen",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Link toevoegen en ophalen",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Bladwijzer naam",
+@@ -2491,6 +2502,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Naar vorige record",
+   "DE.Views.MailMergeSettings.txtUntitled": "Naamloos",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Starten samenvoeging mislukt",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Toevoegen aan de galerie Stijlen",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Stijl gebaseerd op:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Vet",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Centreren",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Teken",
++  "DE.Views.ModifyStyleDialog.txtColor": "Tekstkleur",
++  "DE.Views.ModifyStyleDialog.txtFont": "Lettertype",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Lettertype...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Opmaak",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Opmaak",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Inspringing verkleinen",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Inspringing vergroten",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Cursief",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Uitvullen",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Links uitlijnen",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Regelafstand",
++  "DE.Views.ModifyStyleDialog.txtName": "Naam:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Nieuwe stijl maken op basis van opmaak",
++  "DE.Views.ModifyStyleDialog.txtNext": "Stijl volgende alinea:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Volgende alinea",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(geen stijl)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Alleen in dit document",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Alinea",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Alinea...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Vorige alinea",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Eigenschappen",
++  "DE.Views.ModifyStyleDialog.txtRight": "Rechts uitlijnen",
++  "DE.Views.ModifyStyleDialog.txtSample": "Voorbeeldtekst",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Alinea-afstand verkleinen",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Alinea-afstand vergroten",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Stijl wijzigen",
++  "DE.Views.ModifyStyleDialog.txtType": "Stijltype:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Onderstrepen",
+   "DE.Views.Navigation.strNavigate": "Koppen",
+   "DE.Views.Navigation.txtClosePanel": "Kopjes sluiten",
+   "DE.Views.Navigation.txtCollapse": "Alles inklappen",
+@@ -2793,6 +2837,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Dit veld is vereist",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Veld mag niet leeg zijn",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Hetzelfde als een nieuwe stijl gemaakt",
++  "DE.Views.StylesPane.txtClearAll": "Alles wissen",
++  "DE.Views.StylesPane.txtDelete": "Verwijderen...",
++  "DE.Views.StylesPane.txtDeleteNamed": "{0} verwijderen...",
++  "DE.Views.StylesPane.txtModify": "Wijzigen...",
++  "DE.Views.StylesPane.txtNewStyle": "Nieuwe stijl",
++  "DE.Views.StylesPane.txtRevert": "Standaard herstellen",
++  "DE.Views.StylesPane.txtShowPreview": "Voorbeeld weergeven",
++  "DE.Views.StylesPane.txtTitle": "Stijlen",
++  "DE.Views.StylesPane.txtUpdate": "Bijwerken zodat dit overeenkomt met de selectie",
++  "DE.Views.StylesPane.txtUpdateTo": "{0} bijwerken zodat dit overeenkomt met de selectie",
+   "DE.Views.TableFormulaDialog.textBookmark": "Bladwijzer plakken",
+   "DE.Views.TableFormulaDialog.textFormat": "Getalnotatie",
+   "DE.Views.TableFormulaDialog.textFormula": "Formule",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index ad6b849163..2b97d8c866 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -1667,6 +1667,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Dopasuj do strony",
+   "DE.Controllers.Viewport.textFitWidth": "Dopasuj do szerokości",
+   "DE.Controllers.Viewport.txtDarkMode": "Ciemny motyw",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Zastosuj style...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Wyczyść formatowanie",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Utwórz styl",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Czy chcesz usunąć styl {0} z dokumentu?",
++  "DE.Controllers.WordFormatting.textModify": "Modyfikuj...",
++  "DE.Controllers.WordFormatting.textStyleN": "Styl",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modyfikuj...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Zastosuj ponownie",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nazwa stylu:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Style (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Zastosuj style",
+   "DE.Views.BookmarksDialog.textAdd": "Dodaj",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nazwa zakładki",
+   "DE.Views.BookmarksDialog.textClose": "Zamknij",
+@@ -2741,6 +2752,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Do poprzedniego rekordu",
+   "DE.Views.MailMergeSettings.txtUntitled": "Niezatytułowany",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Rozpoczęcie scalania nie powiodło się",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Dodaj do galerii stylów",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Styl oparty na:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Pogrubienie",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Wyśrodkuj",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Znak",
++  "DE.Views.ModifyStyleDialog.txtColor": "Kolor czcionki",
++  "DE.Views.ModifyStyleDialog.txtFont": "Czcionka",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Czcionka...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Formatuj",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formatowanie",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Zmniejsz wcięcie",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Zwiększ wcięcie",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Kursywa",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Wyjustuj",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Wyrównaj do lewej",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Interlinia",
++  "DE.Views.ModifyStyleDialog.txtName": "Nazwa:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Utwórz nowy styl na podstawie formatowania",
++  "DE.Views.ModifyStyleDialog.txtNext": "Styl następnego akapitu:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Następny akapit",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(brak stylu)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Tylko w tym dokumencie",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Akapit",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Akapit...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Poprzedni akapit",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Właściwości",
++  "DE.Views.ModifyStyleDialog.txtRight": "Wyrównaj do prawej",
++  "DE.Views.ModifyStyleDialog.txtSample": "Przykładowy tekst",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Zmniejsz odstępy między akapitami",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Zwiększ odstępy między akapitami",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modyfikowanie stylu",
++  "DE.Views.ModifyStyleDialog.txtType": "Typ stylu:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Podkreślenie",
+   "DE.Views.Navigation.strNavigate": "Nagłówki",
+   "DE.Views.Navigation.txtClosePanel": "Zamknij nagłówki",
+   "DE.Views.Navigation.txtCollapse": "Zwiń wszystko",
+@@ -3120,6 +3164,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "To pole jest wymagane",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Pole nie może być puste",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Taki sam, jak stworzony nowy styl",
++  "DE.Views.StylesPane.txtClearAll": "Wyczyść wszystko",
++  "DE.Views.StylesPane.txtDelete": "Usuń...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Usuń {0}...",
++  "DE.Views.StylesPane.txtModify": "Modyfikuj...",
++  "DE.Views.StylesPane.txtNewStyle": "Nowy styl",
++  "DE.Views.StylesPane.txtRevert": "Przywróć domyślny",
++  "DE.Views.StylesPane.txtShowPreview": "Pokaż podgląd",
++  "DE.Views.StylesPane.txtTitle": "Style",
++  "DE.Views.StylesPane.txtUpdate": "Aktualizuj, aby pasował do zaznaczenia",
++  "DE.Views.StylesPane.txtUpdateTo": "Aktualizuj {0}, aby pasował do zaznaczenia",
+   "DE.Views.TableFormulaDialog.textBookmark": "Wklej zakładkę",
+   "DE.Views.TableFormulaDialog.textFormat": "Format liczby",
+   "DE.Views.TableFormulaDialog.textFormula": "Formuła",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index c1ed4f9113..f66ca0d01e 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -1527,6 +1527,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar à página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar à largura",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo escuro",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar Estilos...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Pretende eliminar o estilo {0} do documento?",
++  "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nome do estilo:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Estilos (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Aplicar Estilos",
+   "DE.Views.BookmarksDialog.textAdd": "Adicionar",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Adicionar e Obter ligação",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nome do marcador",
+@@ -2556,6 +2567,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "To previous record",
+   "DE.Views.MailMergeSettings.txtUntitled": "Sem título",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Starting merge failed",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Adicionar à galeria de Estilos",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Estilo baseado em:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Negrito",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Centrar",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Caráter",
++  "DE.Views.ModifyStyleDialog.txtColor": "Cor do Tipo de Letra",
++  "DE.Views.ModifyStyleDialog.txtFont": "Tipo de letra",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Tipo de Letra...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Formatar",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formatação",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Diminuir Avanço",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Aumentar Avanço",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Itálico",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Justificar",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Alinhar à Esquerda",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Espaçamento entre linhas",
++  "DE.Views.ModifyStyleDialog.txtName": "Nome:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Criar Novo Estilo a Partir da Formatação",
++  "DE.Views.ModifyStyleDialog.txtNext": "Estilo do parágrafo seguinte:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Parágrafo seguinte",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(sem estilo)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Apenas neste documento",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Parágrafo",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Parágrafo...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Parágrafo anterior",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Propriedades",
++  "DE.Views.ModifyStyleDialog.txtRight": "Alinhar à Direita",
++  "DE.Views.ModifyStyleDialog.txtSample": "Texto de Exemplo",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Diminuir Espaçamento entre Parágrafos",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Aumentar Espaçamento entre Parágrafos",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modificar Estilo",
++  "DE.Views.ModifyStyleDialog.txtType": "Tipo de estilo:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Sublinhado",
+   "DE.Views.Navigation.strNavigate": "Títulos",
+   "DE.Views.Navigation.txtClosePanel": "Fechar títulos",
+   "DE.Views.Navigation.txtCollapse": "Recolher tudo",
+@@ -2916,6 +2960,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "This field is required",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Field must not be empty",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Igual ao novo estilo criado",
++  "DE.Views.StylesPane.txtClearAll": "Limpar Tudo",
++  "DE.Views.StylesPane.txtDelete": "Eliminar...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Eliminar {0}...",
++  "DE.Views.StylesPane.txtModify": "Modificar...",
++  "DE.Views.StylesPane.txtNewStyle": "Novo Estilo",
++  "DE.Views.StylesPane.txtRevert": "Repor Predefinição",
++  "DE.Views.StylesPane.txtShowPreview": "Mostrar Pré-visualização",
++  "DE.Views.StylesPane.txtTitle": "Estilos",
++  "DE.Views.StylesPane.txtUpdate": "Atualizar para Corresponder à Seleção",
++  "DE.Views.StylesPane.txtUpdateTo": "Atualizar {0} para Corresponder à Seleção",
+   "DE.Views.TableFormulaDialog.textBookmark": "Colar Marcador",
+   "DE.Views.TableFormulaDialog.textFormat": "Formato de número",
+   "DE.Views.TableFormulaDialog.textFormula": "Fórmula",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index 67a8a1bce7..cbdc68ac36 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2117,6 +2117,17 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar a página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar largura",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo escuro",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar Estilos...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Deseja excluir o estilo {0} do documento?",
++  "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Nome do estilo:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Estilos (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Aplicar Estilos",
+   "DE.Views.BookmarksDialog.textAdd": "Incluir",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Adicionar e obter link",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Nome do favorito",
+@@ -3386,6 +3397,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Para o registro anterior",
+   "DE.Views.MailMergeSettings.txtUntitled": "Untitled",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Starting merge failed",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Adicionar à galeria de Estilos",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Estilo baseado em:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Negrito",
++  "DE.Views.ModifyStyleDialog.txtCenter": "Centralizar",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Caractere",
++  "DE.Views.ModifyStyleDialog.txtColor": "Cor da Fonte",
++  "DE.Views.ModifyStyleDialog.txtFont": "Fonte",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Fonte...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Formatar",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Formatação",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Diminuir Recuo",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Aumentar Recuo",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Itálico",
++  "DE.Views.ModifyStyleDialog.txtJustify": "Justificar",
++  "DE.Views.ModifyStyleDialog.txtLeft": "Alinhar à Esquerda",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Espaçamento entre linhas",
++  "DE.Views.ModifyStyleDialog.txtName": "Nome:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Criar Novo Estilo a Partir da Formatação",
++  "DE.Views.ModifyStyleDialog.txtNext": "Estilo do parágrafo seguinte:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Parágrafo seguinte",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(sem estilo)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Somente neste documento",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Parágrafo",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Parágrafo...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Parágrafo anterior",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Propriedades",
++  "DE.Views.ModifyStyleDialog.txtRight": "Alinhar à Direita",
++  "DE.Views.ModifyStyleDialog.txtSample": "Texto de Exemplo",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Diminuir Espaçamento entre Parágrafos",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Aumentar Espaçamento entre Parágrafos",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Modificar Estilo",
++  "DE.Views.ModifyStyleDialog.txtType": "Tipo de estilo:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Sublinhado",
+   "DE.Views.Navigation.strNavigate": "Cabeçalhos",
+   "DE.Views.Navigation.txtClosePanel": "Fechar títulos",
+   "DE.Views.Navigation.txtCollapse": "Recolher tudo",
+@@ -3790,6 +3834,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "This field is required",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Field must not be empty",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Igual ao novo estilo criado",
++  "DE.Views.StylesPane.txtClearAll": "Limpar Tudo",
++  "DE.Views.StylesPane.txtDelete": "Excluir...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Excluir {0}...",
++  "DE.Views.StylesPane.txtModify": "Modificar...",
++  "DE.Views.StylesPane.txtNewStyle": "Novo Estilo",
++  "DE.Views.StylesPane.txtRevert": "Restaurar Padrão",
++  "DE.Views.StylesPane.txtShowPreview": "Mostrar Visualização",
++  "DE.Views.StylesPane.txtTitle": "Estilos",
++  "DE.Views.StylesPane.txtUpdate": "Atualizar para Corresponder à Seleção",
++  "DE.Views.StylesPane.txtUpdateTo": "Atualizar {0} para Corresponder à Seleção",
+   "DE.Views.TableFormulaDialog.textBookmark": "Colar marcador",
+   "DE.Views.TableFormulaDialog.textFormat": "Formato de número",
+   "DE.Views.TableFormulaDialog.textFormula": "Fórmula",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index cac295b0fe..c78fbd679b 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "По размеру страницы",
+   "DE.Controllers.Viewport.textFitWidth": "По ширине",
+   "DE.Controllers.Viewport.txtDarkMode": "Темный режим",
++  "DE.Controllers.WordFormatting.textApplyStyles": "Применить стили...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "Очистить формат",
++  "DE.Controllers.WordFormatting.textCreateStyle": "Создать стиль",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "Удалить стиль {0} из документа?",
++  "DE.Controllers.WordFormatting.textModify": "Изменить...",
++  "DE.Controllers.WordFormatting.textStyleN": "Стиль",
++  "DE.Views.ApplyStylesDialog.txtModify": "Изменить...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "Применить снова",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "Имя стиля:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "Стили (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "Применить стили",
+   "DE.Views.BookmarksDialog.textAdd": "Добавить",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "Добавить и получить ссылку",
+   "DE.Views.BookmarksDialog.textBookmarkName": "Имя закладки",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "Предыдущая запись",
+   "DE.Views.MailMergeSettings.txtUntitled": "Без имени",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "Не удалось начать слияние",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "Добавить в коллекцию стилей",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "Основан на стиле:",
++  "DE.Views.ModifyStyleDialog.txtBold": "Полужирный",
++  "DE.Views.ModifyStyleDialog.txtCenter": "По центру",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "Знак",
++  "DE.Views.ModifyStyleDialog.txtColor": "Цвет текста",
++  "DE.Views.ModifyStyleDialog.txtFont": "Шрифт",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "Шрифт...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "Формат",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "Форматирование",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "Уменьшить отступ",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "Увеличить отступ",
++  "DE.Views.ModifyStyleDialog.txtItalic": "Курсив",
++  "DE.Views.ModifyStyleDialog.txtJustify": "По ширине",
++  "DE.Views.ModifyStyleDialog.txtLeft": "По левому краю",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "Междустрочный интервал",
++  "DE.Views.ModifyStyleDialog.txtName": "Имя:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "Создание стиля",
++  "DE.Views.ModifyStyleDialog.txtNext": "Стиль следующего абзаца:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "Следующий абзац",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(нет стиля)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "Только в этом документе",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "Абзац",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "Абзац...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "Предыдущий абзац",
++  "DE.Views.ModifyStyleDialog.txtProperties": "Свойства",
++  "DE.Views.ModifyStyleDialog.txtRight": "По правому краю",
++  "DE.Views.ModifyStyleDialog.txtSample": "Образец текста",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "Уменьшить интервал между абзацами",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "Увеличить интервал между абзацами",
++  "DE.Views.ModifyStyleDialog.txtTitle": "Изменение стиля",
++  "DE.Views.ModifyStyleDialog.txtType": "Стиль:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "Подчеркнутый",
+   "DE.Views.Navigation.strNavigate": "Заголовки",
+   "DE.Views.Navigation.txtClosePanel": "Закрыть заголовки",
+   "DE.Views.Navigation.txtCollapse": "Свернуть все",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "Это поле необходимо заполнить",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "Поле не может быть пустым",
+   "DE.Views.StyleTitleDialog.txtSameAs": "Такой же, как создаваемый стиль",
++  "DE.Views.StylesPane.txtClearAll": "Очистить все",
++  "DE.Views.StylesPane.txtDelete": "Удалить...",
++  "DE.Views.StylesPane.txtDeleteNamed": "Удалить {0}...",
++  "DE.Views.StylesPane.txtModify": "Изменить...",
++  "DE.Views.StylesPane.txtNewStyle": "Создать стиль",
++  "DE.Views.StylesPane.txtRevert": "Восстановить по умолчанию",
++  "DE.Views.StylesPane.txtShowPreview": "Предварительный просмотр",
++  "DE.Views.StylesPane.txtTitle": "Стили",
++  "DE.Views.StylesPane.txtUpdate": "Обновить в соответствии с выделенным фрагментом",
++  "DE.Views.StylesPane.txtUpdateTo": "Обновить {0} в соответствии с выделенным фрагментом",
+   "DE.Views.TableFormulaDialog.textBookmark": "Вставить закладку",
+   "DE.Views.TableFormulaDialog.textFormat": "Формат числа",
+   "DE.Views.TableFormulaDialog.textFormula": "Формула",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index a4c50c4b26..6077818277 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2118,6 +2118,17 @@
+   "DE.Controllers.Viewport.textFitPage": "调整至页面大小",
+   "DE.Controllers.Viewport.textFitWidth": "调整至合适宽度",
+   "DE.Controllers.Viewport.txtDarkMode": "深色模式",
++  "DE.Controllers.WordFormatting.textApplyStyles": "应用样式...",
++  "DE.Controllers.WordFormatting.textClearFormatting": "清除格式",
++  "DE.Controllers.WordFormatting.textCreateStyle": "创建样式",
++  "DE.Controllers.WordFormatting.textDeleteConfirm": "是否要从文档中删除样式 {0}?",
++  "DE.Controllers.WordFormatting.textModify": "修改...",
++  "DE.Controllers.WordFormatting.textStyleN": "样式",
++  "DE.Views.ApplyStylesDialog.txtModify": "修改...",
++  "DE.Views.ApplyStylesDialog.txtReapply": "重新应用",
++  "DE.Views.ApplyStylesDialog.txtStyleName": "样式名:",
++  "DE.Views.ApplyStylesDialog.txtStylesPane": "样式 (Ctrl+Alt+Shift+S)",
++  "DE.Views.ApplyStylesDialog.txtTitle": "应用样式",
+   "DE.Views.BookmarksDialog.textAdd": "添加",
+   "DE.Views.BookmarksDialog.textAddAndGetLink": "添加并获取链接",
+   "DE.Views.BookmarksDialog.textBookmarkName": "书签名称",
+@@ -3387,6 +3398,39 @@
+   "DE.Views.MailMergeSettings.txtPrev": "跳转到上一条记录",
+   "DE.Views.MailMergeSettings.txtUntitled": "无标题",
+   "DE.Views.MailMergeSettings.warnProcessMailMerge": "启动合并失败",
++  "DE.Views.ModifyStyleDialog.txtAddToGallery": "添加到样式库",
++  "DE.Views.ModifyStyleDialog.txtBasedOn": "样式基准:",
++  "DE.Views.ModifyStyleDialog.txtBold": "加粗",
++  "DE.Views.ModifyStyleDialog.txtCenter": "居中",
++  "DE.Views.ModifyStyleDialog.txtCharacter": "字符",
++  "DE.Views.ModifyStyleDialog.txtColor": "字体颜色",
++  "DE.Views.ModifyStyleDialog.txtFont": "字体",
++  "DE.Views.ModifyStyleDialog.txtFontDlg": "字体...",
++  "DE.Views.ModifyStyleDialog.txtFormat": "格式",
++  "DE.Views.ModifyStyleDialog.txtFormatting": "格式",
++  "DE.Views.ModifyStyleDialog.txtIndentDec": "减少缩进量",
++  "DE.Views.ModifyStyleDialog.txtIndentInc": "增加缩进量",
++  "DE.Views.ModifyStyleDialog.txtItalic": "倾斜",
++  "DE.Views.ModifyStyleDialog.txtJustify": "两端对齐",
++  "DE.Views.ModifyStyleDialog.txtLeft": "左对齐",
++  "DE.Views.ModifyStyleDialog.txtLineSpacing": "行距",
++  "DE.Views.ModifyStyleDialog.txtName": "名称:",
++  "DE.Views.ModifyStyleDialog.txtNewTitle": "根据格式化创建新样式",
++  "DE.Views.ModifyStyleDialog.txtNext": "后续段落样式:",
++  "DE.Views.ModifyStyleDialog.txtNextParagraph": "下一段落",
++  "DE.Views.ModifyStyleDialog.txtNoStyle": "(无样式)",
++  "DE.Views.ModifyStyleDialog.txtOnlyDoc": "仅限此文档",
++  "DE.Views.ModifyStyleDialog.txtParagraph": "段落",
++  "DE.Views.ModifyStyleDialog.txtParagraphDlg": "段落...",
++  "DE.Views.ModifyStyleDialog.txtPrevParagraph": "上一段落",
++  "DE.Views.ModifyStyleDialog.txtProperties": "属性",
++  "DE.Views.ModifyStyleDialog.txtRight": "右对齐",
++  "DE.Views.ModifyStyleDialog.txtSample": "示例文字",
++  "DE.Views.ModifyStyleDialog.txtSpaceLess": "减少段落间距",
++  "DE.Views.ModifyStyleDialog.txtSpaceMore": "增加段落间距",
++  "DE.Views.ModifyStyleDialog.txtTitle": "修改样式",
++  "DE.Views.ModifyStyleDialog.txtType": "样式类型:",
++  "DE.Views.ModifyStyleDialog.txtUnderline": "下划线",
+   "DE.Views.Navigation.strNavigate": "标题",
+   "DE.Views.Navigation.txtClosePanel": "关闭标题",
+   "DE.Views.Navigation.txtCollapse": "折叠全部",
+@@ -3791,6 +3835,16 @@
+   "DE.Views.StyleTitleDialog.txtEmpty": "这是必填栏",
+   "DE.Views.StyleTitleDialog.txtNotEmpty": "字段不能为空",
+   "DE.Views.StyleTitleDialog.txtSameAs": "与创建的新样式相同",
++  "DE.Views.StylesPane.txtClearAll": "全部清除",
++  "DE.Views.StylesPane.txtDelete": "删除...",
++  "DE.Views.StylesPane.txtDeleteNamed": "删除 {0}...",
++  "DE.Views.StylesPane.txtModify": "修改...",
++  "DE.Views.StylesPane.txtNewStyle": "新建样式",
++  "DE.Views.StylesPane.txtRevert": "恢复为默认值",
++  "DE.Views.StylesPane.txtShowPreview": "显示预览",
++  "DE.Views.StylesPane.txtTitle": "样式",
++  "DE.Views.StylesPane.txtUpdate": "更新以匹配所选内容",
++  "DE.Views.StylesPane.txtUpdateTo": "更新 {0} 以匹配所选内容",
+   "DE.Views.TableFormulaDialog.textBookmark": "粘贴书签",
+   "DE.Views.TableFormulaDialog.textFormat": "数字格式",
+   "DE.Views.TableFormulaDialog.textFormula": "公式",
+diff --git a/apps/documenteditor/main/resources/less/app.less b/apps/documenteditor/main/resources/less/app.less
+index d1bb75e67c..177b5ae2a8 100644
+--- a/apps/documenteditor/main/resources/less/app.less
++++ b/apps/documenteditor/main/resources/less/app.less
+@@ -145,6 +145,7 @@
+ @import "advanced-settings.less";
+ @import "navigation.less";
+ @import "thumbnails.less";
++@import "word-formatting.less";
+ 
+ // PNG sprites disabled - using SVG sprite instead
+ // @import "sprites/iconssmall@1x";
+diff --git a/apps/documenteditor/main/resources/less/word-formatting.less b/apps/documenteditor/main/resources/less/word-formatting.less
+new file mode 100644
+index 0000000000..bc3956ea22
+--- /dev/null
++++ b/apps/documenteditor/main/resources/less/word-formatting.less
+@@ -0,0 +1,251 @@
++// SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++// SPDX-License-Identifier: AGPL-3.0-only
++//
++// Word-like formatting UI of the document editor (DE.Controllers.WordFormatting):
++// Styles gallery with names under the previews, Styles pane, Apply Styles, Modify Style,
++// Font dialog, Paste Options.
++
++// ---------------------------------------------------------------- Styles gallery
++@word-style-preview-width: 84px;
++@word-style-label-height: 17px;
++
++#slot-field-styles .combo-styles {
++    .combo-styles(62px, 62px, 1);
++
++    .style {
++        display: flex;
++        flex-direction: column;
++        background-color: @canvas-content-background;
++
++        > .style-label {
++            width: @word-style-preview-width;
++            height: @word-style-label-height;
++            line-height: @word-style-label-height;
++            padding: 0 4px;
++            box-sizing: border-box;
++            font-size: 11px;
++            text-align: center;
++            white-space: nowrap;
++            overflow: hidden;
++            text-overflow: ellipsis;
++            color: @text-normal-ie;
++            color: @text-normal;
++            background: transparent;
++        }
++    }
++
++    .dropdown-menu .style > .style-label {
++        color: @text-normal-ie;
++        color: @text-normal;
++    }
++}
++
++// ---------------------------------------------------------------- Styles pane
++.word-styles-pane {
++    .body {
++        height: calc(100% - 34px);
++    }
++
++    .word-styles-pane-box {
++        padding: 8px 8px 0;
++    }
++
++    .word-styles-list {
++        border: @scaled-one-px-value-ie solid @border-regular-control-ie;
++        border: @scaled-one-px-value solid @border-regular-control;
++        border-radius: 4px;
++        position: relative;
++        overflow: hidden;
++
++        .item {
++            width: 100%;
++            padding: 0;
++            border: none !important;
++            background: transparent;
++        }
++    }
++
++    .word-style-row {
++        display: flex;
++        align-items: center;
++        min-height: 24px;
++        padding: 2px 4px 2px 8px;
++        cursor: pointer;
++        border: 1px solid transparent;
++        border-radius: 3px;
++
++        .word-style-name {
++            flex: 1 1 auto;
++            overflow: hidden;
++            white-space: nowrap;
++            text-overflow: ellipsis;
++        }
++
++        .word-style-type {
++            flex: 0 0 auto;
++            width: 20px;
++            text-align: center;
++            color: @text-secondary-ie;
++            color: @text-secondary;
++            font-size: 12px;
++        }
++
++        .word-style-menu-btn {
++            flex: 0 0 auto;
++            width: 18px;
++            height: 18px;
++            padding: 0;
++            border: none;
++            background: transparent;
++            visibility: hidden;
++            cursor: pointer;
++
++            .caret {
++                display: inline-block;
++                width: 6px;
++                height: 6px;
++                border: solid 1px @icon-normal-ie;
++                border: solid 1px @icon-normal;
++                border-top: none;
++                border-left: none;
++                transform: rotate(45deg) translate(-2px, -1px);
++            }
++        }
++
++        &:hover .word-style-menu-btn {
++            visibility: visible;
++        }
++
++        &.clear-all .word-style-name {
++            font-style: italic;
++        }
++    }
++
++    .selected .word-style-row,
++    .item.selected .word-style-row {
++        border-color: @border-preview-select-ie;
++        border-color: @border-preview-select;
++    }
++
++    .word-styles-options {
++        padding: 8px 0 4px;
++    }
++
++    .word-styles-footer {
++        display: flex;
++        gap: 4px;
++        padding: 4px 0 8px;
++        border-top: @scaled-one-px-value-ie solid @border-divider-ie;
++        border-top: @scaled-one-px-value solid @border-divider;
++    }
++}
++
++// ---------------------------------------------------------------- Apply Styles
++.word-apply-styles {
++    .box {
++        padding: 12px 16px 14px;
++    }
++
++    .word-apply-buttons {
++        display: flex;
++        align-items: center;
++        gap: 8px;
++        margin-top: 10px;
++
++        .btn {
++            min-width: 86px;
++        }
++
++        .word-apply-pane {
++            margin-left: auto;
++        }
++    }
++}
++
++// ---------------------------------------------------------------- Modify Style
++.word-modify-style {
++    .box {
++        padding: 6px 16px 4px;
++    }
++
++    .word-ms-section {
++        font-weight: bold;
++        margin: 8px 0 6px;
++    }
++
++    .word-ms-props {
++        width: 100%;
++
++        td {
++            padding: 2px 0;
++            vertical-align: middle;
++
++            &:first-child {
++                width: 190px;
++                padding-right: 8px;
++            }
++        }
++    }
++
++    .word-ms-row {
++        display: flex;
++        align-items: center;
++        gap: 2px;
++        margin-bottom: 6px;
++
++        .word-ms-font {
++            margin-right: 4px;
++        }
++
++        .word-ms-size {
++            margin-right: 8px;
++        }
++
++        .word-ms-sep {
++            width: 1px;
++            height: 18px;
++            margin: 0 6px;
++            background: @border-divider-ie;
++            background: @border-divider;
++        }
++
++        .word-ms-ls .caption {
++            min-width: 18px;
++        }
++
++        &.word-ms-bottom {
++            margin-top: 8px;
++            gap: 16px;
++
++            .word-ms-format {
++                margin-left: auto;
++            }
++        }
++    }
++
++    .word-ms-preview {
++        height: 120px;
++        overflow: hidden;
++        padding: 8px 10px;
++        border: @scaled-one-px-value-ie solid @border-regular-control-ie;
++        border: @scaled-one-px-value solid @border-regular-control;
++        background: #fff;
++        color: #000;
++        font-size: 10pt;
++
++        .word-ms-preview-before,
++        .word-ms-preview-after {
++            color: #a0a0a0;
++            font-size: 7pt;
++            margin: 4px 0;
++            white-space: nowrap;
++            overflow: hidden;
++        }
++
++        .word-ms-preview-text {
++            margin: 6px 0;
++            max-height: 70px;
++            overflow: hidden;
++        }
++    }
++}
+-- 
+2.43.0
+

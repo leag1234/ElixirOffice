@@ -1,0 +1,13 @@
+{
+  "_comment": "Start-page templates. title: per-language labels (en is the fallback). Files are CC0-1.0 documents generated for the ElixirOffice provisional corpus (corpus/provisional/manifest.csv: t01, t02, s06, s08). Thumbnails: tools/example/thumbnails.js.",
+  "templates": [
+    { "id": "worksheet-fractions", "file": "worksheet-fractions.docx", "thumb": "worksheet-fractions.png",
+      "title": { "en": "Fractions worksheet", "fr": "Fiche d'exercices fractions" } },
+    { "id": "assessment-grid", "file": "assessment-grid.docx", "thumb": "assessment-grid.png",
+      "title": { "en": "Assessment with skills grid", "fr": "Évaluation avec grille de compétences" } },
+    { "id": "letterhead", "file": "letterhead.docx", "thumb": "letterhead.png",
+      "title": { "en": "Letter with letterhead", "fr": "Lettre à en-tête" } },
+    { "id": "resume-two-columns", "file": "resume-two-columns.docx", "thumb": "resume-two-columns.png",
+      "title": { "en": "Two-column résumé", "fr": "CV deux colonnes" } }
+  ]
+}

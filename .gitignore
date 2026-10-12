@@ -1,0 +1,18 @@
+.env
+*.local
+node_modules/
+/out/
+
+# Private user documents: never in git. Keep them outside the repository (e.g. $EO_WORK/corpus-private/).
+corpus/real/
+corpus-private/
+*.real.docx
+*.real.odt
+*.real.pdf
+fonts-user/
+*.ttf
+*.otf
+*.ttc
+
+# Generated test and measurement outputs
+results/

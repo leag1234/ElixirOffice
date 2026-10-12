@@ -1,0 +1,62 @@
+From b4ee61c47e519d0639b5e3bb675d5b249808a379 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:06:23 +0200
+Subject: [PATCH 4/6] fix(fonts): draw the visible font previews from their
+ positions
+
+ComboBoxFonts drew the font name images of the rows it computed from
+their index times the row height. With other rows in the list
+(dividers, section headers), the computed range drifted and the first
+visible fonts stayed blank after scrolling. When the list holds other
+rows than fonts, the visible fonts are now found from their offsets
+(read once, then drawn); otherwise nothing changes.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/lib/component/ComboBoxFonts.js       | 20 +++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/apps/common/main/lib/component/ComboBoxFonts.js b/apps/common/main/lib/component/ComboBoxFonts.js
+index 2975388816..341e4226c7 100644
+--- a/apps/common/main/lib/component/ComboBoxFonts.js
++++ b/apps/common/main/lib/component/ComboBoxFonts.js
+@@ -759,15 +759,31 @@ define([
+ 
+                 if (_.isUndefined(scrollY)) scrollY = parseInt($(me.el).find('.ps-scrollbar-x-rail').css('bottom'));
+ 
+-                var scrollH = $(me.el).find('.dropdown-menu').height(),
++                var menuEl = $(me.el).find('.dropdown-menu'),
++                    scrollH = menuEl.height(),
+                     count = Math.max(Math.floor(scrollH / listItemHeight) + 3, 0),
+                     from = Math.max(Math.floor(-(scrollY / listItemHeight)) - 1, 0),
+                     to = from + count;
+ 
+                 var listItems = $(me.el).find('a');
+ 
++                // The list may hold other rows than fonts (dividers, section headers): when it does,
++                // find the visible fonts from their positions instead of their index.
++                var visible = null,
++                    ul = menuEl.get(0);
++                if (ul && ul.clientHeight > 0 && menuEl.children('li:not(:has(> a.font-item))').length > 1) {
++                    var top = ul.scrollTop - 2 * listItemHeight,
++                        bottom = ul.scrollTop + ul.clientHeight + 2 * listItemHeight;
++                    visible = [];
++                    for (j = 0; j < storeCount; ++j) {
++                        var li = listItems[j] ? listItems[j].parentNode : null,
++                            y = li ? li.offsetTop : j * listItemHeight;
++                        visible.push(y + listItemHeight >= top && y <= bottom);
++                    }
++                }
++
+                 for (j = 0; j < storeCount; ++j) {
+-                    if (from <= j && j < to) {
++                    if (visible ? visible[j] : (from <= j && j < to)) {
+                         if (null === me.tiles[j]) {
+                             index = Math.floor(me.store.at(j).get('imgidx')/spriteCols);
+                             var fontImage = me.spriteThumbs.getImage(index);
+-- 
+2.43.0
+

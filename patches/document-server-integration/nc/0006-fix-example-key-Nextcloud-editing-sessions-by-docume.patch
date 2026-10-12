@@ -1,0 +1,65 @@
+From 559717ce7121cdf2c76199f85810a5d15c14b096 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 16:07:48 +0200
+Subject: [PATCH 6/6] fix(example): key Nextcloud editing sessions by document
+ key
+
+A late callback of a closed session (one that ended in a conflict copy) could save into a newer session of the same file. Also logs track statuses and retries a PUT answered 423 Locked.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../nodejs/helpers/elixirNextcloud.js         | 25 ++++++++++---------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
+
+diff --git a/web/documentserver-example/nodejs/helpers/elixirNextcloud.js b/web/documentserver-example/nodejs/helpers/elixirNextcloud.js
+index 02585854..663c87d0 100644
+--- a/web/documentserver-example/nodejs/helpers/elixirNextcloud.js
++++ b/web/documentserver-example/nodejs/helpers/elixirNextcloud.js
+@@ -305,8 +305,10 @@ const addNotice = (hash, notice) => session.update(hash, (data) => {
+   data.notices = (data.notices || []).concat([{ ...notice, at: Date.now() }]).slice(-20);
+ });
+ 
+-// state of Nextcloud files open in the document server, per server+fileid:
+-// { key, etag, path per session, sessions } (shared by co-editors)
++// editing sessions of Nextcloud files in the document server, per document key:
++// { ref (server+fileid), etag, path per browser session } (shared by co-editors).
++// Keyed by document key, not by file: a late callback of a closed editing session
++// (e.g. one that ended in a conflict copy) never touches a newer session of the file.
+ const STATE = 'nc-open';
+ const fileRef = (nc, fileid) => crypto.createHash('sha256').update(`${nc.server}\n${fileid}`).digest('hex');
+ const pruneState = (st) => {
+@@ -315,21 +317,20 @@ const pruneState = (st) => {
+   return st;
+ };
+ 
+-// key of the editing session of this file: reused while the file is open,
+-// new when the file changed on the Nextcloud side since our last save
++// key of the editing session of this file: the open session whose file version
++// (ETag) is the current one, else a new key for this version
+ const documentKey = (nc, item, sessionHash) => {
+   const st = pruneState(session.loadState(STATE));
+   const ref = fileRef(nc, item.fileid);
+-  let entry = st[ref];
+-  if (!entry || entry.etag !== item.etag) {
+-    const key = `nc${crypto.createHash('sha256').update(`${ref}\n${item.etag}`).digest('hex').slice(0, 32)}`;
+-    entry = { key, etag: item.etag, sessions: {}, server: nc.server, fileid: item.fileid };
++  let key = Object.keys(st).find((k) => st[k].ref === ref && st[k].etag === item.etag);
++  if (!key) {
++    key = `nc${crypto.createHash('sha256').update(`${ref}\n${item.etag}`).digest('hex').slice(0, 32)}`;
++    st[key] = { ref, etag: item.etag, sessions: {}, server: nc.server, fileid: item.fileid };
+   }
+-  entry.sessions[sessionHash] = item.path;
+-  entry.updated = Date.now();
+-  st[ref] = entry;
++  st[key].sessions[sessionHash] = item.path;
++  st[key].updated = Date.now();
+   session.saveState(STATE, st);
+-  return { key: entry.key, ref };
++  return { key, ref: key };
+ };
+ 
+ // ---------------------------------------------------------------- document server side
+-- 
+2.43.0
+

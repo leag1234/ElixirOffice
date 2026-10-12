@@ -1,0 +1,102 @@
+ElixirOffice
+Copyright (c) 2026 Gaël Duval and the ElixirOffice contributors
+
+ElixirOffice is free software, licensed under the GNU Affero General Public
+License, version 3 only (AGPL-3.0-only). See the LICENSE file. New source files
+carry the header "SPDX-License-Identifier: AGPL-3.0-only".
+
+Lineage and attribution
+-----------------------
+
+ElixirOffice is derived from Euro-Office (https://github.com/Euro-Office), which
+is itself derived from ONLYOFFICE Docs (DocumentServer) developed by
+Ascensio System SIA (https://www.onlyoffice.com/), licensed under AGPL-3.0.
+Their copyright notices, licence texts and attributions are kept unchanged in
+the source repositories of the components we modify (see "Source code" below).
+ElixirOffice is not affiliated with or endorsed by Ascensio System SIA, the
+Euro-Office project or Microsoft. Microsoft, Windows, Word, Excel, PowerPoint
+and Segoe are trademarks of Microsoft Corporation; the names of fonts of other
+publishers are used only to describe compatibility.
+
+Source code
+-----------
+
+The corresponding source of a distributed build is made of this repository
+(branding, build tooling, tests, desktop shell, documentation) and of the
+component repositories below, all published at https://github.com/leag1234
+(branch "elixiroffice"; unmodified components come from Euro-Office):
+
+  DocumentServer, core, sdkjs, web-apps, server, dictionaries,
+  document-server-integration, document-server-package, document-templates,
+  core-fonts, document-formats.
+
+Third-party material in this repository
+---------------------------------------
+
+Microsoft Fluent UI System Icons (MIT License, Copyright (c) Microsoft
+Corporation), https://github.com/microsoft/fluentui-system-icons
+  branding/web-apps/theme/elixiroffice/assets/icons/ (generated subset, with
+  the licence file next to the icons) and tools/fluent-icons/LICENSE.
+
+Fonts: the font pack is built from pinned upstream sources and is not stored in
+this repository. Provenance, licences and the modified ("Metric") derivatives
+are documented in branding/fonts/LICENSES.md. Licences in use:
+  - SIL Open Font License 1.1: Selawik, Andika, OpenDyslexic, Comic Neue,
+    Gelasio, Archivo Black, Roboto, Comic Relief, Caveat, Neucha, Playwrite FR,
+    Noto Sans Symbols, Carlito, Caladea, and Marelle (Copyright 2026 Ministère
+    de l'Éducation nationale, de l'Enseignement supérieur et de la Recherche,
+    Laurent Bourcellier, Jonathan Fabreguettes and Rosalie Wagner; Reserved
+    Font Name "Marelle", shipped unmodified);
+  - AGPL-3.0 with font exception: P052 and URW Gothic (URW base 35 fonts,
+    Artifex Software);
+  - Liberation fonts 1.07.4 (SIL OFL 1.1 / GPL with font exception): the
+    unmodified licence texts are in tools/desktop/licenses/liberation-1.07.4/;
+  - Bitstream Vera licence (DejaVu), Apache License 2.0 (Open Sans, Noto),
+    and the other licences listed in branding/fonts/LICENSES.md.
+
+Dictionaries and thesauri: spelling dictionaries (Hunspell) and MyThes
+thesauri come from the upstream "dictionaries" component and from the
+LibreOffice dictionaries project (https://git.libreoffice.org/dictionaries).
+Each language keeps its own licence file (GPL, LGPL, MPL, CC BY 4.0, MIT,
+BSD-style and permissive licences). The licences of the thesauri added by
+ElixirOffice are listed in docs/thesaurus.md and in THESAURUS_LICENSES.md of
+the "dictionaries" component repository.
+
+Apache POI test fixtures (Copyright The Apache Software Foundation, Apache
+License 2.0): tests/desktop/fixtures/public.doc, public.ppt, public.xls, with
+APACHE-POI-LICENSE, APACHE-POI-NOTICE and sources.json (origin and SHA-256).
+
+Public documents of the provisional corpus (corpus/provisional): six documents
+published on data.gouv.fr by their producers under the Licence Ouverte /
+Open Licence (Etalab) version 1.0 or 2.0: Ville des Lilas (t09, a07), Ministère
+de l'Éducation nationale (t10), Mairie de Noé (a08), Ministère du Travail (a09)
+and Ministère de l'Europe et des Affaires étrangères (a10). Source URL, licence
+and SHA-256 of each file are in corpus/provisional/manifest.csv; only the
+author metadata of the files was emptied. The other 24 documents are generated
+by the scripts of the same directory (CC0-1.0).
+
+Third-party code vendored in the component repositories
+-------------------------------------------------------
+
+sdkjs, common/clientpdf/vendor/fontkit: @pdf-lib/fontkit 1.1.1 (fork of
+fontkit by Devon Govett and Andrew Dillon), MIT, unmodified; the bundle also
+contains restructure, unicode-properties, unicode-trie, brotli (decoder),
+tiny-inflate, pako, dfa, clone, base64-js, buffer (MIT or zlib) and ieee754
+(BSD-3-Clause). The LICENSE and README sit next to the file.
+
+document-server-integration, web-apps/documentserver-example/.../elixir/fluent:
+Microsoft Fluent UI System Icons subset (MIT), with its LICENSE.
+
+server, AdminPanel/.../ai/vendor: GPT-3-Encoder, markdown-it and select2
+(MIT), with their licence files.
+
+The WebAssembly converter is built from the "core" component with the
+Emscripten toolchain and small patches kept in tools/wasm/patches/; its
+upstream licences (AGPL-3.0 for core, and those of the libraries it embeds)
+are unchanged.
+
+Node.js and Python packages used by the build and the tests (Electron,
+electron-builder, Playwright, Pillow, NumPy, SciPy, scikit-image, OpenCV,
+python-docx, lxml, openpyxl, python-pptx, ...) are installed from their
+registries and are not redistributed in this repository; each keeps its own
+licence.

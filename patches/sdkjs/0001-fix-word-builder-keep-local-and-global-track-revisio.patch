@@ -1,0 +1,232 @@
+From 3482cde727b0b29af733ca40a42658188059f855 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:29:51 +0200
+Subject: [PATCH 1/3] fix(word/builder): keep local and global track-revisions
+ flags consistent
+
+The Api.asc_GetLocalTrackRevisions bridge was overwritten by the setter
+(typo on the assignment), so reading the flag reset the local track flag
+to undefined and switched tracking off.
+
+ApiDocument.SetAssistantTrackRevisions only touched the global flag: it
+had no effect when the user had switched tracking off locally ("for me"
+mode), and on restore it wrote the effective value into the global flag,
+turning a local-only session into tracking for everyone. Keep both flags
+and restore them exactly.
+
+Adds QUnit tests in tests/word/js-api/api-track-revisions.js.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ tests/word/js-api/api-track-revisions.js | 127 +++++++++++++++++++++++
+ tests/word/js-api/js-api.html            |   1 +
+ word/apiBuilder.js                       |  22 ++--
+ 3 files changed, 144 insertions(+), 6 deletions(-)
+ create mode 100644 tests/word/js-api/api-track-revisions.js
+
+diff --git a/tests/word/js-api/api-track-revisions.js b/tests/word/js-api/api-track-revisions.js
+new file mode 100644
+index 0000000000..65fe9d4d60
+--- /dev/null
++++ b/tests/word/js-api/api-track-revisions.js
+@@ -0,0 +1,127 @@
++/*
++ * (c) Copyright Ascensio System SIA 2010-2025
++ *
++ * This program is a free software product. You can redistribute it and/or
++ * modify it under the terms of the GNU Affero General Public License (AGPL)
++ * version 3 as published by the Free Software Foundation. In accordance with
++ * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
++ * that Ascensio System SIA expressly excludes the warranty of non-infringement
++ * of any third-party rights.
++ *
++ * This program is distributed WITHOUT ANY WARRANTY; without even the implied
++ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
++ * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
++ *
++ * The  interactive user interfaces in modified source and object code versions
++ * of the Program must display Appropriate Legal Notices, as required under
++ * Section 5 of the GNU AGPL version 3.
++ *
++ * All the Product's GUI elements, including illustrations and icon sets, as
++ * well as technical writing content are licensed under the terms of the
++ * Creative Commons Attribution-ShareAlike 4.0 International. See the License
++ * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
++ *
++ */
++
++$(function ()
++{
++	QUnit.module("Track revisions: local/global flags in the builder API");
++
++	let editor = AscTest.Editor;
++
++	function setupEditor()
++	{
++		// The test editor is a baseEditorsApi: borrow the Word API implementations of the flag accessors
++		editor.asc_GetLocalTrackRevisions = AscCommon.DocumentEditorApi.prototype.asc_GetLocalTrackRevisions.bind(editor);
++		editor.asc_SetLocalTrackRevisions = AscCommon.DocumentEditorApi.prototype.asc_SetLocalTrackRevisions.bind(editor);
++		editor.sync_OnTrackRevisionsChange = function(){};
++		AscBuilder.Word.init();
++
++		let userInfo = new Asc.asc_CUserInfo();
++		userInfo.put_Id("uid-1");
++		userInfo.put_FullName("Jane Doe");
++		let docInfo = new Asc.asc_CDocInfo();
++		docInfo.put_UserInfo(userInfo);
++		editor.DocInfo = docInfo;
++	}
++
++	function getParagraphRunReviewType(apiParagraph, runIndex)
++	{
++		return apiParagraph.GetElement(runIndex).Run.GetReviewType();
++	}
++
++	QUnit.test("Api.asc_GetLocalTrackRevisions reads the local flag without changing it", function (assert)
++	{
++		setupEditor();
++		let Api = AscBuilder.Word.Api;
++		let logicDocument = AscTest.GetLogicDocument();
++
++		assert.notStrictEqual(Api.asc_GetLocalTrackRevisions, Api.asc_SetLocalTrackRevisions, "getter and setter are different functions");
++
++		logicDocument.SetLocalTrackRevisions(true);
++		assert.strictEqual(Api.asc_GetLocalTrackRevisions(), true, "getter returns the local flag");
++		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), true, "getter does not reset the local flag");
++		assert.strictEqual(logicDocument.IsTrackRevisions(), true, "tracking is still on after reading the flag");
++
++		Api.asc_SetLocalTrackRevisions(false);
++		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), false, "setter changes the local flag");
++		assert.strictEqual(Api.asc_GetLocalTrackRevisions(), false, "getter returns the new local flag");
++
++		logicDocument.SetLocalTrackRevisions(null);
++	});
++
++	QUnit.test("SetAssistantTrackRevisions tracks changes even when tracking is switched off locally", function (assert)
++	{
++		setupEditor();
++		let logicDocument = AscTest.GetLogicDocument();
++		let doc = AscTest.JsApi.GetDocument();
++
++		logicDocument.SetGlobalTrackRevisions(false);
++		logicDocument.SetLocalTrackRevisions(false);
++
++		doc.SetAssistantTrackRevisions(true, "Elixir AI");
++		assert.strictEqual(doc.IsTrackRevisions(), true, "tracking is effective while the assistant works");
++
++		let p = AscTest.JsApi.CreateParagraph();
++		p.AddText("inserted by the assistant");
++		doc.Push(p);
++		assert.strictEqual(getParagraphRunReviewType(p, 0), reviewtype_Add, "new text is a tracked insertion");
++		assert.strictEqual(p.GetElement(0).Run.GetReviewInfo().GetUserName(), "Elixir AI", "the revision author is the assistant");
++
++		doc.SetAssistantTrackRevisions(false);
++		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), false, "local flag restored");
++		assert.strictEqual(logicDocument.GetGlobalTrackRevisions(), false, "global flag restored");
++		assert.strictEqual(editor.DocInfo.get_UserInfo().get_FullName(), "Jane Doe", "user name restored");
++		assert.strictEqual(editor.DocInfo.get_UserInfo().get_Id(), "uid-1", "user id restored");
++
++		logicDocument.SetLocalTrackRevisions(null);
++	});
++
++	QUnit.test("SetAssistantTrackRevisions restores a local-only tracking session exactly", function (assert)
++	{
++		setupEditor();
++		let logicDocument = AscTest.GetLogicDocument();
++		let doc = AscTest.JsApi.GetDocument();
++
++		// "Track changes for me only": local flag on, global flag off
++		logicDocument.SetGlobalTrackRevisions(false);
++		logicDocument.SetLocalTrackRevisions(true);
++
++		doc.SetAssistantTrackRevisions(true, "Elixir AI");
++		assert.strictEqual(doc.IsTrackRevisions(), true, "tracking is on");
++		doc.SetAssistantTrackRevisions(false);
++
++		assert.strictEqual(logicDocument.GetGlobalTrackRevisions(), false, "tracking is not switched on for everyone");
++		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), true, "local flag restored");
++
++		// No local flag, global flag on
++		logicDocument.SetLocalTrackRevisions(null);
++		logicDocument.SetGlobalTrackRevisions(true);
++		doc.SetAssistantTrackRevisions(true, "Elixir AI");
++		doc.SetAssistantTrackRevisions(false);
++		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), null, "local flag stays unset");
++		assert.strictEqual(logicDocument.GetGlobalTrackRevisions(), true, "global flag restored");
++
++		logicDocument.SetGlobalTrackRevisions(false);
++	});
++});
+diff --git a/tests/word/js-api/js-api.html b/tests/word/js-api/js-api.html
+index 2f15e31f40..23acc2077d 100644
+--- a/tests/word/js-api/js-api.html
++++ b/tests/word/js-api/js-api.html
+@@ -34,6 +34,7 @@
+ 	<script type="text/javascript" src="api-table-cell.js"></script>
+ 	<script type="text/javascript" src="api-section.js"></script>
+ 	<script type="text/javascript" src="api-drawing.js"></script>
++	<script type="text/javascript" src="api-track-revisions.js"></script>
+ </head>
+ <body>
+ 	<h1 id="qunit-header">Test document js-api</h1>
+diff --git a/word/apiBuilder.js b/word/apiBuilder.js
+index 3698af8c08..0873742780 100644
+--- a/word/apiBuilder.js
++++ b/word/apiBuilder.js
+@@ -7985,9 +7985,10 @@
+ 	};
+ 	
+ 	var trackRevisionBuffer = {
+-		name : "",
+-		userId : "",
+-		isTrack : false
++		userName    : "",
++		userId      : "",
++		globalTrack : false,
++		localTrack  : null
+ 	};
+ 	/**
+ 	 * Enables or disables AI-assisted change tracking in the document.
+@@ -8002,8 +8003,14 @@
+ 	{
+ 		if (isTrack)
+ 		{
+-			trackRevisionBuffer.isTrack = this.Document.IsTrackRevisions();
++			// IsTrackRevisions() returns the local ("for me") flag whenever it is set, so turning on the global flag
++			// alone does nothing if the user switched tracking off locally. Keep both flags and force tracking on.
++			let localTrack = this.Document.GetLocalTrackRevisions();
++			trackRevisionBuffer.globalTrack = this.Document.GetGlobalTrackRevisions();
++			trackRevisionBuffer.localTrack  = (true === localTrack || false === localTrack) ? localTrack : null;
+ 			this.Document.SetGlobalTrackRevisions(true);
++			if (null !== trackRevisionBuffer.localTrack)
++				this.Document.SetLocalTrackRevisions(true);
+ 			
+ 			let userInfo = Asc.editor.DocInfo.get_UserInfo();
+ 			trackRevisionBuffer.userId   = userInfo.get_Id();
+@@ -8017,7 +8024,10 @@
+ 		}
+ 		else
+ 		{
+-			this.Document.SetGlobalTrackRevisions(trackRevisionBuffer.isTrack);
++			// Restore both flags exactly: restoring the effective value into the global flag would turn a local
++			// ("for me") tracking session into tracking for everyone.
++			this.Document.SetGlobalTrackRevisions(trackRevisionBuffer.globalTrack);
++			this.Document.SetLocalTrackRevisions(trackRevisionBuffer.localTrack);
+ 			let userInfo = Asc.editor.DocInfo.get_UserInfo();
+ 			userInfo.put_Id(trackRevisionBuffer.userId);
+ 			userInfo.put_FullName(trackRevisionBuffer.userName);
+@@ -32302,7 +32312,7 @@
+ 			return Asc.editor.asc_GetLocalTrackRevisions();
+ 		};
+ 		
+-		Api.asc_GetLocalTrackRevisions = Api["asc_SetLocalTrackRevisions"] = function(isTrack)
++		Api.asc_SetLocalTrackRevisions = Api["asc_SetLocalTrackRevisions"] = function(isTrack)
+ 		{
+ 			Asc.editor.asc_SetLocalTrackRevisions(isTrack);
+ 		};
+-- 
+2.43.0
+

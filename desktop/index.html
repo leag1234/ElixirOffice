@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ElixirOffice</title><link rel="stylesheet" href="/style.css"></head>
+<body><header><strong>ElixirOffice</strong><button id="open">Open</button><button id="save" disabled>Save</button><button id="save-as" disabled>Save As</button><button id="pdf" disabled>Export PDF</button><button id="print" disabled>Print</button><button id="fonts">Computer fonts</button><button id="cancel" disabled>Cancel</button><span id="message">Documents stay on this computer.</span></header>
+<main id="home"><h1>Your office, on your computer</h1><p>Create a document or open a file. No server or account is needed.</p><section class="cards"><button data-new="docx">New document</button><button data-new="xlsx">New spreadsheet</button><button data-new="pptx">New presentation</button></section><h2>Recent files</h2><ul id="recent"></ul><p id="privacy">Files and recent history stay on this computer. AI is off.</p></main>
+<main id="workspace" hidden><div id="editor"></div></main>
+<script src="/example/local-assets/web-apps/apps/api/documents/api.js"></script><script src="/renderer.js"></script></body></html>

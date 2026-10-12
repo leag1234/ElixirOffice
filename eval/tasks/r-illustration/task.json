@@ -1,0 +1,10 @@
+{
+  "id": "r-illustration",
+  "title": "Insert a given picture with a size and position (brief task 10, given picture)",
+  "instruction": "Insère cette image sous le titre, centrée, 8 cm de large : https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "Generating an illustration needs an image model (not wired); the task gives the picture. Expected: a new paragraph right after the title holding the picture, 80 mm wide, centred."
+}

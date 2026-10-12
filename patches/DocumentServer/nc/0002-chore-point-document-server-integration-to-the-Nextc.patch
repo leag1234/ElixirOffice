@@ -1,0 +1,22 @@
+From e5f47062a0f088ba531ec952a1899380ccdb8631 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 16:09:30 +0200
+Subject: [PATCH 2/2] chore: point document-server-integration to the Nextcloud
+ session fix
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ document-server-integration | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/document-server-integration b/document-server-integration
+index a988ec8..559717c 160000
+--- a/document-server-integration
++++ b/document-server-integration
+@@ -1 +1 @@
+-Subproject commit a988ec8c8f314b905eed7bcc38540b9b52160b6f
++Subproject commit 559717ce7121cdf2c76199f85810a5d15c14b096
+-- 
+2.43.0
+

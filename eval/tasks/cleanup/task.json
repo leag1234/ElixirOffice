@@ -1,0 +1,8 @@
+{
+  "id": "cleanup",
+  "title": "Clean up a badly formatted document",
+  "instruction": "Clean up this document: real headings for titles, Normal for body",
+  "select": null,
+  "input": "input.docx",
+  "notes": "13 paragraphs. Titles are faked with direct formatting (bold, large size) on Normal; body paragraphs are in No Spacing, Heading 3, List Paragraph or Normal with Comic Sans. No selection: the whole document is the context."
+}

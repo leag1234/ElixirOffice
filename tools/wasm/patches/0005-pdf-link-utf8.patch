@@ -1,0 +1,16 @@
+--- a/PdfFile/PdfWriter.cpp
++++ b/PdfFile/PdfWriter.cpp
+@@ -1188,7 +1188,13 @@
+ HRESULT CPdfWriter::AddHyperlink(const double& dX, const double& dY, const double& dW, const double& dH, const std::wstring& wsUrl, const std::wstring& wsTooltip)
+ {
+ 	NSUnicodeConverter::CUnicodeConverter conv;
++#ifdef EO_WASM
++	// Emscripten ICU has no SASLprep profile data. URLs need UTF-8 encoding,
++	// not username normalization; do not silently replace them with an empty URI.
++	PdfWriter::CAnnotation* pAnnot = m_pDocument->CreateUriLinkAnnot(PdfWriter::TRect(MM_2_PT(dX), m_pPage->GetHeight() - MM_2_PT(dY), MM_2_PT(dX + dW), m_pPage->GetHeight() - MM_2_PT(dY + dH)), NSFile::CUtf8Converter::GetUtf8StringFromUnicode(wsUrl).c_str());
++#else
+ 	PdfWriter::CAnnotation* pAnnot = m_pDocument->CreateUriLinkAnnot(PdfWriter::TRect(MM_2_PT(dX), m_pPage->GetHeight() - MM_2_PT(dY), MM_2_PT(dX + dW), m_pPage->GetHeight() - MM_2_PT(dY + dH)), conv.SASLprepToUtf8(wsUrl).c_str());
++#endif
+ 	m_pPage->AddAnnotation(pAnnot);
+ 	pAnnot->SetBorder(0, 0, {});
+ 	return S_OK;

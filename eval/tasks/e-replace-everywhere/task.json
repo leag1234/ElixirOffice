@@ -1,0 +1,10 @@
+{
+  "id": "e-replace-everywhere",
+  "title": "Replace a name everywhere",
+  "instruction": "Remplace « Mme Durand » par « Mme Martin » partout",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

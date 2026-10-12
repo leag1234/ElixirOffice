@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Browser-reserved keys probe</title>
+<!--
+  Real-browser check of the keys a browser keeps (docs/shortcuts.md, "Checking in a real browser").
+  Serve it from localhost (Keyboard Lock needs a secure context):  python3 -m http.server 8765  in this folder,
+  open http://localhost:8765/probe.html in Chrome / Edge / Firefox / Safari, in a normal tab, in full screen (button), and as an
+  installed app (install from the address bar, then open the same URL in the app window).
+  Press the combinations below: the log shows which ones the page received. A combination the browser keeps shows nothing, then
+  "blur" or "hidden" (tab switch, new window). Playwright cannot do this: it sends keys to the page, bypassing the browser.
+-->
+<style>body{font:14px system-ui;margin:16px;max-width:900px}pre{background:#f4f4f4;padding:8px;height:320px;overflow:auto}button{margin:0 8px 8px 0}</style>
+<h3>Browser-reserved keys probe</h3>
+<p>Display mode: <b id="dm"></b> | Keyboard Lock API: <b id="api"></b> | lock: <b id="lock">not requested</b> | full screen: <b id="fs">no</b></p>
+<button id="b1">Request Keyboard Lock</button><button id="b2">Full screen (then lock)</button><button id="b3">Clear log</button>
+<p>Try: Ctrl+W, Ctrl+N, Ctrl+T, Ctrl+Shift+W, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+PageDown, Ctrl+PageUp, Ctrl+Shift+PageDown, Ctrl+Shift+PageUp, Ctrl+1 to Ctrl+9, Ctrl+F4, F11 (macOS: Cmd instead of Ctrl). Confirm the page asks before Ctrl+W (beforeunload).</p>
+<pre id="log"></pre>
+<script>
+var KEYS = ['KeyW','KeyN','KeyT','Tab','PageUp','PageDown','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9'];
+var $ = function (i) { return document.getElementById(i); }, log = function (s) { $('log').textContent = new Date().toISOString().slice(11, 23) + '  ' + s + '\n' + $('log').textContent; };
+var dm = ['standalone','window-controls-overlay','minimal-ui','fullscreen','browser'].filter(function (m) { return matchMedia('(display-mode: ' + m + ')').matches; })[0];
+$('dm').textContent = dm; $('api').textContent = !!(navigator.keyboard && navigator.keyboard.lock);
+function lock() { if (!navigator.keyboard || !navigator.keyboard.lock) return log('no Keyboard Lock API'); navigator.keyboard.lock(KEYS).then(function () { $('lock').textContent = 'requested'; log('lock() resolved'); }, function (e) { $('lock').textContent = e.name; log('lock() rejected ' + e.name); }); }
+$('b1').onclick = lock; $('b3').onclick = function () { $('log').textContent = ''; };
+$('b2').onclick = function () { document.documentElement.requestFullscreen().then(lock, function (e) { log('fullscreen refused ' + e.message); }); };
+document.addEventListener('fullscreenchange', function () { $('fs').textContent = document.fullscreenElement ? 'yes' : 'no'; log('fullscreenchange ' + $('fs').textContent); });
+addEventListener('keydown', function (e) { log('keydown ' + (e.ctrlKey ? 'Ctrl+' : '') + (e.metaKey ? 'Cmd+' : '') + (e.altKey ? 'Alt+' : '') + (e.shiftKey ? 'Shift+' : '') + e.code); if (e.ctrlKey || e.metaKey) e.preventDefault(); }, true);
+addEventListener('blur', function () { log('blur'); }); addEventListener('focus', function () { log('focus'); });
+document.addEventListener('visibilitychange', function () { log('visibility ' + document.visibilityState); });
+addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; });
+</script>

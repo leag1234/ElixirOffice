@@ -1,0 +1,20 @@
+[
+  {
+    "file": "public.doc",
+    "source": "https://api.github.com/repos/apache/poi/git/blobs/ac0384ac25269d12d778a0d65ce48e74e0541462",
+    "git_blob": "ac0384ac25269d12d778a0d65ce48e74e0541462",
+    "sha256": "4876e828e62d490fa188c7c4e47013e2e0dfdf02f5903dfd374bc0d2b2049ca1"
+  },
+  {
+    "file": "public.ppt",
+    "source": "https://api.github.com/repos/apache/poi/git/blobs/af16393f44e0f315c212b60392e2bae2130987bc",
+    "git_blob": "af16393f44e0f315c212b60392e2bae2130987bc",
+    "sha256": "e8fd4c38ad72ce3735acbca0b60dd5870fb60f819c169e3947d166f4f1bcc79d"
+  },
+  {
+    "file": "public.xls",
+    "source": "https://github.com/apache/poi/blob/trunk/test-data/spreadsheet/Simple.xls",
+    "git_blob": "b06799fea5fcd3e837e66e74f3652e2e3d3e82f8",
+    "sha256": "2b5ec8298bacffdca61c50f6f7607da0a4e63cf76fa011c62f203e6a66bc072a"
+  }
+]

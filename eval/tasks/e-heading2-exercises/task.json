@@ -1,0 +1,10 @@
+{
+  "id": "e-heading2-exercises",
+  "title": "Exercise titles in Heading 2",
+  "instruction": "Mets les titres des exercices en Titre 2",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

@@ -1,0 +1,91 @@
+From bcbbbff84df2df26eb056f2c46bc208a9fb14e35 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 23:51:38 +0200
+Subject: [PATCH 5/6] feat(word): read and set the lock of a drawing's anchor
+
+The "locked" flag of an anchored drawing (Word's Lock anchor) was
+loaded, saved and honoured when the object is dragged, but the
+interface could neither show nor change it. Add LockAnchor to
+asc_CImgProperty (get_LockAnchor / put_LockAnchor), filled by
+ParaDrawing.Get_Props (undefined for a mixed selection) and applied by
+Set_Props through the existing undoable Set_Locked change.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/apiCommon.js                  | 10 ++++++++++
+ word/Editor/Paragraph/ParaDrawing.js |  7 +++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/common/apiCommon.js b/common/apiCommon.js
+index fb1a1cd01e..79f2d25e62 100644
+--- a/common/apiCommon.js
++++ b/common/apiCommon.js
+@@ -5193,6 +5193,7 @@ function (window, undefined) {
+ 			this.Paddings = (undefined != obj.Paddings) ? new asc_CPaddings(obj.Paddings) : undefined;
+ 			this.Position = (undefined != obj.Position) ? new CPosition(obj.Position) : undefined;
+ 			this.AllowOverlap = (undefined != obj.AllowOverlap) ? obj.AllowOverlap : undefined;
++			this.LockAnchor = (undefined != obj.LockAnchor) ? obj.LockAnchor : undefined;
+ 			this.PositionH = (undefined != obj.PositionH) ? new CImagePositionH(obj.PositionH) : undefined;
+ 			this.PositionV = (undefined != obj.PositionV) ? new CImagePositionV(obj.PositionV) : undefined;
+ 
+@@ -5357,6 +5358,13 @@ function (window, undefined) {
+ 	};
+ 	asc_CImgProperty.prototype.asc_putAllowOverlap = function (v) {
+ 		this.AllowOverlap = v;
++	};
++	// "Lock anchor" of Word's Layout dialog: the anchor stays on its paragraph when the object is moved
++	asc_CImgProperty.prototype.asc_getLockAnchor = function () {
++		return this.LockAnchor;
++	};
++	asc_CImgProperty.prototype.asc_putLockAnchor = function (v) {
++		this.LockAnchor = v;
+ 	}; // Возвращается объект класса CPosition
+ 	asc_CImgProperty.prototype.asc_getPosition = function () {
+ 		return this.Position;
+@@ -9187,6 +9195,8 @@ function (window, undefined) {
+ 	prot["put_Paddings"] = prot["asc_putPaddings"] = prot.asc_putPaddings;
+ 	prot["get_AllowOverlap"] = prot["asc_getAllowOverlap"] = prot.asc_getAllowOverlap;
+ 	prot["put_AllowOverlap"] = prot["asc_putAllowOverlap"] = prot.asc_putAllowOverlap;
++	prot["get_LockAnchor"] = prot["asc_getLockAnchor"] = prot.asc_getLockAnchor;
++	prot["put_LockAnchor"] = prot["asc_putLockAnchor"] = prot.asc_putLockAnchor;
+ 	prot["get_Position"] = prot["asc_getPosition"] = prot.asc_getPosition;
+ 	prot["put_Position"] = prot["asc_putPosition"] = prot.asc_putPosition;
+ 	prot["get_PositionH"] = prot["asc_getPositionH"] = prot.asc_getPositionH;
+diff --git a/word/Editor/Paragraph/ParaDrawing.js b/word/Editor/Paragraph/ParaDrawing.js
+index 8da21579c6..b4b404be16 100644
+--- a/word/Editor/Paragraph/ParaDrawing.js
++++ b/word/Editor/Paragraph/ParaDrawing.js
+@@ -439,6 +439,7 @@ ParaDrawing.prototype.Get_Props = function(OtherProps)
+ 	Props.Internal_Position = this.Internal_Position;
+ 
+ 	Props.Locked        = this.Lock.Is_Locked();
++	Props.LockAnchor    = !!this.Locked;
+ 	var ParentParagraph = this.Get_ParentParagraph();
+ 	if (ParentParagraph && undefined !== ParentParagraph.Parent)
+ 	{
+@@ -520,6 +521,9 @@ ParaDrawing.prototype.Get_Props = function(OtherProps)
+ 		if (false === OtherProps.Locked)
+ 			Props.Locked = false;
+ 
++		if (OtherProps.LockAnchor !== Props.LockAnchor)
++			Props.LockAnchor = undefined;
++
+ 		if (false === OtherProps.CanBeFlow || false === Props.CanBeFlow)
+ 			Props.CanBeFlow = false;
+ 		else
+@@ -1036,6 +1040,9 @@ ParaDrawing.prototype.Set_Props = function(Props)
+ 	if (undefined != Props.AllowOverlap)
+ 		this.Set_AllowOverlap(Props.AllowOverlap);
+ 
++	if (undefined != Props.LockAnchor && !!Props.LockAnchor !== !!this.Locked)
++		this.Set_Locked(!!Props.LockAnchor);
++
+ 	if (undefined != Props.PositionH)
+ 	{
+ 		this.Set_PositionH(Props.PositionH.RelativeFrom, Props.PositionH.UseAlign, ( true === Props.PositionH.UseAlign ? Props.PositionH.Align : Props.PositionH.Value ), Props.PositionH.Percent);
+-- 
+2.43.0
+

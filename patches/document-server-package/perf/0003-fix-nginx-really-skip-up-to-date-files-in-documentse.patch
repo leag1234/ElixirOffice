@@ -1,0 +1,36 @@
+From 663b3c96a7b9b4ecd6c10ea2f9bdca429161ddc2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 22:36:49 +0200
+Subject: [PATCH] fix(nginx): really skip up-to-date files in
+ documentserver-static-gzip.sh
+
+gzip -k gives the .gz the modification time of its source, so the test
+[ file.gz -nt file ] was never true and every run recompressed every
+file (17 s in a dev container, the same as a first run). A .gz is now
+stale only when it is missing or its source is newer; a rerun with
+nothing changed takes under a second.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/documentserver/bin/documentserver-static-gzip.sh.m4 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/common/documentserver/bin/documentserver-static-gzip.sh.m4 b/common/documentserver/bin/documentserver-static-gzip.sh.m4
+index bee1158..e08e490 100644
+--- a/common/documentserver/bin/documentserver-static-gzip.sh.m4
++++ b/common/documentserver/bin/documentserver-static-gzip.sh.m4
+@@ -6,8 +6,9 @@ NGINX_ONLYOFFICE_PATH="/etc/M4_DS_PREFIX/nginx"
+ cd ${DIR}
+ # (Re)compress only what changed since its .gz was made (an update or a rebuild replaces the
+ # file but leaves its old .gz, which gzip_static would keep serving), on all cores.
++# gzip -k gives the .gz the mtime of its source: up to date = same mtime, not newer.
+ gzip_stale() {
+-  xargs -0 -r -n 64 -P "$(nproc)" sh -c 'for f; do [ "$f.gz" -nt "$f" ] || gzip -kf9 "$f"; done' _
++  xargs -0 -r -n 64 -P "$(nproc)" sh -c 'for f; do [ -e "$f.gz" ] && ! [ "$f" -nt "$f.gz" ] || gzip -kf9 "$f"; done' _
+ }
+ 
+ # Make gziped scripts
+-- 
+2.43.0
+

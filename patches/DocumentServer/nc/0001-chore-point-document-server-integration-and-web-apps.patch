@@ -1,0 +1,30 @@
+From 628c863aca281d30ab01155a1abde8ca939ab6bb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:48:33 +0200
+Subject: [PATCH 1/2] chore: point document-server-integration and web-apps to
+ elixir/nc (Nextcloud storage, identity)
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ document-server-integration | 2 +-
+ web-apps                    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/document-server-integration b/document-server-integration
+index b6a0e54..a988ec8 160000
+--- a/document-server-integration
++++ b/document-server-integration
+@@ -1 +1 @@
+-Subproject commit b6a0e54c1489d9c30d3725259993168ff1abee55
++Subproject commit a988ec8c8f314b905eed7bcc38540b9b52160b6f
+diff --git a/web-apps b/web-apps
+index d1c6824..f145959 160000
+--- a/web-apps
++++ b/web-apps
+@@ -1 +1 @@
+-Subproject commit d1c6824a1885e0b5ab746c230b402b15b1bf84a3
++Subproject commit f14595949aef413a3f0443856100543314150950
+-- 
+2.43.0
+

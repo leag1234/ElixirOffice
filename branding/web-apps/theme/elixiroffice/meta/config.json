@@ -1,0 +1,19 @@
+{
+  "company_name": "ElixirOffice",
+  "publisher_name": "ElixirOffice",
+  "publisher_url": "",
+  "publisher_address": "",
+  "publisher_phone": "",
+  "sales_email": "",
+  "support_email": "",
+  "support_url": "",
+  "help_url": "",
+  "app_title": "ElixirOffice",
+  "attribution": "ElixirOffice is based on Euro-Office, itself based on ONLYOFFICE by Ascensio System SIA",
+  "mobile_logo_light": "logo_light.svg",
+  "mobile_logo_dark": "logo_dark.svg",
+  "about_logo_light": "logo.svg",
+  "about_logo_dark": "logo.svg",
+  "forms_logo_light": "logo_dark.svg",
+  "forms_logo_dark": "logo_light.svg"
+}

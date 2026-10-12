@@ -1,0 +1,205 @@
+From e3ae533c8ae764fe96034434658f2cd79338c7c4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:18:17 +0200
+Subject: [PATCH 4/4] feat(ai): wire Elixir AI into the document editor
+
+Common.Controllers.ElixirAI adds the "Elixir" ribbon tab (Ask Elixir,
+AI settings, AI journal) and binds Alt+I (Ctrl+Option+I on macOS, the
+editor's convention for Alt shortcuts), which no editor shortcut uses;
+Ctrl+K stays Insert hyperlink. The only hooks are the controller and
+module declarations in app.js and app_dev.js.
+
+[ai]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/common/main/lib/elixir-ai/Controller.js | 132 +++++++++++++++++++
+ apps/documenteditor/main/app.js              |   3 +
+ apps/documenteditor/main/app_dev.js          |   3 +
+ 3 files changed, 138 insertions(+)
+ create mode 100644 apps/common/main/lib/elixir-ai/Controller.js
+
+diff --git a/apps/common/main/lib/elixir-ai/Controller.js b/apps/common/main/lib/elixir-ai/Controller.js
+new file mode 100644
+index 0000000000..abd45ecc47
+--- /dev/null
++++ b/apps/common/main/lib/elixir-ai/Controller.js
+@@ -0,0 +1,132 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Common.Controllers.ElixirAI: wires the Elixir AI layer into an editor.
++ *  - adds the "Elixir" ribbon tab (Ask Elixir, AI settings, AI journal);
++ *  - binds the command bar shortcut: Alt+I (Word's Copilot shortcut), Ctrl+Option+I on macOS,
++ *    following the editor convention for Alt shortcuts on Mac (alt+f -> ctrl+alt+f);
++ *  - hosts the command bar and the settings dialog.
++ * The editor-specific tool layer is registered in Common.ElixirAI.toolsets (see
++ * documenteditor/main/app/elixir-ai/WordTools.js); without a toolset nothing is added.
++ */
++
++define([
++    'core',
++    'common/main/lib/elixir-ai/Core',
++    'common/main/lib/elixir-ai/Icons',
++    'common/main/lib/elixir-ai/View'
++], function () {
++    'use strict';
++
++    var ElixirAI = window.Common.ElixirAI;
++
++    Common.Controllers = Common.Controllers || {};
++
++    Common.Controllers.ElixirAI = Backbone.Controller.extend({
++        toolsetId: 'word',
++
++        initialize: function () {
++            var me = this;
++            this.addListeners({
++                'Toolbar': {
++                    'render:before': function (toolbar) { me.onToolbarRender(toolbar); },
++                    // the tab strip exists only after Mixtbar.afterRender, which runs right after this event
++                    'render:after': function () {
++                        me.hasTab && setTimeout(function () { Common.NotificationCenter.trigger('tab:visible', 'elixir', true); }, 0);
++                    }
++                }
++            });
++            Common.NotificationCenter.on('app:ready', this.onAppReady.bind(this));
++        },
++
++        onLaunch: function () {},
++
++        appOptions: function () {
++            var main = this.getApplication().getController('Main');
++            return (main && main.appOptions) || {};
++        },
++
++        isAvailable: function () {
++            var o = this.appOptions();
++            return !!(o.isEdit && !o.isEditMailMerge && !o.isEditDiagram && !o.isEditOle && ElixirAI.toolsets && ElixirAI.toolsets[this.toolsetId]);
++        },
++
++        shortcutLabel: function () { return Common.Utils.isMac ? '⌃⌥I' : 'Alt+I'; },
++
++        onToolbarRender: function (toolbar) {
++            if (!this.isAvailable()) return;
++            ElixirAI.setLang(this.appOptions().lang);
++            ElixirAI.injectStyles();
++            var t = ElixirAI.t, me = this;
++            var $panel = $('<section class="panel" data-tab="elixir" role="tabpanel" aria-labelledby="elixir">' +
++                '<div class="group"><span class="btn-slot text x-huge" id="slot-btn-elixir-ask"></span></div>' +
++                '<div class="separator long"></div>' +
++                '<div class="group"><span class="btn-slot text x-huge" id="slot-btn-elixir-settings"></span>' +
++                '<span class="btn-slot text x-huge" id="slot-btn-elixir-journal"></span></div>' +
++                '</section>');
++            var mk = function (slot, icon, caption, hint, fn) {
++                var btn = new Common.UI.Button({
++                    cls: 'btn-toolbar x-huge icon-top', iconCls: 'elixir-ai-icon elixir-ai-icon-' + icon,
++                    caption: caption, hint: hint, dataHint: '1', dataHintDirection: 'bottom', dataHintOffset: 'small'
++                });
++                btn.render($panel.find(slot));
++                btn.on('click', fn);
++                return btn;
++            };
++            this.btnAsk = mk('#slot-btn-elixir-ask', 'sparkle', t('ask'), t('askHint') + ' (' + this.shortcutLabel() + ')', function () { me.openBar(); });
++            mk('#slot-btn-elixir-settings', 'settings', t('settings'), t('settingsHint'), function () { me.openSettings(false); });
++            mk('#slot-btn-elixir-journal', 'history', t('journal'), t('journal'), function () { me.openSettings(true); });
++            toolbar.addTab({ action: 'elixir', caption: t('tab'), dataHintTitle: 'A', layoutname: 'toolbar-elixir' }, $panel, Common.UI.LayoutManager.lastTabIdx);
++            this.hasTab = true;
++        },
++
++        onAppReady: function () {
++            if (!this.isAvailable()) return;
++            this.api = this.getApplication().getController('Viewport').getApi();
++            var me = this, keymap = {};
++            keymap[Common.Utils.isMac ? 'ctrl+alt+i' : 'alt+i'] = function (e) {
++                if (Common.Utils.ModalWindow && Common.Utils.ModalWindow.isVisible()) return true;
++                me.openBar();
++                e && e.preventDefault && e.preventDefault();
++                return false;
++            };
++            Common.util.Shortcuts.delegateShortcuts({ shortcuts: keymap });
++        },
++
++        host: function () {
++            var me = this;
++            if (this._host) return this._host;
++            this._host = {
++                api: this.api,
++                toolsetFactory: function () {
++                    if (!me._toolset) me._toolset = ElixirAI.toolsets[me.toolsetId].create(me.api);
++                    return me._toolset;
++                },
++                openSettings: function () { me.openSettings(false); },
++                onSettingsChanged: function () { if (me.bar && me.bar.isOpen()) me.bar.open(); },
++                // History position, to know whether Discard can simply undo the AI step
++                historyIndex: function () { return (window.AscCommon && AscCommon.History) ? AscCommon.History.Index : null; },
++                onClosed: function () { Common.NotificationCenter.trigger('edit:complete'); }
++            };
++            return this._host;
++        },
++
++        openBar: function () {
++            if (!this.api) this.api = this.getApplication().getController('Viewport').getApi();
++            var host = this.host();
++            host.api = this.api;
++            if (!this.bar) { this.bar = new ElixirAI.CommandBar(host); host.bar = this.bar; }
++            this.bar.open();
++        },
++
++        openSettings: function (journal) {
++            var host = this.host();
++            host.api = this.api || this.getApplication().getController('Viewport').getApi();
++            if (!this.dialog) this.dialog = new ElixirAI.SettingsDialog(host);
++            this.dialog.open(journal);
++        }
++    });
++
++    return Common.Controllers.ElixirAI;
++});
+diff --git a/apps/documenteditor/main/app.js b/apps/documenteditor/main/app.js
+index 47d8e3a623..9c4c6243d4 100644
+--- a/apps/documenteditor/main/app.js
++++ b/apps/documenteditor/main/app.js
+@@ -156,6 +156,7 @@ require([
+             ,'Common.Controllers.ReviewChanges'
+             ,'Common.Controllers.Protection'
+             ,'Common.Controllers.Shortcuts'
++            ,'Common.Controllers.ElixirAI'
+         ]
+     });
+ 
+@@ -200,6 +201,8 @@ require([
+                 ,'common/main/lib/controller/ReviewChanges'
+                 ,'common/main/lib/controller/Protection'
+                 ,'common/main/lib/controller/Shortcuts'
++                ,'common/main/lib/elixir-ai/Controller'
++                ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'common/main/lib/controller/Draw'
+             ], function() {
+                 const code_path = 'documenteditor/main/code';
+diff --git a/apps/documenteditor/main/app_dev.js b/apps/documenteditor/main/app_dev.js
+index 5780f99292..2ce8db5480 100644
+--- a/apps/documenteditor/main/app_dev.js
++++ b/apps/documenteditor/main/app_dev.js
+@@ -146,6 +146,7 @@ require([
+             ,'Common.Controllers.ReviewChanges'
+             ,'Common.Controllers.Protection'
+             ,'Common.Controllers.Shortcuts'
++            ,'Common.Controllers.ElixirAI'
+         ]
+     });
+ 
+@@ -190,6 +191,8 @@ require([
+                 ,'common/main/lib/controller/ReviewChanges'
+                 ,'common/main/lib/controller/Protection'
+                 ,'common/main/lib/controller/Shortcuts'
++                ,'common/main/lib/elixir-ai/Controller'
++                ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'common/main/lib/controller/Draw'
+             ], function() {
+                 app.postLaunchScripts = [
+-- 
+2.43.0
+

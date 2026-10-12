@@ -1,0 +1,147 @@
+From 554fd4c6541da4efddb734ad74c1279767b71935 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 23:37:47 +0200
+Subject: [PATCH 2/6] feat(word): expose the layout of the selected drawing to
+ the interface
+
+Add asc_GetSelectedDrawingLayout: for exactly one selected picture,
+shape or chart of the document, its bounds in pixels of the document
+view, its wrapping style, whether it moves with text, whether its anchor
+is locked, whether it is being dragged, and where the paragraph it is
+anchored to starts. Interfaces need this to place Word's Layout Options
+button next to the object and to draw the object anchor in the margin.
+
+Add ParaDrawing.GetWrappingStyle, which names the wrapping as the
+interface does (Asc.c_oAscWrapStyle2).
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ word/Editor/Paragraph/ParaDrawing.js | 18 +++++++
+ word/api.js                          | 72 ++++++++++++++++++++++++++++
+ 2 files changed, 90 insertions(+)
+
+diff --git a/word/Editor/Paragraph/ParaDrawing.js b/word/Editor/Paragraph/ParaDrawing.js
+index 9698c93dac..8da21579c6 100644
+--- a/word/Editor/Paragraph/ParaDrawing.js
++++ b/word/Editor/Paragraph/ParaDrawing.js
+@@ -1094,6 +1094,24 @@ ParaDrawing.prototype.Set_Props = function(Props)
+ 		this.docPr.setTitle(Props.title);
+ 	}
+ };
++/**
++ * Wrapping style as the interface names it (Asc.c_oAscWrapStyle2: in line, square, tight,
++ * through, top and bottom, behind or in front of the text).
++ */
++ParaDrawing.prototype.GetWrappingStyle = function()
++{
++	if (this.IsInline())
++		return c_oAscWrapStyle2.Inline;
++
++	switch (this.wrappingType)
++	{
++		case WRAPPING_TYPE_NONE: return this.behindDoc ? c_oAscWrapStyle2.Behind : c_oAscWrapStyle2.InFront;
++		case WRAPPING_TYPE_TIGHT: return c_oAscWrapStyle2.Tight;
++		case WRAPPING_TYPE_THROUGH: return c_oAscWrapStyle2.Through;
++		case WRAPPING_TYPE_TOP_AND_BOTTOM: return c_oAscWrapStyle2.TopAndBottom;
++	}
++	return c_oAscWrapStyle2.Square;
++};
+ ParaDrawing.prototype.CheckFitToColumn = function()
+ {
+ 	var oLogicDoc = this.document;
+diff --git a/word/api.js b/word/api.js
+index 91a2f23fdd..ac55eedb9a 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -14872,6 +14872,77 @@ background-repeat: no-repeat;\
+ 		return [[oPos0.X, oPos0.Y], [oPos1.X, oPos1.Y], [oPos2.X, oPos2.Y], [oPos3.X, oPos3.Y]];
+ 	};
+ 
++	/**
++	 * Layout of the selected picture or shape, for the Layout Options button and the anchor
++	 * marker of the interface (like Word): its bounds in pixels of the document view
++	 * (#id_viewer), its wrapping style (Asc.c_oAscWrapStyle2), "move with text", the lock of
++	 * its anchor, and the position of the paragraph it is anchored to (start of its first
++	 * line on the page of the drawing). null unless exactly one drawing of the document is
++	 * selected.
++	 */
++	asc_docs_api.prototype.asc_GetSelectedDrawingLayout = function()
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		if (!logicDocument || !logicDocument.DrawingObjects || !logicDocument.GetDrawingDocument())
++			return null;
++
++		let drawingObjects = logicDocument.DrawingObjects;
++		let selected = drawingObjects.getSelectedObjects();
++		if (!selected || 1 !== selected.length || !selected[0].parent || !(selected[0].parent instanceof AscWord.ParaDrawing))
++			return null;
++
++		let shape   = selected[0];
++		let drawing = shape.parent;
++		if (!drawing.IsUseInDocument() || !shape.bounds)
++			return null;
++
++		let drawingDocument = logicDocument.GetDrawingDocument();
++		let page = AscFormat.isRealNumber(shape.selectStartPage) && shape.selectStartPage >= 0 ? shape.selectStartPage : drawing.PageNum;
++		let lt   = drawingDocument.ConvertCoordsToCursor(shape.bounds.l, shape.bounds.t, page);
++		let rb   = drawingDocument.ConvertCoordsToCursor(shape.bounds.r, shape.bounds.b, page);
++		if (lt.Error || rb.Error)
++			return null;
++
++		let isInline = drawing.IsInline();
++		let wrap     = drawing.GetWrappingStyle();
++
++		let anchor = null;
++		let paragraph = isInline ? null : drawing.GetParagraph();
++		if (paragraph && paragraph.Pages.length > 0)
++		{
++			let pageIndex = 0;
++			for (let index = 0; index < paragraph.Pages.length; ++index)
++			{
++				if (paragraph.GetAbsolutePage(index) === drawing.PageNum)
++				{
++					pageIndex = index;
++					break;
++				}
++			}
++			let paraPage = paragraph.Pages[pageIndex];
++			let line     = paragraph.Lines[paraPage.StartLine];
++			let lineTop  = line ? paraPage.Y + line.Y - line.Metrics.Ascent : paraPage.Bounds.Top;
++			let pos      = drawingDocument.ConvertCoordsToCursor(paraPage.X, lineTop, paragraph.GetAbsolutePage(pageIndex));
++			if (!pos.Error)
++				anchor = {"x" : pos.X, "y" : pos.Y, "page" : paragraph.GetAbsolutePage(pageIndex)};
++		}
++
++		let relV = drawing.PositionV.RelativeFrom;
++		return {
++			"left"         : lt.X,
++			"top"          : lt.Y,
++			"right"        : rb.X,
++			"bottom"       : rb.Y,
++			"page"         : page,
++			"inline"       : isInline,
++			"wrap"         : wrap,
++			"moveWithText" : !isInline && (Asc.c_oAscRelativeFromV.Paragraph === relV || Asc.c_oAscRelativeFromV.Line === relV),
++			"lockAnchor"   : !!drawing.Locked,
++			"tracking"     : !!(drawingObjects.arrTrackObjects && drawingObjects.arrTrackObjects.length),
++			"anchor"       : anchor
++		};
++	};
++
+ 	asc_docs_api.prototype.asc_canEditGeometry = function ()
+ 	{
+ 		var document = this.private_GetLogicDocument();
+@@ -16272,6 +16343,7 @@ background-repeat: no-repeat;\
+ 	asc_docs_api.prototype['asc_ConvertTableToText']                    = asc_docs_api.prototype.asc_ConvertTableToText;
+ 
+ 	asc_docs_api.prototype['asc_GetSelectionBounds']                    = asc_docs_api.prototype.asc_GetSelectionBounds;
++	asc_docs_api.prototype['asc_GetSelectedDrawingLayout']              = asc_docs_api.prototype.asc_GetSelectedDrawingLayout;
+ 
+ 
+ 	// mobile
+-- 
+2.43.0
+

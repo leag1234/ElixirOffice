@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# LibreOffice headless, used ONLY as a stand-in reference to exercise the
+# harness end to end while Word references do not exist.
+# Its output is NOT a fidelity reference and must never be reported as one.
+FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      libreoffice-writer-nogui \
+      fonts-crosextra-carlito fonts-crosextra-caladea fonts-liberation fonts-dejavu-core \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV HOME=/tmp
+WORKDIR /tmp

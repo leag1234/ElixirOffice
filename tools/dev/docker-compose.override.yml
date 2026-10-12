@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Compose override for the dev container (DocumentServer/develop/docker-compose.yml is the
+# upstream file, never edited for this). Used by the Makefile (`make up`).
+# /build holds the long C++ builds done inside the container (V8, 3rdParty, x2t, sdkjs stage):
+# it lives on the host so that recreating the container (image bump, compose change) keeps it.
+services:
+  eo:
+    volumes:
+      - ${EO_BUILD_CACHE:-${HOME}/elixiroffice/dev-build-cache}:/build

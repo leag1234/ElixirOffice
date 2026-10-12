@@ -1,0 +1,64 @@
+diff --git a/MsBinaryFile/XlsFile/Format/Binary/CFRecord.cpp b/MsBinaryFile/XlsFile/Format/Binary/CFRecord.cpp
+index c2bc395ab7..6b22b6d88e 100644
+--- a/MsBinaryFile/XlsFile/Format/Binary/CFRecord.cpp
++++ b/MsBinaryFile/XlsFile/Format/Binary/CFRecord.cpp
+@@ -31,13 +31,20 @@
+ namespace XLS
+ {
+ 
+-char CFRecord::intData[MAX_RECORD_SIZE_XLSB];
++char* CFRecord::intData = nullptr;
++
++void CFRecord::ensureIntData()
++{
++	if (!intData)
++		intData = new char[MAX_RECORD_SIZE_XLSB]();
++}
+ 
+ // Create a record and read its data from the stream
+ CFRecord::CFRecord(CFStreamPtr stream, GlobalWorkbookInfoPtr global_info)
+ :	rdPtr(0), // seek to the start
+ 	global_info_(global_info)
+ {
++	ensureIntData();
+ 	file_ptr = static_cast<unsigned int>(stream->getStreamPointer());
+ 	*stream >> type_id_;
+ 	unsigned short size_short;
+@@ -98,6 +105,7 @@ CFRecord::CFRecord(NSFile::CFileBinary &file, GlobalWorkbookInfoPtr global_info)
+ 	type_id_(rt_EOF),
+ 	global_info_(global_info)
+ {
++	ensureIntData();
+ 	file_ptr = file.GetFilePosition();
+ 	
+ 	if (file.GetFilePosition() + 4 <= file.GetFileSize())
+@@ -142,6 +150,7 @@ CFRecord::CFRecord(NSBinPptxRW::CBinaryFileReader &reader, GlobalWorkbookInfoPtr
+ 	type_id_(rt_EOF),
+ 	global_info_(global_info)
+ {
++	ensureIntData();
+     file_ptr = reinterpret_cast<std::uintptr_t>(reader.GetPointer(0)) ;
+     BYTE lenght = 0;
+     _UINT32 size = 0;
+@@ -198,6 +207,7 @@ CFRecord::CFRecord(CFRecordType::TypeId type_id, GlobalWorkbookInfoPtr global_in
+ 	file_ptr(-1),
+ 	global_info_(global_info)
+ {
++	ensureIntData();
+ }
+ 
+ CFRecord::~CFRecord()
+diff --git a/MsBinaryFile/XlsFile/Format/Binary/CFRecord.h b/MsBinaryFile/XlsFile/Format/Binary/CFRecord.h
+index 084507f12a..f688262e2c 100644
+--- a/MsBinaryFile/XlsFile/Format/Binary/CFRecord.h
++++ b/MsBinaryFile/XlsFile/Format/Binary/CFRecord.h
+@@ -174,7 +174,8 @@ private:
+ 	char*  data_ = 0;
+ 	BYTE   sizeOfRecordTypeRecordLength = 0; //size RecordType and RecordLength
+ 	size_t rdPtr = 0;
+-	static char intData[MAX_RECORD_SIZE_XLSB];
++	static char* intData; // allocated on first use (a 256 MB static array is committed memory in WebAssembly)
++	static void ensureIntData();
+ 
+ 	GlobalWorkbookInfoPtr global_info_;
+ };

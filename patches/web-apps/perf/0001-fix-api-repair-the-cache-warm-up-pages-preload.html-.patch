@@ -1,0 +1,89 @@
+From 895c83db95eb331cd724ed7e02e0af6c54f50ccc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 16:19:50 +0200
+Subject: [PATCH] fix(api): repair the cache warm-up pages (preload.html,
+ cache-scripts.html) [upstreamable]
+
+The webpack build replaces @@SRC_ROOT@@ in these pages with the build
+source path but never inlines their ?__inline=true script, so they
+requested /develop/web-apps/apps/common/main/lib/util/docserviceworker.js
+(404, then a MIME-type error), and they preloaded the editors CSS from
+apps/<editor>/main/resources/css/app.css, which the build no longer
+produces (4 x 404): the warm-up registered no service worker and warmed
+no stylesheet.
+
+- inline-svgs.js also processes apps/api/documents;
+- the pages preload apps/<editor>/main/app.css.
+
+Checked with the example test page (/example/?dev=1, which loads
+preload.html): 5 failed requests and 5 console errors before, none
+after.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/api/documents/cache-scripts.html | 8 ++++----
+ apps/api/documents/preload.html       | 8 ++++----
+ build/scripts/inline-svgs.js          | 2 ++
+ 3 files changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/apps/api/documents/cache-scripts.html b/apps/api/documents/cache-scripts.html
+index 54636a116b..2044be2fde 100644
+--- a/apps/api/documents/cache-scripts.html
++++ b/apps/api/documents/cache-scripts.html
+@@ -26,13 +26,13 @@
+     <link rel="preload" as="script" href="../../../../sdkjs/visio/sdk-all-min.js"/>
+     <link rel="preload" as="script" href="../../../../sdkjs/visio/sdk-all.js"/>
+     <link rel="preload" as="script" href="../../../apps/documenteditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/documenteditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/documenteditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/spreadsheeteditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/spreadsheeteditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/spreadsheeteditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/presentationeditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/presentationeditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/presentationeditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/visioeditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/visioeditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/visioeditor/main/app.css"/>
+     <div id="editor_sdk">
+     <script type="text/javascript">
+         window['AscNotLoadAllScript'] = true;
+diff --git a/apps/api/documents/preload.html b/apps/api/documents/preload.html
+index 7e00b191ff..458737b83e 100644
+--- a/apps/api/documents/preload.html
++++ b/apps/api/documents/preload.html
+@@ -26,13 +26,13 @@
+     <link rel="preload" as="script" href="../../../../sdkjs/visio/sdk-all-min.js"/>
+     <link rel="preload" as="script" href="../../../../sdkjs/visio/sdk-all.js"/>
+     <link rel="preload" as="script" href="../../../apps/documenteditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/documenteditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/documenteditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/spreadsheeteditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/spreadsheeteditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/spreadsheeteditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/presentationeditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/presentationeditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/presentationeditor/main/app.css"/>
+     <link rel="preload" as="script" href="../../../apps/visioeditor/main/app.js"/>
+-    <link rel="preload" as="style" href="../../../apps/visioeditor/main/resources/css/app.css"/>
++    <link rel="preload" as="style" href="../../../apps/visioeditor/main/app.css"/>
+     <div id="editor_sdk"></div>
+     <script type="text/javascript">
+         window['AscNotLoadAllScript'] = true;
+diff --git a/build/scripts/inline-svgs.js b/build/scripts/inline-svgs.js
+index 2faa5a8a16..aa92de7f03 100644
+--- a/build/scripts/inline-svgs.js
++++ b/build/scripts/inline-svgs.js
+@@ -42,6 +42,8 @@ const DIRS = [
+     { editor: 'visioeditor',        subpath: 'main'  },
+     { editor: 'documenteditor',     subpath: 'forms' },
+     { editor: 'common',             subpath: ''      },
++    // cache warm-up pages (preload.html, cache-scripts.html)
++    { editor: 'api',                subpath: 'documents' },
+ ];
+ 
+ // Mirror grunt-inline's exact regexes.
+-- 
+2.43.0
+

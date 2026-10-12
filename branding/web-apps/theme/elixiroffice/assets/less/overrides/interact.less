@@ -1,0 +1,211 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// --------------------------------------------------------------------------
+// Interaction polish (ElixirOffice): KeyTips like Office
+//
+// Upstream: apps/common/main/resources/less/hint-manager.less (.hint-div).
+// Office draws its KeyTips as small light boxes with a thin border and a soft
+// shadow, centred under the control; dark text, Segoe UI.
+// --------------------------------------------------------------------------
+
+:root body {
+    --elixir-keytip-background: #ffffff;
+    --elixir-keytip-border: #8a8a8a;
+    --elixir-keytip-text: #242424;
+    --elixir-keytip-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+:root body.theme-night,
+:root body.theme-dark,
+:root body.theme-contrast-dark {
+    --elixir-keytip-background: #2b2b2b;
+    --elixir-keytip-border: #8a8a8a;
+    --elixir-keytip-text: #ffffff;
+    --elixir-keytip-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.hint-div {
+    min-width: 16px;
+    height: 17px;
+    padding: 0 4px;
+    border: 1px solid var(--elixir-keytip-border);
+    border-radius: 2px;
+    background-color: var(--elixir-keytip-background);
+    color: var(--elixir-keytip-text);
+    box-shadow: var(--elixir-keytip-shadow);
+    font-family: var(--font-family-base);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    // a short fade, as the Office badges appear
+    animation: elixir-keytip-in 0.08s ease-out;
+    &.disabled {
+        opacity: 0.45;
+    }
+}
+
+@keyframes elixir-keytip-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+// --------------------------------------------------------------------------
+// Mini toolbar (documenteditor/main/app/view/MiniToolbar.js), like Word's:
+// a light floating panel, two rows, rounded corners and a soft shadow; it
+// fades in and its opacity follows the distance to the pointer (controller).
+// --------------------------------------------------------------------------
+:root body {
+    --elixir-mini-background: #ffffff;
+    --elixir-mini-border: rgba(0, 0, 0, 0.12);
+    --elixir-mini-shadow: 0 2px 6px rgba(0, 0, 0, 0.14), 0 6px 16px rgba(0, 0, 0, 0.10);
+}
+:root body.theme-night,
+:root body.theme-dark,
+:root body.theme-contrast-dark {
+    --elixir-mini-background: #2b2b2b;
+    --elixir-mini-border: rgba(255, 255, 255, 0.12);
+    --elixir-mini-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+#mini-toolbar {
+    display: none;
+    position: absolute;
+    z-index: 1001;
+    padding: 4px 6px;
+    background: var(--elixir-mini-background);
+    border: 1px solid var(--elixir-mini-border);
+    border-radius: 6px;
+    box-shadow: var(--elixir-mini-shadow);
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    user-select: none;
+    &.visible {
+        display: block;
+    }
+    .mini-row {
+        display: flex;
+        align-items: center;
+        gap: 1px;
+        height: 28px;
+    }
+    .mini-slot {
+        display: inline-flex;
+        align-items: center;
+    }
+    #mini-font-name .form-control { width: 128px; }
+    #mini-font-size .form-control { width: 44px; }
+    #mini-font-name, #mini-font-size { margin-right: 4px; }
+    .btn-toolbar {
+        min-width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        &:hover:not(.disabled) { background-color: var(--highlight-button-hover); }
+        &.active, &:active:not(.disabled) { background-color: var(--highlight-button-pressed); }
+    }
+    #mini-styles .btn-toolbar .caption { margin: 0 4px; }
+    // above a table (right click in a cell): Word's layout, tall Insert / Delete / New comment on the right
+    .mini-body { display: flex; align-items: center; }
+    .mini-side { display: none; align-items: center; gap: 2px; margin-left: 6px; padding-left: 6px; border-left: 1px solid var(--elixir-mini-border); }
+    .mini-slot.mini-tbl { display: none; }
+    &.mini-table {
+        .mini-side { display: flex; }
+        .mini-slot.mini-tbl { display: inline-flex; }
+        #mini-comment { display: none; }
+        .mini-side .btn-toolbar.x-huge { height: 56px; min-width: 48px; padding: 2px 4px; }
+    }
+}
+
+// --------------------------------------------------------------------------
+// Context menus (controller/WordContextMenus.js): the shortcut of a command
+// on the right, spelling suggestions in bold, as in Word.
+// --------------------------------------------------------------------------
+.dropdown-menu > li > a.menu-item {
+    .menu-item-shortcut {
+        float: right;
+        margin-left: 32px;
+        padding-right: 2px;
+        color: var(--text-secondary);
+        font-size: 11px;
+        line-height: inherit;
+        pointer-events: none;
+    }
+}
+.dropdown-menu > li.spell-suggestion > a.menu-item {
+    font-weight: 600;
+}
+
+// --------------------------------------------------------------------------
+// ScreenTips (controller/ScreenTips.js, common/main/lib/mods/tooltip.js):
+// Office's light box, the command and its shortcut in bold, one line of
+// description; a short fade.
+// --------------------------------------------------------------------------
+:root body {
+    --elixir-tip-background: #ffffff;
+    --elixir-tip-border: rgba(0, 0, 0, 0.14);
+    --elixir-tip-text: #242424;
+    --elixir-tip-text-secondary: #424242;
+    --elixir-tip-shadow: 0 2px 6px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+}
+:root body.theme-night,
+:root body.theme-dark,
+:root body.theme-contrast-dark {
+    --elixir-tip-background: #2b2b2b;
+    --elixir-tip-border: rgba(255, 255, 255, 0.14);
+    --elixir-tip-text: #ffffff;
+    --elixir-tip-text-secondary: #d6d6d6;
+    --elixir-tip-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+.tooltip.screentip {
+    opacity: 0;
+    transition: opacity 0.12s ease-out;
+    &.in { opacity: 1; }
+    .tooltip-arrow { display: none; }
+    .tooltip-inner {
+        max-width: 300px;
+        padding: 7px 10px 8px;
+        text-align: left;
+        background-color: var(--elixir-tip-background);
+        border: 1px solid var(--elixir-tip-border);
+        border-radius: 4px;
+        box-shadow: var(--elixir-tip-shadow);
+        color: var(--elixir-tip-text);
+        font-family: var(--font-family-base);
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 600;
+        white-space: normal;
+    }
+    .screentip-title {
+        font-weight: 600;
+    }
+    .screentip-description {
+        margin-top: 4px;
+        font-weight: 400;
+        color: var(--elixir-tip-text-secondary);
+    }
+}
+
+// --------------------------------------------------------------------------
+// States: one keyboard focus ring everywhere (Office draws a 2 px ring),
+// smooth tab switching on the ribbon.
+// --------------------------------------------------------------------------
+#toolbar, #statusbar, .asc-window, .dropdown-menu, #mini-toolbar {
+    button:focus-visible, .btn:focus-visible, a[role="tab"]:focus-visible, input:focus-visible {
+        outline: 2px solid var(--elixir-accent, #0082c9);
+        outline-offset: -2px;
+        border-radius: 4px;
+    }
+}
+.dropdown-menu > li > a.menu-item:focus-visible {
+    outline: 2px solid var(--elixir-accent, #0082c9);
+    outline-offset: -2px;
+}
+#toolbar .box-panels > .panel.active {
+    animation: elixir-ribbon-in 0.14s ease-out;
+}
+@keyframes elixir-ribbon-in {
+    from { opacity: 0.35; transform: translateY(-2px); }
+    to   { opacity: 1; transform: none; }
+}

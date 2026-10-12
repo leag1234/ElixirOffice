@@ -1,0 +1,10 @@
+{
+  "id": "e-name-date-line",
+  "title": "Name and date line at the top",
+  "instruction": "Ajoute une ligne pour le nom et la date en haut",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

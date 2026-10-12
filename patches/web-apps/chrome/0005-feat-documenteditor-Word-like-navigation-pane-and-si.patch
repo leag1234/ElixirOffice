@@ -1,0 +1,855 @@
+From 025d89e705cb676d7b2df936d7dd1954c667178d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:47:18 +0200
+Subject: [PATCH 5/7] feat(documenteditor): Word-like navigation pane and side
+ panels
+
+- No icon rail on the left, like Word: the side panels open on demand
+  and the left column takes no room while they are closed.
+- Navigation pane (Ctrl+F, View > Navigation): Headings, Pages and
+  Results tabs over the headings tree and the search panel. Pages shows
+  thumbnails drawn with the print preview renderer; clicking one goes
+  to the page. Ctrl+F (Cmd+F) opens Results with the selected text.
+- The comments pane docks on the right of the page area, like Word, and
+  the pages re-centre in the remaining width; Word-like comment cards.
+- Ctrl+wheel and trackpad pinch zoom smoothly (10 % per wheel notch,
+  continuous for pinches) instead of jumping between preset steps.
+- The properties panel on the right starts closed for new users (View >
+  Right panel opens it), like the format panes of Word.
+- Title bar: the file name stops before the search box; narrow windows
+  show the save state as an icon.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/elixir-chrome/Controller.js      |   8 +-
+ .../main/app/elixir-chrome/NavPane.js         | 289 ++++++++++++++++++
+ .../main/app/elixir-chrome/TitleBar.js        |  14 +
+ apps/documenteditor/main/locale/de.json       |   6 +
+ apps/documenteditor/main/locale/en.json       |   6 +
+ apps/documenteditor/main/locale/es.json       |   6 +
+ apps/documenteditor/main/locale/fr.json       |   6 +
+ apps/documenteditor/main/locale/it.json       |   6 +
+ apps/documenteditor/main/locale/ja.json       |   6 +
+ apps/documenteditor/main/locale/nl.json       |   6 +
+ apps/documenteditor/main/locale/pl.json       |   6 +
+ apps/documenteditor/main/locale/pt-pt.json    |   6 +
+ apps/documenteditor/main/locale/pt.json       |   6 +
+ apps/documenteditor/main/locale/ru.json       |   6 +
+ apps/documenteditor/main/locale/zh.json       |   6 +
+ .../main/resources/less/elixir-chrome.less    | 223 +++++++++++++-
+ 16 files changed, 603 insertions(+), 3 deletions(-)
+ create mode 100644 apps/documenteditor/main/app/elixir-chrome/NavPane.js
+
+diff --git a/apps/documenteditor/main/app/elixir-chrome/Controller.js b/apps/documenteditor/main/app/elixir-chrome/Controller.js
+index 045fd7919f..3b72c49af6 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/Controller.js
++++ b/apps/documenteditor/main/app/elixir-chrome/Controller.js
+@@ -13,7 +13,8 @@ define([
+     'documenteditor/main/app/elixir-chrome/Icons',
+     'documenteditor/main/app/elixir-chrome/CommandIndex',
+     'documenteditor/main/app/elixir-chrome/Backstage',
+-    'documenteditor/main/app/elixir-chrome/TitleBar'
++    'documenteditor/main/app/elixir-chrome/TitleBar',
++    'documenteditor/main/app/elixir-chrome/NavPane'
+ ], function () {
+     'use strict';
+ 
+@@ -41,11 +42,14 @@ define([
+             if (this.fileMenu)
+                 this.backstage = new DE.Views.ElixirBackstage({ controller: this, menu: this.fileMenu });
+             this.titleBar = new DE.Views.ElixirTitleBar({ controller: this });
++            this.navPane = new DE.Views.ElixirNavPane({ controller: this });
++            this.navPane.prepare();
+         },
+ 
+         onAppReady: function (mode) {
+             this.mode = mode;
+             this.titleBar.setup(mode);
++            this.navPane.setup(mode);
+         },
+ 
+         leftMenu: function () {
+@@ -84,7 +88,7 @@ define([
+         findInDocument: function (text, replace) {
+             var lmc = this.getApplication().getController('LeftMenu');
+             if (!lmc) return;
+-            lmc.onShowHideSearch(true, text);
++            this.navPane && this.navPane.ready ? this.navPane.openTab('results', text) : lmc.onShowHideSearch(true, text);
+             if (replace) {
+                 var panel = lmc.leftMenu && lmc.leftMenu.panelSearch;
+                 setTimeout(function () { panel && panel.focus && panel.focus('replace'); }, 100);
+diff --git a/apps/documenteditor/main/app/elixir-chrome/NavPane.js b/apps/documenteditor/main/app/elixir-chrome/NavPane.js
+new file mode 100644
+index 0000000000..a42d06454f
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-chrome/NavPane.js
+@@ -0,0 +1,289 @@
++/*
++ * ElixirOffice window chrome: Word-like Navigation pane and side panels.
++ *
++ * - The left icon rail goes away, like in Word: the side panels open on demand
++ *   (Ctrl+F, View > Navigation, the Comments button of the title bar) and the
++ *   left column takes no room when they are closed.
++ * - Navigation pane with Headings / Pages / Results tabs on top of the upstream
++ *   headings tree and search panel; Pages draws page thumbnails with the print
++ *   preview renderer. Ctrl+F opens it on Results, like Word.
++ * - Ctrl+wheel and pinch zoom smoothly (10 % per wheel notch) instead of
++ *   jumping between preset steps.
++ * - The comments pane docks on the right of the page, like Word's; the page
++ *   area shrinks and stays centred.
++ * - The properties panel on the right starts closed (View > Right panel).
++ *
++ * Licensed under the GNU AGPL v3 like the rest of web-apps.
++ */
++define([
++    'core',
++    'documenteditor/main/app/elixir-chrome/Icons'
++], function () {
++    'use strict';
++
++    var Icons = window.ElixirChromeIcons;
++    var esc = function (s) { return Common.Utils.String.htmlEncode(s === undefined || s === null ? '' : String(s)); };
++
++    var STRINGS = {
++        txtNavigation: 'Navigation',
++        txtClose: 'Close',
++        txtHeadings: 'Headings',
++        txtPages: 'Pages',
++        txtResults: 'Results',
++        txtPage: 'Page {0}'
++    };
++
++    DE.Views.ElixirNavPane = Backbone.View.extend(_.extend({
++
++        initialize: function (options) {
++            this.controller = options.controller;
++            this.tab = 'headings';
++        },
++
++        icon: function (name, size, cls) { return Icons ? Icons.svg(name, size, cls) : ''; },
++
++        // called before the document loads: no rail, right panel closed by default
++        prepare: function () {
++            $('body').addClass('elx-norail');
++            try {
++                if (Common.localStorage.getItem('de-hidden-rightmenu') === null)
++                    Common.localStorage.setBool('de-hidden-rightmenu', true);
++            } catch (e) {}
++            this.bindKeys();
++        },
++
++        setup: function (mode) {
++            var main = DE.getController('Main');
++            this.api = main.api;
++            this.mode = mode;
++            this.$left = $('#left-menu');
++            this.$panel = this.$left.find('.left-panel');
++            if (!this.$panel.length || this.ready) return;
++            this.ready = true;
++            this.renderHead();
++            this.dockComments();
++            this.watchLeftWidth();
++            this.watchPanels();
++            this.bindZoom();
++            this.sync();
++            var me = this;
++            this.api.asc_registerCallback('asc_onCountPages', function (n) { me.pageCount = n; me.tab === 'pages' && me.isOpen() && me.renderPages(); });
++            this.api.asc_registerCallback('asc_onCurrentPage', function (n) { me.markCurrent(n); });
++            this.api.asc_registerCallback('asc_onZoomChange', function (percent) { me.zoomValue = percent; });
++        },
++
++        lm: function () { var c = DE.getController('LeftMenu'); return c && c.leftMenu; },
++        lmc: function () { return DE.getController('LeftMenu'); },
++
++        // ---- the left column takes no room while its panels are closed ---------------------
++
++        watchLeftWidth: function () {
++            var me = this, el = this.$left[0];
++            var check = this.checkLeft = function () {
++                var w = parseInt(el.style.width) || 0;
++                // closed, or open for a panel that lives elsewhere (the docked comments)
++                var collapsed = w <= 40 || !me.$panel.children('.content-box').filter(function () { return this.style.display !== 'none'; }).length;
++                if (collapsed !== me.$left.hasClass('elx-left-collapsed')) {
++                    me.$left.toggleClass('elx-left-collapsed', collapsed);
++                    _.defer(function () { Common.NotificationCenter.trigger('layout:changed', 'leftmenu'); });
++                }
++            };
++            new MutationObserver(check).observe(el, { attributes: true, attributeFilter: ['style'] });
++            check();
++        },
++
++        // ---- Navigation pane ---------------------------------------------------------------
++
++        renderHead: function () {
++            var me = this;
++            this.$head = $('<div class="elx-navhead">' +
++                '<div class="elx-navhead-top"><span class="elx-navhead-title">' + esc(this.txtNavigation) + '</span>' +
++                    '<button type="button" class="elx-navhead-close" title="' + esc(this.txtClose) + '" aria-label="' + esc(this.txtClose) + '">' + this.icon('dismiss', 20) + '</button></div>' +
++                '<div class="elx-navtabs" role="tablist">' +
++                    '<button type="button" role="tab" data-tab="headings">' + esc(this.txtHeadings) + '</button>' +
++                    '<button type="button" role="tab" data-tab="pages">' + esc(this.txtPages) + '</button>' +
++                    '<button type="button" role="tab" data-tab="results">' + esc(this.txtResults) + '</button>' +
++                '</div></div>');
++            this.$panel.prepend(this.$head);
++            this.$pages = $('<div id="left-panel-elx-pages" class="content-box elx-pages" style="display:none;"><div class="elx-pages-list"></div></div>');
++            this.$panel.append(this.$pages);
++            this.$head.find('[data-tab]').on('click', function () { me.openTab($(this).attr('data-tab')); });
++            this.$head.find('.elx-navhead-close').on('click', function () { me.close(); });
++            this.$pages.on('click', '.elx-page-thumb', function () {
++                me.api.goToPage(parseInt($(this).attr('data-page')));
++            });
++        },
++
++        watchPanels: function () {
++            var me = this, timer;
++            new MutationObserver(function () {
++                clearTimeout(timer);
++                timer = setTimeout(function () { me.sync(); me.checkLeft && me.checkLeft(); }, 0);
++            }).observe(this.$panel[0], { attributes: true, attributeFilter: ['style', 'class'], subtree: true, childList: false });
++        },
++
++        // ---- comments pane on the right, like Word -----------------------------------------
++
++        dockComments: function () {
++            var me = this, $c = $('#left-panel-comments');
++            if (!$c.length) return;
++            this.$dock = $('<div id="elx-comments-dock" class="elx-comments-dock side-panel" style="display:none;"></div>').appendTo('#editor-container');
++            this.$dock.append($c);
++            var sync = function () {
++                var open = $c[0].style.display !== 'none';
++                if (open === me.$dock.is(':visible')) return;
++                me.$dock.toggle(open);
++                $('#editor-container').toggleClass('elx-comments-docked', open);
++                me.checkLeft && me.checkLeft();
++                _.defer(function () { Common.NotificationCenter.trigger('layout:changed', 'leftmenu'); });
++            };
++            new MutationObserver(sync).observe($c[0], { attributes: true, attributeFilter: ['style'] });
++            sync();
++        },
++
++        isOpen: function () { return $('body').hasClass('elx-nav-on'); },
++
++        sync: function () {
++            var lm = this.lm();
++            if (!lm) return;
++            var nav = lm.btnNavigation && lm.btnNavigation.pressed,
++                search = lm.btnSearchBar && lm.btnSearchBar.pressed;
++            if (search) this.tab = 'results';
++            else if (nav && this.tab === 'results') this.tab = 'headings';
++            var on = !!(nav || search);
++            $('body').toggleClass('elx-nav-on', on);
++            this.$panel.toggleClass('elx-pages-mode', on && nav && this.tab === 'pages');
++            this.$pages.toggle(on && nav && this.tab === 'pages');
++            var current = on ? (search ? 'results' : this.tab) : '';
++            this.$head.find('[data-tab]').each(function () {
++                var active = $(this).attr('data-tab') === current;
++                $(this).toggleClass('active', active).attr('aria-selected', active);
++            });
++            if (on && nav && this.tab === 'pages' && !this._pagesRendered) this.renderPages();
++        },
++
++        open: function (tab) { this.openTab(tab || 'headings'); },
++
++        openTab: function (tab, findText) {
++            var lmc = this.lmc(), lm = this.lm();
++            if (!lmc || !lm) return;
++            this.tab = tab;
++            if (tab === 'results') {
++                lmc.onShowHideSearch(true, findText);
++            } else {
++                if (!lm.btnNavigation.pressed) lmc.onShowHideNavigation(true);
++                this._pagesRendered = false;
++            }
++            this.sync();
++        },
++
++        close: function () {
++            var lm = this.lm();
++            if (!lm) return;
++            lm.close();
++            Common.NotificationCenter.trigger('layout:changed', 'leftmenu');
++            Common.NotificationCenter.trigger('edit:complete');
++        },
++
++        bindKeys: function () {
++            var me = this;
++            // Ctrl+F (Cmd+F) opens the Navigation pane on its Results tab, like Word
++            window.addEventListener('keydown', function (e) {
++                if (!(e.keyCode === 70 || e.code === 'KeyF')) return;
++                var mod = Common.Utils.isMac ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey;
++                if (!mod || e.altKey || e.shiftKey || !me.ready) return;
++                var fm = me.lm() && me.lm().menuFile;
++                if (fm && fm.isVisible()) return;
++                if ($(e.target).closest('.elx-search, .modal-dlg, .asc-window').length) return;
++                e.preventDefault();
++                e.stopImmediatePropagation();
++                Common.UI.Menu.Manager.hideAll();
++                var sel = me.api && me.api.asc_GetSelectedText ? $.trim(me.api.asc_GetSelectedText() || '') : '';
++                me.openTab('results', sel && sel.length < 200 ? sel : undefined);
++                var lm = me.lm();
++                setTimeout(function () { lm && lm.panelSearch && lm.panelSearch.focus && lm.panelSearch.focus('search'); }, 50);
++            }, true);
++        },
++
++        // ---- Pages: thumbnails drawn with the print preview renderer ------------------------
++
++        renderPages: function () {
++            var api = this.api, me = this;
++            if (!api) return;
++            var n = this.pageCount || (api.getCountPages ? api.getCountPages() : 0) || 0, cur = api.getCurrentPage ? api.getCurrentPage() : 0;
++            var $list = this.$pages.find('.elx-pages-list');
++            var html = '';
++            for (var i = 0; i < n; i++)
++                html += '<button type="button" class="elx-page-thumb' + (i === cur ? ' current' : '') + '" data-page="' + i + '" aria-label="' + esc(Common.Utils.String.format(this.txtPage, i + 1)) + '">' +
++                    '<canvas width="1" height="1"></canvas><span>' + (i + 1) + '</span></button>';
++            $list.html(html);
++            this._pagesRendered = true;
++            clearTimeout(this._pagesTimer);
++            var i0 = 0;
++            var step = function () {
++                // the File menu print preview owns the renderer while it is open
++                if (api.printPreview || !me.$pages.is(':visible')) return;
++                var end = Math.min(n, i0 + 4);
++                for (; i0 < end; i0++) me.drawThumb(i0, $list.find('.elx-page-thumb[data-page=' + i0 + '] canvas')[0]);
++                if (i0 < n) me._pagesTimer = setTimeout(step, 16);
++            };
++            this._pagesTimer = setTimeout(step, 30);
++        },
++
++        drawThumb: function (i, canvas) {
++            var api = this.api;
++            if (!canvas || !api.asc_initPrintPreview) return;
++            var size = api.asc_getPageSize ? api.asc_getPageSize(i) : null;
++            var wmm = size && size['W'] || 210, hmm = size && size['H'] || 297;
++            var W = 150, H = Math.round(W * hmm / wmm), off = 25;
++            var $host = $('#elx-thumb-render');
++            if (!$host.length) $host = $('<div id="elx-thumb-render" aria-hidden="true"></div>').appendTo(document.body);
++            $host.css({ width: W + 2 * off, height: H + 2 * off });
++            try {
++                api.asc_initPrintPreview('elx-thumb-render');
++                api.asc_drawPrintPreview(i);
++                var src = $host.find('canvas')[0];
++                if (src) {
++                    var r = src.width / (W + 2 * off);
++                    canvas.width = Math.round(W * r);
++                    canvas.height = Math.round(H * r);
++                    canvas.getContext('2d').drawImage(src, Math.round(off * r), Math.round(off * r), canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
++                }
++            } catch (e) {
++            } finally {
++                api.asc_closePrintPreview && api.asc_closePrintPreview();
++            }
++        },
++
++        markCurrent: function (n) {
++            if (!this.$pages) return;
++            this.$pages.find('.elx-page-thumb').removeClass('current').filter('[data-page=' + n + ']').addClass('current');
++        },
++
++        // ---- smooth zoom ---------------------------------------------------------------------
++
++        bindZoom: function () {
++            var me = this, target = null, raf = 0;
++            var host = document.getElementById('editor_sdk');
++            if (!host) return;
++            host.addEventListener('wheel', function (e) {
++                if (!e.ctrlKey || e.metaKey || !me.api || !me.api.zoom) return;
++                e.preventDefault();
++                e.stopPropagation();
++                var unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1;
++                // 100 px of wheel (one notch) = 10 %, trackpad pinches give small continuous deltas
++                var factor = Math.exp(-e.deltaY * unit * Math.log(1.1) / 100);
++                var base = target !== null ? target : (me.zoomValue || 100);
++                target = Math.max(10, Math.min(500, base * factor));
++                if (!raf) raf = requestAnimationFrame(function () {
++                    raf = 0;
++                    var z = Math.round(target);
++                    if (Math.abs(z - (me.zoomValue || 0)) >= 1) me.api.zoom(z);
++                    clearTimeout(me._zoomIdle);
++                    me._zoomIdle = setTimeout(function () { target = null; }, 250);
++                });
++            }, { capture: true, passive: false });
++        }
++
++    }, STRINGS, DE.Views.ElixirNavPane || {}));
++});
+diff --git a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+index 21e92d13eb..c1ee58beb4 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
++++ b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+@@ -77,6 +77,9 @@ define([
+             this.renderRight();
+             this.bindSaveState();
+             this.bindShortcut();
++            var me = this;
++            Common.NotificationCenter.on('window:resize', function () { me.fitName(); });
++            this.fitName();
+         },
+ 
+         hostConfig: function () {
+@@ -120,6 +123,17 @@ define([
+             var name = this.caption();
+             this.$doc.find('.elx-docname-text').text(this.splitName(name).base);
+             this.$doc.attr('title', name);
++            this.fitName();
++        },
++
++        // the file name and its state stop before the centred search box
++        fitName: function () {
++            if (!this.$doc || !this.$search) return;
++            var rtl = Common.UI.isRTL(), d = this.$doc[0].getBoundingClientRect(), s = this.$search[0].getBoundingClientRect();
++            var room = rtl ? d.right - s.right - 12 : s.left - d.left - 12;
++            // narrow windows keep the name and show the state as an icon only
++            this.$doc.toggleClass('elx-compact', room < 240);
++            this.$doc.css('max-width', Math.max(80, Math.floor(room)) + 'px');
+         },
+ 
+         bindSaveState: function () {
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 408a4aa3f2..cabfaee25f 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Frühere Versionen anzeigen und wiederherstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Für dieses Dokument ist kein Versionsverlauf verfügbar.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gestern, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Schließen",
++  "DE.Views.ElixirNavPane.txtHeadings": "Überschriften",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
++  "DE.Views.ElixirNavPane.txtPage": "Seite {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Seiten",
++  "DE.Views.ElixirNavPane.txtResults": "Ergebnisse",
+   "DE.Views.ElixirTitleBar.txtActions": "Aktionen",
+   "DE.Views.ElixirTitleBar.txtComments": "Kommentare",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Kommentare anzeigen",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 8d51699aad..7c551453a9 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2781,6 +2781,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "View and restore previous versions.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Version history is not available for this document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Yesterday, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Close",
++  "DE.Views.ElixirNavPane.txtHeadings": "Headings",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
++  "DE.Views.ElixirNavPane.txtPage": "Page {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Pages",
++  "DE.Views.ElixirNavPane.txtResults": "Results",
+   "DE.Views.ElixirTitleBar.txtActions": "Actions",
+   "DE.Views.ElixirTitleBar.txtComments": "Comments",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Show comments",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index 98cdbce1ab..6963967020 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver y restaurar versiones anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "El historial de versiones no está disponible para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ayer, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Cerrar",
++  "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navegación",
++  "DE.Views.ElixirNavPane.txtPage": "Página {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Páginas",
++  "DE.Views.ElixirNavPane.txtResults": "Resultados",
+   "DE.Views.ElixirTitleBar.txtActions": "Acciones",
+   "DE.Views.ElixirTitleBar.txtComments": "Comentarios",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentarios",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 93dc69a27d..24aee081e2 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Afficher et restaurer les versions précédentes.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "L'historique des versions n'est pas disponible pour ce document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Hier, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Fermer",
++  "DE.Views.ElixirNavPane.txtHeadings": "Titres",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
++  "DE.Views.ElixirNavPane.txtPage": "Page {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Pages",
++  "DE.Views.ElixirNavPane.txtResults": "Résultats",
+   "DE.Views.ElixirTitleBar.txtActions": "Actions",
+   "DE.Views.ElixirTitleBar.txtComments": "Commentaires",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Afficher les commentaires",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index d33aad34a3..93692517cf 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Visualizza e ripristina le versioni precedenti.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "La cronologia versioni non è disponibile per questo documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ieri, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Chiudi",
++  "DE.Views.ElixirNavPane.txtHeadings": "Titoli",
++  "DE.Views.ElixirNavPane.txtNavigation": "Spostamento",
++  "DE.Views.ElixirNavPane.txtPage": "Pagina {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Pagine",
++  "DE.Views.ElixirNavPane.txtResults": "Risultati",
+   "DE.Views.ElixirTitleBar.txtActions": "Azioni",
+   "DE.Views.ElixirTitleBar.txtComments": "Commenti",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostra commenti",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index 79b16ef388..b0dfa8d6a0 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2755,6 +2755,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "以前のバージョンを表示して復元します。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "この文書ではバージョン履歴を利用できません。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨日 {0}",
++  "DE.Views.ElixirNavPane.txtClose": "閉じる",
++  "DE.Views.ElixirNavPane.txtHeadings": "見出し",
++  "DE.Views.ElixirNavPane.txtNavigation": "ナビゲーション",
++  "DE.Views.ElixirNavPane.txtPage": "{0} ページ",
++  "DE.Views.ElixirNavPane.txtPages": "ページ",
++  "DE.Views.ElixirNavPane.txtResults": "結果",
+   "DE.Views.ElixirTitleBar.txtActions": "操作",
+   "DE.Views.ElixirTitleBar.txtComments": "コメント",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "コメントを表示",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index cbe7d453d1..c2f29f07c6 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -2067,6 +2067,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Eerdere versies bekijken en herstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Versiegeschiedenis is niet beschikbaar voor dit document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gisteren, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Sluiten",
++  "DE.Views.ElixirNavPane.txtHeadings": "Koppen",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navigatie",
++  "DE.Views.ElixirNavPane.txtPage": "Pagina {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Pagina's",
++  "DE.Views.ElixirNavPane.txtResults": "Resultaten",
+   "DE.Views.ElixirTitleBar.txtActions": "Acties",
+   "DE.Views.ElixirTitleBar.txtComments": "Opmerkingen",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Opmerkingen weergeven",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index eee60280bf..07152d3971 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -2250,6 +2250,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Wyświetl i przywróć poprzednie wersje.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Historia wersji nie jest dostępna dla tego dokumentu.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Wczoraj, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Zamknij",
++  "DE.Views.ElixirNavPane.txtHeadings": "Nagłówki",
++  "DE.Views.ElixirNavPane.txtNavigation": "Nawigacja",
++  "DE.Views.ElixirNavPane.txtPage": "Strona {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Strony",
++  "DE.Views.ElixirNavPane.txtResults": "Wyniki",
+   "DE.Views.ElixirTitleBar.txtActions": "Akcje",
+   "DE.Views.ElixirTitleBar.txtComments": "Komentarze",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Pokaż komentarze",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index 9967615783..5f665d3ac2 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -2108,6 +2108,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Fechar",
++  "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navegação",
++  "DE.Views.ElixirNavPane.txtPage": "Página {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Páginas",
++  "DE.Views.ElixirNavPane.txtResults": "Resultados",
+   "DE.Views.ElixirTitleBar.txtActions": "Ações",
+   "DE.Views.ElixirTitleBar.txtComments": "Comentários",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentários",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index 4d0b5c3e2e..ff03c4f743 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2770,6 +2770,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Exibir e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Fechar",
++  "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
++  "DE.Views.ElixirNavPane.txtNavigation": "Navegação",
++  "DE.Views.ElixirNavPane.txtPage": "Página {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Páginas",
++  "DE.Views.ElixirNavPane.txtResults": "Resultados",
+   "DE.Views.ElixirTitleBar.txtActions": "Ações",
+   "DE.Views.ElixirTitleBar.txtComments": "Comentários",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Mostrar comentários",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 3c85965cfb..2b15c42552 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Просмотр и восстановление предыдущих версий.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Журнал версий недоступен для этого документа.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Вчера, {0}",
++  "DE.Views.ElixirNavPane.txtClose": "Закрыть",
++  "DE.Views.ElixirNavPane.txtHeadings": "Заголовки",
++  "DE.Views.ElixirNavPane.txtNavigation": "Навигация",
++  "DE.Views.ElixirNavPane.txtPage": "Страница {0}",
++  "DE.Views.ElixirNavPane.txtPages": "Страницы",
++  "DE.Views.ElixirNavPane.txtResults": "Результаты",
+   "DE.Views.ElixirTitleBar.txtActions": "Действия",
+   "DE.Views.ElixirTitleBar.txtComments": "Примечания",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "Показать примечания",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index 246919e48b..6895450f1e 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2771,6 +2771,12 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "查看和还原以前的版本。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "此文档没有可用的版本历史记录。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨天 {0}",
++  "DE.Views.ElixirNavPane.txtClose": "关闭",
++  "DE.Views.ElixirNavPane.txtHeadings": "标题",
++  "DE.Views.ElixirNavPane.txtNavigation": "导航",
++  "DE.Views.ElixirNavPane.txtPage": "第 {0} 页",
++  "DE.Views.ElixirNavPane.txtPages": "页面",
++  "DE.Views.ElixirNavPane.txtResults": "结果",
+   "DE.Views.ElixirTitleBar.txtActions": "操作",
+   "DE.Views.ElixirTitleBar.txtComments": "批注",
+   "DE.Views.ElixirTitleBar.txtCommentsTip": "显示批注",
+diff --git a/apps/documenteditor/main/resources/less/elixir-chrome.less b/apps/documenteditor/main/resources/less/elixir-chrome.less
+index 28710aa58a..bca50afddc 100644
+--- a/apps/documenteditor/main/resources/less/elixir-chrome.less
++++ b/apps/documenteditor/main/resources/less/elixir-chrome.less
+@@ -568,7 +568,7 @@ body.elx-chrome {
+         display: inline-flex;
+         align-items: center;
+         gap: 6px;
+-        max-width: calc(50% - 250px);
++        max-width: 40vw;
+         min-width: 0;
+         height: 28px;
+         padding: 0 6px 0 8px;
+@@ -826,3 +826,224 @@ body.elx-chrome {
+     .elx-search .elx-search-input { padding: 0 32px 0 10px; }
+     .elx-docname .elx-docstate::before { margin-right: 0; margin-left: 4px; }
+ }
++
++// ---------------------------------------------------------------------------
++// Side panels without the icon rail; Navigation pane (Headings/Pages/Results)
++// ---------------------------------------------------------------------------
++body.elx-norail {
++    --layout-padding-left-panel: 0px 3px 8px 8px;
++    --layout-padding-left-panel-rtl: 0px 8px 8px 3px;
++
++    #left-menu {
++        .tool-menu-btns {
++            width: 0 !important;
++            padding: 0 !important;
++            border: 0 none !important;
++            overflow: hidden;
++        }
++        .left-panel { border: 0 none; }
++        &.elx-left-collapsed {
++            width: 0 !important;
++            overflow: hidden;
++        }
++    }
++    .left-menu-full-ct {
++        left: 0;
++        padding-right: 0;
++    }
++    &.rtl .left-menu-full-ct { right: 0; padding-left: 0; }
++}
++
++#left-menu .left-panel .elx-navhead { display: none; }
++
++body.elx-nav-on #left-menu .left-panel {
++    display: flex;
++    flex-direction: column;
++
++    > .content-box { flex: 1 1 auto; min-height: 0; }
++    > .content-box:not([style*="display: none"]) { border-radius: 0 0 8px 8px; }
++
++    .elx-navhead {
++        display: block;
++        flex: 0 0 auto;
++        padding: 10px 12px 0;
++        background: var(--background-toolbar);
++        border-radius: 8px 8px 0 0;
++        box-shadow: var(--shadow-side-panel);
++        position: relative;
++        z-index: 1;
++        clip-path: inset(-10px -10px 0 -10px);
++    }
++    .elx-navhead-top {
++        display: flex;
++        align-items: center;
++        justify-content: space-between;
++        height: 28px;
++    }
++    .elx-navhead-title {
++        font-size: 15px;
++        font-weight: 600;
++        color: var(--text-normal);
++    }
++    .elx-navhead-close {
++        display: inline-flex;
++        align-items: center;
++        justify-content: center;
++        width: 28px;
++        height: 28px;
++        border: 0;
++        border-radius: 4px;
++        background: none;
++        color: var(--icon-normal);
++        cursor: pointer;
++        &:hover { background: var(--highlight-button-hover); }
++    }
++    .elx-navtabs {
++        display: flex;
++        gap: 16px;
++        margin-top: 8px;
++        border-bottom: 1px solid var(--border-divider);
++
++        button {
++            position: relative;
++            height: 32px;
++            padding: 0 2px;
++            border: 0;
++            background: none;
++            color: var(--text-secondary);
++            font-size: 13px;
++            cursor: pointer;
++
++            &:hover { color: var(--text-normal); }
++            &.active {
++                color: var(--text-normal);
++                font-weight: 600;
++                &::after {
++                    content: '';
++                    position: absolute;
++                    left: 0;
++                    right: 0;
++                    bottom: -1px;
++                    height: 3px;
++                    border-radius: 3px;
++                    background: @elx-accent;
++                }
++            }
++        }
++    }
++
++    // the upstream panel titles give way to the pane header
++    #navigation-header label { display: none; }
++    #navigation-header #navigation-btn-close { display: none; }
++    #search-header { display: none; }
++    &.elx-pages-mode #left-panel-navigation { display: none !important; }
++}
++
++.elx-pages {
++    overflow-y: auto !important;
++    height: 100%;
++
++    .elx-pages-list {
++        display: flex;
++        flex-direction: column;
++        align-items: center;
++        gap: 14px;
++        padding: 16px 8px 24px;
++    }
++    .elx-page-thumb {
++        display: flex;
++        flex-direction: column;
++        align-items: center;
++        gap: 6px;
++        padding: 6px;
++        border: 0;
++        border-radius: 6px;
++        background: none;
++        color: var(--text-secondary);
++        font-size: 11px;
++        cursor: pointer;
++
++        canvas {
++            width: 150px;
++            height: auto;
++            min-height: 60px;
++            background: #fff;
++            box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .18);
++        }
++        &:hover { background: var(--highlight-button-hover); }
++        &.current {
++            background: var(--highlight-button-pressed);
++            color: var(--text-normal);
++            canvas { box-shadow: 0 0 0 2px @elx-accent; }
++        }
++    }
++}
++
++#elx-thumb-render {
++    position: fixed;
++    left: -10000px;
++    top: 0;
++    visibility: hidden;
++    pointer-events: none;
++}
++
++// Comments pane docked on the right of the page area, like Word
++@elx-comments-width: 340px;
++#editor-container.elx-comments-docked #editor_sdk {
++    width: calc(100% - @elx-comments-width);
++}
++.rtl #editor-container.elx-comments-docked #editor_sdk {
++    margin-right: @elx-comments-width;
++}
++.elx-comments-dock {
++    position: absolute;
++    top: 0;
++    right: 0;
++    bottom: 0;
++    width: @elx-comments-width;
++    padding: 0 8px 8px 0;
++    z-index: 2;
++
++    .rtl & { right: auto; left: 0; padding: 0 0 8px 8px; }
++
++    #left-panel-comments {
++        height: 100%;
++    }
++}
++
++// Word-like comment cards in the docked pane
++.elx-comments-dock #comments-box {
++    .messages-ct .dataview-ct > .item {
++        padding: 0 10px;
++    }
++    .user-comment-item {
++        margin: 10px 0 0;
++        padding: 4px 12px 12px;
++        border: 1px solid var(--border-divider);
++        border-radius: 8px;
++        background-color: var(--background-normal);
++        box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
++        color: var(--text-normal);
++
++        &.last-item { margin-bottom: 0; }
++        .user-name { font-weight: 600; color: var(--text-normal); }
++        .user-date { color: var(--text-secondary); }
++        .user-quote {
++            margin: 6px 0;
++            padding-left: 8px;
++            border-left: 3px solid var(--border-regular-control);
++            color: var(--text-secondary);
++            font-style: normal;
++        }
++        .user-message { color: var(--text-normal); line-height: 18px; }
++        .user-reply { color: var(--text-link); text-decoration: none; }
++    }
++    .item:hover .user-comment-item { background-color: var(--background-normal); border-color: var(--border-regular-control); }
++    .item.active .user-comment-item {
++        background-color: var(--background-normal);
++        border-color: @elx-accent;
++        box-shadow: 0 0 0 1px @elx-accent, 0 2px 6px rgba(0, 0, 0, .10);
++    }
++}
++
++body.elx-chrome .elx-docname.elx-compact .elx-docstate-txt { display: none; }
+-- 
+2.43.0
+

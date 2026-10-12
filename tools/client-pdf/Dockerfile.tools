@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Tools image of tools/client-pdf/gate.sh (same libraries as tools/fidelity).
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends poppler-utils && rm -rf /var/lib/apt/lists/* \
+ && pip install --no-cache-dir numpy scipy scikit-image opencv-python-headless pillow

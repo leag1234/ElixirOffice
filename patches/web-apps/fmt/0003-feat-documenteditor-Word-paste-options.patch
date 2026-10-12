@@ -1,0 +1,447 @@
+From ebb318299c2c9fdc612ed74a55c548928093e7fb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:50:11 +0200
+Subject: [PATCH 3/6] feat(documenteditor): Word paste options
+
+- Paste becomes a split button: the main part pastes, the arrow opens
+  "Paste Options:" with Keep Source Formatting (K), Merge Formatting (M)
+  and Keep Text Only (T), with Fluent icons; choosing one pastes and
+  switches the paste to that option.
+- The main part no longer shows the "copy, cut and paste" warning when
+  the asynchronous Clipboard API pastes: the warning appears only if
+  nothing was pasted after 1.5 s.
+- Paste Options chip after a paste: Word's labels, keys and icons, and
+  the Merge Formatting (M) and Use Destination Styles (S) options that
+  the chip of DocumentHolder did not label or bind.
+The Toolbar view only gets split/menu on the big Paste button; the rest
+lives in DE.Controllers.WordFormatting. Format Painter already behaves
+like Word (one click: once, double click: until Esc or a new click) and
+is unchanged. Strings in en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja,
+zh.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/controller/WordFormatting.js     | 119 ++++++++++++++++++
+ apps/documenteditor/main/app/view/Toolbar.js  |   2 +
+ apps/documenteditor/main/locale/de.json       |   6 +
+ apps/documenteditor/main/locale/en.json       |   6 +
+ apps/documenteditor/main/locale/es.json       |   6 +
+ apps/documenteditor/main/locale/fr.json       |   6 +
+ apps/documenteditor/main/locale/it.json       |   6 +
+ apps/documenteditor/main/locale/ja.json       |   6 +
+ apps/documenteditor/main/locale/nl.json       |   6 +
+ apps/documenteditor/main/locale/pl.json       |   6 +
+ apps/documenteditor/main/locale/pt-pt.json    |   6 +
+ apps/documenteditor/main/locale/pt.json       |   6 +
+ apps/documenteditor/main/locale/ru.json       |   6 +
+ apps/documenteditor/main/locale/zh.json       |   6 +
+ .../main/resources/less/word-formatting.less  |  13 ++
+ 15 files changed, 206 insertions(+)
+
+diff --git a/apps/documenteditor/main/app/controller/WordFormatting.js b/apps/documenteditor/main/app/controller/WordFormatting.js
+index 89155cf7d9..456b4f92d4 100644
+--- a/apps/documenteditor/main/app/controller/WordFormatting.js
++++ b/apps/documenteditor/main/app/controller/WordFormatting.js
+@@ -73,6 +73,7 @@ define([
+             if (!this.canEdit() || !toolbar.listStyles) return;
+             this.bindGalleryPreview(toolbar.listStyles);
+             this.extendGalleryMenus(toolbar);
++            this.setupPasteButton(toolbar);
+         },
+ 
+         onAppReady: function () {
+@@ -86,6 +87,8 @@ define([
+                 me.applyStylesDlg && me.applyStylesDlg.isVisible() && me.applyStylesDlg.setCurrent(name);
+                 me.checkHeadingLevels(name);
+             });
++            // after the handler of DocumentHolder, which builds the Paste Options chip
++            api.asc_registerCallback('asc_onShowSpecialPasteOptions', function (options) { me.onSpecialPasteShown(options); });
+             api.asc_registerCallback('asc_onInitEditorStyles', function () {
+                 me.stylesPane && me.stylesPane.isVisible() && me.refreshStylesPane();
+             });
+@@ -134,6 +137,116 @@ define([
+             }
+         },
+ 
++        // ---------------------------------------------------------------- Paste
++        pasteOptionInfo: function (value) {
++            var P = Asc.c_oSpecialPasteProps, info = {};
++            info[P.sourceformatting] = {caption: this.textKeepSource, key: 'K', icon: 'btn-paste-keep-source'};
++            info[P.mergeFormatting] = {caption: this.textMergeFormatting, key: 'M', icon: 'btn-paste-merge'};
++            info[P.destinationFormatting] = {caption: this.textDestinationStyles, key: 'S', icon: 'btn-paste-merge'};
++            info[P.keepTextOnly] = {caption: this.textKeepTextOnly, key: 'T', icon: 'btn-paste-text-only'};
++            info[P.picture] = {caption: this.textPicture, key: 'U', icon: 'btn-paste-picture'};
++            return info[value];
++        },
++
++        // Paste split button: click pastes, the arrow opens Word's paste options
++        setupPasteButton: function (toolbar) {
++            var btn = toolbar.btnPaste, me = this, P = Asc.c_oSpecialPasteProps;
++            if (!btn || !btn.setMenu || !btn.options.split) return;
++            var items = [{caption: this.textPasteOptions, cls: 'word-paste-header', disabled: true}];
++            _.each([P.sourceformatting, P.mergeFormatting, P.keepTextOnly], function (v) {
++                var i = me.pasteOptionInfo(v);
++                items.push({caption: i.caption + ' (' + i.key + ')', iconCls: 'menu__icon ' + i.icon, value: v});
++            });
++            var menu = new Common.UI.Menu({cls: 'word-paste-menu', items: items});
++            btn.setMenu(menu);
++            menu.on('item:click', function (m, item) {
++                item.value !== undefined && me.pasteWithOption(item.value);
++            });
++            // the main part pastes too; replaces the handler of the Toolbar controller, which warns
++            // that the clipboard is not reachable even when the asynchronous Clipboard API pastes
++            btn.off('click');
++            btn.on('click', function () { me.pasteWithOption(null); });
++        },
++
++        historyIndex: function () {
++            var ld = this.api && this.api.WordControl && this.api.WordControl.m_oLogicDocument;
++            return ld && ld.History ? ld.History.Index : null;
++        },
++
++        pasteWithOption: function (value) {
++            var api = this.api || this.getApi(), me = this;
++            if (!api) return;
++            var pending = this._pendingPaste = {value: value, time: Date.now(), history: this.historyIndex()};
++            var res = api.Paste();
++            if (!res) {
++                // asynchronous paste: warn only if nothing was pasted
++                setTimeout(function () {
++                    if (pending.pasted || (pending.history !== null && me.historyIndex() !== pending.history)) return;
++                    me._pendingPaste === pending && (me._pendingPaste = null);
++                    if (!Common.localStorage.getBool('de-hide-copywarning')) {
++                        (new Common.Views.CopyWarningDialog({
++                            handler: function (dontshow) {
++                                dontshow && Common.localStorage.setItem('de-hide-copywarning', 1);
++                                Common.NotificationCenter.trigger('edit:complete', me.toolbar);
++                            }
++                        })).show();
++                    }
++                }, 1500);
++            }
++            Common.NotificationCenter.trigger('edit:complete', this.toolbar);
++        },
++
++        // Word-like Paste Options chip after a paste: Word's labels, keys and icons, Merge
++        // Formatting (M); a paste started from the Paste menu switches to the chosen option.
++        onSpecialPasteShown: function (showOptions) {
++            // the chip of DocumentHolder may be built by a callback that runs after this one
++            var me = this;
++            _.defer(function () { me.decorateSpecialPaste(showOptions); });
++        },
++
++        decorateSpecialPaste: function (showOptions) {
++            var me = this, P = Asc.c_oSpecialPasteProps,
++                dh = this.getApplication().getController('DocumentHolder'),
++                options = showOptions && showOptions.asc_getOptions ? (showOptions.asc_getOptions() || []) : [];
++            var btn = dh && dh.btnSpecialPaste;
++            if (btn) {
++                btn.cmpEl && btn.cmpEl.closest('#special-paste-container').addClass('word-paste-chip');
++                _.each(btn.menu.items, function (item) {
++                    var i = me.pasteOptionInfo(item.value);
++                    if (i) {
++                        item.setCaption(i.caption + ' (' + i.key + ')');
++                        item.setIconCls && item.setIconCls('menu__icon ' + i.icon);
++                    }
++                });
++                dh.hkSpecPaste && (dh.hkSpecPaste[P.mergeFormatting] = 'M', dh.hkSpecPaste[P.destinationFormatting] = 'S');
++                if (!this._chipKeys) {
++                    this._chipKeys = true;
++                    // letters that the chip of DocumentHolder does not bind (M, S) while its menu is open
++                    document.addEventListener('keydown', function (e) {
++                        var b = dh.btnSpecialPaste;
++                        if (!b || !b.menu || !b.menu.isVisible() || e.ctrlKey || e.altKey || e.metaKey) return;
++                        var key = String.fromCharCode(e.keyCode);
++                        var item = _.find(b.menu.items, function (it) { var i = me.pasteOptionInfo(it.value); return i && i.key === key && (key === 'M' || key === 'S'); });
++                        if (item) {
++                            dh.onSpecialPasteItemClick({value: item.value});
++                            e.preventDefault();
++                            e.stopPropagation();
++                        }
++                    }, true);
++                }
++            }
++            var pending = this._pendingPaste;
++            this._pendingPaste = null;
++            pending && (pending.pasted = true);
++            if (pending && pending.value !== null && Date.now() - pending.time < 15000 && options.length) {
++                var v = pending.value;
++                if (options.indexOf(v) < 0 && v === P.mergeFormatting && options.indexOf(P.destinationFormatting) >= 0)
++                    v = P.destinationFormatting;
++                if (options.indexOf(v) >= 0 && v !== options[0])
++                    _.defer(function () { dh && dh.onSpecialPasteItemClick ? dh.onSpecialPasteItemClick({value: v}) : me.api.asc_SpecialPaste(v); });
++            }
++        },
++
+         // ---------------------------------------------------------------- Font dialog
+         openFontDialog: function () {
+             var api = this.api || this.getApi(), me = this;
+@@ -510,6 +623,12 @@ define([
+             })).show();
+         },
+ 
++        textPasteOptions: 'Paste Options:',
++        textKeepSource: 'Keep Source Formatting',
++        textMergeFormatting: 'Merge Formatting',
++        textDestinationStyles: 'Use Destination Styles',
++        textKeepTextOnly: 'Keep Text Only',
++        textPicture: 'Picture',
+         textCreateStyle: 'Create a Style',
+         textClearFormatting: 'Clear Formatting',
+         textApplyStyles: 'Apply Styles...',
+diff --git a/apps/documenteditor/main/app/view/Toolbar.js b/apps/documenteditor/main/app/view/Toolbar.js
+index 817906ecad..ef97a25b80 100644
+--- a/apps/documenteditor/main/app/view/Toolbar.js
++++ b/apps/documenteditor/main/app/view/Toolbar.js
+@@ -272,6 +272,8 @@ define([
+                         cls: 'btn-toolbar x-huge icon-top',
+                         iconCls: 'toolbar__icon btn-big-paste',
+                         caption: me.tipPaste,
++                        split: true, // Word-like paste options menu, see DE.Controllers.WordFormatting
++                        menu: true,
+                         lock: [_set.paragraphLock, _set.headerLock, _set.richEditLock, _set.plainEditLock, _set.previewReviewMode, _set.viewFormMode, _set.lostConnect, _set.disableOnStart, _set.docLockViewIns, _set.docLockCommentsIns, _set.viewMode],
+                         dataHint: '1',
+                         dataHintDirection: 'top',
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 0784c78f66..8611b5ee7f 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Formatierung löschen",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Formatvorlage erstellen",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Möchten Sie die Formatvorlage {0} aus dem Dokument löschen?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Zielformatvorlagen verwenden",
++  "DE.Controllers.WordFormatting.textKeepSource": "Ursprüngliche Formatierung beibehalten",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Nur den Text übernehmen",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Formatierung zusammenführen",
+   "DE.Controllers.WordFormatting.textModify": "Ändern...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Einfügeoptionen:",
++  "DE.Controllers.WordFormatting.textPicture": "Bild",
+   "DE.Controllers.WordFormatting.textStyleN": "Formatvorlage",
+   "DE.Views.ApplyStylesDialog.txtModify": "Ändern...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Erneut übernehmen",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 1337943526..7955b0a1d2 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2130,7 +2130,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Clear Formatting",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Create a Style",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Do you want to delete the style {0} from the document?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Use Destination Styles",
++  "DE.Controllers.WordFormatting.textKeepSource": "Keep Source Formatting",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Keep Text Only",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Merge Formatting",
+   "DE.Controllers.WordFormatting.textModify": "Modify...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Paste Options:",
++  "DE.Controllers.WordFormatting.textPicture": "Picture",
+   "DE.Controllers.WordFormatting.textStyleN": "Style",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modify...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reapply",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index 7a6e67fd6d..b2c15378e1 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Borrar formato",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Crear un estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "¿Desea eliminar el estilo {0} del documento?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Usar estilos de destino",
++  "DE.Controllers.WordFormatting.textKeepSource": "Mantener formato de origen",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Mantener solo texto",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Combinar formato",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Opciones de pegado:",
++  "DE.Controllers.WordFormatting.textPicture": "Imagen",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Volver a aplicar",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index d74f9fc386..71eb8ab474 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Effacer la mise en forme",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Créer un style",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Voulez-vous supprimer le style {0} du document ?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Utiliser les styles de destination",
++  "DE.Controllers.WordFormatting.textKeepSource": "Conserver la mise en forme source",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Conserver uniquement le texte",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Fusionner la mise en forme",
+   "DE.Controllers.WordFormatting.textModify": "Modifier...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Options de collage :",
++  "DE.Controllers.WordFormatting.textPicture": "Image",
+   "DE.Controllers.WordFormatting.textStyleN": "Style",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modifier...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Réappliquer",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 7636d97b10..01459f4407 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Cancella formattazione",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Crea uno stile",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Eliminare lo stile {0} dal documento?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Usa stili di destinazione",
++  "DE.Controllers.WordFormatting.textKeepSource": "Mantieni formattazione originale",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Mantieni solo testo",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Unisci formattazione",
+   "DE.Controllers.WordFormatting.textModify": "Modifica...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Opzioni Incolla:",
++  "DE.Controllers.WordFormatting.textPicture": "Immagine",
+   "DE.Controllers.WordFormatting.textStyleN": "Stile",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modifica...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Riapplica",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index 1eb2ddcd80..31901cf408 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2106,7 +2106,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "書式のクリア",
+   "DE.Controllers.WordFormatting.textCreateStyle": "スタイルの作成",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "文書からスタイル {0} を削除しますか?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "貼り付け先のスタイルを使用",
++  "DE.Controllers.WordFormatting.textKeepSource": "元の書式を保持",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "テキストのみ保持",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "書式を結合",
+   "DE.Controllers.WordFormatting.textModify": "変更...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "貼り付けのオプション:",
++  "DE.Controllers.WordFormatting.textPicture": "図",
+   "DE.Controllers.WordFormatting.textStyleN": "スタイル",
+   "DE.Views.ApplyStylesDialog.txtModify": "変更...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "再適用",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index 9dffaf063c..7c47b706f1 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -1505,7 +1505,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Opmaak wissen",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Een stijl maken",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Wilt u de stijl {0} uit het document verwijderen?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Doelstijlen gebruiken",
++  "DE.Controllers.WordFormatting.textKeepSource": "Bronopmaak behouden",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Alleen tekst behouden",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Opmaak samenvoegen",
+   "DE.Controllers.WordFormatting.textModify": "Wijzigen...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Plakopties:",
++  "DE.Controllers.WordFormatting.textPicture": "Afbeelding",
+   "DE.Controllers.WordFormatting.textStyleN": "Stijl",
+   "DE.Views.ApplyStylesDialog.txtModify": "Wijzigen...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Opnieuw toepassen",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index 05157853b0..ec02b624b8 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -1671,7 +1671,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Wyczyść formatowanie",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Utwórz styl",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Czy chcesz usunąć styl {0} z dokumentu?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Użyj stylów docelowych",
++  "DE.Controllers.WordFormatting.textKeepSource": "Zachowaj formatowanie źródłowe",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Zachowaj tylko tekst",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Scal formatowanie",
+   "DE.Controllers.WordFormatting.textModify": "Modyfikuj...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Opcje wklejania:",
++  "DE.Controllers.WordFormatting.textPicture": "Obraz",
+   "DE.Controllers.WordFormatting.textStyleN": "Styl",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modyfikuj...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Zastosuj ponownie",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index 5109d67155..6ec1fe173c 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -1531,7 +1531,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Pretende eliminar o estilo {0} do documento?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Utilizar Estilos de Destino",
++  "DE.Controllers.WordFormatting.textKeepSource": "Manter Formatação de Origem",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Manter Apenas Texto",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Intercalar Formatação",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Opções de Colagem:",
++  "DE.Controllers.WordFormatting.textPicture": "Imagem",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index b149f8501d..d6a4ea667f 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2121,7 +2121,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Deseja excluir o estilo {0} do documento?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Usar Estilos de Destino",
++  "DE.Controllers.WordFormatting.textKeepSource": "Manter Formatação Original",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Manter Somente Texto",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Mesclar Formatação",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Opções de Colagem:",
++  "DE.Controllers.WordFormatting.textPicture": "Imagem",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 64ac7aeb37..4ca0fe6d9b 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "Очистить формат",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Создать стиль",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Удалить стиль {0} из документа?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "Использовать стили конечного фрагмента",
++  "DE.Controllers.WordFormatting.textKeepSource": "Сохранить исходное форматирование",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "Сохранить только текст",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "Объединить форматирование",
+   "DE.Controllers.WordFormatting.textModify": "Изменить...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "Параметры вставки:",
++  "DE.Controllers.WordFormatting.textPicture": "Рисунок",
+   "DE.Controllers.WordFormatting.textStyleN": "Стиль",
+   "DE.Views.ApplyStylesDialog.txtModify": "Изменить...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Применить снова",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index 8bbb892c9c..74ded65247 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2122,7 +2122,13 @@
+   "DE.Controllers.WordFormatting.textClearFormatting": "清除格式",
+   "DE.Controllers.WordFormatting.textCreateStyle": "创建样式",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "是否要从文档中删除样式 {0}?",
++  "DE.Controllers.WordFormatting.textDestinationStyles": "使用目标样式",
++  "DE.Controllers.WordFormatting.textKeepSource": "保留源格式",
++  "DE.Controllers.WordFormatting.textKeepTextOnly": "只保留文本",
++  "DE.Controllers.WordFormatting.textMergeFormatting": "合并格式",
+   "DE.Controllers.WordFormatting.textModify": "修改...",
++  "DE.Controllers.WordFormatting.textPasteOptions": "粘贴选项:",
++  "DE.Controllers.WordFormatting.textPicture": "图片",
+   "DE.Controllers.WordFormatting.textStyleN": "样式",
+   "DE.Views.ApplyStylesDialog.txtModify": "修改...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "重新应用",
+diff --git a/apps/documenteditor/main/resources/less/word-formatting.less b/apps/documenteditor/main/resources/less/word-formatting.less
+index 3fcc3dbea7..107a0d43d5 100644
+--- a/apps/documenteditor/main/resources/less/word-formatting.less
++++ b/apps/documenteditor/main/resources/less/word-formatting.less
+@@ -559,3 +559,16 @@
+ .word-paragraph-dlg #paragraphadv-spin-outline-level {
+     width: 140px !important;
+ }
++
++// ---------------------------------------------------------------- Paste options
++.word-paste-menu .word-paste-header > a {
++    font-weight: bold;
++    opacity: 1 !important;
++    color: @text-normal-ie !important;
++    color: @text-normal !important;
++    cursor: default;
++}
++
++.word-font-adv td {
++    white-space: nowrap;
++}
+-- 
+2.43.0
+

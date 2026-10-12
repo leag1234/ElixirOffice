@@ -1,0 +1,2 @@
+# A unified diff context marker is a space before the target's tab indentation.
+*.patch whitespace=-space-before-tab

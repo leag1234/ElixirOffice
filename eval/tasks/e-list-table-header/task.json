@@ -1,0 +1,13 @@
+{
+  "id": "e-list-table-header",
+  "title": "List to table with header (fr)",
+  "instruction": "Fais un tableau de cette liste avec en-tête",
+  "select": [
+    1,
+    4
+  ],
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

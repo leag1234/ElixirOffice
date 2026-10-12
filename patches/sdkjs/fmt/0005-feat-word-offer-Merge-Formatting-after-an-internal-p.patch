@@ -1,0 +1,104 @@
+From 60e54051b3d6f8fb58bf559f6aab5ec01cd50d84 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:50:11 +0200
+Subject: [PATCH 5/7] feat(word): offer Merge Formatting after an internal
+ paste, as Word does
+
+Merge Formatting was implemented but commented out of the paste options
+(it merged the destination formatting into the pasted one, so pasted
+text kept its look). It now follows Word: the pasted paragraphs take the
+destination paragraph properties and the pasted text the destination
+text properties, keeping only its emphasis (bold, italic, underline,
+strikethrough, superscript/subscript), inside hyperlinks, fields and
+inline content controls too. The options after an internal paste are
+Keep Source Formatting, Merge Formatting and Keep Text Only.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/wordcopypaste.js | 47 +++++++++++++++++++++++++++++------------
+ 1 file changed, 33 insertions(+), 14 deletions(-)
+
+diff --git a/common/wordcopypaste.js b/common/wordcopypaste.js
+index 37dafed409..7ca8ff3a6b 100644
+--- a/common/wordcopypaste.js
++++ b/common/wordcopypaste.js
+@@ -3451,7 +3451,7 @@ PasteProcessor.prototype =
+ 			}
+ 			else
+ 			{
+-				props = [sProps.sourceformatting/*, sProps.mergeFormatting*/, sProps.keepTextOnly];
++				props = [sProps.sourceformatting, sProps.mergeFormatting, sProps.keepTextOnly];
+ 			}
+ 
+ 			if (specialPasteHelper.specialPasteData && specialPasteHelper.specialPasteData.images && specialPasteHelper.specialPasteData.images.length && !(window["Asc"]["editor"] && window["Asc"]["editor"].isChartEditor)) {
+@@ -3613,13 +3613,15 @@ PasteProcessor.prototype =
+ 			}
+ 			case Asc.c_oSpecialPasteProps.mergeFormatting:
+ 			{
+-				//ms почему-то при merge игнорирует заливку текста
++				// Word's Merge Formatting: the pasted text takes the formatting of the destination
++				// paragraph and text, and keeps only its emphasis (see _specialPasteParagraphContentConvert)
+ 				if(pasteIntoParagraphPr)
+ 				{
+-					paragraph.Pr.Merge(pasteIntoParagraphPr);
+-					if(paragraph.TextPr)
++					paragraph.Set_Pr(pasteIntoParagraphPr.Copy());
++
++					if(paragraph.TextPr && pasteIntoParaRunPr)
+ 					{
+-						paragraph.TextPr.Value.Merge(pasteIntoParaRunPr);
++						paragraph.TextPr.Value = pasteIntoParaRunPr.Copy();
+ 					}
+ 				}
+ 				this._specialPasteParagraphContentConvert(paragraph.Content, pasteIntoParaRunPr);
+@@ -3730,18 +3732,35 @@ PasteProcessor.prototype =
+ 			}
+ 			case Asc.c_oSpecialPasteProps.mergeFormatting:
+ 			{
+-				//ms почему-то при merge игнорирует заливку текста
+-				if(pasteIntoParaRunPr)
++				// destination text formatting, source emphasis (bold, italic, underline, strikethrough,
++				// superscript/subscript), as Word does
++				var mergeRun = function(run)
+ 				{
+-					for(var i = 0; i < paragraphContent.length; i++)
++					if (!run || !run.Pr || !run.Set_Pr)
++						return;
++
++					var srcPr = run.Pr;
++					var newPr = pasteIntoParaRunPr ? pasteIntoParaRunPr.Copy() : new CTextPr();
++					var keep  = ["Bold", "BoldCS", "Italic", "ItalicCS", "Underline", "Strikeout", "DStrikeout", "VertAlign"];
++					for (var k = 0; k < keep.length; ++k)
+ 					{
+-						var elem = paragraphContent[i];
+-						if(pasteIntoParaRunPr && elem.Pr)
+-						{
+-							elem.Pr.Merge(pasteIntoParaRunPr);
+-						}
++						if (undefined !== srcPr[keep[k]])
++							newPr[keep[k]] = srcPr[keep[k]];
+ 					}
+-				}
++					run.Set_Pr(newPr);
++				};
++				var mergeContent = function(content)
++				{
++					for(var i = 0; content && i < content.length; i++)
++					{
++						var elem = content[i];
++						if (para_Run === elem.Type)
++							mergeRun(elem);
++						else if (elem.Content && (para_Hyperlink === elem.Type || para_Field === elem.Type || para_InlineLevelSdt === elem.Type))
++							mergeContent(elem.Content);
++					}
++				};
++				mergeContent(paragraphContent);
+ 
+ 				break;
+ 			}
+-- 
+2.43.0
+

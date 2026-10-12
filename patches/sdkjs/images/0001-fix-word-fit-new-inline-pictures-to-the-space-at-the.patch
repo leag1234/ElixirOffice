@@ -1,0 +1,173 @@
+From 5bb10b560ae2ea9b7e9cd3d9df18e9859276a94a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 23:18:58 +0200
+Subject: [PATCH 1/6] fix(word): fit new inline pictures to the space at the
+ insertion point
+
+Inserted, pasted and dropped pictures were scaled to the width of the
+section column only. In an indented paragraph (numbered exercise, list)
+they overflowed the right margin, and in a table cell they widened the
+column to the whole text width, reflowing the table and everything after
+it. Their height was never limited, so a tall picture could exceed the
+page.
+
+Add CDocument.GetInlineObjectMaxSize (width of the current paragraph:
+column, table cell, header or footer, minus its indents; height of the
+column or cell) and FitInlineObjectSize (proportional scale-down to fit
+both dimensions), and use them for Insert > Picture, image URLs, file
+drag and drop, multi-image insertion and pasted pictures. This matches
+Word, which fits a new picture into the text area at the insertion point.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/wordcopypaste.js        |  4 ++--
+ word/Editor/Document.js        | 44 ++++++++++++++++++++++++++++++++--
+ word/Editor/DocumentContent.js |  5 ++--
+ word/api.js                    | 14 ++++++-----
+ 4 files changed, 55 insertions(+), 12 deletions(-)
+
+diff --git a/common/wordcopypaste.js b/common/wordcopypaste.js
+index 7ca8ff3a6b..70860b2d19 100644
+--- a/common/wordcopypaste.js
++++ b/common/wordcopypaste.js
+@@ -13420,8 +13420,8 @@ PasteProcessor.prototype =
+ 
+ 	fitPictureSizeToPage: function (nWidth, nHeight) {
+ 		if (this.apiEditor && this.apiEditor.isDocumentEditor) {
+-			if (this.oLogicDocument && this.oLogicDocument.GetColumnSize) {
+-				var oColumnSize = this.oLogicDocument.GetColumnSize();
++			if (this.oLogicDocument && this.oLogicDocument.GetInlineObjectMaxSize) {
++				var oColumnSize = this.oLogicDocument.GetInlineObjectMaxSize();
+ 				if (oColumnSize) {
+ 					if (nWidth > oColumnSize.W || nHeight > oColumnSize.H) {
+ 						if (oColumnSize.W > 0 && oColumnSize.H > 0) {
+diff --git a/word/Editor/Document.js b/word/Editor/Document.js
+index 57a1e27991..e9dd631665 100644
+--- a/word/Editor/Document.js
++++ b/word/Editor/Document.js
+@@ -16911,6 +16911,45 @@ CDocument.prototype.GetColumnSize = function()
+ {
+ 	return this.Controller.GetColumnSize();
+ };
++/**
++ * Largest size of an inline object inserted at the cursor: the width the current paragraph
++ * can give it (its column, table cell, header or footer, minus the paragraph indents) and the
++ * height of the column. Word fits a new picture into this space, so that inserting it never
++ * widens a table column nor overflows the margins.
++ * @returns {{W: number, H: number}}
++ */
++CDocument.prototype.GetInlineObjectMaxSize = function()
++{
++	let size = this.GetColumnSize();
++	let W = size.W, H = size.H;
++	let paragraph = this.GetCurrentParagraph(true);
++	if (paragraph && paragraph.IsParagraph && paragraph.IsParagraph() && paragraph.Pages.length > 0
++		&& AscFormat.isRealNumber(paragraph.X) && AscFormat.isRealNumber(paragraph.XLimit))
++	{
++		let ind = paragraph.Get_CompiledPr2(false).ParaPr.Ind;
++		let paraW = paragraph.XLimit - paragraph.X - Math.max(0, ind.Left || 0) - Math.max(0, ind.Right || 0);
++		if (paraW > 1 && (paraW < W || W <= 0))
++			W = paraW;
++		if (paragraph.IsTableCellContent && paragraph.IsTableCellContent() && AscFormat.isRealNumber(paragraph.YLimit)
++			&& paragraph.YLimit - paragraph.Y > 1 && (paragraph.YLimit - paragraph.Y < H || H <= 0))
++			H = Math.min(H > 0 ? H : Infinity, paragraph.YLimit - paragraph.Y);
++	}
++	return {W : W, H : H};
++};
++/**
++ * Size of a new inline picture of natural size (w, h) in mm: unchanged when it fits the space
++ * of GetInlineObjectMaxSize, otherwise scaled down proportionally to fit both dimensions.
++ */
++CDocument.prototype.FitInlineObjectSize = function(w, h)
++{
++	let max = this.GetInlineObjectMaxSize();
++	let scale = 1;
++	if (max.W > 0 && w > max.W)
++		scale = Math.min(scale, max.W / w);
++	if (max.H > 0 && h > max.H)
++		scale = Math.min(scale, max.H / h);
++	return {W : Math.max(5, w * scale), H : Math.max(5, h * scale)};
++};
+ CDocument.prototype.private_OnSelectionEnd = function()
+ {
+ 	this.sendEvent("asc_onSelectionEnd");
+@@ -19507,8 +19546,9 @@ CDocument.prototype.controller_AddImages = function(aImages)
+ 			{
+ 				var __w = Math.max((_image.Image.width * AscCommon.g_dKoef_pix_to_mm), 1);
+ 				var __h = Math.max((_image.Image.height * AscCommon.g_dKoef_pix_to_mm), 1);
+-				W      = Math.max(5, Math.min(W, __w));
+-				H      = Math.max(5, Math.min((W * __h / __w)));
++				var fit = this.FitInlineObjectSize(__w, __h);
++				W      = fit.W;
++				H      = fit.H;
+ 				Drawing   = new ParaDrawing(W, H, null, this.DrawingDocument, this, null);
+ 				var Image = this.DrawingObjects.createImage(_image.src, 0, 0, W, H);
+ 				Image.setParent(Drawing);
+diff --git a/word/Editor/DocumentContent.js b/word/Editor/DocumentContent.js
+index 49ed664dfb..2f6455f6dc 100644
+--- a/word/Editor/DocumentContent.js
++++ b/word/Editor/DocumentContent.js
+@@ -3173,8 +3173,9 @@ CDocumentContent.prototype.AddImages = function(aImages){
+ 				{
+ 					var __w = Math.max((_image.Image.width * AscCommon.g_dKoef_pix_to_mm), 1);
+ 					var __h = Math.max((_image.Image.height * AscCommon.g_dKoef_pix_to_mm), 1);
+-					W      = Math.max(5, Math.min(W, __w));
+-					H      = Math.max(5, Math.min((W * __h / __w)));
++					var fit = this.LogicDocument && this.LogicDocument.FitInlineObjectSize ? this.LogicDocument.FitInlineObjectSize(__w, __h) : {W : Math.max(5, Math.min(W, __w)), H : Math.max(5, Math.min(W, __w) * __h / __w)};
++					W      = fit.W;
++					H      = fit.H;
+ 					Drawing   = new ParaDrawing(W, H, null, this.DrawingDocument, this, null);
+ 					var Image = this.DrawingObjects.createImage(_image.src, 0, 0, W, H);
+ 					Image.setParent(Drawing);
+diff --git a/word/api.js b/word/api.js
+index 3b6152f217..91a2f23fdd 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -6131,7 +6131,7 @@ background-repeat: no-repeat;\
+ 		let _image = this.ImageLoader.LoadImage(url, 1);
+ 		if (null != _image)
+ 		{
+-			let ColumnSize = this.WordControl.m_oLogicDocument.GetColumnSize();
++			let ColumnSize = this.WordControl.m_oLogicDocument.GetInlineObjectMaxSize();
+ 
+ 			let _w = Math.max(1, ColumnSize.W);
+ 			let _h = Math.max(1, ColumnSize.H);
+@@ -6139,8 +6139,9 @@ background-repeat: no-repeat;\
+ 			{
+ 				let __w = Math.max((_image.Image.width * AscCommon.g_dKoef_pix_to_mm), 1);
+ 				let __h = Math.max((_image.Image.height * AscCommon.g_dKoef_pix_to_mm), 1);
+-				_w      = Math.max(5, Math.min(_w, __w));
+-				_h      = Math.max(5, Math.min((_w * __h / __w)));
++				let fit = this.WordControl.m_oLogicDocument.FitInlineObjectSize(__w, __h);
++				_w      = fit.W;
++				_h      = fit.H;
+ 			}
+ 
+ 			let src = _image.src;
+@@ -6188,7 +6189,7 @@ background-repeat: no-repeat;\
+ 			this.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadImage);
+ 			this.asyncImageEndLoaded2 = function(_image)
+ 			{
+-				let ColumnSize = this.WordControl.m_oLogicDocument.GetColumnSize();
++				let ColumnSize = this.WordControl.m_oLogicDocument.GetInlineObjectMaxSize();
+ 
+ 				let _w = Math.max(1, ColumnSize.W);
+ 				let _h = Math.max(1, ColumnSize.H);
+@@ -6196,8 +6197,9 @@ background-repeat: no-repeat;\
+ 				{
+ 					let __w = Math.max((_image.Image.width * AscCommon.g_dKoef_pix_to_mm), 1);
+ 					let __h = Math.max((_image.Image.height * AscCommon.g_dKoef_pix_to_mm), 1);
+-					_w      = Math.max(5, Math.min(_w, __w));
+-					_h      = Math.max(5, Math.min((_w * __h / __w)));
++					let fit = this.WordControl.m_oLogicDocument.FitInlineObjectSize(__w, __h);
++					_w      = fit.W;
++					_h      = fit.H;
+ 				}
+ 				let src = _image.src;
+ 
+-- 
+2.43.0
+

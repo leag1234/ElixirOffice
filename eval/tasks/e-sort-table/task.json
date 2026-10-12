@@ -1,0 +1,11 @@
+{
+  "id": "e-sort-table",
+  "title": "Sort a table by name",
+  "instruction": "Sort this table by name",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": "",
+  "cursor": 1
+}

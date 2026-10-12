@@ -1,0 +1,50 @@
+From 3cf4e6522aa0a7ab12b85dde6111609887e6c70d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 15:42:49 +0200
+Subject: [PATCH 2/2] perf(nginx): cache the versioned api.js like the other
+ static files [upstreamable]
+
+The no-store rule for api.js also matched its versioned URL
+(/<version>-<hash>/web-apps/apps/api/documents/api.js), which the editor
+frame loads on every open: one uncacheable request (63 KB, 13 KB
+compressed) per document opened, on the editor start-up path. Only the
+unversioned URL, which integrators load and which carries the version
+path, must stay uncached; the versioned one changes with the hash.
+
+Checked on an own instance: versioned api.js now answers
+"Cache-Control: public, max-age=31536000, immutable" and is served from
+the browser cache on warm opens (it was refetched each time); the
+unversioned URL is still no-store. No measurable time change on
+localhost (one round trip saved per open on a real network).
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../documentserver/nginx/includes/ds-docservice.conf.m4   | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/common/documentserver/nginx/includes/ds-docservice.conf.m4 b/common/documentserver/nginx/includes/ds-docservice.conf.m4
+index 3c2659d..77a80db 100644
+--- a/common/documentserver/nginx/includes/ds-docservice.conf.m4
++++ b/common/documentserver/nginx/includes/ds-docservice.conf.m4
+@@ -6,12 +6,14 @@ location ~ ^(?<cache>\/web-apps\/apps\/(?!api\/documents\/api\.js$).*)$ {
+   return 302 $the_scheme://$the_host$the_prefix/M4_PRODUCT_VERSION-$cache_tag$cache$is_args$args;
+ }
+ 
+-#disable caching for api.js
+-location ~ ^(\/[\d]+\.[\d]+\.[\d]+[\.|-][\w]+)?\/(web-apps\/apps\/api\/documents\/api\.js)$ {
++#disable caching for api.js (the unversioned URL that integrators load: it carries the
++#version path of everything else; the versioned copy that the editor frame loads is
++#immutable like the other static files)
++location ~ ^\/(web-apps\/apps\/api\/documents\/api\.js)$ {
+   expires off;
+   add_header Cache-Control "no-store, no-cache, must-revalidate";
+   # gzip_static on;
+-  alias  M4_DS_ROOT/$2;
++  alias  M4_DS_ROOT/$1;
+ }
+ 
+ location ~ ^(\/[\d]+\.[\d]+\.[\d]+[\.|-][\w]+)?\/(document_editor_service_worker.js)$ {
+-- 
+2.43.0
+

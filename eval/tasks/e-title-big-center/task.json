@@ -1,0 +1,10 @@
+{
+  "id": "e-title-big-center",
+  "title": "Big centred title",
+  "instruction": "Mets le titre en gros et centré",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

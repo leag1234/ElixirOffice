@@ -1,0 +1,13 @@
+diff --git a/Fb2File/Fb2File.cpp b/Fb2File/Fb2File.cpp
+index 6f323ef22f..31100af68f 100644
+--- a/Fb2File/Fb2File.cpp
++++ b/Fb2File/Fb2File.cpp
+@@ -125,7 +125,7 @@ struct SPublishInfo
+ };
+ */
+ 
+-void replace_all(std::wstring& s, const std::wstring& s1, const std::wstring& s2)
++static void replace_all(std::wstring& s, const std::wstring& s1, const std::wstring& s2)
+ {
+ 	size_t pos = s.find(s1);
+ 	size_t l = s2.length();

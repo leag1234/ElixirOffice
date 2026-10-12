@@ -1,0 +1,137 @@
+From 7750e39aa67a776fb49f41a6961fae9f9dfe9188 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:40:21 +0200
+Subject: [PATCH 4/7] feat(word): draw a Font dialog preview with full text
+ properties
+
+asc_DrawFontDialogPreview(elementId, props, text) renders text (the
+selection, or "AaBbYyZz") with the Font dialog values (font, size, bold,
+italic, underline, strikethrough, caps, colour, spacing, position, ...)
+centred between two base lines in a canvas inside the element, loading
+the font first. The existing SetDrawImagePlaceParagraph preview only
+knows the effects and always uses Arial.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ word/api.js | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 102 insertions(+)
+
+diff --git a/word/api.js b/word/api.js
+index 32c6a043ba..aebc1dc46b 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -14249,6 +14249,108 @@ background-repeat: no-repeat;\
+ 		return true;
+ 	};
+ 
++	/**
++	 * Draws the preview of a Font dialog: text (or "AaBbYyZz") with the given Font dialog values,
++	 * centred in a canvas inside the element divId, between two base lines as Word does.
++	 */
++	window["asc_docs_api"].prototype["asc_DrawFontDialogPreview"] = function(divId, props, text)
++	{
++		let div = document.getElementById(divId);
++		let logicDocument = this.private_GetLogicDocument();
++		if (!div || !logicDocument)
++			return;
++
++		props = props || {};
++		let _t = this;
++		if (props["FontName"])
++		{
++			let fontInfo = AscFonts.g_fontApplication.GetFontInfo(props["FontName"]);
++			if (fontInfo && false !== AscCommon.g_font_loader.LoadFont(fontInfo, function()
++				{
++					_t.sync_EndAction(Asc.c_oAscAsyncActionType.Information, Asc.c_oAscAsyncAction.LoadFont);
++					_t["asc_DrawFontDialogPreview"](divId, props, text);
++				}, null))
++				return;
++		}
++
++		let canvas = div.getElementsByTagName("canvas")[0];
++		if (!canvas)
++		{
++			canvas = document.createElement("canvas");
++			div.appendChild(canvas);
++		}
++		let wCss = div.clientWidth || 300, hCss = div.clientHeight || 60;
++		canvas.style.width  = wCss + "px";
++		canvas.style.height = hCss + "px";
++		AscCommon.calculateCanvasSize(canvas);
++
++		let wPx = canvas.width, hPx = canvas.height;
++		let ctx = canvas.getContext("2d");
++		ctx.setTransform(1, 0, 0, 1, 0, 0);
++		ctx.fillStyle = "#FFFFFF";
++		ctx.fillRect(0, 0, wPx, hPx);
++
++		let isViewMode = this.isViewMode;
++		this.isViewMode = true;
++		AscCommon.History.TurnOff();
++		try
++		{
++			let par    = new AscWord.Paragraph(logicDocument);
++			let textPr = private_FontPropsToTextPr(props, new AscCommonWord.CTextPr(), false);
++			let size   = Math.min(Math.max(props["FontSize"] || 11, 4), 48);
++			textPr.FontSize   = (AscCommon.AscBrowser.convertToRetinaValue(size * 2, true) >> 0) * 0.5;
++			textPr.FontSizeCS = textPr.FontSize;
++			if (undefined !== textPr.Spacing)
++				textPr.Spacing = AscCommon.AscBrowser.convertToRetinaValue(textPr.Spacing, true);
++			if (undefined !== textPr.Position)
++				textPr.Position = AscCommon.AscBrowser.convertToRetinaValue(textPr.Position, true);
++			textPr.Vanish = false;
++
++			par.MoveCursorToStartPos();
++			par.Pr = new AscCommonWord.CParaPr();
++			let run = new AscWord.Run(par);
++			run.Set_Pr(textPr);
++			run.AddText(text ? ("" + text).substr(0, 64) : "AaBbYyZz");
++			par.AddToContent(0, run);
++			par.Reset(0, 0, 1000, 1000, 0, 0, 1);
++			par.Recalculate_Page(0);
++
++			let baseLine = par.Lines[0].Y;
++			let bounds   = par.Get_PageBounds(0);
++			let textW    = par.Lines[0].Ranges[0].W * AscCommon.g_dKoef_mm_to_pix;
++			let textH    = (bounds.Bottom - bounds.Top) * AscCommon.g_dKoef_mm_to_pix;
++			let yBase    = (((hPx + textH) / 2) - (textH - baseLine * AscCommon.g_dKoef_mm_to_pix)) >> 0;
++
++			// base line on both sides, as in the Font dialog of Word
++			ctx.strokeStyle = "#a0a0a0";
++			ctx.lineWidth   = 1;
++			ctx.beginPath();
++			let lineW = Math.max(0, ((wPx - textW) / 2 - 8) >> 0);
++			ctx.moveTo(4, yBase + 0.5);
++			ctx.lineTo(4 + lineW, yBase + 0.5);
++			ctx.moveTo(wPx - 4 - lineW, yBase + 0.5);
++			ctx.lineTo(wPx - 4, yBase + 0.5);
++			ctx.stroke();
++
++			let graphics = new AscCommon.CGraphics();
++			graphics.init(ctx, wPx, hPx, wPx * AscCommon.g_dKoef_pix_to_mm, hPx * AscCommon.g_dKoef_pix_to_mm);
++			graphics.m_oFontManager = AscCommon.g_fontManager;
++			graphics.m_oCoordTransform.tx = Math.max(0, (wPx - textW) / 2) >> 0;
++			graphics.m_oCoordTransform.ty = (yBase - baseLine * AscCommon.g_dKoef_mm_to_pix) >> 0;
++			graphics.transform(1, 0, 0, 1, 0, 0);
++
++			let showMarks = this.ShowParaMarks;
++			this.ShowParaMarks = false;
++			par.Draw(0, graphics);
++			this.ShowParaMarks = showMarks;
++		}
++		finally
++		{
++			AscCommon.History.TurnOn();
++			this.isViewMode = isViewMode;
++		}
++	};
++
+ 	asc_docs_api.prototype.SetDrawImagePlaceContents = function(id, props)
+ 	{
+ 		if (this.WordControl.m_oDrawingDocument)
+-- 
+2.43.0
+

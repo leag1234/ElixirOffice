@@ -1,0 +1,10 @@
+{
+  "id": "r-translate",
+  "title": "Translate keeping the layout (brief task 9)",
+  "instruction": "Traduis ce document en anglais en gardant la mise en page.",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "French note: Title, two Heading 1, body and two bullets. Expected: same blocks, styles and bullets, every text in English."
+}

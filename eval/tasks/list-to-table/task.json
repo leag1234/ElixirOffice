@@ -1,0 +1,8 @@
+{
+  "id": "list-to-table",
+  "title": "Turn a bulleted list into a table with a header row",
+  "instruction": "Turn this list into a table with a header row",
+  "select": [2, 6],
+  "input": "input.docx",
+  "notes": "Five bulleted items 'Name – Group – Room' (blocks 2-6). Expected: a 3-column table of 6 rows (one header row + 5 items) where the list was; the list removed as a tracked deletion, the table a tracked insertion."
+}

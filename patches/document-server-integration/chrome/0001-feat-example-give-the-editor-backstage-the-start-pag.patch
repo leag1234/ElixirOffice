@@ -1,0 +1,153 @@
+From 717896c54d21c9953e3a1ceccf33073aca718a42 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:16:13 +0200
+Subject: [PATCH] feat(example): give the editor backstage the start page data
+
+The editor configuration now carries what the File menu of the editor
+shows like Word does:
+
+- templates: the start page templates of the same document type, with
+  their thumbnails and a /elixir/new link (falls back to the upstream
+  "Blank / With sample content" pair);
+- recent: the stored files, newest first (name, editor link, location,
+  modification date, size);
+- elixir: host URLs used by the editor pages (start page, upload,
+  editor link pattern, share link of the document, storage name,
+  extensions the upload can open directly).
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ web/documentserver-example/nodejs/app.js      |  7 ++-
+ .../nodejs/helpers/elixirHome.js              | 44 +++++++++++++++++++
+ .../nodejs/public/elixir/i18n/en.json         |  3 +-
+ .../nodejs/public/elixir/i18n/fr.json         |  3 +-
+ .../nodejs/views/config.ejs                   |  2 +
+ 5 files changed, 56 insertions(+), 3 deletions(-)
+
+diff --git a/web/documentserver-example/nodejs/app.js b/web/documentserver-example/nodejs/app.js
+index e57034c3..5d3a5651 100755
+--- a/web/documentserver-example/nodejs/app.js
++++ b/web/documentserver-example/nodejs/app.js
+@@ -1256,6 +1256,9 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+       pluginsConfig = plugins;
+     }
+ 
++    // ElixirOffice backstage: start page templates, recent files, host URLs
++    const elixirExtras = elixirHome.editorExtras(req.DocManager, req, fileName);
++
+     // file config data
+     const argss = {
+       appName,
+@@ -1276,7 +1279,9 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         token: '',
+         callbackUrl: req.DocManager.getCallback(fileName),
+         createUrl: userid !== 'uid-0' ? createUrl : null,
+-        templates: user.templates ? templates : null,
++        templates: user.templates ? (elixirExtras.templates || templates) : null,
++        recent: elixirExtras.recent,
++        elixir: elixirExtras.elixir,
+         isEdit: canEdit && (mode === 'edit' || mode === 'view' || mode === 'filter' || mode === 'blockcontent'),
+         review: canEdit && (mode === 'edit' || mode === 'review'),
+         chat: userid !== 'uid-0',
+diff --git a/web/documentserver-example/nodejs/helpers/elixirHome.js b/web/documentserver-example/nodejs/helpers/elixirHome.js
+index 0c25585c..68191fbb 100644
+--- a/web/documentserver-example/nodejs/helpers/elixirHome.js
++++ b/web/documentserver-example/nodejs/helpers/elixirHome.js
+@@ -148,6 +148,48 @@ const listFiles = (docManager) => docManager.getStoredFiles().map((file) => {
+   };
+ }).sort((a, b) => b.time - a.time);
+ 
++// Editor configuration for the ElixirOffice backstage (File menu): the start
++// page templates of the same document type, the recent files and the host URLs
++// used by the Open, Share and title bar pages (editorConfig.elixir).
++const editorExtras = (docManager, req, fileName) => {
++  const lang = resolveLanguage(req);
++  const t = translator(lang.ui);
++  const server = docManager.getServerUrl();
++  const documentType = fileUtility.getFileType(fileName);
++  const userParam = req.query.userid ? `&userid=${encodeURIComponent(req.query.userid)}` : '';
++  const editorUrl = (name) => `${server}/editor?fileName=${encodeURIComponent(name)}${userParam}`;
++  const templates = loadTemplates().filter((tpl) => fileUtility.getFileType(tpl.file) === documentType)
++    .map((tpl) => ({
++      title: localized(tpl.title, lang.ui),
++      image: tpl.thumb && fileSystem.existsSync(path.join(templatesDir, tpl.thumb))
++        ? `${server}/elixir/brand/templates/${encodeURIComponent(tpl.thumb)}` : '',
++      url: `${server}/elixir/new?template=${encodeURIComponent(tpl.id)}&lang=${encodeURIComponent(lang.ui)}${userParam}`,
++    }));
++  const folder = t('storage.name');
++  const recent = listFiles(docManager).filter((file) => file.name !== fileName).slice(0, 30)
++    .map((file) => ({
++      title: file.name,
++      url: editorUrl(file.name),
++      folder: folder !== 'storage.name' ? folder : configServer.get('appName'),
++      modified: new Date(file.time).toISOString(),
++      size: file.size,
++    }));
++  return {
++    templates: templates.length ? templates : null,
++    recent,
++    elixir: {
++      homeUrl: `${server}/`,
++      openUrl: `${server}/#open`,
++      uploadUrl: `${server}/upload`,
++      editorUrl: editorUrl('{name}').replace(encodeURIComponent('{name}'), '{name}'),
++      shareUrl: editorUrl(fileName),
++      folder: folder !== 'storage.name' ? folder : configServer.get('appName'),
++      uploadExts: fileUtility.getSuppotredExtensions().filter((ext) => fileUtility.getFormatActions(ext).length
++        && fileUtility.getConvertExtensions().indexOf(ext) === -1),
++    },
++  };
++};
++
+ module.exports = function elixirHome() {
+   const router = express.Router();
+ 
+@@ -229,3 +271,5 @@ module.exports = function elixirHome() {
+ 
+   return router;
+ };
++
++module.exports.editorExtras = editorExtras;
+diff --git a/web/documentserver-example/nodejs/public/elixir/i18n/en.json b/web/documentserver-example/nodejs/public/elixir/i18n/en.json
+index c438de64..f688217c 100644
+--- a/web/documentserver-example/nodejs/public/elixir/i18n/en.json
++++ b/web/documentserver-example/nodejs/public/elixir/i18n/en.json
+@@ -75,5 +75,6 @@
+   "time.justNow": "Just now",
+   "time.today": "Today, {time}",
+   "time.yesterday": "Yesterday, {time}",
+-  "toast.close": "Dismiss"
++  "toast.close": "Dismiss",
++  "storage.name": "My files"
+ }
+diff --git a/web/documentserver-example/nodejs/public/elixir/i18n/fr.json b/web/documentserver-example/nodejs/public/elixir/i18n/fr.json
+index cda3b518..eb837c04 100644
+--- a/web/documentserver-example/nodejs/public/elixir/i18n/fr.json
++++ b/web/documentserver-example/nodejs/public/elixir/i18n/fr.json
+@@ -75,5 +75,6 @@
+   "time.justNow": "À l’instant",
+   "time.today": "Aujourd’hui, {time}",
+   "time.yesterday": "Hier, {time}",
+-  "toast.close": "Fermer"
++  "toast.close": "Fermer",
++  "storage.name": "Mes fichiers"
+ }
+diff --git a/web/documentserver-example/nodejs/views/config.ejs b/web/documentserver-example/nodejs/views/config.ejs
+index 67a1a135..970bb2e5 100755
+--- a/web/documentserver-example/nodejs/views/config.ejs
++++ b/web/documentserver-example/nodejs/views/config.ejs
+@@ -59,6 +59,8 @@
+     "mode": "<%- editor.mode %>",
+     "plugins": <%- editor.plugins %>,
+     "templates": <%- JSON.stringify(editor.templates) %>,
++    "recent": <%- JSON.stringify(editor.recent) %>,
++    "elixir": <%- JSON.stringify(editor.elixir) %>,
+     "user": {
+         "group": "<%- editor.userGroup %>",
+         "id": "<%- editor.userid %>",
+-- 
+2.43.0
+

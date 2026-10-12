@@ -1,0 +1,10 @@
+{
+  "id": "r-explain-image-jump",
+  "title": "Explain why a picture jumped to the next page (brief task 6)",
+  "instruction": "Pourquoi l'image est-elle passée à la page suivante ?",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "An inline picture 120 mm high follows nine paragraphs: it does not fit in the space left at the bottom of page 1. Expected: an explanation (space/size), no change."
+}

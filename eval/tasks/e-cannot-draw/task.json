@@ -1,0 +1,10 @@
+{
+  "id": "e-cannot-draw",
+  "title": "Clear failure mode: drawing",
+  "instruction": "Draw me an illustration of a cat",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": "No image generation tool: the AI must say so in one sentence and offer the closest action as a one-click suggestion, without changing the document."
+}

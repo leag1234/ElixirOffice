@@ -1,0 +1,222 @@
+diff --git a/MsBinaryFile/PptFile/Drawing/XmlStringWriter.h b/MsBinaryFile/PptFile/Drawing/XmlStringWriter.h
+index fdbbe5bd0a..488dae5c20 100644
+--- a/MsBinaryFile/PptFile/Drawing/XmlStringWriter.h
++++ b/MsBinaryFile/PptFile/Drawing/XmlStringWriter.h
+@@ -27,15 +27,15 @@
+ 
+ namespace PPT
+ {
+-    static std::wstring	g_bstr_nodeopen				= L"<";
+-    static std::wstring	g_bstr_nodeclose			= L">";
+-    static std::wstring	g_bstr_nodeopen_slash		= L"</";
+-    static std::wstring	g_bstr_nodeclose_slash		= L"/>";
+-    static std::wstring	g_bstr_node_space			= L" ";
+-    static std::wstring	g_bstr_node_equal			= L"=";
+-    static std::wstring	g_bstr_node_quote			= L"\"";
+-    static std::wstring	g_bstr_boolean_true			= L"true";
+-    static std::wstring	g_bstr_boolean_false		= L"false";
++    inline std::wstring	g_bstr_nodeopen				= L"<";
++    inline std::wstring	g_bstr_nodeclose			= L">";
++    inline std::wstring	g_bstr_nodeopen_slash		= L"</";
++    inline std::wstring	g_bstr_nodeclose_slash		= L"/>";
++    inline std::wstring	g_bstr_node_space			= L" ";
++    inline std::wstring	g_bstr_node_equal			= L"=";
++    inline std::wstring	g_bstr_node_quote			= L"\"";
++    inline std::wstring	g_bstr_boolean_true			= L"true";
++    inline std::wstring	g_bstr_boolean_false		= L"false";
+ 	
+ 	inline static double FABS(double dVal)
+ 	{
+diff --git a/MsBinaryFile/XlsFile/Format/Logic/GlobalWorkbookInfo.h b/MsBinaryFile/XlsFile/Format/Logic/GlobalWorkbookInfo.h
+index 1a1f9526fc..5c4ae90552 100644
+--- a/MsBinaryFile/XlsFile/Format/Logic/GlobalWorkbookInfo.h
++++ b/MsBinaryFile/XlsFile/Format/Logic/GlobalWorkbookInfo.h
+@@ -53,7 +53,7 @@ namespace XLS
+ class BaseObject;
+ typedef boost::shared_ptr<BaseObject> BaseObjectPtr;
+ 
+-static const std::wstring DefaultPalette[] = {
++inline const std::wstring DefaultPalette[] = {
+ 	L"00000000",	L"00FFFFFF",	L"00FF0000",	L"0000FF00",	L"000000FF",	L"00FFFF00",	L"00FF00FF",	L"0000FFFF",	
+ 	L"00000000",	L"00FFFFFF",	L"00FF0000",	L"0000FF00",	L"000000FF",	L"00FFFF00",	L"00FF00FF",	L"0000FFFF",	
+ 	L"00800000",	L"00008000",	L"00000080",	L"00808000",	L"00800080",	L"00008080",	L"00C0C0C0",	L"00808080",	
+diff --git a/OOXML/Binary/Presentation/XmlWriter.h b/OOXML/Binary/Presentation/XmlWriter.h
+index c8f82cc6ce..5d35dba168 100644
+--- a/OOXML/Binary/Presentation/XmlWriter.h
++++ b/OOXML/Binary/Presentation/XmlWriter.h
+@@ -35,17 +35,17 @@
+ 
+ namespace NSBinPptxRW
+ {
+-    static std::wstring	g_bstr_nodeopen		= L"<";
+-    static std::wstring	g_bstr_nodeclose	= L">";
+-    static std::wstring	g_bstr_nodeopen_slash	= L"</";
+-    static std::wstring	g_bstr_nodeclose_slash	= L"/>";
+-    static std::wstring	g_bstr_node_space	= L" ";
+-    static std::wstring	g_bstr_node_equal	= L"=";
+-    static std::wstring	g_bstr_node_quote	= L"\"";
+-    static std::wstring	g_bstr_boolean_true	= L"true";
+-    static std::wstring	g_bstr_boolean_false	= L"false";
+-    static std::wstring	g_bstr_boolean_true2	= L"1";
+-    static std::wstring	g_bstr_boolean_false2	= L"0";
++    inline std::wstring	g_bstr_nodeopen		= L"<";
++    inline std::wstring	g_bstr_nodeclose	= L">";
++    inline std::wstring	g_bstr_nodeopen_slash	= L"</";
++    inline std::wstring	g_bstr_nodeclose_slash	= L"/>";
++    inline std::wstring	g_bstr_node_space	= L" ";
++    inline std::wstring	g_bstr_node_equal	= L"=";
++    inline std::wstring	g_bstr_node_quote	= L"\"";
++    inline std::wstring	g_bstr_boolean_true	= L"true";
++    inline std::wstring	g_bstr_boolean_false	= L"false";
++    inline std::wstring	g_bstr_boolean_true2	= L"1";
++    inline std::wstring	g_bstr_boolean_false2	= L"0";
+ 	
+ 	static double FABS(double dVal)
+     {
+diff --git a/OOXML/Binary/XlsbFormat/FileTypes_SpreadsheetBin.h b/OOXML/Binary/XlsbFormat/FileTypes_SpreadsheetBin.h
+index f8ea320c3a..acb46d754b 100644
+--- a/OOXML/Binary/XlsbFormat/FileTypes_SpreadsheetBin.h
++++ b/OOXML/Binary/XlsbFormat/FileTypes_SpreadsheetBin.h
+@@ -34,78 +34,78 @@ namespace OOX
+ 		namespace FileTypes
+ 		{
+ 
+-			const FileType WorkbookBin			(L"xl", L"workbook.bin",
++			inline const FileType WorkbookBin			(L"xl", L"workbook.bin",
+ 													L"application/vnd.ms-excel.sheet.binary.macroEnabled.main",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument");
+ 
+-			const FileType SharedStringsBin		(L"", L"sharedStrings.bin",
++			inline const FileType SharedStringsBin		(L"", L"sharedStrings.bin",
+ 													L"application/vnd.ms-excel.sharedStrings",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings");
+ 
+-			const FileType StylesBin			(L"", L"styles.bin",
++			inline const FileType StylesBin			(L"", L"styles.bin",
+ 													L"application/vnd.ms-excel.styles",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles");
+ 
+-			const FileType WorksheetBin			(L"worksheets", L"sheet.bin",
++			inline const FileType WorksheetBin			(L"worksheets", L"sheet.bin",
+ 													L"application/vnd.ms-excel.worksheet",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet",
+ 													L"worksheets/sheet", true);
+ 
+-			const FileType ChartsheetsBin		(L"chartsheets", L"sheet.bin",
++			inline const FileType ChartsheetsBin		(L"chartsheets", L"sheet.bin",
+ 													L"application/vnd.ms-excel.chartsheet",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/chartsheet",
+ 													L"chartsheets/sheet", true);
+ 
+-			const FileType TableBin				(L"../tables", L"table.bin",
++			inline const FileType TableBin				(L"../tables", L"table.bin",
+ 													L"application/vnd.ms-excel.table",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/table",
+ 													L"tables/table", true, true);
+ 
+-			const FileType QueryTableBin		(L"../queryTables", L"queryTable.bin",
++			inline const FileType QueryTableBin		(L"../queryTables", L"queryTable.bin",
+ 													L"application/vnd.ms-excel.queryTable",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/queryTable",
+ 													L"queryTables/queryTable", true, true);
+ 
+-			const FileType ConnectionsBin		(L"", L"connections.bin",
++			inline const FileType ConnectionsBin		(L"", L"connections.bin",
+ 													L"application/vnd.ms-excel.connections",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/connections");
+ 
+-			const FileType CommentsBin			(L"../", L"comments.bin",
++			inline const FileType CommentsBin			(L"../", L"comments.bin",
+ 													L"application/vnd.ms-excel.comments",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments",
+ 													L"comments", true, true);
+ 
+-			const FileType SlicerCacheBin		(L"slicerCaches", L"slicerCache.bin",
++			inline const FileType SlicerCacheBin		(L"slicerCaches", L"slicerCache.bin",
+ 													L"application/vnd.ms-excel.slicerCache",
+ 													L"http://schemas.microsoft.com/office/2007/relationships/slicerCache",
+ 													L"slicerCaches/slicerCache", true, true);
+ 
+-			const FileType SlicerBin			(L"../slicers", L"slicer.bin",
++			inline const FileType SlicerBin			(L"../slicers", L"slicer.bin",
+ 													L"application/vnd.ms-excel.slicer",
+ 													L"http://schemas.microsoft.com/office/2007/relationships/slicer",
+ 													L"slicers/slicer", true, true);
+ 
+-			const FileType ExternalLinksBin		(L"externalLinks", L"externalLink.bin",
++			inline const FileType ExternalLinksBin		(L"externalLinks", L"externalLink.bin",
+ 													L"application/vnd.ms-excel.externalLink",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/externalLink",
+ 													L"externalLinks/externalLink", true, true);
+ 
+-			const FileType PivotTableBin		(L"../pivotTables", L"pivotTable.bin",
++			inline const FileType PivotTableBin		(L"../pivotTables", L"pivotTable.bin",
+ 													L"application/vnd.ms-excel.pivotTable",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable",
+ 													L"pivotTables/pivotTable", true, true);
+ 
+-			const FileType PivotCacheDefinitionBin(L"pivotCache", L"pivotCacheDefinition.bin",
++			inline const FileType PivotCacheDefinitionBin(L"pivotCache", L"pivotCacheDefinition.bin",
+ 														L"application/vnd.ms-excel.pivotCacheDefinition",
+ 														L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition",
+ 														L"pivotCache/pivotCacheDefinition", true, true);
+ 
+-			const FileType PivotCacheRecordsBin	(L"", L"pivotCacheRecords.bin",
++			inline const FileType PivotCacheRecordsBin	(L"", L"pivotCacheRecords.bin",
+ 													L"application/vnd.ms-excel.pivotCacheRecords",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords",
+ 													L"pivotCache/pivotCacheRecords", true, true);
+ 
+-			const FileType MetadataBin	(L"", L"metadata.bin",
++			inline const FileType MetadataBin	(L"", L"metadata.bin",
+ 													L"application/vnd.ms-excel.sheetMetadata",
+ 													L"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sheetMetadata");
+ 
+diff --git a/OOXML/DocxFormat/ContentTypes.h b/OOXML/DocxFormat/ContentTypes.h
+index 5c6fa8afa0..f473e8a580 100644
+--- a/OOXML/DocxFormat/ContentTypes.h
++++ b/OOXML/DocxFormat/ContentTypes.h
+@@ -90,7 +90,7 @@ namespace OOX
+ 		};
+ 	} // namespace ContentTypes
+ 
+-    static const CPath c_oContentTypeFileName (L"[Content_Types].xml");
++    inline const CPath c_oContentTypeFileName (L"[Content_Types].xml");
+ 
+ 	class CContentTypes
+ 	{
+diff --git a/OOXML/PPTXFormat/Namespaces.h b/OOXML/PPTXFormat/Namespaces.h
+index 4b4343aedb..9c9df108a3 100644
+--- a/OOXML/PPTXFormat/Namespaces.h
++++ b/OOXML/PPTXFormat/Namespaces.h
+@@ -84,7 +84,7 @@ namespace PPTX
+ 		const Namespace p14;
+ 	};
+ 
+-	static Namespaces g_Namespaces;
++	inline Namespaces g_Namespaces;
+ } // namespace PPTX
+ 
+ #endif // PPTXOOX_NAMESPACES_INCLUDE_H_
+diff --git a/UnicodeConverter/UnicodeConverter_Encodings.h b/UnicodeConverter/UnicodeConverter_Encodings.h
+index 40e6c66f93..672d941631 100644
+--- a/UnicodeConverter/UnicodeConverter_Encodings.h
++++ b/UnicodeConverter/UnicodeConverter_Encodings.h
+@@ -117,7 +117,7 @@ namespace NSUnicodeConverter
+         { 53,   54936,   "GB18030",         "Chinese government standard" }
+     };
+ 
+-    static std::map<int, std::string> create_mapEncodingsICU()
++    inline std::map<int, std::string> create_mapEncodingsICU()
+     {
+         std::map<int, std::string> m;
+         m[28596]	= "ISO-8859-6";
+@@ -195,7 +195,7 @@ namespace NSUnicodeConverter
+         m[54936]    = "GB18030";
+         return m;
+     }
+-    static const std::map<int, std::string> mapEncodingsICU = create_mapEncodingsICU();
++    inline const std::map<int, std::string> mapEncodingsICU = create_mapEncodingsICU();
+ 
+ }
+ 

@@ -1,0 +1,44 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// ElixirOffice theme (derived from the Euro-Office theme)
+// This file is loaded AFTER the main LESS files, so it can override any variables.
+// As a little aside, please override using variables, this avoids creating duplicate CSS
+// in the final output.
+// If you need new rules, make them in the overrides file.
+// For the overrides file, please use this as an index.less file and create an appropriate
+// dir structure in your theme, following the main app structure
+// will help with sanity later
+//
+// Build with: THEME=elixiroffice (web-apps build pipeline)
+//
+
+// ==========================================================================
+// Theme Variables
+// ==========================================================================
+
+// Brand colors: upstream blue kept until an ElixirOffice palette is chosen
+@nc-primary: #0082c9;
+@nc-primary-dark: #006aa3;
+@nc-primary-light: #00a2f5;
+
+// Logo paths (used by overrides.less)
+@theme-logo-light-url: '@{common-image-const-path}/header/logo_light.svg';
+@theme-logo-dark-url: '@{common-image-const-path}/header/logo_dark.svg';
+
+// About dialog logos
+@theme-about-logo-url: '@{common-image-const-path}/about/logo.svg';
+@theme-about-logo-dark-url: '@{common-image-const-path}/about/logo.svg';
+
+// Single accent colour of the UI (tabs, focus rings, primary buttons,
+// sliders, selection outlines). Change it here only.
+@elixir-accent: @nc-primary;
+
+// Override brand colors
+@brand-primary: @elixir-accent;
+
+// ==========================================================================
+// Load CSS Overrides
+// ==========================================================================
+// For rules that cannot be changed via variables, we override them here.
+// Keep overrides minimal - prefer variable changes above.
+
+@import "overrides.less";

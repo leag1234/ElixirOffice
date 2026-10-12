@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Standalone production deployment; start page is an explicit opt-in.
+services:
+  documentserver:
+    image: ${EO_IMAGE:?Set EO_IMAGE to the release image tag or digest}
+    hostname: documentserver
+    restart: unless-stopped
+    environment:
+      JWT_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET:?Generate a private JWT_SECRET}
+      JWT_HEADER: Authorization
+      EXAMPLE_ENABLED: ${EO_START_PAGE:-false}
+      GENERATE_FONTS: "false"
+      ALLOW_PRIVATE_IP_ADDRESS: ${EO_ALLOW_PRIVATE_STORAGE:-false}
+      ALLOW_META_IP_ADDRESS: "false"
+      USE_UNAUTHORIZED_STORAGE: "false"
+      ELIXIR_AI_BASE_URL: ${ELIXIR_AI_BASE_URL:-}
+      ELIXIR_AI_MODEL: ${ELIXIR_AI_MODEL:-}
+      ELIXIR_AI_API_KEY: ${ELIXIR_AI_API_KEY:-}
+    volumes:
+      - data:/var/www/elixiroffice/Data
+      - state:/var/lib/elixiroffice
+      - postgres:/var/lib/postgresql
+      - redis:/var/lib/redis
+      - rabbitmq:/var/lib/rabbitmq
+      - logs:/var/log/elixiroffice
+      - ./example.json:/etc/elixiroffice/documentserver-example/local-production-linux.json:ro
+    shm_size: 256m
+    stop_grace_period: 120s
+    healthcheck:
+      test: ["CMD-SHELL", "test \"$$(curl -fsS http://localhost/healthcheck)\" = true"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 120s
+  https:
+    image: ${CADDY_IMAGE:?Set CADDY_IMAGE to an approved Caddy 2 tag or digest}
+    restart: unless-stopped
+    depends_on:
+      documentserver:
+        condition: service_healthy
+    environment:
+      EO_DOMAIN: ${EO_DOMAIN:?Set the public office hostname}
+    ports:
+      - "${EO_BIND_ADDRESS:-0.0.0.0}:${EO_HTTP_PORT:-80}:80"
+      - "${EO_BIND_ADDRESS:-0.0.0.0}:${EO_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  data:
+  state:
+  postgres:
+  redis:
+  rabbitmq:
+  logs:
+  caddy_data:
+  caddy_config:

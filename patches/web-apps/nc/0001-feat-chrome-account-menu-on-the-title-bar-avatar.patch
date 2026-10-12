@@ -1,0 +1,942 @@
+From f14595949aef413a3f0443856100543314150950 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:47:51 +0200
+Subject: [PATCH] feat(chrome): account menu on the title bar avatar
+
+Name, e-mail and server, Connect Nextcloud / Murena or Disconnect, Change name (run on the host start page, which owns the session) and the test-user switcher in developer mode. Strings in en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh for the three editors.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../common/main/lib/elixir-chrome/TitleBar.js | 112 +++++++++++++++++-
+ .../main/resources/less/elixir-chrome.less    |  15 +++
+ apps/documenteditor/main/locale/de.json       |  10 +-
+ apps/documenteditor/main/locale/en.json       |  10 +-
+ apps/documenteditor/main/locale/es.json       |  10 +-
+ apps/documenteditor/main/locale/fr.json       |  10 +-
+ apps/documenteditor/main/locale/it.json       |  10 +-
+ apps/documenteditor/main/locale/ja.json       |  10 +-
+ apps/documenteditor/main/locale/nl.json       |  10 +-
+ apps/documenteditor/main/locale/pl.json       |  10 +-
+ apps/documenteditor/main/locale/pt-pt.json    |  10 +-
+ apps/documenteditor/main/locale/pt.json       |  10 +-
+ apps/documenteditor/main/locale/ru.json       |  10 +-
+ apps/documenteditor/main/locale/zh.json       |  10 +-
+ apps/presentationeditor/main/locale/de.json   |  10 +-
+ apps/presentationeditor/main/locale/en.json   |  10 +-
+ apps/presentationeditor/main/locale/es.json   |  10 +-
+ apps/presentationeditor/main/locale/fr.json   |  10 +-
+ apps/presentationeditor/main/locale/it.json   |  10 +-
+ apps/presentationeditor/main/locale/ja.json   |  10 +-
+ apps/presentationeditor/main/locale/nl.json   |  10 +-
+ apps/presentationeditor/main/locale/pl.json   |  10 +-
+ .../presentationeditor/main/locale/pt-pt.json |  10 +-
+ apps/presentationeditor/main/locale/pt.json   |  10 +-
+ apps/presentationeditor/main/locale/ru.json   |  10 +-
+ apps/presentationeditor/main/locale/zh.json   |  10 +-
+ apps/spreadsheeteditor/main/locale/de.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/en.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/es.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/fr.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/it.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/ja.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/nl.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/pl.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/pt-pt.json |  10 +-
+ apps/spreadsheeteditor/main/locale/pt.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/ru.json    |  10 +-
+ apps/spreadsheeteditor/main/locale/zh.json    |  10 +-
+ 38 files changed, 449 insertions(+), 38 deletions(-)
+
+diff --git a/apps/common/main/lib/elixir-chrome/TitleBar.js b/apps/common/main/lib/elixir-chrome/TitleBar.js
+index b72eb1633c..bf0a0c4822 100644
+--- a/apps/common/main/lib/elixir-chrome/TitleBar.js
++++ b/apps/common/main/lib/elixir-chrome/TitleBar.js
+@@ -11,7 +11,11 @@
+  *   (Common.Controllers.ElixirAI, Word only for now) it becomes "Search or ask
+  *   Elixir (Alt+Q)" and sends the text to Elixir AI (last row; Enter when no
+  *   command matches, Shift+Enter always);
+- * - on the tab row: Comments, the Editing / Reviewing / Viewing mode, Share.
++ * - on the tab row: Comments, the Editing / Reviewing / Viewing mode, Share;
++ * - account menu on the avatar (editorConfig.elixir.account from the host):
++ *   name, e-mail / server, Connect Nextcloud / Murena or Disconnect, Change
++ *   name, and in developer mode the test-user switcher. Account actions run on
++ *   the host's start page (it owns the session), test users reload this page.
+  *
+  * Built on the upstream header (Common.Views.Header) instance, which keeps its
+  * own buttons and events.
+@@ -53,7 +57,15 @@ define([
+         txtComments: 'Comments',
+         txtCommentsTip: 'Show comments',
+         txtShare: 'Share',
+-        txtShareTip: 'Share this document'
++        txtShareTip: 'Share this document',
++        txtAccount: 'Account',
++        txtLocalProfile: 'Local profile in this browser',
++        txtConnect: 'Connect Nextcloud / Murena',
++        txtDisconnect: 'Disconnect…',
++        txtChangeName: 'Change name',
++        txtManageAccount: 'Manage my account on {0}',
++        txtTestUser: 'Test user (developer mode)',
++        txtTestUserMe: 'Me ({0})'
+     };
+ 
+     Common.Views = Common.Views || {};
+@@ -94,6 +106,7 @@ define([
+             this.renderRight();
+             this.bindSaveState();
+             this.bindShortcut();
++            this.renderAccount();
+             var me = this;
+             Common.NotificationCenter.on('window:resize', function () { me.fitName(); });
+             this.fitName();
+@@ -475,6 +488,101 @@ define([
+             }
+         },
+ 
++        // ---- account menu on the avatar ---------------------------------------------------
++
++        renderAccount: function () {
++            var me = this, acc = this.hostConfig().account;
++            if (!acc) return;
++            var $av = $('#box-document-title .btn-current-user, #box-document-title .slot-btn-user-name').filter(':not(.hidden)').first();
++            if (!$av.length) return;
++            this.$avatar = $av;
++            $av.addClass('elx-account-btn').attr({ role: 'button', tabindex: 0, 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-label': this.txtAccount + ': ' + (acc.name || '') });
++            if (acc.color && !acc.image) $av.find('.color-user-name').css('background-color', acc.color);
++            $av.on('click.elxacc', function (e) { e.stopPropagation(); me.toggleAccount(); });
++            $av.on('keydown.elxacc', function (e) {
++                if (e.keyCode === Common.UI.Keys.RETURN || e.keyCode === Common.UI.Keys.SPACE) { e.preventDefault(); me.toggleAccount(); }
++            });
++        },
++
++        toggleAccount: function () {
++            this.$account && this.$account.is(':visible') ? this.closeAccount(true) : this.openAccount();
++        },
++
++        // the start page in a new tab, with an account action (#connect, #profile, #account)
++        openHome: function (hash) {
++            var acc = this.hostConfig().account || {};
++            window.open((acc.homeUrl || this.hostConfig().homeUrl || '') + hash, '_blank');
++        },
++
++        openAccount: function () {
++            var me = this, acc = this.hostConfig().account || {};
++            Common.UI.Menu.Manager.hideAll();
++            this.closeSearch();
++            this.closeFlyout();
++            if (!this.$account) {
++                this.$account = $('<div class="elx-flyout elx-accflyout" role="dialog"></div>').appendTo(document.body);
++                $(document).on('mousedown.elxacc', function (e) {
++                    if (me.$account && me.$account.is(':visible') && !$(e.target).closest('.elx-accflyout, .elx-account-btn').length) me.closeAccount();
++                });
++            }
++            this.$account.attr('aria-label', this.txtAccount);
++            var nc = acc.source === 'nextcloud';
++            var avatar = acc.image
++                ? '<span class="elx-acc-avatar"><img src="' + esc(acc.image) + '" alt=""></span>'
++                : '<span class="elx-acc-avatar" style="background-color:' + esc(acc.color || '#0082c9') + '">' + esc(acc.initials || '') + '</span>';
++            var item = function (act, icon, text, extra) {
++                return '<button type="button" class="elx-fly-link" data-act="' + act + '"' + (extra || '') + '>' + me.icon(icon, 20) + '<span>' + esc(text) + '</span></button>';
++            };
++            var html = '<div class="elx-acc-head">' + avatar + '<div class="elx-acc-id"><div class="elx-acc-name">' + esc(acc.name) + '</div>' +
++                '<div class="elx-acc-sub">' + esc(nc ? (acc.email || acc.login || '') : this.txtLocalProfile) + '</div>' +
++                (nc ? '<div class="elx-acc-sub">' + esc(acc.serverHost) + '</div>' : '') + '</div></div>' +
++                '<div class="elx-fly-actions">' +
++                (nc ? item('manage', 'person', Common.Utils.String.format(this.txtManageAccount, acc.serverHost)) + item('disconnect', 'close', this.txtDisconnect)
++                    : item('connect', 'link', this.txtConnect) + item('rename', 'rename', this.txtChangeName)) +
++                '</div>';
++            if (acc.devMode && acc.testUsers && acc.testUsers.length && acc.reloadUrl) {
++                html += '<div class="elx-fly-label elx-acc-group">' + esc(this.txtTestUser) + '</div><div>' +
++                    item('test', acc.devUser ? 'person' : 'checkmark', Common.Utils.String.format(this.txtTestUserMe, acc.selfName || acc.name), ' data-user=""');
++                acc.testUsers.forEach(function (u) {
++                    html += item('test', acc.devUser === u.id ? 'checkmark' : 'person', u.name, ' data-user="' + esc(u.id) + '"');
++                });
++                html += '</div>';
++            }
++            this.$account.html(html);
++            var off = this.$avatar.offset(), w = 300;
++            var left = Common.UI.isRTL() ? Math.max(8, off.left) : Math.max(8, Math.min(off.left + this.$avatar.outerWidth() - w, $(window).width() - w - 8));
++            this.$account.css({ top: off.top + this.$avatar.outerHeight() + 6, left: left, width: w }).show();
++            this.$avatar.attr('aria-expanded', 'true');
++            this.api && this.api.asc_enableKeyEvents(false);
++            this.$account.find('[data-act]').on('click', function () {
++                var act = $(this).attr('data-act');
++                me.closeAccount(true);
++                if (act === 'manage') window.open(acc.server + '/index.php/settings/user/security', '_blank', 'noopener');
++                else if (act === 'disconnect') me.openHome('#account');
++                else if (act === 'connect') me.openHome('#connect');
++                else if (act === 'rename') me.openHome('#profile');
++                else if (act === 'test') {
++                    var id = $(this).attr('data-user'), url = acc.reloadUrl.replace(/([?&])userid=[^&]*&?/, '$1').replace(/[?&]$/, '');
++                    window.top.location.href = id ? url + (url.indexOf('?') < 0 ? '?' : '&') + 'userid=' + encodeURIComponent(id) : url;
++                }
++            });
++            this.$account.on('keydown', function (e) {
++                var $items = me.$account.find('.elx-fly-link'), i = $items.index(document.activeElement);
++                if (e.keyCode === Common.UI.Keys.ESC) { e.preventDefault(); me.closeAccount(true); me.$avatar.focus(); }
++                else if (e.keyCode === Common.UI.Keys.DOWN) { e.preventDefault(); $items.eq((i + 1) % $items.length).focus(); }
++                else if (e.keyCode === Common.UI.Keys.UP) { e.preventDefault(); $items.eq((i - 1 + $items.length) % $items.length).focus(); }
++            });
++            setTimeout(function () { me.$account.find('.elx-fly-link').first().focus(); }, 30);
++        },
++
++        closeAccount: function (focusDoc) {
++            if (!this.$account || !this.$account.is(':visible')) return;
++            this.$account.hide();
++            this.$avatar && this.$avatar.attr('aria-expanded', 'false');
++            this.api && this.api.asc_enableKeyEvents(true);
++            focusDoc && Common.NotificationCenter.trigger('edit:complete');
++        },
++
+         setCommentsPressed: function (pressed) {
+             this.$comments && this.$comments.toggleClass('active', !!pressed).attr('aria-pressed', !!pressed);
+         }
+diff --git a/apps/common/main/resources/less/elixir-chrome.less b/apps/common/main/resources/less/elixir-chrome.less
+index 78e1b24c6f..337ee90f1f 100644
+--- a/apps/common/main/resources/less/elixir-chrome.less
++++ b/apps/common/main/resources/less/elixir-chrome.less
+@@ -822,6 +822,21 @@ body.elx-chrome {
+     }
+ }
+ 
++.elx-accflyout {
++    .elx-acc-head { display: flex; align-items: center; gap: 12px; padding-bottom: 4px; }
++    .elx-acc-avatar {
++        display: inline-flex; align-items: center; justify-content: center; flex: none; overflow: hidden;
++        width: 48px; height: 48px; border-radius: 50%; color: #fff; font-size: 17px; font-weight: 600;
++        img { width: 100%; height: 100%; object-fit: cover; }
++    }
++    .elx-acc-id { min-width: 0; }
++    .elx-acc-name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++    .elx-acc-sub { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++    .elx-acc-group { margin-top: 12px; }
++}
++body.elx-chrome .elx-account-btn { cursor: pointer; border-radius: 50%; }
++body.elx-chrome .elx-account-btn:focus-visible { outline: 2px solid var(--border-control-focus, #0082c9); outline-offset: 2px; }
++
+ @keyframes elx-spin { to { transform: rotate(360deg); } }
+ 
+ .rtl body.elx-chrome, body.elx-chrome.rtl {
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 1b6bb863e4..6b34e59f11 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Lokales Profil in diesem Browser",
++  "DE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Trennen…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Namen ändern",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Mein Konto auf {0} verwalten",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Testbenutzer (Entwicklermodus)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Ich ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 7691ecaa72..2854f825d7 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -5173,5 +5173,13 @@
+   "DE.Views.WordParagraphDialog.txtTabsBtn": "Tabs...",
+   "DE.Views.WordParagraphDialog.txtTitle": "Paragraph",
+   "DE.Views.WordParagraphDialog.txtWidow": "Widow/Orphan control",
+-  "DE.Views.WordTabsDialog.txtTitle": "Tabs"
++  "DE.Views.WordTabsDialog.txtTitle": "Tabs",
++  "DE.Views.ElixirTitleBar.txtAccount": "Account",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Local profile in this browser",
++  "DE.Views.ElixirTitleBar.txtConnect": "Connect Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Disconnect…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Change name",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Manage my account on {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Test user (developer mode)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Me ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index fd0fb44f86..c0226932c6 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Cuenta",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local en este navegador",
++  "DE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Cambiar nombre",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Administrar mi cuenta en {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Usuario de prueba (modo desarrollador)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Yo ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 4c7a47670e..b78c904fd2 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Compte",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Profil local dans ce navigateur",
++  "DE.Views.ElixirTitleBar.txtConnect": "Connecter Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Se déconnecter…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Changer de nom",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Gérer mon compte sur {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Utilisateur de test (mode développeur)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Moi ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 775011e581..ea6ab351ef 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Account",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Profilo locale in questo browser",
++  "DE.Views.ElixirTitleBar.txtConnect": "Connetti Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Disconnetti…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Cambia nome",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Gestisci il mio account su {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Utente di prova (modalità sviluppatore)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Io ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index ea15bd2a50..8e91b4eabd 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "アカウント",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "このブラウザーのローカル プロファイル",
++  "DE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena に接続",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "切断…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "名前を変更",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "{0} のアカウントを管理",
++  "DE.Views.ElixirTitleBar.txtTestUser": "テスト ユーザー (開発者モード)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "自分 ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index c0d4de19c0..66b33bdeb1 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -5172,5 +5172,13 @@
+   "DE.Views.ViewTab.tipRecMacro": "Record macro",
+   "DE.Views.ViewTab.tipResumeMacro": "Resume recording",
+   "DE.Views.ViewTab.tipStopMacro": "Stop recording",
+-  "DE.Views.ViewTab.tipZoom100": "Zoom to 100%"
++  "DE.Views.ViewTab.tipZoom100": "Zoom to 100%",
++  "DE.Views.ElixirTitleBar.txtAccount": "Account",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Lokaal profiel in deze browser",
++  "DE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Verbinding verbreken…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Naam wijzigen",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Mijn account op {0} beheren",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Testgebruiker (ontwikkelaarsmodus)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Ik ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index 5d6acf3c8e..3e5b2b40e8 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -5172,5 +5172,13 @@
+   "Common.Controllers.Shortcuts.txtLabelNextSpellingError": "Następny błąd pisowni",
+   "Common.Controllers.Shortcuts.txtDescriptionNextSpellingError": "Zaznacz następny błędnie napisany wyraz.",
+   "Common.Controllers.Shortcuts.txtLabelSpellingAndGrammar": "Pisownia",
+-  "Common.Controllers.Shortcuts.txtDescriptionSpellingAndGrammar": "Zaznacz następny błędnie napisany wyraz i pokaż propozycje."
++  "Common.Controllers.Shortcuts.txtDescriptionSpellingAndGrammar": "Zaznacz następny błędnie napisany wyraz i pokaż propozycje.",
++  "DE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Profil lokalny w tej przeglądarce",
++  "DE.Views.ElixirTitleBar.txtConnect": "Połącz Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Rozłącz…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Zmień nazwę",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Zarządzaj moim kontem na {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Użytkownik testowy (tryb dewelopera)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Ja ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index dd52ce928f..b2bfd53ac4 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -5172,5 +5172,13 @@
+   "DE.Views.ViewTab.tipRecMacro": "Record macro",
+   "DE.Views.ViewTab.tipResumeMacro": "Resume recording",
+   "DE.Views.ViewTab.tipStopMacro": "Stop recording",
+-  "DE.Views.ViewTab.tipZoom100": "Zoom to 100%"
++  "DE.Views.ViewTab.tipZoom100": "Zoom to 100%",
++  "DE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "DE.Views.ElixirTitleBar.txtConnect": "Ligar Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Desligar…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Gerir a minha conta em {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Utilizador de teste (modo de programador)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index 4a727ba346..2b8b6934d5 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "DE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Gerenciar minha conta em {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Usuário de teste (modo desenvolvedor)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 458b9d4b4d..08592dba7d 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "Учётная запись",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "Локальный профиль в этом браузере",
++  "DE.Views.ElixirTitleBar.txtConnect": "Подключить Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "Отключить…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "Изменить имя",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "Управлять учётной записью на {0}",
++  "DE.Views.ElixirTitleBar.txtTestUser": "Тестовый пользователь (режим разработчика)",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "Я ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index 828749f05f..9b5cc6d5ce 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -5172,5 +5172,13 @@
+   "DE.Controllers.Toolbar.helpSignatureHeader": "More signature options",
+   "DE.Views.DocumentHolder.txtNcAssistant": "Ask Nextcloud Assistant",
+   "DE.Views.Toolbar.capSmartPicker": "Smart Picker",
+-  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant"
++  "DE.Views.Toolbar.tipSmartPicker": "Ask Nextcloud Assistant",
++  "DE.Views.ElixirTitleBar.txtAccount": "帐户",
++  "DE.Views.ElixirTitleBar.txtLocalProfile": "此浏览器中的本地配置文件",
++  "DE.Views.ElixirTitleBar.txtConnect": "连接 Nextcloud / Murena",
++  "DE.Views.ElixirTitleBar.txtDisconnect": "断开连接…",
++  "DE.Views.ElixirTitleBar.txtChangeName": "更改名称",
++  "DE.Views.ElixirTitleBar.txtManageAccount": "在 {0} 上管理我的帐户",
++  "DE.Views.ElixirTitleBar.txtTestUser": "测试用户（开发者模式）",
++  "DE.Views.ElixirTitleBar.txtTestUserMe": "我（{0}）"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/de.json b/apps/presentationeditor/main/locale/de.json
+index 573516d169..dcab4cf3fe 100644
+--- a/apps/presentationeditor/main/locale/de.json
++++ b/apps/presentationeditor/main/locale/de.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Die letzte Aktion rückgängig machen.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Die rückgängig gemachte Aktion wiederholen.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Die Präsentation speichern.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Die Präsentation drucken."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Die Präsentation drucken.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Lokales Profil in diesem Browser",
++  "PE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Trennen…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Namen ändern",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Mein Konto auf {0} verwalten",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Testbenutzer (Entwicklermodus)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Ich ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/en.json b/apps/presentationeditor/main/locale/en.json
+index 9ed91aad27..55b4ba9e4a 100644
+--- a/apps/presentationeditor/main/locale/en.json
++++ b/apps/presentationeditor/main/locale/en.json
+@@ -3933,5 +3933,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Undo your last action.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Redo the action you undid.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Save your presentation.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Print your presentation."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Print your presentation.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Account",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Local profile in this browser",
++  "PE.Views.ElixirTitleBar.txtConnect": "Connect Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Disconnect…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Change name",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Manage my account on {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Test user (developer mode)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Me ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/es.json b/apps/presentationeditor/main/locale/es.json
+index 0bc0291105..1e01075c6c 100644
+--- a/apps/presentationeditor/main/locale/es.json
++++ b/apps/presentationeditor/main/locale/es.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Deshaga la última acción.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Rehaga la acción que deshizo.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Guarde su presentación.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima su presentación."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima su presentación.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Cuenta",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local en este navegador",
++  "PE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Cambiar nombre",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Administrar mi cuenta en {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Usuario de prueba (modo desarrollador)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Yo ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/fr.json b/apps/presentationeditor/main/locale/fr.json
+index ba89a47a59..14bb002b83 100644
+--- a/apps/presentationeditor/main/locale/fr.json
++++ b/apps/presentationeditor/main/locale/fr.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Annulez votre dernière action.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Rétablissez l'action annulée.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Enregistrez votre présentation.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprimez votre présentation."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprimez votre présentation.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Compte",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Profil local dans ce navigateur",
++  "PE.Views.ElixirTitleBar.txtConnect": "Connecter Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Se déconnecter…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Changer de nom",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Gérer mon compte sur {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Utilisateur de test (mode développeur)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Moi ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/it.json b/apps/presentationeditor/main/locale/it.json
+index d20b147df7..d60673f3d8 100644
+--- a/apps/presentationeditor/main/locale/it.json
++++ b/apps/presentationeditor/main/locale/it.json
+@@ -3471,5 +3471,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Annulla l'ultima azione.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Ripristina l'azione annullata.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Salva la presentazione.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Stampa la presentazione."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Stampa la presentazione.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Account",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Profilo locale in questo browser",
++  "PE.Views.ElixirTitleBar.txtConnect": "Connetti Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Disconnetti…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Cambia nome",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Gestisci il mio account su {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Utente di prova (modalità sviluppatore)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Io ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/ja.json b/apps/presentationeditor/main/locale/ja.json
+index 060dcff1f9..270cb49fe0 100644
+--- a/apps/presentationeditor/main/locale/ja.json
++++ b/apps/presentationeditor/main/locale/ja.json
+@@ -3621,5 +3621,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "直前の操作を元に戻します。",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "元に戻した操作をやり直します。",
+   "PE.Controllers.PowerPointScreenTips.descSave": "プレゼンテーションを保存します。",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "プレゼンテーションを印刷します。"
++  "PE.Controllers.PowerPointScreenTips.descPrint": "プレゼンテーションを印刷します。",
++  "PE.Views.ElixirTitleBar.txtAccount": "アカウント",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "このブラウザーのローカル プロファイル",
++  "PE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena に接続",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "切断…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "名前を変更",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "{0} のアカウントを管理",
++  "PE.Views.ElixirTitleBar.txtTestUser": "テスト ユーザー (開発者モード)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "自分 ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/nl.json b/apps/presentationeditor/main/locale/nl.json
+index cca1789a72..90d303ca78 100644
+--- a/apps/presentationeditor/main/locale/nl.json
++++ b/apps/presentationeditor/main/locale/nl.json
+@@ -2501,5 +2501,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Uw laatste actie ongedaan maken.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "De ongedaan gemaakte actie opnieuw uitvoeren.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Uw presentatie opslaan.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Uw presentatie afdrukken."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Uw presentatie afdrukken.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Account",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Lokaal profiel in deze browser",
++  "PE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Verbinding verbreken…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Naam wijzigen",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Mijn account op {0} beheren",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Testgebruiker (ontwikkelaarsmodus)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Ik ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/pl.json b/apps/presentationeditor/main/locale/pl.json
+index cdaa07e9f6..875ba4f743 100644
+--- a/apps/presentationeditor/main/locale/pl.json
++++ b/apps/presentationeditor/main/locale/pl.json
+@@ -2830,5 +2830,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Cofnij ostatnią akcję.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Ponów cofniętą akcję.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Zapisz prezentację.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Wydrukuj prezentację."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Wydrukuj prezentację.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Profil lokalny w tej przeglądarce",
++  "PE.Views.ElixirTitleBar.txtConnect": "Połącz Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Rozłącz…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Zmień nazwę",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Zarządzaj moim kontem na {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Użytkownik testowy (tryb dewelopera)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Ja ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/pt-pt.json b/apps/presentationeditor/main/locale/pt-pt.json
+index 23910689b4..61ee435e8c 100644
+--- a/apps/presentationeditor/main/locale/pt-pt.json
++++ b/apps/presentationeditor/main/locale/pt-pt.json
+@@ -2807,5 +2807,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Anule a última ação.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Refaça a ação anulada.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Guarde a sua apresentação.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima a sua apresentação."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima a sua apresentação.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "PE.Views.ElixirTitleBar.txtConnect": "Ligar Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Desligar…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Gerir a minha conta em {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Utilizador de teste (modo de programador)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/pt.json b/apps/presentationeditor/main/locale/pt.json
+index d3a4a6a744..80cd193d9b 100644
+--- a/apps/presentationeditor/main/locale/pt.json
++++ b/apps/presentationeditor/main/locale/pt.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Desfaça a última ação.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Refaça a ação desfeita.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Salve sua apresentação.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima sua apresentação."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Imprima sua apresentação.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "PE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Gerenciar minha conta em {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Usuário de teste (modo desenvolvedor)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/ru.json b/apps/presentationeditor/main/locale/ru.json
+index f928ea9de6..b150c60638 100644
+--- a/apps/presentationeditor/main/locale/ru.json
++++ b/apps/presentationeditor/main/locale/ru.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "Отмените последнее действие.",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "Повторите отмененное действие.",
+   "PE.Controllers.PowerPointScreenTips.descSave": "Сохраните презентацию.",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "Напечатайте презентацию."
++  "PE.Controllers.PowerPointScreenTips.descPrint": "Напечатайте презентацию.",
++  "PE.Views.ElixirTitleBar.txtAccount": "Учётная запись",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "Локальный профиль в этом браузере",
++  "PE.Views.ElixirTitleBar.txtConnect": "Подключить Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "Отключить…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "Изменить имя",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "Управлять учётной записью на {0}",
++  "PE.Views.ElixirTitleBar.txtTestUser": "Тестовый пользователь (режим разработчика)",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "Я ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/main/locale/zh.json b/apps/presentationeditor/main/locale/zh.json
+index 54a27ad72d..cec22dc30d 100644
+--- a/apps/presentationeditor/main/locale/zh.json
++++ b/apps/presentationeditor/main/locale/zh.json
+@@ -3926,5 +3926,13 @@
+   "PE.Controllers.PowerPointScreenTips.descUndo": "撤消上一个操作。",
+   "PE.Controllers.PowerPointScreenTips.descRedo": "恢复撤消的操作。",
+   "PE.Controllers.PowerPointScreenTips.descSave": "保存演示文稿。",
+-  "PE.Controllers.PowerPointScreenTips.descPrint": "打印演示文稿。"
++  "PE.Controllers.PowerPointScreenTips.descPrint": "打印演示文稿。",
++  "PE.Views.ElixirTitleBar.txtAccount": "帐户",
++  "PE.Views.ElixirTitleBar.txtLocalProfile": "此浏览器中的本地配置文件",
++  "PE.Views.ElixirTitleBar.txtConnect": "连接 Nextcloud / Murena",
++  "PE.Views.ElixirTitleBar.txtDisconnect": "断开连接…",
++  "PE.Views.ElixirTitleBar.txtChangeName": "更改名称",
++  "PE.Views.ElixirTitleBar.txtManageAccount": "在 {0} 上管理我的帐户",
++  "PE.Views.ElixirTitleBar.txtTestUser": "测试用户（开发者模式）",
++  "PE.Views.ElixirTitleBar.txtTestUserMe": "我（{0}）"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/de.json b/apps/spreadsheeteditor/main/locale/de.json
+index b3bff4890e..6946990e7a 100644
+--- a/apps/spreadsheeteditor/main/locale/de.json
++++ b/apps/spreadsheeteditor/main/locale/de.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Über dem Durchschnitt...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Unter dem Durchschnitt...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Neue Regel...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Regeln verwalten..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Regeln verwalten...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Lokales Profil in diesem Browser",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Trennen…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Namen ändern",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Mein Konto auf {0} verwalten",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Testbenutzer (Entwicklermodus)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Ich ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/en.json b/apps/spreadsheeteditor/main/locale/en.json
+index 77ea37cf9e..09d5920965 100644
+--- a/apps/spreadsheeteditor/main/locale/en.json
++++ b/apps/spreadsheeteditor/main/locale/en.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Above Average...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Below Average...",
+   "SSE.Views.Toolbar.txtElxNewRule": "New Rule...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Manage Rules..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Manage Rules...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Account",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Local profile in this browser",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Connect Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Disconnect…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Change name",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Manage my account on {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Test user (developer mode)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Me ({0})"
+ }
+diff --git a/apps/spreadsheeteditor/main/locale/es.json b/apps/spreadsheeteditor/main/locale/es.json
+index e689746b62..546540f5ca 100644
+--- a/apps/spreadsheeteditor/main/locale/es.json
++++ b/apps/spreadsheeteditor/main/locale/es.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Por encima del promedio...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Por debajo del promedio...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nueva regla...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Administrar reglas..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Administrar reglas...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Cuenta",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local en este navegador",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Cambiar nombre",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Administrar mi cuenta en {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Usuario de prueba (modo desarrollador)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Yo ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/fr.json b/apps/spreadsheeteditor/main/locale/fr.json
+index 6cd1ae9071..b4fcf4b83b 100644
+--- a/apps/spreadsheeteditor/main/locale/fr.json
++++ b/apps/spreadsheeteditor/main/locale/fr.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Valeurs supérieures à la moyenne...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Valeurs inférieures à la moyenne...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nouvelle règle...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Gérer les règles..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Gérer les règles...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Compte",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Profil local dans ce navigateur",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Connecter Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Se déconnecter…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Changer de nom",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Gérer mon compte sur {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Utilisateur de test (mode développeur)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Moi ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/it.json b/apps/spreadsheeteditor/main/locale/it.json
+index c9a07123de..90275eeb5f 100644
+--- a/apps/spreadsheeteditor/main/locale/it.json
++++ b/apps/spreadsheeteditor/main/locale/it.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Sopra la media...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Sotto la media...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nuova regola...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Gestisci regole..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Gestisci regole...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Account",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Profilo locale in questo browser",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Connetti Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Disconnetti…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Cambia nome",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Gestisci il mio account su {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Utente di prova (modalità sviluppatore)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Io ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/ja.json b/apps/spreadsheeteditor/main/locale/ja.json
+index 85d81542d0..cf1a4882ce 100644
+--- a/apps/spreadsheeteditor/main/locale/ja.json
++++ b/apps/spreadsheeteditor/main/locale/ja.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "平均より上...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "平均より下...",
+   "SSE.Views.Toolbar.txtElxNewRule": "新しいルール...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "ルールの管理..."
++  "SSE.Views.Toolbar.txtElxManageRules": "ルールの管理...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "アカウント",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "このブラウザーのローカル プロファイル",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena に接続",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "切断…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "名前を変更",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "{0} のアカウントを管理",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "テスト ユーザー (開発者モード)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "自分 ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/nl.json b/apps/spreadsheeteditor/main/locale/nl.json
+index b68fe9497e..6c0532b0bb 100644
+--- a/apps/spreadsheeteditor/main/locale/nl.json
++++ b/apps/spreadsheeteditor/main/locale/nl.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Boven gemiddelde...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Onder gemiddelde...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nieuwe regel...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Regels beheren..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Regels beheren...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Account",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Lokaal profiel in deze browser",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Nextcloud / Murena verbinden",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Verbinding verbreken…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Naam wijzigen",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Mijn account op {0} beheren",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Testgebruiker (ontwikkelaarsmodus)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Ik ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/pl.json b/apps/spreadsheeteditor/main/locale/pl.json
+index 9f52fc411a..0343b86a21 100644
+--- a/apps/spreadsheeteditor/main/locale/pl.json
++++ b/apps/spreadsheeteditor/main/locale/pl.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Powyżej średniej...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Poniżej średniej...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nowa reguła...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Zarządzaj regułami..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Zarządzaj regułami...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Konto",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Profil lokalny w tej przeglądarce",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Połącz Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Rozłącz…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Zmień nazwę",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Zarządzaj moim kontem na {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Użytkownik testowy (tryb dewelopera)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Ja ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/pt-pt.json b/apps/spreadsheeteditor/main/locale/pt-pt.json
+index 7db278aa28..a57fc8b1be 100644
+--- a/apps/spreadsheeteditor/main/locale/pt-pt.json
++++ b/apps/spreadsheeteditor/main/locale/pt-pt.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Acima da Média...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Abaixo da Média...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nova Regra...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Gerir Regras..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Gerir Regras...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Ligar Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Desligar…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Gerir a minha conta em {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Utilizador de teste (modo de programador)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/pt.json b/apps/spreadsheeteditor/main/locale/pt.json
+index ce9d219a04..5dcafdca8d 100644
+--- a/apps/spreadsheeteditor/main/locale/pt.json
++++ b/apps/spreadsheeteditor/main/locale/pt.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Acima da Média...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Abaixo da Média...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Nova Regra...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Gerenciar Regras..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Gerenciar Regras...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Conta",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Perfil local neste navegador",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Conectar Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Desconectar…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Alterar nome",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Gerenciar minha conta em {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Usuário de teste (modo desenvolvedor)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Eu ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/ru.json b/apps/spreadsheeteditor/main/locale/ru.json
+index a8aca89806..d29fed2b3d 100644
+--- a/apps/spreadsheeteditor/main/locale/ru.json
++++ b/apps/spreadsheeteditor/main/locale/ru.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "Выше среднего...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "Ниже среднего...",
+   "SSE.Views.Toolbar.txtElxNewRule": "Создать правило...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "Управление правилами..."
++  "SSE.Views.Toolbar.txtElxManageRules": "Управление правилами...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "Учётная запись",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "Локальный профиль в этом браузере",
++  "SSE.Views.ElixirTitleBar.txtConnect": "Подключить Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "Отключить…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "Изменить имя",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "Управлять учётной записью на {0}",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "Тестовый пользователь (режим разработчика)",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "Я ({0})"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/main/locale/zh.json b/apps/spreadsheeteditor/main/locale/zh.json
+index b73bfad3f6..7d78fc3df8 100644
+--- a/apps/spreadsheeteditor/main/locale/zh.json
++++ b/apps/spreadsheeteditor/main/locale/zh.json
+@@ -5661,5 +5661,13 @@
+   "SSE.Views.Toolbar.txtElxAboveAverage": "高于平均值...",
+   "SSE.Views.Toolbar.txtElxBelowAverage": "低于平均值...",
+   "SSE.Views.Toolbar.txtElxNewRule": "新建规则...",
+-  "SSE.Views.Toolbar.txtElxManageRules": "管理规则..."
++  "SSE.Views.Toolbar.txtElxManageRules": "管理规则...",
++  "SSE.Views.ElixirTitleBar.txtAccount": "帐户",
++  "SSE.Views.ElixirTitleBar.txtLocalProfile": "此浏览器中的本地配置文件",
++  "SSE.Views.ElixirTitleBar.txtConnect": "连接 Nextcloud / Murena",
++  "SSE.Views.ElixirTitleBar.txtDisconnect": "断开连接…",
++  "SSE.Views.ElixirTitleBar.txtChangeName": "更改名称",
++  "SSE.Views.ElixirTitleBar.txtManageAccount": "在 {0} 上管理我的帐户",
++  "SSE.Views.ElixirTitleBar.txtTestUser": "测试用户（开发者模式）",
++  "SSE.Views.ElixirTitleBar.txtTestUserMe": "我（{0}）"
+ }
+\ No newline at end of file
+-- 
+2.43.0
+

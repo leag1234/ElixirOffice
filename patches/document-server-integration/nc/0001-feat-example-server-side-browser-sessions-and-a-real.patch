@@ -1,0 +1,400 @@
+From 8b39316aa68463b26d2cfc8453ed718f27de1549 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:47:41 +0200
+Subject: [PATCH 1/6] feat(example): server-side browser sessions and a real
+ user identity
+
+Encrypted session store (AES-256-GCM, key file 0600, files 0600, opaque HttpOnly cookie) and the identity of the editor user: the Nextcloud user when connected, otherwise a local profile (display name, initials avatar); test users only in developer mode.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../nodejs/helpers/elixirIdentity.js          | 123 +++++++++
+ .../nodejs/helpers/elixirSession.js           | 245 ++++++++++++++++++
+ 2 files changed, 368 insertions(+)
+ create mode 100644 web/documentserver-example/nodejs/helpers/elixirIdentity.js
+ create mode 100644 web/documentserver-example/nodejs/helpers/elixirSession.js
+
+diff --git a/web/documentserver-example/nodejs/helpers/elixirIdentity.js b/web/documentserver-example/nodejs/helpers/elixirIdentity.js
+new file mode 100644
+index 00000000..cc88ecba
+--- /dev/null
++++ b/web/documentserver-example/nodejs/helpers/elixirIdentity.js
+@@ -0,0 +1,123 @@
++/**
++ *
++ * (c) Copyright ElixirOffice contributors 2026
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ */
++
++// Who is using this browser: the Nextcloud user when the session is connected
++// to a Nextcloud server (display name, e-mail, avatar), otherwise a local
++// profile (a display name the user picks, "Me" by default, and an initials
++// avatar). In developer mode the example's test users can still be chosen.
++// The identity is what the editor gets as editorConfig.user, so co-editing
++// presence, comments and tracked changes carry the real name.
++
++const crypto = require('crypto');
++const users = require('./users');
++
++// accessible avatar colours (white text, contrast >= 4.5:1)
++const COLORS = ['#a4262c', '#ca5010', '#8e562e', '#407855', '#038387', '#0078d4',
++  '#4f6bed', '#5c2e91', '#8764b8', '#881798', '#c239b3', '#498205'];
++
++const hash = (s) => crypto.createHash('sha256').update(String(s)).digest('hex');
++const colorOf = (id) => COLORS[parseInt(hash(id).slice(0, 8), 16) % COLORS.length];
++const initialsOf = (name) => {
++  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
++  if (!parts.length) return '?';
++  const chars = (parts.length > 1 ? [parts[0], parts[parts.length - 1]] : [parts[0]])
++    .map((p) => Array.from(p)[0].toUpperCase());
++  return chars.join('');
++};
++
++const ncUserId = (nc) => `nc-${hash(`${nc.server}\n${nc.userId}`).slice(0, 24)}`;
++
++// the session's identity; creates the local profile id on first use
++const identity = (req, t, serverUrl) => {
++  const session = req.elixir ? req.elixir.data() : {};
++  const nc = session.nc;
++  if (nc && nc.appPassword) {
++    const id = ncUserId(nc);
++    let host = nc.server;
++    try { host = new URL(nc.server).host; } catch (e) { /* keep */ }
++    return {
++      source: 'nextcloud',
++      id,
++      name: nc.displayName || nc.userId,
++      email: nc.email || '',
++      login: nc.userId,
++      server: nc.server,
++      serverHost: host,
++      image: nc.avatarId && serverUrl ? `${serverUrl}/elixir/avatar/${nc.avatarId}` : null,
++      initials: initialsOf(nc.displayName || nc.userId),
++      color: colorOf(id),
++      named: true,
++    };
++  }
++  let profile = session.profile;
++  if ((!profile || !profile.id) && req.elixir) {
++    profile = { id: `local-${crypto.randomBytes(9).toString('base64url')}`, name: '' };
++    const created = profile;
++    req.elixir.update((data) => {
++      if (!data.profile || !data.profile.id) data.profile = created;
++    }).catch(() => {});
++  }
++  profile = profile || { id: 'local', name: '' };
++  const name = profile.name || (t ? t('profile.defaultName') : 'Me');
++  return {
++    source: 'local',
++    id: profile.id,
++    name,
++    email: '',
++    image: null,
++    initials: initialsOf(name),
++    color: colorOf(profile.id),
++    named: !!profile.name,
++  };
++};
++
++const devMode = (req) => !!(req.elixir && req.elixir.data().dev);
++
++// editor user: the identity, with the permissions of the example's default
++// user (uid-1: full rights). The example's test users stay available in
++// developer mode (account menu) and with an explicit ?userid= (test harness).
++const editorUser = (req, t, serverUrl) => {
++  const session = req.elixir ? req.elixir.data() : {};
++  const testId = req.query.userid || (session.dev && session.devUser) || null;
++  if (testId) {
++    const u = users.getUser(testId);
++    if (u && u.id === testId) return { user: u, test: true };
++  }
++  const id = identity(req, t, serverUrl);
++  const base = users.getUser('uid-1');
++  const u = Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
++    id: id.id,
++    name: id.name,
++    email: id.email,
++    avatar: false,
++    image: id.image,
++    favorite: null,
++    goback: base.goback ? { ...base.goback } : base.goback,
++    deniedPermissions: [],
++  });
++  return { user: u, test: false, identity: id };
++};
++
++module.exports = {
++  identity,
++  editorUser,
++  devMode,
++  initialsOf,
++  colorOf,
++  ncUserId,
++};
+diff --git a/web/documentserver-example/nodejs/helpers/elixirSession.js b/web/documentserver-example/nodejs/helpers/elixirSession.js
+new file mode 100644
+index 00000000..79576a00
+--- /dev/null
++++ b/web/documentserver-example/nodejs/helpers/elixirSession.js
+@@ -0,0 +1,245 @@
++/**
++ *
++ * (c) Copyright ElixirOffice contributors 2026
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ */
++
++// Server-side browser sessions of the ElixirOffice start page: the user's
++// profile (display name), developer mode, the Nextcloud connection (app
++// password) and pending notices.
++//
++// - The browser only holds a random session id (cookie elx_sid, HttpOnly,
++//   SameSite=Lax). The server stores data under sha256(id), so the data files
++//   alone do not let anyone impersonate the browser.
++// - Each session file is encrypted with AES-256-GCM. The key is a random
++//   32-byte file created on first use (mode 0600) next to the sessions; the
++//   directory is 0700 and every file 0600.
++// - Nothing here is ever sent to a third party.
++
++const crypto = require('crypto');
++const path = require('path');
++const fileSystem = require('fs');
++const config = require('config');
++
++const COOKIE = 'elx_sid';
++const MAX_AGE = 365 * 24 * 3600; // seconds
++
++const elixirConfig = config.has('elixir') ? config.get('elixir') : {};
++const storageFolder = config.get('server.storageFolder');
++// data folder: elixir.dataFolder, else a sibling of the example's file storage
++const dataDir = path.resolve(elixirConfig.dataFolder || path.join(path.resolve(storageFolder), '..', 'elixir'));
++const sessionsDir = path.join(dataDir, 'sessions');
++const avatarsDir = path.join(dataDir, 'avatars');
++
++const ensureDir = (dir) => {
++  if (!fileSystem.existsSync(dir)) fileSystem.mkdirSync(dir, { recursive: true, mode: 0o700 });
++  try { fileSystem.chmodSync(dir, 0o700); } catch (e) { /* not ours */ }
++};
++
++let secretKey = null;
++const key = () => {
++  if (secretKey) return secretKey;
++  ensureDir(dataDir);
++  const file = path.join(dataDir, 'secret.key');
++  try {
++    secretKey = Buffer.from(fileSystem.readFileSync(file, 'utf8').trim(), 'base64');
++  } catch (e) {
++    secretKey = null;
++  }
++  if (!secretKey || secretKey.length !== 32) {
++    secretKey = crypto.randomBytes(32);
++    fileSystem.writeFileSync(file, secretKey.toString('base64'), { mode: 0o600 });
++  }
++  return secretKey;
++};
++
++// derived keys, so the session key is never used for two purposes
++const subKey = (purpose) => crypto.createHmac('sha256', key()).update(`elixir:${purpose}`).digest();
++
++const encrypt = (obj) => {
++  const iv = crypto.randomBytes(12);
++  const cipher = crypto.createCipheriv('aes-256-gcm', subKey('sessions'), iv);
++  const body = Buffer.concat([cipher.update(JSON.stringify(obj), 'utf8'), cipher.final()]);
++  return Buffer.concat([Buffer.from('EX1'), iv, cipher.getAuthTag(), body]);
++};
++
++const decrypt = (buf) => {
++  if (buf.slice(0, 3).toString() !== 'EX1') throw new Error('bad session file');
++  const iv = buf.slice(3, 15);
++  const tag = buf.slice(15, 31);
++  const decipher = crypto.createDecipheriv('aes-256-gcm', subKey('sessions'), iv);
++  decipher.setAuthTag(tag);
++  return JSON.parse(Buffer.concat([decipher.update(buf.slice(31)), decipher.final()]).toString('utf8'));
++};
++
++const validHash = (h) => typeof h === 'string' && /^[0-9a-f]{64}$/.test(h);
++const sessionFile = (hash) => path.join(sessionsDir, `${hash}.bin`);
++
++const load = (hash) => {
++  if (!validHash(hash)) return {};
++  try {
++    return decrypt(fileSystem.readFileSync(sessionFile(hash)));
++  } catch (e) {
++    return {};
++  }
++};
++
++const save = (hash, data) => {
++  if (!validHash(hash)) return;
++  ensureDir(sessionsDir);
++  const file = sessionFile(hash);
++  const tmp = `${file}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
++  fileSystem.writeFileSync(tmp, encrypt(data), { mode: 0o600 });
++  fileSystem.renameSync(tmp, file);
++};
++
++const remove = (hash) => {
++  if (!validHash(hash)) return;
++  try { fileSystem.unlinkSync(sessionFile(hash)); } catch (e) { /* already gone */ }
++};
++
++// read-modify-write, serialized per session inside this process
++const locks = {};
++const update = (hash, fn) => {
++  const prev = locks[hash] || Promise.resolve();
++  const next = prev.then(() => {
++    const data = load(hash);
++    const res = fn(data);
++    return Promise.resolve(res).then((out) => {
++      save(hash, data);
++      return out;
++    });
++  });
++  locks[hash] = next.catch(() => {});
++  return next;
++};
++
++const parseCookies = (header) => {
++  const out = {};
++  (header || '').split(';').forEach((part) => {
++    const i = part.indexOf('=');
++    if (i > 0) out[part.slice(0, i).trim()] = decodeURIComponent(part.slice(i + 1).trim());
++  });
++  return out;
++};
++
++const isHttps = (req) => (req.headers['x-forwarded-proto'] || req.protocol) === 'https';
++
++// Express middleware: req.elixir = { hash, data(), update(fn) }
++const middleware = () => (req, res, next) => {
++  let sid = parseCookies(req.headers.cookie)[COOKIE];
++  if (!sid || !/^[A-Za-z0-9_-]{43}$/.test(sid)) {
++    sid = crypto.randomBytes(32).toString('base64url');
++    res.append('Set-Cookie', `${COOKIE}=${sid}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; SameSite=Lax${isHttps(req) ? '; Secure' : ''}`);
++  }
++  const hash = crypto.createHash('sha256').update(sid).digest('hex');
++  let cache = null;
++  req.elixir = {
++    hash,
++    data: () => {
++      if (!cache) cache = load(hash);
++      return cache;
++    },
++    update: (fn) => update(hash, fn).then((out) => { cache = null; return out; }),
++    // per-session token for state-changing links (GET /elixir/nc/new, uploads from the editor)
++    csrf: () => {
++      const data = req.elixir.data();
++      if (!data.csrf) {
++        data.csrf = crypto.randomBytes(18).toString('base64url');
++        const value = data.csrf;
++        update(hash, (d) => { if (!d.csrf) d.csrf = value; }).catch(() => {});
++      }
++      return data.csrf;
++    },
++  };
++  next();
++};
++
++// ---- signed tokens (download / callback URLs handed to the document server) ----
++const b64 = (buf) => Buffer.from(buf).toString('base64url');
++const signToken = (payload, ttlSeconds) => {
++  const body = b64(JSON.stringify({ ...payload, exp: Math.floor(Date.now() / 1000) + ttlSeconds }));
++  const mac = b64(crypto.createHmac('sha256', subKey('tokens')).update(body).digest());
++  return `${body}.${mac}`;
++};
++const readToken = (token) => {
++  if (typeof token !== 'string' || token.indexOf('.') < 0) return null;
++  const [body, mac] = token.split('.');
++  const expected = b64(crypto.createHmac('sha256', subKey('tokens')).update(body).digest());
++  if (mac.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(expected))) return null;
++  try {
++    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
++    if (!payload.exp || payload.exp < Date.now() / 1000) return null;
++    return payload;
++  } catch (e) {
++    return null;
++  }
++};
++
++// ---- small shared state files (document keys of open Nextcloud files) ----
++const stateFile = (name) => path.join(dataDir, `${name}.bin`);
++const loadState = (name) => {
++  try {
++    return decrypt(fileSystem.readFileSync(stateFile(name)));
++  } catch (e) {
++    return {};
++  }
++};
++const saveState = (name, data) => {
++  ensureDir(dataDir);
++  const file = stateFile(name);
++  const tmp = `${file}.${process.pid}.tmp`;
++  fileSystem.writeFileSync(tmp, encrypt(data), { mode: 0o600 });
++  fileSystem.renameSync(tmp, file);
++};
++
++// ---- avatars (copied from Nextcloud at connection time, served by random id) ----
++const avatarPath = (id) => (/^[0-9a-f]{32}$/.test(id || '') ? path.join(avatarsDir, `${id}.img`) : null);
++const saveAvatar = (id, buf, type) => {
++  ensureDir(avatarsDir);
++  fileSystem.writeFileSync(avatarPath(id), Buffer.concat([Buffer.from(`${type}\n`), buf]), { mode: 0o600 });
++};
++const readAvatar = (id) => {
++  const p = avatarPath(id);
++  if (!p) return null;
++  try {
++    const buf = fileSystem.readFileSync(p);
++    const nl = buf.indexOf(10);
++    return { type: buf.slice(0, nl).toString(), data: buf.slice(nl + 1) };
++  } catch (e) {
++    return null;
++  }
++};
++const removeAvatar = (id) => {
++  const p = avatarPath(id);
++  if (p) try { fileSystem.unlinkSync(p); } catch (e) { /* gone */ }
++};
++
++module.exports = {
++  middleware,
++  load,
++  save,
++  remove,
++  update,
++  signToken,
++  readToken,
++  loadState,
++  saveState,
++  saveAvatar,
++  readAvatar,
++  removeAvatar,
++  dataDir,
++  elixirConfig,
++};
+-- 
+2.43.0
+

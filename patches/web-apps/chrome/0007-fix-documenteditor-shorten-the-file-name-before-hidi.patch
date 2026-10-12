@@ -1,0 +1,57 @@
+From fd8cbfaffb84d64c2122a9ae2aaa0684a57f4495 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:00:49 +0200
+Subject: [PATCH 7/7] fix(documenteditor): shorten the file name before hiding
+ the save state
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Like Word, the title bar shortens a long file name first and keeps
+"Saved" / "Saving…" visible; the state turns into an icon only when a
+short name and the state do not fit. The search box takes at most
+440 px (30 % of the window).
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/documenteditor/main/app/elixir-chrome/TitleBar.js     | 6 ++++--
+ apps/documenteditor/main/resources/less/elixir-chrome.less | 2 +-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+index 88196809b5..f782437053 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
++++ b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+@@ -131,9 +131,11 @@ define([
+             if (!this.$doc || !this.$search) return;
+             var rtl = Common.UI.isRTL(), d = this.$doc[0].getBoundingClientRect(), s = this.$search[0].getBoundingClientRect();
+             var room = rtl ? d.right - s.right - 12 : s.left - d.left - 12;
+-            // when the name and its state do not fit, the state shows as an icon only
++            // like Word the name is shortened first; the state shows as an icon only
++            // when even a short name and the state do not fit
+             this.$doc.removeClass('elx-compact').css('max-width', 'none');
+-            var need = this.$doc[0].scrollWidth;
++            var $txt = this.$doc.find('.elx-docname-text'),
++                need = this.$doc[0].scrollWidth - $txt[0].scrollWidth + Math.min($txt[0].scrollWidth, 90);
+             this.$doc.toggleClass('elx-compact', need > room);
+             this.$doc.css('max-width', Math.max(80, Math.floor(room)) + 'px');
+         },
+diff --git a/apps/documenteditor/main/resources/less/elixir-chrome.less b/apps/documenteditor/main/resources/less/elixir-chrome.less
+index 8c899de758..aa43ad856d 100644
+--- a/apps/documenteditor/main/resources/less/elixir-chrome.less
++++ b/apps/documenteditor/main/resources/less/elixir-chrome.less
+@@ -622,7 +622,7 @@ body.elx-chrome {
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+-        width: ~"min(480px, 34vw)";
++        width: ~"min(440px, 30vw)";
+         z-index: 2;
+ 
+         .elx-search-ic {
+-- 
+2.43.0
+

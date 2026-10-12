@@ -1,0 +1,7873 @@
+{
+ "schema": 1,
+ "meta": {
+  "run_id": "20261005T213021Z-word-web",
+  "date_utc": "2026-10-05T21:32:28Z",
+  "host": "<build-host>",
+  "image": {
+   "name": "elixiroffice/documentserver:fonts-6",
+   "id": "sha256:763abd45cabcd570276fdcd8a0193383d254cfeb3c30f33a879f0733809ac11d",
+   "repo_digest": "",
+   "created": "2026-10-05T23:30:14.786970472+02:00",
+   "ds_version": "9.3.1"
+  },
+  "corpus": {
+   "path": "$EO_WORK/corpus-provisional",
+   "provisional": true,
+   "label": "provisional@manifest-sha256:b0c458ae9365",
+   "manifest_sha256": "b0c458ae936594550bd6606e878a7c38e50aecccdebd7a9b559255c08f462a08",
+   "documents": 30
+  },
+  "reference": {
+   "source": "word-web",
+   "label": "word-web",
+   "dir": "$EO_WORK/fidelity/refs/word-web",
+   "is_fidelity_reference": true,
+   "provenance": "description=Microsoft Word for the web (free Microsoft account, OneDrive personal), File > Export > Download as PDF (without comments); exported=2026-10-05; exported_by=the Gaël Duval (final click) and Claude Code (navigation); settings={'documents_unchanged': True, 'fields_updated': False, 'tracked_changes_display': \"a01 and a04: Simple Markup (Word for the web offers no 'No Markup'); other documents: default view\", 'comments': \"not exported (plain 'Download as PDF')\"}; anomalies=['Word for the web was opened in edit mode; no edit was made, but autosave was active', \"Fonts available to Word for the web's cloud renderer may differ from Word desktop\"]"
+  },
+  "harness": {
+   "version": "sha256:41da5b339b6acdcd",
+   "tools_image": "eo-fidelity-tools:2b8613e9058b@52bc09c3c5ac"
+  },
+  "timings": {
+   "convert": 24.0,
+   "reference": 1.0
+  }
+ },
+ "params": {
+  "dpi": 120,
+  "ink_level": 200,
+  "tol_level": 64,
+  "tol_radius_px": 1,
+  "ssim_ok": 0.98,
+  "shift_tol_mm": 1.0,
+  "match_min_score": 0.5,
+  "other_page_min_score": 0.8,
+  "page_window": 2,
+  "page_mismatch_penalty": 25.0
+ },
+ "global": {
+  "documents_scored": 30,
+  "mean_ssim": 0.82182,
+  "pct_pages_ok": 7.89,
+  "penalty": 75.69,
+  "page_count_mismatches": 3,
+  "conversion_failures": 0
+ },
+ "determinism": {
+  "documents": 30,
+  "all_pixel_identical": 0,
+  "pdf_bytes_identical": 0,
+  "pdf_identical_except_dates": 0,
+  "nondeterministic": [
+   "t01",
+   "t02",
+   "t03",
+   "t04",
+   "t05",
+   "t06",
+   "t07",
+   "t08",
+   "t09",
+   "t10",
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "a01",
+   "a02",
+   "a03",
+   "a04",
+   "a05",
+   "a06",
+   "a07",
+   "a08",
+   "a09",
+   "a10"
+  ]
+ },
+ "missing_reference": [],
+ "conversion_failed": [],
+ "compare_seconds": 29.7,
+ "documents": [
+  {
+   "id": "t01",
+   "file": "teachers/t01-fiche-fractions-cm1.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t01/p-1.png",
+     "ours_png": "../raster/ours/t01/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.80047,
+     "diff_ink": 0.34113,
+     "diff_page": 0.031712,
+     "blocks": {
+      "n": 14,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.0067,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 0.85,
+      "max_abs_dy_px": 4,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 630,
+       "y1": 654,
+       "x0": 70,
+       "x1": 922,
+       "ink": 176,
+       "score": 0.307,
+       "page": 1,
+       "dy_px": -4,
+       "dy_mm": -0.85,
+       "dx_mm": 2.54,
+       "status": "lost"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t01/p001-diff.png",
+     "text_flow": {
+      "words": 142,
+      "found": 0.866,
+      "to_pages": {
+       "1": 0.866
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t01/p-2.png",
+     "ours_png": "../raster/ours/t01/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.90425,
+     "diff_ink": 0.04159,
+     "diff_page": 0.004934,
+     "blocks": {
+      "n": 18,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t01/p002-diff.png",
+     "text_flow": {
+      "words": 159,
+      "found": 0.931,
+      "to_pages": {
+       "2": 0.931
+      },
+      "starts_on": 2
+     }
+    }
+   ],
+   "ref": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "6f69eda5275d298c5a2bab26f382acc06d4b7ee86e991a232412d8f2d83d775f",
+    "sha256_nodates": "7e453de3449c8ffd1dac75d9f2bfa8347e2aaedc1831b8edba6e6c6641edc9bb",
+    "fonts": [
+     "Calibri-Bold",
+     "Calibri",
+     "CambriaMath",
+     "Arial-BoldMT",
+     "ArialMT",
+     "Wingdings-Regular",
+     "Calibri-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "fa172531f982bbeaed1564ff5c86a551e5e7bbeee3ead0c6638f79c7fdda4116",
+    "sha256_nodates": "2b58f1e587c93422bc6b8cc44334c6ad46eef612318df6f2138d30ee7ff9b94d",
+    "fonts": [
+     "Carlito-Bold",
+     "Carlito",
+     "Asana Math",
+     "Carlito-Italic",
+     "Elixir Symbols"
+    ]
+   },
+   "ref_pages": 2,
+   "cand_pages": 2,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 4.35,
+   "scores": {
+    "mean_ssim": 0.85236,
+    "pct_pages_ok": 0.0,
+    "penalty": 90.26
+   }
+  },
+  {
+   "id": "t02",
+   "file": "teachers/t02-evaluation-sciences-6e-grille.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t02/p-1.png",
+     "ours_png": "../raster/ours/t02/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.87394,
+     "diff_ink": 0.10602,
+     "diff_page": 0.008124,
+     "blocks": {
+      "n": 11,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.0747,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 1174,
+       "y1": 1310,
+       "x0": 72,
+       "x1": 696,
+       "ink": 2230,
+       "score": 0.459,
+       "page": 1,
+       "dy_px": 0,
+       "dy_mm": 0.0,
+       "dx_mm": 0.0,
+       "status": "lost"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t02/p001-diff.png",
+     "text_flow": {
+      "words": 175,
+      "found": 0.617,
+      "to_pages": {
+       "1": 0.617
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t02/p-2.png",
+     "ours_png": "../raster/ours/t02/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.82217,
+     "diff_ink": 0.3181,
+     "diff_page": 0.015977,
+     "blocks": {
+      "n": 7,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.42,
+      "median_dy_px": 2,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t02/p002-diff.png",
+     "text_flow": {
+      "words": 138,
+      "found": 0.906,
+      "to_pages": {
+       "2": 0.906
+      },
+      "starts_on": 2
+     }
+    }
+   ],
+   "ref": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "8bf0438058f63def9899238c3d630f9278dafe4399dec570fd850688b0f99d63",
+    "sha256_nodates": "9af9b073a9eb83578968b67df58b58b26d4dfc7115d95a093ed85d2d60451cd5",
+    "fonts": [
+     "Arial-ItalicMT",
+     "ArialMT",
+     "Arial-BoldMT",
+     "Wingdings-Regular",
+     "Arial-BoldItalicMT"
+    ]
+   },
+   "cand": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "9916a8d51b72b0c25738fb7ba774a4414bd98e0d004219caade39c66558ad6eb",
+    "sha256_nodates": "4f6a76cb356c71b4b3606eca9a4096cb3552418f893322c5267ca5fb00262f10",
+    "fonts": [
+     "Liberation Sans-Italic",
+     "Liberation Sans",
+     "Liberation Sans-Bold",
+     "Elixir Symbols",
+     "Liberation Sans-Italic-Bold"
+    ]
+   },
+   "ref_pages": 2,
+   "cand_pages": 2,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 3.94,
+   "scores": {
+    "mean_ssim": 0.84806,
+    "pct_pages_ok": 0.0,
+    "penalty": 87.53
+   }
+  },
+  {
+   "id": "t03",
+   "file": "teachers/t03-affiche-regles-classe-a3.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t03/p-1.png",
+     "ours_png": "../raster/ours/t03/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1985,
+       1404
+      ],
+      "ours": [
+       1985,
+       1404
+      ]
+     },
+     "ssim": 0.88562,
+     "diff_ink": 0.22047,
+     "diff_page": 0.030822,
+     "blocks": {
+      "n": 9,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.85,
+      "max_abs_dy_px": 4,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t03/p001-diff.png",
+     "text_flow": {
+      "words": 63,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      297.0,
+      420.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "2a1a21fc8ec11bc58ef1bc3f11f5a7833995d004c7f0f03838507666c17cf9d1",
+    "sha256_nodates": "eea8f2aa9b1b52fee4fa26fc79e7b911ea169307bbffe31dba2a610003d33698",
+    "fonts": [
+     "Calibri-Bold",
+     "ComicSansMS",
+     "ComicSansMS-Bold",
+     "Arial-Black"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      297.0,
+      420.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "ae03808734640878ce3b8896db1be98905d23156dabd1162dc2b5bffa48eb217",
+    "sha256_nodates": "a8ea4c5f7de676c3f85390bbd72e28108b606584bfc0b06018965421588a0dd8",
+    "fonts": [
+     "Carlito-Bold",
+     "Comic Relief Metric",
+     "Comic Relief Metric-Bold",
+     "Archivo Black Metric"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 5.32,
+   "scores": {
+    "mean_ssim": 0.88562,
+    "pct_pages_ok": 0.0,
+    "penalty": 88.98
+   }
+  },
+  {
+   "id": "t04",
+   "file": "teachers/t04-sequence-histoire-cm2.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t04/p-1.png",
+     "ours_png": "../raster/ours/t04/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.92027,
+     "diff_ink": 0.13196,
+     "diff_page": 0.006836,
+     "blocks": {
+      "n": 12,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t04/p001-diff.png",
+     "text_flow": {
+      "words": 203,
+      "found": 0.916,
+      "to_pages": {
+       "1": 0.916
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t04/p-2.png",
+     "ours_png": "../raster/ours/t04/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       993,
+       1404
+      ],
+      "ours": [
+       993,
+       1404
+      ]
+     },
+     "ssim": 0.69062,
+     "diff_ink": 0.42092,
+     "diff_page": 0.053435,
+     "blocks": {
+      "n": 5,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.4035,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 2.12,
+      "max_abs_dy_px": 10,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 306,
+       "y1": 518,
+       "x0": 94,
+       "x1": 1310,
+       "ink": 7229,
+       "score": 0.94,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 518,
+       "y1": 730,
+       "x0": 94,
+       "x1": 1310,
+       "ink": 6423,
+       "score": 0.908,
+       "page": 2,
+       "dy_px": -10,
+       "dy_mm": -2.12,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t04/p002-diff.png",
+     "text_flow": {
+      "words": 259,
+      "found": 0.803,
+      "to_pages": {
+       "2": 0.803
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/t04/p-3.png",
+     "ours_png": "../raster/ours/t04/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       993,
+       1404
+      ],
+      "ours": [
+       993,
+       1404
+      ]
+     },
+     "ssim": 0.86146,
+     "diff_ink": 0.30286,
+     "diff_page": 0.020516,
+     "blocks": {
+      "n": 4,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.2098,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 264,
+       "y1": 432,
+       "x0": 94,
+       "x1": 1310,
+       "ink": 5058,
+       "score": 0.132,
+       "page": 3,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": -2.12,
+       "status": "lost"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t04/p003-diff.png",
+     "text_flow": {
+      "words": 113,
+      "found": 0.699,
+      "to_pages": {
+       "1": 0.009,
+       "2": 0.425,
+       "3": 0.265
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/t04/p-4.png",
+     "ours_png": "../raster/ours/t04/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.87552,
+     "diff_ink": 0.46202,
+     "diff_page": 0.020241,
+     "blocks": {
+      "n": 10,
+      "moved": 6,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.2831,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 1.27,
+      "max_abs_dy_px": 6,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 332,
+       "y1": 350,
+       "x0": 96,
+       "x1": 230,
+       "ink": 184,
+       "score": 0.948,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 366,
+       "y1": 384,
+       "x0": 126,
+       "x1": 776,
+       "ink": 942,
+       "score": 0.968,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 404,
+       "y1": 422,
+       "x0": 126,
+       "x1": 810,
+       "ink": 989,
+       "score": 0.969,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 440,
+       "y1": 460,
+       "x0": 124,
+       "x1": 460,
+       "ink": 473,
+       "score": 0.976,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 490,
+       "y1": 506,
+       "x0": 96,
+       "x1": 198,
+       "ink": 130,
+       "score": 0.986,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 526,
+       "y1": 542,
+       "x0": 96,
+       "x1": 632,
+       "ink": 809,
+       "score": 0.964,
+       "page": 4,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.42,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t04/p004-diff.png",
+     "text_flow": {
+      "words": 151,
+      "found": 1.0,
+      "to_pages": {
+       "4": 1.0
+      },
+      "starts_on": 4
+     }
+    }
+   ],
+   "ref": {
+    "pages": 4,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "7d45788c11d9fb30fe0e52ad96f455f8d8d7e2efe2aa26d20d42c926868b7585",
+    "sha256_nodates": "c48bff1108e16622295dae2242429d27974e72618bb4600dd5407a92bda256a1",
+    "fonts": [
+     "Calibri-Italic",
+     "Calibri",
+     "Calibri-Light",
+     "Calibri-Bold",
+     "Wingdings-Regular",
+     "ArialMT",
+     "SymbolMT"
+    ]
+   },
+   "cand": {
+    "pages": 4,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "39714aef680db4e19413187db6b2b7bb7a657ab5ef334630c5c845074e341edb",
+    "sha256_nodates": "ea3c8ee2fbd5b58dd476a0decfe2ed925356ab2b5f5f85993a8384602b37e526",
+    "fonts": [
+     "Carlito-Italic",
+     "Carlito",
+     "Carlito-Bold",
+     "Elixir Symbols",
+     "OpenSymbol"
+    ]
+   },
+   "ref_pages": 4,
+   "cand_pages": 4,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 8.04,
+   "scores": {
+    "mean_ssim": 0.83697,
+    "pct_pages_ok": 0.0,
+    "penalty": 72.32
+   }
+  },
+  {
+   "id": "t05",
+   "file": "teachers/t05-lecture-adaptee-dys-ce1.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t05/p-1.png",
+     "ours_png": "../raster/ours/t05/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.92477,
+     "diff_ink": 0.13822,
+     "diff_page": 0.008074,
+     "blocks": {
+      "n": 10,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t05/p001-diff.png",
+     "text_flow": {
+      "words": 139,
+      "found": 0.899,
+      "to_pages": {
+       "1": 0.899
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t05/p-2.png",
+     "ours_png": "../raster/ours/t05/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.82254,
+     "diff_ink": 0.73335,
+     "diff_page": 0.032858,
+     "blocks": {
+      "n": 14,
+      "moved": 7,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.7325,
+      "median_dy_mm": -9.31,
+      "median_dy_px": -44,
+      "max_abs_dy_mm": 16.09,
+      "max_abs_dy_px": 76,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 434,
+       "y1": 450,
+       "x0": 96,
+       "x1": 234,
+       "ink": 140,
+       "score": 0.864,
+       "page": 2,
+       "dy_px": 76,
+       "dy_mm": 16.09,
+       "dx_mm": 5.5,
+       "status": "moved"
+      },
+      {
+       "y0": 506,
+       "y1": 528,
+       "x0": 96,
+       "x1": 240,
+       "ink": 187,
+       "score": 0.969,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 552,
+       "y1": 566,
+       "x0": 96,
+       "x1": 262,
+       "ink": 239,
+       "score": 0.966,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 600,
+       "y1": 750,
+       "x0": 94,
+       "x1": 900,
+       "ink": 2632,
+       "score": 0.9,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 750,
+       "y1": 900,
+       "x0": 94,
+       "x1": 900,
+       "ink": 3612,
+       "score": 0.963,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 964,
+       "y1": 984,
+       "x0": 96,
+       "x1": 432,
+       "ink": 409,
+       "score": 0.972,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1080,
+       "y1": 1098,
+       "x0": 96,
+       "x1": 468,
+       "ink": 504,
+       "score": 0.976,
+       "page": 2,
+       "dy_px": -44,
+       "dy_mm": -9.31,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t05/p002-diff.png",
+     "text_flow": {
+      "words": 86,
+      "found": 0.651,
+      "to_pages": {
+       "2": 0.651
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/t05/p-3.png",
+     "ours_png": "../raster/ours/t05/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.9824,
+     "diff_ink": 0.31549,
+     "diff_page": 0.003436,
+     "blocks": {
+      "n": 1,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t05/p003-diff.png",
+     "text_flow": {
+      "words": 17,
+      "found": 1.0,
+      "to_pages": {
+       "3": 1.0
+      },
+      "starts_on": 3
+     }
+    }
+   ],
+   "ref": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "5cb91a224311ef60337a65a3034d52db2efbe42e9a63abe00b252d46576e09fc",
+    "sha256_nodates": "12eced75979531eecf5a34e2db797e2ffffbc8667a55c3f7aad1b8c78df0aab9",
+    "fonts": [
+     "Calibri",
+     "Calibri-Italic",
+     "Calibri-Bold",
+     "Calibri-Light",
+     "MS-Gothic",
+     "Arial-BoldMT",
+     "Wingdings-Regular"
+    ]
+   },
+   "cand": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "496f165b0e7b6eec55359a48a0011891f306a9c32a378035982bf1a86c7b52f8",
+    "sha256_nodates": "d988a4915845cff1ee610a7b93431d4227b33730e4b60070bbc559ad01a3d50e",
+    "fonts": [
+     "Carlito",
+     "Carlito-Italic",
+     "Carlito-Bold",
+     "ASCW3",
+     "Elixir Symbols"
+    ]
+   },
+   "ref_pages": 3,
+   "cand_pages": 3,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 5.43,
+   "scores": {
+    "mean_ssim": 0.9099,
+    "pct_pages_ok": 33.33,
+    "penalty": 68.01
+   }
+  },
+  {
+   "id": "t06",
+   "file": "teachers/t06-conjugaison-seyes-ce2.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t06/p-1.png",
+     "ours_png": "../raster/ours/t06/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.60331,
+     "diff_ink": 0.24135,
+     "diff_page": 0.042846,
+     "blocks": {
+      "n": 6,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.7058,
+      "median_dy_mm": -74.08,
+      "median_dy_px": -350,
+      "max_abs_dy_mm": 81.28,
+      "max_abs_dy_px": 384,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 468,
+       "y1": 702,
+       "x0": 0,
+       "x1": 992,
+       "ink": 2074,
+       "score": 0.375,
+       "page": 1,
+       "dy_px": 0,
+       "dy_mm": 0.0,
+       "dx_mm": 0.0,
+       "status": "lost"
+      },
+      {
+       "y0": 702,
+       "y1": 936,
+       "x0": 0,
+       "x1": 992,
+       "ink": 4210,
+       "score": 0.825,
+       "page": 1,
+       "dy_px": -384,
+       "dy_mm": -81.28,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 936,
+       "y1": 1170,
+       "x0": 0,
+       "x1": 990,
+       "ink": 4618,
+       "score": 0.765,
+       "page": 1,
+       "dy_px": -384,
+       "dy_mm": -81.28,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1170,
+       "y1": 1404,
+       "x0": 0,
+       "x1": 992,
+       "ink": 4896,
+       "score": 0.745,
+       "page": 1,
+       "dy_px": -350,
+       "dy_mm": -74.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t06/p001-diff.png",
+     "text_flow": {
+      "words": 99,
+      "found": 0.899,
+      "to_pages": {
+       "1": 0.899
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t06/p-2.png",
+     "ours_png": "../raster/ours/t06/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.66297,
+     "diff_ink": 0.07592,
+     "diff_page": 0.010413,
+     "blocks": {
+      "n": 6,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.6683,
+      "median_dy_mm": 0.42,
+      "median_dy_px": 2,
+      "max_abs_dy_mm": 8.04,
+      "max_abs_dy_px": 38,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 234,
+       "y1": 468,
+       "x0": 0,
+       "x1": 992,
+       "ink": 4684,
+       "score": 0.482,
+       "page": 2,
+       "dy_px": 0,
+       "dy_mm": 0.0,
+       "dx_mm": 0.0,
+       "status": "lost"
+      },
+      {
+       "y0": 468,
+       "y1": 702,
+       "x0": 0,
+       "x1": 992,
+       "ink": 917,
+       "score": 0.839,
+       "page": 2,
+       "dy_px": 38,
+       "dy_mm": 8.04,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 702,
+       "y1": 936,
+       "x0": 0,
+       "x1": 992,
+       "ink": 2260,
+       "score": 0.953,
+       "page": 2,
+       "dy_px": 38,
+       "dy_mm": 8.04,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 936,
+       "y1": 1170,
+       "x0": 0,
+       "x1": 990,
+       "ink": 930,
+       "score": 0.953,
+       "page": 2,
+       "dy_px": 38,
+       "dy_mm": 8.04,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t06/p002-diff.png",
+     "text_flow": {
+      "words": 29,
+      "found": 0.931,
+      "to_pages": {
+       "1": 0.931
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/t06/p-3.png",
+     "ours_png": "../raster/ours/t06/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.67726,
+     "diff_ink": 0.00744,
+     "diff_page": 0.000981,
+     "blocks": {
+      "n": 6,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.325,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 8.04,
+      "max_abs_dy_px": 38,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 468,
+       "y1": 702,
+       "x0": 0,
+       "x1": 992,
+       "ink": 951,
+       "score": 0.828,
+       "page": 3,
+       "dy_px": -38,
+       "dy_mm": -8.04,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 702,
+       "y1": 936,
+       "x0": 0,
+       "x1": 992,
+       "ink": 2315,
+       "score": 0.788,
+       "page": 3,
+       "dy_px": 38,
+       "dy_mm": 8.04,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t06/p003-diff.png",
+     "text_flow": {
+      "words": 19,
+      "found": 1.0,
+      "to_pages": {
+       "3": 1.0
+      },
+      "starts_on": 3
+     }
+    }
+   ],
+   "ref": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "3636bb2b5cc6828c0ce54747755b6075b61a1fdb1afc1d65bc4bda44555d7cea",
+    "sha256_nodates": "e22d4fdfe05df7b51d1d497a781f587487016b22e93c6ebf7f6fe6ad7f3b3857",
+    "fonts": [
+     "ArialMT",
+     "Calibri",
+     "Arial-BoldMT",
+     "Arial-ItalicMT",
+     "Calibri-Bold",
+     "Calibri-Italic",
+     "Wingdings-Regular"
+    ]
+   },
+   "cand": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "bf9d9e489e91fe8457687216ea2d3f5306f37f7c50f3adaa7cffa31608779637",
+    "sha256_nodates": "7374f7f95f5932c0d1978cbc45618111f1411fd5ca39fe3e51c39640eb07c527",
+    "fonts": [
+     "Carlito",
+     "Liberation Sans-Bold",
+     "Liberation Sans",
+     "Liberation Sans-Italic",
+     "Carlito-Bold",
+     "Carlito-Italic",
+     "Elixir Symbols"
+    ]
+   },
+   "ref_pages": 3,
+   "cand_pages": 3,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 9.37,
+   "scores": {
+    "mean_ssim": 0.64785,
+    "pct_pages_ok": 0.0,
+    "penalty": 66.27
+   }
+  },
+  {
+   "id": "t07",
+   "file": "teachers/t07-frise-chronologique-6e.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t07/p-1.png",
+     "ours_png": "../raster/ours/t07/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       993,
+       1404
+      ],
+      "ours": [
+       993,
+       1404
+      ]
+     },
+     "ssim": 0.88382,
+     "diff_ink": 0.05473,
+     "diff_page": 0.003071,
+     "blocks": {
+      "n": 5,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t07/p001-diff.png",
+     "text_flow": {
+      "words": 96,
+      "found": 0.219,
+      "to_pages": {
+       "1": 0.219
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      297.0,
+      210.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "8f3ba3721448bed49d731403d724ba5fa839c99f66eaf063fdf0954e3dec711c",
+    "sha256_nodates": "5ba560b6a245cc3bf2886b07a449ed8dee873632ee0d1e1f9602284ea4be65f8",
+    "fonts": [
+     "Cambria-Bold",
+     "Cambria",
+     "Cambria-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      297.0,
+      210.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "f623ad824ca3c90e6860ea136a1ec88e85787a3d67c2a9851351d6177e545660",
+    "sha256_nodates": "3c5767038426a21b87417f912c9ca09046e40b5984ae02bf249a6b158d28a2ac",
+    "fonts": [
+     "Caladea-Bold",
+     "Caladea-Italic",
+     "Caladea"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 1.64,
+   "scores": {
+    "mean_ssim": 0.88382,
+    "pct_pages_ok": 0.0,
+    "penalty": 97.26
+   }
+  },
+  {
+   "id": "t08",
+   "file": "teachers/t08-progression-maths-5e.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t08/p-1.png",
+     "ours_png": "../raster/ours/t08/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       993,
+       1404
+      ],
+      "ours": [
+       993,
+       1404
+      ]
+     },
+     "ssim": 0.83777,
+     "diff_ink": 0.02472,
+     "diff_page": 0.003068,
+     "blocks": {
+      "n": 8,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t08/p001-diff.png",
+     "text_flow": {
+      "words": 221,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t08/p-2.png",
+     "ours_png": "../raster/ours/t08/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.90988,
+     "diff_ink": 0.15166,
+     "diff_page": 0.010778,
+     "blocks": {
+      "n": 9,
+      "moved": 4,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.8291,
+      "median_dy_mm": 1.69,
+      "median_dy_px": 8,
+      "max_abs_dy_mm": 2.96,
+      "max_abs_dy_px": 14,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 188,
+       "y1": 338,
+       "x0": 130,
+       "x1": 814,
+       "ink": 7496,
+       "score": 0.986,
+       "page": 2,
+       "dy_px": 6,
+       "dy_mm": 1.27,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 338,
+       "y1": 488,
+       "x0": 130,
+       "x1": 856,
+       "ink": 10778,
+       "score": 0.984,
+       "page": 2,
+       "dy_px": 10,
+       "dy_mm": 2.12,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 498,
+       "y1": 508,
+       "x0": 214,
+       "x1": 792,
+       "ink": 86,
+       "score": 0.959,
+       "page": 2,
+       "dy_px": 14,
+       "dy_mm": 2.96,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 532,
+       "y1": 544,
+       "x0": 174,
+       "x1": 822,
+       "ink": 596,
+       "score": 0.767,
+       "page": 2,
+       "dy_px": 8,
+       "dy_mm": 1.69,
+       "dx_mm": 0.42,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t08/p002-diff.png",
+     "text_flow": {
+      "words": 55,
+      "found": 0.836,
+      "to_pages": {
+       "2": 0.836
+      },
+      "starts_on": 2
+     }
+    }
+   ],
+   "ref": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "91133592e417d3eb1664d7fd88c4651180a1564559a329680e4805c851fd0543",
+    "sha256_nodates": "e5c721f2cc557358b3fe452ca9045e6b8b9c5c44fc21aa4716629238a0854eb3",
+    "fonts": [
+     "TimesNewRomanPS-BoldMT",
+     "TimesNewRomanPSMT",
+     "TimesNewRomanPS-ItalicMT",
+     "Calibri",
+     "ArialMT",
+     "Calibri-Bold"
+    ]
+   },
+   "cand": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "cc01e08404c33e0dda659d193c3ca768530560dd9565d0bbf4e3cb4f54ac5d16",
+    "sha256_nodates": "41f05c9703c29d9b079b504bdfe8ce909186bd423322ca22532349f1c537c1f7",
+    "fonts": [
+     "Liberation Serif-Bold",
+     "Liberation Serif",
+     "Liberation Serif-Italic",
+     "Carlito",
+     "Carlito-Bold"
+    ]
+   },
+   "ref_pages": 2,
+   "cand_pages": 2,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 3.86,
+   "scores": {
+    "mean_ssim": 0.87383,
+    "pct_pages_ok": 0.0,
+    "penalty": 74.86
+   }
+  },
+  {
+   "id": "t09",
+   "file": "teachers/t09-projet-classe-solidarite-les-lilas.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t09/p-1.png",
+     "ours_png": "../raster/ours/t09/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.95485,
+     "diff_ink": 0.01441,
+     "diff_page": 0.000841,
+     "blocks": {
+      "n": 30,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t09/p001-diff.png",
+     "text_flow": {
+      "words": 355,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "69e9c1d0e38cf2302ac50fd47e3644fa57aaa748afc4c61f2820aab957d1cde6",
+    "sha256_nodates": "0650183724894307a5860f239fddd18c7f7622b5a2e19745207cb4c4a66467f3",
+    "fonts": [
+     "Calibri"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "a68bc2371da28670503dddf73fe4b4f985bb62344cca36f9e9e95785d4ad2f70",
+    "sha256_nodates": "e2c69496a22f54e1de86e5e163189672be1a8d37dc5aa4351f0aef081ff6a9a0",
+    "fonts": [
+     "Carlito"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.16,
+   "scores": {
+    "mean_ssim": 0.95485,
+    "pct_pages_ok": 0.0,
+    "penalty": 99.28
+   }
+  },
+  {
+   "id": "t10",
+   "file": "teachers/t10-programme-emc-terminale-eduscol.docx",
+   "category": "teachers",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/t10/p-1.png",
+     "ours_png": "../raster/ours/t10/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.96855,
+     "diff_ink": 0.00181,
+     "diff_page": 5.5e-05,
+     "blocks": {
+      "n": 13,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t10/p001-diff.png",
+     "text_flow": {
+      "words": 69,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/t10/p-2.png",
+     "ours_png": "../raster/ours/t10/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.86265,
+     "diff_ink": 0.0035,
+     "diff_page": 0.000484,
+     "blocks": {
+      "n": 8,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/t10/p002-diff.png",
+     "text_flow": {
+      "words": 619,
+      "found": 1.0,
+      "to_pages": {
+       "2": 1.0
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/t10/p-3.png",
+     "ours_png": "../raster/ours/t10/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.76435,
+     "diff_ink": 0.33759,
+     "diff_page": 0.043857,
+     "blocks": {
+      "n": 14,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.2488,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 4.23,
+      "max_abs_dy_px": 20,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 944,
+       "y1": 1094,
+       "x0": 148,
+       "x1": 872,
+       "ink": 5593,
+       "score": 0.86,
+       "page": 3,
+       "dy_px": -12,
+       "dy_mm": -2.54,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1104,
+       "y1": 1188,
+       "x0": 148,
+       "x1": 874,
+       "ink": 4166,
+       "score": 0.91,
+       "page": 3,
+       "dy_px": -20,
+       "dy_mm": -4.23,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t10/p003-diff.png",
+     "text_flow": {
+      "words": 438,
+      "found": 0.995,
+      "to_pages": {
+       "3": 0.995
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/t10/p-4.png",
+     "ours_png": "../raster/ours/t10/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.61539,
+     "diff_ink": 0.66639,
+     "diff_page": 0.090685,
+     "blocks": {
+      "n": 12,
+      "moved": 9,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.9355,
+      "median_dy_mm": -31.33,
+      "median_dy_px": -148,
+      "max_abs_dy_mm": 34.29,
+      "max_abs_dy_px": 162,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 162,
+       "y1": 296,
+       "x0": 138,
+       "x1": 690,
+       "ink": 2998,
+       "score": 0.448,
+       "page": 4,
+       "dy_px": 24,
+       "dy_mm": 5.08,
+       "dx_mm": 0.42,
+       "status": "lost"
+      },
+      {
+       "y0": 314,
+       "y1": 444,
+       "x0": 136,
+       "x1": 872,
+       "ink": 3644,
+       "score": 0.809,
+       "page": 4,
+       "dy_px": -124,
+       "dy_mm": -26.25,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 454,
+       "y1": 566,
+       "x0": 148,
+       "x1": 872,
+       "ink": 2874,
+       "score": 0.749,
+       "page": 4,
+       "dy_px": -140,
+       "dy_mm": -29.63,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 590,
+       "y1": 612,
+       "x0": 118,
+       "x1": 576,
+       "ink": 681,
+       "score": 0.976,
+       "page": 4,
+       "dy_px": -144,
+       "dy_mm": -30.48,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 626,
+       "y1": 662,
+       "x0": 136,
+       "x1": 872,
+       "ink": 1576,
+       "score": 0.98,
+       "page": 4,
+       "dy_px": -144,
+       "dy_mm": -30.48,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 672,
+       "y1": 834,
+       "x0": 118,
+       "x1": 872,
+       "ink": 7084,
+       "score": 0.798,
+       "page": 4,
+       "dy_px": -148,
+       "dy_mm": -31.33,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 834,
+       "y1": 996,
+       "x0": 148,
+       "x1": 872,
+       "ink": 5434,
+       "score": 0.849,
+       "page": 4,
+       "dy_px": -156,
+       "dy_mm": -33.02,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1006,
+       "y1": 1068,
+       "x0": 148,
+       "x1": 872,
+       "ink": 2964,
+       "score": 0.977,
+       "page": 4,
+       "dy_px": -162,
+       "dy_mm": -34.29,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1080,
+       "y1": 1214,
+       "x0": 138,
+       "x1": 614,
+       "ink": 3033,
+       "score": 0.608,
+       "page": 4,
+       "dy_px": -58,
+       "dy_mm": -12.28,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1224,
+       "y1": 1262,
+       "x0": 148,
+       "x1": 354,
+       "ink": 592,
+       "score": 0.75,
+       "page": 4,
+       "dy_px": 20,
+       "dy_mm": 4.23,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t10/p004-diff.png",
+     "text_flow": {
+      "words": 315,
+      "found": 0.987,
+      "to_pages": {
+       "3": 0.063,
+       "4": 0.924
+      },
+      "starts_on": 4
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/t10/p-5.png",
+     "ours_png": "../raster/ours/t10/p-5.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.77382,
+     "diff_ink": 0.74454,
+     "diff_page": 0.056263,
+     "blocks": {
+      "n": 8,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.7724,
+      "median_dy_mm": -46.57,
+      "median_dy_px": -220,
+      "max_abs_dy_mm": 47.84,
+      "max_abs_dy_px": 226,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 210,
+       "y1": 344,
+       "x0": 148,
+       "x1": 586,
+       "ink": 3234,
+       "score": 0.411,
+       "page": 5,
+       "dy_px": 10,
+       "dy_mm": 2.12,
+       "dx_mm": 0.42,
+       "status": "lost"
+      },
+      {
+       "y0": 440,
+       "y1": 464,
+       "x0": 118,
+       "x1": 360,
+       "ink": 543,
+       "score": 0.994,
+       "page": 5,
+       "dy_px": -216,
+       "dy_mm": -45.72,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 492,
+       "y1": 568,
+       "x0": 148,
+       "x1": 872,
+       "ink": 3617,
+       "score": 0.972,
+       "page": 5,
+       "dy_px": -220,
+       "dy_mm": -46.57,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 578,
+       "y1": 778,
+       "x0": 148,
+       "x1": 874,
+       "ink": 8975,
+       "score": 0.736,
+       "page": 5,
+       "dy_px": -226,
+       "dy_mm": -47.84,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/t10/p005-diff.png",
+     "text_flow": {
+      "words": 219,
+      "found": 0.991,
+      "to_pages": {
+       "4": 0.26,
+       "5": 0.731
+      },
+      "starts_on": 4
+     }
+    }
+   ],
+   "ref": {
+    "pages": 5,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "16eaa4288cb81e3ae159e5b98f15d8f4c9e27683e58a473da33e5fdfa475972f",
+    "sha256_nodates": "6c8f4336293ddb3b89384b7d0d92a46e98e7a82df1abe5ffffd07f7f1266261b",
+    "fonts": [
+     "ArialMT",
+     "Arial-BoldMT",
+     "SymbolMT",
+     "Arial-ItalicMT"
+    ]
+   },
+   "cand": {
+    "pages": 5,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "6735c5b59d693521391a17180b06086215acb94d628fe47cb0cfaa9eaaf569ff",
+    "sha256_nodates": "53e9fe6ff301042bdda7e2ba4e75ffc65e93462334ab49dc291197a473ff54f5",
+    "fonts": [
+     "Liberation Sans",
+     "Liberation Sans-Bold",
+     "OpenSymbol",
+     "Liberation Sans-Italic"
+    ]
+   },
+   "ref_pages": 5,
+   "cand_pages": 5,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 13.62,
+   "scores": {
+    "mean_ssim": 0.79695,
+    "pct_pages_ok": 0.0,
+    "penalty": 62.89
+   }
+  },
+  {
+   "id": "s01",
+   "file": "smallorg/s01-devis-menuiserie.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s01/p-1.png",
+     "ours_png": "../raster/ours/s01/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.83642,
+     "diff_ink": 0.13129,
+     "diff_page": 0.016214,
+     "blocks": {
+      "n": 10,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s01/p001-diff.png",
+     "text_flow": {
+      "words": 373,
+      "found": 0.976,
+      "to_pages": {
+       "1": 0.976
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "0f7727a6d3be98c86e46bfd3ba94f600d41a29998069acc9f7dc92a27d26a827",
+    "sha256_nodates": "6f1dd5e45effb642f401bc16d5698a05050cbdc0b54eda82b76c9782c0aa411d",
+    "fonts": [
+     "ArialMT",
+     "Arial-BoldMT",
+     "Arial-ItalicMT"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "9346fbc052c13bf9d097ff5dfb0c990c0dcc81a3c60be0d785b563a32e8b99cb",
+    "sha256_nodates": "2d3366642c06fac2cdbb7821838a856b34d9666387628f77318a09cff537b67d",
+    "fonts": [
+     "Liberation Sans-Bold",
+     "Liberation Sans-Italic",
+     "Liberation Sans"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.19,
+   "scores": {
+    "mean_ssim": 0.83642,
+    "pct_pages_ok": 0.0,
+    "penalty": 93.44
+   }
+  },
+  {
+   "id": "s02",
+   "file": "smallorg/s02-compte-rendu-ag-association.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s02/p-1.png",
+     "ours_png": "../raster/ours/s02/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.96143,
+     "diff_ink": 0.12115,
+     "diff_page": 0.003398,
+     "blocks": {
+      "n": 9,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s02/p001-diff.png",
+     "text_flow": {
+      "words": 109,
+      "found": 0.917,
+      "to_pages": {
+       "1": 0.917
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/s02/p-2.png",
+     "ours_png": "../raster/ours/s02/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.7195,
+     "diff_ink": 0.69093,
+     "diff_page": 0.062192,
+     "blocks": {
+      "n": 28,
+      "moved": 24,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.8733,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 17.78,
+      "max_abs_dy_px": 84,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 150,
+       "y1": 166,
+       "x0": 148,
+       "x1": 762,
+       "ink": 559,
+       "score": 0.923,
+       "page": 2,
+       "dy_px": 24,
+       "dy_mm": 5.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 232,
+       "y1": 246,
+       "x0": 148,
+       "x1": 276,
+       "ink": 162,
+       "score": 0.897,
+       "page": 2,
+       "dy_px": -84,
+       "dy_mm": -17.78,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 282,
+       "y1": 302,
+       "x0": 120,
+       "x1": 290,
+       "ink": 233,
+       "score": 0.972,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 318,
+       "y1": 334,
+       "x0": 150,
+       "x1": 408,
+       "ink": 364,
+       "score": 0.973,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 344,
+       "y1": 360,
+       "x0": 148,
+       "x1": 310,
+       "ink": 231,
+       "score": 0.971,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 370,
+       "y1": 386,
+       "x0": 148,
+       "x1": 496,
+       "ink": 484,
+       "score": 0.97,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 396,
+       "y1": 412,
+       "x0": 148,
+       "x1": 442,
+       "ink": 421,
+       "score": 0.995,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 422,
+       "y1": 438,
+       "x0": 150,
+       "x1": 400,
+       "ink": 341,
+       "score": 0.974,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 448,
+       "y1": 464,
+       "x0": 148,
+       "x1": 622,
+       "ink": 705,
+       "score": 0.961,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 474,
+       "y1": 490,
+       "x0": 150,
+       "x1": 318,
+       "ink": 229,
+       "score": 0.996,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 522,
+       "y1": 542,
+       "x0": 120,
+       "x1": 300,
+       "ink": 273,
+       "score": 0.996,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 558,
+       "y1": 622,
+       "x0": 118,
+       "x1": 872,
+       "ink": 3041,
+       "score": 0.969,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 632,
+       "y1": 648,
+       "x0": 118,
+       "x1": 294,
+       "ink": 245,
+       "score": 0.975,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 680,
+       "y1": 700,
+       "x0": 120,
+       "x1": 330,
+       "ink": 360,
+       "score": 0.974,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 720,
+       "y1": 734,
+       "x0": 120,
+       "x1": 358,
+       "ink": 304,
+       "score": 0.97,
+       "page": 2,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 748,
+       "y1": 764,
+       "x0": 118,
+       "x1": 872,
+       "ink": 1092,
+       "score": 0.81,
+       "page": 2,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 774,
+       "y1": 790,
+       "x0": 118,
+       "x1": 840,
+       "ink": 1000,
+       "score": 0.833,
+       "page": 2,
+       "dy_px": -32,
+       "dy_mm": -6.77,
+       "dx_mm": 7.62,
+       "status": "moved"
+      },
+      {
+       "y0": 810,
+       "y1": 824,
+       "x0": 120,
+       "x1": 276,
+       "ink": 184,
+       "score": 0.992,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 840,
+       "y1": 880,
+       "x0": 118,
+       "x1": 872,
+       "ink": 1847,
+       "score": 0.958,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 912,
+       "y1": 932,
+       "x0": 118,
+       "x1": 330,
+       "ink": 357,
+       "score": 0.998,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 946,
+       "y1": 962,
+       "x0": 120,
+       "x1": 872,
+       "ink": 1064,
+       "score": 0.993,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 972,
+       "y1": 988,
+       "x0": 118,
+       "x1": 510,
+       "ink": 559,
+       "score": 0.95,
+       "page": 2,
+       "dy_px": 16,
+       "dy_mm": 3.39,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1020,
+       "y1": 1034,
+       "x0": 120,
+       "x1": 206,
+       "ink": 116,
+       "score": 0.977,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1054,
+       "y1": 1228,
+       "x0": 118,
+       "x1": 810,
+       "ink": 3337,
+       "score": 0.98,
+       "page": 2,
+       "dy_px": 18,
+       "dy_mm": 3.81,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s02/p002-diff.png",
+     "text_flow": {
+      "words": 302,
+      "found": 0.98,
+      "to_pages": {
+       "2": 0.98
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/s02/p-3.png",
+     "ours_png": "../raster/ours/s02/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.98306,
+     "diff_ink": 0.06717,
+     "diff_page": 0.001137,
+     "blocks": {
+      "n": 9,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s02/p003-diff.png",
+     "text_flow": {
+      "words": 90,
+      "found": 1.0,
+      "to_pages": {
+       "3": 1.0
+      },
+      "starts_on": 3
+     }
+    }
+   ],
+   "ref": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "fad32056bf4b4d2e0ed8b3a01238dc6d3876d800d79fb8820b65c9f0726dd95f",
+    "sha256_nodates": "7514308dd414010ccc2a10e6d0ba1796fbb4179e7eba19bddaa662936d26a41d",
+    "fonts": [
+     "Calibri-Bold",
+     "Calibri",
+     "Cambria",
+     "SymbolMT",
+     "ArialMT",
+     "Cambria-Bold",
+     "Arial-BoldMT",
+     "Calibri-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "696b4c81669aae0b349551b4aa1194e6e7b83a8155ea480d71e6e7ffbce40978",
+    "sha256_nodates": "a310ce618108521b7a1fab83e4ea38f2cee415bbbaeb77e6a9cfd200dc186228",
+    "fonts": [
+     "Carlito-Bold",
+     "Carlito",
+     "Caladea",
+     "OpenSymbol",
+     "Caladea-Bold",
+     "Carlito-Italic"
+    ]
+   },
+   "ref_pages": 3,
+   "cand_pages": 3,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 6.46,
+   "scores": {
+    "mean_ssim": 0.888,
+    "pct_pages_ok": 33.33,
+    "penalty": 70.79
+   }
+  },
+  {
+   "id": "s03",
+   "file": "smallorg/s03-statuts-association-loi-1901.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s03/p-1.png",
+     "ours_png": "../raster/ours/s03/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.87581,
+     "diff_ink": 0.09224,
+     "diff_page": 0.007106,
+     "blocks": {
+      "n": 22,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s03/p001-diff.png",
+     "text_flow": {
+      "words": 356,
+      "found": 0.98,
+      "to_pages": {
+       "1": 0.98
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/s03/p-2.png",
+     "ours_png": "../raster/ours/s03/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.63043,
+     "diff_ink": 0.67388,
+     "diff_page": 0.081024,
+     "blocks": {
+      "n": 18,
+      "moved": 17,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.9869,
+      "median_dy_mm": -5.93,
+      "median_dy_px": -28,
+      "max_abs_dy_mm": 11.01,
+      "max_abs_dy_px": 52,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 122,
+       "y1": 166,
+       "x0": 118,
+       "x1": 496,
+       "ink": 677,
+       "score": 0.627,
+       "page": 2,
+       "dy_px": 52,
+       "dy_mm": 11.01,
+       "dx_mm": 1.69,
+       "status": "moved"
+      },
+      {
+       "y0": 176,
+       "y1": 244,
+       "x0": 118,
+       "x1": 848,
+       "ink": 2199,
+       "score": 0.978,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 270,
+       "y1": 284,
+       "x0": 94,
+       "x1": 282,
+       "ink": 313,
+       "score": 0.965,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 298,
+       "y1": 364,
+       "x0": 94,
+       "x1": 848,
+       "ink": 3189,
+       "score": 0.975,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 388,
+       "y1": 406,
+       "x0": 94,
+       "x1": 450,
+       "ink": 624,
+       "score": 0.97,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 416,
+       "y1": 482,
+       "x0": 94,
+       "x1": 848,
+       "ink": 3249,
+       "score": 0.975,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 496,
+       "y1": 560,
+       "x0": 94,
+       "x1": 848,
+       "ink": 2710,
+       "score": 0.985,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 574,
+       "y1": 640,
+       "x0": 96,
+       "x1": 848,
+       "ink": 2928,
+       "score": 0.976,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 664,
+       "y1": 682,
+       "x0": 94,
+       "x1": 494,
+       "ink": 692,
+       "score": 0.968,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 694,
+       "y1": 782,
+       "x0": 94,
+       "x1": 848,
+       "ink": 3570,
+       "score": 0.855,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 806,
+       "y1": 820,
+       "x0": 94,
+       "x1": 410,
+       "ink": 550,
+       "score": 0.958,
+       "page": 2,
+       "dy_px": -26,
+       "dy_mm": -5.5,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 836,
+       "y1": 924,
+       "x0": 94,
+       "x1": 850,
+       "ink": 3613,
+       "score": 0.971,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 948,
+       "y1": 962,
+       "x0": 94,
+       "x1": 260,
+       "ink": 265,
+       "score": 0.96,
+       "page": 2,
+       "dy_px": -26,
+       "dy_mm": -5.5,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 976,
+       "y1": 996,
+       "x0": 96,
+       "x1": 698,
+       "ink": 910,
+       "score": 0.981,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1010,
+       "y1": 1082,
+       "x0": 118,
+       "x1": 542,
+       "ink": 1641,
+       "score": 0.977,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1106,
+       "y1": 1122,
+       "x0": 94,
+       "x1": 294,
+       "ink": 336,
+       "score": 0.969,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1136,
+       "y1": 1202,
+       "x0": 94,
+       "x1": 848,
+       "ink": 2589,
+       "score": 0.976,
+       "page": 2,
+       "dy_px": -28,
+       "dy_mm": -5.93,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s03/p002-diff.png",
+     "text_flow": {
+      "words": 421,
+      "found": 0.995,
+      "to_pages": {
+       "1": 0.012,
+       "2": 0.983
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/s03/p-3.png",
+     "ours_png": "../raster/ours/s03/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.89978,
+     "diff_ink": 0.58722,
+     "diff_page": 0.019536,
+     "blocks": {
+      "n": 9,
+      "moved": 5,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.521,
+      "median_dy_mm": 4.66,
+      "median_dy_px": 22,
+      "max_abs_dy_mm": 4.66,
+      "max_abs_dy_px": 22,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 218,
+       "y1": 232,
+       "x0": 142,
+       "x1": 340,
+       "ink": 338,
+       "score": 0.963,
+       "page": 3,
+       "dy_px": 22,
+       "dy_mm": 4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 248,
+       "y1": 308,
+       "x0": 142,
+       "x1": 896,
+       "ink": 2303,
+       "score": 0.977,
+       "page": 3,
+       "dy_px": 22,
+       "dy_mm": 4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 346,
+       "y1": 366,
+       "x0": 142,
+       "x1": 740,
+       "ink": 869,
+       "score": 0.965,
+       "page": 3,
+       "dy_px": 22,
+       "dy_mm": 4.66,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 390,
+       "y1": 408,
+       "x0": 272,
+       "x1": 762,
+       "ink": 409,
+       "score": 0.977,
+       "page": 3,
+       "dy_px": 22,
+       "dy_mm": 4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 418,
+       "y1": 432,
+       "x0": 274,
+       "x1": 762,
+       "ink": 366,
+       "score": 0.98,
+       "page": 3,
+       "dy_px": 22,
+       "dy_mm": 4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s03/p003-diff.png",
+     "text_flow": {
+      "words": 128,
+      "found": 0.945,
+      "to_pages": {
+       "3": 0.945
+      },
+      "starts_on": 3
+     }
+    }
+   ],
+   "ref": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "b7d0d9904ce9bb64c4742b63789ed5dd881e2c8d865ff3879c257a9ac9dda275",
+    "sha256_nodates": "a34ef36e89223901adcf6ebc01b66459fb561de13bd3d716ccba40ee6d88d692",
+    "fonts": [
+     "TimesNewRomanPS-ItalicMT",
+     "TimesNewRomanPSMT",
+     "TimesNewRomanPS-BoldMT",
+     "Arial-BoldMT",
+     "ArialMT",
+     "Calibri"
+    ]
+   },
+   "cand": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "356fd646fea5ad4393975f6bef8371e864f5dd8779a3ac8ba74d2edb3546729e",
+    "sha256_nodates": "cb22cc61e4aa6c83b06a532d1e2a28a7511483e644a1674c046b1c556c0a10f4",
+    "fonts": [
+     "Liberation Serif-Italic",
+     "Liberation Serif-Bold",
+     "Liberation Serif",
+     "Carlito"
+    ]
+   },
+   "ref_pages": 3,
+   "cand_pages": 3,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 7.47,
+   "scores": {
+    "mean_ssim": 0.80201,
+    "pct_pages_ok": 0.0,
+    "penalty": 52.31
+   }
+  },
+  {
+   "id": "s04",
+   "file": "smallorg/s04-newsletter-quartier.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s04/p-1.png",
+     "ours_png": "../raster/ours/s04/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.58324,
+     "diff_ink": 0.42052,
+     "diff_page": 0.121333,
+     "blocks": {
+      "n": 6,
+      "moved": 1,
+      "other_page": 0,
+      "lost": 3,
+      "displaced_ink_frac": 0.5725,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 11.85,
+      "max_abs_dy_px": 56,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 262,
+       "y1": 488,
+       "x0": 66,
+       "x1": 924,
+       "ink": 9796,
+       "score": 0.402,
+       "page": 1,
+       "dy_px": -4,
+       "dy_mm": -0.85,
+       "dx_mm": 0.0,
+       "status": "lost"
+      },
+      {
+       "y0": 488,
+       "y1": 714,
+       "x0": 66,
+       "x1": 924,
+       "ink": 13251,
+       "score": 0.268,
+       "page": 1,
+       "dy_px": 94,
+       "dy_mm": 19.9,
+       "dx_mm": 0.0,
+       "status": "lost"
+      },
+      {
+       "y0": 714,
+       "y1": 940,
+       "x0": 64,
+       "x1": 928,
+       "ink": 17995,
+       "score": 0.471,
+       "page": 1,
+       "dy_px": -50,
+       "dy_mm": -10.58,
+       "dx_mm": 0.0,
+       "status": "lost"
+      },
+      {
+       "y0": 940,
+       "y1": 1162,
+       "x0": 64,
+       "x1": 926,
+       "ink": 6205,
+       "score": 0.603,
+       "page": 1,
+       "dy_px": -56,
+       "dy_mm": -11.85,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s04/p001-diff.png",
+     "text_flow": {
+      "words": 510,
+      "found": 0.916,
+      "to_pages": {
+       "1": 0.916
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "056125ce6b6bbd7b5ee652be2ec97a50b27316b83d1a9c207967786b1315a119",
+    "sha256_nodates": "a795acd8e1b448169e15b8452931232545dd03378bc27ca2a28c7052ba2fe809",
+    "fonts": [
+     "Verdana",
+     "Georgia",
+     "Georgia-Bold",
+     "Verdana-Italic",
+     "Verdana-Bold",
+     "Georgia-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "eef1d7470130bc0b308151334f01d15d601401e0732d0af56f831f72ab686b4f",
+    "sha256_nodates": "dfac3ebd90d440e521115398bc361e52a477f4d759a465450eb8c026fa00f7c5",
+    "fonts": [
+     "DejaVu Sans",
+     "Gelasio Metric",
+     "Gelasio Metric-Bold",
+     "DejaVu Sans-Italic",
+     "DejaVu Sans-Bold",
+     "Gelasio Metric-Italic"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.54,
+   "scores": {
+    "mean_ssim": 0.58324,
+    "pct_pages_ok": 0.0,
+    "penalty": 50.35
+   }
+  },
+  {
+   "id": "s05",
+   "file": "smallorg/s05-flyer-fete-quartier.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s05/p-1.png",
+     "ours_png": "../raster/ours/s05/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.88113,
+     "diff_ink": 0.0683,
+     "diff_page": 0.029087,
+     "blocks": {
+      "n": 7,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0702,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 4.23,
+      "max_abs_dy_px": 20,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 188,
+       "y1": 340,
+       "x0": 100,
+       "x1": 950,
+       "ink": 8806,
+       "score": 0.826,
+       "page": 1,
+       "dy_px": -12,
+       "dy_mm": -2.54,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 440,
+       "y1": 486,
+       "x0": 96,
+       "x1": 926,
+       "ink": 1270,
+       "score": 0.964,
+       "page": 1,
+       "dy_px": -20,
+       "dy_mm": -4.23,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s05/p001-diff.png",
+     "text_flow": {
+      "words": 77,
+      "found": 0.974,
+      "to_pages": {
+       "1": 0.974
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "74c5c334f3776ca44f769afca0c0bec97cfefcc58ceba05e691cbb5b69e96f71",
+    "sha256_nodates": "d0405b671383ac214d24d8c922ef377fc2f0bd280d2ece87f1f84db63c9072f6",
+    "fonts": [
+     "Arial-Black",
+     "ArialMT",
+     "Impact",
+     "Arial-BoldMT"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "163889491a77c19596f2729b2b524a00e9474f3a93765e3c83865cd9dc7b83a9",
+    "sha256_nodates": "57b6e7f14129dca3db622561b52cfaf3a2a955cef03311ac2a4a8e7097a986c1",
+    "fonts": [
+     "Archivo Black Metric",
+     "Open Sans",
+     "Liberation Sans-Bold",
+     "Liberation Sans"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.49,
+   "scores": {
+    "mean_ssim": 0.88113,
+    "pct_pages_ok": 0.0,
+    "penalty": 93.08
+   }
+  },
+  {
+   "id": "s06",
+   "file": "smallorg/s06-lettre-en-tete-association.docx",
+   "category": "smallorg",
+   "flags": [
+    "page-count-mismatch"
+   ],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s06/p-1.png",
+     "ours_png": "../raster/ours/s06/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.65298,
+     "diff_ink": 0.60887,
+     "diff_page": 0.077358,
+     "blocks": {
+      "n": 27,
+      "moved": 20,
+      "other_page": 1,
+      "lost": 0,
+      "displaced_ink_frac": 0.5861,
+      "median_dy_mm": 10.16,
+      "median_dy_px": 48,
+      "max_abs_dy_mm": 35.14,
+      "max_abs_dy_px": 166,
+      "to_pages": {
+       "2": 0.008
+      }
+     },
+     "block_list": [
+      {
+       "y0": 222,
+       "y1": 236,
+       "x0": 624,
+       "x1": 898,
+       "ink": 395,
+       "score": 0.775,
+       "page": 1,
+       "dy_px": -106,
+       "dy_mm": -22.44,
+       "dx_mm": -4.66,
+       "status": "moved"
+      },
+      {
+       "y0": 382,
+       "y1": 398,
+       "x0": 120,
+       "x1": 214,
+       "ink": 163,
+       "score": 0.859,
+       "page": 1,
+       "dy_px": 138,
+       "dy_mm": 29.21,
+       "dx_mm": 8.04,
+       "status": "moved"
+      },
+      {
+       "y0": 438,
+       "y1": 452,
+       "x0": 120,
+       "x1": 262,
+       "ink": 220,
+       "score": 0.953,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 484,
+       "y1": 524,
+       "x0": 118,
+       "x1": 896,
+       "ink": 2260,
+       "score": 0.84,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 536,
+       "y1": 552,
+       "x0": 118,
+       "x1": 880,
+       "ink": 1126,
+       "score": 0.912,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 1.27,
+       "status": "moved"
+      },
+      {
+       "y0": 574,
+       "y1": 590,
+       "x0": 150,
+       "x1": 716,
+       "ink": 807,
+       "score": 0.89,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 1.27,
+       "status": "moved"
+      },
+      {
+       "y0": 606,
+       "y1": 646,
+       "x0": 150,
+       "x1": 896,
+       "ink": 1137,
+       "score": 0.911,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 666,
+       "y1": 682,
+       "x0": 120,
+       "x1": 896,
+       "ink": 1036,
+       "score": 0.978,
+       "page": 1,
+       "dy_px": 166,
+       "dy_mm": 35.14,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 694,
+       "y1": 710,
+       "x0": 118,
+       "x1": 352,
+       "ink": 341,
+       "score": 0.868,
+       "page": 1,
+       "dy_px": 6,
+       "dy_mm": 1.27,
+       "dx_mm": 2.12,
+       "status": "moved"
+      },
+      {
+       "y0": 732,
+       "y1": 792,
+       "x0": 126,
+       "x1": 708,
+       "ink": 1158,
+       "score": 0.982,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 804,
+       "y1": 866,
+       "x0": 128,
+       "x1": 768,
+       "ink": 1642,
+       "score": 0.979,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 904,
+       "y1": 920,
+       "x0": 120,
+       "x1": 896,
+       "ink": 1044,
+       "score": 0.974,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 930,
+       "y1": 946,
+       "x0": 118,
+       "x1": 896,
+       "ink": 1125,
+       "score": 0.975,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 956,
+       "y1": 972,
+       "x0": 118,
+       "x1": 896,
+       "ink": 1070,
+       "score": 0.982,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 982,
+       "y1": 994,
+       "x0": 120,
+       "x1": 584,
+       "ink": 679,
+       "score": 0.962,
+       "page": 1,
+       "dy_px": 164,
+       "dy_mm": 34.71,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1020,
+       "y1": 1036,
+       "x0": 120,
+       "x1": 896,
+       "ink": 1188,
+       "score": 0.896,
+       "page": 1,
+       "dy_px": 74,
+       "dy_mm": 15.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1046,
+       "y1": 1062,
+       "x0": 118,
+       "x1": 578,
+       "ink": 674,
+       "score": 0.872,
+       "page": 1,
+       "dy_px": 48,
+       "dy_mm": 10.16,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1086,
+       "y1": 1102,
+       "x0": 120,
+       "x1": 842,
+       "ink": 1073,
+       "score": 0.872,
+       "page": 1,
+       "dy_px": 8,
+       "dy_mm": 1.69,
+       "dx_mm": 2.12,
+       "status": "moved"
+      },
+      {
+       "y0": 1132,
+       "y1": 1146,
+       "x0": 544,
+       "x1": 796,
+       "ink": 371,
+       "score": 0.843,
+       "page": 1,
+       "dy_px": -12,
+       "dy_mm": -2.54,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1158,
+       "y1": 1174,
+       "x0": 544,
+       "x1": 646,
+       "ink": 169,
+       "score": 0.905,
+       "page": 1,
+       "dy_px": 28,
+       "dy_mm": 5.93,
+       "dx_mm": -4.23,
+       "status": "moved"
+      },
+      {
+       "y0": 1194,
+       "y1": 1230,
+       "x0": 550,
+       "x1": 720,
+       "ink": 240,
+       "score": 0.975,
+       "page": 2,
+       "dy_px": -910,
+       "dy_mm": -192.62,
+       "dx_mm": 0.0,
+       "status": "other-page"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s06/p001-diff.png",
+     "text_flow": {
+      "words": 326,
+      "found": 0.936,
+      "to_pages": {
+       "1": 0.914,
+       "2": 0.021
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ours_png": "../raster/ours/s06/p-2.png",
+     "status": "extra-in-ours"
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "c4c249672820b11bddad27007da5c84adb4f98c0bedd3fa7be1e9a0e7ab797cf",
+    "sha256_nodates": "3641fbec9b0ffd1c7db41f33b7067381d297f53862c4e3c594802b4a8b201733",
+    "fonts": [
+     "Aptos-Bold",
+     "Aptos",
+     "Wingdings-Regular",
+     "ArialMT",
+     "Aptos-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "75aab54d036d7e8c80304582356836f9e56f66cf47333ec75dac774d56b52ac1",
+    "sha256_nodates": "be5e543b606f86953f54ca02857f579f3b60765bf3d65f88209039053d3b84e7",
+    "fonts": [
+     "Roboto Metric-Bold",
+     "Roboto Metric",
+     "Elixir Symbols",
+     "Roboto Metric-Italic"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 2,
+   "page_delta": 1,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.98,
+   "scores": {
+    "mean_ssim": 0.32649,
+    "pct_pages_ok": 0.0,
+    "penalty": 0.0
+   }
+  },
+  {
+   "id": "s07",
+   "file": "smallorg/s07-rapport-activite-2025.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s07/p-1.png",
+     "ours_png": "../raster/ours/s07/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.97076,
+     "diff_ink": 0.00775,
+     "diff_page": 0.007673,
+     "blocks": {
+      "n": 6,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s07/p001-diff.png",
+     "text_flow": {
+      "words": 16,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/s07/p-2.png",
+     "ours_png": "../raster/ours/s07/p-2.png",
+     "pixel_identical": true,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 1.0,
+     "diff_ink": 0.0,
+     "diff_page": 0.0,
+     "blocks": {
+      "n": 0,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s07/p002-diff.png",
+     "text_flow": {
+      "words": 0
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/s07/p-3.png",
+     "ours_png": "../raster/ours/s07/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.94006,
+     "diff_ink": 0.19012,
+     "diff_page": 0.005359,
+     "blocks": {
+      "n": 15,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s07/p003-diff.png",
+     "text_flow": {
+      "words": 119,
+      "found": 0.891,
+      "to_pages": {
+       "3": 0.832,
+       "5": 0.042,
+       "6": 0.017
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/s07/p-4.png",
+     "ours_png": "../raster/ours/s07/p-4.png",
+     "pixel_identical": true,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 1.0,
+     "diff_ink": 0.0,
+     "diff_page": 0.0,
+     "blocks": {
+      "n": 0,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s07/p004-diff.png",
+     "text_flow": {
+      "words": 0
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/s07/p-5.png",
+     "ours_png": "../raster/ours/s07/p-5.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.75059,
+     "diff_ink": 0.78677,
+     "diff_page": 0.086982,
+     "blocks": {
+      "n": 22,
+      "moved": 16,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.7873,
+      "median_dy_mm": -19.9,
+      "median_dy_px": -94,
+      "max_abs_dy_mm": 20.74,
+      "max_abs_dy_px": 98,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 418,
+       "y1": 434,
+       "x0": 358,
+       "x1": 634,
+       "ink": 487,
+       "score": 0.991,
+       "page": 5,
+       "dy_px": -96,
+       "dy_mm": -20.32,
+       "dx_mm": -4.66,
+       "status": "moved"
+      },
+      {
+       "y0": 454,
+       "y1": 660,
+       "x0": 154,
+       "x1": 832,
+       "ink": 6268,
+       "score": 0.971,
+       "page": 5,
+       "dy_px": -84,
+       "dy_mm": -17.78,
+       "dx_mm": -5.08,
+       "status": "moved"
+      },
+      {
+       "y0": 670,
+       "y1": 680,
+       "x0": 238,
+       "x1": 782,
+       "ink": 184,
+       "score": 0.977,
+       "page": 5,
+       "dy_px": -80,
+       "dy_mm": -16.93,
+       "dx_mm": -5.08,
+       "status": "moved"
+      },
+      {
+       "y0": 704,
+       "y1": 714,
+       "x0": 380,
+       "x1": 616,
+       "ink": 222,
+       "score": 0.772,
+       "page": 5,
+       "dy_px": 14,
+       "dy_mm": 2.96,
+       "dx_mm": 4.23,
+       "status": "moved"
+      },
+      {
+       "y0": 738,
+       "y1": 752,
+       "x0": 386,
+       "x1": 606,
+       "ink": 220,
+       "score": 0.994,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 776,
+       "y1": 794,
+       "x0": 120,
+       "x1": 274,
+       "ink": 129,
+       "score": 0.989,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 808,
+       "y1": 824,
+       "x0": 120,
+       "x1": 872,
+       "ink": 1057,
+       "score": 0.965,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 834,
+       "y1": 874,
+       "x0": 118,
+       "x1": 872,
+       "ink": 1308,
+       "score": 0.993,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 888,
+       "y1": 1000,
+       "x0": 118,
+       "x1": 876,
+       "ink": 6051,
+       "score": 0.991,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1010,
+       "y1": 1022,
+       "x0": 388,
+       "x1": 606,
+       "ink": 230,
+       "score": 0.995,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1060,
+       "y1": 1080,
+       "x0": 120,
+       "x1": 396,
+       "ink": 317,
+       "score": 0.959,
+       "page": 5,
+       "dy_px": -94,
+       "dy_mm": -19.9,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1112,
+       "y1": 1128,
+       "x0": 120,
+       "x1": 230,
+       "ink": 81,
+       "score": 0.966,
+       "page": 5,
+       "dy_px": -96,
+       "dy_mm": -20.32,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1146,
+       "y1": 1162,
+       "x0": 148,
+       "x1": 642,
+       "ink": 663,
+       "score": 0.958,
+       "page": 5,
+       "dy_px": -96,
+       "dy_mm": -20.32,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1174,
+       "y1": 1190,
+       "x0": 148,
+       "x1": 542,
+       "ink": 514,
+       "score": 0.988,
+       "page": 5,
+       "dy_px": -96,
+       "dy_mm": -20.32,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1204,
+       "y1": 1220,
+       "x0": 148,
+       "x1": 552,
+       "ink": 570,
+       "score": 0.961,
+       "page": 5,
+       "dy_px": -98,
+       "dy_mm": -20.74,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1232,
+       "y1": 1248,
+       "x0": 148,
+       "x1": 612,
+       "ink": 639,
+       "score": 0.992,
+       "page": 5,
+       "dy_px": -98,
+       "dy_mm": -20.74,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s07/p005-diff.png",
+     "text_flow": {
+      "words": 208,
+      "found": 0.87,
+      "to_pages": {
+       "5": 0.87
+      },
+      "starts_on": 5
+     }
+    },
+    {
+     "n": 6,
+     "ref_png": "../raster/ref/s07/p-6.png",
+     "ours_png": "../raster/ours/s07/p-6.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.89816,
+     "diff_ink": 0.30084,
+     "diff_page": 0.018045,
+     "blocks": {
+      "n": 18,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0296,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 2.96,
+      "max_abs_dy_px": 14,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 660,
+       "y1": 670,
+       "x0": 260,
+       "x1": 696,
+       "ink": 342,
+       "score": 0.893,
+       "page": 6,
+       "dy_px": 14,
+       "dy_mm": 2.96,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 688,
+       "y1": 700,
+       "x0": 272,
+       "x1": 534,
+       "ink": 146,
+       "score": 0.941,
+       "page": 6,
+       "dy_px": 6,
+       "dy_mm": 1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s07/p006-diff.png",
+     "text_flow": {
+      "words": 190,
+      "found": 0.863,
+      "to_pages": {
+       "6": 0.863
+      },
+      "starts_on": 6
+     }
+    }
+   ],
+   "ref": {
+    "pages": 6,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "0523bed4cc03131fd8b9f602e6adaffcb71d4bcfa8bc1081e8e10915f3d52e1d",
+    "sha256_nodates": "1c2915532cf547750c72658a8951ce3481f6cf259909f7dcaa4a7d880c03ba9f",
+    "fonts": [
+     "Calibri",
+     "Calibri-Light",
+     "Calibri-Bold",
+     "Calibri-Italic",
+     "ArialMT",
+     "SymbolMT"
+    ]
+   },
+   "cand": {
+    "pages": 6,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "b321882e806b007c3dbff3cff71cb6548b723437c92ea1b7b1ad06dd21234b7f",
+    "sha256_nodates": "5f46e1a3d4e657722e017aa66fc82d4da0f3fa5af131020868eead077c98cfb8",
+    "fonts": [
+     "Carlito-Bold",
+     "Carlito",
+     "Carlito-Italic",
+     "OpenSymbol"
+    ]
+   },
+   "ref_pages": 6,
+   "cand_pages": 6,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 2,
+    "all_pixel_identical": false
+   },
+   "seconds": 10.68,
+   "scores": {
+    "mean_ssim": 0.92659,
+    "pct_pages_ok": 33.33,
+    "penalty": 82.48
+   }
+  },
+  {
+   "id": "s08",
+   "file": "smallorg/s08-cv-deux-colonnes.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s08/p-1.png",
+     "ours_png": "../raster/ours/s08/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.71988,
+     "diff_ink": 0.19054,
+     "diff_page": 0.066059,
+     "blocks": {
+      "n": 6,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.5612,
+      "median_dy_mm": -1.27,
+      "median_dy_px": -6,
+      "max_abs_dy_mm": 2.96,
+      "max_abs_dy_px": 14,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 266,
+       "y1": 486,
+       "x0": 46,
+       "x1": 930,
+       "ink": 22100,
+       "score": 0.975,
+       "page": 1,
+       "dy_px": -6,
+       "dy_mm": -1.27,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 486,
+       "y1": 706,
+       "x0": 46,
+       "x1": 926,
+       "ink": 20975,
+       "score": 0.977,
+       "page": 1,
+       "dy_px": -10,
+       "dy_mm": -2.12,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 706,
+       "y1": 926,
+       "x0": 46,
+       "x1": 930,
+       "ink": 20229,
+       "score": 0.983,
+       "page": 1,
+       "dy_px": -14,
+       "dy_mm": -2.96,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/s08/p001-diff.png",
+     "text_flow": {
+      "words": 254,
+      "found": 0.878,
+      "to_pages": {
+       "1": 0.878
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/s08/p-2.png",
+     "ours_png": "../raster/ours/s08/p-2.png",
+     "pixel_identical": true,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 1.0,
+     "diff_ink": 0.0,
+     "diff_page": 0.0,
+     "blocks": {
+      "n": 0,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s08/p002-diff.png",
+     "text_flow": {
+      "words": 0
+     }
+    }
+   ],
+   "ref": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "96a4225fa8dfb8c58fef138df50982f758ccc0505912a16ba5e038b79e0af37d",
+    "sha256_nodates": "dfa39a7d974a501064b6162cf78324762e8e4d9d8a0bd0f6b989555cde2cc1b8",
+    "fonts": [
+     "CenturyGothic",
+     "CenturyGothic-Bold",
+     "SegoeUISymbol",
+     "Wingdings-Regular",
+     "CenturyGothic-Italic",
+     "SymbolMT",
+     "ArialMT"
+    ]
+   },
+   "cand": {
+    "pages": 2,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "50da3599a5fe9a8c13b3eb300e795e4a183eb914921729bb7b2ee3ea8f2eeb5f",
+    "sha256_nodates": "50f0a98a68495fbbb3e46807b6f377e5fea981e1a6220ec873afa6d439c710ec",
+    "fonts": [
+     "URW Gothic Metric-Bold",
+     "Symbola",
+     "URW Gothic Metric",
+     "Elixir Symbols",
+     "URW Gothic Metric-Italic",
+     "OpenSymbol"
+    ]
+   },
+   "ref_pages": 2,
+   "cand_pages": 2,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 1,
+    "all_pixel_identical": false
+   },
+   "seconds": 3.39,
+   "scores": {
+    "mean_ssim": 0.85994,
+    "pct_pages_ok": 50.0,
+    "penalty": 81.21
+   }
+  },
+  {
+   "id": "s09",
+   "file": "smallorg/s09-convocation-ag-pouvoir.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s09/p-1.png",
+     "ours_png": "../raster/ours/s09/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.91962,
+     "diff_ink": 0.06418,
+     "diff_page": 0.003814,
+     "blocks": {
+      "n": 20,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s09/p001-diff.png",
+     "text_flow": {
+      "words": 256,
+      "found": 0.949,
+      "to_pages": {
+       "1": 0.949
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "6b6220f021d3323ebb8e88d3c1b4a5e7ff9a223632f53c629e2b31d6f2c95e2f",
+    "sha256_nodates": "2e4150b1fd71faaebe209bc6d38eaa5383d10f8c615d4286349d0fb7598c44a7",
+    "fonts": [
+     "TimesNewRomanPS-BoldMT",
+     "TimesNewRomanPSMT",
+     "TimesNewRomanPS-ItalicMT",
+     "Arial-BoldMT",
+     "Wingdings-Regular"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "e0a70a05f79cf9443957b3c57fa19e3bd66d7f463518ba29821a0b637deff610",
+    "sha256_nodates": "dc231a25e253a6d778727aba7dc7a26b8bf9b65bfb3a9daca45bb7b7f4b9c5b8",
+    "fonts": [
+     "Liberation Serif-Bold",
+     "Liberation Serif",
+     "Liberation Serif-Italic",
+     "Elixir Symbols"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 1.96,
+   "scores": {
+    "mean_ssim": 0.91962,
+    "pct_pages_ok": 0.0,
+    "penalty": 96.79
+   }
+  },
+  {
+   "id": "s10",
+   "file": "smallorg/s10-bulletin-adhesion-formulaire.docx",
+   "category": "smallorg",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/s10/p-1.png",
+     "ours_png": "../raster/ours/s10/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.86113,
+     "diff_ink": 0.08986,
+     "diff_page": 0.008689,
+     "blocks": {
+      "n": 19,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.85,
+      "max_abs_dy_px": 4,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/s10/p001-diff.png",
+     "text_flow": {
+      "words": 268,
+      "found": 0.97,
+      "to_pages": {
+       "1": 0.97
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "dd37f20dd6d0c2e60329f562e980d28272c969eb2844ece32b700c4e724d6e69",
+    "sha256_nodates": "df10db12c48e36d69ecda04ace95403b30b0da766c4bf7fadead1dfdd53ccf4b",
+    "fonts": [
+     "Calibri",
+     "Calibri-Bold",
+     "Calibri-Italic",
+     "MS-Gothic"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "76624c7c9e1b077926f9a3395ed6ec9c78263fbfe5cbf545b8fb1d15444783a8",
+    "sha256_nodates": "0e7033fc60a18479341829581da8f579ccfbb6f640439090ce62a486a20cbb1c",
+    "fonts": [
+     "Carlito-Bold",
+     "Carlito",
+     "Carlito-Italic",
+     "ASCW3"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.01,
+   "scores": {
+    "mean_ssim": 0.86113,
+    "pct_pages_ok": 0.0,
+    "penalty": 95.51
+   }
+  },
+  {
+   "id": "a01",
+   "file": "admin/a01-courrier-mairie-revisions.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a01/p-1.png",
+     "ours_png": "../raster/ours/a01/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.8161,
+     "diff_ink": 0.42271,
+     "diff_page": 0.030456,
+     "blocks": {
+      "n": 18,
+      "moved": 6,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.2975,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 16.51,
+      "max_abs_dy_px": 78,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 780,
+       "y1": 840,
+       "x0": 118,
+       "x1": 896,
+       "ink": 2638,
+       "score": 0.688,
+       "page": 1,
+       "dy_px": 78,
+       "dy_mm": 16.51,
+       "dx_mm": 0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 858,
+       "y1": 872,
+       "x0": 118,
+       "x1": 734,
+       "ink": 880,
+       "score": 0.973,
+       "page": 1,
+       "dy_px": 76,
+       "dy_mm": 16.09,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 890,
+       "y1": 906,
+       "x0": 118,
+       "x1": 624,
+       "ink": 675,
+       "score": 0.909,
+       "page": 1,
+       "dy_px": 12,
+       "dy_mm": 2.54,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 942,
+       "y1": 980,
+       "x0": 520,
+       "x1": 732,
+       "ink": 576,
+       "score": 0.961,
+       "page": 1,
+       "dy_px": 78,
+       "dy_mm": 16.51,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1048,
+       "y1": 1062,
+       "x0": 520,
+       "x1": 654,
+       "ink": 254,
+       "score": 0.971,
+       "page": 1,
+       "dy_px": 76,
+       "dy_mm": 16.09,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1098,
+       "y1": 1110,
+       "x0": 120,
+       "x1": 660,
+       "ink": 621,
+       "score": 0.959,
+       "page": 1,
+       "dy_px": 76,
+       "dy_mm": 16.09,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a01/p001-diff.png",
+     "text_flow": {
+      "words": 343,
+      "found": 0.968,
+      "to_pages": {
+       "1": 0.968
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "94d978301d5eb67bb547d23058896b3f876da652d7bb2c4797073cd4933b0a69",
+    "sha256_nodates": "3d8e5413282de39f7da9857abb18a4b99b91547a14095e51c6da4f855c98cc07",
+    "fonts": [
+     "Calibri-Bold",
+     "Calibri",
+     "Calibri-Italic",
+     "ArialMT"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "9a5f2dc3888e461b0eb7028e4a38da9481889761f29b8c34b178880eb2b49c1a",
+    "sha256_nodates": "261f9aacb6ebb634dfae332be4a4efee9e7ddf49af9de5a35e41503ba32d1f71",
+    "fonts": [
+     "Carlito-Bold",
+     "Carlito",
+     "Carlito-Italic"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.22,
+   "scores": {
+    "mean_ssim": 0.8161,
+    "pct_pages_ok": 0.0,
+    "penalty": 63.99
+   }
+  },
+  {
+   "id": "a02",
+   "file": "admin/a02-arrete-municipal-circulation.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a02/p-1.png",
+     "ours_png": "../raster/ours/a02/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.91329,
+     "diff_ink": 0.03361,
+     "diff_page": 0.002708,
+     "blocks": {
+      "n": 16,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a02/p001-diff.png",
+     "text_flow": {
+      "words": 398,
+      "found": 0.98,
+      "to_pages": {
+       "1": 0.98
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/a02/p-2.png",
+     "ours_png": "../raster/ours/a02/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.97539,
+     "diff_ink": 0.10515,
+     "diff_page": 0.002242,
+     "blocks": {
+      "n": 4,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a02/p002-diff.png",
+     "text_flow": {
+      "words": 97,
+      "found": 1.0,
+      "to_pages": {
+       "2": 1.0
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/a02/p-3.png",
+     "ours_png": "../raster/ours/a02/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.76708,
+     "diff_ink": 0.0123,
+     "diff_page": 0.001221,
+     "blocks": {
+      "n": 7,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a02/p003-diff.png",
+     "text_flow": {
+      "words": 454,
+      "found": 1.0,
+      "to_pages": {
+       "3": 1.0
+      },
+      "starts_on": 3
+     }
+    }
+   ],
+   "ref": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "60db0a0a0f9e9c9ee541c54ac60e17fb36729613e748328a05ab9c70e0f5997d",
+    "sha256_nodates": "d5a86aebdf60c95756052166e3b0b620a3333d5bb053ff3bd8531796818f94de",
+    "fonts": [
+     "TimesNewRomanPS-ItalicMT",
+     "TimesNewRomanPSMT",
+     "TimesNewRomanPS-BoldMT"
+    ]
+   },
+   "cand": {
+    "pages": 3,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "a9b7dd5d3d1a7e64cc68412a0afe588664fc6e75a380bc161c53e2b18cf1d825",
+    "sha256_nodates": "20f3221abc84b0a5754d59882fb7199084110c6cc7c0ceacab7af73e42d5bc30",
+    "fonts": [
+     "Liberation Serif-Italic",
+     "Liberation Serif",
+     "Liberation Serif-Bold"
+    ]
+   },
+   "ref_pages": 3,
+   "cand_pages": 3,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 6.74,
+   "scores": {
+    "mean_ssim": 0.88525,
+    "pct_pages_ok": 0.0,
+    "penalty": 97.48
+   }
+  },
+  {
+   "id": "a03",
+   "file": "admin/a03-note-de-service.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a03/p-1.png",
+     "ours_png": "../raster/ours/a03/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.78905,
+     "diff_ink": 0.36872,
+     "diff_page": 0.042701,
+     "blocks": {
+      "n": 22,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.2741,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 5.08,
+      "max_abs_dy_px": 24,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 910,
+       "y1": 924,
+       "x0": 96,
+       "x1": 214,
+       "ink": 151,
+       "score": 0.958,
+       "page": 1,
+       "dy_px": 24,
+       "dy_mm": 5.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 936,
+       "y1": 1046,
+       "x0": 94,
+       "x1": 898,
+       "ink": 7913,
+       "score": 0.997,
+       "page": 1,
+       "dy_px": 24,
+       "dy_mm": 5.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 1080,
+       "y1": 1098,
+       "x0": 604,
+       "x1": 896,
+       "ink": 422,
+       "score": 0.99,
+       "page": 1,
+       "dy_px": 24,
+       "dy_mm": 5.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a03/p001-diff.png",
+     "text_flow": {
+      "words": 295,
+      "found": 0.959,
+      "to_pages": {
+       "1": 0.959
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "3007c22c7aa4e7a784894cac32f01a1dae440f2a4794be47e112833b71183b99",
+    "sha256_nodates": "00fcf6eb80c7095a1f30b02f316c199b5ac8083fe2b55c15ee93d83140f4f715",
+    "fonts": [
+     "Calibri",
+     "Calibri-Bold",
+     "Calibri-Light",
+     "Arial-BoldMT",
+     "ArialMT",
+     "Wingdings-Regular",
+     "Calibri-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "cce48fe9a98521b53da7f68be16212f7ab0dd9736685176a305673f7919b41d8",
+    "sha256_nodates": "5a7f357e7a05081a8721ac1a213964777d9d78c44a373883d97e7917e7735f66",
+    "fonts": [
+     "Carlito",
+     "Carlito-Bold",
+     "Elixir Symbols",
+     "Carlito-Italic"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.38,
+   "scores": {
+    "mean_ssim": 0.78905,
+    "pct_pages_ok": 0.0,
+    "penalty": 67.86
+   }
+  },
+  {
+   "id": "a04",
+   "file": "admin/a04-proces-verbal-revisions.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a04/p-1.png",
+     "ours_png": "../raster/ours/a04/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.84284,
+     "diff_ink": 0.04365,
+     "diff_page": 0.00422,
+     "blocks": {
+      "n": 16,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a04/p001-diff.png",
+     "text_flow": {
+      "words": 313,
+      "found": 0.936,
+      "to_pages": {
+       "1": 0.936
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "996a3bf7e25dce7e83afa380888bc2adb0db3dcd895568ceb303f5301e51710f",
+    "sha256_nodates": "fb282a04c62a56b73c9b5701dd0aafb9f7f14abb13c0c8add86dc1f9f2e6e625",
+    "fonts": [
+     "ArialMT",
+     "Arial-BoldMT",
+     "Arial-ItalicMT",
+     "Wingdings-Regular"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "5e2a8acc7e13f69c74c5af538c0e7e3496280af666065d41cb006c3c64e7497a",
+    "sha256_nodates": "2f1a0c2f743f73fdf3f3c165be009349b8846929052aa44640726ebae5764959",
+    "fonts": [
+     "Liberation Sans",
+     "Liberation Sans-Bold",
+     "Liberation Sans-Italic",
+     "Elixir Symbols"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.44,
+   "scores": {
+    "mean_ssim": 0.84284,
+    "pct_pages_ok": 0.0,
+    "penalty": 97.82
+   }
+  },
+  {
+   "id": "a05",
+   "file": "admin/a05-attestation.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a05/p-1.png",
+     "ours_png": "../raster/ours/a05/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.81963,
+     "diff_ink": 0.40134,
+     "diff_page": 0.034164,
+     "blocks": {
+      "n": 6,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 0.85,
+      "max_abs_dy_px": 4,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a05/p001-diff.png",
+     "text_flow": {
+      "words": 180,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "47d7b3fd62f220967407ddc73ad96f6ca31d16cbdf03794d5c0ca63eed840339",
+    "sha256_nodates": "17e494dc8ddf6035250acb01cefb1847e1801180fccbcf9e28504aa229fde9d1",
+    "fonts": [
+     "TimesNewRomanPSMT",
+     "TimesNewRomanPS-BoldMT"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "e2666667583af89a1d622ead4b49953d358dbf0511d7e332fa6d121af20b9fb1",
+    "sha256_nodates": "6a631c838e0ce3533b7355d0baf0c35ea28d71f36c55165e6056322fbff4f9b9",
+    "fonts": [
+     "Liberation Serif",
+     "Liberation Serif-Bold"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.07,
+   "scores": {
+    "mean_ssim": 0.81963,
+    "pct_pages_ok": 0.0,
+    "penalty": 79.93
+   }
+  },
+  {
+   "id": "a06",
+   "file": "admin/a06-rapport-annuel-multisection.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a06/p-1.png",
+     "ours_png": "../raster/ours/a06/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.92847,
+     "diff_ink": 0.97375,
+     "diff_page": 0.030381,
+     "blocks": {
+      "n": 5,
+      "moved": 5,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 1.0,
+      "median_dy_mm": -77.05,
+      "median_dy_px": -364,
+      "max_abs_dy_mm": 77.47,
+      "max_abs_dy_px": 366,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 498,
+       "y1": 638,
+       "x0": 430,
+       "x1": 562,
+       "ink": 2830,
+       "score": 0.998,
+       "page": 1,
+       "dy_px": -364,
+       "dy_mm": -77.05,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 696,
+       "y1": 712,
+       "x0": 342,
+       "x1": 650,
+       "ink": 415,
+       "score": 0.838,
+       "page": 1,
+       "dy_px": -172,
+       "dy_mm": -36.41,
+       "dx_mm": 1.69,
+       "status": "moved"
+      },
+      {
+       "y0": 744,
+       "y1": 788,
+       "x0": 204,
+       "x1": 788,
+       "ink": 1387,
+       "score": 0.693,
+       "page": 1,
+       "dy_px": -366,
+       "dy_mm": -77.47,
+       "dx_mm": -0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 800,
+       "y1": 826,
+       "x0": 328,
+       "x1": 662,
+       "ink": 564,
+       "score": 0.973,
+       "page": 1,
+       "dy_px": -366,
+       "dy_mm": -77.47,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 892,
+       "y1": 906,
+       "x0": 332,
+       "x1": 658,
+       "ink": 444,
+       "score": 0.965,
+       "page": 1,
+       "dy_px": -366,
+       "dy_mm": -77.47,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a06/p001-diff.png",
+     "text_flow": {
+      "words": 21,
+      "found": 1.0,
+      "to_pages": {
+       "1": 1.0
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/a06/p-2.png",
+     "ours_png": "../raster/ours/a06/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.94169,
+     "diff_ink": 0.15185,
+     "diff_page": 0.003187,
+     "blocks": {
+      "n": 15,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a06/p002-diff.png",
+     "text_flow": {
+      "words": 80,
+      "found": 0.863,
+      "to_pages": {
+       "2": 0.775,
+       "3": 0.062,
+       "4": 0.025
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/a06/p-3.png",
+     "ours_png": "../raster/ours/a06/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.83841,
+     "diff_ink": 0.16928,
+     "diff_page": 0.012261,
+     "blocks": {
+      "n": 20,
+      "moved": 2,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.1095,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 1.69,
+      "max_abs_dy_px": 8,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 808,
+       "y1": 1012,
+       "x0": 152,
+       "x1": 832,
+       "ink": 2241,
+       "score": 0.866,
+       "page": 3,
+       "dy_px": 6,
+       "dy_mm": 1.27,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 1034,
+       "y1": 1044,
+       "x0": 424,
+       "x1": 570,
+       "ink": 157,
+       "score": 0.828,
+       "page": 3,
+       "dy_px": 8,
+       "dy_mm": 1.69,
+       "dx_mm": -0.42,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a06/p003-diff.png",
+     "text_flow": {
+      "words": 288,
+      "found": 0.938,
+      "to_pages": {
+       "3": 0.938
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/a06/p-4.png",
+     "ours_png": "../raster/ours/a06/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.82339,
+     "diff_ink": 0.01511,
+     "diff_page": 0.001317,
+     "blocks": {
+      "n": 9,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a06/p004-diff.png",
+     "text_flow": {
+      "words": 197,
+      "found": 0.97,
+      "to_pages": {
+       "2": 0.005,
+       "3": 0.01,
+       "4": 0.954
+      },
+      "starts_on": 4
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/a06/p-5.png",
+     "ours_png": "../raster/ours/a06/p-5.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       993,
+       1404
+      ],
+      "ours": [
+       993,
+       1404
+      ]
+     },
+     "ssim": 0.88664,
+     "diff_ink": 0.25935,
+     "diff_page": 0.010991,
+     "blocks": {
+      "n": 8,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a06/p005-diff.png",
+     "text_flow": {
+      "words": 247,
+      "found": 0.964,
+      "to_pages": {
+       "5": 0.964
+      },
+      "starts_on": 5
+     }
+    },
+    {
+     "n": 6,
+     "ref_png": "../raster/ref/a06/p-6.png",
+     "ours_png": "../raster/ours/a06/p-6.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.91346,
+     "diff_ink": 0.38668,
+     "diff_page": 0.012354,
+     "blocks": {
+      "n": 14,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": -0.42,
+      "median_dy_px": -2,
+      "max_abs_dy_mm": 0.85,
+      "max_abs_dy_px": 4,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a06/p006-diff.png",
+     "text_flow": {
+      "words": 145,
+      "found": 0.766,
+      "to_pages": {
+       "6": 0.766
+      },
+      "starts_on": 6
+     }
+    }
+   ],
+   "ref": {
+    "pages": 6,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "33af3b3b4ab87f03d7439a81901b302eb701909dcca980cfd09dcf2811e49340",
+    "sha256_nodates": "efb742bca365c504c929218230b0d4a62311b8e327032f9e5853d18535f52b3d",
+    "fonts": [
+     "Calibri",
+     "Calibri-Light",
+     "Calibri-Italic",
+     "Calibri-Bold",
+     "ArialMT",
+     "Arial-BoldMT",
+     "SymbolMT"
+    ]
+   },
+   "cand": {
+    "pages": 6,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      297.0,
+      210.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "556543f77cd6738787547d87b7cfb076f350f9c65c0a5890578bed47e92e3bb5",
+    "sha256_nodates": "6e1eb1bab47bc54035967513fb7d3ac08fc26aed16fb0f41f4690282f0d066af",
+    "fonts": [
+     "Carlito",
+     "Carlito-Italic",
+     "Carlito-Bold",
+     "OpenSymbol"
+    ]
+   },
+   "ref_pages": 6,
+   "cand_pages": 6,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 12.07,
+   "scores": {
+    "mean_ssim": 0.88868,
+    "pct_pages_ok": 0.0,
+    "penalty": 74.45
+   }
+  },
+  {
+   "id": "a07",
+   "file": "admin/a07-formulaire-pret-vehicule-les-lilas.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a07/p-1.png",
+     "ours_png": "../raster/ours/a07/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.97627,
+     "diff_ink": 0.0034,
+     "diff_page": 0.000122,
+     "blocks": {
+      "n": 11,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a07/p001-diff.png",
+     "text_flow": {
+      "words": 115,
+      "found": 0.957,
+      "to_pages": {
+       "1": 0.957
+      },
+      "starts_on": 1
+     }
+    }
+   ],
+   "ref": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "217eb73cfbbb22a27c5be7e1fdcb383c8eb688bb2caaa2389baedba7a37023e1",
+    "sha256_nodates": "cee15dea3f473da96d57e78f47d3d82620b8612d7430079eb3118e250954c198",
+    "fonts": [
+     "ArialMT",
+     "Arial-BoldMT",
+     "Arial-ItalicMT",
+     "Calibri-Bold",
+     "Calibri"
+    ]
+   },
+   "cand": {
+    "pages": 1,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "77e1efd7b2d44aa00caa1fbf9e3c2d64a3ae6da4b0f645e6c5b8faf9e064579e",
+    "sha256_nodates": "67eb2581d6e3b0e3b2a6e87b4e96e8468315eedb2f664ed6e1a8b53e53eafc4a",
+    "fonts": [
+     "Liberation Sans",
+     "Liberation Sans-Bold",
+     "Liberation Sans-Italic",
+     "Carlito-Bold",
+     "Carlito"
+    ]
+   },
+   "ref_pages": 1,
+   "cand_pages": 1,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 2.11,
+   "scores": {
+    "mean_ssim": 0.97627,
+    "pct_pages_ok": 0.0,
+    "penalty": 99.83
+   }
+  },
+  {
+   "id": "a08",
+   "file": "admin/a08-debat-orientation-budgetaire-2016-noe.docx",
+   "category": "admin",
+   "flags": [
+    "page-count-mismatch"
+   ],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a08/p-1.png",
+     "ours_png": "../raster/ours/a08/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.86028,
+     "diff_ink": 0.0322,
+     "diff_page": 0.005414,
+     "blocks": {
+      "n": 13,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a08/p001-diff.png",
+     "text_flow": {
+      "words": 300,
+      "found": 0.677,
+      "to_pages": {
+       "1": 0.673,
+       "3": 0.003
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/a08/p-2.png",
+     "ours_png": "../raster/ours/a08/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.94103,
+     "diff_ink": 0.02083,
+     "diff_page": 0.004235,
+     "blocks": {
+      "n": 11,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a08/p002-diff.png",
+     "text_flow": {
+      "words": 240,
+      "found": 0.971,
+      "to_pages": {
+       "2": 0.971
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/a08/p-3.png",
+     "ours_png": "../raster/ours/a08/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.93654,
+     "diff_ink": 0.08456,
+     "diff_page": 0.005822,
+     "blocks": {
+      "n": 11,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a08/p003-diff.png",
+     "text_flow": {
+      "words": 307,
+      "found": 0.99,
+      "to_pages": {
+       "3": 0.99
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/a08/p-4.png",
+     "ours_png": "../raster/ours/a08/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.70681,
+     "diff_ink": 0.43783,
+     "diff_page": 0.055752,
+     "blocks": {
+      "n": 7,
+      "moved": 3,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.6112,
+      "median_dy_mm": -4.66,
+      "median_dy_px": -22,
+      "max_abs_dy_mm": 4.66,
+      "max_abs_dy_px": 22,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 460,
+       "y1": 654,
+       "x0": 40,
+       "x1": 950,
+       "ink": 11760,
+       "score": 0.915,
+       "page": 4,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 758,
+       "y1": 894,
+       "x0": 120,
+       "x1": 872,
+       "ink": 6012,
+       "score": 0.94,
+       "page": 4,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 914,
+       "y1": 1078,
+       "x0": 120,
+       "x1": 872,
+       "ink": 5445,
+       "score": 0.955,
+       "page": 4,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a08/p004-diff.png",
+     "text_flow": {
+      "words": 347,
+      "found": 0.075,
+      "to_pages": {
+       "3": 0.006,
+       "4": 0.035,
+       "5": 0.017,
+       "6": 0.012,
+       "7": 0.006
+      },
+      "starts_on": 4
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/a08/p-5.png",
+     "ours_png": "../raster/ours/a08/p-5.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.84157,
+     "diff_ink": 0.17288,
+     "diff_page": 0.05213,
+     "blocks": {
+      "n": 9,
+      "moved": 4,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.7313,
+      "median_dy_mm": 0.42,
+      "median_dy_px": 2,
+      "max_abs_dy_mm": 2.96,
+      "max_abs_dy_px": 14,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 366,
+       "y1": 534,
+       "x0": 72,
+       "x1": 708,
+       "ink": 17174,
+       "score": 0.832,
+       "page": 5,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 1.27,
+       "status": "moved"
+      },
+      {
+       "y0": 534,
+       "y1": 702,
+       "x0": 52,
+       "x1": 748,
+       "ink": 8271,
+       "score": 0.818,
+       "page": 5,
+       "dy_px": 14,
+       "dy_mm": 2.96,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 912,
+       "y1": 1086,
+       "x0": 254,
+       "x1": 900,
+       "ink": 18062,
+       "score": 0.864,
+       "page": 5,
+       "dy_px": 10,
+       "dy_mm": 2.12,
+       "dx_mm": -0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 1086,
+       "y1": 1258,
+       "x0": 234,
+       "x1": 934,
+       "ink": 8331,
+       "score": 0.801,
+       "page": 5,
+       "dy_px": 10,
+       "dy_mm": 2.12,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a08/p005-diff.png",
+     "text_flow": {
+      "words": 118,
+      "found": 0.636,
+      "to_pages": {
+       "5": 0.636
+      },
+      "starts_on": 5
+     }
+    },
+    {
+     "n": 6,
+     "ref_png": "../raster/ref/a08/p-6.png",
+     "ours_png": "../raster/ours/a08/p-6.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       992
+      ],
+      "ours": [
+       1404,
+       992
+      ]
+     },
+     "ssim": 0.75447,
+     "diff_ink": 0.69127,
+     "diff_page": 0.195318,
+     "blocks": {
+      "n": 9,
+      "moved": 5,
+      "other_page": 0,
+      "lost": 1,
+      "displaced_ink_frac": 0.7038,
+      "median_dy_mm": 106.68,
+      "median_dy_px": 504,
+      "max_abs_dy_mm": 108.37,
+      "max_abs_dy_px": 512,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 110,
+       "y1": 134,
+       "x0": 168,
+       "x1": 824,
+       "ink": 1794,
+       "score": 0.984,
+       "page": 6,
+       "dy_px": 502,
+       "dy_mm": 106.26,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 198,
+       "y1": 366,
+       "x0": 50,
+       "x1": 726,
+       "ink": 6796,
+       "score": 0.653,
+       "page": 6,
+       "dy_px": 504,
+       "dy_mm": 106.68,
+       "dx_mm": -0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 366,
+       "y1": 534,
+       "x0": 50,
+       "x1": 708,
+       "ink": 16151,
+       "score": 0.926,
+       "page": 6,
+       "dy_px": 512,
+       "dy_mm": 108.37,
+       "dx_mm": 0.85,
+       "status": "moved"
+      },
+      {
+       "y0": 534,
+       "y1": 698,
+       "x0": 50,
+       "x1": 726,
+       "ink": 7540,
+       "score": 0.951,
+       "page": 6,
+       "dy_px": 510,
+       "dy_mm": 107.95,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 740,
+       "y1": 914,
+       "x0": 254,
+       "x1": 940,
+       "ink": 6244,
+       "score": 0.254,
+       "page": 6,
+       "dy_px": 36,
+       "dy_mm": 7.62,
+       "dx_mm": -8.04,
+       "status": "lost"
+      },
+      {
+       "y0": 1088,
+       "y1": 1260,
+       "x0": 254,
+       "x1": 940,
+       "ink": 8200,
+       "score": 0.534,
+       "page": 6,
+       "dy_px": 50,
+       "dy_mm": 10.58,
+       "dx_mm": 8.04,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a08/p006-diff.png",
+     "text_flow": {
+      "words": 113,
+      "found": 0.628,
+      "to_pages": {
+       "3": 0.009,
+       "6": 0.381,
+       "7": 0.239
+      },
+      "starts_on": 6
+     }
+    },
+    {
+     "n": 7,
+     "ours_png": "../raster/ours/a08/p-7.png",
+     "status": "extra-in-ours"
+    }
+   ],
+   "ref": {
+    "pages": 6,
+    "sizes_mm": [
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "e34374865fe1d459ada2f47c043bcfd651784a02d2eb1f15190fc4538bab6f7f",
+    "sha256_nodates": "a2c84b903e5e370bdb58ed6da1d902639a548937dfd488c431444ee963377f8f",
+    "fonts": [
+     "Calibri-Bold",
+     "Calibri",
+     "Arial-BoldMT",
+     "Wingdings-Regular",
+     "ArialMT",
+     "Calibri-BoldItalic",
+     "Calibri-Italic"
+    ]
+   },
+   "cand": {
+    "pages": 7,
+    "sizes_mm": [
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ],
+     [
+      209.9,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "03abd32f74e81293b1a98376823c30b95642cd37e7db44068b0acd41012c2a9d",
+    "sha256_nodates": "e2d4794ad4eca80ecd3e3c8b7bc14449d40cb0d615e79a1779faef0522013c36",
+    "fonts": [
+     "Carlito-Bold",
+     "Elixir Symbols",
+     "Carlito",
+     "Carlito-Italic-Bold",
+     "Carlito-Italic"
+    ]
+   },
+   "ref_pages": 6,
+   "cand_pages": 7,
+   "page_delta": 1,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 16.82,
+   "scores": {
+    "mean_ssim": 0.7201,
+    "pct_pages_ok": 0.0,
+    "penalty": 35.82
+   }
+  },
+  {
+   "id": "a09",
+   "file": "admin/a09-documentation-inspection-du-travail.docx",
+   "category": "admin",
+   "flags": [],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a09/p-1.png",
+     "ours_png": "../raster/ours/a09/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.8192,
+     "diff_ink": 0.12844,
+     "diff_page": 0.01317,
+     "blocks": {
+      "n": 16,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a09/p001-diff.png",
+     "text_flow": {
+      "words": 386,
+      "found": 0.982,
+      "to_pages": {
+       "1": 0.982
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/a09/p-2.png",
+     "ours_png": "../raster/ours/a09/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.81579,
+     "diff_ink": 0.08506,
+     "diff_page": 0.019126,
+     "blocks": {
+      "n": 11,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a09/p002-diff.png",
+     "text_flow": {
+      "words": 427,
+      "found": 1.0,
+      "to_pages": {
+       "2": 1.0
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/a09/p-3.png",
+     "ours_png": "../raster/ours/a09/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.76561,
+     "diff_ink": 0.35955,
+     "diff_page": 0.036205,
+     "blocks": {
+      "n": 10,
+      "moved": 1,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.1999,
+      "median_dy_mm": -0.85,
+      "median_dy_px": -4,
+      "max_abs_dy_mm": 1.69,
+      "max_abs_dy_px": 8,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 1070,
+       "y1": 1272,
+       "x0": 118,
+       "x1": 874,
+       "ink": 6437,
+       "score": 0.967,
+       "page": 3,
+       "dy_px": -8,
+       "dy_mm": -1.69,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a09/p003-diff.png",
+     "text_flow": {
+      "words": 340,
+      "found": 0.971,
+      "to_pages": {
+       "1": 0.003,
+       "3": 0.968
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/a09/p-4.png",
+     "ours_png": "../raster/ours/a09/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.85778,
+     "diff_ink": 0.0872,
+     "diff_page": 0.007816,
+     "blocks": {
+      "n": 9,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a09/p004-diff.png",
+     "text_flow": {
+      "words": 359,
+      "found": 0.994,
+      "to_pages": {
+       "4": 0.994
+      },
+      "starts_on": 4
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/a09/p-5.png",
+     "ours_png": "../raster/ours/a09/p-5.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.72401,
+     "diff_ink": 0.60096,
+     "diff_page": 0.054138,
+     "blocks": {
+      "n": 13,
+      "moved": 11,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.9785,
+      "median_dy_mm": -4.66,
+      "median_dy_px": -22,
+      "max_abs_dy_mm": 5.5,
+      "max_abs_dy_px": 26,
+      "to_pages": {}
+     },
+     "block_list": [
+      {
+       "y0": 118,
+       "y1": 234,
+       "x0": 118,
+       "x1": 874,
+       "ink": 5037,
+       "score": 0.668,
+       "page": 5,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 276,
+       "y1": 292,
+       "x0": 148,
+       "x1": 708,
+       "ink": 1066,
+       "score": 0.971,
+       "page": 5,
+       "dy_px": -24,
+       "dy_mm": -5.08,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 308,
+       "y1": 436,
+       "x0": 118,
+       "x1": 874,
+       "ink": 3828,
+       "score": 0.982,
+       "page": 5,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 436,
+       "y1": 562,
+       "x0": 118,
+       "x1": 874,
+       "ink": 4934,
+       "score": 0.96,
+       "page": 5,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 602,
+       "y1": 618,
+       "x0": 118,
+       "x1": 452,
+       "ink": 593,
+       "score": 0.978,
+       "page": 5,
+       "dy_px": -24,
+       "dy_mm": -5.08,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 650,
+       "y1": 666,
+       "x0": 148,
+       "x1": 540,
+       "ink": 723,
+       "score": 0.987,
+       "page": 5,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 688,
+       "y1": 776,
+       "x0": 118,
+       "x1": 864,
+       "ink": 3586,
+       "score": 0.957,
+       "page": 5,
+       "dy_px": -24,
+       "dy_mm": -5.08,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 836,
+       "y1": 848,
+       "x0": 148,
+       "x1": 238,
+       "ink": 140,
+       "score": 0.992,
+       "page": 5,
+       "dy_px": -22,
+       "dy_mm": -4.66,
+       "dx_mm": 0.0,
+       "status": "moved"
+      },
+      {
+       "y0": 874,
+       "y1": 890,
+       "x0": 118,
+       "x1": 708,
+       "ink": 832,
+       "score": 0.964,
+       "page": 5,
+       "dy_px": -24,
+       "dy_mm": -5.08,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 912,
+       "y1": 952,
+       "x0": 148,
+       "x1": 838,
+       "ink": 1331,
+       "score": 0.973,
+       "page": 5,
+       "dy_px": -24,
+       "dy_mm": -5.08,
+       "dx_mm": 0.42,
+       "status": "moved"
+      },
+      {
+       "y0": 962,
+       "y1": 1050,
+       "x0": 148,
+       "x1": 864,
+       "ink": 2918,
+       "score": 0.983,
+       "page": 5,
+       "dy_px": -26,
+       "dy_mm": -5.5,
+       "dx_mm": 0.0,
+       "status": "moved"
+      }
+     ],
+     "status": "compared",
+     "diff_png": "full/a09/p005-diff.png",
+     "text_flow": {
+      "words": 298,
+      "found": 0.987,
+      "to_pages": {
+       "4": 0.037,
+       "5": 0.95
+      },
+      "starts_on": 5
+     }
+    }
+   ],
+   "ref": {
+    "pages": 5,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "af6d064e4fc891582223cef66868cba1b043587d48fd2107f5209bad8e7e916f",
+    "sha256_nodates": "fe503b13b60df3efa84538b8e7429a9435ddfc642c8049129e7ae3ac184b7cb9",
+    "fonts": [
+     "Aptos",
+     "Calibri",
+     "Calibri-Bold",
+     "Calibri-Italic",
+     "Arial-BoldMT",
+     "ArialMT",
+     "SymbolMT"
+    ]
+   },
+   "cand": {
+    "pages": 5,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "843300e8f704b447e5866f0e2aead1c5fdaefd7cd4b32674698fdedb4f37cbee",
+    "sha256_nodates": "9e2ef35b203a435be309db515a241d267589d216b45a8be35ffd7a94eab6a0a2",
+    "fonts": [
+     "Carlito",
+     "Carlito-Bold",
+     "Carlito-Italic-Bold",
+     "Roboto Metric",
+     "OpenSymbol"
+    ]
+   },
+   "ref_pages": 5,
+   "cand_pages": 5,
+   "page_delta": 0,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 11.97,
+   "scores": {
+    "mean_ssim": 0.79648,
+    "pct_pages_ok": 0.0,
+    "penalty": 75.6
+   }
+  },
+  {
+   "id": "a10",
+   "file": "admin/a10-notice-programme-vacances-travail-meae.docx",
+   "category": "admin",
+   "flags": [
+    "page-count-mismatch"
+   ],
+   "pages": [
+    {
+     "n": 1,
+     "ref_png": "../raster/ref/a10/p-1.png",
+     "ours_png": "../raster/ours/a10/p-1.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.99371,
+     "diff_ink": 0.02803,
+     "diff_page": 0.000349,
+     "blocks": {
+      "n": 4,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a10/p001-diff.png",
+     "text_flow": {
+      "words": 11,
+      "found": 0.818,
+      "to_pages": {
+       "1": 0.818
+      },
+      "starts_on": 1
+     }
+    },
+    {
+     "n": 2,
+     "ref_png": "../raster/ref/a10/p-2.png",
+     "ours_png": "../raster/ours/a10/p-2.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.91818,
+     "diff_ink": 0.0117,
+     "diff_page": 0.000762,
+     "blocks": {
+      "n": 16,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.42,
+      "max_abs_dy_px": 2,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a10/p002-diff.png",
+     "text_flow": {
+      "words": 384,
+      "found": 0.94,
+      "to_pages": {
+       "2": 0.935,
+       "4": 0.005
+      },
+      "starts_on": 2
+     }
+    },
+    {
+     "n": 3,
+     "ref_png": "../raster/ref/a10/p-3.png",
+     "ours_png": "../raster/ours/a10/p-3.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.92725,
+     "diff_ink": 0.01816,
+     "diff_page": 0.001082,
+     "blocks": {
+      "n": 5,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a10/p003-diff.png",
+     "text_flow": {
+      "words": 338,
+      "found": 0.967,
+      "to_pages": {
+       "2": 0.009,
+       "3": 0.959
+      },
+      "starts_on": 3
+     }
+    },
+    {
+     "n": 4,
+     "ref_png": "../raster/ref/a10/p-4.png",
+     "ours_png": "../raster/ours/a10/p-4.png",
+     "pixel_identical": false,
+     "size_px": {
+      "ref": [
+       1404,
+       993
+      ],
+      "ours": [
+       1404,
+       993
+      ]
+     },
+     "ssim": 0.88731,
+     "diff_ink": 0.01369,
+     "diff_page": 0.000949,
+     "blocks": {
+      "n": 6,
+      "moved": 0,
+      "other_page": 0,
+      "lost": 0,
+      "displaced_ink_frac": 0.0,
+      "median_dy_mm": 0.0,
+      "median_dy_px": 0,
+      "max_abs_dy_mm": 0.0,
+      "max_abs_dy_px": 0,
+      "to_pages": {}
+     },
+     "block_list": [],
+     "status": "compared",
+     "diff_png": "full/a10/p004-diff.png",
+     "text_flow": {
+      "words": 332,
+      "found": 0.898,
+      "to_pages": {
+       "3": 0.012,
+       "4": 0.886
+      },
+      "starts_on": 4
+     }
+    },
+    {
+     "n": 5,
+     "ref_png": "../raster/ref/a10/p-5.png",
+     "status": "missing-in-ours",
+     "text_flow": {
+      "words": 0
+     }
+    }
+   ],
+   "ref": {
+    "pages": 5,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "",
+    "creator": "Microsoft Word",
+    "sha256": "6c568d79ead3b9ccf7bcd9d99aa57d90795eb9218fdc5bdd6a1649006e15e401",
+    "sha256_nodates": "4980a81d0c1a6238b83dbed449ba0ff55bf3a2aa10326f710e72215e700115ef",
+    "fonts": [
+     "ArialMT",
+     "TimesNewRomanPSMT",
+     "Arial-BoldMT",
+     "TimesNewRomanPS-BoldMT",
+     "Calibri",
+     "Calibri-Bold"
+    ]
+   },
+   "cand": {
+    "pages": 4,
+    "sizes_mm": [
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ],
+     [
+      210.0,
+      297.0
+     ]
+    ],
+    "producer": "elixiroffice/2.5.565.0",
+    "creator": "elixiroffice/2.5.565.0",
+    "sha256": "c16342416349a461fd048b1f3946e62e9a6752f1d2963fb952ec43339121daa8",
+    "sha256_nodates": "d2e853d8dca1da9e722ae515a891c09383bdec3d1794b53de96de8cdcd8a5849",
+    "fonts": [
+     "Liberation Sans",
+     "Liberation Serif-Bold",
+     "Liberation Serif",
+     "Carlito-Bold",
+     "Carlito"
+    ]
+   },
+   "ref_pages": 5,
+   "cand_pages": 4,
+   "page_delta": -1,
+   "status": "compared",
+   "determinism": {
+    "pdf_bytes_identical": false,
+    "pdf_identical_except_dates": false,
+    "pixel_identical_pages": 0,
+    "all_pixel_identical": false
+   },
+   "seconds": 7.75,
+   "scores": {
+    "mean_ssim": 0.74529,
+    "pct_pages_ok": 20.0,
+    "penalty": 54.28
+   }
+  }
+ ]
+}

@@ -1,0 +1,3 @@
+# generated test documents (gen_docs.py) and raw run output
+/docs/
+/results/*.cpuprofile

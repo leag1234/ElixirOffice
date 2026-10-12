@@ -1,0 +1,1320 @@
+From fe15079b740bf79d5eb469b905763dddd6c4c069 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:46:59 +0200
+Subject: [PATCH 3/3] feat(example): add an Office-style start page
+
+Replace the default page of the example app with a start screen:
+navigation rail (Home, New, Open, Document, Spreadsheet, Presentation,
+PDF form), "Start new" tiles (blank files and templates), and a recent
+list with type filters, search, open, download and delete.
+
+Everything goes through the example's existing routes (/editor,
+/upload, /convert, /download, DELETE /file); the new router only adds
+/elixir/api/files and /elixir/new?template=<id>. Logo, favicon and
+templates are distribution assets read from public/elixir/brand/ and
+are optional. The test harness stays at /?dev=1, linked from the
+Developer item of the rail. No framework, no web font.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ web/documentserver-example/nodejs/app.js      |   3 +
+ .../nodejs/helpers/elixirHome.js              | 231 +++++++++
+ .../nodejs/public/elixir/home.css             | 340 ++++++++++++++
+ .../nodejs/public/elixir/home.js              | 444 ++++++++++++++++++
+ .../nodejs/views/home.ejs                     | 224 +++++++++
+ 5 files changed, 1242 insertions(+)
+ create mode 100644 web/documentserver-example/nodejs/helpers/elixirHome.js
+ create mode 100644 web/documentserver-example/nodejs/public/elixir/home.css
+ create mode 100644 web/documentserver-example/nodejs/public/elixir/home.js
+ create mode 100644 web/documentserver-example/nodejs/views/home.ejs
+
+diff --git a/web/documentserver-example/nodejs/app.js b/web/documentserver-example/nodejs/app.js
+index 4f49b8e6..e57034c3 100755
+--- a/web/documentserver-example/nodejs/app.js
++++ b/web/documentserver-example/nodejs/app.js
+@@ -35,6 +35,7 @@ const documentService = require('./helpers/documentService');
+ const fileUtility = require('./helpers/fileUtility');
+ const wopiApp = require('./helpers/wopi/wopiRouting');
+ const users = require('./helpers/users');
++const elixirHome = require('./helpers/elixirHome');
+ const dataAutofill = require('./config/data.json');
+ 
+ const configServer = config.get('server');
+@@ -92,6 +93,8 @@ app.use(favicon(`${__dirname}/public/images/favicon.ico`)); // use favicon
+ app.use(bodyParser.json()); // connect middleware that parses json
+ app.use(bodyParser.urlencoded({ extended: false })); // connect middleware that parses urlencoded bodies
+ 
++app.use(elixirHome()); // ElixirOffice start page; the test harness below stays at /?dev=1
++
+ app.get('/', (req, res) => { // define a handler for default page
+   try {
+     req.DocManager = new DocManager(req, res);
+diff --git a/web/documentserver-example/nodejs/helpers/elixirHome.js b/web/documentserver-example/nodejs/helpers/elixirHome.js
+new file mode 100644
+index 00000000..0c25585c
+--- /dev/null
++++ b/web/documentserver-example/nodejs/helpers/elixirHome.js
+@@ -0,0 +1,231 @@
++/**
++ *
++ * (c) Copyright ElixirOffice contributors 2026
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ */
++
++// Office-style start page ("home") in front of the example integration.
++// It only adds views on top of the example's own plumbing: files are created,
++// uploaded, converted, downloaded and deleted through the existing routes
++// (/editor, /upload, /convert, /download, DELETE /file). The test harness
++// (upstream index page) stays reachable with ?dev=1.
++
++const express = require('express');
++const path = require('path');
++const fileSystem = require('fs');
++const config = require('config');
++const DocManager = require('./docManager');
++const fileUtility = require('./fileUtility');
++const users = require('./users');
++
++const configServer = config.get('server');
++const publicDir = path.join(__dirname, '..', 'public');
++const elixirDir = path.join(publicDir, 'elixir');
++const i18nDir = path.join(elixirDir, 'i18n');
++// brand assets (logo, favicon, templates) are not part of this module: they are
++// copied into public/elixir/brand/ by the distribution (see docs/home.md there)
++const brandDir = path.join(elixirDir, 'brand');
++const templatesDir = path.join(brandDir, 'templates');
++
++const readJson = (file, fallback) => {
++  try {
++    return JSON.parse(fileSystem.readFileSync(file, 'utf8'));
++  } catch (e) {
++    return fallback;
++  }
++};
++
++const readText = (file) => {
++  try {
++    return fileSystem.readFileSync(file, 'utf8');
++  } catch (e) {
++    return '';
++  }
++};
++
++// translations: one flat JSON file per language, English is the reference
++const catalogs = {};
++const loadCatalogs = () => {
++  let files = [];
++  try {
++    files = fileSystem.readdirSync(i18nDir).filter((f) => f.endsWith('.json'));
++  } catch (e) {
++    files = [];
++  }
++  files.forEach((f) => {
++    catalogs[f.replace(/\.json$/, '')] = readJson(path.join(i18nDir, f), {});
++  });
++  if (!catalogs.en) catalogs.en = {};
++};
++loadCatalogs();
++
++const iconSprite = readText(path.join(elixirDir, 'icons.svg'));
++
++const editorLanguages = Object.keys(configServer.get('languages'));
++
++// match a requested language tag against a list of supported tags
++const matchLanguage = (tag, supported) => {
++  if (!tag) return null;
++  const lower = tag.toLowerCase();
++  const exact = supported.find((s) => s.toLowerCase() === lower);
++  if (exact) return exact;
++  const base = lower.split('-')[0];
++  return supported.find((s) => s.toLowerCase() === base) || null;
++};
++
++// explicit ?lang= wins, then the browser preferences, then English
++const resolveLanguage = (req) => {
++  const candidates = [];
++  if (req.query.lang) candidates.push(String(req.query.lang));
++  const accept = req.headers['accept-language'] || '';
++  accept.split(',').forEach((part) => {
++    const tag = part.split(';')[0].trim();
++    if (tag && tag !== '*') candidates.push(tag);
++  });
++  const uiLanguages = Object.keys(catalogs);
++  let ui = null;
++  let editor = null;
++  candidates.some((c) => {
++    ui = ui || matchLanguage(c, uiLanguages);
++    editor = editor || matchLanguage(c, editorLanguages);
++    return ui && editor;
++  });
++  return { ui: ui || 'en', editor: editor || 'en' };
++};
++
++const translator = (lang) => {
++  const catalog = catalogs[lang] || {};
++  return (key, vars) => {
++    let text = catalog[key] || catalogs.en[key] || key;
++    if (vars) {
++      Object.keys(vars).forEach((k) => {
++        text = text.split(`{${k}}`).join(vars[k]);
++      });
++    }
++    return text;
++  };
++};
++
++// templates manifest (brand asset); entries whose file is missing are skipped
++const loadTemplates = () => {
++  const manifest = readJson(path.join(templatesDir, 'templates.json'), { templates: [] });
++  return (manifest.templates || []).filter((tpl) => tpl.id && tpl.file
++    && fileSystem.existsSync(path.join(templatesDir, tpl.file))
++    && fileUtility.getFileType(tpl.file));
++};
++
++const localized = (value, lang) => {
++  if (!value || typeof value === 'string') return value || '';
++  return value[lang] || value.en || Object.values(value)[0] || '';
++};
++
++const listFiles = (docManager) => docManager.getStoredFiles().map((file) => {
++  let size = 0;
++  try {
++    size = fileSystem.statSync(docManager.storagePath(file.name)).size;
++  } catch (e) {
++    size = 0;
++  }
++  return {
++    name: file.name,
++    time: file.time,
++    size,
++    documentType: file.documentType,
++    canEdit: file.canEdit,
++    version: file.version,
++  };
++}).sort((a, b) => b.time - a.time);
++
++module.exports = function elixirHome() {
++  const router = express.Router();
++
++  router.get('/', (req, res, next) => {
++    // the upstream test harness (user switcher, languages, WOPI…) stays available
++    if (req.query.dev === '1' || req.query.dev === 'true') {
++      next();
++      return;
++    }
++    try {
++      const docManager = new DocManager(req, res);
++      const lang = resolveLanguage(req);
++      const t = translator(lang.ui);
++      const user = users.getUser(req.query.userid);
++      const templates = loadTemplates().map((tpl) => ({
++        id: tpl.id,
++        title: localized(tpl.title, lang.ui),
++        documentType: fileUtility.getFileType(tpl.file),
++        thumb: tpl.thumb && fileSystem.existsSync(path.join(templatesDir, tpl.thumb))
++          ? `elixir/brand/templates/${encodeURIComponent(tpl.thumb)}` : '',
++      }));
++      res.render('home', {
++        appName: configServer.get('appName'),
++        lang,
++        t,
++        strings: { ...catalogs.en, ...(catalogs[lang.ui] || {}) },
++        iconSprite,
++        hasLogo: fileSystem.existsSync(path.join(brandDir, 'logo.svg')),
++        hasFavicon: fileSystem.existsSync(path.join(brandDir, 'favicon.svg')),
++        user: { id: user.id, name: user.name || '' },
++        templates,
++        files: listFiles(docManager),
++        uploadExts: fileUtility.getSuppotredExtensions().filter((ext) => fileUtility.getFormatActions(ext).length),
++        convertExts: fileUtility.getConvertExtensions(),
++        maxFileSize: configServer.get('maxFileSize'),
++      });
++    } catch (ex) {
++      console.log(ex);
++      res.status(500);
++      res.render('error', { message: 'Server error' });
++    }
++  });
++
++  // recent files, newest first
++  router.get('/elixir/api/files', (req, res) => {
++    try {
++      res.json({ files: listFiles(new DocManager(req, res)) });
++    } catch (ex) {
++      console.log(ex);
++      res.status(500).json({ error: 'Server error' });
++    }
++  });
++
++  // create a document from a template, then open it like /editor?fileExt= does
++  router.get('/elixir/new', (req, res) => {
++    try {
++      const docManager = new DocManager(req, res);
++      const tpl = loadTemplates().find((item) => item.id === req.query.template);
++      if (!tpl) {
++        res.status(404);
++        res.render('error', { message: 'Template not found' });
++        return;
++      }
++      const lang = resolveLanguage(req);
++      const ext = fileUtility.getFileExtension(tpl.file);
++      const title = localized(tpl.title, lang.ui) || fileUtility.getFileName(tpl.file, true);
++      const fileName = docManager.getCorrectName(`${title}${ext}`);
++      docManager.copyFile(path.join(templatesDir, tpl.file), docManager.storagePath(fileName));
++      const user = users.getUser(req.query.userid);
++      docManager.saveFileData(fileName, user.id, user.name);
++      res.redirect(`${docManager.getServerUrl()}/editor?mode=edit&fileName=${encodeURIComponent(fileName)}`
++        + `${docManager.getCustomParams()}`);
++    } catch (ex) {
++      console.log(ex);
++      res.status(500);
++      res.render('error', { message: 'Server error' });
++    }
++  });
++
++  return router;
++};
+diff --git a/web/documentserver-example/nodejs/public/elixir/home.css b/web/documentserver-example/nodejs/public/elixir/home.css
+new file mode 100644
+index 00000000..c6867129
+--- /dev/null
++++ b/web/documentserver-example/nodejs/public/elixir/home.css
+@@ -0,0 +1,340 @@
++/*
++ * (c) Copyright ElixirOffice contributors 2026
++ * Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
++ *
++ * Start page. Neutral palette, one accent variable (--accent).
++ */
++
++:root {
++  --accent: #0082c9;
++  --accent-text: color-mix(in srgb, var(--accent) 82%, #000);
++  --accent-soft: color-mix(in srgb, var(--accent) 10%, #fff);
++  --accent-softer: color-mix(in srgb, var(--accent) 5%, #fff);
++
++  --bg: #f6f6f7;
++  --surface: #ffffff;
++  --surface-2: #f0f0f2;
++  --hover: #f1f1f3;
++  --pressed: #e8e8eb;
++  --border: #e1e1e5;
++  --border-strong: #c9c9cf;
++  --text: #1c1c1f;
++  --text-2: #5b5b63;
++  --text-3: #85858d;
++  --danger: #c4314b;
++
++  /* file-type hues: distinct per app, deliberately not any vendor's brand colours */
++  --t-word: #2d6bd3;
++  --t-cell: #18865a;
++  --t-slide: #d0602a;
++  --t-pdf: #c33a44;
++  --t-file: #6b6b73;
++
++  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Ubuntu, Cantarell, "Noto Sans", Arial, sans-serif;
++  --radius: 6px;
++  --shadow-1: 0 1px 2px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .06);
++  --shadow-2: 0 4px 12px rgba(0, 0, 0, .10), 0 1px 3px rgba(0, 0, 0, .06);
++  --shadow-3: 0 12px 32px rgba(0, 0, 0, .16), 0 2px 6px rgba(0, 0, 0, .08);
++  --topbar-h: 48px;
++  --rail-w: 76px;
++}
++
++*, *::before, *::after { box-sizing: border-box; }
++[hidden] { display: none !important; }
++
++html { -webkit-text-size-adjust: 100%; }
++body {
++  margin: 0;
++  font: 14px/20px var(--font);
++  color: var(--text);
++  background: var(--bg);
++  -webkit-font-smoothing: antialiased;
++}
++
++button, input { font: inherit; color: inherit; }
++a { color: inherit; }
++:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
++
++.visually-hidden {
++  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
++  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; padding: 0; margin: -1px;
++}
++.skip-link {
++  position: absolute; left: 8px; top: 8px; z-index: 100; padding: 8px 12px;
++  background: var(--surface); border-radius: var(--radius);
++  transform: translateY(-200%);
++}
++.skip-link:focus { transform: none; box-shadow: var(--shadow-2); }
++
++/* ---------- top bar ---------- */
++.topbar {
++  position: sticky; top: 0; z-index: 20;
++  height: var(--topbar-h);
++  display: grid; grid-template-columns: minmax(180px, 1fr) minmax(280px, 600px) minmax(180px, 1fr); align-items: center;
++  gap: 16px; padding: 0 16px 0 20px;
++  background: var(--surface); border-bottom: 1px solid var(--border);
++}
++.brand { display: inline-flex; align-items: center; height: 32px; text-decoration: none; justify-self: start; border-radius: 4px; }
++.brand img { display: block; height: 26px; width: auto; }
++.brand-text { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
++
++.search { position: relative; width: 100%; }
++.search input {
++  width: 100%; height: 34px; padding: 0 36px 0 38px;
++  border: 1px solid transparent; border-radius: var(--radius);
++  background: var(--surface-2); outline: none;
++  transition: background-color .12s, border-color .12s, box-shadow .12s;
++}
++.search input::placeholder { color: var(--text-2); }
++.search input:hover { background: var(--pressed); }
++.search input:focus { background: var(--surface); border-color: var(--border-strong); box-shadow: var(--shadow-2); }
++.search input::-webkit-search-cancel-button { cursor: pointer; }
++.search-icon { position: absolute; left: 10px; top: 7px; width: 20px; height: 20px; color: var(--text-2); pointer-events: none; }
++.search-kbd {
++  position: absolute; right: 10px; top: 8px; min-width: 18px; height: 18px; padding: 0 4px;
++  font: 11px/16px var(--font); color: var(--text-3); text-align: center;
++  border: 1px solid var(--border-strong); border-radius: 4px; pointer-events: none;
++}
++.search input:focus ~ .search-kbd, .search input:not(:placeholder-shown) ~ .search-kbd { display: none; }
++
++.account { justify-self: end; display: flex; align-items: center; }
++.avatar {
++  display: inline-flex; align-items: center; justify-content: center;
++  width: 32px; height: 32px; border-radius: 50%;
++  background: var(--accent-soft); color: var(--accent-text);
++  font-size: 13px; font-weight: 600; user-select: none;
++}
++
++/* ---------- layout ---------- */
++.layout { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: calc(100vh - var(--topbar-h)); }
++
++.rail {
++  position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h));
++  display: flex; flex-direction: column; gap: 2px; padding: 8px 6px;
++  background: var(--surface); border-right: 1px solid var(--border);
++  overflow-y: auto;
++}
++.rail-item {
++  position: relative;
++  display: flex; flex-direction: column; align-items: center; gap: 2px;
++  padding: 8px 2px 7px; border-radius: var(--radius);
++  color: var(--text-2); text-decoration: none; text-align: center;
++  font-size: 11px; line-height: 14px;
++  transition: background-color .1s, color .1s;
++}
++.rail-item:hover { background: var(--hover); color: var(--text); }
++.rail-item:active { background: var(--pressed); }
++.rail-item .ic { width: 24px; height: 24px; flex: none; }
++.rail-item .ic-f { display: none; }
++.rail-item[aria-current="page"] { color: var(--accent-text); background: var(--accent-softer); font-weight: 600; }
++.rail-item[aria-current="page"] .ic-r { display: none; }
++.rail-item[aria-current="page"] .ic-f { display: block; }
++.rail-item[aria-current="page"]::before {
++  content: ""; position: absolute; left: -6px; top: 12px; bottom: 12px; width: 3px;
++  border-radius: 0 3px 3px 0; background: var(--accent);
++}
++.rail-item.rail-app[aria-current="page"] { color: var(--text); }
++.rail-sep { height: 1px; margin: 6px 10px; background: var(--border); flex: none; }
++.rail-fill { flex: 1 1 auto; }
++.rail-dev { color: var(--text-3); }
++.rail-dev .ic { width: 20px; height: 20px; }
++
++.t-word { color: var(--t-word); }
++.t-cell { color: var(--t-cell); }
++.t-slide { color: var(--t-slide); }
++.t-pdf { color: var(--t-pdf); }
++.t-file { color: var(--t-file); }
++
++main { padding: 28px 40px 64px; min-width: 0; outline: none; }
++main > section { max-width: 1280px; }
++
++.section-title { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -.005em; }
++
++/* ---------- start tiles ---------- */
++.start .section-title { margin-bottom: 16px; }
++.tiles { display: flex; flex-wrap: wrap; gap: 20px 16px; }
++.tile { width: 132px; text-decoration: none; color: var(--text); border-radius: var(--radius); }
++.tile:focus-visible { outline-offset: 4px; }
++.thumb {
++  position: relative; display: flex; align-items: center; justify-content: center;
++  height: 170px; overflow: hidden;
++  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
++  box-shadow: var(--shadow-1);
++  transition: border-color .12s, box-shadow .12s, transform .12s;
++}
++.tile:hover .thumb { border-color: var(--accent); box-shadow: var(--shadow-2); }
++.tile:active .thumb { transform: scale(.985); }
++.tile-label { display: block; margin-top: 8px; padding: 0 2px; font-size: 13px; line-height: 18px; }
++
++/* blank thumbnails are drawn, no images */
++.thumb .sheet { display: block; }
++.thumb-word .sheet { width: 100%; height: 100%; }
++.thumb-cell .sheet {
++  width: 100%; height: 100%;
++  background-image:
++    linear-gradient(var(--border) 1px, transparent 1px),
++    linear-gradient(90deg, var(--border) 1px, transparent 1px);
++  background-size: 33px 17px; background-position: -1px -1px;
++}
++.thumb-cell .sheet::before {
++  content: ""; display: block; margin: 16px 0 0 32px; width: 34px; height: 18px;
++  border: 2px solid var(--t-cell);
++}
++.thumb-slide { background: var(--surface-2); }
++.thumb-slide .sheet {
++  width: 112px; height: 63px; background: var(--surface); border-radius: 2px; box-shadow: var(--shadow-1);
++  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
++}
++.thumb-slide .sheet::before, .thumb-slide .sheet::after { content: ""; display: block; height: 4px; border-radius: 2px; background: var(--border-strong); }
++.thumb-slide .sheet::before { width: 64px; height: 6px; }
++.thumb-slide .sheet::after { width: 40px; background: var(--border); }
++.thumb-pdf .sheet { width: 100%; height: 100%; padding: 22px 16px; display: flex; flex-direction: column; gap: 14px; }
++.thumb-pdf .sheet::before, .thumb-pdf .sheet::after {
++  content: ""; display: block; height: 16px; border: 1px solid var(--border-strong); border-radius: 3px;
++}
++.thumb-pdf .sheet::after { height: 40px; }
++.tile-blank .thumb::after {
++  content: ""; position: absolute; right: 8px; bottom: 8px; width: 22px; height: 22px; border-radius: 50%;
++  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6v12M6 12h12' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 16px no-repeat;
++  opacity: 0; transform: scale(.8); transition: opacity .12s, transform .12s;
++}
++.tile-blank:hover .thumb::after, .tile-blank:focus-visible .thumb::after { opacity: 1; transform: none; }
++
++.thumb-image { background: var(--surface); }
++.thumb-image img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
++.thumb-badge {
++  position: absolute; left: 6px; bottom: 6px; width: 22px; height: 22px; padding: 2px;
++  background: var(--surface); border-radius: 4px; box-shadow: var(--shadow-1);
++}
++
++/* ---------- open ---------- */
++.open-panel .section-title { margin-bottom: 16px; }
++.dropzone {
++  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
++  min-height: 240px; padding: 32px; text-align: center; cursor: pointer;
++  background: var(--surface); border: 2px dashed var(--border-strong); border-radius: 10px;
++  transition: border-color .12s, background-color .12s;
++}
++.dropzone:hover { border-color: var(--accent); background: var(--accent-softer); }
++.dropzone-icon { width: 40px; height: 40px; color: var(--accent); margin-bottom: 4px; }
++.dropzone-title { font-size: 16px; font-weight: 600; }
++.dropzone-or { color: var(--text-2); }
++.dropzone-hint { margin-top: 10px; max-width: 520px; font-size: 12px; line-height: 16px; color: var(--text-2); }
++
++/* ---------- buttons ---------- */
++.btn {
++  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
++  height: 32px; padding: 0 14px; border-radius: 4px; cursor: pointer;
++  border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
++  font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap;
++  transition: background-color .1s, border-color .1s;
++}
++.btn:hover { background: var(--hover); }
++.btn:active { background: var(--pressed); }
++.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
++.btn-primary:hover { background: var(--accent-text); border-color: var(--accent-text); }
++.btn-subtle { border-color: transparent; background: transparent; font-weight: 400; }
++.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
++.btn-danger:hover { background: color-mix(in srgb, var(--danger) 85%, #000); }
++.ic-sm { width: 20px; height: 20px; flex: none; }
++.icon-btn {
++  display: inline-flex; align-items: center; justify-content: center;
++  width: 32px; height: 32px; padding: 0; border: 0; border-radius: 4px;
++  background: transparent; color: var(--text-2); cursor: pointer;
++}
++.icon-btn:hover { background: var(--pressed); color: var(--text); }
++
++/* ---------- recent ---------- */
++.recent { margin-top: 36px; }
++.open-panel + .recent, .start[hidden] + .open-panel + .recent { margin-top: 32px; }
++.recent-head { display: flex; align-items: center; gap: 16px; min-height: 40px; margin-bottom: 8px; }
++.recent-fill { flex: 1; }
++.chips { display: flex; gap: 6px; flex-wrap: wrap; }
++.chip {
++  height: 28px; padding: 0 12px; border-radius: 14px; cursor: pointer;
++  border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 13px;
++}
++.chip:hover { background: var(--hover); color: var(--text); }
++.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
++
++.files { width: 100%; border-collapse: collapse; table-layout: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
++.files th {
++  height: 36px; padding: 0 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--text-2);
++  border-bottom: 1px solid var(--border); background: var(--surface);
++}
++.files td { height: 44px; padding: 0 12px; border-bottom: 1px solid var(--surface-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
++.files tbody tr:last-child td { border-bottom: 0; }
++.files tbody tr { cursor: pointer; transition: background-color .08s; }
++.files tbody tr:hover { background: var(--hover); }
++.files .c-icon { width: 52px; padding-right: 0; padding-left: 16px; }
++.files .c-mod { width: 220px; color: var(--text-2); }
++.files .c-size { width: 110px; color: var(--text-2); text-align: right; }
++.files .c-act { width: 60px; text-align: center; padding: 0 8px; }
++.ft { width: 24px; height: 24px; display: block; }
++.file-link { text-decoration: none; }
++.file-link:hover .file-base { text-decoration: underline; }
++.file-ext { color: var(--text-3); }
++.row-menu { opacity: 0; }
++.files tr:hover .row-menu, .row-menu:focus-visible, .row-menu[aria-expanded="true"] { opacity: 1; }
++@media (hover: none) { .row-menu { opacity: 1; } }
++
++.empty { padding: 48px 24px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
++.empty-icon { width: 40px; height: 40px; color: var(--text-3); }
++.empty-title { margin: 8px 0 4px; font-size: 16px; font-weight: 600; }
++.empty-body { margin: 0; color: var(--text-2); }
++.no-match { margin: 0; padding: 24px; color: var(--text-2); text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
++
++/* ---------- menu, dialog, toast, overlay ---------- */
++.menu {
++  position: fixed; z-index: 50; min-width: 200px; padding: 4px;
++  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-3);
++}
++.menu button {
++  display: flex; align-items: center; gap: 10px; width: 100%; height: 34px; padding: 0 10px;
++  border: 0; border-radius: 4px; background: transparent; text-align: left; cursor: pointer;
++}
++.menu button:hover, .menu button:focus-visible { background: var(--hover); outline: none; }
++.menu button .ic-sm { color: var(--text-2); }
++.menu button.danger, .menu button.danger .ic-sm { color: var(--danger); }
++.menu-sep { height: 1px; margin: 4px 6px; background: var(--border); }
++
++.dialog {
++  width: min(440px, calc(100vw - 32px)); padding: 24px; border: 0; border-radius: 10px;
++  box-shadow: var(--shadow-3); color: var(--text);
++}
++.dialog::backdrop { background: rgba(0, 0, 0, .32); }
++.dialog h2 { margin: 0 0 8px; font-size: 18px; line-height: 24px; font-weight: 600; }
++.dialog p { margin: 0 0 24px; color: var(--text-2); overflow-wrap: anywhere; }
++.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
++
++.toast {
++  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60;
++  display: flex; align-items: center; gap: 12px; max-width: min(640px, calc(100vw - 32px));
++  padding: 8px 8px 8px 16px; min-height: 48px;
++  background: #2b2b30; color: #fff; border-radius: 8px; box-shadow: var(--shadow-3);
++}
++.toast-text { flex: 1; overflow-wrap: anywhere; }
++.toast.error { background: #6e1b29; }
++.toast .icon-btn { color: #d6d6db; }
++.toast .icon-btn:hover { background: rgba(255, 255, 255, .12); color: #fff; }
++.toast-link { color: #9bd6ff; font-weight: 600; text-decoration: none; padding: 0 4px; }
++.toast-spinner { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .3); border-top-color: #fff; animation: spin .8s linear infinite; }
++.toast.busy .toast-spinner { display: block; }
++.toast.busy .toast-close { display: none; }
++@keyframes spin { to { transform: rotate(360deg); } }
++
++.drop-overlay {
++  position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
++  background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, .85));
++  border: 3px dashed var(--accent); pointer-events: none;
++}
++.drop-overlay-box { display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; color: var(--accent-text); }
++.drop-overlay-box svg { width: 48px; height: 48px; }
++
++@media (max-width: 1360px) {
++  main { padding: 24px 28px 56px; }
++  .files .c-mod { width: 190px; }
++}
++@media (prefers-reduced-motion: reduce) {
++  * { transition: none !important; animation: none !important; }
++}
+diff --git a/web/documentserver-example/nodejs/public/elixir/home.js b/web/documentserver-example/nodejs/public/elixir/home.js
+new file mode 100644
+index 00000000..eb98686d
+--- /dev/null
++++ b/web/documentserver-example/nodejs/public/elixir/home.js
+@@ -0,0 +1,444 @@
++/**
++ *
++ * (c) Copyright ElixirOffice contributors 2026
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ */
++
++// Start page behaviour. No framework: the page is server-rendered and this
++// script only switches views, renders the recent list and drives uploads
++// through the example's /upload and /convert endpoints.
++(function home() {
++  'use strict';
++
++  var data = JSON.parse(document.getElementById('home-data').textContent);
++  var strings = data.strings;
++  var TYPES = ['word', 'cell', 'slide', 'pdf'];
++  var VIEWS = ['home', 'new', 'open'].concat(TYPES);
++
++  var $ = function (id) { return document.getElementById(id); };
++  var t = function (key, vars) {
++    var text = strings[key] || key;
++    if (vars) {
++      Object.keys(vars).forEach(function (k) { text = text.split('{' + k + '}').join(vars[k]); });
++    }
++    return text;
++  };
++
++  var state = {
++    view: 'home',
++    filter: '',
++    query: '',
++    files: data.files || [],
++    menuFile: null,
++  };
++
++  var langParam = '&lang=' + encodeURIComponent(data.lang.editor);
++  var editorUrl = function (name) { return 'editor?fileName=' + encodeURIComponent(name) + langParam; };
++  var extOf = function (name) {
++    var i = name.lastIndexOf('.');
++    return i < 0 ? '' : name.slice(i + 1).toLowerCase();
++  };
++
++  // ---------- formatting ----------
++  var locale = document.documentElement.lang || 'en';
++  var timeFmt = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' });
++  var dateFmt = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' });
++  var fullFmt = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' });
++  var numFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
++
++  var formatTime = function (ms) {
++    var d = new Date(ms);
++    var now = new Date();
++    if (now - d < 60 * 1000 && now >= d) return t('time.justNow');
++    var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
++    if (ms >= startOfDay) return t('time.today', { time: timeFmt.format(d) });
++    if (ms >= startOfDay - 86400000) return t('time.yesterday', { time: timeFmt.format(d) });
++    return dateFmt.format(d);
++  };
++  var formatSize = function (bytes) {
++    if (bytes < 1024) return numFmt.format(bytes) + ' B';
++    if (bytes < 1024 * 1024) return numFmt.format(bytes / 1024) + ' KB';
++    return numFmt.format(bytes / 1024 / 1024) + ' MB';
++  };
++
++  var svgUse = function (id, cls) {
++    var ns = 'http://www.w3.org/2000/svg';
++    var svg = document.createElementNS(ns, 'svg');
++    svg.setAttribute('class', cls);
++    svg.setAttribute('aria-hidden', 'true');
++    var use = document.createElementNS(ns, 'use');
++    use.setAttribute('href', '#i-' + id);
++    svg.appendChild(use);
++    return svg;
++  };
++
++  // ---------- recent list ----------
++  var renderFiles = function () {
++    var body = $('files-body');
++    var type = TYPES.indexOf(state.view) !== -1 ? state.view : state.filter;
++    var q = state.query.trim().toLowerCase();
++    var list = state.files.filter(function (f) {
++      return (!type || f.documentType === type) && (!q || f.name.toLowerCase().indexOf(q) !== -1);
++    });
++    var frag = document.createDocumentFragment();
++    list.forEach(function (f) {
++      var tr = document.createElement('tr');
++      tr.dataset.name = f.name;
++
++      var tdIcon = document.createElement('td');
++      tdIcon.className = 'c-icon';
++      var ft = TYPES.indexOf(f.documentType) !== -1 ? f.documentType : 'file';
++      tdIcon.appendChild(svgUse(ft === 'file' ? 'file' : ft + '-f', 'ft t-' + ft));
++      tr.appendChild(tdIcon);
++
++      var tdName = document.createElement('td');
++      tdName.className = 'c-name';
++      var a = document.createElement('a');
++      a.href = editorUrl(f.name);
++      a.target = '_blank';
++      a.className = 'file-link';
++      var dot = f.name.lastIndexOf('.');
++      var base = document.createElement('span');
++      base.className = 'file-base';
++      base.textContent = dot > 0 ? f.name.slice(0, dot) : f.name;
++      var ext = document.createElement('span');
++      ext.className = 'file-ext';
++      ext.textContent = dot > 0 ? f.name.slice(dot) : '';
++      a.appendChild(base);
++      a.appendChild(ext);
++      tdName.appendChild(a);
++      tr.appendChild(tdName);
++
++      var tdMod = document.createElement('td');
++      tdMod.className = 'c-mod';
++      tdMod.textContent = formatTime(f.time);
++      tdMod.title = fullFmt.format(new Date(f.time));
++      tr.appendChild(tdMod);
++
++      var tdSize = document.createElement('td');
++      tdSize.className = 'c-size';
++      tdSize.textContent = formatSize(f.size);
++      tr.appendChild(tdSize);
++
++      var tdAct = document.createElement('td');
++      tdAct.className = 'c-act';
++      var btn = document.createElement('button');
++      btn.type = 'button';
++      btn.className = 'icon-btn row-menu';
++      btn.setAttribute('aria-haspopup', 'menu');
++      btn.setAttribute('aria-label', t('action.more', { name: f.name }));
++      btn.appendChild(svgUse('more', 'ic-sm'));
++      tdAct.appendChild(btn);
++      tr.appendChild(tdAct);
++
++      frag.appendChild(tr);
++    });
++    body.replaceChildren(frag);
++
++    var none = state.files.length === 0;
++    $('files').hidden = none || list.length === 0;
++    $('empty').hidden = !none;
++    $('no-match').hidden = none || list.length > 0;
++    if (!none && list.length === 0) {
++      $('no-match').textContent = q ? t('noMatch', { q: state.query.trim() }) : t('empty.title');
++    }
++  };
++
++  var refreshFiles = function () {
++    return fetch('elixir/api/files', { cache: 'no-store' })
++      .then(function (r) { return r.json(); })
++      .then(function (res) {
++        if (res.files) {
++          state.files = res.files;
++          renderFiles();
++        }
++      })
++      .catch(function () { /* keep the current list */ });
++  };
++
++  // ---------- views ----------
++  var setView = function (view) {
++    if (VIEWS.indexOf(view) === -1) view = 'home';
++    state.view = view;
++    var isType = TYPES.indexOf(view) !== -1;
++
++    document.querySelectorAll('.rail-item[data-view]').forEach(function (a) {
++      if (a.dataset.view === view) a.setAttribute('aria-current', 'page');
++      else a.removeAttribute('aria-current');
++    });
++
++    $('start').hidden = view === 'open';
++    $('start-title').textContent = data.startTitles[view] || data.startTitles.home;
++    document.querySelectorAll('#tiles .tile').forEach(function (tile) {
++      var type = tile.dataset.type;
++      var show;
++      if (isType) show = type === view;
++      else if (view === 'home') show = !(tile.dataset.blank && type === 'pdf');
++      else show = true;
++      tile.hidden = !show;
++    });
++
++    $('open-panel').hidden = view !== 'open';
++    $('recent').hidden = view === 'new';
++    $('chips').hidden = isType;
++    $('upload-button').hidden = view === 'open';
++    $('recent-title').textContent = isType ? t('recent.recentOf.' + view) : t('recent.title');
++    renderFiles();
++  };
++
++  var onHash = function () { setView((location.hash || '#home').slice(1)); };
++  window.addEventListener('hashchange', onHash);
++
++  $('chips').addEventListener('click', function (e) {
++    var chip = e.target.closest('.chip');
++    if (!chip) return;
++    state.filter = chip.dataset.filter;
++    document.querySelectorAll('#chips .chip').forEach(function (c) {
++      c.setAttribute('aria-pressed', String(c === chip));
++    });
++    renderFiles();
++  });
++
++  var search = $('search');
++  search.addEventListener('input', function () {
++    state.query = search.value;
++    if (state.view === 'new') location.hash = '#home';
++    else renderFiles();
++  });
++  search.addEventListener('keydown', function (e) {
++    if (e.key === 'Escape') { search.value = ''; state.query = ''; renderFiles(); }
++  });
++  document.addEventListener('keydown', function (e) {
++    var tag = (e.target.tagName || '').toLowerCase();
++    if (e.key === '/' && tag !== 'input' && tag !== 'textarea' && !e.ctrlKey && !e.metaKey) {
++      e.preventDefault();
++      search.focus();
++    }
++  });
++
++  // ---------- toast ----------
++  var toastTimer = null;
++  var toast = function (text, opts) {
++    opts = opts || {};
++    clearTimeout(toastTimer);
++    var el = $('toast');
++    el.classList.toggle('busy', !!opts.busy);
++    el.classList.toggle('error', !!opts.error);
++    $('toast-text').textContent = text;
++    var link = $('toast-link');
++    link.hidden = !opts.link;
++    if (opts.link) {
++      link.href = opts.link.href;
++      link.textContent = opts.link.text;
++    }
++    el.hidden = false;
++    if (!opts.busy && !opts.sticky) toastTimer = setTimeout(function () { el.hidden = true; }, opts.error ? 8000 : 4000);
++  };
++  $('toast-close').addEventListener('click', function () { $('toast').hidden = true; });
++
++  // ---------- row actions ----------
++  var menu = $('menu');
++  var closeMenu = function () {
++    if (menu.hidden) return;
++    menu.hidden = true;
++    if (state.menuButton) state.menuButton.setAttribute('aria-expanded', 'false');
++    state.menuFile = null;
++  };
++  var openMenu = function (button, name) {
++    state.menuFile = name;
++    state.menuButton = button;
++    button.setAttribute('aria-expanded', 'true');
++    menu.hidden = false;
++    var r = button.getBoundingClientRect();
++    var mw = menu.offsetWidth;
++    var mh = menu.offsetHeight;
++    var top = r.bottom + 4;
++    if (top + mh > window.innerHeight - 8) top = r.top - mh - 4;
++    menu.style.top = Math.max(8, top) + 'px';
++    menu.style.left = Math.max(8, Math.min(r.right - mw, window.innerWidth - mw - 8)) + 'px';
++    menu.querySelector('button').focus();
++  };
++
++  $('files-body').addEventListener('click', function (e) {
++    var btn = e.target.closest('.row-menu');
++    var tr = e.target.closest('tr');
++    if (!tr) return;
++    if (btn) {
++      e.stopPropagation();
++      if (!menu.hidden && state.menuFile === tr.dataset.name) closeMenu();
++      else openMenu(btn, tr.dataset.name);
++      return;
++    }
++    if (!e.target.closest('a')) window.open(editorUrl(tr.dataset.name), '_blank');
++  });
++
++  var deleteFile = function (name) {
++    $('confirm-body').textContent = t('delete.body', { name: name });
++    var dlg = $('confirm');
++    dlg.returnValue = '';
++    dlg.onclose = function () {
++      if (dlg.returnValue !== 'ok') return;
++      fetch('file?filename=' + encodeURIComponent(name), { method: 'DELETE' })
++        .then(function (r) { return r.json(); })
++        .then(function (res) {
++          if (!res.success) throw new Error('delete failed');
++          toast(t('delete.done', { name: name }));
++          return refreshFiles();
++        })
++        .catch(function (err) { toast(t('error.generic', { message: err.message }), { error: true }); });
++    };
++    dlg.showModal();
++  };
++
++  menu.addEventListener('click', function (e) {
++    var item = e.target.closest('button[data-action]');
++    if (!item) return;
++    var name = state.menuFile;
++    var button = state.menuButton;
++    closeMenu();
++    if (!name) return;
++    if (item.dataset.action === 'open') window.open(editorUrl(name), '_blank');
++    else if (item.dataset.action === 'download') location.href = 'download?fileName=' + encodeURIComponent(name);
++    else if (item.dataset.action === 'delete') deleteFile(name);
++    if (item.dataset.action !== 'delete' && button) button.focus();
++  });
++  menu.addEventListener('keydown', function (e) {
++    var items = Array.prototype.slice.call(menu.querySelectorAll('button'));
++    var i = items.indexOf(document.activeElement);
++    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
++    if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
++    if (e.key === 'Escape' || e.key === 'Tab') {
++      var b = state.menuButton;
++      closeMenu();
++      if (e.key === 'Escape' && b) b.focus();
++    }
++  });
++  document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
++  window.addEventListener('resize', closeMenu);
++  window.addEventListener('scroll', closeMenu, true);
++
++  // ---------- upload ----------
++  var busy = false;
++  var postForm = function (url, fields) {
++    return fetch(url, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
++      body: new URLSearchParams(fields).toString(),
++    }).then(function (r) { return r.json(); });
++  };
++
++  var convert = function (name) {
++    return postForm('convert', { filename: name, lang: data.lang.editor }).then(function (res) {
++      if (res.error) {
++        var err = new Error(res.error);
++        err.password = String(res.error).indexOf('Incorrect password') !== -1;
++        throw err;
++      }
++      if (res.step !== undefined && res.step < 100) {
++        return new Promise(function (resolve) { setTimeout(resolve, 1000); })
++          .then(function () { return convert(name); });
++      }
++      return res.filename || name;
++    });
++  };
++
++  var openAfterUpload = function (name) {
++    var url = editorUrl(name);
++    var win = window.open(url, '_blank');
++    if (win) toast(t('upload.done', { name: name }));
++    else toast(t('upload.done', { name: name }), { sticky: true, link: { href: url, text: t('action.open') } });
++  };
++
++  var upload = function (file) {
++    if (busy || !file) return;
++    var ext = extOf(file.name);
++    if (data.uploadExts.indexOf(ext) === -1) {
++      toast(t('error.unsupported', { name: file.name }), { error: true });
++      return;
++    }
++    if (file.size <= 0 || file.size > data.maxFileSize) {
++      toast(t('error.tooLarge', { name: file.name }), { error: true });
++      return;
++    }
++    busy = true;
++    toast(t('upload.uploading', { name: file.name }), { busy: true });
++    var form = new FormData();
++    form.append('uploadedFile', file, file.name);
++    fetch('upload', { method: 'POST', body: form })
++      .then(function (r) { return r.json(); })
++      .then(function (res) {
++        if (res.error) throw new Error(res.error);
++        var name = res.filename;
++        if (data.convertExts.indexOf(ext) === -1) return name;
++        toast(t('upload.converting', { name: name }), { busy: true });
++        return convert(name);
++      })
++      .then(function (name) {
++        busy = false;
++        refreshFiles();
++        openAfterUpload(name);
++      })
++      .catch(function (err) {
++        busy = false;
++        refreshFiles();
++        if (err.password) toast(t('error.password', { name: file.name }), { error: true });
++        else if (err instanceof TypeError) toast(t('error.network'), { error: true });
++        else toast(t('error.generic', { message: err.message }), { error: true });
++      });
++  };
++
++  var input = $('file-input');
++  input.addEventListener('change', function () {
++    upload(input.files[0]);
++    input.value = '';
++  });
++
++  // drag and drop anywhere on the page
++  var overlay = $('drop-overlay');
++  var dragDepth = 0;
++  var hasFiles = function (e) {
++    return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') !== -1;
++  };
++  document.addEventListener('dragenter', function (e) {
++    if (!hasFiles(e)) return;
++    e.preventDefault();
++    dragDepth += 1;
++    overlay.hidden = false;
++  });
++  document.addEventListener('dragover', function (e) {
++    if (!hasFiles(e)) return;
++    e.preventDefault();
++    e.dataTransfer.dropEffect = 'copy';
++  });
++  document.addEventListener('dragleave', function (e) {
++    if (!hasFiles(e)) return;
++    dragDepth = Math.max(0, dragDepth - 1);
++    if (!dragDepth) overlay.hidden = true;
++  });
++  document.addEventListener('drop', function (e) {
++    if (!hasFiles(e)) return;
++    e.preventDefault();
++    dragDepth = 0;
++    overlay.hidden = true;
++    if (e.dataTransfer.files.length) upload(e.dataTransfer.files[0]);
++  });
++
++  // refresh when coming back from an editor tab
++  document.addEventListener('visibilitychange', function () {
++    if (document.visibilityState === 'visible') refreshFiles();
++  });
++
++  onHash();
++}());
+diff --git a/web/documentserver-example/nodejs/views/home.ejs b/web/documentserver-example/nodejs/views/home.ejs
+new file mode 100644
+index 00000000..8bde402c
+--- /dev/null
++++ b/web/documentserver-example/nodejs/views/home.ejs
+@@ -0,0 +1,224 @@
++<!DOCTYPE html>
++<html lang="<%= lang.ui %>">
++<head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <meta name="color-scheme" content="light" />
++    <!--
++    *
++    * (c) Copyright ElixirOffice contributors 2026
++    *
++    * Licensed under the Apache License, Version 2.0 (the "License");
++    * you may not use this file except in compliance with the License.
++    * You may obtain a copy of the License at
++    *
++    *     http://www.apache.org/licenses/LICENSE-2.0
++    *
++    * Unless required by applicable law or agreed to in writing, software
++    * distributed under the License is distributed on an "AS IS" BASIS,
++    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    * See the License for the specific language governing permissions and
++    * limitations under the License.
++    *
++    * Icons: Fluent UI System Icons, (c) Microsoft Corporation, MIT License
++    * (public/elixir/fluent/LICENSE).
++    *
++    -->
++    <title><%= appName %></title>
++    <% if (hasFavicon) { %><link rel="icon" href="elixir/brand/favicon.svg" type="image/svg+xml" /><% } %>
++    <link rel="stylesheet" href="elixir/home.css" />
++</head>
++<%
++  const types = ['word', 'cell', 'slide', 'pdf'];
++  const blankExt = { word: 'docx', cell: 'xlsx', slide: 'pptx', pdf: 'pdf' };
++  const langParam = '&lang=' + encodeURIComponent(lang.editor);
++  const initials = (user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
++%>
++<body>
++    <a class="skip-link" href="#main"><%= t('skipToContent') %></a>
++    <%- iconSprite %>
++    <header class="topbar">
++        <a class="brand" href="./" aria-label="<%= appName %> &ndash; <%= t('nav.home') %>">
++            <% if (hasLogo) { %>
++                <img src="elixir/brand/logo.svg" alt="<%= appName %>" width="135" height="26" />
++            <% } else { %>
++                <span class="brand-text"><%= appName %></span>
++            <% } %>
++        </a>
++        <div class="search" role="search">
++            <svg class="search-icon" aria-hidden="true"><use href="#i-search"/></svg>
++            <input type="search" id="search" autocomplete="off" spellcheck="false"
++                placeholder="<%= t('search.placeholder') %>" aria-label="<%= t('search.label') %>" />
++            <kbd class="search-kbd" aria-hidden="true">/</kbd>
++        </div>
++        <div class="account" title="<%= t('account.label', { name: user.name }) %>">
++            <span class="avatar" aria-label="<%= t('account.label', { name: user.name }) %>"><%= initials %></span>
++        </div>
++    </header>
++
++    <div class="layout">
++        <nav class="rail" aria-label="<%= t('nav.label') %>">
++            <a class="rail-item" href="#home" data-view="home">
++                <svg class="ic ic-r" aria-hidden="true"><use href="#i-home"/></svg>
++                <svg class="ic ic-f" aria-hidden="true"><use href="#i-home-f"/></svg>
++                <span><%= t('nav.home') %></span>
++            </a>
++            <a class="rail-item" href="#new" data-view="new">
++                <svg class="ic ic-r" aria-hidden="true"><use href="#i-add"/></svg>
++                <svg class="ic ic-f" aria-hidden="true"><use href="#i-add-f"/></svg>
++                <span><%= t('nav.new') %></span>
++            </a>
++            <a class="rail-item" href="#open" data-view="open">
++                <svg class="ic ic-r" aria-hidden="true"><use href="#i-open"/></svg>
++                <svg class="ic ic-f" aria-hidden="true"><use href="#i-open-f"/></svg>
++                <span><%= t('nav.open') %></span>
++            </a>
++            <div class="rail-sep" role="separator"></div>
++            <% types.forEach((type) => { %>
++                <a class="rail-item rail-app" href="#<%= type %>" data-view="<%= type %>" data-type="<%= type %>">
++                    <svg class="ic ic-r t-<%= type %>" aria-hidden="true"><use href="#i-<%= type %>"/></svg>
++                    <svg class="ic ic-f t-<%= type %>" aria-hidden="true"><use href="#i-<%= type %>-f"/></svg>
++                    <span><%= t('app.' + type) %></span>
++                </a>
++            <% }) %>
++            <div class="rail-fill"></div>
++            <a class="rail-item rail-dev" href="?dev=1" title="<%= t('dev.title') %>">
++                <svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg>
++                <span><%= t('dev.label') %></span>
++            </a>
++        </nav>
++
++        <main id="main" tabindex="-1">
++            <section class="start" id="start" aria-labelledby="start-title">
++                <h1 class="section-title" id="start-title"><%= t('home.startNew') %></h1>
++                <div class="tiles" id="tiles">
++                    <% types.forEach((type) => { %>
++                        <a class="tile tile-blank" data-type="<%= type %>" data-blank="1" target="_blank"
++                            href="editor?fileExt=<%= blankExt[type] %><%= langParam %>">
++                            <span class="thumb thumb-<%= type %>" aria-hidden="true"><span class="sheet"></span></span>
++                            <span class="tile-label"><%= t('tile.blank.' + type) %></span>
++                        </a>
++                    <% }) %>
++                    <% templates.forEach((tpl) => { %>
++                        <a class="tile tile-template" data-type="<%= tpl.documentType %>" target="_blank"
++                            href="elixir/new?template=<%= encodeURIComponent(tpl.id) %><%= langParam %>">
++                            <span class="thumb thumb-image" aria-hidden="true">
++                                <% if (tpl.thumb) { %><img src="<%= tpl.thumb %>" alt="" loading="lazy" decoding="async" /><% } %>
++                                <svg class="thumb-badge t-<%= tpl.documentType %>"><use href="#i-<%= tpl.documentType %>-f"/></svg>
++                            </span>
++                            <span class="tile-label"><%= tpl.title %></span>
++                        </a>
++                    <% }) %>
++                </div>
++            </section>
++
++            <section class="open-panel" id="open-panel" aria-labelledby="open-title" hidden>
++                <h1 class="section-title" id="open-title"><%= t('open.title') %></h1>
++                <label class="dropzone" id="dropzone" for="file-input">
++                    <svg class="dropzone-icon" aria-hidden="true"><use href="#i-upload"/></svg>
++                    <span class="dropzone-title"><%= t('open.drop') %></span>
++                    <span class="dropzone-or"><%= t('open.or') %></span>
++                    <span class="btn btn-primary"><%= t('open.browse') %></span>
++                    <span class="dropzone-hint"><%= t('open.hint') %></span>
++                </label>
++            </section>
++
++            <section class="recent" id="recent" aria-labelledby="recent-title">
++                <div class="recent-head">
++                    <h2 class="section-title" id="recent-title"><%= t('recent.title') %></h2>
++                    <div class="chips" id="chips" role="group" aria-label="<%= t('filter.label') %>">
++                        <button type="button" class="chip" data-filter="" aria-pressed="true"><%= t('filter.all') %></button>
++                        <% types.forEach((type) => { %>
++                            <button type="button" class="chip" data-filter="<%= type %>" aria-pressed="false"><%= t('filter.' + type) %></button>
++                        <% }) %>
++                    </div>
++                    <span class="recent-fill"></span>
++                    <label class="btn btn-subtle" id="upload-button" for="file-input">
++                        <svg class="ic-sm" aria-hidden="true"><use href="#i-upload"/></svg>
++                        <span><%= t('upload.button') %></span>
++                    </label>
++                </div>
++                <table class="files" id="files">
++                    <thead>
++                        <tr>
++                            <th class="c-icon" scope="col"><span class="visually-hidden"><%= t('col.name') %></span></th>
++                            <th class="c-name" scope="col"><%= t('col.name') %></th>
++                            <th class="c-mod" scope="col"><%= t('col.modified') %></th>
++                            <th class="c-size" scope="col"><%= t('col.size') %></th>
++                            <th class="c-act" scope="col"><span class="visually-hidden"><%= t('col.actions') %></span></th>
++                        </tr>
++                    </thead>
++                    <tbody id="files-body"></tbody>
++                </table>
++                <div class="empty" id="empty" hidden>
++                    <svg class="empty-icon" aria-hidden="true"><use href="#i-file"/></svg>
++                    <p class="empty-title"><%= t('empty.title') %></p>
++                    <p class="empty-body"><%= t('empty.body') %></p>
++                </div>
++                <p class="no-match" id="no-match" hidden></p>
++            </section>
++        </main>
++    </div>
++
++    <input type="file" id="file-input" class="visually-hidden" tabindex="-1"
++        accept="<%= uploadExts.map((e) => '.' + e).join(',') %>" />
++
++    <div class="menu" id="menu" role="menu" hidden>
++        <button type="button" role="menuitem" data-action="open">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-new-tab"/></svg><span><%= t('action.open') %></span>
++        </button>
++        <button type="button" role="menuitem" data-action="download">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-download"/></svg><span><%= t('action.download') %></span>
++        </button>
++        <div class="menu-sep" role="separator"></div>
++        <button type="button" role="menuitem" data-action="delete" class="danger">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-delete"/></svg><span><%= t('action.delete') %></span>
++        </button>
++    </div>
++
++    <dialog class="dialog" id="confirm" aria-labelledby="confirm-title">
++        <form method="dialog">
++            <h2 id="confirm-title"><%= t('delete.title') %></h2>
++            <p id="confirm-body"></p>
++            <div class="dialog-actions">
++                <button class="btn btn-danger" value="ok"><%= t('action.delete') %></button>
++                <button class="btn" value="cancel" autofocus><%= t('action.cancel') %></button>
++            </div>
++        </form>
++    </dialog>
++
++    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
++        <span class="toast-spinner" aria-hidden="true"></span>
++        <span class="toast-text" id="toast-text"></span>
++        <a class="toast-link" id="toast-link" target="_blank" hidden></a>
++        <button type="button" class="icon-btn toast-close" id="toast-close" aria-label="<%= t('toast.close') %>">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-dismiss"/></svg>
++        </button>
++    </div>
++
++    <div class="drop-overlay" id="drop-overlay" hidden>
++        <div class="drop-overlay-box">
++            <svg aria-hidden="true"><use href="#i-upload"/></svg>
++            <span><%= t('upload.dropOverlay') %></span>
++        </div>
++    </div>
++
++    <script id="home-data" type="application/json"><%- JSON.stringify({
++        lang,
++        strings,
++        files,
++        uploadExts,
++        convertExts,
++        maxFileSize,
++        startTitles: {
++            home: t('home.startNew'),
++            new: t('new.title'),
++            word: t('app.word.title'),
++            cell: t('app.cell.title'),
++            slide: t('app.slide.title'),
++            pdf: t('app.pdf.title'),
++        },
++    }).replace(/</g, '\\u003c') %></script>
++    <script src="elixir/home.js"></script>
++</body>
++</html>
+-- 
+2.43.0
+

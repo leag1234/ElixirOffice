@@ -1,0 +1,323 @@
+From 71aeee4ee573f8f85be8c87504305ba3810b02f5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:52:09 +0200
+Subject: [PATCH 1/7] fix(word): built-in heading styles use the theme heading
+ font
+
+Heading 1-9, their linked character styles and Title were created with a
+fixed Arial font. Word's built-in (latent) definitions use the theme
+heading font (+Headings: majorHAnsi/majorEastAsia/majorBidi), so a style
+applied to a document that does not define it follows the document
+theme: Calibri Light in a Calibri document, Cambria in a Cambria one.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ word/Editor/Styles/default-styles.js | 149 ++++++---------------------
+ 1 file changed, 29 insertions(+), 120 deletions(-)
+
+diff --git a/word/Editor/Styles/default-styles.js b/word/Editor/Styles/default-styles.js
+index ab178fef01..9c49f0eec1 100644
+--- a/word/Editor/Styles/default-styles.js
++++ b/word/Editor/Styles/default-styles.js
+@@ -30,6 +30,15 @@
+ 	const DEFAULT_HEADING_FONT = "Arial";
+ 	const DEFAULT_FONT         = "Arial";
+ 	
++	// Like the built-in (latent) styles of Word, headings and Title use the theme heading font
++	// (+Headings), so they follow the document theme instead of a fixed font.
++	const HEADING_RFONTS = {
++		AsciiTheme    : "majorHAnsi",
++		EastAsiaTheme : "majorEastAsia",
++		HAnsiTheme    : "majorHAnsi",
++		CSTheme       : "majorBidi"
++	};
++	
+ 	function tw2mm(tw)
+ 	{
+ 		return tw * g_dKoef_twips_to_mm
+@@ -70,12 +79,7 @@
+ 				FontSizeCS : 20,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -102,12 +106,7 @@
+ 				FontSizeCS : 16,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -134,12 +133,7 @@
+ 				FontSizeCS : 14,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -166,12 +160,7 @@
+ 				ItalicCS   : true,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -196,12 +185,7 @@
+ 			TextPr         : {
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -228,12 +212,7 @@
+ 				ItalicCS   : true,
+ 				Color      : {r : 0x59, g : 0x59, b : 0x59},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xA6, null),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -258,12 +237,7 @@
+ 			TextPr         : {
+ 				Color      : {r : 0x59, g : 0x59, b : 0x59},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xA6, null),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -289,12 +263,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x27, g : 0x27, b : 0x27},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xD8, null),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -320,12 +289,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x27, g : 0x27, b : 0x27},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xD8, null),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -358,12 +322,7 @@
+ 				FontSizeCS : 20,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -378,12 +337,7 @@
+ 				FontSizeCS : 16,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -398,12 +352,7 @@
+ 				FontSizeCS : 14,
+ 				Color      : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill    : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -418,12 +367,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -436,12 +380,7 @@
+ 			TextPr     : {
+ 				Color   : {r : 0x0F, g : 0x47, b : 0x61},
+ 				Unifill : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorAccent1, null, 0xBF),
+-				RFonts  : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts  : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -456,12 +395,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x59, g : 0x59, b : 0x59},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xA6, null),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -474,12 +408,7 @@
+ 			TextPr     : {
+ 				Color   : {r : 0x59, g : 0x59, b : 0x59},
+ 				Unifill : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xA6, null),
+-				RFonts  : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts  : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -494,12 +423,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x27, g : 0x27, b : 0x27},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xD8, null),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -514,12 +438,7 @@
+ 				ItalicCS : true,
+ 				Color    : {r : 0x27, g : 0x27, b : 0x27},
+ 				Unifill  : AscCommonWord.CreateThemeUnifill(EThemeColor.themecolorText1, 0xD8, null),
+-				RFonts   : {
+-					Ascii    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_HEADING_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_HEADING_FONT, Index : -1}
+-				}
++				RFonts   : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -543,12 +462,7 @@
+ 				Spacing    : tw2mm(-10),
+ 				FontSize   : 28,
+ 				FontSizeCS : 28,
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+@@ -562,12 +476,7 @@
+ 				Spacing    : tw2mm(-10),
+ 				FontSize   : 28,
+ 				FontSizeCS : 28,
+-				RFonts     : {
+-					Ascii    : {Name : DEFAULT_FONT, Index : -1},
+-					EastAsia : {Name : DEFAULT_FONT, Index : -1},
+-					HAnsi    : {Name : DEFAULT_FONT, Index : -1},
+-					CS       : {Name : DEFAULT_FONT, Index : -1}
+-				}
++				RFonts     : HEADING_RFONTS
+ 			}
+ 		},
+ 		{
+-- 
+2.43.0
+

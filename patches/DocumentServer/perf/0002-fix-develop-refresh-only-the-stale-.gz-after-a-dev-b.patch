@@ -1,0 +1,38 @@
+From 7d702071f688fd52e74e8aa873cc4b612acbed8f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 22:36:49 +0200
+Subject: [PATCH] fix(develop): refresh only the stale .gz after a dev build
+
+Same test as documentserver-static-gzip.sh: gzip -k keeps the mtime of
+the source, so [ file.gz -nt file ] recompressed everything at each
+cache flush. Recompress when the .gz is missing or its source is newer.
+Also points document-server-package at the same fix in its script.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ develop/setup/Makefile | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/develop/setup/Makefile b/develop/setup/Makefile
+index 7f03f87..73be11d 100644
+--- a/develop/setup/Makefile
++++ b/develop/setup/Makefile
+@@ -40,11 +40,12 @@ define FLUSH_CACHE
+ endef
+ 
+ # With gzip_static on (documentserver-static-gzip.sh), nginx serves file.gz when it exists,
+-# even if it is older than the file: recompress what a rebuild replaced.
++# even if it is older than the file: recompress what a rebuild replaced (gzip -k gives the
++# .gz the mtime of its source, so a .gz is stale when its source is newer).
+ define REFRESH_GZIP
+ 	if grep -qE '^[[:space:]]*gzip_static on' /etc/nginx/includes/ds-docservice.conf 2>/dev/null; then \
+ 	  cd $(EO_ROOT) && find ./sdkjs ./web-apps -type f \( -name '*.js' -o -name '*.json' -o -name '*.html' -o -name '*.css' -o -name '*.bin' -o -name '*.wasm' -o -name '*.svg' \) -print0 | \
+-	  xargs -0 -r -n 64 -P $$(nproc) sh -c 'for f; do [ "$$f.gz" -nt "$$f" ] || gzip -kf9 "$$f"; done' _; \
++	  xargs -0 -r -n 64 -P $$(nproc) sh -c 'for f; do [ -e "$$f.gz" ] && ! [ "$$f" -nt "$$f.gz" ] || gzip -kf9 "$$f"; done' _; \
+ 	  echo "gzip_static: stale .gz refreshed"; \
+ 	fi;
+ endef
+-- 
+2.43.0
+

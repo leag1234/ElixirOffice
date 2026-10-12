@@ -1,0 +1,8 @@
+{
+  "id": "two-columns",
+  "title": "Put a selected section in two columns",
+  "instruction": "Put this section in two columns",
+  "select": [2, 6],
+  "input": "input.docx",
+  "notes": "Teacher worksheet (10 blocks). The selection is the section 'Les étapes du cycle' (heading 2 + 4 paragraphs, blocks 2-6). Columns are a section property: Word has no revision type for it, so the change is not tracked; the UI must say so and one undo must revert it."
+}

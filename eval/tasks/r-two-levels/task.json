@@ -1,0 +1,10 @@
+{
+  "id": "r-two-levels",
+  "title": "Make a second, easier level of a worksheet (brief task 7)",
+  "instruction": "Décline cette fiche en deux niveaux : ajoute à la suite une version plus facile pour les élèves en difficulté.",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "Four-exercise fractions worksheet. Expected: the original untouched, then a titled easier version with at least 3 exercises."
+}

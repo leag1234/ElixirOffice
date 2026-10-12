@@ -1,0 +1,426 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// --------------------------------------------------------------------------
+// Office-grade look (ElixirOffice)
+//
+// Retunes the two "modern" themes (theme-white = default light,
+// theme-night = default dark) through their CSS custom properties:
+// typography, neutral grey chrome, a single accent colour, Office-like
+// density and rounded selection states.
+// Upstream: apps/common/main/resources/less/colors-table-white.less and
+// colors-table-night.less define the tokens overridden here; the selectors
+// below are one step more specific (`:root body.<theme>`) so they win
+// regardless of load order.
+// The other themes (classic, light, gray, dark, contrast-dark) keep their
+// upstream colours, only the typography is shared.
+// --------------------------------------------------------------------------
+
+// Title bar (file name, quick access toolbar) and tab row heights.
+@document-title-height: 36px;
+@toolbar-height-tabs-top-title: 32px;
+
+// Segoe UI (Variable on Windows 11) like Office on Windows; San Francisco on
+// macOS like Office for Mac (-apple-system: Safari and Firefox, BlinkMacSystemFont:
+// Chrome); then the platform UI font.
+@elixir-font-stack: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+
+// Single accent colour (theme.less: @elixir-accent), derived shades.
+@elixir-accent-hover:   darken(@elixir-accent, 6%);
+@elixir-accent-pressed: darken(@elixir-accent, 12%);
+@elixir-accent-text:    darken(@elixir-accent, 10%);
+@elixir-accent-soft:    mix(@elixir-accent, #fff, 14%);
+@elixir-accent-softer:  mix(@elixir-accent, #fff, 7%);
+@elixir-accent-dark:    lighten(@elixir-accent, 12%);
+
+// Neutral chrome (light)
+@elixir-chrome:         #f3f3f3;
+@elixir-canvas:         #ebebeb;
+@elixir-hover:          #ebebeb;
+@elixir-pressed:        #e0e0e0;
+@elixir-checked:        #e0e0e0;
+@elixir-checked-hover:  #d6d6d6;
+@elixir-divider:        #e1e1e1;
+
+:root body {
+    --font-family-base: @elixir-font-stack;
+    --elixir-accent: @elixir-accent;
+    // Taller title bar and tab row, like Word (read by common/main/lib/util/utils.js)
+    --document-title-height: @document-title-height;
+    --toolbar-height-tabs-top-title: @toolbar-height-tabs-top-title;
+}
+
+:root body.theme-white {
+    // upstream sets "Segoe UI" alone in `:root .theme-white`, which beats `:root body`
+    --font-family-base: @elixir-font-stack;
+    --font-size-base: 12px;
+
+    --toolbar-header-document: @elixir-chrome;
+    --toolbar-header-spreadsheet: @elixir-chrome;
+    --toolbar-header-presentation: @elixir-chrome;
+    --toolbar-header-pdf: @elixir-chrome;
+    --toolbar-header-visio: @elixir-chrome;
+
+    --background-pane: @elixir-chrome;
+    --background-statusbar: @elixir-chrome;
+    --background-primary-dialog-button: @elixir-accent;
+    --background-accent-button: @elixir-accent;
+
+    --highlight-button-hover: @elixir-hover;
+    --highlight-button-pressed: @elixir-checked;
+    --highlight-button-pressed-hover: @elixir-checked-hover;
+    --highlight-header-button-hover: #e6e6e6;
+    --highlight-header-button-pressed: #dadada;
+    --highlight-primary-dialog-button-hover: @elixir-accent-hover;
+    --highlight-primary-dialog-button-pressed: @elixir-accent-pressed;
+    --highlight-category-button-hover: fade(@elixir-accent, 6%);
+    --highlight-category-button-pressed: fade(@elixir-accent, 12%);
+
+    --border-divider: @elixir-divider;
+    --border-preview-hover: mix(@elixir-accent, #fff, 45%);
+    --border-preview-select: @elixir-accent;
+    --border-control-focus: @elixir-accent;
+    --border-button-pressed-focus: @elixir-accent;
+    --border-fill-input-focused: @elixir-accent;
+    --border-regular-control: #d1d1d1;
+
+    --text-normal: #242424;
+    --text-normal-pressed: #242424;
+    --text-secondary: #616161;
+    --text-tertiary: #8a8a8a;
+    --text-toolbar-header: #242424;
+    --text-link: @elixir-accent-text;
+    --text-link-hover: @elixir-accent-text;
+    --text-link-active: @elixir-accent-text;
+    --text-link-visited: @elixir-accent-text;
+
+    --icon-normal: #424242;
+    --icon-normal-pressed: #242424;
+    --icon-toolbar-header: #424242;
+    --icon-gray-primary: #424242;
+    --icon-blue-primary: @elixir-accent;
+    --icon-blue-secondary: @elixir-accent-soft;
+
+    --highlight-header-tab-underline-document: @elixir-accent;
+    --highlight-header-tab-underline-spreadsheet: @elixir-accent;
+    --highlight-header-tab-underline-presentation: @elixir-accent;
+    --highlight-header-tab-underline-pdf: @elixir-accent;
+    --highlight-header-tab-underline-visio: @elixir-accent;
+    --highlight-toolbar-tab-underline-document: @elixir-accent;
+    --highlight-toolbar-tab-underline-spreadsheet: @elixir-accent;
+    --highlight-toolbar-tab-underline-presentation: @elixir-accent;
+    --highlight-toolbar-tab-underline-pdf: @elixir-accent;
+    --highlight-toolbar-tab-underline-visio: @elixir-accent;
+
+    --canvas-background: @elixir-canvas;
+    // Word draws pages with a soft shadow and no hard frame
+    --canvas-page-border: #e1e1e1;
+    --canvas-page-shadow: rgba(0, 0, 0, 0.22);
+    --canvas-ruler-background: #fff;
+    --canvas-ruler-border: #d6d6d6;
+    --canvas-ruler-margins-background: #e3e3e3;
+
+    --chb-border-normal-focus: @elixir-accent;
+    --chb-border-checked-focus: @elixir-accent;
+    --rb-border-normal-focus: @elixir-accent;
+    --rb-border-checked-focus: @elixir-accent;
+    --slider-track-background-normal: #c7c7c7;
+    --slider-track-background-filled: #616161;
+    --slider-thumb-background-normal: #616161;
+    --slider-thumb-background-hover: #424242;
+    --slider-thumb-background-active: #242424;
+
+    --highlight-comment-pressed: @elixir-accent-softer;
+
+    // Office-like density and rounded selection states
+    --border-radius-button-base: 4px;
+    --border-radius-form-control: 4px;
+    --border-radius-dataview-item: 4px;
+    --border-radius-dropdown-menu: 8px;
+    --border-radius-window: 8px;
+    --toolbar-tab-line-height: 3px;
+    --toolbar-tab-line-radius: 3px;
+    --shadow-toolbar: 0 1px 2px 0 rgba(0, 0, 0, 0.10), 0 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+// Neutral chrome (dark), Office-like: near-black title bar and tab row, a
+// slightly lighter ribbon card and panels, white pages on a dark canvas
+// (the page turns dark only with View > Dark document).
+@elixir-dk-chrome:   #1f1f1f;
+@elixir-dk-surface:  #292929;
+@elixir-dk-canvas:   #1a1a1a;
+@elixir-dk-hover:    #383838;
+@elixir-dk-pressed:  #454545;
+@elixir-dk-divider:  #3d3d3d;
+@elixir-dk-control:  #616161;
+
+:root body.theme-night {
+    --font-family-base: @elixir-font-stack;
+    --font-size-base: 12px;
+
+    --toolbar-header-document: @elixir-dk-chrome;
+    --toolbar-header-spreadsheet: @elixir-dk-chrome;
+    --toolbar-header-presentation: @elixir-dk-chrome;
+    --toolbar-header-pdf: @elixir-dk-chrome;
+    --toolbar-header-visio: @elixir-dk-chrome;
+    --text-toolbar-header-on-background-document: @elixir-dk-chrome;
+
+    --background-normal: @elixir-dk-surface;
+    --background-toolbar: @elixir-dk-surface;
+    --background-toolbar-tab: @elixir-dk-surface;
+    --background-toolbar-additional: @elixir-dk-surface;
+    --background-contrast-popover: #3a3a3a;
+    --background-pane: @elixir-dk-chrome;
+    --background-statusbar: @elixir-dk-chrome;
+
+    --highlight-button-hover: @elixir-dk-hover;
+    --highlight-button-pressed: @elixir-dk-pressed;
+    --highlight-button-pressed-hover: #4f4f4f;
+    --highlight-header-button-hover: #333333;
+    --highlight-header-button-pressed: @elixir-dk-pressed;
+    --highlight-category-button-hover: fade(#fff, 6%);
+    --highlight-category-button-pressed: fade(#fff, 10%);
+
+    --border-toolbar: @elixir-dk-divider;
+    --border-toolbar-active-panel-top: @elixir-dk-chrome;
+    --border-divider: @elixir-dk-divider;
+    --border-regular-control: @elixir-dk-control;
+    --border-color-shading: @elixir-dk-control;
+    --border-contrast-popover: @elixir-dk-control;
+
+    --text-normal: #f5f5f5;
+    --text-normal-pressed: #ffffff;
+    --text-secondary: #c7c7c7;
+    --text-tertiary: #9e9e9e;
+    --text-toolbar-header: #f5f5f5;
+
+    --icon-normal: #d6d6d6;
+    --icon-normal-pressed: #ffffff;
+    --icon-toolbar-header: #d6d6d6;
+
+    --canvas-background: @elixir-dk-canvas;
+    --canvas-page-border: #3d3d3d;
+    --canvas-page-shadow: rgba(0, 0, 0, 0.6);
+    --canvas-ruler-background: @elixir-dk-chrome;
+    --canvas-ruler-border: @elixir-dk-divider;
+    --canvas-ruler-margins-background: #333333;
+    --canvas-scroll-thumb: #333333;
+    --canvas-scroll-thumb-hover: #4a4a4a;
+    --canvas-scroll-thumb-pressed: #5a5a5a;
+    --canvas-scroll-thumb-border: #4a4a4a;
+    --canvas-scroll-thumb-border-hover: #6a6a6a;
+
+    --border-radius-button-base: 4px;
+    --border-radius-form-control: 4px;
+    --border-radius-dataview-item: 4px;
+    --border-radius-dropdown-menu: 8px;
+    --border-radius-window: 8px;
+    --toolbar-tab-line-height: 3px;
+    --toolbar-tab-line-radius: 3px;
+    --shadow-toolbar: 0 1px 2px 0 rgba(0, 0, 0, 0.5), 0 0 1px 0 rgba(0, 0, 0, 0.6);
+
+    --background-primary-dialog-button: @elixir-accent;
+    --background-accent-button: @elixir-accent;
+    --border-preview-select: @elixir-accent-dark;
+    --border-control-focus: @elixir-accent-dark;
+    --border-button-pressed-focus: @elixir-accent-dark;
+    --border-fill-input-focused: @elixir-accent-dark;
+    --chb-border-normal-focus: @elixir-accent-dark;
+    --chb-border-checked-focus: @elixir-accent-dark;
+    --rb-border-normal-focus: @elixir-accent-dark;
+    --rb-border-checked-focus: @elixir-accent-dark;
+    --slider-track-background-filled: @elixir-accent-dark;
+    --slider-thumb-background-normal: @elixir-accent-dark;
+    --slider-thumb-background-active: @elixir-accent;
+    --icon-blue-primary: @elixir-accent-dark;
+    --highlight-header-tab-underline-document: @elixir-accent-dark;
+    --highlight-toolbar-tab-underline-document: @elixir-accent-dark;
+    --text-link: @elixir-accent-dark;
+    --text-link-hover: @elixir-accent-dark;
+    --text-link-active: @elixir-accent-dark;
+    --text-link-visited: @elixir-accent-dark;
+}
+
+// --------------------------------------------------------------------------
+// Ribbon tabs: Word-like labels, accent underline under the active tab.
+// Upstream: apps/common/main/resources/less/toolbar.less (.ribtab, style-line)
+// --------------------------------------------------------------------------
+body.theme-white,
+body.theme-night {
+    .toolbar .box-tabs .ribtab {
+        > a {
+            font-size: 13px;
+            letter-spacing: 0;
+        }
+        &.active > a {
+            font-weight: 600;
+        }
+    }
+    .toolbar .box-tabs .ribtab.active > a {
+        color: @elixir-accent-text;
+    }
+
+    // Ribbon card: Office-like flat white panel with a soft edge
+    .toolbar .box-controls {
+        border-radius: 8px;
+    }
+
+    // Status bar text in the chrome colour, like Word
+    #statusbar .statusbar,
+    .statusbar {
+        font-size: 12px;
+    }
+}
+
+body.theme-night .toolbar .box-tabs .ribtab.active > a {
+    color: @elixir-accent-dark;
+}
+
+// --------------------------------------------------------------------------
+// Office-like ribbon in the document, spreadsheet and presentation editors:
+// group labels under the groups and dialog launchers
+// (Common.UI.RibbonGroupLabels, apps/common/main/resources/less/elixir-ribbon.less).
+// --------------------------------------------------------------------------
+:root body.theme-white[data-editor-type="document"],
+:root body.theme-night[data-editor-type="document"],
+:root body.theme-white[data-editor-type="spreadsheet"],
+:root body.theme-night[data-editor-type="spreadsheet"],
+:root body.theme-white[data-editor-type="presentation"],
+:root body.theme-night[data-editor-type="presentation"] {
+    // Office desktop geometry: 6 px above the controls (60 px, two rows), a
+    // 16 px label line 2 px above the ribbon edge (baseline ~6 px above it),
+    // launcher arrows centred on that line. 6 + 60 + 4 + 16 + 2 = 88 px.
+    --toolbar-group-label-display: block;
+    --toolbar-group-label-space: 20px;
+    --toolbar-group-label-line: 16px;
+    --toolbar-group-label-font-size: 11px;
+    --toolbar-ribbon-padding-bottom: 2px;
+    --toolbar-height-controls: 88px;
+}
+
+// --------------------------------------------------------------------------
+// File menu as an Office "backstage": roomy navigation pane, large panel
+// titles, rounded selection with an accent bar.
+// Upstream: apps/*/main/resources/less/leftmenu.less, filemenu.less
+// --------------------------------------------------------------------------
+@backstage-pane-width: 240px;
+
+body.theme-white,
+body.theme-night {
+    #file-menu-panel {
+        > .panel-menu {
+            width: @backstage-pane-width;
+            padding: 12px 8px 16px;
+            background-color: @background-pane-ie;
+            background-color: @background-pane;
+            border: 0 none;
+
+            li.fm-btn {
+                width: auto;
+                height: auto;
+                padding: 0;
+                margin: 1px 0;
+
+                > a.menu-item {
+                    display: flex;
+                    align-items: center;
+                    height: 40px;
+                    padding: 0 12px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    line-height: 20px;
+                    color: @text-normal;
+
+                    .menu-item-icon {
+                        width: 20px;
+                        height: 20px;
+                        margin: 0 12px 0 0;
+                        flex-shrink: 0;
+                    }
+                }
+
+                &:hover > a.menu-item {
+                    background-color: @highlight-button-hover;
+                }
+
+                &.active > a.menu-item {
+                    background-color: @background-normal;
+                    font-weight: 600;
+                    box-shadow: inset 3px 0 0 @elixir-accent, 0 1px 2px rgba(0, 0, 0, 0.08);
+                }
+            }
+
+            #fm-btn-return > a.menu-item {
+                font-weight: 600;
+            }
+
+            .devider {
+                margin: 8px 12px;
+            }
+        }
+
+        > .panel-context {
+            padding-left: @backstage-pane-width;
+
+            .content-box {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+
+            .header,
+            #panel-saveas .header,
+            #panel-savecopy .header,
+            #panel-createnew .header,
+            #panel-print .header {
+                font-size: 28px;
+                font-weight: 400;
+                line-height: 36px;
+                margin-top: 16px;
+                margin-bottom: 20px;
+            }
+        }
+    }
+
+    &.rtl #file-menu-panel {
+        > .panel-menu li.fm-btn {
+            > a.menu-item .menu-item-icon {
+                margin: 0 0 0 12px;
+            }
+            &.active > a.menu-item {
+                box-shadow: inset -3px 0 0 @elixir-accent, 0 1px 2px rgba(0, 0, 0, 0.08);
+            }
+        }
+        > .panel-context {
+            padding-left: 0;
+            padding-right: @backstage-pane-width;
+        }
+    }
+}
+
+// --------------------------------------------------------------------------
+// Spreadsheet grid like Excel: light row/column headers, the headers of the
+// selection in the accent colour, accent selection outline (instead of the
+// stock green). Tokens read by sdkjs (common/skin.js): canvas-cell-title-*,
+// canvas-cell-title-text-selected, canvas-cell-selection-border.
+// --------------------------------------------------------------------------
+:root body.theme-white {
+    --canvas-cell-title-text: #424242;
+    --canvas-cell-title-text-selected: @elixir-accent-text;
+    --canvas-cell-title-background: #f5f5f5;
+    --canvas-cell-title-background-hover: #e6e6e6;
+    --canvas-cell-title-background-selected: #e1e1e1;
+    --canvas-cell-title-border: #e1e1e1;
+    --canvas-cell-title-border-hover: #d1d1d1;
+    --canvas-cell-title-border-selected: #c7c7c7;
+    --canvas-cell-selection-border: @elixir-accent;
+}
+
+:root body.theme-night {
+    --canvas-cell-title-text: #d6d6d6;
+    --canvas-cell-title-text-selected: @elixir-accent-dark;
+    --canvas-cell-title-background: @elixir-dk-surface;
+    --canvas-cell-title-background-hover: @elixir-dk-hover;
+    --canvas-cell-title-background-selected: @elixir-dk-pressed;
+    --canvas-cell-title-border: @elixir-dk-divider;
+    --canvas-cell-title-border-hover: #4f4f4f;
+    --canvas-cell-title-border-selected: #5c5c5c;
+    --canvas-cell-selection-border: @elixir-accent-dark;
+}

@@ -1,0 +1,13 @@
+# Status bar (PE.Views.SlideStatusbar)
+# key | en | fr | de | es | it | pt | pt-pt | nl | ru | pl | ja | zh
+@prefix PE.Views.SlideStatusbar.
+txtNotes | Notes | Notes | Notizen | Notas | Note | Anotações | Notas | Notities | Заметки | Notatki | ノート | 备注
+tipNotes | Notes: enter speaker notes below the slide | Notes : saisissez les commentaires du présentateur sous la diapositive | Notizen: Sprechernotizen unter der Folie eingeben | Notas: escriba las notas del orador debajo de la diapositiva | Note: inserisci le note del relatore sotto la diapositiva | Anotações: insira as anotações do orador abaixo do slide | Notas: introduza as notas do orador por baixo do diapositivo | Notities: voer sprekersnotities in onder de dia | Заметки: введите заметки докладчика под слайдом | Notatki: wprowadź notatki prelegenta pod slajdem | ノート: スライドの下に発表者のノートを入力します | 备注：在幻灯片下方输入演讲者备注
+txtComments | Comments | Commentaires | Kommentare | Comentarios | Commenti | Comentários | Comentários | Opmerkingen | Примечания | Komentarze | コメント | 批注
+tipComments | Show the Comments pane | Afficher le volet Commentaires | Kommentarbereich anzeigen | Mostrar el panel Comentarios | Mostra il riquadro Commenti | Mostrar o painel Comentários | Mostrar o painel Comentários | Het deelvenster Opmerkingen weergeven | Показать область примечаний | Pokaż okienko Komentarze | [コメント] ウィンドウを表示します | 显示“批注”窗格
+tipNormal | Normal | Normal | Normal | Normal | Normale | Normal | Normal | Normaal | Обычный | Normalny | 標準 | 普通
+tipReadingView | Reading View | Mode Lecture | Leseansicht | Vista de lectura | Visualizzazione di lettura | Modo de Exibição de Leitura | Vista de Leitura | Leesweergave | Режим чтения | Widok do czytania | 閲覧表示 | 阅读视图
+tipSlideShow | Slide Show (Shift+F5) | Diaporama (Maj+F5) | Bildschirmpräsentation (Umschalt+F5) | Presentación con diapositivas (Mayús+F5) | Presentazione (MAIUSC+F5) | Apresentação de Slides (Shift+F5) | Apresentação de Diapositivos (Shift+F5) | Diavoorstelling (Shift+F5) | Слайд-шоу (SHIFT+F5) | Pokaz slajdów (Shift+F5) | スライド ショー (Shift+F5) | 幻灯片放映 (Shift+F5)
+tipFit | Fit slide to current window | Ajuster la diapositive à la fenêtre active | Folie an aktuelles Fenster anpassen | Ajustar diapositiva a la ventana actual | Adatta diapositiva alla finestra corrente | Ajustar slide à janela atual | Ajustar diapositivo à janela atual | Dia aanpassen aan huidig venster | Вписать слайд в текущее окно | Dopasuj slajd do bieżącego okna | スライドを現在のウィンドウ サイズに合わせる | 使幻灯片适应当前窗口
+tipZoom | Zoom | Zoom | Zoom | Zoom | Zoom | Zoom | Zoom | In-/uitzoomen | Масштаб | Powiększenie | ズーム | 缩放
+textZoomPercent | {0}% | {0} % | {0} % | {0}% | {0}% | {0}% | {0}% | {0}% | {0}% | {0}% | {0}% | {0}%

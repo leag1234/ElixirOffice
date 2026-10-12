@@ -1,0 +1,190 @@
+From 02fa9e1e0a6f8eca604e7cd17b2867076e304eac Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:46:59 +0200
+Subject: [PATCH 2/3] feat(example): add start page translations (en, fr)
+
+Flat JSON catalogs, one per language, English as reference and
+fallback. The language comes from ?lang= or Accept-Language.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../nodejs/public/elixir/i18n/en.json         | 79 +++++++++++++++++++
+ .../nodejs/public/elixir/i18n/fr.json         | 79 +++++++++++++++++++
+ 2 files changed, 158 insertions(+)
+ create mode 100644 web/documentserver-example/nodejs/public/elixir/i18n/en.json
+ create mode 100644 web/documentserver-example/nodejs/public/elixir/i18n/fr.json
+
+diff --git a/web/documentserver-example/nodejs/public/elixir/i18n/en.json b/web/documentserver-example/nodejs/public/elixir/i18n/en.json
+new file mode 100644
+index 00000000..c438de64
+--- /dev/null
++++ b/web/documentserver-example/nodejs/public/elixir/i18n/en.json
+@@ -0,0 +1,79 @@
++{
++  "skipToContent": "Skip to content",
++  "nav.label": "Main navigation",
++  "nav.home": "Home",
++  "nav.new": "New",
++  "nav.open": "Open",
++  "nav.apps": "Apps",
++  "app.word": "Document",
++  "app.cell": "Spreadsheet",
++  "app.slide": "Presentation",
++  "app.pdf": "PDF form",
++  "dev.label": "Developer",
++  "dev.title": "Open the integration test harness (users, languages, WOPI…)",
++  "search.placeholder": "Search",
++  "search.label": "Search your files",
++  "account.label": "Test user: {name}",
++  "home.title": "Home",
++  "home.startNew": "Start new",
++  "home.moreTemplates": "More templates",
++  "new.title": "New",
++  "new.blank": "Blank",
++  "new.templates": "Templates",
++  "open.title": "Open",
++  "open.drop": "Drag and drop a file here",
++  "open.or": "or",
++  "open.browse": "Browse this device",
++  "open.hint": "Word, Excel, PowerPoint, PDF, OpenDocument and other formats. Files in other formats are converted when opened.",
++  "app.word.title": "Document",
++  "app.cell.title": "Spreadsheet",
++  "app.slide.title": "Presentation",
++  "app.pdf.title": "PDF form",
++  "tile.blank.word": "Blank document",
++  "tile.blank.cell": "Blank workbook",
++  "tile.blank.slide": "Blank presentation",
++  "tile.blank.pdf": "Blank PDF form",
++  "recent.title": "Recent",
++  "recent.recentOf.word": "Recent documents",
++  "recent.recentOf.cell": "Recent workbooks",
++  "recent.recentOf.slide": "Recent presentations",
++  "recent.recentOf.pdf": "Recent PDF files",
++  "filter.label": "Filter by type",
++  "filter.all": "All",
++  "filter.word": "Documents",
++  "filter.cell": "Workbooks",
++  "filter.slide": "Presentations",
++  "filter.pdf": "PDFs",
++  "filter.byName": "Filter by name",
++  "col.name": "Name",
++  "col.modified": "Modified",
++  "col.size": "Size",
++  "col.actions": "Actions",
++  "empty.title": "No files yet",
++  "empty.body": "Create a new file, or drag and drop one anywhere on this page to open it.",
++  "noMatch": "No files match “{q}”.",
++  "action.open": "Open",
++  "action.openNewTab": "Open in new tab",
++  "action.download": "Download",
++  "action.delete": "Delete",
++  "action.more": "More options for {name}",
++  "action.cancel": "Cancel",
++  "delete.title": "Delete file?",
++  "delete.body": "“{name}” will be permanently deleted, with its version history. This can’t be undone.",
++  "delete.done": "“{name}” was deleted.",
++  "upload.button": "Upload",
++  "upload.uploading": "Uploading “{name}”…",
++  "upload.converting": "Converting “{name}”…",
++  "upload.opening": "Opening “{name}”…",
++  "upload.done": "“{name}” is ready.",
++  "upload.dropOverlay": "Drop to upload and open",
++  "error.unsupported": "“{name}” can’t be opened: this file type isn’t supported.",
++  "error.tooLarge": "“{name}” is too large.",
++  "error.password": "“{name}” is password-protected. Open it from the developer view to enter the password.",
++  "error.generic": "Something went wrong: {message}",
++  "error.network": "The server can’t be reached. Check your connection and try again.",
++  "time.justNow": "Just now",
++  "time.today": "Today, {time}",
++  "time.yesterday": "Yesterday, {time}",
++  "toast.close": "Dismiss"
++}
+diff --git a/web/documentserver-example/nodejs/public/elixir/i18n/fr.json b/web/documentserver-example/nodejs/public/elixir/i18n/fr.json
+new file mode 100644
+index 00000000..cda3b518
+--- /dev/null
++++ b/web/documentserver-example/nodejs/public/elixir/i18n/fr.json
+@@ -0,0 +1,79 @@
++{
++  "skipToContent": "Aller au contenu",
++  "nav.label": "Navigation principale",
++  "nav.home": "Accueil",
++  "nav.new": "Nouveau",
++  "nav.open": "Ouvrir",
++  "nav.apps": "Applications",
++  "app.word": "Document",
++  "app.cell": "Classeur",
++  "app.slide": "Présentation",
++  "app.pdf": "Formulaire PDF",
++  "dev.label": "Développeur",
++  "dev.title": "Ouvrir le banc de test de l’intégration (utilisateurs, langues, WOPI…)",
++  "search.placeholder": "Rechercher",
++  "search.label": "Rechercher dans vos fichiers",
++  "account.label": "Utilisateur de test : {name}",
++  "home.title": "Accueil",
++  "home.startNew": "Créer",
++  "home.moreTemplates": "Autres modèles",
++  "new.title": "Nouveau",
++  "new.blank": "Vide",
++  "new.templates": "Modèles",
++  "open.title": "Ouvrir",
++  "open.drop": "Glissez-déposez un fichier ici",
++  "open.or": "ou",
++  "open.browse": "Parcourir cet appareil",
++  "open.hint": "Word, Excel, PowerPoint, PDF, OpenDocument et d’autres formats. Les autres formats sont convertis à l’ouverture.",
++  "app.word.title": "Document",
++  "app.cell.title": "Classeur",
++  "app.slide.title": "Présentation",
++  "app.pdf.title": "Formulaire PDF",
++  "tile.blank.word": "Document vide",
++  "tile.blank.cell": "Classeur vide",
++  "tile.blank.slide": "Présentation vide",
++  "tile.blank.pdf": "Formulaire PDF vide",
++  "recent.title": "Récents",
++  "recent.recentOf.word": "Documents récents",
++  "recent.recentOf.cell": "Classeurs récents",
++  "recent.recentOf.slide": "Présentations récentes",
++  "recent.recentOf.pdf": "Fichiers PDF récents",
++  "filter.label": "Filtrer par type",
++  "filter.all": "Tous",
++  "filter.word": "Documents",
++  "filter.cell": "Classeurs",
++  "filter.slide": "Présentations",
++  "filter.pdf": "PDF",
++  "filter.byName": "Filtrer par nom",
++  "col.name": "Nom",
++  "col.modified": "Modifié",
++  "col.size": "Taille",
++  "col.actions": "Actions",
++  "empty.title": "Aucun fichier pour l’instant",
++  "empty.body": "Créez un fichier, ou glissez-en un n’importe où sur cette page pour l’ouvrir.",
++  "noMatch": "Aucun fichier ne correspond à « {q} ».",
++  "action.open": "Ouvrir",
++  "action.openNewTab": "Ouvrir dans un nouvel onglet",
++  "action.download": "Télécharger",
++  "action.delete": "Supprimer",
++  "action.more": "Autres actions pour {name}",
++  "action.cancel": "Annuler",
++  "delete.title": "Supprimer le fichier ?",
++  "delete.body": "« {name} » sera définitivement supprimé, avec son historique de versions. Cette action est irréversible.",
++  "delete.done": "« {name} » a été supprimé.",
++  "upload.button": "Charger",
++  "upload.uploading": "Chargement de « {name} »…",
++  "upload.converting": "Conversion de « {name} »…",
++  "upload.opening": "Ouverture de « {name} »…",
++  "upload.done": "« {name} » est prêt.",
++  "upload.dropOverlay": "Déposez pour charger et ouvrir",
++  "error.unsupported": "Impossible d’ouvrir « {name} » : ce type de fichier n’est pas pris en charge.",
++  "error.tooLarge": "« {name} » est trop volumineux.",
++  "error.password": "« {name} » est protégé par un mot de passe. Ouvrez-le depuis la vue développeur pour saisir le mot de passe.",
++  "error.generic": "Une erreur s’est produite : {message}",
++  "error.network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
++  "time.justNow": "À l’instant",
++  "time.today": "Aujourd’hui, {time}",
++  "time.yesterday": "Hier, {time}",
++  "toast.close": "Fermer"
++}
+-- 
+2.43.0
+

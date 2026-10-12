@@ -1,0 +1,76 @@
+# Contextual tabs (PE.Views.SlideContextTabs), PowerPoint vocabulary
+# key | en | fr | de | es | it | pt | pt-pt | nl | ru | pl | ja | zh
+@prefix PE.Views.SlideContextTabs.
+txtTabShapeFormat | Shape Format | Format de la forme | Formformat | Formato de forma | Formato forma | Formato da Forma | Formato da Forma | Vormopmaak | Формат фигуры | Formatowanie kształtu | 図形の書式 | 形状格式
+txtTabPictureFormat | Picture Format | Format de l'image | Bildformat | Formato de imagen | Formato immagine | Formato da Imagem | Formato da Imagem | Afbeeldingsopmaak | Формат рисунка | Formatowanie obrazu | 図の形式 | 图片格式
+txtTabTableDesign | Table Design | Création de tableau | Tabellenentwurf | Diseño de tabla | Struttura tabella | Design da Tabela | Estrutura da Tabela | Tabelontwerp | Конструктор таблиц | Projekt tabeli | テーブル デザイン | 表设计
+txtTabTableLayout | Layout | Disposition | Layout | Disposición | Layout | Layout | Esquema | Indeling | Макет | Układ | レイアウト | 布局
+txtTabChartDesign | Chart Design | Création de graphique | Diagrammentwurf | Diseño de gráfico | Progettazione grafico | Design do Gráfico | Estrutura do Gráfico | Grafiekontwerp | Конструктор диаграмм | Projekt wykresu | グラフのデザイン | 图表设计
+txtGroupShapeStyles | Shape Styles | Styles de forme | Formenarten | Estilos de forma | Stili forma | Estilos de Forma | Estilos de Forma | Stijlen voor vormen | Стили фигур | Style kształtów | 図形のスタイル | 形状样式
+txtGroupArrange | Arrange | Organiser | Anordnen | Organizar | Disponi | Organizar | Organizar | Schikken | Упорядочить | Rozmieszczanie | 配置 | 排列
+txtGroupSize | Size | Taille | Größe | Tamaño | Dimensioni | Tamanho | Tamanho | Grootte | Размер | Rozmiar | サイズ | 大小
+txtGroupAdjust | Adjust | Ajuster | Anpassen | Ajustar | Regola | Ajustar | Ajustar | Aanpassen | Изменение | Dopasowywanie | 調整 | 调整
+txtGroupPictureStyles | Picture Styles | Styles d'images | Bildformatvorlagen | Estilos de imagen | Stili immagine | Estilos de Imagem | Estilos de Imagem | Afbeeldingsstijlen | Стили рисунков | Style obrazów | 図のスタイル | 图片样式
+txtGroupStyleOptions | Table Style Options | Options de style de tableau | Optionen für Tabellenformat | Opciones de estilo de tabla | Opzioni stile tabella | Opções de Estilo de Tabela | Opções de Estilo de Tabela | Opties voor tabelstijl | Параметры стилей таблиц | Opcje stylu tabeli | 表スタイルのオプション | 表格样式选项
+txtGroupTableStyles | Table Styles | Styles de tableau | Tabellenformatvorlagen | Estilos de tabla | Stili tabella | Estilos de Tabela | Estilos de Tabela | Tabelstijlen | Стили таблиц | Style tabeli | 表のスタイル | 表格样式
+txtGroupRowsCols | Rows & Columns | Lignes et colonnes | Zeilen und Spalten | Filas y columnas | Righe e colonne | Linhas e Colunas | Linhas e Colunas | Rijen en kolommen | Строки и столбцы | Wiersze i kolumny | 行と列 | 行和列
+txtGroupMerge | Merge | Fusionner | Zusammenführen | Combinar | Unisci | Mesclar | Unir | Samenvoegen | Объединение | Scalanie | 結合 | 合并
+txtGroupTable | Table | Tableau | Tabelle | Tabla | Tabella | Tabela | Tabela | Tabel | Таблица | Tabela | 表 | 表
+txtGroupAlignment | Alignment | Alignement | Ausrichtung | Alineación | Allineamento | Alinhamento | Alinhamento | Uitlijning | Выравнивание | Wyrównanie | 配置 | 对齐方式
+txtGroupType | Type | Type | Typ | Tipo | Tipo | Tipo | Tipo | Type | Тип | Typ | 種類 | 类型
+txtGroupData | Data | Données | Daten | Datos | Dati | Dados | Dados | Gegevens | Данные | Dane | データ | 数据
+txtGroupInsertShapes | Insert Shapes | Insérer des formes | Formen einfügen | Insertar formas | Inserisci forme | Inserir Formas | Inserir Formas | Vormen invoegen | Вставка фигур | Wstawianie kształtów | 図形の挿入 | 插入形状
+txtShapeFill | Shape Fill | Remplissage | Fülleffekt | Relleno de forma | Riempimento forma | Preenchimento da Forma | Preenchimento da Forma | Opvulling van vorm | Заливка фигуры | Wypełnienie kształtu | 図形の塗りつぶし | 形状填充
+txtShapeOutline | Shape Outline | Contour de forme | Formkontur | Contorno de forma | Contorno forma | Contorno da Forma | Contorno da Forma | Omtrek van vorm | Контур фигуры | Kontur kształtu | 図形の枠線 | 形状轮廓
+txtFormatPane | Format Pane | Volet Format | Formatbereich | Panel de formato | Riquadro Formato | Painel de Formatação | Painel de Formatação | Opmaakvenster | Область формата | Okienko formatowania | 書式ウィンドウ | 格式窗格
+txtNoFill | No Fill | Aucun remplissage | Keine Füllung | Sin relleno | Nessun riempimento | Sem Preenchimento | Sem Preenchimento | Geen opvulling | Нет заливки | Brak wypełnienia | 塗りつぶしなし | 无填充
+txtNoOutline | No Outline | Sans contour | Keine Kontur | Sin contorno | Nessun contorno | Sem Contorno | Sem Contorno | Geen omtrek | Нет контура | Brak konturu | 枠線なし | 无轮廓
+txtPictureBorder | Picture Border | Bordure de l'image | Bildrahmen | Borde de imagen | Bordo immagine | Borda da Imagem | Limite da Imagem | Afbeeldingsrand | Граница рисунка | Obramowanie obrazu | 図の枠線 | 图片边框
+txtChangePicture | Change Picture | Modifier l'image | Bild ändern | Cambiar imagen | Cambia immagine | Alterar Imagem | Alterar Imagem | Afbeelding wijzigen | Изменить рисунок | Zmień obraz | 図の変更 | 更改图片
+txtFromFile | From a File... | À partir d'un fichier... | Aus einer Datei... | Desde un archivo... | Da un file... | De um Arquivo... | De um Ficheiro... | Uit een bestand... | Из файла... | Z pliku... | ファイルから... | 来自文件...
+txtFromUrl | From URL... | À partir d'une URL... | Aus URL... | Desde una URL... | Da URL... | Da URL... | De um URL... | Van URL... | По URL-адресу... | Z adresu URL... | URL から... | 来自 URL...
+txtFromStorage | From Storage | À partir du stockage | Aus dem Speicher | Desde almacenamiento | Da archivio | Do Armazenamento | Do Armazenamento | Uit opslag | Из хранилища | Z magazynu | ストレージから | 来自存储
+txtResetPicture | Reset Picture | Rétablir l'image | Bild zurücksetzen | Restablecer imagen | Reimposta immagine | Redefinir Imagem | Repor Imagem | Afbeelding opnieuw instellen | Сброс параметров рисунка | Resetuj obraz | 図のリセット | 重置图片
+txtCrop | Crop | Rogner | Zuschneiden | Recortar | Ritaglia | Cortar | Recortar | Bijsnijden | Обрезать | Przytnij | トリミング | 裁剪
+txtFill | Fill | Remplissage | Füllen | Rellenar | Riempi | Preencher | Preencher | Opvullen | Заливка | Wypełnij | 塗りつぶし | 填充
+txtFit | Fit | Ajuster | Einpassen | Ajustar | Adatta | Ajustar | Ajustar | Passend maken | Вписать | Dopasuj | 枠に合わせる | 适合
+txtBringForward | Bring Forward | Avancer | Ebene nach vorne | Traer adelante | Porta avanti | Avançar | Avançar | Naar voren | Переместить вперед | Przesuń do przodu | 前面へ移動 | 上移一层
+txtSendBackward | Send Backward | Reculer | Ebene nach hinten | Enviar atrás | Porta indietro | Recuar | Recuar | Naar achteren | Переместить назад | Przesuń do tyłu | 背面へ移動 | 下移一层
+txtGroup | Group | Grouper | Gruppieren | Agrupar | Raggruppa | Agrupar | Agrupar | Groeperen | Группировать | Grupuj | グループ化 | 组合
+txtRotate | Rotate | Faire pivoter | Drehen | Girar | Ruota | Girar | Rodar | Draaien | Повернуть | Obróć | 回転 | 旋转
+txtRotateRight | Rotate Right 90° | Faire pivoter de 90° à droite | 90° nach rechts drehen | Girar 90° a la derecha | Ruota a destra di 90° | Girar 90° à Direita | Rodar 90° para a Direita | 90° rechtsom draaien | Повернуть вправо на 90° | Obróć w prawo o 90° | 右へ 90 度回転 | 向右旋转 90°
+txtRotateLeft | Rotate Left 90° | Faire pivoter de 90° à gauche | 90° nach links drehen | Girar 90° a la izquierda | Ruota a sinistra di 90° | Girar 90° à Esquerda | Rodar 90° para a Esquerda | 90° linksom draaien | Повернуть влево на 90° | Obróć w lewo o 90° | 左へ 90 度回転 | 向左旋转 90°
+txtFlipV | Flip Vertical | Retourner verticalement | Vertikal kippen | Voltear verticalmente | Capovolgi verticalmente | Inverter Verticalmente | Inverter Verticalmente | Verticaal spiegelen | Отразить сверху вниз | Przerzuć pionowo | 上下反転 | 垂直翻转
+txtFlipH | Flip Horizontal | Retourner horizontalement | Horizontal kippen | Voltear horizontalmente | Capovolgi orizzontalmente | Inverter Horizontalmente | Inverter Horizontalmente | Horizontaal spiegelen | Отразить слева направо | Przerzuć w poziomie | 左右反転 | 水平翻转
+txtHeight | Height | Hauteur | Höhe | Alto | Altezza | Altura | Altura | Hoogte | Высота | Wysokość | 高さ | 高度
+txtWidth | Width | Largeur | Breite | Ancho | Larghezza | Largura | Largura | Breedte | Ширина | Szerokość | 幅 | 宽度
+txtHeaderRow | Header Row | Ligne d'en-tête | Kopfzeile | Fila de encabezado | Riga di intestazione | Linha de Cabeçalho | Linha de Cabeçalho | Veldnamenrij | Строка заголовка | Wiersz nagłówka | タイトル行 | 标题行
+txtTotalRow | Total Row | Ligne Total | Ergebniszeile | Fila de totales | Riga totale | Linha de Total | Linha de Totais | Totaalrij | Строка итогов | Wiersz sumy | 集計行 | 汇总行
+txtBandedRows | Banded Rows | Lignes à bandes | Gebänderte Zeilen | Filas con bandas | Righe alternate | Linhas em Tiras | Linhas Listadas | Gestreepte rijen | Чередующиеся строки | Wiersze naprzemienne | 縞模様 (行) | 镶边行
+txtFirstColumn | First Column | Première colonne | Erste Spalte | Primera columna | Prima colonna | Primeira Coluna | Primeira Coluna | Eerste kolom | Первый столбец | Pierwsza kolumna | 最初の列 | 第一列
+txtLastColumn | Last Column | Dernière colonne | Letzte Spalte | Última columna | Ultima colonna | Última Coluna | Última Coluna | Laatste kolom | Последний столбец | Ostatnia kolumna | 最後の列 | 最后一列
+txtBandedColumns | Banded Columns | Colonnes à bandes | Gebänderte Spalten | Columnas con bandas | Colonne alternate | Colunas em Tiras | Colunas Listadas | Gestreepte kolommen | Чередующиеся столбцы | Kolumny naprzemienne | 縞模様 (列) | 镶边列
+txtShading | Shading | Trame de fond | Schattierung | Sombreado | Sfondo | Sombreamento | Sombreado | Arcering | Заливка | Cieniowanie | 塗りつぶし | 底纹
+txtSelect | Select | Sélectionner | Auswählen | Seleccionar | Seleziona | Selecionar | Selecionar | Selecteren | Выделить | Zaznacz | 選択 | 选择
+txtSelectCell | Select Cell | Sélectionner la cellule | Zelle auswählen | Seleccionar celda | Seleziona cella | Selecionar Célula | Selecionar Célula | Cel selecteren | Выделить ячейку | Zaznacz komórkę | セルの選択 | 选择单元格
+txtSelectColumn | Select Column | Sélectionner la colonne | Spalte auswählen | Seleccionar columna | Seleziona colonna | Selecionar Coluna | Selecionar Coluna | Kolom selecteren | Выделить столбец | Zaznacz kolumnę | 列の選択 | 选择列
+txtSelectRow | Select Row | Sélectionner la ligne | Zeile auswählen | Seleccionar fila | Seleziona riga | Selecionar Linha | Selecionar Linha | Rij selecteren | Выделить строку | Zaznacz wiersz | 行の選択 | 选择行
+txtSelectTable | Select Table | Sélectionner le tableau | Tabelle auswählen | Seleccionar tabla | Seleziona tabella | Selecionar Tabela | Selecionar Tabela | Tabel selecteren | Выделить таблицу | Zaznacz tabelę | 表の選択 | 选择表格
+txtDelete | Delete | Supprimer | Löschen | Eliminar | Elimina | Excluir | Eliminar | Verwijderen | Удалить | Usuń | 削除 | 删除
+txtDeleteColumns | Delete Columns | Supprimer les colonnes | Spalten löschen | Eliminar columnas | Elimina colonne | Excluir Colunas | Eliminar Colunas | Kolommen verwijderen | Удалить столбцы | Usuń kolumny | 列の削除 | 删除列
+txtDeleteRows | Delete Rows | Supprimer les lignes | Zeilen löschen | Eliminar filas | Elimina righe | Excluir Linhas | Eliminar Linhas | Rijen verwijderen | Удалить строки | Usuń wiersze | 行の削除 | 删除行
+txtDeleteTable | Delete Table | Supprimer le tableau | Tabelle löschen | Eliminar tabla | Elimina tabella | Excluir Tabela | Eliminar Tabela | Tabel verwijderen | Удалить таблицу | Usuń tabelę | 表の削除 | 删除表格
+txtInsertAbove | Insert Above | Insérer au-dessus | Darüber einfügen | Insertar arriba | Inserisci sopra | Inserir Acima | Inserir Acima | Boven invoegen | Вставить сверху | Wstaw powyżej | 上に行を挿入 | 在上方插入
+txtInsertBelow | Insert Below | Insérer en dessous | Darunter einfügen | Insertar debajo | Inserisci sotto | Inserir Abaixo | Inserir Abaixo | Onder invoegen | Вставить снизу | Wstaw poniżej | 下に行を挿入 | 在下方插入
+txtInsertLeft | Insert Left | Insérer à gauche | Links einfügen | Insertar a la izquierda | Inserisci a sinistra | Inserir à Esquerda | Inserir à Esquerda | Links invoegen | Вставить слева | Wstaw z lewej | 左に列を挿入 | 在左侧插入
+txtInsertRight | Insert Right | Insérer à droite | Rechts einfügen | Insertar a la derecha | Inserisci a destra | Inserir à Direita | Inserir à Direita | Rechts invoegen | Вставить справа | Wstaw z prawej | 右に列を挿入 | 在右侧插入
+txtMergeCells | Merge Cells | Fusionner les cellules | Zellen verbinden | Combinar celdas | Unisci celle | Mesclar Células | Unir Células | Cellen samenvoegen | Объединить ячейки | Scal komórki | セルの結合 | 合并单元格
+txtSplitCells | Split Cells | Fractionner les cellules | Zellen teilen | Dividir celdas | Dividi celle | Dividir Células | Dividir Células | Cellen splitsen | Разделить ячейки | Podziel komórki | セルの分割 | 拆分单元格
+txtDistRows | Distribute Rows | Distribuer les lignes | Zeilen verteilen | Distribuir filas | Distribuisci righe | Distribuir Linhas | Distribuir Linhas | Rijen verdelen | Выровнять высоту строк | Rozłóż wiersze | 行の高さを揃える | 分布行
+txtDistCols | Distribute Columns | Distribuer les colonnes | Spalten verteilen | Distribuir columnas | Distribuisci colonne | Distribuir Colunas | Distribuir Colunas | Kolommen verdelen | Выровнять ширину столбцов | Rozłóż kolumny | 列の幅を揃える | 分布列
+txtAlignTop | Align Top | Aligner en haut | Oben ausrichten | Alinear en la parte superior | Allinea in alto | Alinhar em Cima | Alinhar Acima | Boven uitlijnen | Выровнять по верхнему краю | Wyrównaj do góry | 上揃え | 顶端对齐
+txtAlignMiddle | Center Vertically | Centrer verticalement | Vertikal zentrieren | Centrar verticalmente | Centra verticalmente | Centralizar Verticalmente | Centrar Verticalmente | Verticaal centreren | Выровнять по центру | Wyśrodkuj w pionie | 上下中央揃え | 垂直居中
+txtAlignBottom | Align Bottom | Aligner en bas | Unten ausrichten | Alinear en la parte inferior | Allinea in basso | Alinhar Embaixo | Alinhar Abaixo | Onder uitlijnen | Выровнять по нижнему краю | Wyrównaj do dołu | 下揃え | 底端对齐
+txtChangeChartType | Change Chart Type | Modifier le type de graphique | Diagrammtyp ändern | Cambiar tipo de gráfico | Cambia tipo di grafico | Alterar Tipo de Gráfico | Alterar Tipo de Gráfico | Ander grafiektype | Изменить тип диаграммы | Zmień typ wykresu | グラフの種類の変更 | 更改图表类型
+txtEditData | Edit Data | Modifier les données | Daten bearbeiten | Editar datos | Modifica dati | Editar Dados | Editar Dados | Gegevens bewerken | Изменить данные | Edytuj dane | データの編集 | 编辑数据
+txtProperties | Properties | Propriétés | Eigenschaften | Propiedades | Proprietà | Propriedades | Propriedades | Eigenschappen | Свойства | Właściwości | プロパティ | 属性

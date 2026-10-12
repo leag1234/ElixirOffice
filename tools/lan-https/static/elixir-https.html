@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ElixirOffice : faire confiance au certificat du réseau local</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:46em;margin:2em auto;padding:0 1em;color:#222}h1{font-size:1.4em}h2{font-size:1.1em;margin-top:1.6em}code{background:#f0f0f0;padding:0 .3em}a.btn{display:inline-block;background:#1f6feb;color:#fff;padding:.5em 1em;border-radius:6px;text-decoration:none}</style></head>
+<body>
+<h1>Installer le certificat du réseau local (une seule fois)</h1>
+<p>Cette suite bureautique de test est servie en HTTPS par un certificat émis par une autorité locale. Pour que le navigateur la considère comme sûre (et autorise l'accès à vos polices), installez une fois le certificat de cette autorité. Il ne sert qu'à ce serveur de test.</p>
+<p><a class="btn" href="/elixir-ca.crt">Télécharger elixir-ca.crt</a></p>
+<p>La première fois, le navigateur affiche « Votre connexion n'est pas privée » : c'est normal tant que le certificat n'est pas installé. Cliquez sur <b>Paramètres avancés</b>, puis sur <b>Continuer vers … (dangereux)</b> pour télécharger le certificat, installez-le (ci-dessous), fermez le navigateur et rouvrez l'adresse : le cadenas est alors fermé, sans avertissement.</p>
+
+<h2>Windows 10 / 11</h2>
+<ol>
+<li>Double-cliquez sur <code>elixir-ca.crt</code> (dossier Téléchargements), puis « Ouvrir ».</li>
+<li>Cliquez sur <b>Installer le certificat…</b></li>
+<li>Choisissez <b>Utilisateur actuel</b> (ou « Ordinateur local » avec les droits d'administration), puis Suivant.</li>
+<li>Cochez <b>Placer tous les certificats dans le magasin suivant</b>, cliquez sur Parcourir et choisissez <b>Autorités de certification racines de confiance</b>. OK, Suivant, Terminer.</li>
+<li>Répondez <b>Oui</b> à l'avertissement de sécurité.</li>
+<li>Fermez complètement Chrome ou Edge, puis rouvrez-le.</li>
+</ol>
+
+<h2>macOS</h2>
+<ol>
+<li>Double-cliquez sur <code>elixir-ca.crt</code> : le Trousseau d'accès s'ouvre, ajoutez-le au trousseau « Session ».</li>
+<li>Double-cliquez sur le certificat ajouté, déroulez « Se fier », choisissez <b>Toujours approuver</b>, fermez (le mot de passe est demandé).</li>
+<li>Redémarrez le navigateur.</li>
+</ol>
+
+<h2>Ensuite</h2>
+<ol>
+<li>Ouvrez l'adresse HTTPS donnée (avec Chrome ou Edge) : le cadenas doit être fermé, sans avertissement.</li>
+<li>Dans l'éditeur, cliquez sur <b>Utiliser mes polices</b> dans le bandeau, puis <b>Autoriser</b> quand le navigateur demande l'accès aux polices.</li>
+</ol>
+<p><small>Vos polices ne quittent jamais votre ordinateur. Pour retirer le certificat : <code>certmgr.msc</code> (Windows) ou Trousseau d'accès (macOS), supprimez « Caddy Local Authority ».</small></p>
+</body></html>

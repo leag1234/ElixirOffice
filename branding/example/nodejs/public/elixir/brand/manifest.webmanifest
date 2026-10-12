@@ -1,0 +1,37 @@
+{
+  "id": "../../../",
+  "name": "ElixirOffice",
+  "short_name": "ElixirOffice",
+  "description": "Word processor, spreadsheets and presentations in the browser. Installed, the window has no tabs and receives Office keys such as Ctrl+Tab and Ctrl+PageDown.",
+  "start_url": "../../../",
+  "scope": "../../../",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0082c9",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

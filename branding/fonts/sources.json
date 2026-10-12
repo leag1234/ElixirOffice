@@ -1,0 +1,708 @@
+{
+ "derivative_note": "ElixirOffice metric derivative: vertical metrics (and width instance for variable fonts) adjusted to match the font named in 'replaces'; see branding/fonts/LICENSES.md",
+ "families": [
+  {
+   "family": "Gelasio Metric",
+   "dir": "gelasio-metric",
+   "replaces": "Georgia",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/gelasio/OFL.txt",
+   "upstream": "https://github.com/SorkinType/Gelasio",
+   "files": [
+    {
+     "name": "GelasioMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/7ab20e7e5c42791e603b9ee3201a0b49849cfdb2/fonts/ttf/Gelasio-Regular.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Georgia"
+     },
+     "sha256": "48c797fbe0e07c48a18cb962e7bdfa23f19618327dddf54093265328dc9eb39d"
+    },
+    {
+     "name": "GelasioMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/7ab20e7e5c42791e603b9ee3201a0b49849cfdb2/fonts/ttf/Gelasio-Bold.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "Georgia-Bold"
+     },
+     "sha256": "e0ef3addf1acf35f5c6aef2be00d0a2c01363bf70a5950e16650976051a0c462"
+    },
+    {
+     "name": "GelasioMetric-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/7ab20e7e5c42791e603b9ee3201a0b49849cfdb2/fonts/ttf/Gelasio-Italic.ttf",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "Georgia-Italic"
+     },
+     "sha256": "1d8bda4ff258bb8251eae4f7d7500c8d97d084136192bb264bc2305168765d1b"
+    },
+    {
+     "name": "GelasioMetric-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/7ab20e7e5c42791e603b9ee3201a0b49849cfdb2/fonts/ttf/Gelasio-BoldItalic.ttf",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "Georgia-Bold"
+     },
+     "sha256": "aa87e21b46aef3dcb50a68dc6e1946f0c0a9819d067e4be6a98a6daa8f5b3c16"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "URW Gothic Metric",
+   "dir": "urw-gothic-metric",
+   "replaces": "Century Gothic",
+   "license": "AGPL-3.0 with font-embedding exception",
+   "license_url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/LICENSE",
+   "upstream": "https://github.com/ArtifexSoftware/urw-base35-fonts",
+   "files": [
+    {
+     "name": "URWGothicMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-Book.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "CenturyGothic"
+     },
+     "sha256": "1860f85c10347a7a3b00137d08ccc0c71ebd5b780a0436dc1df590344d34b952"
+    },
+    {
+     "name": "URWGothicMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-Demi.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "CenturyGothic-Bold"
+     },
+     "sha256": "6de372e48aae93601d97f948b7aa0865977dbbd7f1835e1c6879bd8eabc26caa"
+    },
+    {
+     "name": "URWGothicMetric-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-BookOblique.ttf",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "CenturyGothic-Italic"
+     },
+     "sha256": "ad91b4ffeec1c7d9e1664d817a1be043a6af691ca3f961f004f5e51840986c5c"
+    },
+    {
+     "name": "URWGothicMetric-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-DemiOblique.ttf",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "CenturyGothic-Bold"
+     },
+     "sha256": "536cb6a663f494df82f0333ed60588af0a6910ca307bd5281915f940125a9813"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "P052",
+   "dir": "urw-p052",
+   "replaces": "Book Antiqua, Palatino Linotype",
+   "license": "AGPL-3.0 with font-embedding exception",
+   "license_url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/LICENSE",
+   "upstream": "https://github.com/ArtifexSoftware/urw-base35-fonts",
+   "files": [
+    {
+     "name": "P052-Roman.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/P052-Roman.ttf",
+     "sha256": "5ebaf9c427fb6afd48f7173d6b43c89ba849d4214796d15ed5315a65afc64f77"
+    },
+    {
+     "name": "P052-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/P052-Bold.ttf",
+     "sha256": "1b932fe1167659bdec980d58bba90b2be06e94748caac225ba2f675e40d32d24"
+    },
+    {
+     "name": "P052-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/P052-Italic.ttf",
+     "sha256": "c7baa18065ef9a9f4d6ef4ed2ab36edacc2c69518c1908bfedc913a816a3d8d7"
+    },
+    {
+     "name": "P052-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/P052-BoldItalic.ttf",
+     "sha256": "980966a1e1deb1f34c3ad5da6ab0f9958bfc888d6d9bf54fb19a03b05ab50ad9"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Comic Relief Metric",
+   "dir": "comic-relief-metric",
+   "replaces": "Comic Sans MS",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicrelief/OFL.txt",
+   "upstream": "https://github.com/loudifier/Comic-Relief",
+   "files": [
+    {
+     "name": "ComicReliefMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicrelief/ComicRelief-Regular.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "ComicSansMS"
+     },
+     "sha256": "9ef4958ab06385d91f635f83a15569786b243f9d010cfb3f9a5cdda593c7bc22"
+    },
+    {
+     "name": "ComicReliefMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicrelief/ComicRelief-Bold.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "ComicSansMS-Bold"
+     },
+     "sha256": "33aee007212b696afd57d50c901135cd723cd188f7ad98f3a1c572ea64e8f0d5"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Archivo Black Metric",
+   "dir": "archivo-black-metric",
+   "replaces": "Arial Black",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/archivoblack/OFL.txt",
+   "upstream": "https://github.com/Omnibus-Type/ArchivoBlack",
+   "files": [
+    {
+     "name": "ArchivoBlackMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/archivoblack/ArchivoBlack-Regular.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Arial-Black"
+     },
+     "sha256": "dd9a89a019b4849f66ab75455fe7bdf931311042cbb0f0f97acc061539703180"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Roboto Metric",
+   "dir": "roboto-metric",
+   "replaces": "Aptos, Aptos Display (closest free match: widths within 0.2 %, vertical metrics of Aptos)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/roboto/OFL.txt",
+   "upstream": "https://github.com/googlefonts/roboto-classic",
+   "files": [
+    {
+     "name": "RobotoMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/roboto/Roboto%5Bwdth,wght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Aptos",
+      "instance": {
+       "wdth": 96.5,
+       "wght": 400
+      }
+     },
+     "sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134"
+    },
+    {
+     "name": "RobotoMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/roboto/Roboto%5Bwdth,wght%5D.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "Aptos-Bold",
+      "instance": {
+       "wdth": 100,
+       "wght": 700
+      }
+     },
+     "sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134"
+    },
+    {
+     "name": "RobotoMetric-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/roboto/Roboto-Italic%5Bwdth,wght%5D.ttf",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "Aptos-Italic",
+      "instance": {
+       "wdth": 96.5,
+       "wght": 400
+      }
+     },
+     "sha256": "9725a847af6b460ffca162ae66d20dad48b01876137947180b42d7dcd7887182"
+    },
+    {
+     "name": "RobotoMetric-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/roboto/Roboto-Italic%5Bwdth,wght%5D.ttf",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "Aptos-Bold",
+      "instance": {
+       "wdth": 100,
+       "wght": 700
+      }
+     },
+     "sha256": "9725a847af6b460ffca162ae66d20dad48b01876137947180b42d7dcd7887182"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Selawik",
+   "dir": "selawik",
+   "replaces": "Segoe UI (metric-compatible by design)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/microsoft/Selawik/89362e84731d1f5777fa078fd4d5ebbd339e4378/LICENSE.txt",
+   "upstream": "https://github.com/microsoft/Selawik",
+   "files": [
+    {
+     "name": "selawk.ttf",
+     "url": "https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip",
+     "member": "selawk.ttf",
+     "sha256": "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+    },
+    {
+     "name": "selawkb.ttf",
+     "url": "https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip",
+     "member": "selawkb.ttf",
+     "sha256": "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+    },
+    {
+     "name": "selawkl.ttf",
+     "url": "https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip",
+     "member": "selawkl.ttf",
+     "sha256": "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+    },
+    {
+     "name": "selawksb.ttf",
+     "url": "https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip",
+     "member": "selawksb.ttf",
+     "sha256": "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+    },
+    {
+     "name": "selawksl.ttf",
+     "url": "https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip",
+     "member": "selawksl.ttf",
+     "sha256": "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Andika",
+   "dir": "andika",
+   "replaces": "(school font, installed as is)",
+   "license": "OFL-1.1 (RFN Andika, SIL)",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/andika/OFL.txt",
+   "upstream": "https://software.sil.org/andika/",
+   "files": [
+    {
+     "name": "Andika-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/andika/Andika-Regular.ttf",
+     "sha256": "202b96b1f174a4a43baefe885b40dacacb81786755efd08ed4b7704e79c45515"
+    },
+    {
+     "name": "Andika-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/andika/Andika-Bold.ttf",
+     "sha256": "4361126189a2d0e0da66999352db58aaf1b4ca940faf8a8239d725f8303d890d"
+    },
+    {
+     "name": "Andika-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/andika/Andika-Italic.ttf",
+     "sha256": "6a4a0dd26d28f577b51dd6afb5acf6fd91ab21694e25649c270a32179bb52a62"
+    },
+    {
+     "name": "Andika-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/andika/Andika-BoldItalic.ttf",
+     "sha256": "2d000f8791a1827c0c4d411e9f4593c4fc2db0fdbb868bb1f863593b3d3968e6"
+    }
+   ],
+   "group": "school"
+  },
+  {
+   "family": "OpenDyslexic",
+   "dir": "opendyslexic",
+   "replaces": "(school font, installed as is)",
+   "license": "OFL-1.1 (RFN OpenDyslexic)",
+   "license_url": "https://raw.githubusercontent.com/antijingoist/opendyslexic/1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7/OFL.txt",
+   "upstream": "https://github.com/antijingoist/opendyslexic",
+   "files": [
+    {
+     "name": "OpenDyslexic-Regular.otf",
+     "url": "https://raw.githubusercontent.com/antijingoist/opendyslexic/1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7/compiled/OpenDyslexic-Regular.otf",
+     "sha256": "32f5840fb2bf844bdabafe372591ddfb9286e98117f5b21950aaf54ea856919a"
+    },
+    {
+     "name": "OpenDyslexic-Bold.otf",
+     "url": "https://raw.githubusercontent.com/antijingoist/opendyslexic/1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7/compiled/OpenDyslexic-Bold.otf",
+     "sha256": "5d690ea4c87ccb0d5d5d81487826a395e9b20a6c1d606f1f262c060d2bef4f03"
+    },
+    {
+     "name": "OpenDyslexic-Italic.otf",
+     "url": "https://raw.githubusercontent.com/antijingoist/opendyslexic/1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7/compiled/OpenDyslexic-Italic.otf",
+     "sha256": "dfa0185bb0d47cb76cb5d082531822d0dca03152f5b6ec6c9f6e3f8d00b71782"
+    },
+    {
+     "name": "OpenDyslexic-Bold-Italic.otf",
+     "url": "https://raw.githubusercontent.com/antijingoist/opendyslexic/1824da5c0e41dc3e13ffc7f3a636dcaf695d61b7/compiled/OpenDyslexic-Bold-Italic.otf",
+     "sha256": "b50779f4f547917a648d38976a664cab8952563112ce03209ff568b1eb364090"
+    }
+   ],
+   "group": "school"
+  },
+  {
+   "family": "Comic Neue",
+   "dir": "comic-neue",
+   "replaces": "(school font, installed as is)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/OFL.txt",
+   "upstream": "https://github.com/crozynski/comicneue",
+   "files": [
+    {
+     "name": "ComicNeue-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-Regular.ttf",
+     "sha256": "a0ee5a37c8b27c4db0700137d928598b1e23b0089e1546a8961909176b779360"
+    },
+    {
+     "name": "ComicNeue-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-Bold.ttf",
+     "sha256": "3e7e5fccfd7e0788f317b43312151c1bd5cf058c9697a8d83eac3939050bd61e"
+    },
+    {
+     "name": "ComicNeue-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-Italic.ttf",
+     "sha256": "e06bfd1552f5c9464c5665733ffd69239b0593885dbb9e059688a5900f78cf98"
+    },
+    {
+     "name": "ComicNeue-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-BoldItalic.ttf",
+     "sha256": "5c312c2a2fa64eee82f3b87fcfab8f3b12a5e59b043124401d322eb323cfbf16"
+    },
+    {
+     "name": "ComicNeue-Light.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-Light.ttf",
+     "sha256": "efb91c06dccc264f07f800c0691d40c94e8cfce6183daade0709268bec178f76"
+    },
+    {
+     "name": "ComicNeue-LightItalic.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/comicneue/ComicNeue-LightItalic.ttf",
+     "sha256": "a6d36baee09c7025916ddb517835458d15ef890291507197a54875ccc096b927"
+    }
+   ],
+   "group": "school"
+  },
+  {
+   "family": "Elixir Symbols",
+   "dir": "elixir-symbols",
+   "replaces": "Wingdings, Wingdings 2, Wingdings 3, Webdings (glyphs at the Unicode code points of the symbols, vertical metrics of Wingdings)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/notosanssymbols2/OFL.txt",
+   "upstream": "https://github.com/notofonts/symbols",
+   "files": [
+    {
+     "name": "ElixirSymbols-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/notosanssymbols2/NotoSansSymbols2-Regular.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Wingdings-Regular",
+      "merge": {
+       "codes_from": "symbol-tables.json",
+       "tables": [
+        "Wingdings",
+        "Wingdings 2",
+        "Wingdings 3",
+        "Webdings"
+       ],
+       "with": [
+        {
+         "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/notosanssymbols/NotoSansSymbols%5Bwght%5D.ttf",
+         "instance": {
+          "wght": 400
+         },
+         "sha256": "f7e7e04b4a24b6c78893d50cbfd2b2f6cae49617ab047bfef668d252adb128f7"
+        }
+       ]
+      }
+     },
+     "sha256": "7d5fb73b7ca67a6798101741f5d280a3d016a56a197afcd4199dbb57b4b82a21"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "URW Gothic Ecole Metric",
+   "dir": "urw-gothic-ecole-metric",
+   "replaces": "Script École (non-redistributable school font; widths within 0.2 %, vertical metrics of Script École)",
+   "license": "AGPL-3.0 with font-embedding exception",
+   "license_url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/LICENSE",
+   "upstream": "https://github.com/ArtifexSoftware/urw-base35-fonts",
+   "files": [
+    {
+     "name": "URWGothicEcoleMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-Book.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Scriptcole"
+     },
+     "sha256": "1860f85c10347a7a3b00137d08ccc0c71ebd5b780a0436dc1df590344d34b952"
+    },
+    {
+     "name": "URWGothicEcoleMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-Demi.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "Scriptcole"
+     },
+     "sha256": "6de372e48aae93601d97f948b7aa0865977dbbd7f1835e1c6879bd8eabc26caa"
+    },
+    {
+     "name": "URWGothicEcoleMetric-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-BookOblique.ttf",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "Scriptcole"
+     },
+     "sha256": "ad91b4ffeec1c7d9e1664d817a1be043a6af691ca3f961f004f5e51840986c5c"
+    },
+    {
+     "name": "URWGothicEcoleMetric-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/3c0ba3b5687632dfc66526544a4e811fe0ec0cd9/fonts/URWGothic-DemiOblique.ttf",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "Scriptcole"
+     },
+     "sha256": "536cb6a663f494df82f0333ed60588af0a6910ca307bd5281915f940125a9813"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Caveat Penmanship Metric",
+   "dir": "caveat-penmanship-metric",
+   "replaces": "KG Primary Penmanship (non-redistributable school font; widths within 1 %, vertical metrics of the original)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/caveat/OFL.txt",
+   "upstream": "https://github.com/googlefonts/caveat",
+   "files": [
+    {
+     "name": "CaveatPenmanshipMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/caveat/Caveat%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "KGPrimaryPenmanship",
+      "instance": {
+       "wght": 400
+      }
+     },
+     "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988"
+    },
+    {
+     "name": "CaveatPenmanshipMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/caveat/Caveat%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "KGPrimaryPenmanship",
+      "instance": {
+       "wght": 700
+      }
+     },
+     "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Neucha Penmanship Metric",
+   "dir": "neucha-penmanship-metric",
+   "replaces": "KG Primary Penmanship 2 (non-redistributable school font; widths within 1.2 %, vertical metrics of the original)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/neucha/OFL.txt",
+   "upstream": "https://fonts.google.com/specimen/Neucha",
+   "files": [
+    {
+     "name": "NeuchaPenmanshipMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/neucha/Neucha.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "KGPrimaryPenmanship2"
+     },
+     "sha256": "7927bd6ce090fa032857dcbc3ad0e8b765c462d0a72a8779068132496b4e087d"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Playwrite FR Moderne",
+   "dir": "playwrite-fr-moderne",
+   "replaces": "fallback of the Playwrite FR derivatives (French school cursive, free font in its own right)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/OFL.txt",
+   "upstream": "https://github.com/TypeTogether/Playwrite",
+   "files": [
+    {
+     "name": "PlaywriteFRModerne-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/PlaywriteFRModerne%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "instance": {
+       "wght": 400
+      }
+     },
+     "sha256": "8ac2813db7de12935b95e7127c85a92e694b03083be379db7ceb3ac202b0d500"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Playwrite FR Trad",
+   "dir": "playwrite-fr-trad",
+   "replaces": "fallback of the Playwrite FR derivatives (French school cursive, free font in its own right)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrtrad/OFL.txt",
+   "upstream": "https://github.com/TypeTogether/Playwrite",
+   "files": [
+    {
+     "name": "PlaywriteFRTrad-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrtrad/PlaywriteFRTrad%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "instance": {
+       "wght": 400
+      }
+     },
+     "sha256": "0f20dd00ba639dc19e9095e8239a7667d92922c2fd6b69bd3ffb600b90ae4845"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Playwrite FR Moderne Metric",
+   "dir": "playwrite-fr-moderne-metric",
+   "replaces": "Cursive standard, Belle Allure et cursives scolaires inconnues (largeur et hauteur de ligne de Cursive standard)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/OFL.txt",
+   "upstream": "https://github.com/TypeTogether/Playwrite",
+   "files": [
+    {
+     "name": "PlaywriteFRModerneMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/PlaywriteFRModerne%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "instance": {
+       "wght": 400
+      },
+      "vmetrics": "Cursivestandard"
+     },
+     "sha256": "8ac2813db7de12935b95e7127c85a92e694b03083be379db7ceb3ac202b0d500"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Playwrite FR Moderne Compact",
+   "dir": "playwrite-fr-moderne-compact",
+   "replaces": "unknown script fonts (declared w:family=\"script\" by the document): average width and line height (1.25 em) of a common cursive",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/OFL.txt",
+   "upstream": "https://github.com/TypeTogether/Playwrite",
+   "files": [
+    {
+     "name": "PlaywriteFRModerneCompact-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrmoderne/PlaywriteFRModerne%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "instance": {
+       "wght": 400
+      },
+      "vmetrics": "ScriptNeutral"
+     },
+     "sha256": "8ac2813db7de12935b95e7127c85a92e694b03083be379db7ceb3ac202b0d500"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Playwrite Seyes Metric",
+   "dir": "playwrite-seyes-metric",
+   "replaces": "ruled school cursive (school cursive with Seyès ruled lines drawn in the glyphs)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrtrad/OFL.txt",
+   "upstream": "https://github.com/TypeTogether/Playwrite",
+   "files": [
+    {
+     "name": "PlaywriteSeyesMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrtrad/PlaywriteFRTrad%5Bwght%5D.ttf",
+     "derive": {
+      "style": "Regular",
+      "instance": {
+       "wght": 400
+      },
+      "vmetrics": "RuledCursive",
+      "ruled": "RuledCursive"
+     },
+     "sha256": "0f20dd00ba639dc19e9095e8239a7667d92922c2fd6b69bd3ffb600b90ae4845"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Marelle",
+   "dir": "marelle",
+   "replaces": "(French national-education school cursive, installed as is; real font for Marelle documents)",
+   "license": "OFL-1.1 (RFN Marelle)",
+   "license_url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+   "license_member": "LICENSE",
+   "upstream": "https://marelle.forge.apps.education.fr/ (forge: https://forge.apps.education.fr/marelle/marelle.forge.apps.education.fr), version 1.005",
+   "files": [
+    {
+     "name": "Marelle-Regular.ttf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "Marelle-Regular.ttf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "e72b6332ccd52ae441bd4175411287afce321a84ddb222ca3846c306c293e7e7"
+    },
+    {
+     "name": "Marelle2-Regular.ttf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "Marelle2-Regular.ttf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "08573d46b13fd446ced8c0ec31244c714b8d07298f39bb141a18ab5c75892811"
+    },
+    {
+     "name": "MarelleBaton-Regular.ttf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleBaton-Regular.ttf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "ea7ebeebaa660c8d2764094aa36c78e1d1fb453c827e63e9c1d4ff31bf6c1081"
+    },
+    {
+     "name": "MarelleBaton2-Regular.ttf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleBaton2-Regular.ttf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "e93bac4aa10bb02fd9b38e9c9dc5b9ac27d6c34f345423098de8294e70dc0349"
+    },
+    {
+     "name": "MarelleLIGNES-Regular.otf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleLIGNES-Regular.otf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "37038d769a03f9aadc83e44dff5f67b77b8e4f8237b36a9592d2f073ddffd4ad"
+    },
+    {
+     "name": "MarelleLIGNES2-Regular.otf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleLIGNES2-Regular.otf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "0e17396f2031ae9d441394fe8369fa1bf9f84a08a15eea56885bab97d33cec03"
+    },
+    {
+     "name": "MarelleLIGNESBaton-Regular.otf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleLIGNESBaton-Regular.otf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "bef6bb004d6c99ffe9dde5a9093e0d706b88d99fbe4c3be8ec171545b6383659"
+    },
+    {
+     "name": "MarelleLIGNESBaton2-Regular.otf",
+     "url": "https://forge.apps.education.fr/api/v4/projects/10339/packages/generic/marelle/v1.005/marelle-ttf.zip",
+     "member": "MarelleLIGNESBaton2-Regular.otf",
+     "sha256": "d53d5a57177f6968d69ecfcb252e18ceab02ecffa8896004942605237c90e345",
+     "member_sha256": "fe41481b856763c6ed0d5fb4e3977c780e7df8917c7fe740c5e7924cc6221392"
+    }
+   ],
+   "group": "metric"
+  }
+ ]
+}

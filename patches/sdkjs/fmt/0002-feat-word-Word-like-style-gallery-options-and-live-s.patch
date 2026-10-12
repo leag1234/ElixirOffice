@@ -1,0 +1,289 @@
+From 45e97186de2ec2b8643342e6c486bc3b1ac3d47d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:24:25 +0200
+Subject: [PATCH 2/7] feat(word): Word-like style gallery options and live
+ style preview
+
+- asc_SetStyleGalleryOptions({wordLike, previewText, width, height}):
+  list the styles as Word does (Quick Styles only; Heading 3-9 once the
+  level above is used; Caption, TOC Heading and semi-hidden styles once
+  used; styles without priority last), draw a sample text such as
+  "AaBbCcDd" instead of the style name, set the preview size even when
+  the painter already exists. asc_UpdateStyleGallery() regenerates.
+- asc_StartStylePreview(name) / asc_EndStylePreview(): apply a style to
+  the selection inside a group action with interface events off, and
+  revert it without an undo point (gallery hover); nothing is sent to
+  co-authors meanwhile; spell checking is turned back on afterwards.
+- Fixes: the gallery sorted styles of equal priority on CStyleImage.Name,
+  which does not exist (the field is "name"), so they kept a random
+  order; now case-insensitive with numeric order (Heading 1..9).
+  Character style previews applied the style to the paragraph and showed
+  plain text; they now format the run.
+Default behaviour is unchanged without the options.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ word/Drawing/stylespainter.js | 87 +++++++++++++++++++++++++++++------
+ word/api.js                   | 83 +++++++++++++++++++++++++++++++++
+ 2 files changed, 156 insertions(+), 14 deletions(-)
+
+diff --git a/word/Drawing/stylespainter.js b/word/Drawing/stylespainter.js
+index a7cfd5bd73..f440b9008e 100644
+--- a/word/Drawing/stylespainter.js
++++ b/word/Drawing/stylespainter.js
+@@ -135,11 +135,15 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 		if (!this.styleManager.Style)
+ 			return;
+ 		
++		let galleryOptions = _api.StyleGalleryOptions;
++		this.isWordGallery = !!(galleryOptions && galleryOptions.wordLike);
++		let usedStyles = this.isWordGallery ? this.GetUsedParagraphStyles(_api) : null;
++		
+ 		this.styles = [];
+ 		for (let i in this.styleManager.Style)
+ 		{
+ 			let style = this.styleManager.Style[i];
+-			if (style.IsExpressStyle(this.styleManager))
++			if (this.isWordGallery ? this.IsWordGalleryStyle(style, usedStyles) : style.IsExpressStyle(this.styleManager))
+ 				this.styles.push(this.styleManager.Style[i]);
+ 		}
+ 		
+@@ -176,12 +180,13 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 		if (null != this.docStyles)
+ 			_count_doc = this.docStyles.length;
+ 		
++		var _t = this;
+ 		var aPriorityStyles = [];
+ 		var fAddToPriorityStyles = function (style)
+ 		{
+ 			var index = style.uiPriority;
+ 			if (null == index)
+-				index = 0;
++				index = (_t.isWordGallery && "Normal" !== style.name) ? 99 : 0;
+ 			var aSubArray = aPriorityStyles[index];
+ 			if (null == aSubArray)
+ 			{
+@@ -195,14 +200,14 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 		for (var i = 0; i < _count_doc; i++)
+ 		{
+ 			var style = this.docStyles[i];
+-			_map_document[style.Name] = 1;
++			_map_document[style.name] = 1;
+ 			fAddToPriorityStyles(style);
+ 		}
+ 		
+ 		for (var i = 0; i < _count_default; i++)
+ 		{
+ 			var style = this.defaultStyles[i];
+-			if (null == _map_document[style.Name])
++			if (null == _map_document[style.name])
+ 				fAddToPriorityStyles(style);
+ 		}
+ 		
+@@ -210,14 +215,11 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 		for (var index in aPriorityStyles)
+ 		{
+ 			var aSubArray = aPriorityStyles[index];
++			// CStyleImage keeps the name in "name". Names read from a file may be lower case
++			// ("heading 1"): compare without case, and numbers by value (Heading 1..9 in order)
+ 			aSubArray.sort(function (a, b)
+ 			{
+-				if (a.Name < b.Name)
+-					return -1;
+-				else if (a.Name > b.Name)
+-					return 1;
+-				else
+-					return 0;
++				return ("" + a.name).localeCompare("" + b.name, undefined, {numeric : true, sensitivity : "base"});
+ 			});
+ 			for (var i = 0, length = aSubArray.length; i < length; ++i)
+ 			{
+@@ -299,8 +301,9 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 		}
+ 		
+ 		var _dr_style  = this.styleManager.Get_Pr(styleId, AscWord.styletype_Paragraph);
+-		_dr_style.Name = styleName;
+-		_dr_style.Id   = styleId;
++		_dr_style.Name      = styleName;
++		_dr_style.Id        = styleId;
++		_dr_style.StyleType = style.GetType();
+ 		
+ 		this.drawStyle(this.api, this.graphics, _dr_style, this.styleManager.IsStyleDefaultByName(styleName) ? AscCommon.translateManager.getValue(styleName) : styleName);
+ 		return new AscCommon.CStyleImage(styleName, AscCommon.c_oAscStyleImage.Document, this.canvas.toDataURL("image/png"), uiPriority);
+@@ -420,11 +423,16 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 			
+ 			var par = new AscWord.Paragraph(_dc, false);
+ 			var run = new ParaRun(par, false);
+-			run.AddText(styleName);
++			var previewText = this.api && this.api.StyleGalleryOptions ? this.api.StyleGalleryOptions.previewText : null;
++			run.AddText(previewText ? previewText : styleName);
+ 			
+ 			_dc.Internal_Content_Add(0, par, false);
+ 			par.Add_ToContent(0, run);
+-			par.Style_Add(style.Id, false);
++			// a character style formats the run, not the paragraph
++			if (AscWord.styletype_Character === style.StyleType)
++				run.Set_RStyle(style.Id);
++			else
++				par.Style_Add(style.Id, false);
+ 			par.Set_Tabs(new CParaTabs());
+ 			
+ 			let isRtl = this.api.isRtlInterface;
+@@ -531,6 +539,57 @@ CStylesPainter.prototype.get_MergedStyles = function ()
+ 			graphics.restore();
+ 		}
+ 	};
++	/**
++	 * Paragraph styles used in the document, by id and by simplified name ("heading1")
++	 */
++	StylePreviewGenerator.prototype.GetUsedParagraphStyles = function(_api)
++	{
++		let used = {ids : {}, names : {}};
++		let logicDocument = _api.getLogicDocument();
++		if (!logicDocument)
++			return used;
++		
++		let paragraphs = logicDocument.GetAllParagraphs({All : true});
++		for (let i = 0; i < paragraphs.length; ++i)
++		{
++			let styleId = paragraphs[i].Style_Get();
++			if (!styleId || used.ids[styleId])
++				continue;
++			
++			used.ids[styleId] = true;
++			let style = this.styleManager.Get(styleId);
++			if (style)
++				used.names[style.GetName().toLowerCase().replace(/\s/g, "")] = true;
++		}
++		return used;
++	};
++	/**
++	 * Which styles Word shows in its Styles gallery: Quick Styles (qFormat) only, Heading 3-9 once
++	 * the heading level above is used, and the styles hidden until used (semiHidden, Caption,
++	 * TOC Heading) once they are used.
++	 */
++	StylePreviewGenerator.prototype.IsWordGalleryStyle = function(style, used)
++	{
++		if (true !== style.GetQFormat() || true === style.GetHidden())
++			return false;
++		
++		let type = style.GetType();
++		if (AscWord.styletype_Paragraph !== type && AscWord.styletype_Character !== type)
++			return false;
++		
++		let name    = style.GetName().toLowerCase().replace(/\s/g, "");
++		let heading = name.match(/^heading([1-9])$/);
++		if (heading)
++		{
++			let level = heading[1] | 0;
++			return (level <= 2 || !!used.names[name] || !!used.names["heading" + (level - 1)]);
++		}
++		
++		if (true === style.GetSemiHidden() || "caption" === name || "tocheading" === name)
++			return !!used.ids[style.GetId()];
++		
++		return true;
++	};
+ 	StylePreviewGenerator.prototype.GenerateDefaultStyles = function ()
+ 	{
+ 		for (let i = 0; i < this.styles.length; ++i)
+diff --git a/word/api.js b/word/api.js
+index e20e0eafcf..e7d737bf3f 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -13856,6 +13856,89 @@ background-repeat: no-repeat;\
+ 		}
+ 	};
+ 
++	/**
++	 * Styles gallery options:
++	 *  wordLike    - list the styles the way Word does (Quick Styles only, Heading 3-9 once the level
++	 *                above is used, Caption/TOC Heading/semi-hidden styles once used, custom styles last);
++	 *  previewText - text drawn in each style preview instead of the style name (e.g. "AaBbCcDd");
++	 *  width, height - size of each preview, in CSS pixels.
++	 * Takes effect on the next generation of the previews (see asc_UpdateStyleGallery).
++	 */
++	window["asc_docs_api"].prototype["asc_SetStyleGalleryOptions"] = function(options)
++	{
++		this.StyleGalleryOptions = {
++			wordLike    : !!(options && options["wordLike"]),
++			previewText : (options && options["previewText"]) ? ("" + options["previewText"]) : null
++		};
++		
++		// preview size in CSS pixels; also applies to an already created painter
++		if (options && options["width"] > 0 && options["height"] > 0)
++		{
++			this["asc_setParagraphStylesSizes"](options["width"], options["height"]);
++			if (this.stylePainter)
++			{
++				this.stylePainter.STYLE_THUMBNAIL_WIDTH  = options["width"];
++				this.stylePainter.STYLE_THUMBNAIL_HEIGHT = options["height"];
++			}
++		}
++	};
++	window["asc_docs_api"].prototype["asc_UpdateStyleGallery"] = function()
++	{
++		if (this.WordControl && this.WordControl.m_oLogicDocument)
++			this.GenerateStyles();
++	};
++	/**
++	 * Live preview of a style, as when hovering the Styles gallery of Word: sName is applied to the
++	 * selection inside a group action, so nothing is sent to co-authors or saved, and
++	 * asc_EndStylePreview() reverts it without leaving an undo/redo point.
++	 * @returns {boolean} whether the preview started
++	 */
++	window["asc_docs_api"].prototype["asc_StartStylePreview"] = function(sName)
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		if (this.isStylePreview)
++			this["asc_EndStylePreview"]();
++
++		if (!logicDocument || !sName || this.isGroupActions() || this.isLongAction() || this.isViewMode
++			|| !logicDocument.CanEdit() || logicDocument.IsSelectionLocked(AscCommon.changestype_Paragraph_Properties, null, true))
++			return false;
++
++		this.isStylePreview = true;
++		this.startGroupActions();
++		this.executeGroupActions(function()
++		{
++			// put_Style without its lock request (the preview is never sent) and without interface
++			// events (the toolbar keeps showing the real formatting)
++			let isTurnedOff = logicDocument.TurnOff_InterfaceEvents();
++			logicDocument.StartAction(AscDFH.historydescription_Document_SetParagraphStyle, null, null, sName);
++			logicDocument.SetParagraphStyle(sName, true);
++			logicDocument.FinalizeAction();
++			if (isTurnedOff)
++				logicDocument.TurnOn_InterfaceEvents(false);
++		});
++		return true;
++	};
++	window["asc_docs_api"].prototype["asc_EndStylePreview"] = function()
++	{
++		if (!this.isStylePreview)
++			return;
++
++		this.isStylePreview = false;
++		this.cancelGroupActions();
++
++		let logicDocument = this.private_GetLogicDocument();
++		if (logicDocument && !this.isGroupActions())
++		{
++			logicDocument.UpdateInterface();
++			logicDocument.UpdateSelection();
++			logicDocument.GetSpellCheckManager().TurnOn();
++		}
++	};
++	window["asc_docs_api"].prototype["asc_IsStylePreview"] = function()
++	{
++		return !!this.isStylePreview;
++	};
++
+ 	asc_docs_api.prototype.SetDrawImagePlaceContents = function(id, props)
+ 	{
+ 		if (this.WordControl.m_oDrawingDocument)
+-- 
+2.43.0
+

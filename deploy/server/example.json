@@ -1,0 +1,13 @@
+{
+  "server": {
+    "verify_peer_off": false
+  },
+  "elixir": {
+    "nextcloud": {
+      "defaultServer": "https://murena.io",
+      "allowHttp": false,
+      "allowedServers": ["https://murena.io"]
+    },
+    "documentServerInternalUrl": "http://localhost"
+  }
+}

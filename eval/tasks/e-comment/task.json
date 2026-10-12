@@ -1,0 +1,10 @@
+{
+  "id": "e-comment",
+  "title": "Comment on a paragraph",
+  "instruction": "Add a comment on the paragraph about Paris saying it needs a source",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": ""
+}

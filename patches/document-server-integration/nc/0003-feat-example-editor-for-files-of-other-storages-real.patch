@@ -1,0 +1,270 @@
+From 7919f7cf955d074d49a401578bc4f1edfb2d6123 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:47:41 +0200
+Subject: [PATCH 3/6] feat(example): editor for files of other storages, real
+ identity in editorConfig.user
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ web/documentserver-example/nodejs/app.js      | 60 +++++++++++++------
+ .../nodejs/views/config.ejs                   | 14 ++---
+ .../nodejs/views/editor.ejs                   | 15 +++--
+ 3 files changed, 59 insertions(+), 30 deletions(-)
+
+diff --git a/web/documentserver-example/nodejs/app.js b/web/documentserver-example/nodejs/app.js
+index 5d3a5651..7610ba1b 100755
+--- a/web/documentserver-example/nodejs/app.js
++++ b/web/documentserver-example/nodejs/app.js
+@@ -36,6 +36,9 @@ const fileUtility = require('./helpers/fileUtility');
+ const wopiApp = require('./helpers/wopi/wopiRouting');
+ const users = require('./helpers/users');
+ const elixirHome = require('./helpers/elixirHome');
++const elixirSession = require('./helpers/elixirSession');
++const elixirIdentity = require('./helpers/elixirIdentity');
++const elixirNextcloud = require('./helpers/elixirNextcloud');
+ const dataAutofill = require('./config/data.json');
+ 
+ const configServer = config.get('server');
+@@ -93,7 +96,9 @@ app.use(favicon(`${__dirname}/public/images/favicon.ico`)); // use favicon
+ app.use(bodyParser.json()); // connect middleware that parses json
+ app.use(bodyParser.urlencoded({ extended: false })); // connect middleware that parses urlencoded bodies
+ 
++app.use(elixirSession.middleware()); // ElixirOffice browser session (profile, Nextcloud connection)
+ app.use(elixirHome()); // ElixirOffice start page; the test harness below stays at /?dev=1
++app.use(elixirNextcloud()); // ElixirOffice Nextcloud storage (/elixir/nc/*)
+ 
+ app.get('/', (req, res) => { // define a handler for default page
+   try {
+@@ -1110,16 +1115,21 @@ app.get('/config', async (req, res) => {
+   res.end();
+ });
+ 
+-app.get('/editor', (req, res) => { // define a handler for editing document
++// ElixirOffice: also renders files from other storages (Nextcloud): `ext` then gives
++// the document's title, key, download and callback URLs and backstage data.
++const renderEditor = (req, res, ext = null) => { // define a handler for editing document
+   try {
+     req.DocManager = new DocManager(req, res);
+ 
+     let { fileExt } = req.query;
+-    const user = users.getUser(req.query.userid);
++    // ElixirOffice identity: the Nextcloud user or the local profile (test users in developer mode)
++    const lang0 = elixirHome.resolveLanguage(req);
++    const who = elixirIdentity.editorUser(req, elixirHome.translator(lang0.ui), req.DocManager.getServerUrl());
++    const { user } = who;
+     const userid = user.id;
+     const { name } = user;
+ 
+-    if (fileExt) {
++    if (fileExt && !ext) {
+       fileExt = fileUtility.getFileExtension(fileUtility.getFileName(fileExt), true);
+       // create demo document of a given extension
+       const fName = req.DocManager.createDemo(!!req.query.sample, fileExt, userid, name, false);
+@@ -1131,7 +1141,7 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+       return;
+     }
+ 
+-    const fileName = fileUtility.getFileName(req.query.fileName);
++    const fileName = ext ? ext.title : fileUtility.getFileName(req.query.fileName);
+     const lang = req.DocManager.getLang();
+     const userDirectUrl = req.query.directUrl === 'true';
+ 
+@@ -1179,7 +1189,12 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+ 
+     const usersInfo = [];
+     const usersForProtect = [];
+-    if (user.id !== 'uid-0') {
++    if (!who.test) {
++      // a real identity: only this user is known here (co-editors come from the document server)
++      const self = { id: user.id, name: user.name, email: user.email, image: user.image || null };
++      usersInfo.push(self);
++      usersForProtect.push(self);
++    } else if (user.id !== 'uid-0') {
+       users.getAllUsers().forEach((userInfo) => {
+         const u = userInfo;
+         u.image = userInfo.avatar ? `${req.DocManager.getServerUrl()}/images/${userInfo.id}.png` : null;
+@@ -1197,13 +1212,14 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+ 
+     const userAddress = req.DocManager.curUserHostAddress();
+     // if the file with a given name doesn't exist
+-    if (!req.DocManager.existsSync(req.DocManager.storagePath(fileName, userAddress))) {
++    if (!ext && !req.DocManager.existsSync(req.DocManager.storagePath(fileName, userAddress))) {
+       throw new Error(`File not found: ${fileName}`); // display error message
+     }
+-    const key = req.DocManager.getKey(fileName);
+-    const url = req.DocManager.getDownloadUrl(fileName, true);
+-    const directUrl = req.DocManager.getDownloadUrl(fileName);
++    const key = ext ? ext.key : req.DocManager.getKey(fileName);
++    const url = ext ? ext.url : req.DocManager.getDownloadUrl(fileName, true);
++    const directUrl = ext ? null : req.DocManager.getDownloadUrl(fileName);
+     let mode = req.query.mode || 'edit'; // mode: view/edit/review/comment/fillForms/embedded
++    if (ext && !ext.canWrite) mode = 'view';
+ 
+     let canEdit = fileUtility.getEditExtensions().indexOf(fileExt.slice(1)) !== -1; // check if this file can be edited
+     if (((!canEdit && mode === 'edit') || mode === 'fillForms')
+@@ -1258,6 +1274,10 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+ 
+     // ElixirOffice backstage: start page templates, recent files, host URLs
+     const elixirExtras = elixirHome.editorExtras(req.DocManager, req, fileName);
++    if (ext) {
++      elixirExtras.recent = ext.recent;
++      Object.assign(elixirExtras.elixir, ext.elixir);
++    }
+ 
+     // file config data
+     const argss = {
+@@ -1267,8 +1287,8 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         name: fileName,
+         ext: fileUtility.getFileExtension(fileName, true),
+         uri: url,
+-        directUrl: !userDirectUrl ? null : directUrl,
+-        uriUser: directUrl,
++        directUrl: !userDirectUrl || ext ? null : directUrl,
++        uriUser: ext ? (ext.elixir.shareUrl || '') : directUrl,
+         created: new Date().toDateString(),
+         favorite: user.favorite != null ? user.favorite : 'null',
+       },
+@@ -1277,8 +1297,10 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         documentType: fileType,
+         key,
+         token: '',
+-        callbackUrl: req.DocManager.getCallback(fileName),
+-        createUrl: userid !== 'uid-0' ? createUrl : null,
++        callbackUrl: ext ? ext.callbackUrl : req.DocManager.getCallback(fileName),
++        forcesave: !!(ext && ext.forcesave),
++        external: !!ext,
++        createUrl: userid !== 'uid-0' && !ext ? createUrl : null,
+         templates: user.templates ? (elixirExtras.templates || templates) : null,
+         recent: elixirExtras.recent,
+         elixir: elixirExtras.elixir,
+@@ -1298,7 +1320,7 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         curUserHostAddress: req.DocManager.curUserHostAddress(),
+         lang,
+         userid: userid !== 'uid-0' ? userid : null,
+-        userImage: user.avatar ? `${req.DocManager.getServerUrl()}/images/${user.id}.png` : null,
++        userImage: user.image || (user.avatar ? `${req.DocManager.getServerUrl()}/images/${user.id}.png` : null),
+         name,
+         userGroup,
+         userRoles,
+@@ -1309,9 +1331,9 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         submitForm,
+         plugins: JSON.stringify(pluginsConfig),
+         actionData,
+-        fileKey: userid !== 'uid-0'
++        fileKey: userid !== 'uid-0' && !ext
+           ? JSON.stringify({ fileName, userAddress: req.DocManager.curUserHostAddress() }) : null,
+-        instanceId: userid !== 'uid-0' ? req.DocManager.getInstanceId() : null,
++        instanceId: userid !== 'uid-0' && !ext ? req.DocManager.getInstanceId() : null,
+         protect: !user.deniedPermissions.includes('protect'),
+         goback: user.goback != null ? user.goback : '',
+         close: user.close,
+@@ -1334,7 +1356,7 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+         url: `${req.DocManager.getServerUrl(true)}/csv`,
+         directUrl: !userDirectUrl ? null : `${req.DocManager.getServerUrl()}/csv`,
+       },
+-      usersForMentions: user.id !== 'uid-0' ? users.getUsersForMentions(user.id) : null,
++      usersForMentions: who.test && user.id !== 'uid-0' ? users.getUsersForMentions(user.id) : [],
+       usersForProtect,
+       usersInfo,
+     };
+@@ -1376,7 +1398,9 @@ app.get('/editor', (req, res) => { // define a handler for editing document
+     res.status(500);
+     res.render('error', { message: `Server error: ${ex.message}` });
+   }
+-});
++};
++app.get('/editor', (req, res) => renderEditor(req, res));
++elixirNextcloud.setRenderer(renderEditor);
+ 
+ app.post('/rename', (req, res) => { // define a handler for renaming file
+   let { newfilename } = req.body;
+diff --git a/web/documentserver-example/nodejs/views/config.ejs b/web/documentserver-example/nodejs/views/config.ejs
+index 970bb2e5..f77b8772 100755
+--- a/web/documentserver-example/nodejs/views/config.ejs
++++ b/web/documentserver-example/nodejs/views/config.ejs
+@@ -27,13 +27,13 @@
+         "fileKey": <%- JSON.stringify(editor.fileKey) %>,
+         "instanceId": <%- JSON.stringify(editor.instanceId) %>
+     },
+-    "title": "<%- file.name %>",
+-    "url": "<%- file.uri %>"
++    "title": <%- JSON.stringify(file.name) %>,
++    "url": <%- JSON.stringify(file.uri) %>
+ },
+ "documentType": "<%- editor.documentType %>",
+ "editorConfig": {
+     "actionLink": <%- editor.actionData %>,
+-    "callbackUrl": "<%- editor.callbackUrl %>",
++    "callbackUrl": <%- JSON.stringify(editor.callbackUrl) %>,
+     "coEditing": <%- JSON.stringify(editor.coEditing) %>,
+     "createUrl": <%- JSON.stringify(editor.createUrl) %>,
+     "customization": {
+@@ -44,7 +44,7 @@
+         "features": {
+             "featuresTips": <%- editor.featuresTips %>
+         },
+-        "forcesave": false,
++        "forcesave": <%- JSON.stringify(!!editor.forcesave) %>,
+         "goback": <%- JSON.stringify(editor.goback) %>,
+         "submitForm": <%- editor.submitForm %>
+     },
+@@ -63,9 +63,9 @@
+     "elixir": <%- JSON.stringify(editor.elixir) %>,
+     "user": {
+         "group": "<%- editor.userGroup %>",
+-        "id": "<%- editor.userid %>",
+-        "image": "<%- editor.userImage %>",
+-        "name": "<%- editor.name %>",
++        "id": <%- JSON.stringify(editor.userid == null ? "" : String(editor.userid)) %>,
++        "image": <%- JSON.stringify(editor.userImage == null ? "" : String(editor.userImage)) %>,
++        "name": <%- JSON.stringify(editor.name) %>,
+         "roles": <%- JSON.stringify(editor.userRoles) %>
+     }
+ },
+diff --git a/web/documentserver-example/nodejs/views/editor.ejs b/web/documentserver-example/nodejs/views/editor.ejs
+index 3b396601..ba96da8c 100644
+--- a/web/documentserver-example/nodejs/views/editor.ejs
++++ b/web/documentserver-example/nodejs/views/editor.ejs
+@@ -23,7 +23,7 @@
+     * limitations under the License.
+     *
+     -->
+-    <title><%- file.name %> - <%= appName %></title>
++    <title><%= file.name %> - <%= appName %></title>
+     <link rel="icon"
+         href="images/<%- editor.documentType %>.ico"
+         type="image/x-icon" />
+@@ -456,20 +456,25 @@
+             "onRequestOpen": onRequestOpen,
+         };
+ 
++        // ElixirOffice: files from another storage (Nextcloud) have no local history,
++        // rename, "save copy" or reference sources in the example's storage
++        var externalStorage = <%- JSON.stringify(!!editor.external) %>;
+         if (<%- JSON.stringify(editor.userid) %> != null) {
+             config.events.onRequestClose = onRequestClose;
+             config.events.onRequestEditRights = onRequestEditRights;
++            config.events.onRequestUsers = onRequestUsers;
++            config.events.onRequestSendNotify = onRequestSendNotify;
++            config.events.onRequestStartFilling = onRequestStartFilling;
++            config.events.onStartFilling = onStartFilling;
++        }
++        if (<%- JSON.stringify(editor.userid) %> != null && !externalStorage) {
+             config.events.onRequestHistory = onRequestHistory;
+             config.events.onRequestHistoryData = onRequestHistoryData;
+             config.events.onRequestRename = onRequestRename;
+-            config.events.onRequestUsers = onRequestUsers;
+             config.events.onRequestSaveAs = onRequestSaveAs;
+-            config.events.onRequestSendNotify = onRequestSendNotify;
+             config.events.onRequestReferenceData = onRequestReferenceData;
+             config.events.onRequestReferenceSource = onRequestReferenceSource;
+             config.events.onRequestRefreshFile = onRequestRefreshFile;
+-            config.events.onRequestStartFilling = onRequestStartFilling;
+-            config.events.onStartFilling = onStartFilling;
+             if (<%- JSON.stringify(editor.userid) %> != "uid-3") {
+                 config.events.onRequestHistoryClose = onRequestHistoryClose;
+                 config.events.onRequestRestore = onRequestRestore;
+-- 
+2.43.0
+

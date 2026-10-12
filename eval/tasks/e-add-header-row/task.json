@@ -1,0 +1,11 @@
+{
+  "id": "e-add-header-row",
+  "title": "Add a header row to a table",
+  "instruction": "Add a header row to this table",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": "",
+  "cursor": 1
+}

@@ -1,0 +1,875 @@
+From 1aff0cc9d117acc035385619da5a35593c45ed6e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 23:37:47 +0200
+Subject: [PATCH 1/2] feat(documenteditor): Layout Options button and object
+ anchor like Word
+
+When one picture, shape or chart is selected, a button appears next to
+its top right corner and opens Word's Layout Options flyout: In Line
+with Text; With Text Wrapping (Square, Tight, Through, Top and Bottom,
+Behind Text, In Front of Text) with Word-like icons; Move with text /
+Fix position on page; See more... (Layout dialog, Position tab). The
+wrapping choices go through the ribbon's Wrap Text menu, so an inline
+picture that starts floating keeps its place; "Fix position on page"
+and "Move with text" convert the position so that the object does not
+move. The anchor of a floating object is drawn in the margin next to
+its paragraph, with a lock when the anchor is locked. The button and
+the anchor hide while the object is dragged or resized and follow
+scrolling and zoom. Keyboard: arrows between the choices, Esc closes.
+
+New module app/elixir-images (controller ElixirImages, view
+ElixirLayoutOptions); strings in en, fr, de, es, it, pt, pt-pt, nl, ru,
+pl, ja and zh, Word's own terms.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/documenteditor/main/app.js               |   2 +
+ .../main/app/elixir-images/Controller.js      |  33 ++
+ .../main/app/elixir-images/LayoutOptions.js   | 292 ++++++++++++++++++
+ apps/documenteditor/main/app_dev.js           |   2 +
+ apps/documenteditor/main/locale/de.json       |  16 +
+ apps/documenteditor/main/locale/en.json       |  16 +
+ apps/documenteditor/main/locale/es.json       |  16 +
+ apps/documenteditor/main/locale/fr.json       |  16 +
+ apps/documenteditor/main/locale/it.json       |  16 +
+ apps/documenteditor/main/locale/ja.json       |  16 +
+ apps/documenteditor/main/locale/nl.json       |  16 +
+ apps/documenteditor/main/locale/pl.json       |  16 +
+ apps/documenteditor/main/locale/pt-pt.json    |  16 +
+ apps/documenteditor/main/locale/pt.json       |  16 +
+ apps/documenteditor/main/locale/ru.json       |  16 +
+ apps/documenteditor/main/locale/zh.json       |  16 +
+ .../main/resources/less/app.less              |   1 +
+ .../main/resources/less/elixir-images.less    | 104 +++++++
+ 18 files changed, 626 insertions(+)
+ create mode 100644 apps/documenteditor/main/app/elixir-images/Controller.js
+ create mode 100644 apps/documenteditor/main/app/elixir-images/LayoutOptions.js
+ create mode 100644 apps/documenteditor/main/resources/less/elixir-images.less
+
+diff --git a/apps/documenteditor/main/app.js b/apps/documenteditor/main/app.js
+index f4aeb5667a..73760bfeed 100644
+--- a/apps/documenteditor/main/app.js
++++ b/apps/documenteditor/main/app.js
+@@ -160,6 +160,7 @@ require([
+             ,'Common.Controllers.Shortcuts'
+             ,'Common.Controllers.ElixirAI'
+             ,'ElixirChrome'
++            ,'ElixirImages'
+             ,'WordFormatting'
+             ,'WordShortcuts'
+             ,'WordKeyTips'
+@@ -216,6 +217,7 @@ require([
+                 ,'documenteditor/main/app/controller/WordFormatting'
+                 ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'documenteditor/main/app/elixir-chrome/Controller'
++                ,'documenteditor/main/app/elixir-images/Controller'
+                 ,'documenteditor/main/app/controller/WordShortcuts'
+                 ,'documenteditor/main/app/controller/WordKeyTips'
+                 ,'documenteditor/main/app/controller/MiniToolbar'
+diff --git a/apps/documenteditor/main/app/elixir-images/Controller.js b/apps/documenteditor/main/app/elixir-images/Controller.js
+new file mode 100644
+index 0000000000..e839c9ffd5
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-images/Controller.js
+@@ -0,0 +1,33 @@
++/*
++ * ElixirOffice pictures controller (document editor): Word's Layout Options button and
++ * object anchor (LayoutOptions.js). The only hooks are the controller and module
++ * declarations in app.js / app_dev.js and an @import in app.less.
++ *
++ * Licensed under the GNU AGPL v3 like the rest of web-apps.
++ */
++define([
++    'core',
++    'documenteditor/main/app/elixir-images/LayoutOptions'
++], function () {
++    'use strict';
++
++    DE.Controllers.ElixirImages = Backbone.Controller.extend({
++
++        initialize: function () {
++            var me = this;
++            Common.NotificationCenter.on('app:ready', function (mode) {
++                _.defer(function () { me.onAppReady(mode); });
++            });
++        },
++
++        onLaunch: function () {
++            this.layoutOptions = new DE.Views.ElixirLayoutOptions({ controller: this });
++        },
++
++        onAppReady: function (mode) {
++            var main = DE.getController('Main');
++            if (!mode || !mode.isEdit || !main || !main.api) return;
++            this.layoutOptions.setup(main.api, mode);
++        }
++    });
++});
+diff --git a/apps/documenteditor/main/app/elixir-images/LayoutOptions.js b/apps/documenteditor/main/app/elixir-images/LayoutOptions.js
+new file mode 100644
+index 0000000000..8cf20eb19f
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-images/LayoutOptions.js
+@@ -0,0 +1,292 @@
++/*
++ * ElixirOffice: Word's Layout Options button and object anchor (document editor).
++ *
++ * When one picture, shape or chart is selected, a small button appears next to its top
++ * right corner, as in Word. It opens the Layout Options flyout:
++ *   - In Line with Text;
++ *   - With Text Wrapping: Square, Tight, Through, Top and Bottom, Behind Text, In Front of Text;
++ *   - Move with text / Fix position on page (floating objects);
++ *   - See more... (the Layout dialog, Position tab).
++ * When the selected object floats, the anchor of the paragraph it is attached to is drawn in
++ * the margin, with a lock when the anchor is locked.
++ *
++ * The wrapping choices go through the ribbon's Wrap Text menu (same history point, same
++ * position kept when an inline picture starts floating). Geometry comes from the sdkjs API
++ * asc_GetSelectedDrawingLayout (pixels of the document view).
++ *
++ * Licensed under the GNU AGPL v3 like the rest of web-apps.
++ */
++define([
++    'core'
++], function () {
++    'use strict';
++
++    var esc = function (s) { return Common.Utils.String.htmlEncode(s === undefined || s === null ? '' : String(s)); };
++
++    // Word-like layout icons, 32 px tiles drawn on a 20 x 20 grid: text lines follow the text
++    // colour, the picture uses the accent of the icons
++    var PIC = function (x, y, w, h, extra) {
++        return '<g class="elx-lo-pic"' + (extra || '') + '><rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="1"/>' +
++            '<path class="elx-lo-mount" d="M' + (x + 1) + ' ' + (y + h - 1) + 'l' + (w * 0.3) + ' ' + (-h * 0.45) + 'l' + (w * 0.22) + ' ' + (h * 0.25) + 'l' + (w * 0.14) + ' ' + (-h * 0.15) + 'l' + (w * 0.24) + ' ' + (h * 0.35) + 'z"/></g>';
++    };
++    var LINES = function (rows) {
++        return rows.map(function (r) { return '<rect class="elx-lo-line" x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="1.2" rx=".6"/>'; }).join('');
++    };
++    var ICONS = {
++        inline: LINES([[2, 3, 16], [12, 13.8, 6], [2, 17, 16]]) + PIC(2, 7, 9, 8),
++        square: LINES([[2, 2, 16], [2, 5, 4], [14, 5, 4], [2, 8.5, 4], [14, 8.5, 4], [2, 12, 4], [14, 12, 4], [2, 15.5, 16]]) + PIC(7, 4.5, 6, 9),
++        tight: LINES([[2, 2, 16], [2, 5, 5.5], [12.5, 5, 5.5], [2, 8.5, 4.5], [13.5, 8.5, 4.5], [2, 12, 5.5], [12.5, 12, 5.5], [2, 15.5, 16]]) +
++            '<g class="elx-lo-pic"><circle cx="10" cy="9" r="4"/></g>',
++        through: LINES([[2, 2, 16], [2, 5, 6], [12, 5, 6], [2, 8.5, 18 - 2], [2, 12, 6], [12, 12, 6], [2, 15.5, 16]]) +
++            '<g class="elx-lo-pic" opacity=".85"><path d="M10 4.5l4.5 4.5-4.5 4.5-4.5-4.5z"/></g>',
++        topAndBottom: LINES([[2, 2, 16], [2, 4.5, 16], [2, 15, 16], [2, 17.5, 16]]) + PIC(6, 6.5, 8, 7),
++        behind: PIC(5, 4, 10, 12, ' opacity=".55"') + LINES([[2, 3, 16], [2, 6.5, 16], [2, 10, 16], [2, 13.5, 16], [2, 17, 16]]),
++        inFront: LINES([[2, 3, 16], [2, 6.5, 16], [2, 10, 16], [2, 13.5, 16], [2, 17, 16]]) + PIC(5, 4, 10, 12),
++        anchor: '<path class="elx-lo-anchor" d="M10 2a2 2 0 0 1 .75 3.86V7.5H13v1.5h-2.25v6.4c1.8-.3 3.3-1.6 3.8-3.4h-1.3l2-2.5 2 2.5H16c-.6 2.9-3.1 5-6 5s-5.4-2.1-6-5H2.75l2-2.5 2 2.5h-1.3c.5 1.8 2 3.1 3.8 3.4V9H7V7.5h2.25V5.86A2 2 0 0 1 10 2zm0 1.3a.7.7 0 1 0 0 1.4.7.7 0 0 0 0-1.4z"/>',
++        lock: '<path class="elx-lo-lock" d="M7 9V7a3 3 0 0 1 6 0v2h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1zm1.5 0h3V7a1.5 1.5 0 0 0-3 0z"/>',
++        close: '<path class="elx-lo-x" d="M5.3 4.2 10 8.9l4.7-4.7 1.1 1.1-4.7 4.7 4.7 4.7-1.1 1.1-4.7-4.7-4.7 4.7-1.1-1.1 4.7-4.7-4.7-4.7z"/>'
++    };
++    var svg = function (name, size) {
++        return '<svg class="elx-lo-icon" viewBox="0 0 20 20" width="' + size + '" height="' + size + '" aria-hidden="true">' + ICONS[name] + '</svg>';
++    };
++
++    var WRAPS = [
++        { key: 'inline', style: 'Inline', text: 'textInline' },
++        { key: 'square', style: 'Square', text: 'textSquare' },
++        { key: 'tight', style: 'Tight', text: 'textTight' },
++        { key: 'through', style: 'Through', text: 'textThrough' },
++        { key: 'topAndBottom', style: 'TopAndBottom', text: 'textTopBottom' },
++        { key: 'behind', style: 'Behind', text: 'textBehind' },
++        { key: 'inFront', style: 'InFront', text: 'textInFront' }
++    ];
++
++    var STRINGS = {
++        textTitle: 'Layout Options',
++        textInlineGroup: 'In Line with Text',
++        textWrapGroup: 'With Text Wrapping',
++        textInline: 'In Line with Text',
++        textSquare: 'Square',
++        textTight: 'Tight',
++        textThrough: 'Through',
++        textTopBottom: 'Top and Bottom',
++        textBehind: 'Behind Text',
++        textInFront: 'In Front of Text',
++        textMove: 'Move with text',
++        textFix: 'Fix position on page',
++        textSeeMore: 'See more...',
++        textClose: 'Close',
++        tipAnchor: 'Object anchor',
++        tipLockedAnchor: 'Object anchor (locked)'
++    };
++
++    DE.Views.ElixirLayoutOptions = Backbone.View.extend(_.extend({
++
++        initialize: function (options) {
++            this.controller = options.controller;
++            this.layout = null;
++            this.key = '';
++            this.selected = false;
++        },
++
++        setup: function (api, mode) {
++            if (this.api || !api || !api.asc_GetSelectedDrawingLayout) return;
++            this.api = api;
++            this.mode = mode || {};
++            var me = this;
++            this.$main = $('#id_main_view');
++            if (!this.$main.length) return;
++            this.$btn = $('<button type="button" class="elx-lo-btn" aria-haspopup="dialog" aria-expanded="false"></button>')
++                .attr('title', this.textTitle).attr('aria-label', this.textTitle).html(svg('square', 20)).hide();
++            this.$anchor = $('<div class="elx-lo-anchor-mark" role="img"></div>').hide();
++            this.$pane = $(this.renderPane()).hide();
++            this.$main.append(this.$anchor, this.$btn, this.$pane);
++
++            this.$btn.on('mousedown', function (e) { e.preventDefault(); e.stopPropagation(); });
++            this.$btn.on('click', function (e) { e.preventDefault(); e.stopPropagation(); me.togglePane(); });
++            this.$pane.on('mousedown', function (e) { e.stopPropagation(); if (!$(e.target).is('input')) e.preventDefault(); });
++            this.$pane.on('click', '.elx-lo-tile', function () { me.applyWrap($(this).data('wrap')); });
++            this.$pane.on('change', 'input[name=elx-lo-move]', function () { me.applyMove(this.value === 'move'); });
++            this.$pane.on('click', '.elx-lo-more', function (e) { e.preventDefault(); me.seeMore(); });
++            this.$pane.on('click', '.elx-lo-close', function () { me.hidePane(true); });
++            this.$pane.on('keydown', function (e) {
++                if (e.keyCode === Common.UI.Keys.ESC) { e.preventDefault(); e.stopPropagation(); me.hidePane(true); }  // the picture stays selected
++                else if (e.keyCode === Common.UI.Keys.LEFT || e.keyCode === Common.UI.Keys.RIGHT) {
++                    var $t = me.$pane.find('.elx-lo-tile'), i = $t.index(document.activeElement);
++                    if (i >= 0) { e.preventDefault(); $t.eq((i + (e.keyCode === Common.UI.Keys.RIGHT ? 1 : $t.length - 1)) % $t.length).focus(); }
++                }
++            });
++            // Esc closes the flyout wherever the focus is (the document keeps the picture selected)
++            document.addEventListener('keydown', function (e) {
++                if (e.keyCode === Common.UI.Keys.ESC && me.$pane.is(':visible')) {
++                    e.preventDefault(); e.stopPropagation(); me.hidePane(true);
++                }
++            }, true);
++            $(document).on('mousedown.elxlo', function (e) {
++                if (me.$pane.is(':visible') && !$(e.target).closest('.elx-lo-pane, .elx-lo-btn').length) me.hidePane();
++            });
++
++            api.asc_registerCallback('asc_onFocusObject', _.bind(this.onFocusObject, this));
++            api.asc_registerCallback('asc_onCoAuthoringDisconnect', function () { me.selected = false; me.refresh(); });
++            // follows scrolling, zoom, recalculation and drags while an object is selected
++            this.timer = setInterval(function () { me.selected && me.refresh(); }, 120);
++        },
++
++        renderPane: function () {
++            var me = this;
++            var tile = function (w) {
++                return '<button type="button" class="elx-lo-tile" data-wrap="' + w.key + '" title="' + esc(me[w.text]) + '" aria-label="' + esc(me[w.text]) + '" aria-pressed="false">' + svg(w.key, 32) + '</button>';
++            };
++            return '<div class="elx-lo-pane" role="dialog" aria-label="' + esc(this.textTitle) + '">' +
++                '<div class="elx-lo-head"><span class="elx-lo-title">' + esc(this.textTitle) + '</span>' +
++                '<button type="button" class="elx-lo-close" title="' + esc(this.textClose) + '" aria-label="' + esc(this.textClose) + '">' + svg('close', 16) + '</button></div>' +
++                '<div class="elx-lo-group">' + esc(this.textInlineGroup) + '</div>' +
++                '<div class="elx-lo-tiles">' + tile(WRAPS[0]) + '</div>' +
++                '<div class="elx-lo-group">' + esc(this.textWrapGroup) + '</div>' +
++                '<div class="elx-lo-tiles">' + WRAPS.slice(1).map(tile).join('') + '</div>' +
++                '<div class="elx-lo-sep"></div>' +
++                '<label class="elx-lo-radio"><input type="radio" name="elx-lo-move" value="move"><span>' + esc(this.textMove) + '</span></label>' +
++                '<label class="elx-lo-radio"><input type="radio" name="elx-lo-move" value="fix"><span>' + esc(this.textFix) + '</span></label>' +
++                '<a href="#" class="elx-lo-more">' + esc(this.textSeeMore) + '</a>' +
++                '</div>';
++        },
++
++        onFocusObject: function (selected) {
++            var img = null;
++            for (var i = selected.length - 1; i >= 0; i--) {
++                if (selected[i].get_ObjectType() === Asc.c_oAscTypeSelectElement.Image) { img = selected[i].get_ObjectValue(); break; }
++            }
++            this.imgProps = img;
++            this.selected = !!img;
++            this.refresh();
++        },
++
++        canEdit: function () {
++            return this.mode && this.mode.isEdit !== false && !(this.api.isViewMode) && !(this.imgProps && this.imgProps.get_Locked && this.imgProps.get_Locked());
++        },
++
++        refresh: function () {
++            if (!this.$btn) return;
++            var L = this.selected && this.canEdit() ? this.api.asc_GetSelectedDrawingLayout() : null;
++            var key = L ? [L.left, L.top, L.right, L.bottom, L.wrap, L.moveWithText, L.lockAnchor, L.tracking, L.anchor ? L.anchor.x + ',' + L.anchor.y : ''].join('|') : '';
++            if (key === this.key) return;
++            this.key = key;
++            this.layout = L;
++            if (!L || L.tracking) {
++                // hidden while the object is dragged, resized or rotated, like Word
++                this.$btn.hide(); this.$anchor.hide();
++                if (!L) this.hidePane();
++                else this.$pane.hide();
++                return;
++            }
++            var viewer = document.getElementById('id_viewer'), main = this.$main[0];
++            if (!viewer || !main) return;
++            var vr = viewer.getBoundingClientRect(), mr = main.getBoundingClientRect();
++            var ox = vr.left - mr.left, oy = vr.top - mr.top, W = main.clientWidth, H = main.clientHeight;
++            var size = 24, gap = 8;
++            var x = ox + L.right + gap, y = oy + L.top;
++            if (x + size > W - 4) x = ox + L.right - size - 4;              // no room on the right: inside
++            if (x < 4) x = 4;
++            y = Math.max(4, Math.min(y, oy + L.bottom - size));                 // top scrolled out: stay at the top of the view
++            var visible = oy + L.bottom > size && oy + L.top < H - 4;
++            this.$btn.css({ left: Math.round(x), top: Math.round(y) }).toggle(visible);
++
++            if (L.anchor && !L.inline) {
++                var ax = ox + L.anchor.x - 22, ay = oy + L.anchor.y;
++                this.$anchor.html(svg('anchor', 16) + (L.lockAnchor ? '<span class="elx-lo-lockbadge">' + svg('lock', 10) + '</span>' : ''))
++                    .attr('title', L.lockAnchor ? this.tipLockedAnchor : this.tipAnchor).attr('aria-label', L.lockAnchor ? this.tipLockedAnchor : this.tipAnchor)
++                    .css({ left: Math.round(Math.max(0, ax)), top: Math.round(ay) })
++                    .toggle(ay > -16 && ay < H);
++            } else this.$anchor.hide();
++
++            if (this.$pane.is(':visible')) this.placePane();
++            this.updatePane();
++        },
++
++        togglePane: function () {
++            if (this.$pane.is(':visible')) this.hidePane(true);
++            else this.showPane();
++        },
++
++        showPane: function () {
++            if (!this.layout) return;
++            this.updatePane();
++            this.$pane.show();
++            this.placePane();
++            this.$btn.attr('aria-expanded', 'true').addClass('active');
++            var $cur = this.$pane.find('.elx-lo-tile.active');
++            ($cur.length ? $cur : this.$pane.find('.elx-lo-tile').first()).focus();
++        },
++
++        hidePane: function (focusDoc) {
++            if (!this.$pane) return;
++            this.$pane.hide();
++            this.$btn.attr('aria-expanded', 'false').removeClass('active');
++            focusDoc && this.api && this.api.asc_enableKeyEvents(true);
++        },
++
++        placePane: function () {
++            var b = this.$btn.position(), W = this.$main[0].clientWidth, H = this.$main[0].clientHeight;
++            var pw = this.$pane.outerWidth(), ph = this.$pane.outerHeight();
++            var x = b.left + this.$btn.outerWidth() + 6;
++            if (x + pw > W - 4) x = b.left - pw - 6;
++            var y = Math.min(b.top, H - ph - 4);
++            this.$pane.css({ left: Math.max(4, Math.round(x)), top: Math.max(4, Math.round(y)) });
++        },
++
++        updatePane: function () {
++            var L = this.layout;
++            if (!L || !this.$pane) return;
++            var cur = _.find(WRAPS, function (w) { return Asc.c_oAscWrapStyle2[w.style] === L.wrap; });
++            this.$pane.find('.elx-lo-tile').each(function () {
++                var on = cur && $(this).data('wrap') === cur.key;
++                $(this).toggleClass('active', !!on).attr('aria-pressed', on ? 'true' : 'false');
++            });
++            var canFlow = !this.imgProps || !this.imgProps.get_CanBeFlow || this.imgProps.get_CanBeFlow();
++            this.$pane.find('.elx-lo-tile').not('[data-wrap=inline]').prop('disabled', !canFlow);
++            var $r = this.$pane.find('input[name=elx-lo-move]');
++            $r.prop('disabled', L.inline);
++            $r.filter('[value=move]').prop('checked', !L.inline && L.moveWithText);
++            $r.filter('[value=fix]').prop('checked', !L.inline && !L.moveWithText);
++        },
++
++        // the ribbon's Wrap Text menu does the work (it keeps the place of a picture that
++        // starts floating)
++        applyWrap: function (key) {
++            var w = _.findWhere(WRAPS, { key: key });
++            var tb = DE.getController('Toolbar'), menu = tb && tb.toolbar && tb.toolbar.btnImgWrapping && tb.toolbar.btnImgWrapping.menu;
++            if (!w || !menu) return;
++            var item = _.find(menu.items, function (i) { return i.options.wrapType === Asc.c_oAscWrapStyle2[w.style]; });
++            if (!item) return;
++            menu.trigger('item:click', menu, item);
++            this.key = '';
++            var me = this;
++            _.defer(function () { me.refresh(); me.$pane.find('.elx-lo-tile.active').focus(); });
++        },
++
++        // Word: "Fix position on page" ties the object to the page, "Move with text" to its
++        // paragraph; the object stays where it is (values converted from the current place)
++        applyMove: function (move) {
++            var props = this.imgProps;
++            if (!props || !this.api) return;
++            var p = new Asc.asc_CImgProperty(), h = new Asc.CImagePositionH(), v = new Asc.CImagePositionV();
++            var relH = move ? Asc.c_oAscRelativeFromH.Column : Asc.c_oAscRelativeFromH.Page,
++                relV = move ? Asc.c_oAscRelativeFromV.Paragraph : Asc.c_oAscRelativeFromV.Page;
++            h.put_UseAlign(false); h.put_Percent(false); h.put_RelativeFrom(relH); h.put_Value(props.get_Value_X(relH));
++            v.put_UseAlign(false); v.put_Percent(false); v.put_RelativeFrom(relV); v.put_Value(props.get_Value_Y(relV));
++            p.put_PositionH(h); p.put_PositionV(v);
++            this.api.ImgApply(p);
++            this.key = '';
++            Common.NotificationCenter.trigger('edit:complete', this);
++        },
++
++        seeMore: function () {
++            this.hidePane();
++            var ct = DE.getController('ContextTabs');
++            if (ct && ct.openImageAdvanced) ct.openImageAdvanced(9);
++        }
++
++    }, STRINGS, DE.Views.ElixirLayoutOptions || {}));
++
++    DE.Views.ElixirLayoutOptions.ICONS = ICONS;
++    return DE.Views.ElixirLayoutOptions;
++});
+diff --git a/apps/documenteditor/main/app_dev.js b/apps/documenteditor/main/app_dev.js
+index 4997d529de..e2a132f649 100644
+--- a/apps/documenteditor/main/app_dev.js
++++ b/apps/documenteditor/main/app_dev.js
+@@ -150,6 +150,7 @@ require([
+             ,'Common.Controllers.Shortcuts'
+             ,'Common.Controllers.ElixirAI'
+             ,'ElixirChrome'
++            ,'ElixirImages'
+             ,'WordFormatting'
+             ,'WordShortcuts'
+             ,'WordKeyTips'
+@@ -206,6 +207,7 @@ require([
+                 ,'documenteditor/main/app/controller/WordFormatting'
+                 ,'documenteditor/main/app/elixir-ai/WordTools'
+                 ,'documenteditor/main/app/elixir-chrome/Controller'
++                ,'documenteditor/main/app/elixir-images/Controller'
+                 ,'documenteditor/main/app/controller/WordShortcuts'
+                 ,'documenteditor/main/app/controller/WordKeyTips'
+                 ,'documenteditor/main/app/controller/MiniToolbar'
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index a2bf043342..2a19d346bd 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Frühere Versionen anzeigen und wiederherstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Für dieses Dokument ist kein Versionsverlauf verfügbar.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gestern, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Layoutoptionen",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "Mit Text in Zeile",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Mit Textumbruch",
++  "DE.Views.ElixirLayoutOptions.textInline": "Mit Text in Zeile",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Quadrat",
++  "DE.Views.ElixirLayoutOptions.textTight": "Passend",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Transparent",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Oben und unten",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Hinter den Text",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Vor den Text",
++  "DE.Views.ElixirLayoutOptions.textMove": "Mit Text verschieben",
++  "DE.Views.ElixirLayoutOptions.textFix": "Position auf der Seite fixieren",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Weitere anzeigen...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Schließen",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Objektanker",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Objektanker (gesperrt)",
+   "DE.Views.ElixirNavPane.txtClose": "Schließen",
+   "DE.Views.ElixirNavPane.txtHeadings": "Überschriften",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 9937298040..357cc804e4 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -3103,6 +3103,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "View and restore previous versions.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Version history is not available for this document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Yesterday, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Layout Options",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "In Line with Text",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "With Text Wrapping",
++  "DE.Views.ElixirLayoutOptions.textInline": "In Line with Text",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Square",
++  "DE.Views.ElixirLayoutOptions.textTight": "Tight",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Through",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Top and Bottom",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Behind Text",
++  "DE.Views.ElixirLayoutOptions.textInFront": "In Front of Text",
++  "DE.Views.ElixirLayoutOptions.textMove": "Move with text",
++  "DE.Views.ElixirLayoutOptions.textFix": "Fix position on page",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "See more...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Close",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Object anchor",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Object anchor (locked)",
+   "DE.Views.ElixirNavPane.txtClose": "Close",
+   "DE.Views.ElixirNavPane.txtHeadings": "Headings",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index 32a1cf4692..c297f09e5c 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver y restaurar versiones anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "El historial de versiones no está disponible para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ayer, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Opciones de diseño",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "En línea con el texto",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Con ajuste de texto",
++  "DE.Views.ElixirLayoutOptions.textInline": "En línea con el texto",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Cuadrado",
++  "DE.Views.ElixirLayoutOptions.textTight": "Estrecho",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Transparente",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Arriba y abajo",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Detrás del texto",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Delante del texto",
++  "DE.Views.ElixirLayoutOptions.textMove": "Mover con el texto",
++  "DE.Views.ElixirLayoutOptions.textFix": "Fijar posición en la página",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Ver más...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Cerrar",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Anclaje del objeto",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Anclaje del objeto (bloqueado)",
+   "DE.Views.ElixirNavPane.txtClose": "Cerrar",
+   "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navegación",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index b804f34287..d39363d359 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Afficher et restaurer les versions précédentes.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "L'historique des versions n'est pas disponible pour ce document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Hier, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Options de disposition",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "Aligné sur le texte",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Avec habillage",
++  "DE.Views.ElixirLayoutOptions.textInline": "Aligné sur le texte",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Carré",
++  "DE.Views.ElixirLayoutOptions.textTight": "Rapproché",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Au travers",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Haut et bas",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Derrière le texte",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Devant le texte",
++  "DE.Views.ElixirLayoutOptions.textMove": "Déplacer avec le texte",
++  "DE.Views.ElixirLayoutOptions.textFix": "Fixer la position sur la page",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Voir plus...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Fermer",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Ancre de l’objet",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Ancre de l’objet (verrouillée)",
+   "DE.Views.ElixirNavPane.txtClose": "Fermer",
+   "DE.Views.ElixirNavPane.txtHeadings": "Titres",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navigation",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 04eeffee79..9ad4a44d43 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Visualizza e ripristina le versioni precedenti.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "La cronologia versioni non è disponibile per questo documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ieri, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Opzioni di layout",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "In linea con il testo",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Con disposizione testo",
++  "DE.Views.ElixirLayoutOptions.textInline": "In linea con il testo",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Quadrato",
++  "DE.Views.ElixirLayoutOptions.textTight": "Ravvicinato",
++  "DE.Views.ElixirLayoutOptions.textThrough": "All’interno",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Sopra e sotto",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Dietro al testo",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Davanti al testo",
++  "DE.Views.ElixirLayoutOptions.textMove": "Sposta con il testo",
++  "DE.Views.ElixirLayoutOptions.textFix": "Correggi la posizione nella pagina",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Mostra altro...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Chiudi",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Ancoraggio dell’oggetto",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Ancoraggio dell’oggetto (bloccato)",
+   "DE.Views.ElixirNavPane.txtClose": "Chiudi",
+   "DE.Views.ElixirNavPane.txtHeadings": "Titoli",
+   "DE.Views.ElixirNavPane.txtNavigation": "Spostamento",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index 6ceac526bc..7ae816b089 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -3077,6 +3077,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "以前のバージョンを表示して復元します。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "この文書ではバージョン履歴を利用できません。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨日 {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "レイアウト オプション",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "行内",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "文字列の折り返し",
++  "DE.Views.ElixirLayoutOptions.textInline": "行内",
++  "DE.Views.ElixirLayoutOptions.textSquare": "四角形",
++  "DE.Views.ElixirLayoutOptions.textTight": "外周",
++  "DE.Views.ElixirLayoutOptions.textThrough": "内部",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "上下",
++  "DE.Views.ElixirLayoutOptions.textBehind": "背面",
++  "DE.Views.ElixirLayoutOptions.textInFront": "前面",
++  "DE.Views.ElixirLayoutOptions.textMove": "文字列と一緒に移動する",
++  "DE.Views.ElixirLayoutOptions.textFix": "ページ上の位置を固定する",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "詳細表示...",
++  "DE.Views.ElixirLayoutOptions.textClose": "閉じる",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "オブジェクトのアンカー",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "オブジェクトのアンカー (ロック)",
+   "DE.Views.ElixirNavPane.txtClose": "閉じる",
+   "DE.Views.ElixirNavPane.txtHeadings": "見出し",
+   "DE.Views.ElixirNavPane.txtNavigation": "ナビゲーション",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index 5b26d39ac6..b57970f588 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -2390,6 +2390,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Eerdere versies bekijken en herstellen.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Versiegeschiedenis is niet beschikbaar voor dit document.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Gisteren, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Indelingsopties",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "In tekstregel",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Met tekstterugloop",
++  "DE.Views.ElixirLayoutOptions.textInline": "In tekstregel",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Vierkant",
++  "DE.Views.ElixirLayoutOptions.textTight": "Contour",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Door",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Boven en onder",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Achter tekst",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Voor tekst",
++  "DE.Views.ElixirLayoutOptions.textMove": "Verplaatsen met tekst",
++  "DE.Views.ElixirLayoutOptions.textFix": "Positie op pagina vastzetten",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Meer weergeven...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Sluiten",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Objectanker",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Objectanker (vergrendeld)",
+   "DE.Views.ElixirNavPane.txtClose": "Sluiten",
+   "DE.Views.ElixirNavPane.txtHeadings": "Koppen",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navigatie",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index a59ca9b1d8..2309595ebe 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -2486,6 +2486,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Wyświetl i przywróć poprzednie wersje.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Historia wersji nie jest dostępna dla tego dokumentu.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Wczoraj, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Opcje układu",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "W linii z tekstem",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Z zawijaniem tekstu",
++  "DE.Views.ElixirLayoutOptions.textInline": "W linii z tekstem",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Kwadratowe",
++  "DE.Views.ElixirLayoutOptions.textTight": "Ścisłe",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Przelotowe",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Górne i dolne",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Za tekstem",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Przed tekstem",
++  "DE.Views.ElixirLayoutOptions.textMove": "Przenieś z tekstem",
++  "DE.Views.ElixirLayoutOptions.textFix": "Ustal położenie na stronie",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Zobacz więcej...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Zamknij",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Zakotwiczenie obiektu",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Zakotwiczenie obiektu (zablokowane)",
+   "DE.Views.ElixirNavPane.txtClose": "Zamknij",
+   "DE.Views.ElixirNavPane.txtHeadings": "Nagłówki",
+   "DE.Views.ElixirNavPane.txtNavigation": "Nawigacja",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index 3dfd5eb23f..df8665f245 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -2432,6 +2432,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Ver e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Opções de Esquema",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "Em Linha com o Texto",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Com Moldagem de Texto",
++  "DE.Views.ElixirLayoutOptions.textInline": "Em Linha com o Texto",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Quadrado",
++  "DE.Views.ElixirLayoutOptions.textTight": "Justo",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Através",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Em Cima e em Baixo",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Atrás do Texto",
++  "DE.Views.ElixirLayoutOptions.textInFront": "À Frente do Texto",
++  "DE.Views.ElixirLayoutOptions.textMove": "Mover com o texto",
++  "DE.Views.ElixirLayoutOptions.textFix": "Fixar posição na página",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Ver mais...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Fechar",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Âncora do objeto",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Âncora do objeto (bloqueada)",
+   "DE.Views.ElixirNavPane.txtClose": "Fechar",
+   "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navegação",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index 03d4ba0adc..1c7dab5a49 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -3092,6 +3092,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Exibir e restaurar versões anteriores.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "O histórico de versões não está disponível para este documento.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Ontem, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Opções de Layout",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "Alinhado com o Texto",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Com Disposição do Texto",
++  "DE.Views.ElixirLayoutOptions.textInline": "Alinhado com o Texto",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Quadrado",
++  "DE.Views.ElixirLayoutOptions.textTight": "Comprimido",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Através",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Superior e Inferior",
++  "DE.Views.ElixirLayoutOptions.textBehind": "Atrás do Texto",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Na Frente do Texto",
++  "DE.Views.ElixirLayoutOptions.textMove": "Mover com o texto",
++  "DE.Views.ElixirLayoutOptions.textFix": "Corrigir a posição na página",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Ver mais...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Fechar",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Âncora do objeto",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Âncora do objeto (bloqueada)",
+   "DE.Views.ElixirNavPane.txtClose": "Fechar",
+   "DE.Views.ElixirNavPane.txtHeadings": "Títulos",
+   "DE.Views.ElixirNavPane.txtNavigation": "Navegação",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index dd6922d9a0..222eea2920 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "Просмотр и восстановление предыдущих версий.",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "Журнал версий недоступен для этого документа.",
+   "DE.Views.ElixirBackstage.txtYesterday": "Вчера, {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "Параметры разметки",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "В тексте",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "Обтекание текстом",
++  "DE.Views.ElixirLayoutOptions.textInline": "В тексте",
++  "DE.Views.ElixirLayoutOptions.textSquare": "Квадрат",
++  "DE.Views.ElixirLayoutOptions.textTight": "По контуру",
++  "DE.Views.ElixirLayoutOptions.textThrough": "Сквозное",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "Сверху и снизу",
++  "DE.Views.ElixirLayoutOptions.textBehind": "За текстом",
++  "DE.Views.ElixirLayoutOptions.textInFront": "Перед текстом",
++  "DE.Views.ElixirLayoutOptions.textMove": "Перемещать с текстом",
++  "DE.Views.ElixirLayoutOptions.textFix": "Зафиксировать положение на странице",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "Подробнее...",
++  "DE.Views.ElixirLayoutOptions.textClose": "Закрыть",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "Привязка объекта",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "Привязка объекта (заблокирована)",
+   "DE.Views.ElixirNavPane.txtClose": "Закрыть",
+   "DE.Views.ElixirNavPane.txtHeadings": "Заголовки",
+   "DE.Views.ElixirNavPane.txtNavigation": "Навигация",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index a1f76c63e0..cea5fa03e3 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -3093,6 +3093,22 @@
+   "DE.Views.ElixirBackstage.txtVersionHistoryDesc": "查看和还原以前的版本。",
+   "DE.Views.ElixirBackstage.txtVersionHistoryNone": "此文档没有可用的版本历史记录。",
+   "DE.Views.ElixirBackstage.txtYesterday": "昨天 {0}",
++  "DE.Views.ElixirLayoutOptions.textTitle": "布局选项",
++  "DE.Views.ElixirLayoutOptions.textInlineGroup": "嵌入型",
++  "DE.Views.ElixirLayoutOptions.textWrapGroup": "文字环绕",
++  "DE.Views.ElixirLayoutOptions.textInline": "嵌入型",
++  "DE.Views.ElixirLayoutOptions.textSquare": "四周型",
++  "DE.Views.ElixirLayoutOptions.textTight": "紧密型环绕",
++  "DE.Views.ElixirLayoutOptions.textThrough": "穿越型环绕",
++  "DE.Views.ElixirLayoutOptions.textTopBottom": "上下型环绕",
++  "DE.Views.ElixirLayoutOptions.textBehind": "衬于文字下方",
++  "DE.Views.ElixirLayoutOptions.textInFront": "浮于文字上方",
++  "DE.Views.ElixirLayoutOptions.textMove": "随文字移动",
++  "DE.Views.ElixirLayoutOptions.textFix": "在页面上的位置固定",
++  "DE.Views.ElixirLayoutOptions.textSeeMore": "查看更多...",
++  "DE.Views.ElixirLayoutOptions.textClose": "关闭",
++  "DE.Views.ElixirLayoutOptions.tipAnchor": "对象锚点",
++  "DE.Views.ElixirLayoutOptions.tipLockedAnchor": "对象锚点（已锁定）",
+   "DE.Views.ElixirNavPane.txtClose": "关闭",
+   "DE.Views.ElixirNavPane.txtHeadings": "标题",
+   "DE.Views.ElixirNavPane.txtNavigation": "导航",
+diff --git a/apps/documenteditor/main/resources/less/app.less b/apps/documenteditor/main/resources/less/app.less
+index d0721284ac..b0a7eb5561 100644
+--- a/apps/documenteditor/main/resources/less/app.less
++++ b/apps/documenteditor/main/resources/less/app.less
+@@ -146,6 +146,7 @@
+ @import "navigation.less";
+ @import "thumbnails.less";
+ @import "elixir-chrome.less";
++@import "elixir-images.less";
+ @import "word-formatting.less";
+ @import "ribbon.less";
+ 
+diff --git a/apps/documenteditor/main/resources/less/elixir-images.less b/apps/documenteditor/main/resources/less/elixir-images.less
+new file mode 100644
+index 0000000000..dea9eee90f
+--- /dev/null
++++ b/apps/documenteditor/main/resources/less/elixir-images.less
+@@ -0,0 +1,104 @@
++// ElixirOffice pictures (apps/documenteditor/main/app/elixir-images): Word's Layout Options
++// button and flyout, object anchor. Colours come from the theme tokens (light, dark, RTL).
++
++@elx-lo-accent: var(--elixir-accent, var(--border-control-focus));
++
++.elx-lo-icon {
++    display: block;
++    .elx-lo-line { fill: var(--icon-normal, #444); }
++    .elx-lo-pic { fill: #5b9bd5; }
++    .elx-lo-mount { fill: #2e75b6; }
++    .elx-lo-anchor, .elx-lo-x { fill: currentColor; }
++    .elx-lo-lock { fill: currentColor; }
++}
++
++.elx-lo-btn {
++    position: absolute;
++    z-index: 5;
++    width: 24px;
++    height: 24px;
++    padding: 1px;
++    border: 1px solid var(--border-regular-control, #c0c0c0);
++    border-radius: 2px;
++    background: var(--background-normal, #fff);
++    box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
++    cursor: pointer;
++    &:hover { background: var(--highlight-button-hover, #e0e0e0); }
++    &.active, &:focus-visible { border-color: @elx-lo-accent; outline: none; }
++}
++
++.elx-lo-anchor-mark {
++    position: absolute;
++    z-index: 4;
++    width: 16px;
++    height: 16px;
++    color: var(--text-normal, #333);
++    pointer-events: auto;
++    .elx-lo-lockbadge {
++        position: absolute;
++        right: -5px;
++        bottom: -3px;
++        color: var(--text-normal, #333);
++    }
++}
++
++.elx-lo-pane {
++    position: absolute;
++    z-index: 6;
++    width: 220px;
++    padding: 8px 12px 10px;
++    background: var(--background-normal, #fff);
++    color: var(--text-normal, #333);
++    border: 1px solid var(--border-regular-control, #c0c0c0);
++    border-radius: 4px;
++    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
++    font-size: 12px;
++    .elx-lo-head {
++        display: flex;
++        align-items: center;
++        justify-content: space-between;
++        margin-bottom: 6px;
++    }
++    .elx-lo-title { font-size: 14px; font-weight: 600; }
++    .elx-lo-close {
++        border: 0;
++        background: none;
++        padding: 2px;
++        border-radius: 2px;
++        color: var(--text-normal, #333);
++        cursor: pointer;
++        &:hover { background: var(--highlight-button-hover, #e0e0e0); }
++    }
++    .elx-lo-group { margin: 6px 0 4px; color: var(--text-secondary, #666); }
++    .elx-lo-tiles { display: flex; flex-wrap: wrap; gap: 2px; }
++    .elx-lo-tile {
++        width: 42px;
++        height: 42px;
++        padding: 4px;
++        border: 1px solid transparent;
++        border-radius: 3px;
++        background: none;
++        cursor: pointer;
++        &:hover { background: var(--highlight-button-hover, #e0e0e0); }
++        &.active { border-color: @elx-lo-accent; background: var(--highlight-button-pressed, #cbcbcb); }
++        &:focus-visible { outline: 2px solid @elx-lo-accent; outline-offset: -2px; }
++        &[disabled] { opacity: .4; cursor: default; }
++    }
++    .elx-lo-sep { height: 1px; margin: 8px 0 6px; background: var(--border-divider, #dfdfdf); }
++    .elx-lo-radio {
++        display: flex;
++        align-items: center;
++        gap: 6px;
++        margin: 4px 0;
++        cursor: pointer;
++        input { margin: 0; }
++        input[disabled] + span { opacity: .45; }
++    }
++    .elx-lo-more {
++        display: inline-block;
++        margin-top: 6px;
++        color: @elx-lo-accent;
++        text-decoration: none;
++        &:hover { text-decoration: underline; }
++    }
++}
+-- 
+2.43.0
+

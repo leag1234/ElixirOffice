@@ -1,0 +1,3 @@
+{$EO_DOMAIN} {
+    reverse_proxy documentserver:80
+}

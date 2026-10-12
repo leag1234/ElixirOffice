@@ -1,0 +1,10 @@
+{
+  "id": "r-exercise-sheet",
+  "title": "One-page exercise sheet with answer key (brief task 1)",
+  "instruction": "Crée une fiche d'exercices d'une page sur les fractions pour des CM2, avec le corrigé à la fin.",
+  "select": null,
+  "input": null,
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "Empty document. Expected: a title, at least 3 exercises, then an answer key section, at most 2 pages."
+}

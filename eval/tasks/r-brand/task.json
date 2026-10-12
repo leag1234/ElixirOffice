@@ -1,0 +1,10 @@
+{
+  "id": "r-brand",
+  "title": "Apply a style guide (brief task 8)",
+  "instruction": "Applique notre charte : titres en bleu foncé #1F3864 et en Arial, texte courant en Calibri 11.",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "Title, Heading 1/2 and body paragraphs. Expected: every title line Arial in #1F3864, body Calibri 11 pt."
+}

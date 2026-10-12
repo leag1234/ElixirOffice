@@ -1,0 +1,39 @@
+From 740b62ebae6e72e7c371305f0de8f87bd2b0de54 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:12:06 +0200
+Subject: [PATCH 6/6] fix(documenteditor): readable style names under the
+ gallery in dark themes
+
+The style name sat on the page colour of the preview (white) in the
+ribbon text colour, invisible in dark themes. Only the preview keeps
+the page colour; the name sits on the ribbon colour.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/resources/less/word-formatting.less               | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/apps/documenteditor/main/resources/less/word-formatting.less b/apps/documenteditor/main/resources/less/word-formatting.less
+index 0e626bd81f..22eee6598e 100644
+--- a/apps/documenteditor/main/resources/less/word-formatting.less
++++ b/apps/documenteditor/main/resources/less/word-formatting.less
+@@ -15,7 +15,12 @@
+     .style {
+         display: flex;
+         flex-direction: column;
+-        background-color: @canvas-content-background;
++        // the preview keeps the page colour, the name sits on the ribbon colour (dark themes)
++        background-color: transparent;
++
++        > div:first-child {
++            background-color: @canvas-content-background;
++        }
+ 
+         > .style-label {
+             width: @word-style-preview-width;
+-- 
+2.43.0
+

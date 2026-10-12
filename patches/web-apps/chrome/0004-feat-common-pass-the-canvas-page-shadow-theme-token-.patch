@@ -1,0 +1,32 @@
+From 275669fba18fa35b58baab961ceb1e2b22f1725c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:47:18 +0200
+Subject: [PATCH 4/7] feat(common): pass the canvas-page-shadow theme token to
+ the editor
+
+Themes that define --canvas-page-shadow get a soft shadow under the
+pages (sdkjs skin colour PageShadow). Themes without it are unchanged.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/common/main/lib/controller/Themes.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/apps/common/main/lib/controller/Themes.js b/apps/common/main/lib/controller/Themes.js
+index 1341a07438..d2393e107b 100644
+--- a/apps/common/main/lib/controller/Themes.js
++++ b/apps/common/main/lib/controller/Themes.js
+@@ -728,6 +728,7 @@ define([
+         "canvas-background",
+         "canvas-content-background",
+         "canvas-page-border",
++        "canvas-page-shadow",
+ 
+         "canvas-ruler-background",
+         "canvas-ruler-border",
+-- 
+2.43.0
+

@@ -1,0 +1,49 @@
+From 09a50d181d90259867860a3283aa5c671524edc7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 15:40:51 +0200
+Subject: [PATCH 1/2] perf(nginx): make documentserver-static-gzip.sh
+ incremental and parallel [upstreamable]
+
+The script gzips every static file one at a time (find -exec ... \;) and
+always from scratch, which makes it too slow to run at each start. It
+now (re)compresses only files whose .gz is missing or older than the
+file, on all cores. This also fixes a latent bug: after an update or a
+rebuild replaced a file, its old .gz stayed and, with gzip_static on,
+nginx kept serving the stale content.
+
+Full run in a dev container (sdkjs, web-apps, plugins, dictionaries,
+fonts; 16 cores): 12.6 s; a rerun with nothing changed does no work.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../bin/documentserver-static-gzip.sh.m4               | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/common/documentserver/bin/documentserver-static-gzip.sh.m4 b/common/documentserver/bin/documentserver-static-gzip.sh.m4
+index ce91ffa..bee1158 100644
+--- a/common/documentserver/bin/documentserver-static-gzip.sh.m4
++++ b/common/documentserver/bin/documentserver-static-gzip.sh.m4
+@@ -4,11 +4,17 @@ DIR="/var/www/M4_DS_PREFIX"
+ NGINX_ONLYOFFICE_PATH="/etc/M4_DS_PREFIX/nginx"
+ 
+ cd ${DIR}
++# (Re)compress only what changed since its .gz was made (an update or a rebuild replaces the
++# file but leaves its old .gz, which gzip_static would keep serving), on all cores.
++gzip_stale() {
++  xargs -0 -r -n 64 -P "$(nproc)" sh -c 'for f; do [ "$f.gz" -nt "$f" ] || gzip -kf9 "$f"; done' _
++}
++
+ # Make gziped scripts
+-find ./sdkjs ./web-apps ./sdkjs-plugins ./dictionaries -type f \( -name *.js -o -name *.json -o -name *.htm -o -name *.html -o -name *.css -o -name *.bin -o -name *.wasm -o -name *.dic -o -name *.aff -o -name *.svg \) -exec gzip -kf9 {} \;
++find ./sdkjs ./web-apps ./sdkjs-plugins ./dictionaries -type f \( -name '*.js' -o -name '*.json' -o -name '*.htm' -o -name '*.html' -o -name '*.css' -o -name '*.bin' -o -name '*.wasm' -o -name '*.dic' -o -name '*.aff' -o -name '*.svg' \) -print0 | gzip_stale
+ 
+ # Make gziped fonts
+-find ./fonts -type f ! -name "*.*" -exec gzip -kf9 {} \;
++find ./fonts -type f ! -name "*.*" -print0 | gzip_stale
+ 
+ # Turn on static gzip for nginx
+ sed 's/#*\s*\(gzip_static\).*/\1 on;/g' \
+-- 
+2.43.0
+

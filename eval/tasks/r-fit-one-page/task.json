@@ -1,0 +1,10 @@
+{
+  "id": "r-fit-one-page",
+  "title": "Fit on one page (brief task 5)",
+  "instruction": "Fais tenir ce document sur une page.",
+  "select": null,
+  "input": "input.docx",
+  "kind": "reference",
+  "lang": "fr",
+  "notes": "17 paragraphs (8 sections) slightly longer than one A4 page. Expected: one page, all text kept, body text at least 9 pt."
+}

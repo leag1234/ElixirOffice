@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Test image for the fidelity harness: upstream DocumentServer + ElixirOffice font pack
+# (+ optionally a built sdkjs tree). Build context: a directory with fonts/ (output of
+# build.py) and sdkjs/ (built sdkjs, may be empty).
+#   docker build -f Dockerfile.test -t elixiroffice/documentserver:fonts-<n> <context>
+# BASE: a DocumentServer image (make fonts-image passes FONTS_BASE). Its install
+# prefix comes from the image's own EO_ROOT, so upstream and ElixirOffice images
+# both work.
+ARG BASE
+FROM ${BASE}
+COPY fonts/ /usr/share/fonts/truetype/elixiroffice/
+COPY sdkjs/ ${EO_ROOT}/sdkjs/
+# "true": data-container mode, no service restart during the build
+RUN documentserver-generate-allfonts.sh true

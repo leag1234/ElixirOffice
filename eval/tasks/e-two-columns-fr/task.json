@@ -1,0 +1,13 @@
+{
+  "id": "e-two-columns-fr",
+  "title": "Two columns (fr phrasing)",
+  "instruction": "Mets ça en deux colonnes",
+  "select": [
+    2,
+    6
+  ],
+  "input": "../two-columns/input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": "Same document and criteria as two-columns, French phrasing."
+}

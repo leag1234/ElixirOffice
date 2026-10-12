@@ -1,0 +1,10 @@
+{
+  "id": "e-page-numbers",
+  "title": "Page numbers at the bottom",
+  "instruction": "Add page numbers at the bottom of the page",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": ""
+}

@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Screenshot of the Presenter View window: node presenter-shot.mjs <base> <out.png> [--dark]
+import { createRequire } from 'module';
+import fs from 'fs'; import path from 'path';
+const require = createRequire(import.meta.url);
+const { chromium } = require(path.join(process.env.HOME, 'elixiroffice/pw/node_modules/playwright'));
+const [base, out] = process.argv.slice(2);
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: process.argv.includes('--dark') ? 'dark' : 'light' });
+const p = await ctx.newPage();
+const fx = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../fixtures/pptx/p01-cours-photosynthese.pptx');
+const r = await ctx.request.post(base + '/example/upload', { multipart: { uploadedFile: { name: 'p01.pptx', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', buffer: fs.readFileSync(fx) } } });
+const j = await r.json(); await p.goto(`${base}/example/editor?fileName=${encodeURIComponent(j.filename)}&lang=en`);
+const f = await (await p.waitForSelector('iframe[name=frameEditor]')).contentFrame();
+await f.waitForFunction(() => { try { return PE.getController('Main').api.getCountPages() > 0; } catch (e) { return false; } }, null, { timeout: 90000 });
+await p.waitForTimeout(4000);
+const popP = ctx.waitForEvent('page', { timeout: 30000 });
+await p.keyboard.press('Alt+F5');
+const pop = await popP;
+await pop.setViewportSize({ width: 1440, height: 900 });
+await pop.waitForTimeout(6000);
+await pop.screenshot({ path: out });
+await pop.keyboard.press('ArrowRight'); await pop.waitForTimeout(1500);
+await pop.screenshot({ path: out.replace(/\.png$/, '-2.png') });
+console.log('ok', pop.url().slice(0, 120));
+await b.close();

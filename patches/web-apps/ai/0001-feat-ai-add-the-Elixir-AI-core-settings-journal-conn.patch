@@ -1,0 +1,418 @@
+From ca2a8bdfb4aa9cbab51e35ad70fecb38c88949e8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:18:05 +0200
+Subject: [PATCH 1/4] feat(ai): add the Elixir AI core (settings, journal,
+ connector, tool loop)
+
+Editor-independent core of the AI layer:
+- Settings stored per browser (localStorage); nothing configured means
+  no network call. The API key only goes to the configured endpoint.
+- Journal of every AI call in IndexedDB (prompt, model, tool calls with
+  arguments and results, timings, token usage, estimated cost), with
+  JSON export.
+- One OpenAI-compatible connector: chat completions with tools,
+  streamed over SSE, using fetch.
+- Orchestrator: validated tool calls, structured errors returned to the
+  model, at most 8 tool rounds, the whole action reverted on failure.
+
+[ai]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/common/main/lib/elixir-ai/Core.js | 383 +++++++++++++++++++++++++
+ 1 file changed, 383 insertions(+)
+ create mode 100644 apps/common/main/lib/elixir-ai/Core.js
+
+diff --git a/apps/common/main/lib/elixir-ai/Core.js b/apps/common/main/lib/elixir-ai/Core.js
+new file mode 100644
+index 0000000000..dd162250da
+--- /dev/null
++++ b/apps/common/main/lib/elixir-ai/Core.js
+@@ -0,0 +1,383 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Elixir AI core, editor independent:
++ *  - Settings: endpoint / key / model, stored per browser (localStorage). Nothing configured => no network call.
++ *  - Journal: local log of every AI call (IndexedDB, in-memory fallback), viewable and exportable.
++ *  - Connector: one OpenAI-compatible client (chat completions, tools, streaming SSE) using fetch.
++ *  - Orchestrator: the tool loop (capped rounds, validated arguments, structured errors).
++ *
++ * The API key is only ever sent in the Authorization header of requests to the configured endpoint.
++ * It is never logged, never written to the journal and never part of exported data.
++ */
++
++define([], function () {
++    'use strict';
++
++    var ElixirAI = (window.Common = window.Common || {}).ElixirAI = window.Common.ElixirAI || {};
++
++    // ---------------------------------------------------------------------------------------------
++    // Settings
++    // ---------------------------------------------------------------------------------------------
++
++    var SETTINGS_KEY = 'elixir-ai-settings';
++
++    // Indicative prices in USD per million tokens (input, output), to be checked against the provider's
++    // price list; overridable through the stored settings ("prices"). Used only for the journal estimate.
++    var DEFAULT_PRICES = {
++        'gpt-4.1-mini': [0.40, 1.60],
++        'gpt-5.4-mini': [0.75, 4.50]
++    };
++
++    var DEFAULTS = {
++        endpoint: '',       // e.g. https://api.openai.com/v1 ; empty = not configured
++        apiKey: '',
++        model: 'gpt-4.1-mini',
++        extraParams: '',    // optional JSON merged into the request body, e.g. {"reasoning_effort":"low"}
++        maxRounds: 8,
++        prices: DEFAULT_PRICES
++    };
++
++    function readJSON(key) {
++        try { return JSON.parse(window.localStorage.getItem(key) || 'null'); } catch (e) { return null; }
++    }
++
++    ElixirAI.Settings = {
++        defaults: DEFAULTS,
++        get: function () {
++            var s = readJSON(SETTINGS_KEY) || {};
++            var out = {};
++            for (var k in DEFAULTS) out[k] = (s[k] !== undefined && s[k] !== null) ? s[k] : DEFAULTS[k];
++            out.prices = Object.assign({}, DEFAULT_PRICES, s.prices || {});
++            return out;
++        },
++        save: function (s) {
++            try {
++                window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
++                return true;
++            } catch (e) { return false; }
++        },
++        clear: function () { try { window.localStorage.removeItem(SETTINGS_KEY); } catch (e) {} },
++        isConfigured: function (s) {
++            s = s || this.get();
++            return !!(s.endpoint && /^https?:\/\//i.test(s.endpoint) && s.model);
++        },
++        // What may be shown or journaled: never the key.
++        publicView: function (s) {
++            var host = '';
++            try { host = new URL(s.endpoint).host; } catch (e) {}
++            return { endpointHost: host, model: s.model, hasKey: !!s.apiKey };
++        },
++        estimateCost: function (s, model, usage) {
++            var p = (s.prices || {})[model];
++            if (!p || !usage) return null;
++            return ((usage.prompt_tokens || 0) * p[0] + (usage.completion_tokens || 0) * p[1]) / 1e6;
++        }
++    };
++
++    // ---------------------------------------------------------------------------------------------
++    // Journal (IndexedDB)
++    // ---------------------------------------------------------------------------------------------
++
++    var DB_NAME = 'elixir-ai', STORE = 'calls';
++    var memory = [];
++    var dbPromise = null;
++
++    function openDb() {
++        if (dbPromise) return dbPromise;
++        dbPromise = new Promise(function (resolve) {
++            try {
++                var req = window.indexedDB.open(DB_NAME, 1);
++                req.onupgradeneeded = function () { req.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true }); };
++                req.onsuccess = function () { resolve(req.result); };
++                req.onerror = function () { resolve(null); };
++            } catch (e) { resolve(null); }
++        });
++        return dbPromise;
++    }
++
++    function tx(mode, fn) {
++        return openDb().then(function (db) {
++            if (!db) return fn(null);
++            return new Promise(function (resolve, reject) {
++                var t = db.transaction(STORE, mode), store = t.objectStore(STORE), result;
++                Promise.resolve(fn(store)).then(function (r) { result = r; });
++                t.oncomplete = function () { resolve(result); };
++                t.onerror = function () { reject(t.error); };
++            });
++        });
++    }
++
++    function reqP(req) {
++        return new Promise(function (resolve, reject) {
++            req.onsuccess = function () { resolve(req.result); };
++            req.onerror = function () { reject(req.error); };
++        });
++    }
++
++    ElixirAI.Journal = {
++        add: function (entry) {
++            return tx('readwrite', function (store) {
++                if (!store) { entry.id = memory.length + 1; memory.push(entry); return entry.id; }
++                return reqP(store.add(entry));
++            }).catch(function () { return null; });
++        },
++        update: function (entry) {
++            return tx('readwrite', function (store) {
++                if (!store) return entry.id;
++                return reqP(store.put(entry));
++            }).catch(function () { return null; });
++        },
++        list: function () {
++            return tx('readonly', function (store) {
++                if (!store) return memory.slice();
++                return reqP(store.getAll());
++            }).then(function (all) { return (all || []).sort(function (a, b) { return b.id - a.id; }); })
++              .catch(function () { return memory.slice().reverse(); });
++        },
++        clear: function () {
++            memory = [];
++            return tx('readwrite', function (store) { return store ? reqP(store.clear()) : null; }).catch(function () {});
++        },
++        exportJSON: function () {
++            return this.list().then(function (all) {
++                return JSON.stringify({ exported: new Date().toISOString(), entries: all }, null, 2);
++            });
++        }
++    };
++
++    // ---------------------------------------------------------------------------------------------
++    // Connector: OpenAI-compatible chat completions with tools, streamed (SSE)
++    // ---------------------------------------------------------------------------------------------
++
++    function ConnectorError(message, status) {
++        var e = new Error(message);
++        e.status = status;
++        return e;
++    }
++
++    ElixirAI.Connector = {
++        /**
++         * opts: {settings, messages, tools, signal, onDelta(text)}
++         * resolves {message:{role, content, tool_calls}, usage, finish_reason, ms, ttfbMs}
++         */
++        chat: function (opts) {
++            var s = opts.settings;
++            if (!ElixirAI.Settings.isConfigured(s))
++                return Promise.reject(ConnectorError('Elixir AI is not configured.', 0));
++            var url = s.endpoint.replace(/\/+$/, '') + '/chat/completions';
++            var body = {
++                model: s.model,
++                messages: opts.messages,
++                stream: true,
++                stream_options: { include_usage: true }
++            };
++            if (opts.tools && opts.tools.length) { body.tools = opts.tools; body.tool_choice = 'auto'; }
++            if (s.extraParams) {
++                try { Object.assign(body, JSON.parse(s.extraParams)); } catch (e) {}
++            }
++            var headers = { 'Content-Type': 'application/json' };
++            if (s.apiKey) headers.Authorization = 'Bearer ' + s.apiKey;
++
++            var t0 = performance.now(), ttfb = null;
++            var send = function (b) {
++                return fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(b), signal: opts.signal, credentials: 'omit', referrerPolicy: 'no-referrer' });
++            };
++            return send(body).then(function (resp) {
++                if (resp.status === 400 && body.stream_options) {
++                    // some compatible servers reject stream_options: retry once without it
++                    return resp.clone().text().then(function (t) {
++                        if (/stream_options/.test(t)) { delete body.stream_options; return send(body); }
++                        return resp;
++                    });
++                }
++                return resp;
++            }).then(function (resp) {
++                if (!resp.ok) {
++                    return resp.text().then(function (t) {
++                        var msg = t;
++                        try { msg = (JSON.parse(t).error || {}).message || t; } catch (e) {}
++                        throw ConnectorError('HTTP ' + resp.status + ': ' + String(msg).slice(0, 300), resp.status);
++                    });
++                }
++                var ctype = resp.headers.get('content-type') || '';
++                if (ctype.indexOf('text/event-stream') < 0 || !resp.body) {
++                    // non-streaming answer
++                    return resp.json().then(function (j) {
++                        var ch = (j.choices || [])[0] || {};
++                        return { message: ch.message || { role: 'assistant', content: '' }, usage: j.usage || null, finish_reason: ch.finish_reason, ms: performance.now() - t0, ttfbMs: performance.now() - t0 };
++                    });
++                }
++                var reader = resp.body.getReader(), decoder = new TextDecoder(), buf = '';
++                var content = '', calls = [], usage = null, finish = null;
++                var handle = function (data) {
++                    if (data === '[DONE]') return;
++                    var j;
++                    try { j = JSON.parse(data); } catch (e) { return; }
++                    if (j.usage) usage = j.usage;
++                    var ch = (j.choices || [])[0];
++                    if (!ch) return;
++                    if (ch.finish_reason) finish = ch.finish_reason;
++                    var d = ch.delta || {};
++                    if (d.content) {
++                        content += d.content;
++                        opts.onDelta && opts.onDelta(d.content, content);
++                    }
++                    (d.tool_calls || []).forEach(function (tc) {
++                        var i = tc.index !== undefined ? tc.index : calls.length;
++                        var c = calls[i] = calls[i] || { id: '', type: 'function', 'function': { name: '', arguments: '' } };
++                        if (tc.id) c.id = tc.id;
++                        if (tc['function']) {
++                            if (tc['function'].name) c['function'].name += tc['function'].name;
++                            if (tc['function'].arguments) c['function'].arguments += tc['function'].arguments;
++                        }
++                    });
++                };
++                var pump = function () {
++                    return reader.read().then(function (r) {
++                        if (ttfb === null) ttfb = performance.now() - t0;
++                        if (r.done) return;
++                        buf += decoder.decode(r.value, { stream: true });
++                        var lines = buf.split(/\r?\n/);
++                        buf = lines.pop();
++                        lines.forEach(function (line) {
++                            if (line.indexOf('data:') === 0) handle(line.slice(5).trim());
++                        });
++                        return pump();
++                    });
++                };
++                return pump().then(function () {
++                    if (buf.indexOf('data:') === 0) handle(buf.slice(5).trim());
++                    var message = { role: 'assistant', content: content || null };
++                    calls = calls.filter(Boolean);
++                    if (calls.length) message.tool_calls = calls;
++                    return { message: message, usage: usage, finish_reason: finish, ms: performance.now() - t0, ttfbMs: ttfb };
++                });
++            });
++        }
++    };
++
++    // ---------------------------------------------------------------------------------------------
++    // Orchestrator: model <-> tools loop
++    // ---------------------------------------------------------------------------------------------
++
++    function addUsage(total, u) {
++        if (!u) return;
++        total.prompt_tokens += u.prompt_tokens || 0;
++        total.completion_tokens += u.completion_tokens || 0;
++        total.total_tokens += u.total_tokens || ((u.prompt_tokens || 0) + (u.completion_tokens || 0));
++    }
++
++    /**
++     * opts: {instruction, toolset, settings, signal, onEvent(type, data)}
++     * Events: context, delta, round, tool:start, tool:end, done, error.
++     * Resolves {ok, ctx, summary, untracked:[notes], changed, entry}
++     */
++    ElixirAI.Orchestrator = {
++        run: function (opts) {
++            var ts = opts.toolset, s = opts.settings, emit = opts.onEvent || function () {};
++            var maxRounds = Math.max(1, Math.min(20, +s.maxRounds || 8));
++            var t0 = performance.now();
++            var entry = {
++                ts: new Date().toISOString(), editor: ts.id, prompt: opts.instruction,
++                endpointHost: ElixirAI.Settings.publicView(s).endpointHost, model: s.model,
++                extraParams: s.extraParams || '', rounds: [], usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
++                outcome: 'running'
++            };
++            var ctx = null, messages = [], changed = false, untracked = [], groupStarted = false, finalText = '';
++
++            var finish = function (outcome, err) {
++                entry.outcome = outcome;
++                entry.ms = Math.round(performance.now() - t0);
++                entry.costUsd = ElixirAI.Settings.estimateCost(s, s.model, entry.usage);
++                if (err) entry.error = String(err && err.message || err);
++                entry.summary = finalText;
++                entry.changed = changed;
++                return ElixirAI.Journal.add(entry).then(function (id) { entry.id = id; return entry; });
++            };
++
++            return ts.init().then(function (c) {
++                ctx = c;
++                entry.scope = { kind: ctx.scope, from: ctx.from, to: ctx.to, blocks: ctx.context.blocks.length };
++                emit('context', ctx);
++                messages = [
++                    { role: 'system', content: ts.systemPrompt(ctx) },
++                    { role: 'user', content: ts.userMessage(opts.instruction, ctx) }
++                ];
++                var round = function (n) {
++                    if (opts.signal && opts.signal.aborted) throw new Error('Cancelled');
++                    emit('round', { n: n });
++                    var r0 = performance.now();
++                    return ElixirAI.Connector.chat({
++                        settings: s, messages: messages, tools: ts.tools, signal: opts.signal,
++                        onDelta: function (d, all) { emit('delta', { text: all, round: n }); }
++                    }).then(function (res) {
++                        var rec = { n: n, ms: Math.round(res.ms), ttfbMs: Math.round(res.ttfbMs || 0), usage: res.usage, finish_reason: res.finish_reason, content: res.message.content || '', tool_calls: [] };
++                        entry.rounds.push(rec);
++                        addUsage(entry.usage, res.usage);
++                        messages.push(res.message);
++                        if (res.message.content) finalText = res.message.content;
++                        var calls = res.message.tool_calls || [];
++                        if (!calls.length) return 'done';
++                        if (n >= maxRounds) {
++                            rec.capped = true;
++                            throw new Error('Stopped after ' + maxRounds + ' tool rounds.');
++                        }
++                        // execute tool calls sequentially, in order
++                        var chain = Promise.resolve();
++                        calls.forEach(function (call) {
++                            chain = chain.then(function () {
++                                var name = call['function'].name, args, t1 = performance.now();
++                                try { args = call['function'].arguments ? JSON.parse(call['function'].arguments) : {}; }
++                                catch (e) { args = undefined; }
++                                var tc = { id: call.id, name: name, args: args !== undefined ? args : call['function'].arguments };
++                                rec.tool_calls.push(tc);
++                                emit('tool:start', tc);
++                                var p;
++                                var err = args === undefined ? { ok: false, error: { code: 'invalid_json', message: 'Arguments are not valid JSON.' } } : ts.validate(name, args, ctx);
++                                if (err) p = Promise.resolve(err);
++                                else if (ts.isMutating(name) && !groupStarted) {
++                                    groupStarted = true;
++                                    p = ts.begin(ctx).then(function () { return ts.execute(name, args, ctx); });
++                                } else p = ts.execute(name, args, ctx);
++                                return p.then(function (result) {
++                                    tc.result = result;
++                                    tc.ms = Math.round(performance.now() - t1);
++                                    if (result && result.ok && ts.isMutating(name)) {
++                                        changed = true;
++                                        var note = ts.untrackedNote(name);
++                                        if (note && untracked.indexOf(note) < 0) untracked.push(note);
++                                    }
++                                    emit('tool:end', tc);
++                                    messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
++                                });
++                            });
++                        });
++                        return chain.then(function () { return round(n + 1); });
++                    });
++                };
++                return round(1);
++            }).then(function () {
++                return (groupStarted ? ts.end(ctx, true) : Promise.resolve()).then(function () {
++                    entry.revisions = ctx.revisionsAfter || null;
++                    return finish(changed ? 'applied' : 'no-change');
++                }).then(function () {
++                    var res = { ok: true, ctx: ctx, summary: finalText, untracked: untracked, changed: changed, entry: entry };
++                    emit('done', res);
++                    return res;
++                });
++            }, function (err) {
++                // Fatal error (network, cap, cancel): revert everything done in this action
++                return (groupStarted && ctx ? ts.end(ctx, false) : Promise.resolve()).catch(function () {}).then(function () {
++                    return finish(opts.signal && opts.signal.aborted ? 'cancelled' : 'error', err);
++                }).then(function () {
++                    emit('error', err);
++                    return { ok: false, error: err, ctx: ctx, entry: entry, changed: false };
++                });
++            });
++        }
++    };
++
++    return ElixirAI;
++});
+-- 
+2.43.0
+

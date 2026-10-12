@@ -1,0 +1,103 @@
+From 18d41352bdb2153ab77034e8f9008a8f77436276 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:21:55 +0200
+Subject: [PATCH 1/2] perf(word): paint the next frame after input instead of
+ the next 40 ms tick [upstreamable]
+
+The editor paint loop (PaintMessageLoop) runs on requestAnimationFrame but
+only every 40 ms, so a keystroke waited up to 40 ms before its glyph or
+caret move reached the canvas, and wheel scrolling repainted the document
+at most 25 times per second. Add PaintMessageLoop.requestUrgent(): the
+next animation frame runs the paint engine whatever the interval. The
+Word page calls it when a repaint is requested (OnScroll) and after key
+handling; idle polling keeps its 40 ms interval.
+
+Measured with tools/perf (ElixirOffice repo), own instance, Chromium
+headless, 10-page document, 5 x 200 keystrokes; keydown to the frame
+after the repaint, p50/p95:
+  CPU x1: 44/65 ms -> 26/33 ms
+  CPU x4: 59/74 ms -> 39/47 ms
+Wheel scrolling a 50-page document for 5 s at 60 Hz, document repaints
+per second: 20 -> 60 (x1), 20 -> 58 (x4); animation frame rate and
+frame-interval p95 unchanged (60 fps, 16.8 ms).
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/Drawings/WorkEvents.js | 17 ++++++++++++++++-
+ word/Drawing/HtmlPage.js      |  3 +++
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/common/Drawings/WorkEvents.js b/common/Drawings/WorkEvents.js
+index 436eb45e14..f5eedc8a1f 100644
+--- a/common/Drawings/WorkEvents.js
++++ b/common/Drawings/WorkEvents.js
+@@ -793,6 +793,7 @@
+ 			this.isUseRequestAnimationFrame = false;
+ 
+ 		this.requestAnimationOldTime = -1;
++		this.isUrgent = false;
+ 
+ 		this.engine = null;
+ 		this.step = null;
+@@ -835,14 +836,28 @@
+ 	PaintMessageLoop.prototype._animation = function()
+ 	{
+ 		var now = Date.now();
+-		if (!this.isUseInterval || -1 === this.requestAnimationOldTime || (now >= (this.requestAnimationOldTime + this.interval)) || (now < this.requestAnimationOldTime))
++		if (!this.isUseInterval || this.isUrgent || -1 === this.requestAnimationOldTime || (now >= (this.requestAnimationOldTime + this.interval)) || (now < this.requestAnimationOldTime))
+ 		{
++			this.isUrgent = false;
+ 			this.requestAnimationOldTime = now;
+ 			this.engine();
+ 		}
+ 		this.id = this.requestAnimationFrame.call(window, this.step);
+ 	};
+ 
++	// Run the engine on the next animation frame instead of waiting for the end of the current
++	// interval (up to 40 ms): called when user input needs a repaint, so that typed text, caret
++	// moves and scrolling are painted in the next frame. Idle polling keeps its interval.
++	PaintMessageLoop.prototype.requestUrgent = function()
++	{
++		this.isUrgent = true;
++		if (!this.isUseRequestAnimationFrame && null !== this.id)
++		{
++			clearTimeout(this.id);
++			this.id = setTimeout(this.step, 0);
++		}
++	};
++
+ 	PaintMessageLoop.prototype._timer = function()
+ 	{
+ 		this.engine();
+diff --git a/word/Drawing/HtmlPage.js b/word/Drawing/HtmlPage.js
+index 27488f6adc..50a34b074f 100644
+--- a/word/Drawing/HtmlPage.js
++++ b/word/Drawing/HtmlPage.js
+@@ -2693,6 +2693,7 @@ function CEditorPage(api)
+ 		oWordControl.bIsUseKeyPress      = ((_ret_mouseDown & keydownresult_PreventKeyPress) != 0) ? false : true;
+ 
+ 		oWordControl.EndUpdateOverlay();
++		oWordControl.paintMessageLoop.requestUrgent(); // caret moves, deletions: next frame
+ 
+ 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0)// || (true === global_keyboardEvent.AltKey && !AscBrowser.isMacOs))
+ 		{
+@@ -2780,6 +2781,7 @@ function CEditorPage(api)
+ 		oWordControl.StartUpdateOverlay();
+ 		var retValue = oWordControl.m_oLogicDocument.OnKeyPress(global_keyboardEvent);
+ 		oWordControl.EndUpdateOverlay();
++		oWordControl.paintMessageLoop.requestUrgent(); // caret and text in the next frame
+ 		if (true === retValue)
+ 			e.preventDefault();
+ 	};
+@@ -3709,6 +3711,7 @@ function CEditorPage(api)
+ 
+ 		this.OnCalculatePagesPlace();
+ 		this.m_bIsScroll = true;
++		this.paintMessageLoop.requestUrgent();
+ 	};
+ 
+ 	///
+-- 
+2.43.0
+

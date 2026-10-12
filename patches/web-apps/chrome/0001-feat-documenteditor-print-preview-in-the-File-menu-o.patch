@@ -1,0 +1,38 @@
+From 7806266435d4ea0757c18b8906b3ad1795b72074 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:16:02 +0200
+Subject: [PATCH 1/7] feat(documenteditor): print preview in the File menu on
+ the web
+
+The print preview page (settings column and live preview of the pages)
+was only enabled in the desktop app. Enable it in the browser too, like
+Word: Print in the File menu, the quick access toolbar and Ctrl+P open
+the preview; Print hands the PDF to the browser print dialog, with the
+page range of the settings, and Print to PDF downloads it. The macOS
+desktop app keeps its native dialog as before.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/documenteditor/main/app/controller/Main.js | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/apps/documenteditor/main/app/controller/Main.js b/apps/documenteditor/main/app/controller/Main.js
+index e957d1cb17..c59ea60fdf 100644
+--- a/apps/documenteditor/main/app/controller/Main.js
++++ b/apps/documenteditor/main/app/controller/Main.js
+@@ -1720,7 +1720,8 @@ define([
+                 }
+                 this.appOptions.canEditStyles  = this.appOptions.canLicense && this.appOptions.canEdit;
+                 this.appOptions.canPrint       = (this.permissions.print !== false);
+-                this.appOptions.canPreviewPrint = this.appOptions.canPrint && !Common.Utils.isMac && this.appOptions.isDesktopApp;
++                // print preview in the backstage on the web too (the browser prints the PDF), like Word
++                this.appOptions.canPreviewPrint = this.appOptions.canPrint && (!this.appOptions.isDesktopApp || !Common.Utils.isMac);
+                 this.appOptions.canQuickPrint = this.appOptions.canPrint && !Common.Utils.isMac && this.appOptions.isDesktopApp;
+                 this.appOptions.canRename      = this.editorConfig.canRename;
+                 this.appOptions.buildVersion   = params.asc_getBuildVersion();
+-- 
+2.43.0
+

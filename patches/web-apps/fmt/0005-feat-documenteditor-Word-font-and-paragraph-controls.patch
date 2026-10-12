@@ -1,0 +1,713 @@
+From 49b9d32478b827aa62f173af7a54be8ff50d8582 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:06:23 +0200
+Subject: [PATCH 5/6] feat(documenteditor): Word font and paragraph controls
+
+- Font name list with Word's sections: Theme Fonts (heading and body
+  fonts, applied as theme references, shown in their own face when
+  installed), Recently Used Fonts, All Fonts.
+- Font size list of Word (8 ... 10.5, 11, 12 ... 72).
+- Highlight colours: Word's 15 colours in Word order, 5 x 3, and
+  "No Color" (white removed).
+- Line spacing: "Line Spacing Options..." opens the Paragraph dialog
+  instead of the right panel; icons on Add/Remove Space Before/After.
+- Borders: "Borders and Shading..." at the end of the menu (paragraph
+  borders and fill).
+- Paragraph dialog: Alignment, Outline level and Direction on their own
+  rows, as in Word.
+Change Case (5 options), font colour (theme and standard colours, More
+colors) and the bullet and numbering libraries with previews already
+matched Word and are unchanged. Toolbar view: only the highlight
+palette (colours, width). Strings in en, fr, de, es, it, pt, pt-pt, nl,
+ru, pl, ja, zh.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/controller/WordFormatting.js     | 107 ++++++++++++++++++
+ apps/documenteditor/main/app/view/Toolbar.js  |  17 +--
+ .../main/app/view/WordParagraphDialog.js      |   6 +-
+ apps/documenteditor/main/locale/de.json       |   8 ++
+ apps/documenteditor/main/locale/en.json       |   8 ++
+ apps/documenteditor/main/locale/es.json       |   8 ++
+ apps/documenteditor/main/locale/fr.json       |   8 ++
+ apps/documenteditor/main/locale/it.json       |   8 ++
+ apps/documenteditor/main/locale/ja.json       |   8 ++
+ apps/documenteditor/main/locale/nl.json       |   8 ++
+ apps/documenteditor/main/locale/pl.json       |   8 ++
+ apps/documenteditor/main/locale/pt-pt.json    |   8 ++
+ apps/documenteditor/main/locale/pt.json       |   8 ++
+ apps/documenteditor/main/locale/ru.json       |   8 ++
+ apps/documenteditor/main/locale/zh.json       |   8 ++
+ .../main/resources/less/word-formatting.less  |  72 +++++++++++-
+ 16 files changed, 281 insertions(+), 17 deletions(-)
+
+diff --git a/apps/documenteditor/main/app/controller/WordFormatting.js b/apps/documenteditor/main/app/controller/WordFormatting.js
+index 456b4f92d4..0fab780641 100644
+--- a/apps/documenteditor/main/app/controller/WordFormatting.js
++++ b/apps/documenteditor/main/app/controller/WordFormatting.js
+@@ -74,12 +74,16 @@ define([
+             this.bindGalleryPreview(toolbar.listStyles);
+             this.extendGalleryMenus(toolbar);
+             this.setupPasteButton(toolbar);
++            this.setupFontControls(toolbar);
+         },
+ 
+         onAppReady: function () {
+             var api = this.getApi(), me = this;
+             if (!api || !this.canEdit()) return;
+             this.api = api;
++            // after the Toolbar view fills the size list on app:ready
++            _.defer(function () { me.setWordFontSizes(); me.setupDelayedMenus(); });
++            setTimeout(function () { me.setupDelayedMenus(); }, 1500);
+             api.asc_UpdateStyleGallery && api.asc_UpdateStyleGallery();
+             api.asc_registerCallback('asc_onParaStyleName', function (name) {
+                 me._currentStyle = name;
+@@ -137,6 +141,101 @@ define([
+             }
+         },
+ 
++        // ---------------------------------------------------------------- Font and paragraph controls
++        setupFontControls: function (toolbar) {
++            var me = this;
++            // font list: Theme Fonts / Recently Used Fonts / All Fonts
++            toolbar.cmbFontName && toolbar.cmbFontName.on('show:after', function (cmb) { me.decorateFontList(cmb || toolbar.cmbFontName); });
++
++            // line spacing: Line Spacing Options... opens the Paragraph dialog, icons as in Word
++            if (toolbar.mnuLineSpace) {
++                if (toolbar.mnuLineSpaceOptions) {
++                    toolbar.mnuLineSpaceOptions.value = 'word-paragraph';
++                    toolbar.mnuLineSpaceOptions.setCaption(this.textLineSpacingOptions);
++                }
++                toolbar.mnuLineSpaceBefore && toolbar.mnuLineSpaceBefore.setIconCls('menu__icon btn-para-space-more');
++                toolbar.mnuLineSpaceAfter && toolbar.mnuLineSpaceAfter.setIconCls('menu__icon btn-para-space-less');
++                toolbar.mnuLineSpace.on('item:click', function (menu, item) {
++                    item.value === 'word-paragraph' && me.openParagraphDialog();
++                });
++            }
++
++            // highlight: Word's "No Color"
++            toolbar.mnuHighlightTransparent && toolbar.mnuHighlightTransparent.setCaption(this.textNoColor);
++
++        },
++
++        // menus that the Toolbar view creates late (createDelayedElements)
++        setupDelayedMenus: function () {
++            var me = this, toolbar = this.toolbar;
++            // borders: Borders and Shading... at the end, as in Word
++            var bmenu = toolbar && toolbar.btnBorders && toolbar.btnBorders.menu;
++            if (bmenu && bmenu.addItem && !this.mnuBordersShading) {
++                bmenu.addItem(new Common.UI.MenuItem({caption: '--'}));
++                this.mnuBordersShading = new Common.UI.MenuItem({caption: this.textBordersShading, iconCls: 'menu__icon btn-border-style', value: 'word-borders-shading'});
++                bmenu.addItem(this.mnuBordersShading);
++                this.mnuBordersShading.on('click', function () { me.openBordersDialog(); });
++            }
++        },
++
++        openBordersDialog: function () {
++            var dh = this.getApplication().getController('DocumentHolder'),
++                win = dh && dh.advancedParagraphClick && dh.advancedParagraphClick({});
++            win && win.setActiveCategory && win.setActiveCategory(2);
++        },
++
++        // Word's font size list
++        setWordFontSizes: function () {
++            var cmb = this.toolbar && this.toolbar.cmbFontSize;
++            if (!cmb || this.toolbar._fontSizeChinese) return;
++            cmb.setData(_.map([8, 9, 10, 10.5, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72], function (v) {
++                return {value: v, displayValue: String(v)};
++            }));
++        },
++
++        decorateFontList: function (cmb) {
++            var me = this, api = this.api, $ul = $(cmb.el).find('ul.dropdown-menu');
++            if (!$ul.length) return;
++            $ul.children('.word-font-section, .word-theme-font').remove();
++            var header = function (text) { return $('<li class="divider word-font-section" role="presentation"></li>').text(text); };
++            var $items = $ul.children('li');
++            var $firstRecent = $items.first(), $divider = $ul.children('li.divider').first();
++            var hasRecent = $firstRecent.length && !$firstRecent.hasClass('divider');
++            hasRecent && $firstRecent.before(header(this.textRecentFonts));
++            $divider.after(header(this.textAllFonts));
++
++            // theme fonts, applied as theme references (+Headings / +Body)
++            var names = api && api.asc_GetThemeFontNames ? api.asc_GetThemeFontNames() : null;
++            names && (names.majorTile = names.majorSubst || names.major, names.minorTile = names.minorSubst || names.minor);
++            if (!names) return;
++            var $first = $ul.children('li').first();
++            $first.before(header(this.textThemeFonts));
++            var thumbs = cmb.spriteThumbs, lis = [];
++            _.each([[names.major, true, this.textHeadings, names.majorTile], [names.minor, false, this.textBody, names.minorTile]], function (f) {
++                var $li = $('<li class="divider word-theme-font" role="menuitem"><div class="font-item"></div></li>'),
++                    $item = $li.children('.font-item'),
++                    // the tile of the font itself; a font that is not installed (Calibri, rendered with
++                    // Carlito) shows its name as text, not the tile of its substitute
++                    rec = cmb.store.findWhere({name: f[0]});
++                if (rec && thumbs && thumbs.getImage && rec.get('imgidx') !== undefined) {
++                    var cols = thumbs.heightOne ? Math.max(1, Math.floor(thumbs.width / (thumbs.heightOne * 300 / 28))) : 1;
++                    try { $item.append(thumbs.getImage(Math.floor(rec.get('imgidx') / cols))); } catch (e) { $item.text(f[0]); }
++                } else
++                    $item.append($('<span class="word-theme-name"></span>').text(f[0]));
++                $item.append($('<span class="word-theme-role"></span>').text(f[2]));
++                $li.attr('title', f[0] + ' (' + f[2] + ')');
++                $li.on('click', function () {
++                    cmb.closeMenu ? cmb.closeMenu() : cmb.cmpEl.find('.dropdown-toggle').dropdown('toggle');
++                    api.asc_SetThemeFont(f[1]);
++                    rec && cmb.addItemToRecent && cmb.addItemToRecent(rec);
++                    Common.NotificationCenter.trigger('edit:complete', me.toolbar);
++                });
++                lis.push($li);
++            });
++            $ul.children('.word-font-section').first().after(lis);
++            cmb.updateVisibleFontsTiles && cmb.updateVisibleFontsTiles();
++        },
++
+         // ---------------------------------------------------------------- Paste
+         pasteOptionInfo: function (value) {
+             var P = Asc.c_oSpecialPasteProps, info = {};
+@@ -623,6 +722,14 @@ define([
+             })).show();
+         },
+ 
++        textNoColor: 'No Color',
++        textThemeFonts: 'Theme Fonts',
++        textRecentFonts: 'Recently Used Fonts',
++        textAllFonts: 'All Fonts',
++        textHeadings: 'Headings',
++        textBody: 'Body',
++        textLineSpacingOptions: 'Line Spacing Options...',
++        textBordersShading: 'Borders and Shading...',
+         textPasteOptions: 'Paste Options:',
+         textKeepSource: 'Keep Source Formatting',
+         textMergeFormatting: 'Merge Formatting',
+diff --git a/apps/documenteditor/main/app/view/Toolbar.js b/apps/documenteditor/main/app/view/Toolbar.js
+index ef97a25b80..d9e372f784 100644
+--- a/apps/documenteditor/main/app/view/Toolbar.js
++++ b/apps/documenteditor/main/app/view/Toolbar.js
+@@ -473,7 +473,7 @@ define([
+                         menu: new Common.UI.Menu({
+                             style: 'min-width: 100px;',
+                             items: [
+-                                {template: _.template('<div id="id-toolbar-menu-highlight" style="width: 145px; display: inline-block;" class="palette-large"></div>')},
++                                {template: _.template('<div id="id-toolbar-menu-highlight" style="width: 182px; display: inline-block;" class="palette-large"></div>')},
+                                 {caption: '--'},
+                                 this.mnuHighlightTransparent = new Common.UI.MenuItem({
+                                     caption: this.strMenuNoFill,
+@@ -3437,21 +3437,22 @@ define([
+                     this.btnHighlightColor.setColor(this.btnHighlightColor.currentColor);
+                     this.mnuHighlightColorPicker = new Common.UI.ThemeColorPalette({
+                         el: $('#id-toolbar-menu-highlight'),
++                        // Word highlight colours, in Word order (5 x 3, no white)
+                         colors: [
+-                            'FFFF00', '00FF00', '00FFFF', 'FF00FF', '0000FF', 'FF0000', '00008B', '008B8B',
+-                            '006400', '800080', '8B0000', '808000', 'FFFFFF', 'D3D3D3', 'A9A9A9', '000000'
++                            'FFFF00', '00FF00', '00FFFF', 'FF00FF', '0000FF',
++                            'FF0000', '00008B', '008B8B', '006400', '800080',
++                            '8B0000', '808000', 'A9A9A9', 'D3D3D3', '000000'
+                         ],
+                         colorHints: [
+-                            Common.Utils.ThemeColor.txtYellow, Common.Utils.ThemeColor.txtBrightGreen, Common.Utils.ThemeColor.txtTurquosie, Common.Utils.ThemeColor.txtPink,
+-                            Common.Utils.ThemeColor.txtBlue, Common.Utils.ThemeColor.txtRed, Common.Utils.ThemeColor.txtDarkBlue, Common.Utils.ThemeColor.txtTeal,
+-                            Common.Utils.ThemeColor.txtGreen, Common.Utils.ThemeColor.txtViolet, Common.Utils.ThemeColor.txtDarkRed, Common.Utils.ThemeColor.txtDarkYellow,
+-                            Common.Utils.ThemeColor.txtWhite, Common.Utils.ThemeColor.txtGray + '-25%', Common.Utils.ThemeColor.txtGray + '-50%', Common.Utils.ThemeColor.txtBlack
++                            Common.Utils.ThemeColor.txtYellow, Common.Utils.ThemeColor.txtBrightGreen, Common.Utils.ThemeColor.txtTurquosie, Common.Utils.ThemeColor.txtPink, Common.Utils.ThemeColor.txtBlue,
++                            Common.Utils.ThemeColor.txtRed, Common.Utils.ThemeColor.txtDarkBlue, Common.Utils.ThemeColor.txtTeal, Common.Utils.ThemeColor.txtGreen, Common.Utils.ThemeColor.txtViolet,
++                            Common.Utils.ThemeColor.txtDarkRed, Common.Utils.ThemeColor.txtDarkYellow, Common.Utils.ThemeColor.txtGray + '-50%', Common.Utils.ThemeColor.txtGray + '-25%', Common.Utils.ThemeColor.txtBlack
+                         ],
+                         value: 'FFFF00',
+                         dynamiccolors: 0,
+                         themecolors: 0,
+                         effects: 0,
+-                        columns: 4,
++                        columns: 5,
+                         outerMenu: {menu: this.btnHighlightColor.menu, index: 0, focusOnShow: true}
+                     });
+                     this.btnHighlightColor.setPicker(this.mnuHighlightColorPicker);
+diff --git a/apps/documenteditor/main/app/view/WordParagraphDialog.js b/apps/documenteditor/main/app/view/WordParagraphDialog.js
+index 39f7b1486e..3b8247918b 100644
+--- a/apps/documenteditor/main/app/view/WordParagraphDialog.js
++++ b/apps/documenteditor/main/app/view/WordParagraphDialog.js
+@@ -28,9 +28,9 @@ define([
+                 '<div class="inner-content word-para">',
+                     '<div class="word-dlg-section">' + s.txtGeneral + '</div>',
+                     '<table class="word-para-grid" role="presentation"><tbody>',
+-                        '<tr><td class="lbl"><label>' + s.txtAlignment + '</label></td><td><div id="paragraphadv-spin-text-alignment"></div></td>',
+-                            '<td class="lbl text-only"><label>' + s.txtOutlineLevel + '</label></td><td class="text-only"><div id="paragraphadv-spin-outline-level"></div></td></tr>',
+-                        '<tr><td class="lbl"><label>' + s.txtDirection + '</label></td><td colspan="3"><div id="paragraphadv-dir-ltr" class="word-para-radio"></div><div id="paragraphadv-dir-rtl" class="word-para-radio"></div></td></tr>',
++                        '<tr><td class="lbl"><label>' + s.txtAlignment + '</label></td><td><div id="paragraphadv-spin-text-alignment"></div></td></tr>',
++                        '<tr class="text-only"><td class="lbl"><label>' + s.txtOutlineLevel + '</label></td><td><div id="paragraphadv-spin-outline-level"></div></td></tr>',
++                        '<tr><td class="lbl"><label>' + s.txtDirection + '</label></td><td><div id="paragraphadv-dir-ltr" class="word-para-radio"></div><div id="paragraphadv-dir-rtl" class="word-para-radio"></div></td></tr>',
+                     '</tbody></table>',
+                     '<div class="word-dlg-section">' + s.txtIndentation + '</div>',
+                     '<table class="word-para-grid" role="presentation"><tbody>',
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index 8611b5ee7f..bfb850e979 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Seite anpassen",
+   "DE.Controllers.Viewport.textFitWidth": "Breite anpassen",
+   "DE.Controllers.Viewport.txtDarkMode": "Dunkelmodus",
++  "DE.Controllers.WordFormatting.textAllFonts": "Alle Schriftarten",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Formatvorlagen übernehmen...",
++  "DE.Controllers.WordFormatting.textBody": "Textkörper",
++  "DE.Controllers.WordFormatting.textBordersShading": "Rahmen und Schattierung...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Formatierung löschen",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Formatvorlage erstellen",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Möchten Sie die Formatvorlage {0} aus dem Dokument löschen?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Zielformatvorlagen verwenden",
++  "DE.Controllers.WordFormatting.textHeadings": "Überschriften",
+   "DE.Controllers.WordFormatting.textKeepSource": "Ursprüngliche Formatierung beibehalten",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Nur den Text übernehmen",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Zeilenabstandsoptionen...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Formatierung zusammenführen",
+   "DE.Controllers.WordFormatting.textModify": "Ändern...",
++  "DE.Controllers.WordFormatting.textNoColor": "Keine Farbe",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Einfügeoptionen:",
+   "DE.Controllers.WordFormatting.textPicture": "Bild",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Zuletzt verwendete Schriftarten",
+   "DE.Controllers.WordFormatting.textStyleN": "Formatvorlage",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Designschriftarten",
+   "DE.Views.ApplyStylesDialog.txtModify": "Ändern...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Erneut übernehmen",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Formatvorlagenname:",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 7955b0a1d2..83d26dcb67 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2126,18 +2126,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Fit to Page",
+   "DE.Controllers.Viewport.textFitWidth": "Fit to Width",
+   "DE.Controllers.Viewport.txtDarkMode": "Dark mode",
++  "DE.Controllers.WordFormatting.textAllFonts": "All Fonts",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Apply Styles...",
++  "DE.Controllers.WordFormatting.textBody": "Body",
++  "DE.Controllers.WordFormatting.textBordersShading": "Borders and Shading...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Clear Formatting",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Create a Style",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Do you want to delete the style {0} from the document?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Use Destination Styles",
++  "DE.Controllers.WordFormatting.textHeadings": "Headings",
+   "DE.Controllers.WordFormatting.textKeepSource": "Keep Source Formatting",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Keep Text Only",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Line Spacing Options...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Merge Formatting",
+   "DE.Controllers.WordFormatting.textModify": "Modify...",
++  "DE.Controllers.WordFormatting.textNoColor": "No Color",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Paste Options:",
+   "DE.Controllers.WordFormatting.textPicture": "Picture",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Recently Used Fonts",
+   "DE.Controllers.WordFormatting.textStyleN": "Style",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Theme Fonts",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modify...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reapply",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Style Name:",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index b2c15378e1..e6bdba2541 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar a la página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar al ancho",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo oscuro",
++  "DE.Controllers.WordFormatting.textAllFonts": "Todas las fuentes",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar estilos...",
++  "DE.Controllers.WordFormatting.textBody": "Cuerpo",
++  "DE.Controllers.WordFormatting.textBordersShading": "Bordes y sombreado...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Borrar formato",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Crear un estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "¿Desea eliminar el estilo {0} del documento?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Usar estilos de destino",
++  "DE.Controllers.WordFormatting.textHeadings": "Títulos",
+   "DE.Controllers.WordFormatting.textKeepSource": "Mantener formato de origen",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Mantener solo texto",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opciones de interlineado...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Combinar formato",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textNoColor": "Sin color",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Opciones de pegado:",
+   "DE.Controllers.WordFormatting.textPicture": "Imagen",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Fuentes usadas recientemente",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Fuentes del tema",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Volver a aplicar",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nombre de estilo:",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 71eb8ab474..400a0672a7 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajuster à la page",
+   "DE.Controllers.Viewport.textFitWidth": "Ajuster à la largeur",
+   "DE.Controllers.Viewport.txtDarkMode": "Mode sombre",
++  "DE.Controllers.WordFormatting.textAllFonts": "Toutes les polices",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Appliquer les styles...",
++  "DE.Controllers.WordFormatting.textBody": "Corps",
++  "DE.Controllers.WordFormatting.textBordersShading": "Bordure et trame...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Effacer la mise en forme",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Créer un style",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Voulez-vous supprimer le style {0} du document ?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Utiliser les styles de destination",
++  "DE.Controllers.WordFormatting.textHeadings": "Titres",
+   "DE.Controllers.WordFormatting.textKeepSource": "Conserver la mise en forme source",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Conserver uniquement le texte",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Options d'interligne...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Fusionner la mise en forme",
+   "DE.Controllers.WordFormatting.textModify": "Modifier...",
++  "DE.Controllers.WordFormatting.textNoColor": "Pas de couleur",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Options de collage :",
+   "DE.Controllers.WordFormatting.textPicture": "Image",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Polices récemment utilisées",
+   "DE.Controllers.WordFormatting.textStyleN": "Style",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Polices du thème",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modifier...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Réappliquer",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nom du style :",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 01459f4407..4c04afc209 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Adatta alla pagina",
+   "DE.Controllers.Viewport.textFitWidth": "Adatta alla larghezza",
+   "DE.Controllers.Viewport.txtDarkMode": "Modalità scura",
++  "DE.Controllers.WordFormatting.textAllFonts": "Tutti i tipi di carattere",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Applica stili...",
++  "DE.Controllers.WordFormatting.textBody": "Corpo",
++  "DE.Controllers.WordFormatting.textBordersShading": "Bordi e sfondo...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Cancella formattazione",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Crea uno stile",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Eliminare lo stile {0} dal documento?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Usa stili di destinazione",
++  "DE.Controllers.WordFormatting.textHeadings": "Titoli",
+   "DE.Controllers.WordFormatting.textKeepSource": "Mantieni formattazione originale",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Mantieni solo testo",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opzioni interlinea...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Unisci formattazione",
+   "DE.Controllers.WordFormatting.textModify": "Modifica...",
++  "DE.Controllers.WordFormatting.textNoColor": "Nessun colore",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Opzioni Incolla:",
+   "DE.Controllers.WordFormatting.textPicture": "Immagine",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Tipi di carattere usati di recente",
+   "DE.Controllers.WordFormatting.textStyleN": "Stile",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Tipi di carattere del tema",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modifica...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Riapplica",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nome stile:",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index 31901cf408..c6a99d1ac5 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2102,18 +2102,26 @@
+   "DE.Controllers.Viewport.textFitPage": "ページに合わせる",
+   "DE.Controllers.Viewport.textFitWidth": "幅を合わせる",
+   "DE.Controllers.Viewport.txtDarkMode": "ダークモード",
++  "DE.Controllers.WordFormatting.textAllFonts": "すべてのフォント",
+   "DE.Controllers.WordFormatting.textApplyStyles": "スタイルの適用...",
++  "DE.Controllers.WordFormatting.textBody": "本文",
++  "DE.Controllers.WordFormatting.textBordersShading": "線種とページ罫線と網かけの設定...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "書式のクリア",
+   "DE.Controllers.WordFormatting.textCreateStyle": "スタイルの作成",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "文書からスタイル {0} を削除しますか?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "貼り付け先のスタイルを使用",
++  "DE.Controllers.WordFormatting.textHeadings": "見出し",
+   "DE.Controllers.WordFormatting.textKeepSource": "元の書式を保持",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "テキストのみ保持",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "行間のオプション...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "書式を結合",
+   "DE.Controllers.WordFormatting.textModify": "変更...",
++  "DE.Controllers.WordFormatting.textNoColor": "色なし",
+   "DE.Controllers.WordFormatting.textPasteOptions": "貼り付けのオプション:",
+   "DE.Controllers.WordFormatting.textPicture": "図",
++  "DE.Controllers.WordFormatting.textRecentFonts": "最近使用したフォント",
+   "DE.Controllers.WordFormatting.textStyleN": "スタイル",
++  "DE.Controllers.WordFormatting.textThemeFonts": "テーマのフォント",
+   "DE.Views.ApplyStylesDialog.txtModify": "変更...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "再適用",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "スタイル名:",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index 7c47b706f1..6e9ad64cef 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -1501,18 +1501,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Aan pagina aanpassen",
+   "DE.Controllers.Viewport.textFitWidth": "Aan breedte aanpassen",
+   "DE.Controllers.Viewport.txtDarkMode": "Donkere modus",
++  "DE.Controllers.WordFormatting.textAllFonts": "Alle lettertypen",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Stijlen toepassen...",
++  "DE.Controllers.WordFormatting.textBody": "Hoofdtekst",
++  "DE.Controllers.WordFormatting.textBordersShading": "Randen en arcering...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Opmaak wissen",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Een stijl maken",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Wilt u de stijl {0} uit het document verwijderen?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Doelstijlen gebruiken",
++  "DE.Controllers.WordFormatting.textHeadings": "Koppen",
+   "DE.Controllers.WordFormatting.textKeepSource": "Bronopmaak behouden",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Alleen tekst behouden",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opties voor regelafstand...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Opmaak samenvoegen",
+   "DE.Controllers.WordFormatting.textModify": "Wijzigen...",
++  "DE.Controllers.WordFormatting.textNoColor": "Geen kleur",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Plakopties:",
+   "DE.Controllers.WordFormatting.textPicture": "Afbeelding",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Recent gebruikte lettertypen",
+   "DE.Controllers.WordFormatting.textStyleN": "Stijl",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Themalettertypen",
+   "DE.Views.ApplyStylesDialog.txtModify": "Wijzigen...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Opnieuw toepassen",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Stijlnaam:",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index ec02b624b8..8d482e149a 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -1667,18 +1667,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Dopasuj do strony",
+   "DE.Controllers.Viewport.textFitWidth": "Dopasuj do szerokości",
+   "DE.Controllers.Viewport.txtDarkMode": "Ciemny motyw",
++  "DE.Controllers.WordFormatting.textAllFonts": "Wszystkie czcionki",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Zastosuj style...",
++  "DE.Controllers.WordFormatting.textBody": "Tekst podstawowy",
++  "DE.Controllers.WordFormatting.textBordersShading": "Obramowanie i cieniowanie...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Wyczyść formatowanie",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Utwórz styl",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Czy chcesz usunąć styl {0} z dokumentu?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Użyj stylów docelowych",
++  "DE.Controllers.WordFormatting.textHeadings": "Nagłówki",
+   "DE.Controllers.WordFormatting.textKeepSource": "Zachowaj formatowanie źródłowe",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Zachowaj tylko tekst",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opcje interlinii...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Scal formatowanie",
+   "DE.Controllers.WordFormatting.textModify": "Modyfikuj...",
++  "DE.Controllers.WordFormatting.textNoColor": "Brak koloru",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Opcje wklejania:",
+   "DE.Controllers.WordFormatting.textPicture": "Obraz",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Ostatnio używane czcionki",
+   "DE.Controllers.WordFormatting.textStyleN": "Styl",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Czcionki motywu",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modyfikuj...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Zastosuj ponownie",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nazwa stylu:",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index 6ec1fe173c..c0afa6e104 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -1527,18 +1527,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar à página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar à largura",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo escuro",
++  "DE.Controllers.WordFormatting.textAllFonts": "Todos os Tipos de Letra",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar Estilos...",
++  "DE.Controllers.WordFormatting.textBody": "Corpo",
++  "DE.Controllers.WordFormatting.textBordersShading": "Limites e Sombreado...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Pretende eliminar o estilo {0} do documento?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Utilizar Estilos de Destino",
++  "DE.Controllers.WordFormatting.textHeadings": "Títulos",
+   "DE.Controllers.WordFormatting.textKeepSource": "Manter Formatação de Origem",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Manter Apenas Texto",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opções de Espaçamento entre Linhas...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Intercalar Formatação",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textNoColor": "Sem Cor",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Opções de Colagem:",
+   "DE.Controllers.WordFormatting.textPicture": "Imagem",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Tipos de Letra Utilizados Recentemente",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Tipos de Letra do Tema",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nome do estilo:",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index d6a4ea667f..64431bcb37 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2117,18 +2117,26 @@
+   "DE.Controllers.Viewport.textFitPage": "Ajustar a página",
+   "DE.Controllers.Viewport.textFitWidth": "Ajustar largura",
+   "DE.Controllers.Viewport.txtDarkMode": "Modo escuro",
++  "DE.Controllers.WordFormatting.textAllFonts": "Todas as Fontes",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Aplicar Estilos...",
++  "DE.Controllers.WordFormatting.textBody": "Corpo",
++  "DE.Controllers.WordFormatting.textBordersShading": "Bordas e Sombreamento...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Limpar Formatação",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Criar um Estilo",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Deseja excluir o estilo {0} do documento?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Usar Estilos de Destino",
++  "DE.Controllers.WordFormatting.textHeadings": "Títulos",
+   "DE.Controllers.WordFormatting.textKeepSource": "Manter Formatação Original",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Manter Somente Texto",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Opções de Espaçamento de Linha...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Mesclar Formatação",
+   "DE.Controllers.WordFormatting.textModify": "Modificar...",
++  "DE.Controllers.WordFormatting.textNoColor": "Sem Cor",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Opções de Colagem:",
+   "DE.Controllers.WordFormatting.textPicture": "Imagem",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Fontes Usadas Recentemente",
+   "DE.Controllers.WordFormatting.textStyleN": "Estilo",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Fontes do Tema",
+   "DE.Views.ApplyStylesDialog.txtModify": "Modificar...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Reaplicar",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Nome do estilo:",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 4ca0fe6d9b..a1f5aae6cd 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "По размеру страницы",
+   "DE.Controllers.Viewport.textFitWidth": "По ширине",
+   "DE.Controllers.Viewport.txtDarkMode": "Темный режим",
++  "DE.Controllers.WordFormatting.textAllFonts": "Все шрифты",
+   "DE.Controllers.WordFormatting.textApplyStyles": "Применить стили...",
++  "DE.Controllers.WordFormatting.textBody": "Основной текст",
++  "DE.Controllers.WordFormatting.textBordersShading": "Границы и заливка...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "Очистить формат",
+   "DE.Controllers.WordFormatting.textCreateStyle": "Создать стиль",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "Удалить стиль {0} из документа?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "Использовать стили конечного фрагмента",
++  "DE.Controllers.WordFormatting.textHeadings": "Заголовки",
+   "DE.Controllers.WordFormatting.textKeepSource": "Сохранить исходное форматирование",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "Сохранить только текст",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "Другие варианты междустрочных интервалов...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "Объединить форматирование",
+   "DE.Controllers.WordFormatting.textModify": "Изменить...",
++  "DE.Controllers.WordFormatting.textNoColor": "Нет цвета",
+   "DE.Controllers.WordFormatting.textPasteOptions": "Параметры вставки:",
+   "DE.Controllers.WordFormatting.textPicture": "Рисунок",
++  "DE.Controllers.WordFormatting.textRecentFonts": "Последние использованные шрифты",
+   "DE.Controllers.WordFormatting.textStyleN": "Стиль",
++  "DE.Controllers.WordFormatting.textThemeFonts": "Шрифты темы",
+   "DE.Views.ApplyStylesDialog.txtModify": "Изменить...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "Применить снова",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "Имя стиля:",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index 74ded65247..e412e49f85 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2118,18 +2118,26 @@
+   "DE.Controllers.Viewport.textFitPage": "调整至页面大小",
+   "DE.Controllers.Viewport.textFitWidth": "调整至合适宽度",
+   "DE.Controllers.Viewport.txtDarkMode": "深色模式",
++  "DE.Controllers.WordFormatting.textAllFonts": "所有字体",
+   "DE.Controllers.WordFormatting.textApplyStyles": "应用样式...",
++  "DE.Controllers.WordFormatting.textBody": "正文",
++  "DE.Controllers.WordFormatting.textBordersShading": "边框和底纹...",
+   "DE.Controllers.WordFormatting.textClearFormatting": "清除格式",
+   "DE.Controllers.WordFormatting.textCreateStyle": "创建样式",
+   "DE.Controllers.WordFormatting.textDeleteConfirm": "是否要从文档中删除样式 {0}?",
+   "DE.Controllers.WordFormatting.textDestinationStyles": "使用目标样式",
++  "DE.Controllers.WordFormatting.textHeadings": "标题",
+   "DE.Controllers.WordFormatting.textKeepSource": "保留源格式",
+   "DE.Controllers.WordFormatting.textKeepTextOnly": "只保留文本",
++  "DE.Controllers.WordFormatting.textLineSpacingOptions": "行距选项...",
+   "DE.Controllers.WordFormatting.textMergeFormatting": "合并格式",
+   "DE.Controllers.WordFormatting.textModify": "修改...",
++  "DE.Controllers.WordFormatting.textNoColor": "无颜色",
+   "DE.Controllers.WordFormatting.textPasteOptions": "粘贴选项:",
+   "DE.Controllers.WordFormatting.textPicture": "图片",
++  "DE.Controllers.WordFormatting.textRecentFonts": "最近使用的字体",
+   "DE.Controllers.WordFormatting.textStyleN": "样式",
++  "DE.Controllers.WordFormatting.textThemeFonts": "主题字体",
+   "DE.Views.ApplyStylesDialog.txtModify": "修改...",
+   "DE.Views.ApplyStylesDialog.txtReapply": "重新应用",
+   "DE.Views.ApplyStylesDialog.txtStyleName": "样式名:",
+diff --git a/apps/documenteditor/main/resources/less/word-formatting.less b/apps/documenteditor/main/resources/less/word-formatting.less
+index 107a0d43d5..0e626bd81f 100644
+--- a/apps/documenteditor/main/resources/less/word-formatting.less
++++ b/apps/documenteditor/main/resources/less/word-formatting.less
+@@ -494,7 +494,7 @@
+             vertical-align: middle;
+ 
+             &.lbl {
+-                width: 72px;
++                width: 96px;
+                 white-space: nowrap;
+             }
+ 
+@@ -555,11 +555,6 @@
+     padding-left: 16px;
+ }
+ 
+-.word-paragraph-dlg #paragraphadv-spin-text-alignment,
+-.word-paragraph-dlg #paragraphadv-spin-outline-level {
+-    width: 140px !important;
+-}
+-
+ // ---------------------------------------------------------------- Paste options
+ .word-paste-menu .word-paste-header > a {
+     font-weight: bold;
+@@ -572,3 +567,68 @@
+ .word-font-adv td {
+     white-space: nowrap;
+ }
++
++// ---------------------------------------------------------------- Font list sections
++.combobox.fonts .dropdown-menu {
++    > li.word-font-section {
++        display: block !important;
++        height: auto;
++        margin: 0;
++        padding: 5px 10px 3px;
++        background: @background-toolbar-ie;
++        background: @background-toolbar;
++        border-top: @scaled-one-px-value-ie solid @border-divider-ie;
++        border-top: @scaled-one-px-value solid @border-divider;
++        color: @text-normal-ie;
++        color: @text-normal;
++        font-weight: bold;
++        font-size: 11px;
++        line-height: 14px;
++        cursor: default;
++
++        &:first-child {
++            border-top: none;
++        }
++    }
++
++    > li.word-theme-font {
++        display: block !important;
++        height: auto;
++        margin: 0;
++        background: transparent;
++        cursor: pointer;
++
++        > .font-item {
++            position: relative;
++            height: 28px;
++            display: flex;
++            align-items: center;
++            padding: 0 0 0 0;
++            overflow: hidden;
++
++            canvas {
++                flex: 0 0 auto;
++                margin-left: 20px;
++            }
++        }
++
++        .word-theme-name {
++            padding-left: 28px;
++            font-size: 14px;
++        }
++
++        .word-theme-role {
++            position: absolute;
++            right: 10px;
++            top: 7px;
++            font-size: 11px;
++            color: @text-secondary-ie;
++            color: @text-secondary;
++        }
++
++        &:hover {
++            background-color: @highlight-button-hover-ie;
++            background-color: @highlight-button-hover;
++        }
++    }
++}
+-- 
+2.43.0
+

@@ -1,0 +1,10 @@
+{
+  "id": "e-margin-2cm",
+  "title": "2 cm margins",
+  "instruction": "Mets une marge de 2 cm",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

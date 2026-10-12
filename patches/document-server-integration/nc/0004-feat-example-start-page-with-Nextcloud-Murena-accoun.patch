@@ -1,0 +1,1421 @@
+From e6e9b035919714f7deec2a83db26bd1c1019b8ff Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:47:41 +0200
+Subject: [PATCH 4/6] feat(example): start page with Nextcloud / Murena,
+ account menu and local profile
+
+Connect card and dialog, Nextcloud folder view with breadcrumbs and New, Nextcloud recent files, conflict notices, Office-like account menu (name, server, Connect or Disconnect, Change name, developer mode, test users); the local test storage only in developer mode.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../nodejs/helpers/elixirHome.js              | 124 +++-
+ .../nodejs/public/elixir/fluent/README.md     |  10 +
+ .../nodejs/public/elixir/home.css             |  73 +-
+ .../nodejs/public/elixir/home.js              | 656 +++++++++++++++---
+ .../nodejs/public/elixir/icons.svg            |   2 +-
+ .../nodejs/views/home.ejs                     | 148 +++-
+ 6 files changed, 900 insertions(+), 113 deletions(-)
+
+diff --git a/web/documentserver-example/nodejs/helpers/elixirHome.js b/web/documentserver-example/nodejs/helpers/elixirHome.js
+index a6fdfc2f..e39fc55d 100644
+--- a/web/documentserver-example/nodejs/helpers/elixirHome.js
++++ b/web/documentserver-example/nodejs/helpers/elixirHome.js
+@@ -21,6 +21,9 @@
+ // uploaded, converted, downloaded and deleted through the existing routes
+ // (/editor, /upload, /convert, /download, DELETE /file). The test harness
+ // (upstream index page) stays reachable with ?dev=1.
++//
++// Storage: the user's Nextcloud (elixirNextcloud.js). The example's local
++// test storage (per IP address) is only shown in developer mode.
+ 
+ const express = require('express');
+ const path = require('path');
+@@ -29,6 +32,11 @@ const config = require('config');
+ const DocManager = require('./docManager');
+ const fileUtility = require('./fileUtility');
+ const users = require('./users');
++const identityLib = require('./elixirIdentity');
++const session = require('./elixirSession');
++
++// set by elixirNextcloud (no require cycle): default server, http allowed
++const nextcloudDefaults = { defaultServer: 'https://murena.io', allowHttp: false };
+ 
+ const configServer = config.get('server');
+ const publicDir = path.join(__dirname, '..', 'public');
+@@ -148,6 +156,30 @@ const listFiles = (docManager) => docManager.getStoredFiles().map((file) => {
+   };
+ }).sort((a, b) => b.time - a.time);
+ 
++// account menu data (start page and editor title bar)
++const accountInfo = (req, t, server) => {
++  const id = identityLib.identity(req, t, server);
++  const dev = identityLib.devMode(req);
++  const devUser = dev ? (req.elixir.data().devUser || null) : null;
++  return {
++    source: id.source,
++    name: id.name,
++    named: id.named,
++    asked: !!((req.elixir.data().profile || {}).asked),
++    login: id.login || '',
++    email: id.email || '',
++    server: id.server || '',
++    serverHost: id.serverHost || '',
++    image: id.image || '',
++    initials: id.initials,
++    color: id.color,
++    homeUrl: `${server}/`,
++    devMode: dev,
++    devUser,
++    testUsers: dev ? users.getAllUsers().map((u) => ({ id: u.id, name: u.name || t('account.anonymous') })) : [],
++  };
++};
++
+ // Editor configuration for the ElixirOffice backstage (File menu): the start
+ // page templates of the same document type, the recent files and the host URLs
+ // used by the Open, Share and title bar pages (editorConfig.elixir).
+@@ -178,6 +210,7 @@ const editorExtras = (docManager, req, fileName) => {
+     templates: templates.length ? templates : null,
+     recent,
+     elixir: {
++      account: { ...accountInfo(req, t, server), reloadUrl: `${server}${req.originalUrl}` },
+       homeUrl: `${server}/`,
+       openUrl: `${server}/#open`,
+       uploadUrl: `${server}/upload`,
+@@ -194,8 +227,13 @@ module.exports = function elixirHome() {
+   const router = express.Router();
+ 
+   router.get('/', (req, res, next) => {
+-    // the upstream test harness (user switcher, languages, WOPI…) stays available
++    // the upstream test harness (user switcher, languages, WOPI…) stays available,
++    // and turns developer mode on for this browser
+     if (req.query.dev === '1' || req.query.dev === 'true') {
++      if (req.elixir && !req.elixir.data().dev) {
++        req.elixir.update((data) => { data.dev = true; }).then(() => next(), () => next());
++        return;
++      }
+       next();
+       return;
+     }
+@@ -203,7 +241,9 @@ module.exports = function elixirHome() {
+       const docManager = new DocManager(req, res);
+       const lang = resolveLanguage(req);
+       const t = translator(lang.ui);
+-      const user = users.getUser(req.query.userid);
++      const server = docManager.getServerUrl();
++      const account = accountInfo(req, t, server);
++      const sessionData = req.elixir.data();
+       const templates = loadTemplates().map((tpl) => ({
+         id: tpl.id,
+         title: localized(tpl.title, lang.ui),
+@@ -219,9 +259,17 @@ module.exports = function elixirHome() {
+         iconSprite,
+         hasLogo: fileSystem.existsSync(path.join(brandDir, 'logo.svg')),
+         hasFavicon: fileSystem.existsSync(path.join(brandDir, 'favicon.svg')),
+-        user: { id: user.id, name: user.name || '' },
++        account,
++        csrf: req.elixir.csrf(),
++        nc: {
++          connected: account.source === 'nextcloud',
++          defaultServer: nextcloudDefaults.defaultServer,
++          allowHttp: nextcloudDefaults.allowHttp,
++          lastFolder: sessionData.lastFolder || '/',
++        },
++        devMode: account.devMode,
+         templates,
+-        files: listFiles(docManager),
++        files: account.devMode ? listFiles(docManager) : [],
+         uploadExts: fileUtility.getSuppotredExtensions().filter((ext) => fileUtility.getFormatActions(ext).length),
+         convertExts: fileUtility.getConvertExtensions(),
+         maxFileSize: configServer.get('maxFileSize'),
+@@ -271,7 +319,75 @@ module.exports = function elixirHome() {
+     }
+   });
+ 
++  // ---- identity, developer mode, notices (JSON; state changes need X-Elixir: 1)
++  const api = (fn) => (req, res) => {
++    res.removeHeader('Access-Control-Allow-Origin');
++    res.setHeader('Cache-Control', 'no-store');
++    if (req.method !== 'GET' && req.get('X-Elixir') !== '1') {
++      res.status(403).json({ error: 'csrf' });
++      return;
++    }
++    Promise.resolve(fn(req, res)).catch((ex) => {
++      console.log(ex);
++      res.status(500).json({ error: 'Server error' });
++    });
++  };
++
++  router.get('/elixir/api/me', api((req, res) => {
++    const t = translator(resolveLanguage(req).ui);
++    res.json(accountInfo(req, t, new DocManager(req, res).getServerUrl()));
++  }));
++
++  router.post('/elixir/api/profile', api(async (req, res) => {
++    const name = String((req.body && req.body.name) || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 80);
++    await req.elixir.update((data) => {
++      data.profile = data.profile || {};
++      data.profile.name = name;
++      data.profile.asked = true;
++    });
++    const t = translator(resolveLanguage(req).ui);
++    res.json(accountInfo(req, t, new DocManager(req, res).getServerUrl()));
++  }));
++
++  router.post('/elixir/api/dev', api(async (req, res) => {
++    const on = !!(req.body && req.body.on);
++    const userId = req.body && req.body.user;
++    await req.elixir.update((data) => {
++      data.dev = on;
++      if (!on) data.devUser = null;
++      else if (userId !== undefined) {
++        data.devUser = userId && users.getAllUsers().some((u) => u.id === userId) ? userId : null;
++      }
++    });
++    res.json({ ok: true, devMode: on });
++  }));
++
++  router.get('/elixir/api/notices', api(async (req, res) => {
++    const notices = req.elixir.data().notices || [];
++    if (notices.length) await req.elixir.update((data) => { data.notices = []; });
++    res.json({ notices });
++  }));
++
++  router.get('/elixir/avatar/:id', (req, res) => {
++    const avatar = session.readAvatar(req.params.id);
++    if (!avatar) {
++      res.sendStatus(404);
++      return;
++    }
++    res.setHeader('Content-Type', avatar.type);
++    res.setHeader('Cache-Control', 'private, max-age=3600');
++    res.setHeader('X-Content-Type-Options', 'nosniff');
++    res.end(avatar.data);
++  });
++
+   return router;
+ };
+ 
+ module.exports.editorExtras = editorExtras;
++module.exports.nextcloudDefaults = nextcloudDefaults;
++module.exports.accountInfo = accountInfo;
++module.exports.resolveLanguage = resolveLanguage;
++module.exports.translator = translator;
++module.exports.loadTemplates = loadTemplates;
++module.exports.templatesDir = templatesDir;
++module.exports.localized = localized;
+diff --git a/web/documentserver-example/nodejs/public/elixir/fluent/README.md b/web/documentserver-example/nodejs/public/elixir/fluent/README.md
+index abcd1238..4ee7acc5 100644
+--- a/web/documentserver-example/nodejs/public/elixir/fluent/README.md
++++ b/web/documentserver-example/nodejs/public/elixir/fluent/README.md
+@@ -27,3 +27,13 @@ a563cf9166f4f91aa617557ed272612b7f0a2f72.
+ | i-dismiss | Dismiss 24 regular |
+ | i-new-tab | Open 24 regular |
+ | i-warning | Warning 24 regular |
++| i-cloud, i-cloud-f | Cloud 24 regular / filled |
++| i-folder | Folder 24 filled |
++| i-laptop, i-laptop-f | Laptop 24 regular / filled |
++| i-person | Person 24 regular |
++| i-edit | Edit 24 regular |
++| i-sign-out | Sign Out 24 regular |
++| i-link | Plug Connected 24 regular |
++| i-check | Checkmark 24 regular |
++| i-chevron | Chevron Right 24 regular |
++| i-lock | Lock Closed 24 regular |
+diff --git a/web/documentserver-example/nodejs/public/elixir/home.css b/web/documentserver-example/nodejs/public/elixir/home.css
+index c6867129..02e0319b 100644
+--- a/web/documentserver-example/nodejs/public/elixir/home.css
++++ b/web/documentserver-example/nodejs/public/elixir/home.css
+@@ -98,12 +98,81 @@ a { color: inherit; }
+ .search input:focus ~ .search-kbd, .search input:not(:placeholder-shown) ~ .search-kbd { display: none; }
+ 
+ .account { justify-self: end; display: flex; align-items: center; }
++.account-btn {
++  display: inline-flex; padding: 2px; border: 0; border-radius: 50%; background: transparent; cursor: pointer;
++}
++.account-btn:hover .avatar, .account-btn[aria-expanded="true"] .avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--border-strong); }
+ .avatar {
+-  display: inline-flex; align-items: center; justify-content: center;
++  display: inline-flex; align-items: center; justify-content: center; flex: none; overflow: hidden;
+   width: 32px; height: 32px; border-radius: 50%;
+-  background: var(--accent-soft); color: var(--accent-text);
++  background: var(--av, var(--accent)); color: #fff;
+   font-size: 13px; font-weight: 600; user-select: none;
+ }
++.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
++.avatar-lg { width: 56px; height: 56px; font-size: 20px; }
++.ic-xs { width: 16px; height: 16px; flex: none; }
++
++/* ---------- account panel ---------- */
++.account-panel {
++  position: fixed; top: calc(var(--topbar-h) - 4px); right: 12px; z-index: 55; width: 320px; max-width: calc(100vw - 24px);
++  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-3);
++  padding: 16px 8px 8px;
++}
++.acct-head { display: flex; align-items: center; gap: 14px; padding: 0 8px 14px; border-bottom: 1px solid var(--border); }
++.acct-id { min-width: 0; }
++.acct-name { font-size: 16px; line-height: 22px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.acct-sub { color: var(--text-2); font-size: 13px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.acct-server { display: flex; align-items: center; gap: 4px; }
++.acct-actions { padding-top: 6px; }
++.acct-item {
++  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 0 10px;
++  border: 0; border-radius: 4px; background: transparent; text-align: left; cursor: pointer; text-decoration: none;
++}
++.acct-item:hover, .acct-item:focus-visible { background: var(--hover); outline: none; }
++.acct-item .ic-sm { color: var(--text-2); }
++.acct-item > span:not(.switch) { flex: 1; }
++.switch { position: relative; width: 34px; height: 18px; border-radius: 9px; background: var(--border-strong); flex: none; transition: background-color .12s; }
++.switch::after { content: ""; position: absolute; left: 3px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform .12s; }
++.acct-item[aria-checked="true"] .switch { background: var(--accent); }
++.acct-item[aria-checked="true"] .switch::after { transform: translateX(16px); }
++.acct-group-title { padding: 6px 10px 2px; font-size: 12px; font-weight: 600; color: var(--text-2); }
++.acct-test .ic-sm { visibility: hidden; }
++.acct-test[aria-pressed="true"] .ic-sm { visibility: visible; color: var(--accent); }
++.acct-privacy { display: flex; gap: 6px; margin: 8px 8px 2px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; line-height: 16px; color: var(--text-2); }
++.acct-privacy .ic-xs { margin-top: 0; }
++
++/* ---------- connect card, dialogs ---------- */
++.connect-card {
++  display: flex; align-items: center; gap: 20px; margin-bottom: 28px; padding: 18px 20px;
++  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px;
++}
++.connect-icon { width: 36px; height: 36px; color: var(--accent); flex: none; }
++.connect-text { flex: 1; min-width: 0; }
++.connect-text h2 { margin: 0 0 2px; font-size: 16px; line-height: 22px; }
++.connect-text p { margin: 0; color: var(--text-2); }
++.field-label { display: block; margin: 0 0 6px; font-weight: 600; }
++.field {
++  width: 100%; height: 34px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface);
++}
++.field:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
++.dialog p.field-hint { margin: 8px 0 20px; font-size: 12px; line-height: 16px; }
++.dialog p.field-error { margin: -8px 0 16px; color: var(--danger); }
++.dialog form > p { margin-bottom: 16px; }
++.dialog .field + .dialog-actions { margin-top: 24px; }
++.connect-wait { display: flex; align-items: center; gap: 10px; }
++.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
++
++/* ---------- Nextcloud folder ---------- */
++.crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; font-size: 20px; line-height: 28px; font-weight: 600; min-width: 0; }
++.crumb { padding: 2px 6px; border: 0; border-radius: 4px; background: transparent; font: inherit; color: var(--text-2); cursor: pointer; }
++.crumb:hover { background: var(--hover); color: var(--text); }
++span.crumb { color: var(--text); cursor: default; }
++.crumb-sep { width: 16px; height: 16px; color: var(--text-3); }
++.t-folder { color: #c49a1b; }
++.file-where { display: block; font-size: 12px; line-height: 14px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; }
++.files td.c-name { line-height: 18px; }
++.files tr.unsupported .file-link { color: var(--text-2); }
++.rail-label-clip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ 
+ /* ---------- layout ---------- */
+ .layout { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: calc(100vh - var(--topbar-h)); }
+diff --git a/web/documentserver-example/nodejs/public/elixir/home.js b/web/documentserver-example/nodejs/public/elixir/home.js
+index 871da854..9f10388b 100644
+--- a/web/documentserver-example/nodejs/public/elixir/home.js
++++ b/web/documentserver-example/nodejs/public/elixir/home.js
+@@ -17,15 +17,19 @@
+  */
+ 
+ // Start page behaviour. No framework: the page is server-rendered and this
+-// script only switches views, renders the recent list and drives uploads
+-// through the example's /upload and /convert endpoints.
++// script switches views, renders the file lists and drives uploads.
++// Storage: the user's Nextcloud (/elixir/nc/*) when connected; the example's
++// local test storage (/upload, /convert, /download, DELETE /file) only in
++// developer mode.
+ (function home() {
+   'use strict';
+ 
+   var data = JSON.parse(document.getElementById('home-data').textContent);
+   var strings = data.strings;
+   var TYPES = ['word', 'cell', 'slide', 'pdf'];
+-  var VIEWS = ['home', 'new', 'open'].concat(TYPES);
++  var VIEWS = ['home', 'new', 'open', 'cloud', 'local'].concat(TYPES);
++  var connected = !!(data.nc && data.nc.connected);
++  var devMode = !!data.devMode;
+ 
+   var $ = function (id) { return document.getElementById(id); };
+   var t = function (key, vars) {
+@@ -36,20 +40,65 @@
+     return text;
+   };
+ 
++  var langParam = '&lang=' + encodeURIComponent(data.lang.editor);
++  var editorUrl = function (name) { return 'editor?fileName=' + encodeURIComponent(name) + langParam; };
++  var ncOpenUrl = function (p) { return 'elixir/nc/open?path=' + encodeURIComponent(p) + langParam; };
++
+   var state = {
+     view: 'home',
+     filter: '',
+     query: '',
+-    files: data.files || [],
+-    menuFile: null,
++    local: (data.files || []).map(function (f) { return localItem(f); }),
++    recent: [],
++    recentLoaded: false,
++    folder: { path: (data.nc && data.nc.lastFolder) || '/', items: [], loaded: false, canCreate: true },
++    rows: [],
++    menuItem: null,
+   };
+ 
+-  var langParam = '&lang=' + encodeURIComponent(data.lang.editor);
+-  var editorUrl = function (name) { return 'editor?fileName=' + encodeURIComponent(name) + langParam; };
+   var extOf = function (name) {
+     var i = name.lastIndexOf('.');
+     return i < 0 ? '' : name.slice(i + 1).toLowerCase();
+   };
++  var serverHost = (data.account && data.account.serverHost) || '';
++
++  function localItem(f) {
++    return { kind: 'file', source: 'local', name: f.name, documentType: f.documentType, time: f.time, size: f.size, url: editorUrl(f.name) };
++  }
++  function ncItem(f) {
++    return {
++      kind: f.type === 'dir' ? 'dir' : 'file', source: 'nc', name: f.name, path: f.path, fileid: f.fileid,
++      documentType: f.documentType, time: f.time, size: f.size, supported: f.supported,
++      url: f.type === 'dir' ? '#cloud' : ncOpenUrl(f.path),
++    };
++  }
++
++  // JSON API helper: state changes carry X-Elixir (forces a CORS preflight)
++  var api = function (url, body) {
++    var opts = { cache: 'no-store', credentials: 'same-origin', headers: { Accept: 'application/json' } };
++    if (body !== undefined) {
++      opts.method = 'POST';
++      opts.headers['Content-Type'] = 'application/json';
++      opts.headers['X-Elixir'] = '1';
++      opts.body = JSON.stringify(body);
++    }
++    return fetch(url, opts).then(function (r) {
++      return r.json().catch(function () { return {}; }).then(function (res) {
++        if (!r.ok) {
++          var err = new Error(res.error || ('HTTP ' + r.status));
++          err.code = res.error;
++          err.status = r.status;
++          throw err;
++        }
++        return res;
++      });
++    });
++  };
++  var ncError = function (err) {
++    if (err instanceof TypeError) return t('error.network');
++    var key = 'nc.error.' + (err.code || 'generic');
++    return strings[key] ? t(key, { server: serverHost }) : t('error.generic', { message: err.message });
++  };
+ 
+   // ---------- formatting ----------
+   var locale = document.documentElement.lang || 'en';
+@@ -59,6 +108,7 @@
+   var numFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+ 
+   var formatTime = function (ms) {
++    if (!ms) return '';
+     var d = new Date(ms);
+     var now = new Date();
+     if (now - d < 60 * 1000 && now >= d) return t('time.justNow');
+@@ -70,7 +120,8 @@
+   var formatSize = function (bytes) {
+     if (bytes < 1024) return numFmt.format(bytes) + ' B';
+     if (bytes < 1024 * 1024) return numFmt.format(bytes / 1024) + ' KB';
+-    return numFmt.format(bytes / 1024 / 1024) + ' MB';
++    if (bytes < 1024 * 1024 * 1024) return numFmt.format(bytes / 1024 / 1024) + ' MB';
++    return numFmt.format(bytes / 1024 / 1024 / 1024) + ' GB';
+   };
+ 
+   var svgUse = function (id, cls) {
+@@ -84,32 +135,49 @@
+     return svg;
+   };
+ 
+-  // ---------- recent list ----------
++  // ---------- which list is shown ----------
++  var isType = function (view) { return TYPES.indexOf(view) !== -1; };
++  var currentList = function () {
++    if (state.view === 'cloud') return state.folder.items;
++    if (state.view === 'local') return state.local;
++    if (connected) return state.recent;
++    return devMode ? state.local : [];
++  };
++  var listSource = function () {
++    if (state.view === 'local') return 'local';
++    if (state.view === 'cloud' || connected) return 'nc';
++    return devMode ? 'local' : 'none';
++  };
++
++  // ---------- file list ----------
+   var renderFiles = function () {
+     var body = $('files-body');
+-    var type = TYPES.indexOf(state.view) !== -1 ? state.view : state.filter;
++    var type = isType(state.view) ? state.view : state.filter;
+     var q = state.query.trim().toLowerCase();
+-    var list = state.files.filter(function (f) {
+-      return (!type || f.documentType === type) && (!q || f.name.toLowerCase().indexOf(q) !== -1);
++    var all = currentList();
++    var list = all.filter(function (f) {
++      return (!type || f.kind === 'dir' || f.documentType === type) && (!q || f.name.toLowerCase().indexOf(q) !== -1);
+     });
++    state.rows = list;
+     var frag = document.createDocumentFragment();
+-    list.forEach(function (f) {
++    list.forEach(function (f, idx) {
+       var tr = document.createElement('tr');
+-      tr.dataset.name = f.name;
++      tr.dataset.idx = String(idx);
++      if (f.kind === 'file' && f.source === 'nc' && !f.supported) tr.className = 'unsupported';
+ 
+       var tdIcon = document.createElement('td');
+       tdIcon.className = 'c-icon';
+-      var ft = TYPES.indexOf(f.documentType) !== -1 ? f.documentType : 'file';
+-      tdIcon.appendChild(svgUse(ft === 'file' ? 'file' : ft + '-f', 'ft t-' + ft));
++      var ft = f.kind === 'dir' ? 'folder' : (TYPES.indexOf(f.documentType) !== -1 ? f.documentType : 'file');
++      tdIcon.appendChild(svgUse(ft === 'file' || ft === 'folder' ? ft : ft + '-f', 'ft t-' + ft));
+       tr.appendChild(tdIcon);
+ 
+       var tdName = document.createElement('td');
+       tdName.className = 'c-name';
+       var a = document.createElement('a');
+-      a.href = editorUrl(f.name);
+-      a.target = '_blank';
++      a.href = f.url;
++      if (f.kind === 'file') a.target = '_blank';
+       a.className = 'file-link';
+-      var dot = f.name.lastIndexOf('.');
++      var dot = f.kind === 'file' ? f.name.lastIndexOf('.') : -1;
+       var base = document.createElement('span');
+       base.className = 'file-base';
+       base.textContent = dot > 0 ? f.name.slice(0, dot) : f.name;
+@@ -119,82 +187,210 @@
+       a.appendChild(base);
+       a.appendChild(ext);
+       tdName.appendChild(a);
++      if (f.source === 'nc' && state.view !== 'cloud' && f.path) {
++        var where = document.createElement('span');
++        where.className = 'file-where';
++        var parent = f.path.slice(0, f.path.lastIndexOf('/')) || '/';
++        where.textContent = parent === '/' ? serverHost : serverHost + parent;
++        tdName.appendChild(where);
++      }
+       tr.appendChild(tdName);
+ 
+       var tdMod = document.createElement('td');
+       tdMod.className = 'c-mod';
+       tdMod.textContent = formatTime(f.time);
+-      tdMod.title = fullFmt.format(new Date(f.time));
++      if (f.time) tdMod.title = fullFmt.format(new Date(f.time));
+       tr.appendChild(tdMod);
+ 
+       var tdSize = document.createElement('td');
+       tdSize.className = 'c-size';
+-      tdSize.textContent = formatSize(f.size);
++      tdSize.textContent = f.kind === 'dir' ? '' : formatSize(f.size);
+       tr.appendChild(tdSize);
+ 
+       var tdAct = document.createElement('td');
+       tdAct.className = 'c-act';
+-      var btn = document.createElement('button');
+-      btn.type = 'button';
+-      btn.className = 'icon-btn row-menu';
+-      btn.setAttribute('aria-haspopup', 'menu');
+-      btn.setAttribute('aria-label', t('action.more', { name: f.name }));
+-      btn.appendChild(svgUse('more', 'ic-sm'));
+-      tdAct.appendChild(btn);
++      if (f.kind === 'file') {
++        var btn = document.createElement('button');
++        btn.type = 'button';
++        btn.className = 'icon-btn row-menu';
++        btn.setAttribute('aria-haspopup', 'menu');
++        btn.setAttribute('aria-label', t('action.more', { name: f.name }));
++        btn.appendChild(svgUse('more', 'ic-sm'));
++        tdAct.appendChild(btn);
++      }
+       tr.appendChild(tdAct);
+ 
+       frag.appendChild(tr);
+     });
+     body.replaceChildren(frag);
+ 
+-    var none = state.files.length === 0;
++    var src = listSource();
++    var loading = (src === 'nc' && state.view === 'cloud' && !state.folder.loaded) || (src === 'nc' && state.view !== 'cloud' && !state.recentLoaded);
++    var none = all.length === 0;
+     $('files').hidden = none || list.length === 0;
+     $('empty').hidden = !none;
+     $('no-match').hidden = none || list.length > 0;
++    if (none) {
++      var title = t('empty.title');
++      var bodyText = t('empty.body');
++      if (src === 'none') { title = t('nc.empty.notConnected'); bodyText = t('nc.empty.notConnectedBody'); }
++      else if (loading) { title = t('nc.loading'); bodyText = ''; }
++      else if (state.view === 'cloud') { title = t('nc.empty.folder'); bodyText = t('nc.empty.folderBody'); }
++      else if (src === 'nc') { title = t('nc.empty.recent'); bodyText = t('nc.empty.recentBody', { server: serverHost }); }
++      $('empty').querySelector('.empty-title').textContent = title;
++      $('empty').querySelector('.empty-body').textContent = bodyText;
++    }
+     if (!none && list.length === 0) {
+       $('no-match').textContent = q ? t('noMatch', { q: state.query.trim() }) : t('empty.title');
+     }
+   };
+ 
+-  var refreshFiles = function () {
++  var refreshLocal = function () {
++    if (!devMode) return Promise.resolve();
+     return fetch('elixir/api/files', { cache: 'no-store' })
+       .then(function (r) { return r.json(); })
+       .then(function (res) {
+         if (res.files) {
+-          state.files = res.files;
++          state.local = res.files.map(localItem);
+           renderFiles();
+         }
+       })
+       .catch(function () { /* keep the current list */ });
+   };
+ 
++  var onNcFailure = function (err) {
++    if (err.status === 401) { location.reload(); return; } // the app password was revoked: page shows "connect"
++    toast(ncError(err), { error: true });
++  };
++
++  var refreshRecent = function () {
++    if (!connected) return Promise.resolve();
++    return api('elixir/nc/recent').then(function (res) {
++      state.recent = (res.files || []).map(ncItem);
++      state.recentLoaded = true;
++      renderFiles();
++    }).catch(function (err) {
++      state.recentLoaded = true;
++      renderFiles();
++      onNcFailure(err);
++    });
++  };
++
++  var loadFolder = function (p) {
++    if (!connected) return Promise.resolve();
++    state.folder.loaded = false;
++    state.folder.path = p;
++    state.folder.items = [];
++    renderCrumbs();
++    renderFiles();
++    return api('elixir/nc/list?path=' + encodeURIComponent(p)).then(function (res) {
++      if (state.folder.path !== p) return;
++      state.folder.items = (res.items || []).map(ncItem);
++      state.folder.canCreate = res.canCreate !== false;
++      state.folder.loaded = true;
++      renderCrumbs();
++      renderFiles();
++    }).catch(function (err) {
++      state.folder.loaded = true;
++      renderFiles();
++      if (err.status === 404 && p !== '/') { loadFolder('/'); return; }
++      onNcFailure(err);
++    });
++  };
++
++  var refreshFiles = function () {
++    if (state.view === 'cloud') return loadFolder(state.folder.path);
++    if (state.view === 'local') return refreshLocal();
++    return Promise.all([refreshRecent(), connected ? null : refreshLocal()]);
++  };
++
++  // ---------- breadcrumbs (Nextcloud folder) ----------
++  var renderCrumbs = function () {
++    var nav = $('crumbs');
++    var frag = document.createDocumentFragment();
++    var parts = state.folder.path.split('/').filter(Boolean);
++    var add = function (label, p, last) {
++      var b = document.createElement(last ? 'span' : 'button');
++      b.className = 'crumb';
++      b.textContent = label;
++      if (last) b.setAttribute('aria-current', 'location');
++      else { b.type = 'button'; b.dataset.path = p; }
++      frag.appendChild(b);
++      if (!last) frag.appendChild(svgUse('chevron', 'crumb-sep'));
++    };
++    add(serverHost || t('nav.cloud'), '/', parts.length === 0);
++    parts.forEach(function (part, i) { add(part, '/' + parts.slice(0, i + 1).join('/'), i === parts.length - 1); });
++    nav.replaceChildren(frag);
++  };
++  $('crumbs').addEventListener('click', function (e) {
++    var b = e.target.closest('button[data-path]');
++    if (b) loadFolder(b.dataset.path);
++  });
++
++  // ---------- creation targets ----------
++  var newUrl = function (ext, template) {
++    var folder = state.view === 'cloud' ? state.folder.path : ((data.nc && data.nc.lastFolder) || '/');
++    if (state.view === 'cloud') data.nc.lastFolder = folder;
++    return 'elixir/nc/new?' + (template ? 'template=' + encodeURIComponent(template) : 'type=' + ext)
++      + '&folder=' + encodeURIComponent(folder) + '&csrf=' + encodeURIComponent(data.csrf) + langParam;
++  };
++  var BLANK = { word: 'docx', cell: 'xlsx', slide: 'pptx', pdf: 'pdf' };
++  document.querySelectorAll('#tiles .tile').forEach(function (tile) {
++    tile.dataset.localHref = tile.getAttribute('href');
++    var m = /template=([^&]+)/.exec(tile.dataset.localHref);
++    tile.dataset.template = m ? decodeURIComponent(m[1]) : '';
++  });
++  // without Nextcloud (and outside developer mode) a new file has nowhere to go: ask to connect
++  $('tiles').addEventListener('click', function (e) {
++    var tile = e.target.closest('.tile');
++    if (!tile) return;
++    if (connected) tile.href = newUrl(BLANK[tile.dataset.type], tile.dataset.template);
++    else if (!devMode) { e.preventDefault(); openConnect(); }
++  });
++  $('tiles').addEventListener('auxclick', function (e) {
++    var tile = e.target.closest('.tile');
++    if (tile && connected) tile.href = newUrl(BLANK[tile.dataset.type], tile.dataset.template);
++  });
++
+   // ---------- views ----------
+   var setView = function (view) {
+     if (VIEWS.indexOf(view) === -1) view = 'home';
++    if (view === 'local' && !devMode) view = 'home';
+     state.view = view;
+-    var isType = TYPES.indexOf(view) !== -1;
++    var typeView = isType(view);
++    var browsing = view === 'cloud' || view === 'local';
+ 
+     document.querySelectorAll('.rail-item[data-view]').forEach(function (a) {
+       if (a.dataset.view === view) a.setAttribute('aria-current', 'page');
+       else a.removeAttribute('aria-current');
+     });
+ 
+-    $('start').hidden = view === 'open';
++    $('connect-card').hidden = connected || browsing && view === 'local' || view === 'new' || view === 'open' && devMode;
++    $('start').hidden = view === 'open' || browsing;
+     $('start-title').textContent = data.startTitles[view] || data.startTitles.home;
+     document.querySelectorAll('#tiles .tile').forEach(function (tile) {
+       var type = tile.dataset.type;
+       var show;
+-      if (isType) show = type === view;
++      if (typeView) show = type === view;
+       else if (view === 'home') show = !(tile.dataset.blank && type === 'pdf');
+       else show = true;
+       tile.hidden = !show;
+     });
+ 
+     $('open-panel').hidden = view !== 'open';
+-    $('recent').hidden = view === 'new';
+-    $('chips').hidden = isType;
+-    $('upload-button').hidden = view === 'open';
+-    $('recent-title').textContent = isType ? t('recent.recentOf.' + view) : t('recent.title');
++    $('recent').hidden = view === 'new' || (view === 'cloud' && !connected);
++    $('chips').hidden = typeView || view === 'cloud';
++    $('crumbs').hidden = view !== 'cloud';
++    $('recent-title').hidden = view === 'cloud';
++    $('new-button').hidden = view !== 'cloud';
++    $('upload-button').hidden = view === 'open' || listSource() === 'none';
++    if (view === 'local') $('recent-title').textContent = t('local.title');
++    else $('recent-title').textContent = typeView ? t('recent.recentOf.' + view) : t('recent.title');
++    if (view === 'cloud') {
++      if (!connected) openConnect();
++      else if (!state.folder.loaded) loadFolder(state.folder.path);
++      else renderCrumbs();
++    }
+     renderFiles();
+   };
+ 
+@@ -254,34 +450,53 @@
+     if (menu.hidden) return;
+     menu.hidden = true;
+     if (state.menuButton) state.menuButton.setAttribute('aria-expanded', 'false');
+-    state.menuFile = null;
++    state.menuItem = null;
+   };
+-  var openMenu = function (button, name) {
+-    state.menuFile = name;
+-    state.menuButton = button;
+-    button.setAttribute('aria-expanded', 'true');
+-    menu.hidden = false;
+-    var r = button.getBoundingClientRect();
+-    var mw = menu.offsetWidth;
+-    var mh = menu.offsetHeight;
++  var placeMenu = function (m, anchor) {
++    m.hidden = false;
++    var r = anchor.getBoundingClientRect();
++    var mw = m.offsetWidth;
++    var mh = m.offsetHeight;
+     var top = r.bottom + 4;
+     if (top + mh > window.innerHeight - 8) top = r.top - mh - 4;
+-    menu.style.top = Math.max(8, top) + 'px';
+-    menu.style.left = Math.max(8, Math.min(r.right - mw, window.innerWidth - mw - 8)) + 'px';
+-    menu.querySelector('button').focus();
++    m.style.top = Math.max(8, top) + 'px';
++    m.style.left = Math.max(8, Math.min(r.right - mw, window.innerWidth - mw - 8)) + 'px';
++    var first = m.querySelector('button:not([hidden])');
++    if (first) first.focus();
++  };
++  var openMenu = function (button, item) {
++    state.menuItem = item;
++    state.menuButton = button;
++    button.setAttribute('aria-expanded', 'true');
++    menu.querySelectorAll('[data-nc]').forEach(function (el) { el.hidden = item.source !== 'nc'; });
++    menu.querySelectorAll('[data-local]').forEach(function (el) { el.hidden = item.source !== 'local'; });
++    placeMenu(menu, button);
++  };
++
++  var openItem = function (item) {
++    if (item.kind === 'dir') {
++      if (state.view !== 'cloud') location.hash = '#cloud';
++      loadFolder(item.path);
++      return;
++    }
++    window.open(item.url, '_blank');
+   };
+ 
+   $('files-body').addEventListener('click', function (e) {
+     var btn = e.target.closest('.row-menu');
+     var tr = e.target.closest('tr');
+     if (!tr) return;
++    var item = state.rows[Number(tr.dataset.idx)];
++    if (!item) return;
+     if (btn) {
+       e.stopPropagation();
+-      if (!menu.hidden && state.menuFile === tr.dataset.name) closeMenu();
+-      else openMenu(btn, tr.dataset.name);
++      if (!menu.hidden && state.menuItem === item) closeMenu();
++      else openMenu(btn, item);
+       return;
+     }
+-    if (!e.target.closest('a')) window.open(editorUrl(tr.dataset.name), '_blank');
++    var link = e.target.closest('a');
++    if (item.kind === 'dir') { e.preventDefault(); openItem(item); return; }
++    if (!link) openItem(item);
+   });
+ 
+   var deleteFile = function (name) {
+@@ -295,7 +510,7 @@
+         .then(function (res) {
+           if (!res.success) throw new Error('delete failed');
+           toast(t('delete.done', { name: name }));
+-          return refreshFiles();
++          return refreshLocal();
+         })
+         .catch(function (err) { toast(t('error.generic', { message: err.message }), { error: true }); });
+     };
+@@ -303,31 +518,63 @@
+   };
+ 
+   menu.addEventListener('click', function (e) {
+-    var item = e.target.closest('button[data-action]');
+-    if (!item) return;
+-    var name = state.menuFile;
++    var el = e.target.closest('button[data-action]');
++    if (!el) return;
++    var item = state.menuItem;
+     var button = state.menuButton;
+     closeMenu();
+-    if (!name) return;
+-    if (item.dataset.action === 'open') window.open(editorUrl(name), '_blank');
+-    else if (item.dataset.action === 'download') location.href = 'download?fileName=' + encodeURIComponent(name);
+-    else if (item.dataset.action === 'delete') deleteFile(name);
+-    if (item.dataset.action !== 'delete' && button) button.focus();
+-  });
+-  menu.addEventListener('keydown', function (e) {
+-    var items = Array.prototype.slice.call(menu.querySelectorAll('button'));
+-    var i = items.indexOf(document.activeElement);
+-    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+-    if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+-    if (e.key === 'Escape' || e.key === 'Tab') {
+-      var b = state.menuButton;
+-      closeMenu();
+-      if (e.key === 'Escape' && b) b.focus();
+-    }
++    if (!item) return;
++    var action = el.dataset.action;
++    if (action === 'open') openItem(item);
++    else if (action === 'download') {
++      location.href = item.source === 'nc' ? 'elixir/nc/file?path=' + encodeURIComponent(item.path) : 'download?fileName=' + encodeURIComponent(item.name);
++    } else if (action === 'location') {
++      location.hash = '#cloud';
++      loadFolder(item.path.slice(0, item.path.lastIndexOf('/')) || '/');
++    } else if (action === 'web') {
++      window.open(data.account.server + '/index.php/f/' + encodeURIComponent(item.fileid), '_blank', 'noopener');
++    } else if (action === 'delete') deleteFile(item.name);
++    if (action !== 'delete' && action !== 'location' && button) button.focus();
++  });
++  var menuKeys = function (m, close) {
++    m.addEventListener('keydown', function (e) {
++      var items = Array.prototype.slice.call(m.querySelectorAll('button:not([hidden])'));
++      var i = items.indexOf(document.activeElement);
++      if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
++      if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
++      if (e.key === 'Escape' || e.key === 'Tab') close(e.key === 'Escape');
++    });
++  };
++  menuKeys(menu, function (focus) {
++    var b = state.menuButton;
++    closeMenu();
++    if (focus && b) b.focus();
+   });
+-  document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
+-  window.addEventListener('resize', closeMenu);
+-  window.addEventListener('scroll', closeMenu, true);
++
++  // "New" in a Nextcloud folder
++  var newMenu = $('new-menu');
++  var closeNewMenu = function () { newMenu.hidden = true; $('new-button').setAttribute('aria-expanded', 'false'); };
++  $('new-button').addEventListener('click', function (e) {
++    e.stopPropagation();
++    if (!newMenu.hidden) { closeNewMenu(); return; }
++    $('new-button').setAttribute('aria-expanded', 'true');
++    placeMenu(newMenu, $('new-button'));
++  });
++  newMenu.addEventListener('click', function (e) {
++    var b = e.target.closest('button[data-new]');
++    if (!b) return;
++    closeNewMenu();
++    window.open(newUrl(b.dataset.new), '_blank');
++    setTimeout(function () { loadFolder(state.folder.path); }, 2500);
++  });
++  menuKeys(newMenu, function (focus) { closeNewMenu(); if (focus) $('new-button').focus(); });
++
++  document.addEventListener('click', function (e) {
++    if (!menu.contains(e.target)) closeMenu();
++    if (!newMenu.contains(e.target)) closeNewMenu();
++  });
++  window.addEventListener('resize', function () { closeMenu(); closeNewMenu(); });
++  window.addEventListener('scroll', function () { closeMenu(); closeNewMenu(); }, true);
+ 
+   // ---------- upload ----------
+   var busy = false;
+@@ -354,29 +601,16 @@
+     });
+   };
+ 
+-  var openAfterUpload = function (name) {
+-    var url = editorUrl(name);
++  var openAfterUpload = function (name, url) {
+     var win = window.open(url, '_blank');
+     if (win) toast(t('upload.done', { name: name }));
+     else toast(t('upload.done', { name: name }), { sticky: true, link: { href: url, text: t('action.open') } });
+   };
+ 
+-  var upload = function (file) {
+-    if (busy || !file) return;
+-    var ext = extOf(file.name);
+-    if (data.uploadExts.indexOf(ext) === -1) {
+-      toast(t('error.unsupported', { name: file.name }), { error: true });
+-      return;
+-    }
+-    if (file.size <= 0 || file.size > data.maxFileSize) {
+-      toast(t('error.tooLarge', { name: file.name }), { error: true });
+-      return;
+-    }
+-    busy = true;
+-    toast(t('upload.uploading', { name: file.name }), { busy: true });
++  var uploadLocal = function (file, ext) {
+     var form = new FormData();
+     form.append('uploadedFile', file, file.name);
+-    fetch('upload', { method: 'POST', body: form })
++    return fetch('upload', { method: 'POST', body: form })
+       .then(function (r) { return r.json(); })
+       .then(function (res) {
+         if (res.error) throw new Error(res.error);
+@@ -386,14 +620,51 @@
+         return convert(name);
+       })
+       .then(function (name) {
+-        busy = false;
+-        refreshFiles();
+-        openAfterUpload(name);
++        refreshLocal();
++        openAfterUpload(name, editorUrl(name));
++      });
++  };
++
++  var uploadNc = function (file) {
++    var folder = state.view === 'cloud' ? state.folder.path : ((data.nc && data.nc.lastFolder) || '/');
++    var form = new FormData();
++    form.append('folder', folder);
++    form.append('uploadedFile', file, file.name);
++    return fetch('elixir/nc/upload', { method: 'POST', body: form, headers: { 'X-Elixir': '1' }, credentials: 'same-origin' })
++      .then(function (r) {
++        return r.json().catch(function () { return {}; }).then(function (res) {
++          if (!r.ok) { var err = new Error(res.error || r.status); err.code = res.error; err.status = r.status; throw err; }
++          return res;
++        });
+       })
++      .then(function (res) {
++        refreshFiles();
++        openAfterUpload(res.name, ncOpenUrl(res.path));
++      });
++  };
++
++  var upload = function (file) {
++    if (busy || !file) return;
++    var target = state.view === 'local' ? 'local' : (connected ? 'nc' : (devMode ? 'local' : 'none'));
++    if (target === 'none') { openConnect(); return; }
++    var ext = extOf(file.name);
++    if (data.uploadExts.indexOf(ext) === -1) {
++      toast(t('error.unsupported', { name: file.name }), { error: true });
++      return;
++    }
++    if (file.size <= 0 || file.size > data.maxFileSize) {
++      toast(t('error.tooLarge', { name: file.name }), { error: true });
++      return;
++    }
++    busy = true;
++    toast(target === 'nc' ? t('nc.uploading', { name: file.name, server: serverHost }) : t('upload.uploading', { name: file.name }), { busy: true });
++    (target === 'nc' ? uploadNc(file) : uploadLocal(file, ext))
++      .then(function () { busy = false; })
+       .catch(function (err) {
+         busy = false;
+         refreshFiles();
+         if (err.password) toast(t('error.password', { name: file.name }), { error: true });
++        else if (target === 'nc') toast(ncError(err), { error: true });
+         else if (err instanceof TypeError) toast(t('error.network'), { error: true });
+         else toast(t('error.generic', { message: err.message }), { error: true });
+       });
+@@ -435,11 +706,182 @@
+     if (e.dataTransfer.files.length) upload(e.dataTransfer.files[0]);
+   });
+ 
++  // ---------- notices (saves that ended in a conflict copy, failed saves) ----------
++  var showNotices = function () {
++    if (!connected) return;
++    api('elixir/api/notices').then(function (res) {
++      var n = (res.notices || [])[0];
++      if (!n) return;
++      if (n.type === 'conflict') {
++        toast(t('nc.notice.conflict', { name: n.name, copy: n.copy }), { sticky: true, error: true, link: { href: ncOpenUrl(n.path), text: t('action.open') } });
++      } else if (n.type === 'saveFailed') {
++        toast(t('nc.notice.saveFailed', { name: n.name, server: serverHost }), { sticky: true, error: true });
++      }
++    }).catch(function () {});
++  };
++
+   // refresh when coming back from an editor tab
+   document.addEventListener('visibilitychange', function () {
+-    if (document.visibilityState === 'visible') refreshFiles();
++    if (document.visibilityState === 'visible') { refreshFiles(); showNotices(); }
+   });
+ 
++  // ---------- account panel ----------
++  var panel = $('account-panel');
++  var accBtn = $('account-btn');
++  var closePanel = function (focus) {
++    if (panel.hidden) return;
++    panel.hidden = true;
++    accBtn.setAttribute('aria-expanded', 'false');
++    if (focus) accBtn.focus();
++  };
++  accBtn.addEventListener('click', function (e) {
++    e.stopPropagation();
++    if (!panel.hidden) { closePanel(); return; }
++    panel.hidden = false;
++    accBtn.setAttribute('aria-expanded', 'true');
++    var first = panel.querySelector('.acct-item');
++    if (first) first.focus();
++  });
++  document.addEventListener('click', function (e) { if (!panel.contains(e.target) && e.target !== accBtn) closePanel(); });
++  panel.addEventListener('keydown', function (e) {
++    if (e.key === 'Escape') { e.preventDefault(); closePanel(true); }
++    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
++      var items = Array.prototype.slice.call(panel.querySelectorAll('.acct-item'));
++      var i = items.indexOf(document.activeElement);
++      e.preventDefault();
++      items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
++    }
++  });
++  var on = function (id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); };
++  on('acct-rename', function () { closePanel(); openProfile(); });
++  on('acct-disconnect', function () {
++    closePanel();
++    toast(t('nc.disconnecting', { server: serverHost }), { busy: true });
++    api('elixir/nc/disconnect', {}).then(function (res) {
++      try { sessionStorage.setItem('elx-notice', res.revoked ? 'disconnected' : 'disconnectedLocal'); } catch (e) { /* ignore */ }
++      location.reload();
++    }).catch(function (err) { toast(ncError(err), { error: true }); });
++  });
++  on('acct-dev', function () {
++    api('elixir/api/dev', { on: !devMode }).then(function () { location.reload(); })
++      .catch(function (err) { toast(t('error.generic', { message: err.message }), { error: true }); });
++  });
++  panel.querySelectorAll('[data-test-user]').forEach(function (b) {
++    b.addEventListener('click', function () {
++      api('elixir/api/dev', { on: true, user: b.dataset.testUser || null }).then(function () { location.reload(); });
++    });
++  });
++  document.querySelectorAll('[data-connect]').forEach(function (b) {
++    b.addEventListener('click', function () { closePanel(); openConnect(); });
++  });
++
++  // ---------- profile (local identity) ----------
++  var profileDlg = $('profile-dialog');
++  var openProfile = function () {
++    profileDlg.returnValue = '';
++    profileDlg.showModal();
++    $('profile-name').select();
++  };
++  profileDlg.addEventListener('close', function () {
++    var v = profileDlg.returnValue;
++    if (v !== 'ok' && v !== 'skip') return;
++    var name = v === 'ok' ? $('profile-name').value.trim() : '';
++    if (v === 'skip' && data.account.named) return;
++    api('elixir/api/profile', { name: name }).then(function () { location.reload(); })
++      .catch(function (err) { toast(t('error.generic', { message: err.message }), { error: true }); });
++  });
++
++  // ---------- connect (Nextcloud Login Flow v2) ----------
++  var connectDlg = $('connect-dialog');
++  var pollTimer = null;
++  var loginWin = null;
++  var stopPolling = function () { clearTimeout(pollTimer); pollTimer = null; };
++  var showStep = function (step) {
++    $('connect-step-server').hidden = step !== 'server';
++    $('connect-step-wait').hidden = step !== 'wait';
++  };
++  var openConnect = function () {
++    if (connected) return;
++    stopPolling();
++    showStep('server');
++    $('connect-error').hidden = true;
++    if (!connectDlg.open) connectDlg.showModal();
++    $('connect-server').focus();
++    $('connect-server').select();
++  };
++  connectDlg.addEventListener('close', function () {
++    stopPolling();
++    if (loginWin && !loginWin.closed) loginWin.close();
++  });
++  connectDlg.querySelectorAll('[data-close]').forEach(function (b) {
++    b.addEventListener('click', function () { connectDlg.close(); });
++  });
++  var poll = function () {
++    api('elixir/nc/connect/poll', {}).then(function (res) {
++      if (res.status === 'connected') {
++        stopPolling();
++        if (loginWin && !loginWin.closed) loginWin.close();
++        try { sessionStorage.setItem('elx-notice', 'connected'); } catch (e) { /* ignore */ }
++        location.hash = '#home';
++        location.reload();
++      } else if (res.status === 'expired') {
++        stopPolling();
++        showStep('server');
++        $('connect-error').textContent = t('nc.error.expired');
++        $('connect-error').hidden = false;
++      } else {
++        pollTimer = setTimeout(poll, 2000);
++      }
++    }).catch(function (err) {
++      if (err instanceof TypeError || err.status >= 500 || err.code === 'network' || err.code === 'timeout') { pollTimer = setTimeout(poll, 4000); return; }
++      stopPolling();
++      showStep('server');
++      $('connect-error').textContent = ncError(err);
++      $('connect-error').hidden = false;
++    });
++  };
++  $('connect-form').addEventListener('submit', function (e) {
++    e.preventDefault();
++    var server = $('connect-server').value.trim();
++    if (!server) { $('connect-server').focus(); return; }
++    // the sign-in window is opened now, in the click, so popup blockers let it through
++    loginWin = window.open('', 'elx-nc-login', 'width=640,height=760');
++    if (loginWin) { try { loginWin.document.title = t('nc.dialog.title'); } catch (x) { /* cross-origin later */ } }
++    $('connect-submit').disabled = true;
++    $('connect-error').hidden = true;
++    api('elixir/nc/connect', { server: server }).then(function (res) {
++      $('connect-submit').disabled = false;
++      var host = res.server;
++      try { host = new URL(res.server).host; } catch (x) { /* keep */ }
++      $('connect-wait-text').textContent = t('nc.dialog.wait', { server: host });
++      $('connect-reopen').href = res.login;
++      if (loginWin && !loginWin.closed) loginWin.location.href = res.login;
++      else loginWin = window.open(res.login, 'elx-nc-login', 'width=640,height=760');
++      showStep('wait');
++      pollTimer = setTimeout(poll, 2000);
++    }).catch(function (err) {
++      $('connect-submit').disabled = false;
++      if (loginWin && !loginWin.closed) loginWin.close();
++      $('connect-error').textContent = ncError(err);
++      $('connect-error').hidden = false;
++    });
++  });
++  $('connect-reopen').addEventListener('click', function (e) {
++    e.preventDefault();
++    loginWin = window.open($('connect-reopen').href, 'elx-nc-login', 'width=640,height=760');
++  });
++
++  // messages carried over a reload
++  try {
++    var carried = sessionStorage.getItem('elx-notice');
++    if (carried) {
++      sessionStorage.removeItem('elx-notice');
++      if (carried === 'connected') toast(t('nc.connected', { name: data.account.name, server: serverHost }));
++      else if (carried === 'disconnected') toast(t('nc.disconnected'));
++      else if (carried === 'disconnectedLocal') toast(t('nc.disconnectedLocal'), { error: true, sticky: true });
++    }
++  } catch (e) { /* storage blocked */ }
++
+   // ---------- editor warm-up ----------
+   // Files open in a new tab whose editor downloads ~6 MB of compressed code and fonts before
+   // the document shows. Fetch them into the HTTP cache while the user is on this page (when
+@@ -512,14 +954,13 @@
+       return warmFonts(root);
+     }).catch(function () { warmed[type] = false; });
+   };
+-  var docTypeOf = function (name) {
+-    for (var i = 0; i < state.files.length; i++) if (state.files[i].name === name) return state.files[i].documentType;
+-    return null;
+-  };
+   var typeOfTarget = function (el) {
+     if (!el || !el.closest) return null;
+     var tr = el.closest('#files-body tr');
+-    if (tr && tr.dataset.name) return docTypeOf(tr.dataset.name);
++    if (tr && tr.dataset.idx) {
++      var item = state.rows[Number(tr.dataset.idx)];
++      return item && item.kind === 'file' ? item.documentType : null;
++    }
+     var tile = el.closest('.tile');
+     return tile ? tile.dataset.type : null;
+   };
+@@ -534,5 +975,18 @@
+     setTimeout(function () { idle(function () { warmUp('word'); }, { timeout: 4000 }); }, 1000);
+   });
+ 
++  // account actions asked from an editor tab (title bar account menu)
++  var action = (location.hash || '').slice(1);
++  if (action === 'connect' || action === 'profile' || action === 'account') {
++    history.replaceState(null, '', location.pathname + location.search + '#home');
++    setTimeout(function () {
++      if (action === 'connect') openConnect();
++      else if (action === 'profile') openProfile();
++      else accBtn.click();
++    }, 0);
++    data.askName = false;
++  }
+   onHash();
++  if (connected) { refreshRecent(); showNotices(); }
++  if (data.askName && !location.hash.match(/cloud/)) openProfile();
+ }());
+diff --git a/web/documentserver-example/nodejs/public/elixir/icons.svg b/web/documentserver-example/nodejs/public/elixir/icons.svg
+index e1d1327d..50e0225a 100644
+--- a/web/documentserver-example/nodejs/public/elixir/icons.svg
++++ b/web/documentserver-example/nodejs/public/elixir/icons.svg
+@@ -1 +1 @@
+-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><!-- Fluent UI System Icons, (c) Microsoft Corporation, MIT License (see fluent/LICENSE); ref a563cf9166f4f91aa617557ed272612b7f0a2f72 --><symbol id="i-home" viewBox="0 0 24 24"><path d="M10.5495 2.53189C11.3874 1.82531 12.6126 1.82531 13.4505 2.5319L20.2005 8.224C20.7074 8.65152 21 9.2809 21 9.94406L21 19.2539C21 20.2204 20.2165 21.0039 19.25 21.0039H15.75C14.7835 21.0039 14 20.2204 14 19.2539L14 14.2468C14 14.1088 13.8881 13.9968 13.75 13.9968H10.25C10.1119 13.9968 9.99999 14.1088 9.99999 14.2468L9.99999 19.2539C9.99999 20.2204 9.2165 21.0039 8.25 21.0039H4.75C3.7835 21.0039 3 20.2204 3 19.2539V9.94406C3 9.2809 3.29255 8.65152 3.79952 8.224L10.5495 2.53189ZM12.4835 3.6786C12.2042 3.44307 11.7958 3.44307 11.5165 3.6786L4.76651 9.37071C4.59752 9.51321 4.5 9.72301 4.5 9.94406L4.5 19.2539C4.5 19.392 4.61193 19.5039 4.75 19.5039H8.25C8.38807 19.5039 8.49999 19.392 8.49999 19.2539L8.49999 14.2468C8.49999 13.2803 9.2835 12.4968 10.25 12.4968H13.75C14.7165 12.4968 15.5 13.2803 15.5 14.2468L15.5 19.2539C15.5 19.392 15.6119 19.5039 15.75 19.5039H19.25C19.3881 19.5039 19.5 19.392 19.5 19.2539L19.5 9.94406C19.5 9.72301 19.4025 9.51321 19.2335 9.37071L12.4835 3.6786Z" fill="currentColor"/></symbol><symbol id="i-home-f" viewBox="0 0 24 24"><path d="M13.4508 2.53318C12.6128 1.82618 11.3872 1.82618 10.5492 2.53318L3.79916 8.22772C3.29241 8.65523 3 9.28447 3 9.94747V19.2526C3 20.2191 3.7835 21.0026 4.75 21.0026H7.75C8.7165 21.0026 9.5 20.2191 9.5 19.2526V15.25C9.5 14.5707 10.0418 14.018 10.7169 14.0004H13.2831C13.9582 14.018 14.5 14.5707 14.5 15.25V19.2526C14.5 20.2191 15.2835 21.0026 16.25 21.0026H19.25C20.2165 21.0026 21 20.2191 21 19.2526V9.94747C21 9.28447 20.7076 8.65523 20.2008 8.22772L13.4508 2.53318Z" fill="currentColor"/></symbol><symbol id="i-add" viewBox="0 0 24 24"><path d="M12 3.25C12.4142 3.25 12.75 3.58579 12.75 4V11.25H20C20.4142 11.25 20.75 11.5858 20.75 12C20.75 12.4142 20.4142 12.75 20 12.75H12.75V20C12.75 20.4142 12.4142 20.75 12 20.75C11.5858 20.75 11.25 20.4142 11.25 20V12.75H4C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H11.25V4C11.25 3.58579 11.5858 3.25 12 3.25Z" fill="currentColor"/></symbol><symbol id="i-add-f" viewBox="0 0 24 24"><path d="M11.8834 3.00673L12 3C12.5128 3 12.9355 3.38604 12.9933 3.88338L13 4V11H20C20.5128 11 20.9355 11.386 20.9933 11.8834L21 12C21 12.5128 20.614 12.9355 20.1166 12.9933L20 13H13V20C13 20.5128 12.614 20.9355 12.1166 20.9933L12 21C11.4872 21 11.0645 20.614 11.0067 20.1166L11 20V13H4C3.48716 13 3.06449 12.614 3.00673 12.1166L3 12C3 11.4872 3.38604 11.0645 3.88338 11.0067L4 11H11V4C11 3.48716 11.386 3.06449 11.8834 3.00673L12 3L11.8834 3.00673Z" fill="currentColor"/></symbol><symbol id="i-open" viewBox="0 0 24 24"><path d="M3.50014 6.25C3.50014 5.2835 4.28364 4.5 5.25014 4.5H8.12882C8.32773 4.5 8.5185 4.57902 8.65915 4.71967L10.7198 6.78033C10.8605 6.92098 11.0512 7 11.2501 7H16.7501C17.7166 7 18.5001 7.7835 18.5001 8.75C18.5001 8.83602 18.5146 8.91866 18.5413 8.99561L8.71867 8.99561C7.37893 8.99561 6.14095 9.71035 5.47108 10.8706L3.50014 14.2844V6.25ZM2.00036 17.7883C2.02089 19.5656 3.468 21 5.25014 21H11.0001C11.0292 21 11.058 20.9983 11.0862 20.9951H16.2812C17.6209 20.9951 18.8589 20.2804 19.5288 19.1201L22.5596 13.8706C23.7748 11.7657 22.3337 9.14964 19.9567 9.00214C19.9848 8.92334 20.0001 8.83846 20.0001 8.75C20.0001 6.95507 18.5451 5.5 16.7501 5.5H11.5608L9.71981 3.65901C9.29786 3.23705 8.72556 3 8.12882 3H5.25014C3.45522 3 2.00014 4.45507 2.00014 6.25V17.71C1.9999 17.7362 1.99997 17.7623 2.00036 17.7883ZM8.71867 10.4956L19.745 10.4956C21.0921 10.4956 21.9341 11.9539 21.2605 13.1206L18.2297 18.3701C17.8278 19.0663 17.085 19.4951 16.2812 19.4951H5.25485C3.9077 19.4951 3.06573 18.0368 3.7393 16.8701L6.77011 11.6206C7.17204 10.9245 7.91482 10.4956 8.71867 10.4956Z" fill="currentColor"/></symbol><symbol id="i-open-f" viewBox="0 0 24 24"><path d="M5.25 3C3.45507 3 2 4.45507 2 6.25V15.1618L4.04451 11.6206C4.8037 10.3057 6.20674 9.49561 7.72512 9.49561L20 9.49561V8.75C20 6.95507 18.5449 5.5 16.75 5.5H11.5607L9.71967 3.65901C9.29771 3.23705 8.72542 3 8.12868 3H5.25ZM7.72512 10.9956L20.7445 10.9956C22.4765 10.9956 23.5591 12.8706 22.6931 14.3706L19.6569 19.6294C19.1657 20.4802 18.2578 21.0044 17.2753 21.0044H4.25594C2.52389 21.0044 1.44136 19.1294 2.30738 17.6294L5.34355 12.3706C5.83479 11.5198 6.74264 10.9956 7.72512 10.9956Z" fill="currentColor"/></symbol><symbol id="i-word" viewBox="0 0 24 24"><path d="M8.75 11.5C8.33579 11.5 8 11.8358 8 12.25C8 12.6642 8.33579 13 8.75 13H15.25C15.6642 13 16 12.6642 16 12.25C16 11.8358 15.6642 11.5 15.25 11.5H8.75ZM8.75 14.25C8.33579 14.25 8 14.5858 8 15C8 15.4142 8.33579 15.75 8.75 15.75H15.25C15.6642 15.75 16 15.4142 16 15C16 14.5858 15.6642 14.25 15.25 14.25H8.75ZM8.75 17C8.33579 17 8 17.3358 8 17.75C8 18.1642 8.33579 18.5 8.75 18.5H15.25C15.6642 18.5 16 18.1642 16 17.75C16 17.3358 15.6642 17 15.25 17H8.75ZM13.585 2.586L19.414 8.414C19.789 8.789 20 9.298 20 9.828V20C20 21.104 19.104 22 18 22H6C4.896 22 4 21.104 4 20V4C4 2.896 4.896 2 6 2H12.172C12.6865 2 13.2194 2.22035 13.585 2.586ZM18 20.5C18.276 20.5 18.5 20.275 18.5 20V10H14C12.896 10 12 9.104 12 8V3.5H6C5.724 3.5 5.5 3.725 5.5 4V20C5.5 20.275 5.724 20.5 6 20.5H18ZM17.378 8.5L13.5 4.621V8C13.5 8.275 13.724 8.5 14 8.5H17.378Z" fill="currentColor"/></symbol><symbol id="i-word-f" viewBox="0 0 24 24"><path d="M12 8V2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10H14C12.8954 10 12 9.10457 12 8ZM8.25 11.5H15.75C16.1642 11.5 16.5 11.8358 16.5 12.25C16.5 12.6642 16.1642 13 15.75 13H8.25C7.83579 13 7.5 12.6642 7.5 12.25C7.5 11.8358 7.83579 11.5 8.25 11.5ZM8.25 14.25H15.75C16.1642 14.25 16.5 14.5858 16.5 15C16.5 15.4142 16.1642 15.75 15.75 15.75H8.25C7.83579 15.75 7.5 15.4142 7.5 15C7.5 14.5858 7.83579 14.25 8.25 14.25ZM8.25 17H15.75C16.1642 17 16.5 17.3358 16.5 17.75C16.5 18.1642 16.1642 18.5 15.75 18.5H8.25C7.83579 18.5 7.5 18.1642 7.5 17.75C7.5 17.3358 7.83579 17 8.25 17ZM13.5 8V2.5L19.5 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8Z" fill="currentColor"/></symbol><symbol id="i-cell" viewBox="0 0 24 24"><path d="M3 6.25C3 4.45507 4.45507 3 6.25 3H17.75C19.5449 3 21 4.45507 21 6.25V17.75C21 19.5449 19.5449 21 17.75 21H6.25C4.45507 21 3 19.5449 3 17.75V6.25ZM6.25 4.5C5.2835 4.5 4.5 5.2835 4.5 6.25V8.5H8.5V4.5H6.25ZM4.5 10V14H8.5L8.5 10H4.5ZM10 10L10 14H14L14 10H10ZM15.5 10L15.5 14H19.5V10H15.5ZM14 15.5H10V19.5H14V15.5ZM15.5 19.5H17.75C18.7165 19.5 19.5 18.7165 19.5 17.75V15.5H15.5V19.5ZM15.5 8.5H19.5V6.25C19.5 5.2835 18.7165 4.5 17.75 4.5H15.5V8.5ZM14 4.5H10V8.5H14V4.5ZM4.5 15.5V17.75C4.5 18.7165 5.2835 19.5 6.25 19.5H8.5V15.5H4.5Z" fill="currentColor"/></symbol><symbol id="i-cell-f" viewBox="0 0 24 24"><path d="M9.5 21H14.5V16H9.5L9.5 21ZM16 21H17.75C19.5449 21 21 19.5449 21 17.75V16H16V21ZM21 14.5V9.5H16L16 14.5H21ZM21 8V6.25C21 4.45507 19.5449 3 17.75 3H16V8H21ZM14.5 3H9.5L9.5 8H14.5V3ZM8 3H6.25C4.45507 3 3 4.45507 3 6.25V8H8L8 3ZM3 9.5V14.5H8V9.5H3ZM3 16V17.75C3 19.5449 4.45507 21 6.25 21H8L8 16H3ZM14.5 9.5L14.5 14.5H9.5V9.5H14.5Z" fill="currentColor"/></symbol><symbol id="i-slide" viewBox="0 0 24 24"><path d="M6.75 8C6.33579 8 6 8.33579 6 8.75C6 9.16421 6.33579 9.5 6.75 9.5H11.25C11.6642 9.5 12 9.16421 12 8.75C12 8.33579 11.6642 8 11.25 8H6.75ZM6 11.75C6 11.3358 6.33579 11 6.75 11H15.25C15.6642 11 16 11.3358 16 11.75C16 12.1642 15.6642 12.5 15.25 12.5H6.75C6.33579 12.5 6 12.1642 6 11.75ZM6.75 14C6.33579 14 6 14.3358 6 14.75C6 15.1642 6.33579 15.5 6.75 15.5H13.25C13.6642 15.5 14 15.1642 14 14.75C14 14.3358 13.6642 14 13.25 14H6.75ZM4.75 4C3.23122 4 2 5.23122 2 6.75V17.25C2 18.7688 3.23122 20 4.75 20H19.25C20.7688 20 22 18.7688 22 17.25V6.75C22 5.23122 20.7688 4 19.25 4H4.75ZM3.5 6.75C3.5 6.05964 4.05964 5.5 4.75 5.5H19.25C19.9404 5.5 20.5 6.05964 20.5 6.75V17.25C20.5 17.9404 19.9404 18.5 19.25 18.5H4.75C4.05964 18.5 3.5 17.9404 3.5 17.25V6.75Z" fill="currentColor"/></symbol><symbol id="i-slide-f" viewBox="0 0 24 24"><path d="M2 6.75C2 5.23122 3.23122 4 4.75 4H19.25C20.7688 4 22 5.23122 22 6.75V17.25C22 18.7688 20.7688 20 19.25 20H4.75C3.23122 20 2 18.7688 2 17.25V6.75ZM6.75 8C6.33579 8 6 8.33579 6 8.75C6 9.16421 6.33579 9.5 6.75 9.5H11.25C11.6642 9.5 12 9.16421 12 8.75C12 8.33579 11.6642 8 11.25 8H6.75ZM6.75 11C6.33579 11 6 11.3358 6 11.75C6 12.1642 6.33579 12.5 6.75 12.5H15.25C15.6642 12.5 16 12.1642 16 11.75C16 11.3358 15.6642 11 15.25 11H6.75ZM6 14.75C6 15.1642 6.33579 15.5 6.75 15.5H13.25C13.6642 15.5 14 15.1642 14 14.75C14 14.3358 13.6642 14 13.25 14H6.75C6.33579 14 6 14.3358 6 14.75Z" fill="currentColor"/></symbol><symbol id="i-pdf" viewBox="0 0 24 24"><path d="M3.75 15C5.13071 15 6.25 16.1193 6.25 17.5C6.25 18.8807 5.13071 20 3.75 20H2.5V21.25C2.5 21.6642 2.16421 22 1.75 22C1.33579 22 1 21.6642 1 21.25V15.75C1 15.3358 1.33579 15 1.75 15H3.75ZM2.5 18.5H3.75C4.30228 18.5 4.75 18.0523 4.75 17.5C4.75 16.9477 4.30228 16.5 3.75 16.5H2.5V18.5ZM9.25 15C10.7688 15 12 16.2312 12 17.75V19.25C12 20.7688 10.7688 22 9.25 22H7.75C7.33579 22 7 21.6642 7 21.25V15.75C7 15.3358 7.33579 15 7.75 15H9.25ZM8.5 20.5H9.25C9.94036 20.5 10.5 19.9404 10.5 19.25V17.75C10.5 17.0596 9.94036 16.5 9.25 16.5H8.5V20.5ZM16.75 15C17.1642 15 17.5 15.3358 17.5 15.75C17.5 16.1642 17.1642 16.5 16.75 16.5H14.5V18H16.25C16.6642 18 17 18.3358 17 18.75C17 19.1642 16.6642 19.5 16.25 19.5H14.5V21.25C14.5 21.6642 14.1642 22 13.75 22C13.3358 22 13 21.6642 13 21.25V15.75C13 15.3358 13.3358 15 13.75 15H16.75ZM12.1289 2C12.7256 2.00006 13.2978 2.23728 13.7197 2.65918L19.3408 8.28027C19.7627 8.70218 19.9999 9.27444 20 9.87109V19.5C20 20.8807 18.8807 22 17.5 22H15.3291C15.4374 21.7724 15.5 21.5188 15.5 21.25V20.5H17.5C18.0523 20.5 18.5 20.0523 18.5 19.5V10H14C12.8954 10 12 9.10457 12 8V3.5H6.5C5.94772 3.5 5.5 3.94772 5.5 4.5V14H4V4.5C4 3.11929 5.11929 2 6.5 2H12.1289ZM13.5 8C13.5 8.27614 13.7239 8.5 14 8.5H17.4395L13.5 4.56055V8Z" fill="currentColor"/></symbol><symbol id="i-pdf-f" viewBox="0 0 24 24"><path d="M3.75 15C5.13071 15 6.25 16.1193 6.25 17.5C6.25 18.8807 5.13071 20 3.75 20H2.5V21.25C2.5 21.6642 2.16421 22 1.75 22C1.33579 22 1 21.6642 1 21.25V15.75C1 15.3358 1.33579 15 1.75 15H3.75ZM2.5 18.5H3.75C4.30228 18.5 4.75 18.0523 4.75 17.5C4.75 16.9477 4.30228 16.5 3.75 16.5H2.5V18.5ZM9.25 15C10.7688 15 12 16.2312 12 17.75V19.25C12 20.7688 10.7688 22 9.25 22H7.75C7.33579 22 7 21.6642 7 21.25V15.75C7 15.3358 7.33579 15 7.75 15H9.25ZM8.5 20.5H9.25C9.94036 20.5 10.5 19.9404 10.5 19.25V17.75C10.5 17.0596 9.94036 16.5 9.25 16.5H8.5V20.5ZM16.75 15C17.1642 15 17.5 15.3358 17.5 15.75C17.5 16.1642 17.1642 16.5 16.75 16.5H14.5V18H16.25C16.6642 18 17 18.3358 17 18.75C17 19.1642 16.6642 19.5 16.25 19.5H14.5V21.25C14.5 21.6642 14.1642 22 13.75 22C13.3358 22 13 21.6642 13 21.25V15.75C13 15.3358 13.3358 15 13.75 15H16.75ZM12 8C12 9.10457 12.8954 10 14 10H20V20C20 21.1046 19.1046 22 18 22H15.3291C15.4374 21.7724 15.5 21.5188 15.5 21.25V20.5H16.25C17.2165 20.5 18 19.7165 18 18.75C18 18.2011 17.747 17.7115 17.3516 17.3906C18.0212 17.145 18.5 16.5047 18.5 15.75C18.5 14.7835 17.7165 14 16.75 14H13.75C12.9481 14 12.2734 14.5397 12.0664 15.2754C11.3792 14.4938 10.3725 14 9.25 14H7.75C7.05913 14 6.46324 14.4011 6.17871 14.9824C5.60526 14.4291 4.84445 14.0686 4 14.0088V4C4 2.89543 4.89543 2 6 2H12V8ZM19.5 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8V2.5L19.5 8.5Z" fill="currentColor"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V9.82777C20 9.29733 19.7893 8.78863 19.4142 8.41355L13.5864 2.58579C13.2114 2.21071 12.7027 2 12.1722 2H6ZM5.5 4C5.5 3.72386 5.72386 3.5 6 3.5H12V8C12 9.10457 12.8954 10 14 10H18.5V20C18.5 20.2761 18.2761 20.5 18 20.5H6C5.72386 20.5 5.5 20.2761 5.5 20V4ZM17.3793 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8V4.62066L17.3793 8.5Z" fill="currentColor"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><path d="M16.1017 17.1624C14.717 18.3101 12.9391 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 12.9391 18.3101 14.717 17.1624 16.1018L21.7803 20.7197C22.0732 21.0126 22.0732 21.4874 21.7803 21.7803C21.4874 22.0732 21.0125 22.0732 20.7196 21.7803L16.1017 17.1624ZM17.5 11C17.5 7.41015 14.5899 4.5 11 4.5C7.41015 4.5 4.5 7.41015 4.5 11C4.5 14.5899 7.41015 17.5 11 17.5C14.5899 17.5 17.5 14.5899 17.5 11Z" fill="currentColor"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M7.75 12C7.75 12.9665 6.9665 13.75 6 13.75C5.0335 13.75 4.25 12.9665 4.25 12C4.25 11.0335 5.0335 10.25 6 10.25C6.9665 10.25 7.75 11.0335 7.75 12ZM13.75 12C13.75 12.9665 12.9665 13.75 12 13.75C11.0335 13.75 10.25 12.9665 10.25 12C10.25 11.0335 11.0335 10.25 12 10.25C12.9665 10.25 13.75 11.0335 13.75 12ZM18 13.75C18.9665 13.75 19.75 12.9665 19.75 12C19.75 11.0335 18.9665 10.25 18 10.25C17.0335 10.25 16.25 11.0335 16.25 12C16.25 12.9665 17.0335 13.75 18 13.75Z" fill="currentColor"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M18.2498 20.5009C18.664 20.5008 19 20.8365 19 21.2507C19 21.6649 18.6644 22.0008 18.2502 22.0009L5.25022 22.0047C4.836 22.0048 4.5 21.6691 4.5 21.2549C4.5 20.8407 4.83557 20.5048 5.24978 20.5047L18.2498 20.5009ZM11.6482 2.01271L11.75 2.00586C12.1297 2.00586 12.4435 2.28801 12.4932 2.65409L12.5 2.75586L12.499 16.4409L16.2208 12.7205C16.4871 12.4543 16.9038 12.4301 17.1974 12.648L17.2815 12.7206C17.5477 12.9869 17.5719 13.4036 17.354 13.6972L17.2814 13.7813L12.2837 18.7779C12.0176 19.044 11.6012 19.0683 11.3076 18.8507L11.2235 18.7782L6.22003 13.7816C5.92694 13.4889 5.92661 13.014 6.21931 12.7209C6.48539 12.4545 6.90204 12.43 7.1958 12.6477L7.27997 12.7202L10.999 16.4339L11 2.75586C11 2.37616 11.2822 2.06237 11.6482 2.01271L11.75 2.00586L11.6482 2.01271Z" fill="currentColor"/></symbol><symbol id="i-delete" viewBox="0 0 24 24"><path d="M10 5H14C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5ZM8.5 5C8.5 3.067 10.067 1.5 12 1.5C13.933 1.5 15.5 3.067 15.5 5H21.25C21.6642 5 22 5.33579 22 5.75C22 6.16421 21.6642 6.5 21.25 6.5H19.9309L18.7589 18.6112C18.5729 20.5334 16.9575 22 15.0263 22H8.97369C7.04254 22 5.42715 20.5334 5.24113 18.6112L4.06908 6.5H2.75C2.33579 6.5 2 6.16421 2 5.75C2 5.33579 2.33579 5 2.75 5H8.5ZM10.5 9.75C10.5 9.33579 10.1642 9 9.75 9C9.33579 9 9 9.33579 9 9.75V17.25C9 17.6642 9.33579 18 9.75 18C10.1642 18 10.5 17.6642 10.5 17.25V9.75ZM14.25 9C14.6642 9 15 9.33579 15 9.75V17.25C15 17.6642 14.6642 18 14.25 18C13.8358 18 13.5 17.6642 13.5 17.25V9.75C13.5 9.33579 13.8358 9 14.25 9ZM6.73416 18.4667C6.84577 19.62 7.815 20.5 8.97369 20.5H15.0263C16.185 20.5 17.1542 19.62 17.2658 18.4667L18.4239 6.5H5.57608L6.73416 18.4667Z" fill="currentColor"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M18.2498 3.50962C18.664 3.50974 19 3.17405 19 2.75984C19 2.34563 18.6644 2.00974 18.2502 2.00962L5.25022 2.00586C4.836 2.00574 4.5 2.34143 4.5 2.75564C4.5 3.16986 4.83557 3.50574 5.24978 3.50586L18.2498 3.50962ZM11.6482 21.9978L11.75 22.0047C12.1297 22.0047 12.4435 21.7225 12.4932 21.3564L12.5 21.2547L12.499 7.56968L16.2208 11.29C16.4871 11.5562 16.9038 11.5804 17.1974 11.3625L17.2815 11.2899C17.5477 11.0236 17.5719 10.6069 17.354 10.3133L17.2814 10.2292L12.2837 5.23262C12.0176 4.96653 11.6012 4.94223 11.3076 5.15979L11.2235 5.23232L6.22003 10.2289C5.92694 10.5216 5.92661 10.9965 6.21931 11.2896C6.48539 11.556 6.90204 11.5805 7.1958 11.3629L7.27997 11.2903L10.999 7.57668L11 21.2547C11 21.6344 11.2822 21.9482 11.6482 21.9978Z" fill="currentColor"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M11.0002 7.5C11.0002 4.46243 13.4627 2 16.5002 2C17.267 2 17.999 2.15735 18.6641 2.44223C18.8929 2.54023 19.0582 2.74534 19.1053 2.98974C19.1524 3.23414 19.0751 3.48599 18.8991 3.66198L16.3111 6.25L17.7505 7.68934L20.3384 5.10142C20.5144 4.92542 20.7663 4.8482 21.0107 4.8953C21.2551 4.94241 21.4602 5.10771 21.5582 5.33652C21.8429 6.00153 22.0002 6.73337 22.0002 7.5C22.0002 10.5376 19.5378 13 16.5002 13C16.058 13 15.6272 12.9477 15.214 12.8486L6.90165 21.1609C5.78033 22.2823 3.96231 22.2823 2.84099 21.1609C1.71967 20.0396 1.71967 18.2216 2.84099 17.1003L11.1523 8.78899C11.0528 8.37496 11.0002 7.94322 11.0002 7.5ZM16.5002 3.5C14.2911 3.5 12.5002 5.29086 12.5002 7.5C12.5002 7.94506 12.5726 8.37169 12.7057 8.76964C12.7959 9.0393 12.7258 9.33677 12.5248 9.53783L3.90165 18.1609C3.36612 18.6965 3.36612 19.5648 3.90165 20.1003C4.43718 20.6358 5.30546 20.6358 5.84099 20.1003L14.465 11.4763C14.6659 11.2754 14.9632 11.2053 15.2327 11.2952C15.6301 11.4279 16.056 11.5 16.5002 11.5C18.7094 11.5 20.5002 9.70914 20.5002 7.5C20.5002 7.35886 20.4929 7.21955 20.4787 7.08239L18.6344 8.92678C18.1462 9.41493 17.3547 9.41493 16.8666 8.92678L15.0737 7.13388C14.5855 6.64573 14.5855 5.85427 15.0737 5.36612L16.9183 3.52153C16.781 3.5073 16.6415 3.5 16.5002 3.5Z" fill="currentColor"/></symbol><symbol id="i-dismiss" viewBox="0 0 24 24"><path d="M4.39705 4.55379L4.46967 4.46967C4.73594 4.2034 5.1526 4.1792 5.44621 4.39705L5.53033 4.46967L12 10.939L18.4697 4.46967C18.7626 4.17678 19.2374 4.17678 19.5303 4.46967C19.8232 4.76256 19.8232 5.23744 19.5303 5.53033L13.061 12L19.5303 18.4697C19.7966 18.7359 19.8208 19.1526 19.6029 19.4462L19.5303 19.5303C19.2641 19.7966 18.8474 19.8208 18.5538 19.6029L18.4697 19.5303L12 13.061L5.53033 19.5303C5.23744 19.8232 4.76256 19.8232 4.46967 19.5303C4.17678 19.2374 4.17678 18.7626 4.46967 18.4697L10.939 12L4.46967 5.53033C4.2034 5.26406 4.1792 4.8474 4.39705 4.55379L4.46967 4.46967L4.39705 4.55379Z" fill="currentColor"/></symbol><symbol id="i-new-tab" viewBox="0 0 24 24"><path d="M6.24992 4.5C5.28344 4.5 4.49996 5.2835 4.49996 6.25V17.75C4.49996 18.7165 5.28344 19.5 6.24992 19.5H17.7496C18.7161 19.5 19.4996 18.7165 19.4996 17.75V13.75C19.4996 13.3358 19.8354 13 20.2496 13C20.6638 13 20.9995 13.3358 20.9995 13.75V17.75C20.9995 19.5449 19.5445 21 17.7496 21H6.24992C4.45504 21 3 19.5449 3 17.75V6.25C3 4.45507 4.45504 3 6.24992 3H10.2498C10.664 3 10.9998 3.33579 10.9998 3.75C10.9998 4.16421 10.664 4.5 10.2498 4.5H6.24992ZM12.9997 3.75C12.9997 3.33579 13.3355 3 13.7497 3H20.25C20.6642 3 21 3.33579 21 3.75V10.25C21 10.6642 20.6642 11 20.25 11C19.8358 11 19.5 10.6642 19.5 10.25V5.56074L14.28 10.7804C13.9871 11.0732 13.5123 11.0732 13.2194 10.7803C12.9265 10.4874 12.9265 10.0125 13.2194 9.71964L18.4395 4.5H13.7497C13.3355 4.5 12.9997 4.16421 12.9997 3.75Z" fill="currentColor"/></symbol><symbol id="i-warning" viewBox="0 0 24 24"><path d="M9.13848 3.70711C10.3664 1.43126 13.6315 1.43104 14.8592 3.70711L21.6024 16.209C22.7697 18.374 21.2016 21.0014 18.742 21.002H5.25469C2.79486 21.0017 1.22681 18.3742 2.39433 16.209L9.13848 3.70711ZM13.5389 4.41902C12.8779 3.1935 11.119 3.19371 10.4578 4.41902L3.71464 16.921C3.08599 18.0867 3.93027 19.5017 5.25469 19.502H18.742C20.0661 19.5014 20.9105 18.0866 20.2821 16.921L13.5389 4.41902ZM11.9998 15.0001C12.5521 15.0001 12.9998 15.4478 12.9998 16.0001C12.9998 16.5523 12.5521 17.0001 11.9998 17.0001C11.4477 16.9999 10.9999 16.5522 10.9998 16.0001C10.9998 15.4479 11.4476 15.0002 11.9998 15.0001ZM11.9998 7.50007C12.414 7.50007 12.7498 7.83586 12.7498 8.25007V12.7501C12.7498 13.1642 12.414 13.5001 11.9998 13.5001C11.5857 13.4999 11.2499 13.1642 11.2498 12.7501V8.25007C11.2498 7.83593 11.5857 7.5002 11.9998 7.50007Z" fill="currentColor"/></symbol></svg>
++<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><!-- Fluent UI System Icons, (c) Microsoft Corporation, MIT License (see fluent/LICENSE); ref a563cf9166f4f91aa617557ed272612b7f0a2f72 --><symbol id="i-home" viewBox="0 0 24 24"><path d="M10.5495 2.53189C11.3874 1.82531 12.6126 1.82531 13.4505 2.5319L20.2005 8.224C20.7074 8.65152 21 9.2809 21 9.94406L21 19.2539C21 20.2204 20.2165 21.0039 19.25 21.0039H15.75C14.7835 21.0039 14 20.2204 14 19.2539L14 14.2468C14 14.1088 13.8881 13.9968 13.75 13.9968H10.25C10.1119 13.9968 9.99999 14.1088 9.99999 14.2468L9.99999 19.2539C9.99999 20.2204 9.2165 21.0039 8.25 21.0039H4.75C3.7835 21.0039 3 20.2204 3 19.2539V9.94406C3 9.2809 3.29255 8.65152 3.79952 8.224L10.5495 2.53189ZM12.4835 3.6786C12.2042 3.44307 11.7958 3.44307 11.5165 3.6786L4.76651 9.37071C4.59752 9.51321 4.5 9.72301 4.5 9.94406L4.5 19.2539C4.5 19.392 4.61193 19.5039 4.75 19.5039H8.25C8.38807 19.5039 8.49999 19.392 8.49999 19.2539L8.49999 14.2468C8.49999 13.2803 9.2835 12.4968 10.25 12.4968H13.75C14.7165 12.4968 15.5 13.2803 15.5 14.2468L15.5 19.2539C15.5 19.392 15.6119 19.5039 15.75 19.5039H19.25C19.3881 19.5039 19.5 19.392 19.5 19.2539L19.5 9.94406C19.5 9.72301 19.4025 9.51321 19.2335 9.37071L12.4835 3.6786Z" fill="currentColor"/></symbol><symbol id="i-home-f" viewBox="0 0 24 24"><path d="M13.4508 2.53318C12.6128 1.82618 11.3872 1.82618 10.5492 2.53318L3.79916 8.22772C3.29241 8.65523 3 9.28447 3 9.94747V19.2526C3 20.2191 3.7835 21.0026 4.75 21.0026H7.75C8.7165 21.0026 9.5 20.2191 9.5 19.2526V15.25C9.5 14.5707 10.0418 14.018 10.7169 14.0004H13.2831C13.9582 14.018 14.5 14.5707 14.5 15.25V19.2526C14.5 20.2191 15.2835 21.0026 16.25 21.0026H19.25C20.2165 21.0026 21 20.2191 21 19.2526V9.94747C21 9.28447 20.7076 8.65523 20.2008 8.22772L13.4508 2.53318Z" fill="currentColor"/></symbol><symbol id="i-add" viewBox="0 0 24 24"><path d="M12 3.25C12.4142 3.25 12.75 3.58579 12.75 4V11.25H20C20.4142 11.25 20.75 11.5858 20.75 12C20.75 12.4142 20.4142 12.75 20 12.75H12.75V20C12.75 20.4142 12.4142 20.75 12 20.75C11.5858 20.75 11.25 20.4142 11.25 20V12.75H4C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H11.25V4C11.25 3.58579 11.5858 3.25 12 3.25Z" fill="currentColor"/></symbol><symbol id="i-add-f" viewBox="0 0 24 24"><path d="M11.8834 3.00673L12 3C12.5128 3 12.9355 3.38604 12.9933 3.88338L13 4V11H20C20.5128 11 20.9355 11.386 20.9933 11.8834L21 12C21 12.5128 20.614 12.9355 20.1166 12.9933L20 13H13V20C13 20.5128 12.614 20.9355 12.1166 20.9933L12 21C11.4872 21 11.0645 20.614 11.0067 20.1166L11 20V13H4C3.48716 13 3.06449 12.614 3.00673 12.1166L3 12C3 11.4872 3.38604 11.0645 3.88338 11.0067L4 11H11V4C11 3.48716 11.386 3.06449 11.8834 3.00673L12 3L11.8834 3.00673Z" fill="currentColor"/></symbol><symbol id="i-open" viewBox="0 0 24 24"><path d="M3.50014 6.25C3.50014 5.2835 4.28364 4.5 5.25014 4.5H8.12882C8.32773 4.5 8.5185 4.57902 8.65915 4.71967L10.7198 6.78033C10.8605 6.92098 11.0512 7 11.2501 7H16.7501C17.7166 7 18.5001 7.7835 18.5001 8.75C18.5001 8.83602 18.5146 8.91866 18.5413 8.99561L8.71867 8.99561C7.37893 8.99561 6.14095 9.71035 5.47108 10.8706L3.50014 14.2844V6.25ZM2.00036 17.7883C2.02089 19.5656 3.468 21 5.25014 21H11.0001C11.0292 21 11.058 20.9983 11.0862 20.9951H16.2812C17.6209 20.9951 18.8589 20.2804 19.5288 19.1201L22.5596 13.8706C23.7748 11.7657 22.3337 9.14964 19.9567 9.00214C19.9848 8.92334 20.0001 8.83846 20.0001 8.75C20.0001 6.95507 18.5451 5.5 16.7501 5.5H11.5608L9.71981 3.65901C9.29786 3.23705 8.72556 3 8.12882 3H5.25014C3.45522 3 2.00014 4.45507 2.00014 6.25V17.71C1.9999 17.7362 1.99997 17.7623 2.00036 17.7883ZM8.71867 10.4956L19.745 10.4956C21.0921 10.4956 21.9341 11.9539 21.2605 13.1206L18.2297 18.3701C17.8278 19.0663 17.085 19.4951 16.2812 19.4951H5.25485C3.9077 19.4951 3.06573 18.0368 3.7393 16.8701L6.77011 11.6206C7.17204 10.9245 7.91482 10.4956 8.71867 10.4956Z" fill="currentColor"/></symbol><symbol id="i-open-f" viewBox="0 0 24 24"><path d="M5.25 3C3.45507 3 2 4.45507 2 6.25V15.1618L4.04451 11.6206C4.8037 10.3057 6.20674 9.49561 7.72512 9.49561L20 9.49561V8.75C20 6.95507 18.5449 5.5 16.75 5.5H11.5607L9.71967 3.65901C9.29771 3.23705 8.72542 3 8.12868 3H5.25ZM7.72512 10.9956L20.7445 10.9956C22.4765 10.9956 23.5591 12.8706 22.6931 14.3706L19.6569 19.6294C19.1657 20.4802 18.2578 21.0044 17.2753 21.0044H4.25594C2.52389 21.0044 1.44136 19.1294 2.30738 17.6294L5.34355 12.3706C5.83479 11.5198 6.74264 10.9956 7.72512 10.9956Z" fill="currentColor"/></symbol><symbol id="i-word" viewBox="0 0 24 24"><path d="M8.75 11.5C8.33579 11.5 8 11.8358 8 12.25C8 12.6642 8.33579 13 8.75 13H15.25C15.6642 13 16 12.6642 16 12.25C16 11.8358 15.6642 11.5 15.25 11.5H8.75ZM8.75 14.25C8.33579 14.25 8 14.5858 8 15C8 15.4142 8.33579 15.75 8.75 15.75H15.25C15.6642 15.75 16 15.4142 16 15C16 14.5858 15.6642 14.25 15.25 14.25H8.75ZM8.75 17C8.33579 17 8 17.3358 8 17.75C8 18.1642 8.33579 18.5 8.75 18.5H15.25C15.6642 18.5 16 18.1642 16 17.75C16 17.3358 15.6642 17 15.25 17H8.75ZM13.585 2.586L19.414 8.414C19.789 8.789 20 9.298 20 9.828V20C20 21.104 19.104 22 18 22H6C4.896 22 4 21.104 4 20V4C4 2.896 4.896 2 6 2H12.172C12.6865 2 13.2194 2.22035 13.585 2.586ZM18 20.5C18.276 20.5 18.5 20.275 18.5 20V10H14C12.896 10 12 9.104 12 8V3.5H6C5.724 3.5 5.5 3.725 5.5 4V20C5.5 20.275 5.724 20.5 6 20.5H18ZM17.378 8.5L13.5 4.621V8C13.5 8.275 13.724 8.5 14 8.5H17.378Z" fill="currentColor"/></symbol><symbol id="i-word-f" viewBox="0 0 24 24"><path d="M12 8V2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10H14C12.8954 10 12 9.10457 12 8ZM8.25 11.5H15.75C16.1642 11.5 16.5 11.8358 16.5 12.25C16.5 12.6642 16.1642 13 15.75 13H8.25C7.83579 13 7.5 12.6642 7.5 12.25C7.5 11.8358 7.83579 11.5 8.25 11.5ZM8.25 14.25H15.75C16.1642 14.25 16.5 14.5858 16.5 15C16.5 15.4142 16.1642 15.75 15.75 15.75H8.25C7.83579 15.75 7.5 15.4142 7.5 15C7.5 14.5858 7.83579 14.25 8.25 14.25ZM8.25 17H15.75C16.1642 17 16.5 17.3358 16.5 17.75C16.5 18.1642 16.1642 18.5 15.75 18.5H8.25C7.83579 18.5 7.5 18.1642 7.5 17.75C7.5 17.3358 7.83579 17 8.25 17ZM13.5 8V2.5L19.5 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8Z" fill="currentColor"/></symbol><symbol id="i-cell" viewBox="0 0 24 24"><path d="M3 6.25C3 4.45507 4.45507 3 6.25 3H17.75C19.5449 3 21 4.45507 21 6.25V17.75C21 19.5449 19.5449 21 17.75 21H6.25C4.45507 21 3 19.5449 3 17.75V6.25ZM6.25 4.5C5.2835 4.5 4.5 5.2835 4.5 6.25V8.5H8.5V4.5H6.25ZM4.5 10V14H8.5L8.5 10H4.5ZM10 10L10 14H14L14 10H10ZM15.5 10L15.5 14H19.5V10H15.5ZM14 15.5H10V19.5H14V15.5ZM15.5 19.5H17.75C18.7165 19.5 19.5 18.7165 19.5 17.75V15.5H15.5V19.5ZM15.5 8.5H19.5V6.25C19.5 5.2835 18.7165 4.5 17.75 4.5H15.5V8.5ZM14 4.5H10V8.5H14V4.5ZM4.5 15.5V17.75C4.5 18.7165 5.2835 19.5 6.25 19.5H8.5V15.5H4.5Z" fill="currentColor"/></symbol><symbol id="i-cell-f" viewBox="0 0 24 24"><path d="M9.5 21H14.5V16H9.5L9.5 21ZM16 21H17.75C19.5449 21 21 19.5449 21 17.75V16H16V21ZM21 14.5V9.5H16L16 14.5H21ZM21 8V6.25C21 4.45507 19.5449 3 17.75 3H16V8H21ZM14.5 3H9.5L9.5 8H14.5V3ZM8 3H6.25C4.45507 3 3 4.45507 3 6.25V8H8L8 3ZM3 9.5V14.5H8V9.5H3ZM3 16V17.75C3 19.5449 4.45507 21 6.25 21H8L8 16H3ZM14.5 9.5L14.5 14.5H9.5V9.5H14.5Z" fill="currentColor"/></symbol><symbol id="i-slide" viewBox="0 0 24 24"><path d="M6.75 8C6.33579 8 6 8.33579 6 8.75C6 9.16421 6.33579 9.5 6.75 9.5H11.25C11.6642 9.5 12 9.16421 12 8.75C12 8.33579 11.6642 8 11.25 8H6.75ZM6 11.75C6 11.3358 6.33579 11 6.75 11H15.25C15.6642 11 16 11.3358 16 11.75C16 12.1642 15.6642 12.5 15.25 12.5H6.75C6.33579 12.5 6 12.1642 6 11.75ZM6.75 14C6.33579 14 6 14.3358 6 14.75C6 15.1642 6.33579 15.5 6.75 15.5H13.25C13.6642 15.5 14 15.1642 14 14.75C14 14.3358 13.6642 14 13.25 14H6.75ZM4.75 4C3.23122 4 2 5.23122 2 6.75V17.25C2 18.7688 3.23122 20 4.75 20H19.25C20.7688 20 22 18.7688 22 17.25V6.75C22 5.23122 20.7688 4 19.25 4H4.75ZM3.5 6.75C3.5 6.05964 4.05964 5.5 4.75 5.5H19.25C19.9404 5.5 20.5 6.05964 20.5 6.75V17.25C20.5 17.9404 19.9404 18.5 19.25 18.5H4.75C4.05964 18.5 3.5 17.9404 3.5 17.25V6.75Z" fill="currentColor"/></symbol><symbol id="i-slide-f" viewBox="0 0 24 24"><path d="M2 6.75C2 5.23122 3.23122 4 4.75 4H19.25C20.7688 4 22 5.23122 22 6.75V17.25C22 18.7688 20.7688 20 19.25 20H4.75C3.23122 20 2 18.7688 2 17.25V6.75ZM6.75 8C6.33579 8 6 8.33579 6 8.75C6 9.16421 6.33579 9.5 6.75 9.5H11.25C11.6642 9.5 12 9.16421 12 8.75C12 8.33579 11.6642 8 11.25 8H6.75ZM6.75 11C6.33579 11 6 11.3358 6 11.75C6 12.1642 6.33579 12.5 6.75 12.5H15.25C15.6642 12.5 16 12.1642 16 11.75C16 11.3358 15.6642 11 15.25 11H6.75ZM6 14.75C6 15.1642 6.33579 15.5 6.75 15.5H13.25C13.6642 15.5 14 15.1642 14 14.75C14 14.3358 13.6642 14 13.25 14H6.75C6.33579 14 6 14.3358 6 14.75Z" fill="currentColor"/></symbol><symbol id="i-pdf" viewBox="0 0 24 24"><path d="M3.75 15C5.13071 15 6.25 16.1193 6.25 17.5C6.25 18.8807 5.13071 20 3.75 20H2.5V21.25C2.5 21.6642 2.16421 22 1.75 22C1.33579 22 1 21.6642 1 21.25V15.75C1 15.3358 1.33579 15 1.75 15H3.75ZM2.5 18.5H3.75C4.30228 18.5 4.75 18.0523 4.75 17.5C4.75 16.9477 4.30228 16.5 3.75 16.5H2.5V18.5ZM9.25 15C10.7688 15 12 16.2312 12 17.75V19.25C12 20.7688 10.7688 22 9.25 22H7.75C7.33579 22 7 21.6642 7 21.25V15.75C7 15.3358 7.33579 15 7.75 15H9.25ZM8.5 20.5H9.25C9.94036 20.5 10.5 19.9404 10.5 19.25V17.75C10.5 17.0596 9.94036 16.5 9.25 16.5H8.5V20.5ZM16.75 15C17.1642 15 17.5 15.3358 17.5 15.75C17.5 16.1642 17.1642 16.5 16.75 16.5H14.5V18H16.25C16.6642 18 17 18.3358 17 18.75C17 19.1642 16.6642 19.5 16.25 19.5H14.5V21.25C14.5 21.6642 14.1642 22 13.75 22C13.3358 22 13 21.6642 13 21.25V15.75C13 15.3358 13.3358 15 13.75 15H16.75ZM12.1289 2C12.7256 2.00006 13.2978 2.23728 13.7197 2.65918L19.3408 8.28027C19.7627 8.70218 19.9999 9.27444 20 9.87109V19.5C20 20.8807 18.8807 22 17.5 22H15.3291C15.4374 21.7724 15.5 21.5188 15.5 21.25V20.5H17.5C18.0523 20.5 18.5 20.0523 18.5 19.5V10H14C12.8954 10 12 9.10457 12 8V3.5H6.5C5.94772 3.5 5.5 3.94772 5.5 4.5V14H4V4.5C4 3.11929 5.11929 2 6.5 2H12.1289ZM13.5 8C13.5 8.27614 13.7239 8.5 14 8.5H17.4395L13.5 4.56055V8Z" fill="currentColor"/></symbol><symbol id="i-pdf-f" viewBox="0 0 24 24"><path d="M3.75 15C5.13071 15 6.25 16.1193 6.25 17.5C6.25 18.8807 5.13071 20 3.75 20H2.5V21.25C2.5 21.6642 2.16421 22 1.75 22C1.33579 22 1 21.6642 1 21.25V15.75C1 15.3358 1.33579 15 1.75 15H3.75ZM2.5 18.5H3.75C4.30228 18.5 4.75 18.0523 4.75 17.5C4.75 16.9477 4.30228 16.5 3.75 16.5H2.5V18.5ZM9.25 15C10.7688 15 12 16.2312 12 17.75V19.25C12 20.7688 10.7688 22 9.25 22H7.75C7.33579 22 7 21.6642 7 21.25V15.75C7 15.3358 7.33579 15 7.75 15H9.25ZM8.5 20.5H9.25C9.94036 20.5 10.5 19.9404 10.5 19.25V17.75C10.5 17.0596 9.94036 16.5 9.25 16.5H8.5V20.5ZM16.75 15C17.1642 15 17.5 15.3358 17.5 15.75C17.5 16.1642 17.1642 16.5 16.75 16.5H14.5V18H16.25C16.6642 18 17 18.3358 17 18.75C17 19.1642 16.6642 19.5 16.25 19.5H14.5V21.25C14.5 21.6642 14.1642 22 13.75 22C13.3358 22 13 21.6642 13 21.25V15.75C13 15.3358 13.3358 15 13.75 15H16.75ZM12 8C12 9.10457 12.8954 10 14 10H20V20C20 21.1046 19.1046 22 18 22H15.3291C15.4374 21.7724 15.5 21.5188 15.5 21.25V20.5H16.25C17.2165 20.5 18 19.7165 18 18.75C18 18.2011 17.747 17.7115 17.3516 17.3906C18.0212 17.145 18.5 16.5047 18.5 15.75C18.5 14.7835 17.7165 14 16.75 14H13.75C12.9481 14 12.2734 14.5397 12.0664 15.2754C11.3792 14.4938 10.3725 14 9.25 14H7.75C7.05913 14 6.46324 14.4011 6.17871 14.9824C5.60526 14.4291 4.84445 14.0686 4 14.0088V4C4 2.89543 4.89543 2 6 2H12V8ZM19.5 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8V2.5L19.5 8.5Z" fill="currentColor"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V9.82777C20 9.29733 19.7893 8.78863 19.4142 8.41355L13.5864 2.58579C13.2114 2.21071 12.7027 2 12.1722 2H6ZM5.5 4C5.5 3.72386 5.72386 3.5 6 3.5H12V8C12 9.10457 12.8954 10 14 10H18.5V20C18.5 20.2761 18.2761 20.5 18 20.5H6C5.72386 20.5 5.5 20.2761 5.5 20V4ZM17.3793 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8V4.62066L17.3793 8.5Z" fill="currentColor"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><path d="M16.1017 17.1624C14.717 18.3101 12.9391 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 12.9391 18.3101 14.717 17.1624 16.1018L21.7803 20.7197C22.0732 21.0126 22.0732 21.4874 21.7803 21.7803C21.4874 22.0732 21.0125 22.0732 20.7196 21.7803L16.1017 17.1624ZM17.5 11C17.5 7.41015 14.5899 4.5 11 4.5C7.41015 4.5 4.5 7.41015 4.5 11C4.5 14.5899 7.41015 17.5 11 17.5C14.5899 17.5 17.5 14.5899 17.5 11Z" fill="currentColor"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M7.75 12C7.75 12.9665 6.9665 13.75 6 13.75C5.0335 13.75 4.25 12.9665 4.25 12C4.25 11.0335 5.0335 10.25 6 10.25C6.9665 10.25 7.75 11.0335 7.75 12ZM13.75 12C13.75 12.9665 12.9665 13.75 12 13.75C11.0335 13.75 10.25 12.9665 10.25 12C10.25 11.0335 11.0335 10.25 12 10.25C12.9665 10.25 13.75 11.0335 13.75 12ZM18 13.75C18.9665 13.75 19.75 12.9665 19.75 12C19.75 11.0335 18.9665 10.25 18 10.25C17.0335 10.25 16.25 11.0335 16.25 12C16.25 12.9665 17.0335 13.75 18 13.75Z" fill="currentColor"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M18.2498 20.5009C18.664 20.5008 19 20.8365 19 21.2507C19 21.6649 18.6644 22.0008 18.2502 22.0009L5.25022 22.0047C4.836 22.0048 4.5 21.6691 4.5 21.2549C4.5 20.8407 4.83557 20.5048 5.24978 20.5047L18.2498 20.5009ZM11.6482 2.01271L11.75 2.00586C12.1297 2.00586 12.4435 2.28801 12.4932 2.65409L12.5 2.75586L12.499 16.4409L16.2208 12.7205C16.4871 12.4543 16.9038 12.4301 17.1974 12.648L17.2815 12.7206C17.5477 12.9869 17.5719 13.4036 17.354 13.6972L17.2814 13.7813L12.2837 18.7779C12.0176 19.044 11.6012 19.0683 11.3076 18.8507L11.2235 18.7782L6.22003 13.7816C5.92694 13.4889 5.92661 13.014 6.21931 12.7209C6.48539 12.4545 6.90204 12.43 7.1958 12.6477L7.27997 12.7202L10.999 16.4339L11 2.75586C11 2.37616 11.2822 2.06237 11.6482 2.01271L11.75 2.00586L11.6482 2.01271Z" fill="currentColor"/></symbol><symbol id="i-delete" viewBox="0 0 24 24"><path d="M10 5H14C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5ZM8.5 5C8.5 3.067 10.067 1.5 12 1.5C13.933 1.5 15.5 3.067 15.5 5H21.25C21.6642 5 22 5.33579 22 5.75C22 6.16421 21.6642 6.5 21.25 6.5H19.9309L18.7589 18.6112C18.5729 20.5334 16.9575 22 15.0263 22H8.97369C7.04254 22 5.42715 20.5334 5.24113 18.6112L4.06908 6.5H2.75C2.33579 6.5 2 6.16421 2 5.75C2 5.33579 2.33579 5 2.75 5H8.5ZM10.5 9.75C10.5 9.33579 10.1642 9 9.75 9C9.33579 9 9 9.33579 9 9.75V17.25C9 17.6642 9.33579 18 9.75 18C10.1642 18 10.5 17.6642 10.5 17.25V9.75ZM14.25 9C14.6642 9 15 9.33579 15 9.75V17.25C15 17.6642 14.6642 18 14.25 18C13.8358 18 13.5 17.6642 13.5 17.25V9.75C13.5 9.33579 13.8358 9 14.25 9ZM6.73416 18.4667C6.84577 19.62 7.815 20.5 8.97369 20.5H15.0263C16.185 20.5 17.1542 19.62 17.2658 18.4667L18.4239 6.5H5.57608L6.73416 18.4667Z" fill="currentColor"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M18.2498 3.50962C18.664 3.50974 19 3.17405 19 2.75984C19 2.34563 18.6644 2.00974 18.2502 2.00962L5.25022 2.00586C4.836 2.00574 4.5 2.34143 4.5 2.75564C4.5 3.16986 4.83557 3.50574 5.24978 3.50586L18.2498 3.50962ZM11.6482 21.9978L11.75 22.0047C12.1297 22.0047 12.4435 21.7225 12.4932 21.3564L12.5 21.2547L12.499 7.56968L16.2208 11.29C16.4871 11.5562 16.9038 11.5804 17.1974 11.3625L17.2815 11.2899C17.5477 11.0236 17.5719 10.6069 17.354 10.3133L17.2814 10.2292L12.2837 5.23262C12.0176 4.96653 11.6012 4.94223 11.3076 5.15979L11.2235 5.23232L6.22003 10.2289C5.92694 10.5216 5.92661 10.9965 6.21931 11.2896C6.48539 11.556 6.90204 11.5805 7.1958 11.3629L7.27997 11.2903L10.999 7.57668L11 21.2547C11 21.6344 11.2822 21.9482 11.6482 21.9978Z" fill="currentColor"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M11.0002 7.5C11.0002 4.46243 13.4627 2 16.5002 2C17.267 2 17.999 2.15735 18.6641 2.44223C18.8929 2.54023 19.0582 2.74534 19.1053 2.98974C19.1524 3.23414 19.0751 3.48599 18.8991 3.66198L16.3111 6.25L17.7505 7.68934L20.3384 5.10142C20.5144 4.92542 20.7663 4.8482 21.0107 4.8953C21.2551 4.94241 21.4602 5.10771 21.5582 5.33652C21.8429 6.00153 22.0002 6.73337 22.0002 7.5C22.0002 10.5376 19.5378 13 16.5002 13C16.058 13 15.6272 12.9477 15.214 12.8486L6.90165 21.1609C5.78033 22.2823 3.96231 22.2823 2.84099 21.1609C1.71967 20.0396 1.71967 18.2216 2.84099 17.1003L11.1523 8.78899C11.0528 8.37496 11.0002 7.94322 11.0002 7.5ZM16.5002 3.5C14.2911 3.5 12.5002 5.29086 12.5002 7.5C12.5002 7.94506 12.5726 8.37169 12.7057 8.76964C12.7959 9.0393 12.7258 9.33677 12.5248 9.53783L3.90165 18.1609C3.36612 18.6965 3.36612 19.5648 3.90165 20.1003C4.43718 20.6358 5.30546 20.6358 5.84099 20.1003L14.465 11.4763C14.6659 11.2754 14.9632 11.2053 15.2327 11.2952C15.6301 11.4279 16.056 11.5 16.5002 11.5C18.7094 11.5 20.5002 9.70914 20.5002 7.5C20.5002 7.35886 20.4929 7.21955 20.4787 7.08239L18.6344 8.92678C18.1462 9.41493 17.3547 9.41493 16.8666 8.92678L15.0737 7.13388C14.5855 6.64573 14.5855 5.85427 15.0737 5.36612L16.9183 3.52153C16.781 3.5073 16.6415 3.5 16.5002 3.5Z" fill="currentColor"/></symbol><symbol id="i-dismiss" viewBox="0 0 24 24"><path d="M4.39705 4.55379L4.46967 4.46967C4.73594 4.2034 5.1526 4.1792 5.44621 4.39705L5.53033 4.46967L12 10.939L18.4697 4.46967C18.7626 4.17678 19.2374 4.17678 19.5303 4.46967C19.8232 4.76256 19.8232 5.23744 19.5303 5.53033L13.061 12L19.5303 18.4697C19.7966 18.7359 19.8208 19.1526 19.6029 19.4462L19.5303 19.5303C19.2641 19.7966 18.8474 19.8208 18.5538 19.6029L18.4697 19.5303L12 13.061L5.53033 19.5303C5.23744 19.8232 4.76256 19.8232 4.46967 19.5303C4.17678 19.2374 4.17678 18.7626 4.46967 18.4697L10.939 12L4.46967 5.53033C4.2034 5.26406 4.1792 4.8474 4.39705 4.55379L4.46967 4.46967L4.39705 4.55379Z" fill="currentColor"/></symbol><symbol id="i-new-tab" viewBox="0 0 24 24"><path d="M6.24992 4.5C5.28344 4.5 4.49996 5.2835 4.49996 6.25V17.75C4.49996 18.7165 5.28344 19.5 6.24992 19.5H17.7496C18.7161 19.5 19.4996 18.7165 19.4996 17.75V13.75C19.4996 13.3358 19.8354 13 20.2496 13C20.6638 13 20.9995 13.3358 20.9995 13.75V17.75C20.9995 19.5449 19.5445 21 17.7496 21H6.24992C4.45504 21 3 19.5449 3 17.75V6.25C3 4.45507 4.45504 3 6.24992 3H10.2498C10.664 3 10.9998 3.33579 10.9998 3.75C10.9998 4.16421 10.664 4.5 10.2498 4.5H6.24992ZM12.9997 3.75C12.9997 3.33579 13.3355 3 13.7497 3H20.25C20.6642 3 21 3.33579 21 3.75V10.25C21 10.6642 20.6642 11 20.25 11C19.8358 11 19.5 10.6642 19.5 10.25V5.56074L14.28 10.7804C13.9871 11.0732 13.5123 11.0732 13.2194 10.7803C12.9265 10.4874 12.9265 10.0125 13.2194 9.71964L18.4395 4.5H13.7497C13.3355 4.5 12.9997 4.16421 12.9997 3.75Z" fill="currentColor"/></symbol><symbol id="i-warning" viewBox="0 0 24 24"><path d="M9.13848 3.70711C10.3664 1.43126 13.6315 1.43104 14.8592 3.70711L21.6024 16.209C22.7697 18.374 21.2016 21.0014 18.742 21.002H5.25469C2.79486 21.0017 1.22681 18.3742 2.39433 16.209L9.13848 3.70711ZM13.5389 4.41902C12.8779 3.1935 11.119 3.19371 10.4578 4.41902L3.71464 16.921C3.08599 18.0867 3.93027 19.5017 5.25469 19.502H18.742C20.0661 19.5014 20.9105 18.0866 20.2821 16.921L13.5389 4.41902ZM11.9998 15.0001C12.5521 15.0001 12.9998 15.4478 12.9998 16.0001C12.9998 16.5523 12.5521 17.0001 11.9998 17.0001C11.4477 16.9999 10.9999 16.5522 10.9998 16.0001C10.9998 15.4479 11.4476 15.0002 11.9998 15.0001ZM11.9998 7.50007C12.414 7.50007 12.7498 7.83586 12.7498 8.25007V12.7501C12.7498 13.1642 12.414 13.5001 11.9998 13.5001C11.5857 13.4999 11.2499 13.1642 11.2498 12.7501V8.25007C11.2498 7.83593 11.5857 7.5002 11.9998 7.50007Z" fill="currentColor"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M12 5.5C9.58676 5.5 7.61684 7.39994 7.50502 9.78512C7.48627 10.1852 7.15641 10.5 6.75585 10.5H6.5C4.84315 10.5 3.5 11.8431 3.5 13.5C3.5 15.1569 4.84315 16.5 6.5 16.5H17.5C19.1569 16.5 20.5 15.1569 20.5 13.5C20.5 11.8431 19.1569 10.5 17.5 10.5H17.2442C16.8436 10.5 16.5137 10.1852 16.495 9.78512C16.3832 7.39994 14.4132 5.5 12 5.5ZM6.07981 9.01936C6.54808 6.17188 9.02022 4 12 4C14.9798 4 17.4519 6.17189 17.9202 9.01936C20.2085 9.23125 22 11.1564 22 13.5C22 15.9853 19.9853 18 17.5 18H6.5C4.01472 18 2 15.9853 2 13.5C2 11.1564 3.79155 9.23125 6.07981 9.01936Z" fill="currentColor"/></symbol><symbol id="i-cloud-f" viewBox="0 0 24 24"><path d="M6.07981 9.01936C6.54808 6.17188 9.02022 4 12 4C14.9798 4 17.4519 6.17189 17.9202 9.01936C20.2085 9.23125 22 11.1564 22 13.5C22 15.9853 19.9853 18 17.5 18H6.5C4.01472 18 2 15.9853 2 13.5C2 11.1564 3.79155 9.23125 6.07981 9.01936Z" fill="currentColor"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M2 8V6.25C2 4.45507 3.45507 3 5.25 3H8.12868C8.72542 3 9.29771 3.23705 9.71967 3.65901L11.25 5.18934L8.65901 7.78033C8.51836 7.92098 8.32759 8 8.12868 8H2ZM2 9.5V17.75C2 19.5449 3.45507 21 5.25 21H18.75C20.5449 21 22 19.5449 22 17.75V8.75C22 6.95507 20.5449 5.5 18.75 5.5H13.0607L9.71967 8.84099C9.29771 9.26295 8.72542 9.5 8.12868 9.5H2Z" fill="currentColor"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><path d="M6.25 4C5.00736 4 4 5.00736 4 6.25V13.75C4 14.9926 5.00736 16 6.25 16H17.75C18.9926 16 20 14.9926 20 13.75V6.25C20 5.00736 18.9926 4 17.75 4H6.25ZM5.5 6.25C5.5 5.83579 5.83579 5.5 6.25 5.5H17.75C18.1642 5.5 18.5 5.83579 18.5 6.25V13.75C18.5 14.1642 18.1642 14.5 17.75 14.5H6.25C5.83579 14.5 5.5 14.1642 5.5 13.75V6.25ZM2.75 17.5C2.33579 17.5 2 17.8358 2 18.25C2 18.6642 2.33579 19 2.75 19H21.25C21.6642 19 22 18.6642 22 18.25C22 17.8358 21.6642 17.5 21.25 17.5H2.75Z" fill="currentColor"/></symbol><symbol id="i-laptop-f" viewBox="0 0 24 24"><path d="M4 6.25C4 5.00736 5.00736 4 6.25 4H17.75C18.9926 4 20 5.00736 20 6.25V13.75C20 14.9926 18.9926 16 17.75 16H6.25C5.00736 16 4 14.9926 4 13.75V6.25ZM2.75 17.5C2.33579 17.5 2 17.8358 2 18.25C2 18.6642 2.33579 19 2.75 19H21.25C21.6642 19 22 18.6642 22 18.25C22 17.8358 21.6642 17.5 21.25 17.5H2.75Z" fill="currentColor"/></symbol><symbol id="i-person" viewBox="0 0 24 24"><path d="M17.7545 14.0002C18.9966 14.0002 20.0034 15.007 20.0034 16.2491V16.8245C20.0034 17.7188 19.6838 18.5836 19.1023 19.263C17.5329 21.0965 15.1457 22.0013 12.0004 22.0013C8.8545 22.0013 6.46849 21.0962 4.90219 19.2619C4.32242 18.583 4.00391 17.7195 4.00391 16.8267V16.2491C4.00391 15.007 5.01076 14.0002 6.25278 14.0002H17.7545ZM17.7545 15.5002H6.25278C5.83919 15.5002 5.50391 15.8355 5.50391 16.2491V16.8267C5.50391 17.3624 5.69502 17.8805 6.04287 18.2878C7.29618 19.7555 9.26206 20.5013 12.0004 20.5013C14.7387 20.5013 16.7063 19.7555 17.9627 18.2876C18.3117 17.8799 18.5034 17.361 18.5034 16.8245V16.2491C18.5034 15.8355 18.1681 15.5002 17.7545 15.5002ZM12.0004 2.00488C14.7618 2.00488 17.0004 4.24346 17.0004 7.00488C17.0004 9.76631 14.7618 12.0049 12.0004 12.0049C9.23894 12.0049 7.00036 9.76631 7.00036 7.00488C7.00036 4.24346 9.23894 2.00488 12.0004 2.00488ZM12.0004 3.50488C10.0674 3.50488 8.50036 5.07189 8.50036 7.00488C8.50036 8.93788 10.0674 10.5049 12.0004 10.5049C13.9334 10.5049 15.5004 8.93788 15.5004 7.00488C15.5004 5.07189 13.9334 3.50488 12.0004 3.50488Z" fill="currentColor"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M20.9519 3.0481C19.5543 1.65058 17.2885 1.65064 15.8911 3.04825L3.94103 14.9997C3.5347 15.4061 3.2491 15.9172 3.116 16.4762L2.02041 21.0777C1.96009 21.3311 2.03552 21.5976 2.21968 21.7817C2.40385 21.9659 2.67037 22.0413 2.92373 21.981L7.52498 20.8855C8.08418 20.7523 8.59546 20.4666 9.00191 20.0601L20.952 8.10861C22.3493 6.71112 22.3493 4.4455 20.9519 3.0481ZM16.9518 4.10884C17.7634 3.29709 19.0795 3.29705 19.8912 4.10876C20.7028 4.9204 20.7029 6.23632 19.8913 7.04801L19 7.93946L16.0606 5.00012L16.9518 4.10884ZM15 6.06084L17.9394 9.00018L7.94119 18.9995C7.73104 19.2097 7.46668 19.3574 7.17755 19.4263L3.76191 20.2395L4.57521 16.8237C4.64402 16.5346 4.79168 16.2704 5.00175 16.0603L15 6.06084Z" fill="currentColor"/></symbol><symbol id="i-sign-out" viewBox="0 0 24 24"><path d="M8.50215 11.4995C9.05562 11.4995 9.5043 11.9482 9.5043 12.5017C9.5043 13.0552 9.05562 13.5038 8.50215 13.5038C7.94868 13.5038 7.5 13.0552 7.5 12.5017C7.5 11.9482 7.94868 11.4995 8.50215 11.4995ZM12 4.3537V10.4995L12.0005 11.0045L19.442 11.0035L17.7196 9.27977C17.4534 9.01346 17.4292 8.59679 17.6471 8.30321L17.7198 8.21911C17.9861 7.95289 18.4027 7.92875 18.6963 8.14666L18.7804 8.21929L21.777 11.2169C22.043 11.483 22.0674 11.8992 21.85 12.1928L21.7775 12.2769L18.7809 15.2803C18.4884 15.5736 18.0135 15.5741 17.7203 15.2816C17.4537 15.0156 17.429 14.599 17.6465 14.3051L17.7191 14.2209L19.432 12.5035L12.0005 12.5045L12 19.2495C12 19.7159 11.5788 20.0692 11.1196 19.9881L2.61955 18.4868C2.26121 18.4235 2 18.1121 2 17.7482V5.74953C2 5.38222 2.26601 5.06896 2.62847 5.00944L11.1285 3.61361C11.5851 3.53863 12 3.89097 12 4.3537ZM10.5 5.2369L3.5 6.38641V17.1191L10.5 18.3555V5.2369ZM13 18.5008L13.7652 18.501L13.867 18.4941C14.2335 18.4443 14.5158 18.1299 14.5152 17.7497L14.508 13.4995H13V18.5008ZM13.002 9.99953L13 8.72487V4.99952L13.7453 4.99953C14.1245 4.99953 14.4381 5.28105 14.4883 5.64664L14.4953 5.74829L14.502 9.99953H13.002Z" fill="currentColor"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M19.4898 5.57084C20.2796 6.58684 20.7499 7.8635 20.7499 9.25001C20.7499 11.5333 19.4745 13.5187 17.5972 14.5327C16.9481 14.8833 16.1671 14.6672 15.6454 14.1455L9.85438 8.35451C9.33268 7.8328 9.1166 7.05181 9.46723 6.40265C10.4812 4.52541 12.4666 3.25001 14.7499 3.25001C16.1364 3.25001 17.4132 3.72034 18.4292 4.51016L20.7197 2.21967C21.0126 1.92678 21.4874 1.92678 21.7803 2.21967C22.0732 2.51256 22.0732 2.98744 21.7803 3.28033L19.4898 5.57084ZM17.4732 12.8331C18.5534 12.0106 19.2499 10.7106 19.2499 9.25001C19.2499 6.76473 17.2352 4.75001 14.7499 4.75001C13.2893 4.75001 11.9893 5.44648 11.1668 6.52671C10.9008 6.87593 10.9812 7.35998 11.2916 7.67036L16.3295 12.7083C16.6399 13.0187 17.124 13.0991 17.4732 12.8331ZM3.28033 21.7803L5.57072 19.4899C6.58673 20.2797 7.86339 20.75 9.24989 20.75C11.5332 20.75 13.5186 19.4746 14.5325 17.5973C14.8832 16.9482 14.6671 16.1672 14.1454 15.6455L8.35438 9.85448C7.83268 9.33278 7.05168 9.1167 6.40253 9.46733C4.52528 10.4813 3.24989 12.4667 3.24989 14.75C3.24989 16.1366 3.72022 17.4133 4.51005 18.4293L2.21967 20.7197C1.92678 21.0126 1.92678 21.4874 2.21967 21.7803C2.51256 22.0732 2.98744 22.0732 3.28033 21.7803ZM7.67023 11.2917L12.7082 16.3296C13.0186 16.64 13.0989 17.1241 12.833 17.4733C12.0105 18.5535 10.7105 19.25 9.24989 19.25C6.76461 19.25 4.74989 17.2353 4.74989 14.75C4.74989 13.2894 5.44635 11.9894 6.52659 11.1669C6.87581 10.9009 7.35985 10.9813 7.67023 11.2917Z" fill="currentColor"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M4.53033 12.9697C4.23744 12.6768 3.76256 12.6768 3.46967 12.9697C3.17678 13.2626 3.17678 13.7374 3.46967 14.0303L7.96967 18.5303C8.26256 18.8232 8.73744 18.8232 9.03033 18.5303L20.0303 7.53033C20.3232 7.23744 20.3232 6.76256 20.0303 6.46967C19.7374 6.17678 19.2626 6.17678 18.9697 6.46967L8.5 16.9393L4.53033 12.9697Z" fill="currentColor"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24"><path d="M8.46967 4.21967C8.17678 4.51256 8.17678 4.98744 8.46967 5.28033L15.1893 12L8.46967 18.7197C8.17678 19.0126 8.17678 19.4874 8.46967 19.7803C8.76256 20.0732 9.23744 20.0732 9.53033 19.7803L16.7803 12.5303C17.0732 12.2374 17.0732 11.7626 16.7803 11.4697L9.53033 4.21967C9.23744 3.92678 8.76256 3.92678 8.46967 4.21967Z" fill="currentColor"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><path d="M12 1C14.7614 1 17 3.23858 17 6V8.00977C18.6781 8.13743 20 9.5392 20 11.25V18.75C20 20.5449 18.5449 22 16.75 22H7.25C5.45507 22 4 20.5449 4 18.75V11.25C4 9.5392 5.3219 8.13743 7 8.00977V6C7 3.23858 9.23858 1 12 1ZM7.25 9.5C6.2835 9.5 5.5 10.2835 5.5 11.25V18.75C5.5 19.7165 6.2835 20.5 7.25 20.5H16.75C17.7165 20.5 18.5 19.7165 18.5 18.75V11.25C18.5 10.2835 17.7165 9.5 16.75 9.5H7.25ZM12 13.75C12.6904 13.75 13.25 14.3096 13.25 15C13.25 15.6904 12.6904 16.25 12 16.25C11.3096 16.25 10.75 15.6904 10.75 15C10.75 14.3096 11.3096 13.75 12 13.75ZM12 2.5C10.067 2.5 8.5 4.067 8.5 6V8H15.5V6C15.5 4.067 13.933 2.5 12 2.5Z" fill="currentColor"/></symbol></svg>
+diff --git a/web/documentserver-example/nodejs/views/home.ejs b/web/documentserver-example/nodejs/views/home.ejs
+index ea13f876..087403aa 100644
+--- a/web/documentserver-example/nodejs/views/home.ejs
++++ b/web/documentserver-example/nodejs/views/home.ejs
+@@ -32,7 +32,10 @@
+   const types = ['word', 'cell', 'slide', 'pdf'];
+   const blankExt = { word: 'docx', cell: 'xlsx', slide: 'pptx', pdf: 'pdf' };
+   const langParam = '&lang=' + encodeURIComponent(lang.editor);
+-  const initials = (user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
++  const avatar = (cls) => account.image
++    ? `<span class="avatar ${cls}" style="--av:${account.color}"><img src="${account.image}" alt="" /></span>`
++    : `<span class="avatar ${cls}" style="--av:${account.color}" aria-hidden="true">${account.initials.replace(/[<>&"]/g, '')}</span>`;
++  const cloudLabel = nc.connected ? account.serverHost : t('nav.cloud');
+ %>
+ <body>
+     <a class="skip-link" href="#main"><%= t('skipToContent') %></a>
+@@ -51,8 +54,11 @@
+                 placeholder="<%= t('search.placeholder') %>" aria-label="<%= t('search.label') %>" />
+             <kbd class="search-kbd" aria-hidden="true">/</kbd>
+         </div>
+-        <div class="account" title="<%= t('account.label', { name: user.name }) %>">
+-            <span class="avatar" aria-label="<%= t('account.label', { name: user.name }) %>"><%= initials %></span>
++        <div class="account">
++            <button type="button" class="account-btn" id="account-btn" aria-haspopup="dialog" aria-expanded="false"
++                aria-controls="account-panel" title="<%= account.name %>" aria-label="<%= t('account.menuLabel', { name: account.name }) %>">
++                <%- avatar('') %>
++            </button>
+         </div>
+     </header>
+ 
+@@ -73,6 +79,18 @@
+                 <svg class="ic ic-f" aria-hidden="true"><use href="#i-open-f"/></svg>
+                 <span><%= t('nav.open') %></span>
+             </a>
++            <a class="rail-item" href="#cloud" data-view="cloud" title="<%= nc.connected ? account.server : t('nav.cloudTitle') %>">
++                <svg class="ic ic-r" aria-hidden="true"><use href="#i-cloud"/></svg>
++                <svg class="ic ic-f" aria-hidden="true"><use href="#i-cloud-f"/></svg>
++                <span class="rail-label-clip"><%= cloudLabel %></span>
++            </a>
++            <% if (devMode) { %>
++            <a class="rail-item" href="#local" data-view="local" title="<%= t('nav.localTitle') %>">
++                <svg class="ic ic-r" aria-hidden="true"><use href="#i-laptop"/></svg>
++                <svg class="ic ic-f" aria-hidden="true"><use href="#i-laptop-f"/></svg>
++                <span><%= t('nav.local') %></span>
++            </a>
++            <% } %>
+             <div class="rail-sep" role="separator"></div>
+             <% types.forEach((type) => { %>
+                 <a class="rail-item rail-app" href="#<%= type %>" data-view="<%= type %>" data-type="<%= type %>">
+@@ -82,13 +100,23 @@
+                 </a>
+             <% }) %>
+             <div class="rail-fill"></div>
++            <% if (devMode) { %>
+             <a class="rail-item rail-dev" href="?dev=1" title="<%= t('dev.title') %>">
+                 <svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg>
+                 <span><%= t('dev.label') %></span>
+             </a>
++            <% } %>
+         </nav>
+ 
+         <main id="main" tabindex="-1">
++            <section class="connect-card" id="connect-card" aria-labelledby="connect-title" hidden>
++                <svg class="connect-icon" aria-hidden="true"><use href="#i-cloud"/></svg>
++                <div class="connect-text">
++                    <h2 id="connect-title"><%= t('nc.card.title') %></h2>
++                    <p><%= t('nc.card.body') %></p>
++                </div>
++                <button type="button" class="btn btn-primary" data-connect="1"><%= t('nc.connect') %></button>
++            </section>
+             <section class="start" id="start" aria-labelledby="start-title">
+                 <h1 class="section-title" id="start-title"><%= t('home.startNew') %></h1>
+                 <div class="tiles" id="tiles">
+@@ -126,6 +154,7 @@
+             <section class="recent" id="recent" aria-labelledby="recent-title">
+                 <div class="recent-head">
+                     <h2 class="section-title" id="recent-title"><%= t('recent.title') %></h2>
++                    <nav class="crumbs" id="crumbs" aria-label="<%= t('nc.crumbs') %>" hidden></nav>
+                     <div class="chips" id="chips" role="group" aria-label="<%= t('filter.label') %>">
+                         <button type="button" class="chip" data-filter="" aria-pressed="true"><%= t('filter.all') %></button>
+                         <% types.forEach((type) => { %>
+@@ -133,6 +162,10 @@
+                         <% }) %>
+                     </div>
+                     <span class="recent-fill"></span>
++                    <button type="button" class="btn btn-subtle" id="new-button" aria-haspopup="menu" hidden>
++                        <svg class="ic-sm" aria-hidden="true"><use href="#i-add"/></svg>
++                        <span><%= t('nc.newIn') %></span>
++                    </button>
+                     <label class="btn btn-subtle" id="upload-button" for="file-input">
+                         <svg class="ic-sm" aria-hidden="true"><use href="#i-upload"/></svg>
+                         <span><%= t('upload.button') %></span>
+@@ -170,12 +203,112 @@
+         <button type="button" role="menuitem" data-action="download">
+             <svg class="ic-sm" aria-hidden="true"><use href="#i-download"/></svg><span><%= t('action.download') %></span>
+         </button>
+-        <div class="menu-sep" role="separator"></div>
+-        <button type="button" role="menuitem" data-action="delete" class="danger">
++        <button type="button" role="menuitem" data-action="location" data-nc="1">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-open"/></svg><span><%= t('nc.action.location') %></span>
++        </button>
++        <button type="button" role="menuitem" data-action="web" data-nc="1">
++            <svg class="ic-sm" aria-hidden="true"><use href="#i-cloud"/></svg><span><%= t('nc.action.web', { server: account.serverHost || 'Nextcloud' }) %></span>
++        </button>
++        <div class="menu-sep" role="separator" data-local="1"></div>
++        <button type="button" role="menuitem" data-action="delete" class="danger" data-local="1">
+             <svg class="ic-sm" aria-hidden="true"><use href="#i-delete"/></svg><span><%= t('action.delete') %></span>
+         </button>
+     </div>
+ 
++    <div class="menu" id="new-menu" role="menu" hidden>
++        <% ['word', 'cell', 'slide'].forEach((type) => { %>
++        <button type="button" role="menuitem" data-new="<%= blankExt[type] %>">
++            <svg class="ic-sm t-<%= type %>" aria-hidden="true"><use href="#i-<%= type %>-f"/></svg><span><%= t('tile.blank.' + type) %></span>
++        </button>
++        <% }) %>
++    </div>
++
++    <div class="account-panel" id="account-panel" role="dialog" aria-label="<%= t('account.title') %>" hidden>
++        <div class="acct-head">
++            <%- avatar('avatar-lg') %>
++            <div class="acct-id">
++                <div class="acct-name" id="acct-name"><%= account.name %></div>
++                <div class="acct-sub"><%= nc.connected ? (account.email || account.login || '') : t('account.localProfile') %></div>
++                <% if (nc.connected) { %><div class="acct-sub acct-server"><svg class="ic-xs" aria-hidden="true"><use href="#i-cloud"/></svg><span><%= account.serverHost %></span></div><% } %>
++            </div>
++        </div>
++        <div class="acct-actions">
++            <% if (nc.connected) { %>
++                <a class="acct-item" href="<%= account.server %>/index.php/settings/user/security" target="_blank" rel="noopener noreferrer">
++                    <svg class="ic-sm" aria-hidden="true"><use href="#i-person"/></svg><span><%= t('account.manage', { server: account.serverHost }) %></span>
++                </a>
++                <button type="button" class="acct-item" id="acct-disconnect">
++                    <svg class="ic-sm" aria-hidden="true"><use href="#i-sign-out"/></svg><span><%= t('nc.disconnect') %></span>
++                </button>
++            <% } else { %>
++                <button type="button" class="acct-item" data-connect="1">
++                    <svg class="ic-sm" aria-hidden="true"><use href="#i-link"/></svg><span><%= t('nc.connect') %></span>
++                </button>
++                <button type="button" class="acct-item" id="acct-rename">
++                    <svg class="ic-sm" aria-hidden="true"><use href="#i-edit"/></svg><span><%= t('account.changeName') %></span>
++                </button>
++            <% } %>
++            <div class="menu-sep" role="separator"></div>
++            <button type="button" class="acct-item" id="acct-dev" role="switch" aria-checked="<%= devMode ? 'true' : 'false' %>">
++                <svg class="ic-sm" aria-hidden="true"><use href="#i-wrench"/></svg><span><%= t('account.devMode') %></span>
++                <span class="switch" aria-hidden="true"></span>
++            </button>
++            <% if (devMode) { %>
++                <div class="acct-group" role="group" aria-label="<%= t('account.testUser') %>">
++                    <div class="acct-group-title"><%= t('account.testUser') %></div>
++                    <button type="button" class="acct-item acct-test" data-test-user="" aria-pressed="<%= account.devUser ? 'false' : 'true' %>">
++                        <svg class="ic-sm" aria-hidden="true"><use href="#i-check"/></svg><span><%= t('account.testUserNone', { name: account.name }) %></span>
++                    </button>
++                    <% account.testUsers.forEach((u) => { %>
++                    <button type="button" class="acct-item acct-test" data-test-user="<%= u.id %>" aria-pressed="<%= account.devUser === u.id ? 'true' : 'false' %>">
++                        <svg class="ic-sm" aria-hidden="true"><use href="#i-check"/></svg><span><%= u.name %></span>
++                    </button>
++                    <% }) %>
++                </div>
++            <% } %>
++        </div>
++        <p class="acct-privacy"><svg class="ic-xs" aria-hidden="true"><use href="#i-lock"/></svg><span><%= t('account.privacy') %></span></p>
++    </div>
++
++    <dialog class="dialog" id="connect-dialog" aria-labelledby="connect-dialog-title">
++        <form id="connect-form" novalidate>
++            <h2 id="connect-dialog-title"><%= t('nc.dialog.title') %></h2>
++            <div class="connect-step" id="connect-step-server">
++                <p><%= t('nc.dialog.body') %></p>
++                <label class="field-label" for="connect-server"><%= t('nc.dialog.server') %></label>
++                <input class="field" type="url" id="connect-server" name="server" autocomplete="url" spellcheck="false"
++                    value="<%= nc.defaultServer %>" placeholder="https://cloud.example.org" required />
++                <p class="field-hint"><%= t('nc.dialog.hint') %></p>
++                <p class="field-error" id="connect-error" role="alert" hidden></p>
++                <div class="dialog-actions">
++                    <button type="submit" class="btn btn-primary" id="connect-submit"><%= t('nc.dialog.continue') %></button>
++                    <button type="button" class="btn" data-close="1"><%= t('action.cancel') %></button>
++                </div>
++            </div>
++            <div class="connect-step" id="connect-step-wait" hidden>
++                <p class="connect-wait"><span class="spinner" aria-hidden="true"></span><span id="connect-wait-text"></span></p>
++                <p class="field-hint"><%= t('nc.dialog.waitHint') %> <a href="#" id="connect-reopen" target="_blank" rel="noopener"><%= t('nc.dialog.reopen') %></a></p>
++                <div class="dialog-actions">
++                    <button type="button" class="btn" data-close="1"><%= t('action.cancel') %></button>
++                </div>
++            </div>
++        </form>
++    </dialog>
++
++    <dialog class="dialog" id="profile-dialog" aria-labelledby="profile-title">
++        <form id="profile-form" method="dialog">
++            <h2 id="profile-title"><%= t('profile.title') %></h2>
++            <p><%= t('profile.body') %></p>
++            <label class="field-label" for="profile-name"><%= t('profile.name') %></label>
++            <input class="field" type="text" id="profile-name" maxlength="80" autocomplete="name"
++                value="<%= account.named ? account.name : '' %>" placeholder="<%= t('profile.defaultName') %>" />
++            <div class="dialog-actions">
++                <button class="btn btn-primary" value="ok"><%= t('profile.save') %></button>
++                <button class="btn" value="skip" id="profile-skip"><%= t('profile.skip') %></button>
++            </div>
++        </form>
++    </dialog>
++
+     <dialog class="dialog" id="confirm" aria-labelledby="confirm-title">
+         <form method="dialog">
+             <h2 id="confirm-title"><%= t('delete.title') %></h2>
+@@ -211,6 +344,11 @@
+         convertExts,
+         maxFileSize,
+         apiUrl,
++        account,
++        nc,
++        devMode,
++        csrf,
++        askName: account.source === 'local' && !account.named && !account.asked,
+         startTitles: {
+             home: t('home.startNew'),
+             new: t('new.title'),
+-- 
+2.43.0
+

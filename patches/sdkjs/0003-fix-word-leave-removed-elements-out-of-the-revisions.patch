@@ -1,0 +1,85 @@
+From 26ebab3b471953487ae7565c1eb742c2c84356e8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:03:51 +0200
+Subject: [PATCH 3/3] fix(word): leave removed elements out of the revisions
+ report
+
+CTrackRevisionsManager keeps the changes of elements that are no longer
+in the document (for instance a tracked table insertion that was
+undone), so asc_GetTrackRevisionsReportByAuthors, and with it the
+builder ApiDocument.GetReviewReport, still listed them. Skip those
+elements, as Have_Changes already does.
+
+Test added to tests/word/js-api/api-track-revisions.js.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ tests/word/js-api/api-track-revisions.js | 25 ++++++++++++++++++++++++
+ word/api.js                              | 10 +++++++++-
+ 2 files changed, 34 insertions(+), 1 deletion(-)
+
+diff --git a/tests/word/js-api/api-track-revisions.js b/tests/word/js-api/api-track-revisions.js
+index 020f793af1..7a9213feca 100644
+--- a/tests/word/js-api/api-track-revisions.js
++++ b/tests/word/js-api/api-track-revisions.js
+@@ -101,6 +101,31 @@ $(function ()
+ 		logicDocument.SetLocalTrackRevisions(null);
+ 	});
+ 
++	QUnit.test("GetReviewReport ignores changes of elements no longer in the document", function (assert)
++	{
++		setupEditor();
++		editor.asc_GetTrackRevisionsReportByAuthors = AscCommon.DocumentEditorApi.prototype.asc_GetTrackRevisionsReportByAuthors.bind(editor);
++		let logicDocument = AscTest.GetLogicDocument();
++		let doc = AscTest.JsApi.GetDocument();
++		let count = function ()
++		{
++			let report = doc.GetReviewReport(), n = 0;
++			for (let author in report)
++				n += report[author].length;
++			return n;
++		};
++
++		logicDocument.SetLocalTrackRevisions(true);
++		let p = AscTest.JsApi.CreateParagraph();
++		p.AddText("tracked insertion");
++		doc.Push(p);
++		logicDocument.SetLocalTrackRevisions(null);
++		assert.ok(count() > 0, "the insertion is reported");
++
++		doc.RemoveElement(p.GetPosInParent());
++		assert.strictEqual(count(), 0, "nothing is reported once the paragraph left the document");
++	});
++
+ 	QUnit.test("SetAssistantTrackRevisions restores a local-only tracking session exactly", function (assert)
+ 	{
+ 		setupEditor();
+diff --git a/word/api.js b/word/api.js
+index c0f4918941..e20e0eafcf 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -10116,9 +10116,17 @@ background-repeat: no-repeat;\
+ 	asc_docs_api.prototype.asc_GetTrackRevisionsReportByAuthors= function()
+ 	{
+ 		var oResult = {};
+-		var oAllChanges = this.WordControl.m_oLogicDocument.TrackRevisionsManager.Get_AllChanges();
++		var oLogicDocument = this.WordControl.m_oLogicDocument;
++		var oTableId = oLogicDocument.GetTableId ? oLogicDocument.GetTableId() : null;
++		var oAllChanges = oLogicDocument.TrackRevisionsManager.Get_AllChanges();
+ 		for (var ParaId in oAllChanges)
+ 		{
++			// The manager keeps the changes of elements removed from the document (e.g. by an undo):
++			// skip them, as CTrackRevisionsManager.Have_Changes does.
++			var oElement = oTableId ? oTableId.Get_ById(ParaId) : null;
++			if (oTableId && (!oElement || !oElement.IsUseInDocument || !oElement.IsUseInDocument()))
++				continue;
++
+ 			var arrChanges = oAllChanges[ParaId];
+ 			for (var nIndex = 0, nCount = arrChanges.length; nIndex < nCount; ++nIndex)
+ 			{
+-- 
+2.43.0
+

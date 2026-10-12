@@ -1,0 +1,310 @@
+id,category,action,windows,macos,ms_section,scope,alternative,notes
+file.open,file,Open a document,Ctrl+O,,Frequently used,editor,,Opens File > Recent in the backstage. macOS: Cmd+O
+file.open.ctrl-f12,file,Display the Open dialog box,Ctrl+F12,,Function keys,editor,,Same as Ctrl+O
+file.open.ctrl-alt-f2,file,Display the Open dialog box,Ctrl+Alt+F2,,Function keys,editor,Ctrl+O,Linux: Ctrl+Alt+F2 switches virtual console
+file.new,file,Create a new document,Ctrl+N,,Frequently used,browser,"File > New (Alt, F, N)",Ctrl+N opens a browser window; it reaches the editor in an installed app or in full screen
+file.save,file,Save the document,Ctrl+S,,Frequently used,editor,,macOS: Cmd+S. Co-editing saves continuously; Ctrl+S forces the save
+file.save.shift-f12,file,Save the document,Shift+F12,,Function keys,editor,,
+file.save.alt-shift-f2,file,Save the document,Alt+Shift+F2,,Function keys,editor,,
+file.save-as,file,Display the Save As dialog box,F12,Cmd+Shift+S,Function keys,editor,,"Opens File > Save a copy (Ctrl+Shift+S is Apply Styles, as in Word)"
+file.close,file,Close the document,Ctrl+W,Cmd+F4,Frequently used,browser,File > Close (unsaved changes are asked first),"Ctrl+W, Cmd+W close the tab or window: the browser asks first when the document has unsaved changes (beforeunload guard); in an installed app Keyboard Lock is not granted for it"
+file.close.ctrl-f4,file,Close the current document,Ctrl+F4,,Function keys,browser,Close the browser tab,"Closes the tab in Chrome, Edge, Firefox"
+file.quit,file,Close Word,Alt+F4,,Function keys,os,,
+file.print,file,Print the document,Ctrl+P,Cmd+P,Preview and print,editor,,Opens File > Print
+file.print-preview,file,Switch to print preview,Ctrl+Alt+I,,Preview and print,editor,,Not Alt+I (Elixir AI bar)
+file.print-preview.ctrl-f2,file,Display the print preview area on the Print tab in the Backstage view,Ctrl+F2,,Function keys,editor,,
+file.print.ctrl-shift-f12,file,Display the Print tab in the Backstage view,Ctrl+Shift+F12,,Function keys,editor,,
+file.preview.move,file,Move around the preview page when zoomed in,Arrow keys,,Preview and print,editor,Preview page buttons,"The preview shows one fitted page (no zoom), so the arrow keys move between pages"
+file.preview.page,file,Move by one preview page when zoomed out,Page up or Page down,,Preview and print,editor,Preview page buttons,File > Print preview
+file.preview.first,file,Move to the first preview page when zoomed out,Ctrl+Home,,Preview and print,editor,Preview page buttons,File > Print preview
+file.preview.last,file,Move to the last preview page when zoomed out,Ctrl+End,,Preview and print,editor,Preview page buttons,File > Print preview
+file.rename,file,Open the dialog box to rename the document or save it to another location,Alt+B,,Work in the ribbon,editor,,Opens File > Rename
+file.autosave,file,Toggle AutoSave on or off,"Alt+Z, A",,Work in the ribbon,absent,File > Options > Autosave,Co-editing always saves
+file.help,file,Display the Word help task pane,F1,,Function keys,editor,,macOS: F1 is Undo
+window.split,window,Split the document window,Ctrl+Alt+S,Cmd+Option+S,Frequently used,editor,View > Split,"Two panes on the document, each with its own scroll; the second pane is drawn by the engine and follows each change, a click in it puts the cursor there (typing goes to the upper pane). Drag the split bar to resize"
+window.unsplit,window,Remove the document window split,Alt+Shift+C or Ctrl+Alt+S,Cmd+Option+S,Frequently used,editor,View > Remove Split; double-click or drag the split bar to an edge,Alt+Shift+C removes the split when there is one (otherwise it still closes the reviewing pane: review.close-pane)
+window.next,window,Switch to the next window,,Cmd+Grave accent (`),Frequently used,os,,
+window.previous,window,Switch to the previous window,,Cmd+Shift+Grave accent (`),Frequently used,os,,
+window.next-document,window,Switch to the next document window when more than one document is open,Ctrl+F6,Cmd+F6,Function keys,browser,Browser tab switching,One document per tab
+window.previous-document,window,Switch to the previous document window when more than one document is open,Ctrl+Shift+F6,Cmd+Shift+F6,Function keys,browser,Browser tab switching,
+window.restore,window,Restore the document window size,Alt+F5,,Function keys,os,,
+window.maximize,window,Maximize or restore the document window size,Ctrl+F10,,Function keys,os,,
+window.cycle-regions,window,"Switch between the document, task pane, status bar, and ribbon",F6,F6,Function keys,editor,,
+window.cycle-regions.back,window,"Switch between the document, ribbon, status bar, and task pane",Shift+F6,Shift+F6,Function keys,editor,,
+window.dialog-to-document,window,"Move from an open dialog box back to the document, for dialog boxes that support this behavior",Alt+F6,,Function keys,editor,,"From a pane that does not take the whole window (Find, Comments, Navigation...) back to the document; modal dialogs keep the focus until they are closed"
+edit.cut,editing,Cut the selected content to the Clipboard,Ctrl+X,Cmd+X or F2,Frequently used,editor,,
+edit.copy,editing,Copy the selected content to the Clipboard,Ctrl+C,Cmd+C or F3,Frequently used,editor,,
+edit.paste,editing,Paste the contents of the Clipboard,Ctrl+V,Cmd+V or F4,Frequently used,editor,,
+edit.paste-text,editing,Paste text only,Ctrl+Shift+V,Cmd+Shift+V,Frequently used,editor,,
+edit.paste-special,editing,Display the Paste Special dialog box,Ctrl+Alt+V,Cmd+Control+V,Edit text and graphics,editor,Paste menu > Paste Special,"Dialog with Formatted text, Merge formatting, Unformatted text, Picture. Windows: Ctrl+Alt+V first applies formatting copied with Ctrl+Alt+C (legacy), then it is Paste Special"
+edit.paste-special.menu,editing,Open Paste Special from the Paste menu,"Alt, H, V, S",,Use the Access Keys for ribbon tabs,keytips,Home > Paste > Paste Special,
+edit.select-all,editing,Select all document content,Ctrl+A,Cmd+A,Frequently used,editor,,
+edit.undo,editing,Undo the previous action,Ctrl+Z,Cmd+Z or F1,Frequently used,editor,,
+edit.redo,editing,"Redo the previous action, if possible",Ctrl+Y,Cmd+Y,Frequently used,editor,,
+edit.repeat,editing,"Repeat the last command or action, if possible",F4,Cmd+Y,Function keys,editor,,Ctrl+Y (Cmd+Y) repeats when there is nothing to redo (as in Word). macOS: F4 repeats too (Word for Mac pastes with it; not wired in a browser). The quick access Redo button turns into Repeat. tests/shortcuts/repeat.mjs
+edit.cancel,editing,Cancel a command,Esc,,Frequently used,editor,,Closes the open menu or dialog
+edit.delete-word-left,editing,Delete one word to the left,Ctrl+Backspace,,Edit text and graphics,editor,,macOS: Option+Backspace
+edit.delete-word-right,editing,Delete one word to the right,Ctrl+Delete,,Edit text and graphics,editor,,macOS: Option+Delete
+edit.clipboard-pane,editing,Open the Clipboard task pane and enable the Office Clipboard,"Alt, H, F, O",,Edit text and graphics,absent,,No Office Clipboard (browsers expose one clipboard entry)
+edit.move-to,editing,Move the selected content to a specific location,"F2, move the cursor to the destination, and then press Enter",,Edit text and graphics,editor,"Ctrl+X, Ctrl+V","Status hint ""Move to where? Press Enter""; Esc cancels. Selections in the document body"
+edit.copy-to,editing,Copy the selected content to a specific location,"Shift+F2, move the cursor to the destination, and then press Enter",Shift+F2,Edit text and graphics,editor,"Ctrl+C, Ctrl+V","Status hint ""Copy to where? Press Enter""; Esc cancels"
+edit.autotext-define,editing,Define an AutoText block with the selected content,Alt+F3,Option+F3,Edit text and graphics,editor,,"Asks for a name; the blocks are kept per user in this browser (localStorage), with their formatting, not in the document"
+edit.autotext-insert,editing,Insert an AutoText block,"The first few characters of the AutoText block, and then press Enter",,Edit text and graphics,editor,,"Type the whole name of the block, then Enter (no prefix matching, no tooltip); names have no spaces"
+edit.spike-cut,editing,Cut the selected content to the Spike,Ctrl+F3,Cmd+F3,Edit text and graphics,editor,,The Spike is kept while the document is open; the status hint shows the number of items
+edit.spike-paste,editing,Paste the contents of the Spike,Ctrl+Shift+F3,Cmd+Shift+F3,Edit text and graphics,editor,,"Each Spike item ends with a paragraph mark, as in Word; the Spike is emptied"
+edit.copy-format,editing,Copy the selected text formatting,Ctrl+Alt+C,Cmd+Option+C,Edit text and graphics,editor,,
+edit.paste-format,editing,Paste the selected text formatting,Ctrl+Alt+V,Cmd+Option+V,Edit text and graphics,editor,,
+edit.copy-previous-header,editing,Copy the header or footer used in the previous section of the document,Alt+Shift+R,,Edit text and graphics,editor,Header & Footer > Link to Previous,In a header or footer of the second or a later section: it becomes the header or footer of the previous section (Link to Previous)
+edit.hyperlink,editing,Insert a hyperlink,Ctrl+K,,Work with web content,editor,,macOS: Cmd+K
+edit.replace,editing,Display the Replace dialog box,Ctrl+H,Control+H,Edit text and graphics,editor,,
+edit.object,editing,Display the Object dialog box,"Alt, N, J, J",,Edit text and graphics,absent,,No OLE objects
+edit.smartart,editing,Insert a SmartArt graphic,"Alt, N, M",,Edit text and graphics,keytips,,
+edit.wordart,editing,Insert a WordArt graphic,"Alt, N, W",,Edit text and graphics,keytips,,
+fmt.bold,formatting,Apply bold formatting,Ctrl+B,Cmd+B,Format characters,editor,,
+fmt.italic,formatting,Apply italic formatting,Ctrl+I,Cmd+I,Format characters,editor,,
+fmt.underline,formatting,Apply underline formatting,Ctrl+U,Cmd+U,Format characters,editor,,
+fmt.strikethrough,formatting,Apply strike-through formatting,,Cmd+Shift+X,Format characters,editor,,Windows: none in Word
+fmt.font-dialog,formatting,Display the Font dialog box,Ctrl+D or Ctrl+Shift+F,Cmd+D,Format characters,editor,,
+fmt.grow,formatting,Increase the font size,Ctrl+Shift+Right angle bracket (>),Cmd+Shift+Right angle bracket (>),Format characters,editor,,To the next size of the size list
+fmt.shrink,formatting,Decrease the font size,Ctrl+Shift+Left angle bracket (<),Cmd+Shift+Left angle bracket (<),Format characters,editor,,
+fmt.grow-1pt,formatting,Increase the font size by 1 point,Ctrl+Right bracket (]),Cmd+Right bracket (]),Format characters,editor,,
+fmt.shrink-1pt,formatting,Decrease the font size by 1 point,Ctrl+Left bracket ([),Cmd+Left bracket ([),Format characters,editor,,
+fmt.change-case,formatting,"Switch the text between upper case, lower case, and title case",Shift+F3,Shift+F3,Format characters,editor,,
+fmt.all-caps,formatting,Change the text to all upper case,Ctrl+Shift+A,Cmd+Shift+A,Format characters,editor,,Toggles the All caps effect
+fmt.hidden,formatting,Hide the selected text,Ctrl+Shift+H,,Format characters,editor,Font dialog (Ctrl+D) > Hidden,"Hidden text takes no room and is not drawn; it shows with the formatting marks (Ctrl+Shift+8), without Word's dotted underline. Ctrl+Shift+H no longer opens the Comments pane (button on the ribbon; macOS Cmd+Shift+H)"
+fmt.word-underline,formatting,"Apply underline formatting to the words, but not the spaces",Ctrl+Shift+W,Cmd+Shift+W,Format characters,browser,"Ctrl+Alt+Shift+W (Cmd+Option+Shift+W), or Font dialog (Ctrl+D) > Underline style","Words only (w:u words, kept in .docx). Ctrl+Shift+W closes the window in Chrome, Edge and Firefox, Cmd+Shift+W in Chrome and Safari on macOS; the alternative always reaches the editor"
+fmt.double-underline,formatting,Apply double-underline formatting,Ctrl+Shift+D,Cmd+Shift+D,Format characters,editor,Font dialog (Ctrl+D) > Underline style,"Double underline (w:u double, kept in .docx)"
+fmt.small-caps,formatting,Apply small caps formatting,Ctrl+Shift+K,Cmd+Shift+K,Format characters,editor,,
+fmt.subscript,formatting,Apply subscript formatting,Ctrl+Shift+Minus sign (-),Cmd+Shift+Minus sign (-),Format characters,editor,,Ctrl+= is Zoom in (this page); older Word used it for subscript
+fmt.superscript,formatting,Apply superscript formatting,Ctrl+Shift+Plus sign (+),,Format characters,editor,,macOS: Cmd+Shift+Plus
+fmt.reset-char,formatting,Remove manual character formatting,Ctrl+Spacebar,,Format characters,editor,,macOS: Control+Spacebar is the input source switch
+fmt.symbol-font,formatting,Change the selected text to the Symbol font,Ctrl+Shift+Q,,Format characters,editor,,Chrome on Linux quits with Ctrl+Shift+Q
+fmt.bullets,formatting,Add a bulleted list,Ctrl+Shift+L,Cmd+Shift+L,Format characters,editor,,
+fmt.show-all,formatting,Display all nonprinting characters,Ctrl+Shift+8,,Manage text formatting,editor,,macOS: Cmd+8
+fmt.reveal,formatting,Display the Reveal Formatting task pane,Shift+F1,Shift+F1,Manage text formatting,editor,,"Task pane at the right (font, paragraph, section at the cursor; the headings open the Font, Paragraph and Page Setup dialogs). No style source distinction, no comparison with another selection"
+fmt.autoformat,formatting,Enable AutoFormat,Ctrl+Alt+K,Cmd+Option+K,Align and format paragraphs,absent,File > Options > AutoCorrect,No AutoFormat Now
+para.center,paragraph,Center the paragraph,Ctrl+E,Cmd+E,Align and format paragraphs,editor,,
+para.justify,paragraph,Justify the paragraph,Ctrl+J,Cmd+J,Align and format paragraphs,editor,,
+para.left,paragraph,Align the paragraph to the left,Ctrl+L,Cmd+L,Align and format paragraphs,editor,,
+para.right,paragraph,Align the paragraph to the right,Ctrl+R,Cmd+R,Align and format paragraphs,editor,,
+para.indent,paragraph,Indent the paragraph,Ctrl+M,Control+Shift+M,Align and format paragraphs,editor,,
+para.unindent,paragraph,Remove a paragraph indent,Ctrl+Shift+M,Cmd+Shift+M,Align and format paragraphs,editor,,
+para.hanging,paragraph,Create a hanging indent,Ctrl+T,Cmd+T,Align and format paragraphs,browser,"Ctrl+Alt+Shift+T (Cmd+Option+Shift+T), or Paragraph dialog > Special: Hanging","Ctrl+T, Cmd+T open a browser tab; reaches the editor in an installed app (no tabs) or in full screen"
+para.unhanging,paragraph,Remove a hanging indent,Ctrl+Shift+T,Cmd+Shift+T,Align and format paragraphs,browser,Paragraph dialog > Special: (none),Ctrl+Shift+T reopens a browser tab; reaches the editor in an installed app or in full screen
+para.reset,paragraph,Remove paragraph formatting,Ctrl+Q,,Align and format paragraphs,editor,,
+para.spacing-1,paragraph,Apply single spacing to the paragraph,Ctrl+1,Cmd+1,Align and format paragraphs,editor,,
+para.spacing-2,paragraph,Apply double spacing to the paragraph,Ctrl+2,Cmd+2,Align and format paragraphs,editor,,
+para.spacing-1.5,paragraph,Apply 1.5-line spacing to the paragraph,Ctrl+5,Cmd+5,Align and format paragraphs,editor,,
+para.rtl,paragraph,Switch the writing direction to right-to-left,,Control+Cmd+Left arrow key,Work with right-to-left languages,editor,,
+para.ltr,paragraph,Switch the writing direction to left-to-right,,Control+Cmd+Right arrow key,Work with right-to-left languages,editor,,
+style.normal,styles,Apply the Normal style,Ctrl+Shift+N,Cmd+Shift+N,Align and format paragraphs,browser,"Ctrl+Alt+Shift+N (Cmd+Option+Shift+N), or Styles gallery > Normal (Alt, H, L)","Ctrl+Shift+N, Cmd+Shift+N open a private window; the alternative always reaches the editor"
+style.heading1,styles,Apply the Heading 1 style,Ctrl+Alt+1,Cmd+Option+1,Align and format paragraphs,editor,,
+style.heading2,styles,Apply the Heading 2 style,Ctrl+Alt+2,Cmd+Option+2,Align and format paragraphs,editor,,
+style.heading3,styles,Apply the Heading 3 style,Ctrl+Alt+3,Cmd+Option+3,Align and format paragraphs,editor,,
+style.list,styles,Apply the List style,,"Cmd+Shift+L, when the cursor is at the beginning of a line",Align and format paragraphs,editor,,Same as fmt.bullets
+style.apply-pane,styles,Display the Apply Styles task pane,Ctrl+Shift+S,,Align and format paragraphs,editor,,Opens the Apply Styles box. macOS: Cmd+Shift+S stays Save As
+style.pane,styles,Display the Styles task pane,Ctrl+Alt+Shift+S,,Align and format paragraphs,editor,,Toggles the Styles pane. macOS: Cmd+Option+Shift+S
+style.promote,styles,Promote a paragraph,Alt+Shift+Left arrow key,Control+Shift+Left arrow key,Outline a document,editor,,Heading n to Heading n-1
+style.demote,styles,Demote a paragraph,Alt+Shift+Right arrow key,Control+Shift+Right arrow key,Outline a document,editor,,"Heading n to Heading n+1, body text to Heading 1... as Word"
+style.body-text,styles,Demote the paragraph to body text,Ctrl+Shift+N,Cmd+Shift+N,Outline a document,browser,"Ctrl+Alt+Shift+N (Cmd+Option+Shift+N), or Styles gallery > Normal",Same keys as style.normal
+nav.word-left,navigation,Move the cursor one word to the left,Ctrl+Left arrow key,Option+Left arrow key,Navigate the document,editor,,
+nav.word-right,navigation,Move the cursor one word to the right,Ctrl+Right arrow key,Option+Right arrow key,Navigate the document,editor,,
+nav.paragraph-up,navigation,Move the cursor up by one paragraph,Ctrl+Up arrow key,Cmd+Up arrow key,Navigate the document,editor,,
+nav.paragraph-down,navigation,Move the cursor down by one paragraph,Ctrl+Down arrow key,Cmd+Down arrow key,Navigate the document,editor,,
+nav.line-end,navigation,Move the cursor to the end of the current line,End,Cmd+Right arrow key or End,Navigate the document,editor,,
+nav.line-start,navigation,Move the cursor to the beginning of the current line,Home,Cmd+Left arrow or Home,Navigate the document,editor,,
+nav.screen-top,navigation,Move the cursor to the top of the screen,Ctrl+Alt+Page up,,Navigate the document,editor,,
+nav.screen-bottom,navigation,Move the cursor to the bottom of the screen,Ctrl+Alt+Page down,,Navigate the document,editor,,
+nav.page-up,navigation,Move the cursor by scrolling the document view up by one screen,Page up,Page up,Navigate the document,editor,,
+nav.page-down,navigation,Move the cursor by scrolling the document view down by one screen,Page down,Page down,Navigate the document,editor,,
+nav.next-page,navigation,Move the cursor to the top of the next page,Ctrl+Page down,Cmd+Page down,Navigate the document,browser,Ctrl+G / F5 (Go To page),"Windows, Linux: Ctrl+Page down selects the next browser tab. macOS Cmd+Page down works"
+nav.previous-page,navigation,Move the cursor to the top of the previous page,Ctrl+Page up,Cmd+Page up,Navigate the document,browser,Ctrl+G / F5 (Go To page),"Windows, Linux: Ctrl+Page up selects the previous browser tab. macOS Cmd+Page up works"
+nav.document-end,navigation,Move the cursor to the end of the document,Ctrl+End,Cmd+End,Navigate the document,editor,,
+nav.document-start,navigation,Move the cursor to the beginning of the document,Ctrl+Home,Cmd+Home,Navigate the document,editor,,
+nav.previous-revision,navigation,Move the cursor to the location of the previous revision,Shift+F5,Shift+F5,Navigate the document,editor,,"History of the last 4 edit places (one per paragraph); with none, the previous tracked change"
+nav.last-revision-on-open,navigation,Move the cursor to the location of the last revision made before the document was last closed,"Shift+F5, immediately after opening the document",,Navigate the document,editor,,"The places of the last session are kept by this browser (localStorage, per document); not stored in the .docx"
+nav.recent-changes,navigation,Cycle through the locations of the four previous changes made to the document,Ctrl+Alt+Z,,Navigate the document,editor,,Cycles through the last 4 edit places
+nav.floating-shapes,navigation,"Cycle through floating shapes, such as text boxes or images","Ctrl+Alt+5, and then the Tab key repeatedly",,Navigate the document,editor,,
+nav.floating-shapes.exit,navigation,Exit the floating shape navigation and return to the normal navigation,Esc,,Navigate the document,editor,,
+nav.find,navigation,"Display the Navigation task pane, to search within the document content",Ctrl+F,Cmd+F,Navigate the document,editor,,Opens the Navigation pane on its Results tab
+nav.go-to,navigation,Display the Go To dialog box,Ctrl+G,Cmd+Option+G or F5,Navigate the document,editor,,
+nav.go-to.f5,navigation,Display the Go To dialog box,F5,F5,Function keys,editor,,F5 reloads the page only if the editor does not take it
+nav.repeat-find,navigation,Repeat the last Find or Go To action,Shift+F4,Shift+F4 or Cmd+Shift+F4,Function keys,editor,,
+nav.web-back,navigation,Go back one page,Alt+Left arrow key,,Work with web content,browser,,Browser history back
+nav.web-forward,navigation,Go forward one page,Alt+Right arrow key,,Work with web content,browser,,Browser history forward
+nav.web-refresh,navigation,Refresh the page,F9,,Work with web content,editor,,"In a document, F9 updates fields (fields.update)"
+sel.char,selection,Select text,Shift+Arrow keys,Shift+Arrow keys,Select text and graphics,editor,,
+sel.word-left,selection,Select the word to the left,Ctrl+Shift+Left arrow key,Shift+Option+Left arrow key,Select text and graphics,editor,,
+sel.word-right,selection,Select the word to the right,Ctrl+Shift+Right arrow key,Shift+Option+Right arrow key,Select text and graphics,editor,,
+sel.line-start,selection,Select from the current position to the beginning of the current line,Shift+Home,Cmd+Shift+Left arrow key or Shift+Home,Select text and graphics,editor,,
+sel.line-end,selection,Select from the current position to the end of the current line,Shift+End,Cmd+Shift+Right arrow key or Shift+End,Select text and graphics,editor,,
+sel.paragraph-start,selection,Select from the current position to the beginning of the current paragraph,Ctrl+Shift+Up arrow key,Cmd+Shift+Up arrow key,Select text and graphics,editor,,
+sel.paragraph-end,selection,Select from the current position to the end of the current paragraph,Ctrl+Shift+Down arrow key,Cmd+Shift+Down arrow key,Select text and graphics,editor,,
+sel.screen-up,selection,Select from the current position to the top of the screen,Shift+Page up,Shift+Page up,Select text and graphics,editor,,
+sel.screen-down,selection,Select from the current position to the bottom of the screen,Shift+Page down,Shift+Page down,Select text and graphics,editor,,
+sel.document-start,selection,Select from the current position to the beginning of the document,Ctrl+Shift+Home,Cmd+Shift+Home,Select text and graphics,editor,,
+sel.document-end,selection,Select from the current position to the end of the document,Ctrl+Shift+End,Cmd+Shift+End,Select text and graphics,editor,,
+sel.window-bottom,selection,Select from the current position to the bottom of the window,Ctrl+Alt+Shift+Page down,Cmd+Shift+Option+Page down,Select text and graphics,editor,,
+sel.multiple,selection,Select multiple items that are not next to each other,,"Select the first item, hold down Cmd, and then click the additional items",Select text and graphics,absent,,No multiple selection in the engine
+sel.extend,selection,Start extending the selection,F8,F8,Extend a selection,editor,,
+sel.extend.char,selection,Select the nearest character to the left or right,"F8, Left or Right arrow key","F8, Left arrow key or F8, Right arrow key",Extend a selection,editor,,
+sel.extend.grow,selection,Expand the selection,F8 repeatedly,F8 repeatedly,Extend a selection,editor,,"Word, sentence, paragraph, document"
+sel.extend.shrink,selection,Reduce the selection,Shift+F8,Shift+F8,Extend a selection,editor,,
+sel.extend.block,selection,Select a vertical block of text,"Ctrl+Shift+F8, then press the arrow keys","Cmd+Shift+F8, then press the arrow keys",Extend a selection,editor,Alt+drag (macOS Option+drag),"Block (column) selection on one page: copy and cut give one line of text per line of the block, Delete and Backspace remove it, character formatting applies to it; Esc or any other key ends it"
+sel.extend.stop,selection,Stop extending the selection,Esc,Esc,Extend a selection,editor,,
+table.next-cell,tables,Move to the next cell in the row and select its content,Tab key,Tab key,Work with tables,editor,,
+table.previous-cell,tables,Move to the previous cell in the row and select its content,Shift+Tab,Shift+Tab,Work with tables,editor,,
+table.row-first,tables,Move to the first cell in the row,Alt+Home,Control+Home,Work with tables,editor,,
+table.row-last,tables,Move to the last cell in the row,Alt+End,Control+End,Work with tables,editor,,
+table.column-first,tables,Move to the first cell in the column,Alt+Page up,Control+Page up,Work with tables,editor,,
+table.column-last,tables,Move to the last cell in the column,Alt+Page down,Control+Page down,Work with tables,editor,,
+table.previous-row,tables,Move to the previous row,Up arrow key,Up arrow key,Work with tables,editor,,
+table.next-row,tables,Move to the next row,Down arrow key,Down arrow key,Work with tables,editor,,
+table.move-row-up,tables,Move one row up,Alt+Shift+Up arrow key,,Work with tables,editor,,Moves the row (or the paragraphs outside a table: outline.move-up)
+table.move-row-down,tables,Move one row down,Alt+Shift+Down arrow key,,Work with tables,editor,,
+table.add-row,tables,Add a new row to the bottom of the table,,"Tab key, at the end of the last row",Work with tables,editor,,
+table.insert-row,tables,Insert a row,,Cmd+Control+I,Work with tables,editor,,Above the current row
+table.select-extend,tables,Extend a selection to adjacent cells,Shift+Arrow keys,Shift+Arrow keys,Select table content,editor,,
+table.select-column,tables,Select a column,"Select the top or bottom cell of the column, and then press Shift+Page up or Page down",,Select table content,editor,,
+table.select-row,tables,Select a row,"Select the first or last cell in the row, and then press Shift+Alt+End or Home","Select the first or last cell in the row, and then press Shift+Alt+End or Home",Select table content,editor,,
+table.select-table,tables,Select the whole table,"Alt+5 on the numeric keypad, with Num Lock switched off",,Select table content,editor,,
+table.new-paragraph,tables,Insert a new paragraph in a cell,Enter,Return,Work with tables,editor,,
+table.tab-char,tables,Insert a tab character in a cell,Ctrl+Tab,Option+Tab,Work with tables,browser,"Ctrl+Alt+Shift+Tab (Windows, Linux)","Windows, Linux: Ctrl+Tab selects the next browser tab; reaches the editor in an installed app or in full screen. macOS Option+Tab works"
+table.resize-ruler,tables,Retain the column sizes to the right and change the table width,,Drag the column boundary in the ruler,Resize table columns,mouse,,
+table.resize-ruler.single,tables,Move a single column line and retain the table width,,Shift+Drag the column boundary in the ruler,Resize table columns,mouse,,
+table.resize-ruler.equal,tables,Equally resize all columns to the right and retain the table width,,Cmd+Shift+Drag the column boundary in the ruler,Resize table columns,mouse,,
+table.resize-ruler.proportional,tables,Proportionally resize all columns to the right and retain the table width,,Cmd+Drag the column boundary in the ruler,Resize table columns,mouse,,
+table.resize-direct,tables,Move a single column line and retain the table width,,Drag the column boundary,Resize table columns,mouse,,
+table.resize-direct.keep,tables,Retain column sizes to the right and change the table width,,Shift+Drag the column boundary,Resize table columns,mouse,,
+table.resize-direct.equal,tables,Equally resize all columns to the right and retain the table width,,Cmd+Shift+Drag the column boundary,Resize table columns,mouse,,
+table.resize-direct.proportional,tables,Proportionally resize all columns to the right and retain the table width,,Cmd+Drag the column boundary,Resize table columns,mouse,,
+review.comment,review,Insert a comment,Ctrl+Alt+M,Cmd+Option+A,Review a document,editor,,
+review.track-changes,review,Turn change tracking on or off,Ctrl+Shift+E,Cmd+Shift+E,Review a document,editor,,
+review.close-pane,review,Close the Reviewing Pane,Alt+Shift+C,,Review a document,editor,,Closes the comments pane
+review.comments-list,review,Show list of comments,"Alt, R, P, 1, L",,Review a document,keytips,Comments pane (left bar),"Alt, R, P opens the Comments pane (the list of comments); Word's further letters (1, L) are not needed"
+review.comment-home,review,Move to the beginning of a comment,,Home,Review a document,native,,Text field behaviour
+review.comment-end,review,Move to the end of a comment,,End,Review a document,native,,
+review.comments-first,review,Move to the beginning of the list of comments,,"Cmd+Home, in the Reviewing Pane",Review a document,editor,,In the Comments pane; Ctrl+Home on Windows and Linux
+review.comments-last,review,Move to the end of the list of comments,,"Cmd+End, in the Reviewing Pane",Review a document,editor,,In the Comments pane; Ctrl+End on Windows and Linux
+review.spelling,review,Display the Editor task pane to check spelling and grammar,F7,Cmd+Option+L or F7,Function keys,editor,,No Editor pane: selects the next misspelling and opens its suggestions
+review.next-error,review,Find the next spelling or grammatical error,Alt+F7,Option+F7,Function keys,editor,,
+review.thesaurus,review,Display the Thesaurus task pane,Shift+F7,Shift+F7,Function keys,editor,,"Offline MyThes thesaurus files: English, Arabic, Ukrainian; no French thesaurus bundled yet"
+review.translator,review,Display the Translator task pane,Alt+Shift+F7,,Function keys,absent,,No translator
+review.dictionary,review,Open the Dictionary,,Option+Shift+F7,Frequently used,absent,,
+review.language,review,Display the Language dialog box to set the proofing language,"Alt+R, U, L",,Set the proofing language,absent,Status bar > language,The Review tab has no Language command
+review.default-language,review,Set default languages,"Alt+R, L",,Set the proofing language,absent,File > Options,The Review tab has no Language command
+ref.footnote,references,Insert a footnote,Ctrl+Alt+F,Cmd+Option+F,Work with references,editor,,
+ref.endnote,references,Insert an endnote,Ctrl+Alt+D,Cmd+Option+E,Work with references,editor,,
+ref.next-footnote,references,Go to the next footnote,Alt+Shift+Right angle bracket (>),,Work with references,editor,,
+ref.previous-footnote,references,Go to the previous footnote,Alt+Shift+Left angle bracket (<),,Work with references,editor,,
+ref.mark-toc,references,Mark a table of contents entry,Alt+Shift+O,,Work with references,absent,,No TC fields
+ref.mark-citation,references,Mark a table of authorities entry (citation),Alt+Shift+I,,Work with references,absent,,No table of authorities
+ref.citation-options,references,Choose citation options,"Alt+Shift+F12, Spacebar",,Work with references,absent,,
+ref.mark-index,references,Mark an index entry,Alt+Shift+X,,Work with references,absent,,No index
+ref.toc-button,references,Select the Table of Contents button in the Table of Contents container,Alt+Shift+F12,,Function keys,absent,,
+ref.bookmark,references,Display the Bookmark dialog box,Ctrl+Shift+F5,Cmd+Shift+F5,Function keys,editor,,
+merge.preview,mail merge,Preview the mail merge,Alt+Shift+K,,Perform a mail merge,editor,Mailings > Preview Results,"Recipients from a CSV or XLSX file (Mailings > Select Recipients); First, Previous, Next, Last record"
+merge.merge,mail merge,Merge a document,Alt+Shift+N,,Perform a mail merge,editor,Mailings > Finish & Merge > Edit Individual Documents,Downloads one .docx with a section per record (at most 100 records)
+merge.print,mail merge,Print the merged document,Alt+Shift+M,,Perform a mail merge,editor,Mailings > Finish & Merge > Merge to PDF,"Downloads one PDF of the merged records, to print; One PDF per Record is in the same menu"
+merge.edit-data,mail merge,Edit a mail-merge data document,Alt+Shift+E,,Perform a mail merge,editor,Mailings > Edit Recipient List,Opens the recipient list in a spreadsheet; without recipients it asks for the file
+merge.field,mail merge,Insert a merge field,Alt+Shift+F,,Perform a mail merge,editor,Mailings > Insert Merge Field,Opens the list of the fields of the recipients
+field.date,fields,Insert a DATE field,Alt+Shift+D,Control+Shift+D,Work with fields,editor,,
+field.time,fields,Insert a TIME field,Alt+Shift+T,Control+Shift+T,Work with fields,editor,,
+field.page,fields,Insert a PAGE field,Alt+Shift+P,Control+Shift+P,Work with fields,editor,,
+field.listnum,fields,Insert a LISTNUM field,Ctrl+Alt+L,Cmd+Option+Shift+L,Work with fields,absent,,No LISTNUM field
+field.empty,fields,Insert an empty field,Ctrl+F9,Cmd+F9,Work with fields,editor,,The field code is shown with the cursor inside (a selection becomes the code); F9 computes the result and shows it
+field.update-link,fields,Update the linked information in a Word source document,Ctrl+Shift+F7,Cmd+Shift+F7,Work with fields,absent,,No linked documents
+field.update,fields,Update the selected fields,F9,F9,Work with fields,editor,,
+field.unlink,fields,Unlink a field,Ctrl+Shift+F9,Cmd+Shift+F9,Work with fields,editor,,
+field.toggle-code,fields,Switch between a selected field code and its result,Shift+F9,Shift+F9,Work with fields,editor,,
+field.toggle-all-codes,fields,Switch between all field codes and their results,Alt+F9,Option+F9,Work with fields,editor,,
+field.run-button,fields,Run GOTOBUTTON or MACROBUTTON from a field displaying field results,Alt+Shift+F9,Option+Shift+F9,Work with fields,absent,,
+field.next,fields,Go to the next field,F11,,Work with fields,editor,,macOS: F11 shows the desktop
+field.next.alt-f1,fields,Move to the next field,Alt+F1,,Function keys,editor,,
+field.previous,fields,Go to the previous field,Shift+F11,,Work with fields,editor,,
+field.previous.alt-shift-f1,fields,Move to the previous field,Alt+Shift+F1,,Function keys,editor,,
+field.lock,fields,Lock a field,Ctrl+F11,Cmd+F11,Work with fields,editor,,F9 skips a locked field. The lock lasts for the session: it is not saved in the .docx yet (the editor file format has no fldLock)
+field.unlock,fields,Unlock a field,Ctrl+Shift+F11,Cmd+Shift+F11,Work with fields,editor,,See field.lock
+char.line-break,special characters,Insert a line break,Shift+Enter,Shift+Return,Insert special characters,editor,,
+char.page-break,special characters,Insert a page break,Ctrl+Enter,Cmd+Return,Insert special characters,editor,,
+char.column-break,special characters,Insert a column break,Ctrl+Shift+Enter,Cmd+Shift+Return,Insert special characters,editor,,
+char.em-dash,special characters,Insert an em dash,Ctrl+Alt+Minus sign (on the numeric keypad),,Insert special characters,editor,,macOS: Shift+Option+Minus from the keyboard layout
+char.en-dash,special characters,Insert an en dash,Ctrl+Minus sign (on the numeric keypad),,Insert special characters,editor,,macOS: Option+Minus from the keyboard layout
+char.optional-hyphen,special characters,Insert an optional hyphen,Ctrl+Alt+Minus sign (-),Cmd+Option+Minus sign (-),Insert special characters,editor,,
+char.nonbreaking-hyphen,special characters,Insert a nonbreaking hyphen,Shift+Alt+Minus sign (-),Shift+Option+Minus sign (-),Insert special characters,editor,,Ctrl+Shift+Minus (older Word) is now subscript
+char.nonbreaking-space,special characters,Insert a nonbreaking space,Ctrl+Shift+Spacebar,Option+Spacebar,Insert special characters,editor,,
+char.copyright,special characters,Insert a copyright symbol,"Press (, C, )","Press (, C, )",Insert special characters,editor,,AutoCorrect
+char.registered,special characters,Insert a registered trademark symbol,Ctrl+Alt+R,Option+R,Insert special characters,editor,,macOS: from the keyboard layout
+char.trademark,special characters,Insert a trademark symbol,Ctrl+Alt+T,Option+2,Insert special characters,editor,,macOS: from the keyboard layout
+char.ellipsis,special characters,Insert an ellipsis,Ctrl+Alt+Period (.),,Insert special characters,editor,,
+char.unicode,special characters,Insert the Unicode character for the specified Unicode (hexadecimal) character code,"The character code, then press Alt+X",,Insert special characters,editor,,
+char.ansi,special characters,Insert the ANSI character for the specified ANSI (decimal) character code,Alt+the character code (on the numeric keypad),,Insert special characters,native,,Windows input method
+intl.grave,international,"Insert à, è, ì, ò, ù, À, È, Ì, Ò, Ù","Ctrl+Grave accent (`), the letter",,Insert international characters,editor,,US layout key names; macOS: Option dead keys of the layout
+intl.acute,international,"Insert á, é, í, ó, ú, ý, Á, É, Í, Ó, Ú, Ý","Ctrl+Single quotation mark ('), the letter",,Insert international characters,editor,,
+intl.circumflex,international,"Insert â, ê, î, ô, û, Â, Ê, Î, Ô, Û","Ctrl+Shift+Caret (^), the letter",,Insert international characters,editor,,
+intl.tilde,international,"Insert ã, ñ, õ, Ã, Ñ, Õ","Ctrl+Shift+Tilde (~), the letter",,Insert international characters,editor,,
+intl.umlaut,international,"Insert ä, ë, ï, ö, ü, ÿ, Ä, Ë, Ï, Ö, Ü, Ÿ","Ctrl+Shift+Colon (:), the letter",,Insert international characters,editor,,
+intl.ring,international,"Insert å, Å","Ctrl+Shift+At sign (@), a or A",,Insert international characters,editor,,
+intl.ae,international,"Insert æ, Æ","Ctrl+Shift+Ampersand (&), a or A",,Insert international characters,editor,,
+intl.oe,international,"Insert œ, Œ","Ctrl+Shift+Ampersand (&), o or O",,Insert international characters,editor,,
+intl.cedilla,international,"Insert ç, Ç","Ctrl+Comma (,), c or C",,Insert international characters,editor,,
+intl.eth,international,"Insert ð, Ð","Ctrl+Single quotation mark ('), d or D",,Insert international characters,editor,,
+intl.slash-o,international,"Insert ø, Ø","Ctrl+Forward slash (/), o or O",,Insert international characters,editor,,
+intl.inverted-question,international,Insert ¿,Ctrl+Alt+Shift+Question mark (?),,Insert international characters,editor,,
+intl.inverted-exclamation,international,Insert ¡,Ctrl+Alt+Shift+Exclamation point (!),,Insert international characters,editor,,
+intl.sharp-s,international,Insert ß,"Ctrl+Shift+Ampersand (&), s",,Insert international characters,editor,,
+intl.ime-japanese,international,Switch to the Japanese Input Method Editor (IME) for a 101-key keyboard,Alt+Back quote (`),,Use Input Method Editors,native,,
+intl.ime-korean,international,Switch to the Korean Input Method Editor (IME) for a 101-key keyboard,Right Alt,,Use Input Method Editors,native,,
+intl.ime-chinese,international,Switch to the Chinese Input Method Editor (IME) for a 101-key keyboard,Ctrl+Spacebar,,Use Input Method Editors,native,,Only with a Chinese IME installed; otherwise Ctrl+Spacebar resets character formatting
+view.zoom-in,view,Zoom in,Ctrl+Plus sign (+),Cmd+Plus sign (+),Zoom and adjust view,editor,,
+view.zoom-out,view,Zoom out,Ctrl+Minus sign (-),Cmd+Minus sign (-),Zoom and adjust view,editor,,
+view.zoom-100,view,Return back to 100% zoom,Ctrl+0,Cmd+0,Zoom and adjust view,editor,,
+view.zoom-wheel,view,Zoom in and out with mouse,Ctrl+Scroll,Cmd+Scroll,Zoom and adjust view,editor,,
+view.read-mode,view,Switch to the Read Mode view,"Alt+W, F",,Switch the document view,keytips,View > Read Mode,"Read-only, ribbon folded, the text flows in pages of the window size (one page at a time, not side by side)"
+view.print-layout,view,Switch to the Print Layout view,Ctrl+Alt+P,Cmd+Option+P,Switch the document view,editor,,Also leaves the Outline and Draft views and Read Mode
+view.outline,view,Switch to the Outline view,Ctrl+Alt+O,Cmd+Option+O,Switch the document view,editor,View > Outline,Outlining tab before Home; floating objects are shown in the text flow
+view.draft,view,Switch to the Draft view,Ctrl+Alt+N,Cmd+Option+N,Switch the document view,editor,View > Draft,"No headers, footers or top margin; long pages instead of a continuous strip (page breaks start a new page); floating objects in the text flow"
+view.drawing-mode,view,Toggle drawing mode,,Cmd+Control+Z,Drawing,absent,Draw tab,No ink drawing mode
+view.read-mode.home,view,Move to the beginning of the document (Read Mode),Home,,Move through the document in Read Mode,editor,,
+view.read-mode.end,view,Move to the end of the document (Read Mode),End,,Move through the document in Read Mode,editor,,
+view.read-mode.page,view,Go to a specific page (Read Mode),"Type the page number, then press Enter",,Move through the document in Read Mode,editor,,
+view.read-mode.exit,view,Exit Read Mode,Esc,,Move through the document in Read Mode,editor,,"Back to Print Layout and the mode of before (Editing, Reviewing)"
+outline.move-up,outline,Move the selected paragraphs up,Alt+Shift+Up arrow key,Control+Shift+Up arrow key,Outline a document,editor,,Also in Print Layout
+outline.move-down,outline,Move the selected paragraphs down,Alt+Shift+Down arrow key,Control+Shift+Down arrow key,Outline a document,editor,,
+outline.expand,outline,Expand the text under a heading,Alt+Shift+Plus sign (+),Control+Shift+Plus sign (+),Outline a document,editor,,One level more under the current headings (Outline view)
+outline.collapse,outline,Collapse the text under a heading,Alt+Shift+Plus sign (+),Control+Shift+Minus sign (-),Outline a document,editor,,"One level less: body text first, then the lowest headings (Outline view). Not in Print Layout"
+outline.expand-all,outline,Expand or collapse all text or headings,Alt+Shift+A,Control+Shift+A,Outline a document,editor,,"Everything, or the headings only when everything is shown"
+outline.char-format,outline,Hide or display the character formatting,Forward slash (/) (on the numeric keypad),,Outline a document,editor,,"Outline view only; the formatting is hidden on screen, not removed"
+outline.first-line,outline,Switch between showing the first line of body text and showing all body text,Alt+Shift+L,Control+Shift+L,Outline a document,editor,Outlining > Show First Line Only,Body text paragraphs show their first line followed by an ellipsis
+outline.show-heading1,outline,Show all headings with the Heading 1 style,Alt+Shift+1,,Outline a document,editor,,
+outline.show-level,outline,Show all headings with the specified heading level,Alt+Shift+Heading level number,Control+Shift+Heading level number,Outline a document,editor,,Alt+Shift+1 to 9 in the Outline view
+outline.tab,outline,Insert a tab character,Ctrl+Tab,,Outline a document,browser,"Ctrl+Alt+Shift+Tab, or Ctrl+Tab in an installed app",Ctrl+Tab selects the next browser tab outside an installed app and full screen
+ribbon.search,ribbon,Move to the Tell Me or Search field on the Ribbon,"Alt, Q, then enter the search term",,Use the Access Keys for ribbon tabs,editor,,Title-bar command search; also Alt+Q (macOS: Ctrl+Option+Q)
+ribbon.file,ribbon,Open the File page to use Backstage view,"Alt, F",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.home,ribbon,Open the Home tab,"Alt, H",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.insert,ribbon,Open the Insert tab,"Alt, N",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.design,ribbon,Open the Design tab,"Alt, G",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.layout,ribbon,Open the Layout tab,"Alt, P",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.references,ribbon,Open the References tab,"Alt, S",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.mailings,ribbon,Open the Mailings tab,"Alt, M",,Use the Access Keys for ribbon tabs,keytips,,Mailings tab after References
+ribbon.review,ribbon,Open the Review tab,"Alt, R",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.view,ribbon,Open the View tab,"Alt, W",,Use the Access Keys for ribbon tabs,keytips,,
+ribbon.help,ribbon,Open the Help box,"Alt, F1",,Use the Access Keys for ribbon tabs,absent,F1,
+ribbon.developer,ribbon,Open the Developer box,"Alt, L",,Use the Access Keys for ribbon tabs,absent,,No Developer tab
+ribbon.keytips,ribbon,Select the active tab on the ribbon and activate the access keys,Alt or F10,,Work in the ribbon,keytips,,macOS: see docs/shortcuts.md
+ribbon.keytips.f10,ribbon,Turn KeyTips on or off,F10,,Function keys,keytips,,
+ribbon.focus-commands,ribbon,Move the focus to commands on the ribbon,Tab key or Shift+Tab,,Work in the ribbon,ribbon,,
+ribbon.groups,ribbon,Move between command groupings on the ribbon,Ctrl+Left or Right arrow key,,Work in the ribbon,ribbon,,
+ribbon.items,ribbon,Move among the items on the ribbon,Arrow keys,,Work in the ribbon,ribbon,,
+ribbon.tooltip,ribbon,Show the tooltip for the ribbon element currently in focus,Ctrl+Shift+F10,,Work in the ribbon,ribbon,,
+ribbon.activate,ribbon,Activate the selected button,Spacebar or Enter,,Work in the ribbon,ribbon,,
+ribbon.open-list,ribbon,Open the list for the selected command,Down arrow key,,Work in the ribbon,ribbon,,
+ribbon.open-menu,ribbon,Open the menu for the selected button,Alt+Down arrow key,,Work in the ribbon,ribbon,,
+ribbon.menu-next,ribbon,"When a menu or submenu is open, move to the next command",Down arrow key,,Work in the ribbon,ribbon,,
+ribbon.submenu,ribbon,Move to the submenu when a main menu is open or selected,Right arrow key,,Work in the ribbon,ribbon,,
+ribbon.collapse,ribbon,Expand or collapse the ribbon,Ctrl+F1,Cmd+Option+R,Work in the ribbon,editor,,
+ribbon.context-menu,ribbon,Open the context menu,Shift+F10 or the Windows Menu key,Shift+F10,Work in the ribbon,editor,,
+ribbon.selection-pane,ribbon,Display the Selection task pane,Alt+F10,,Function keys,editor,,"Objects of the document, front first: select, rename, show / hide (saved as hidden), Show All, Hide All, Bring Forward, Send Backward. No drag and drop in the list"
+ribbon.actions-menu,ribbon,Display the menu or message for available actions,Alt+Shift+F10,,Function keys,editor,,Opens the paste options after a paste
+ribbon.macros,ribbon,Display the Macro dialog box,Alt+F8,Option+F8,Function keys,editor,,Opens the macros dialog
+ribbon.vba,ribbon,Open the Microsoft Visual Basic for Applications editor,Alt+F11,Option+F11,Function keys,editor,,"Opens the macros editor (JavaScript, no VBA)"

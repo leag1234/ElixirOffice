@@ -1,0 +1,671 @@
+From 322058bb2e62d3415f8752e8ec860652d4a6f541 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:18:15 +0200
+Subject: [PATCH 3/4] feat(ai): add the command bar and the AI settings and
+ journal dialog
+
+Floating command bar docked over the document: instruction, scope
+(selection or whole document), plan and steps, Accept / Discard, note
+for changes Word cannot track. Settings and journal dialog with
+connection test and JSON export. Plain DOM with injected styles and the
+editor's theme variables; icons from Fluent UI System Icons (MIT).
+
+[ai]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/common/main/lib/elixir-ai/Icons.js |  29 ++
+ apps/common/main/lib/elixir-ai/View.js  | 604 ++++++++++++++++++++++++
+ 2 files changed, 633 insertions(+)
+ create mode 100644 apps/common/main/lib/elixir-ai/Icons.js
+ create mode 100644 apps/common/main/lib/elixir-ai/View.js
+
+diff --git a/apps/common/main/lib/elixir-ai/Icons.js b/apps/common/main/lib/elixir-ai/Icons.js
+new file mode 100644
+index 0000000000..73b408f75b
+--- /dev/null
++++ b/apps/common/main/lib/elixir-ai/Icons.js
+@@ -0,0 +1,29 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Icon paths from Fluent UI System Icons (https://github.com/microsoft/fluentui-system-icons),
++ * Copyright (c) 2020 Microsoft Corporation, MIT License. 24px regular variants:
++ * ic_fluent_sparkle_24_regular, ic_fluent_settings_24_regular, ic_fluent_history_24_regular.
++ */
++
++define([], function () {
++    'use strict';
++    var ElixirAI = (window.Common = window.Common || {}).ElixirAI = window.Common.ElixirAI || {};
++    var PATHS = {
++        sparkle: 'M8.66535 15.7345C8.90969 15.9075 9.20192 15.9999 9.50129 15.9989V15.9949C9.78358 15.9955 10.0598 15.9132 10.2957 15.7582C10.5316 15.6031 10.7168 15.3822 10.8283 15.1229L11.4413 13.2589C11.5829 12.8366 11.8207 12.4531 12.1361 12.1386C12.4514 11.8241 12.8356 11.5873 13.2583 11.4469L15.0363 10.8689C15.3227 10.7683 15.5701 10.5799 15.7432 10.3305C15.9164 10.0812 16.0065 9.7836 16.0007 9.48009C15.9949 9.17659 15.8936 8.88262 15.7111 8.64003C15.5286 8.39744 15.2743 8.21858 14.9843 8.12889L13.2293 7.55889C12.8048 7.41763 12.419 7.1793 12.1027 6.86283C11.7864 6.54637 11.5483 6.1605 11.4073 5.73589L10.8293 3.95889C10.7285 3.67586 10.542 3.43127 10.2958 3.25908C10.0496 3.0869 9.7559 2.99567 9.45547 2.99809C9.15504 3.00051 8.86282 3.09645 8.61942 3.27258C8.37602 3.44871 8.19353 3.69628 8.09729 3.98089L7.51429 5.77289C7.37371 6.18515 7.14135 6.56012 6.83474 6.8695C6.52813 7.17888 6.15528 7.4146 5.74429 7.55889L3.96729 8.12989C3.75592 8.20382 3.56463 8.32589 3.40855 8.48647C3.25247 8.64704 3.13587 8.84172 3.06798 9.05511C3.00008 9.2685 2.98274 9.49475 3.01733 9.716C3.05193 9.93724 3.1375 10.1474 3.26729 10.3299C3.44418 10.5789 3.69508 10.7657 3.98429 10.8639L5.73829 11.4329C6.16392 11.5753 6.55049 11.815 6.86729 12.1329C6.95236 12.2173 7.03186 12.3072 7.10529 12.4019C7.30447 12.6597 7.45833 12.9495 7.56029 13.2589L8.13829 15.0339C8.23676 15.3166 8.42102 15.5615 8.66535 15.7345ZM8.29129 11.4849C8.17979 11.3392 8.05851 11.2012 7.92829 11.0719H7.93129C7.44841 10.5886 6.85948 10.2247 6.21129 10.0089L4.61129 9.50089L6.22229 8.97689C6.85983 8.75615 7.43806 8.39176 7.91229 7.91189C8.38447 7.42897 8.74047 6.84487 8.95329 6.20389L9.46829 4.62189L9.98429 6.20889C10.1997 6.85585 10.5633 7.44351 11.0462 7.92497C11.529 8.40643 12.1177 8.76837 12.7653 8.98189L14.3843 9.50389L12.7953 10.0189C12.1489 10.2338 11.5616 10.5965 11.08 11.0782C10.5984 11.56 10.2359 12.1474 10.0213 12.7939L9.50629 14.3759L8.99129 12.7909C8.83406 12.3189 8.59732 11.8772 8.29129 11.4849ZM16.332 20.7819C16.1415 20.6461 15.9981 20.4541 15.922 20.2329L15.594 19.2259C15.5302 19.0344 15.4231 18.8602 15.281 18.7169C15.1385 18.574 14.9645 18.4664 14.773 18.4029L13.782 18.0799C13.5516 18.0026 13.3516 17.8541 13.211 17.6559C13.0737 17.4636 13.0002 17.2331 13.001 16.9969C13.0013 16.7591 13.0757 16.5274 13.214 16.3339C13.3512 16.1394 13.5466 15.9934 13.772 15.9169L14.778 15.5909C14.965 15.5245 15.1343 15.4162 15.273 15.2742C15.4117 15.1322 15.516 14.9604 15.578 14.7719L15.902 13.7799C15.9782 13.5557 16.1222 13.3606 16.3141 13.2218C16.5059 13.0829 16.7362 13.0071 16.973 13.0048C17.2099 13.0025 17.4416 13.0738 17.6361 13.2089C17.8306 13.344 17.9784 13.5362 18.059 13.7589L18.388 14.7729C18.4524 14.963 18.5599 15.1356 18.7022 15.2771C18.8445 15.4187 19.0176 15.5254 19.208 15.5889L20.2 15.9119C20.4287 15.9834 20.629 16.1251 20.7727 16.3169C20.9163 16.5086 20.9959 16.7408 21.0002 16.9803C21.0045 17.2199 20.9333 17.4547 20.7967 17.6516C20.6601 17.8484 20.4649 17.9972 20.239 18.0769L19.225 18.4059C19.0349 18.4707 18.8622 18.5781 18.72 18.7199C18.5777 18.8627 18.4705 19.0366 18.407 19.2279L18.085 20.2169C18.0075 20.4472 17.8586 20.6469 17.66 20.7869C17.468 20.9249 17.2375 20.9991 17.001 20.9989C16.7607 20.9989 16.5265 20.9229 16.332 20.7819ZM15.3014 16.999C15.6943 17.1386 16.051 17.3646 16.3452 17.6602C16.6394 17.956 16.8635 18.314 17.001 18.7079C17.1399 18.3158 17.3646 17.9597 17.6587 17.6656C17.9528 17.3715 18.3089 17.1468 18.701 17.0079C18.3026 16.8685 17.9406 16.6412 17.642 16.3429C17.3469 16.049 17.1217 15.6926 16.983 15.2999C16.8449 15.6898 16.6223 16.0444 16.3312 16.3383C16.0407 16.6316 15.689 16.8572 15.3014 16.999Z',
++        settings: 'M12.0122 2.25C12.7462 2.25846 13.4773 2.34326 14.1937 2.50304C14.5064 2.57279 14.7403 2.83351 14.7758 3.15196L14.946 4.67881C15.0231 5.37986 15.615 5.91084 16.3206 5.91158C16.5103 5.91188 16.6979 5.87238 16.8732 5.79483L18.2738 5.17956C18.5651 5.05159 18.9055 5.12136 19.1229 5.35362C20.1351 6.43464 20.8889 7.73115 21.3277 9.14558C21.4223 9.45058 21.3134 9.78203 21.0564 9.9715L19.8149 10.8866C19.4607 11.1468 19.2516 11.56 19.2516 11.9995C19.2516 12.4389 19.4607 12.8521 19.8157 13.1129L21.0582 14.0283C21.3153 14.2177 21.4243 14.5492 21.3297 14.8543C20.8911 16.2685 20.1377 17.5649 19.1261 18.6461C18.9089 18.8783 18.5688 18.9483 18.2775 18.8206L16.8712 18.2045C16.4688 18.0284 16.0068 18.0542 15.6265 18.274C15.2463 18.4937 14.9933 18.8812 14.945 19.3177L14.7759 20.8444C14.741 21.1592 14.5122 21.4182 14.204 21.4915C12.7556 21.8361 11.2465 21.8361 9.79803 21.4915C9.48991 21.4182 9.26105 21.1592 9.22618 20.8444L9.05736 19.32C9.00777 18.8843 8.75434 18.498 8.37442 18.279C7.99451 18.06 7.5332 18.0343 7.1322 18.2094L5.72557 18.8256C5.43422 18.9533 5.09403 18.8833 4.87678 18.6509C3.86462 17.5685 3.11119 16.2705 2.6732 14.8548C2.57886 14.5499 2.68786 14.2186 2.94485 14.0293L4.18818 13.1133C4.54232 12.8531 4.75147 12.4399 4.75147 12.0005C4.75147 11.561 4.54232 11.1478 4.18771 10.8873L2.94516 9.97285C2.6878 9.78345 2.5787 9.45178 2.67337 9.14658C3.11212 7.73215 3.86594 6.43564 4.87813 5.35462C5.09559 5.12236 5.43594 5.05259 5.72724 5.18056L7.12762 5.79572C7.53056 5.97256 7.9938 5.94585 8.37577 5.72269C8.75609 5.50209 9.00929 5.11422 9.05817 4.67764L9.22824 3.15196C9.26376 2.83335 9.49786 2.57254 9.8108 2.50294C10.5281 2.34342 11.26 2.25865 12.0122 2.25ZM12.0124 3.7499C11.5583 3.75524 11.1056 3.79443 10.6578 3.86702L10.5489 4.84418C10.4471 5.75368 9.92003 6.56102 9.13042 7.01903C8.33597 7.48317 7.36736 7.53903 6.52458 7.16917L5.62629 6.77456C5.05436 7.46873 4.59914 8.25135 4.27852 9.09168L5.07632 9.67879C5.81513 10.2216 6.25147 11.0837 6.25147 12.0005C6.25147 12.9172 5.81513 13.7793 5.0771 14.3215L4.27805 14.9102C4.59839 15.752 5.05368 16.5361 5.626 17.2316L6.53113 16.8351C7.36923 16.4692 8.33124 16.5227 9.12353 16.9794C9.91581 17.4361 10.4443 18.2417 10.548 19.1526L10.657 20.1365C11.5466 20.2878 12.4555 20.2878 13.3451 20.1365L13.4541 19.1527C13.5549 18.2421 14.0828 17.4337 14.876 16.9753C15.6692 16.5168 16.6332 16.463 17.4728 16.8305L18.3772 17.2267C18.949 16.5323 19.4041 15.7495 19.7247 14.909L18.9267 14.3211C18.1879 13.7783 17.7516 12.9162 17.7516 11.9995C17.7516 11.0827 18.1879 10.2206 18.9258 9.67847L19.7227 9.09109C19.4021 8.25061 18.9468 7.46784 18.3748 6.77356L17.4783 7.16737C17.113 7.32901 16.7178 7.4122 16.3187 7.41158C14.849 7.41004 13.6155 6.30355 13.4551 4.84383L13.3462 3.8667C12.9007 3.7942 12.4526 3.75512 12.0124 3.7499ZM11.9997 8.24995C14.0708 8.24995 15.7497 9.92888 15.7497 12C15.7497 14.071 14.0708 15.75 11.9997 15.75C9.92863 15.75 8.2497 14.071 8.2497 12C8.2497 9.92888 9.92863 8.24995 11.9997 8.24995ZM11.9997 9.74995C10.7571 9.74995 9.7497 10.7573 9.7497 12C9.7497 13.2426 10.7571 14.25 11.9997 14.25C13.2423 14.25 14.2497 13.2426 14.2497 12C14.2497 10.7573 13.2423 9.74995 11.9997 9.74995Z',
++        history: 'M12 4.5C16.1421 4.5 19.5 7.85786 19.5 12C19.5 16.1421 16.1421 19.5 12 19.5C7.85786 19.5 4.5 16.1421 4.5 12C4.5 11.6236 4.52772 11.2538 4.58123 10.8923C4.64845 10.4382 4.31609 10 3.85708 10C3.48623 10 3.161 10.2562 3.10471 10.6228C3.03576 11.0718 3 11.5317 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C9.69494 3 7.59227 3.86656 6 5.29168V4.25C6 3.83579 5.66421 3.5 5.25 3.5C4.83579 3.5 4.5 3.83579 4.5 4.25V7.25C4.5 7.66421 4.83579 8 5.25 8H8.25C8.66421 8 9 7.66421 9 7.25C9 6.83579 8.66421 6.5 8.25 6.5H6.90093C8.23907 5.25883 10.0309 4.5 12 4.5ZM12.5 7.75C12.5 7.33579 12.1642 7 11.75 7C11.3358 7 11 7.33579 11 7.75V12.25C11 12.6642 11.3358 13 11.75 13H14.75C15.1642 13 15.5 12.6642 15.5 12.25C15.5 11.8358 15.1642 11.5 14.75 11.5H12.5V7.75Z'
++    };
++    ElixirAI.Icons = {
++        paths: PATHS,
++        svg: function (name, size) {
++            return '<svg width="' + (size || 24) + '" height="' + (size || 24) + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="' + PATHS[name] + '"/></svg>';
++        },
++        // data: URL usable as a CSS mask (the icon then takes the current text color of the theme)
++        maskUrl: function (name) {
++            return 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="' + PATHS[name] + '"/></svg>') + '")';
++        }
++    };
++    return ElixirAI.Icons;
++});
+diff --git a/apps/common/main/lib/elixir-ai/View.js b/apps/common/main/lib/elixir-ai/View.js
+new file mode 100644
+index 0000000000..dfe289d983
+--- /dev/null
++++ b/apps/common/main/lib/elixir-ai/View.js
+@@ -0,0 +1,604 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Elixir AI user interface: the floating command bar over the document and the settings /
++ * journal dialog. Plain DOM, self-contained styles (injected once), theme colors through the
++ * editor's CSS variables, so the module does not touch the editor's LESS or templates.
++ */
++
++define([
++    'common/main/lib/elixir-ai/Core',
++    'common/main/lib/elixir-ai/Icons'
++], function () {
++    'use strict';
++
++    var ElixirAI = window.Common.ElixirAI;
++
++    // ---------------------------------------------------------------------------------------------
++    // Strings (en, fr)
++    // ---------------------------------------------------------------------------------------------
++
++    var STRINGS = {
++        en: {
++            tab: 'Elixir', ask: 'Ask Elixir', settings: 'AI settings', journal: 'AI journal',
++            askHint: 'Ask Elixir to change the document structure', settingsHint: 'Model connection and AI journal',
++            placeholder: 'Ask Elixir to change this document… e.g. “Put this section in two columns”',
++            scopeSelection: 'Selection', scopeDocument: 'Whole document',
++            send: 'Send', stop: 'Stop', accept: 'Accept', discard: 'Discard', close: 'Close',
++            notConfigured: 'Elixir AI is not configured: no request is sent until you set a model endpoint.',
++            configure: 'Configure…', working: 'Working…', reading: 'Reading the document…',
++            done: 'Done. Changes are shown as tracked changes.', doneUntracked: 'Done.', noChange: 'No change was made.',
++            accepted: 'Changes accepted.', discarded: 'Changes discarded.',
++            discardedReject: 'The document changed since the AI action: tracked changes were rejected, untracked layout changes were kept.',
++            failed: 'The action failed and was reverted: ', cancelled: 'Cancelled. Nothing was changed.',
++            untracked: 'Not trackable in Word',
++            shortcut: 'Shortcut', footer: 'Context sent: the selection, or the whole document when nothing is selected.',
++            // settings dialog
++            dlgTitle: 'Elixir AI settings', endpoint: 'Endpoint URL (OpenAI-compatible)', apiKey: 'API key', model: 'Model',
++            extra: 'Extra request parameters (JSON, optional)', rounds: 'Maximum tool rounds',
++            privacy: 'Stored in this browser only (localStorage). The key is sent only to the endpoint above, never elsewhere, never logged.',
++            save: 'Save', test: 'Test connection', clear: 'Remove settings', saved: 'Saved.',
++            testing: 'Testing…', testOk: 'Connection OK', journalTitle: 'AI journal (stored locally in this browser)',
++            exportJ: 'Export JSON', clearJ: 'Clear journal', emptyJ: 'No AI call yet.', invalidUrl: 'The endpoint must start with http:// or https://',
++            invalidJson: 'Extra parameters must be a JSON object.',
++            when: 'When', prompt: 'Instruction', outcome: 'Result', time: 'Time', tokens: 'Tokens', cost: 'Est. cost'
++        },
++        fr: {
++            tab: 'Elixir', ask: 'Demander à Elixir', settings: 'Réglages IA', journal: 'Journal IA',
++            askHint: 'Demander à Elixir de modifier la structure du document', settingsHint: 'Connexion au modèle et journal IA',
++            placeholder: 'Demandez à Elixir de modifier ce document… ex. « Mets cette section en deux colonnes »',
++            scopeSelection: 'Sélection', scopeDocument: 'Document entier',
++            send: 'Envoyer', stop: 'Arrêter', accept: 'Accepter', discard: 'Annuler les changements', close: 'Fermer',
++            notConfigured: 'Elixir IA n’est pas configurée : aucune requête n’est envoyée tant qu’aucun modèle n’est réglé.',
++            configure: 'Configurer…', working: 'En cours…', reading: 'Lecture du document…',
++            done: 'Terminé. Les changements apparaissent en suivi des modifications.', doneUntracked: 'Terminé.', noChange: 'Aucun changement.',
++            accepted: 'Changements acceptés.', discarded: 'Changements annulés.',
++            discardedReject: 'Le document a changé depuis l’action IA : les révisions ont été refusées, la mise en page non suivie a été conservée.',
++            failed: 'L’action a échoué et a été annulée : ', cancelled: 'Interrompu. Rien n’a été modifié.',
++            untracked: 'Non suivable dans Word',
++            shortcut: 'Raccourci', footer: 'Contexte envoyé : la sélection, ou tout le document si rien n’est sélectionné.',
++            dlgTitle: 'Réglages Elixir IA', endpoint: 'URL du service (compatible OpenAI)', apiKey: 'Clé d’API', model: 'Modèle',
++            extra: 'Paramètres de requête supplémentaires (JSON, facultatif)', rounds: 'Nombre maximal de tours d’outils',
++            privacy: 'Enregistré dans ce navigateur uniquement (localStorage). La clé n’est envoyée qu’au service ci-dessus, jamais ailleurs, jamais journalisée.',
++            save: 'Enregistrer', test: 'Tester la connexion', clear: 'Effacer les réglages', saved: 'Enregistré.',
++            testing: 'Test en cours…', testOk: 'Connexion OK', journalTitle: 'Journal IA (stocké localement dans ce navigateur)',
++            exportJ: 'Exporter (JSON)', clearJ: 'Vider le journal', emptyJ: 'Aucun appel IA pour l’instant.', invalidUrl: 'L’URL doit commencer par http:// ou https://',
++            invalidJson: 'Les paramètres supplémentaires doivent être un objet JSON.',
++            when: 'Date', prompt: 'Consigne', outcome: 'Résultat', time: 'Durée', tokens: 'Jetons', cost: 'Coût estimé'
++        }
++    };
++
++    var lang = 'en';
++    ElixirAI.setLang = function (l) { lang = (l || 'en').toLowerCase().split(/[-_]/)[0] === 'fr' ? 'fr' : 'en'; };
++    var t = ElixirAI.t = function (k) { return (STRINGS[lang] && STRINGS[lang][k]) || STRINGS.en[k] || k; };
++
++    function esc(s) {
++        return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) {
++            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
++        });
++    }
++
++    // ---------------------------------------------------------------------------------------------
++    // Styles
++    // ---------------------------------------------------------------------------------------------
++
++    var CSS = [
++        '.elixir-ai-icon{background:none!important;background-color:var(--text-normal,#333)!important;-webkit-mask:var(--elixir-mask) center/24px 24px no-repeat;mask:var(--elixir-mask) center/24px 24px no-repeat;}',
++        '.elixir-ai-bar{position:fixed;z-index:1001;width:640px;max-width:calc(100vw - 32px);box-sizing:border-box;background:var(--background-normal,#fff);color:var(--text-normal,#222);',
++        '  border:1px solid var(--border-regular-control,#c0c0c0);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.22);font:13px/1.4 var(--font-family-base-custom,"Segoe UI",Arial,sans-serif);padding:10px 12px;}',
++        '.elixir-ai-bar *{box-sizing:border-box;}',
++        '.elixir-ai-row{display:flex;align-items:flex-start;gap:8px;}',
++        '.elixir-ai-spark{flex:none;width:24px;height:24px;margin-top:4px;color:#7c4dff;}',
++        '.elixir-ai-bar.busy .elixir-ai-spark{animation:elixir-ai-pulse 1.2s ease-in-out infinite;}',
++        '@keyframes elixir-ai-pulse{0%,100%{opacity:1}50%{opacity:.35}}',
++        '.elixir-ai-input{flex:1;resize:none;border:none;outline:none;background:transparent;color:inherit;font:inherit;font-size:14px;min-height:32px;max-height:120px;padding:5px 2px;}',
++        '.elixir-ai-btn{flex:none;border:1px solid var(--border-regular-control,#c0c0c0);background:var(--background-normal,#fff);color:inherit;border-radius:6px;padding:4px 12px;font:inherit;cursor:pointer;height:28px;}',
++        '.elixir-ai-btn:hover{background:var(--highlight-button-hover,#e0e0e0);}',
++        '.elixir-ai-btn.primary{background:var(--background-accent-button,#446995);border-color:var(--background-accent-button,#446995);color:var(--text-inverse,#fff);}',
++        '.elixir-ai-btn[disabled]{opacity:.5;cursor:default;}',
++        '.elixir-ai-meta{display:flex;justify-content:space-between;gap:8px;margin-top:4px;color:var(--text-secondary,#777);font-size:11px;}',
++        '.elixir-ai-chip{border:1px solid var(--border-divider,#ddd);border-radius:10px;padding:0 8px;}',
++        '.elixir-ai-panel{margin-top:8px;border-top:1px solid var(--border-divider,#e0e0e0);padding-top:8px;display:none;}',
++        '.elixir-ai-panel.show{display:block;}',
++        '.elixir-ai-plan{color:var(--text-secondary,#666);white-space:pre-wrap;margin-bottom:4px;}',
++        '.elixir-ai-steps{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto;}',
++        '.elixir-ai-steps li{padding:2px 0 2px 20px;position:relative;}',
++        '.elixir-ai-steps li:before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--border-regular-control,#bbb);}',
++        '.elixir-ai-steps li.ok:before{background:#2e7d32;}.elixir-ai-steps li.err:before{background:#c62828;}',
++        '.elixir-ai-steps li .err-msg{color:#c62828;font-size:11px;display:block;}',
++        '.elixir-ai-status{margin-top:6px;}',
++        '.elixir-ai-status.error{color:#c62828;}',
++        '.elixir-ai-note{margin-top:6px;padding:4px 8px;border-radius:6px;background:var(--background-toolbar-additional,#f3f3f3);font-size:12px;}',
++        '.elixir-ai-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}',
++        '.elixir-ai-modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:1002;}',
++        '.elixir-ai-dlg{position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);width:760px;max-width:calc(100vw - 32px);max-height:calc(100vh - 48px);overflow:auto;',
++        '  background:var(--background-normal,#fff);color:var(--text-normal,#222);border:1px solid var(--border-regular-control,#c0c0c0);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.3);font:13px/1.4 var(--font-family-base-custom,"Segoe UI",Arial,sans-serif);padding:16px 20px;}',
++        '.elixir-ai-dlg h2{font-size:15px;margin:0 0 12px;font-weight:600;} .elixir-ai-dlg h3{font-size:13px;margin:18px 0 8px;font-weight:600;}',
++        '.elixir-ai-dlg label{display:block;margin:8px 0 3px;color:var(--text-secondary,#555);}',
++        '.elixir-ai-dlg input,.elixir-ai-dlg textarea{width:100%;box-sizing:border-box;border:1px solid var(--border-regular-control,#c0c0c0);border-radius:4px;padding:5px 7px;font:inherit;background:var(--background-normal,#fff);color:inherit;}',
++        '.elixir-ai-dlg .hint{font-size:11px;color:var(--text-secondary,#777);margin-top:6px;}',
++        '.elixir-ai-dlg .msg{margin-left:8px;font-size:12px;} .elixir-ai-dlg .msg.error{color:#c62828;}',
++        '.elixir-ai-dlg table{width:100%;border-collapse:collapse;font-size:12px;} .elixir-ai-dlg td,.elixir-ai-dlg th{border-bottom:1px solid var(--border-divider,#e5e5e5);padding:4px 6px;text-align:left;vertical-align:top;}',
++        '.elixir-ai-dlg pre{white-space:pre-wrap;word-break:break-word;font-size:11px;max-height:240px;overflow:auto;background:var(--background-toolbar-additional,#f5f5f5);padding:6px;margin:4px 0;}',
++        '.elixir-ai-dlg tr.entry{cursor:pointer;} .elixir-ai-dlg tr.entry:hover{background:var(--highlight-button-hover,#eee);}'
++    ].join('\n');
++
++    function injectStyles() {
++        if (document.getElementById('elixir-ai-styles')) return;
++        var st = document.createElement('style');
++        st.id = 'elixir-ai-styles';
++        st.textContent = CSS + '\n' + ['sparkle', 'settings', 'history'].map(function (n) {
++            return '.elixir-ai-icon-' + n + '{--elixir-mask:' + ElixirAI.Icons.maskUrl(n) + ';}';
++        }).join('\n');
++        document.head.appendChild(st);
++    }
++    ElixirAI.injectStyles = injectStyles;
++
++    // ---------------------------------------------------------------------------------------------
++    // Command bar
++    // ---------------------------------------------------------------------------------------------
++
++    var TOOL_LABELS = {
++        en: {
++            read_context: function () { return 'Reading the document'; },
++            insert_paragraphs: function (a) { return 'Inserting ' + (a.items || []).length + ' paragraph(s) after block ' + a.after; },
++            apply_style: function (a) { return 'Style “' + a.style + '” on ' + span(a); },
++            apply_styles: function (a) { return 'Restyling ' + (a.changes || []).length + ' range(s): ' + (a.changes || []).map(function (c) { return c.style + ' ' + span(c); }).join(', '); },
++            list_to_table: function (a) { return 'Converting the list (' + span(a) + ') into a table'; },
++            create_table: function (a) { return 'Creating a table of ' + (a.rows || []).length + ' row(s)'; },
++            set_columns: function (a) { return a.count + ' column(s) on ' + span(a); },
++            replace_text: function (a) { return 'Replacing text in block ' + a.block; }
++        },
++        fr: {
++            read_context: function () { return 'Lecture du document'; },
++            insert_paragraphs: function (a) { return 'Insertion de ' + (a.items || []).length + ' paragraphe(s) après le bloc ' + a.after; },
++            apply_style: function (a) { return 'Style « ' + a.style + ' » sur ' + span(a); },
++            apply_styles: function (a) { return 'Styles sur ' + (a.changes || []).length + ' plage(s) : ' + (a.changes || []).map(function (c) { return c.style + ' ' + span(c); }).join(', '); },
++            list_to_table: function (a) { return 'Conversion de la liste (' + span(a) + ') en tableau'; },
++            create_table: function (a) { return 'Création d’un tableau de ' + (a.rows || []).length + ' ligne(s)'; },
++            set_columns: function (a) { return a.count + ' colonne(s) sur ' + span(a); },
++            replace_text: function (a) { return 'Remplacement de texte dans le bloc ' + a.block; }
++        }
++    };
++    function span(a) {
++        if (a.from === undefined) return '';
++        return a.from === a.to ? (lang === 'fr' ? 'le bloc ' : 'block ') + a.from : (lang === 'fr' ? 'les blocs ' : 'blocks ') + a.from + '–' + a.to;
++    }
++    function toolLabel(name, args) {
++        var f = (TOOL_LABELS[lang] || TOOL_LABELS.en)[name];
++        try { return f ? f(args || {}) : name; } catch (e) { return name; }
++    }
++
++    /**
++     * host: {api, toolsetFactory(), openSettings(), shortcutLabel, isHistoryAt(index)…}
++     */
++    function CommandBar(host) {
++        this.host = host;
++        this.el = null;
++        this.setState('closed');
++        this.result = null;
++    }
++
++    CommandBar.prototype.render = function () {
++        if (this.el) return;
++        injectStyles();
++        var el = this.el = document.createElement('div');
++        el.className = 'elixir-ai-bar';
++        el.id = 'elixir-ai-bar';
++        el.setAttribute('role', 'dialog');
++        el.setAttribute('aria-label', 'Elixir AI');
++        el.innerHTML =
++            '<div class="elixir-ai-row">' +
++                '<span class="elixir-ai-spark">' + ElixirAI.Icons.svg('sparkle', 24) + '</span>' +
++                '<textarea class="elixir-ai-input" rows="1" spellcheck="true"></textarea>' +
++                '<button class="elixir-ai-btn primary" data-act="send"></button>' +
++            '</div>' +
++            '<div class="elixir-ai-meta"><span class="elixir-ai-chip elixir-ai-scope"></span><span class="elixir-ai-footer"></span></div>' +
++            '<div class="elixir-ai-panel">' +
++                '<div class="elixir-ai-plan"></div>' +
++                '<ul class="elixir-ai-steps"></ul>' +
++                '<div class="elixir-ai-status"></div>' +
++                '<div class="elixir-ai-notes"></div>' +
++                '<div class="elixir-ai-actions"></div>' +
++            '</div>';
++        document.body.appendChild(el);
++        this.input = el.querySelector('.elixir-ai-input');
++        this.btnSend = el.querySelector('[data-act=send]');
++        this.panel = el.querySelector('.elixir-ai-panel');
++
++        var me = this;
++        this.input.placeholder = t('placeholder');
++        this.btnSend.textContent = t('send');
++        el.querySelector('.elixir-ai-footer').textContent = t('footer');
++        this.btnSend.addEventListener('click', function () { me.state === 'running' ? me.stop() : me.submit(); });
++        this.input.addEventListener('input', function () {
++            me.input.style.height = 'auto';
++            me.input.style.height = Math.min(120, me.input.scrollHeight) + 'px';
++        });
++        // Keys typed in the bar belong to the bar: they must not reach the editor shortcuts.
++        el.addEventListener('keydown', function (e) {
++            if (e.key === 'Escape') { e.preventDefault(); me.state === 'running' ? me.stop() : me.close(); }
++            else if (e.key === 'Enter' && !e.shiftKey && e.target === me.input) { e.preventDefault(); if (me.state !== 'running') me.submit(); }
++            e.stopPropagation();
++        });
++        el.addEventListener('keyup', function (e) { e.stopPropagation(); });
++        el.addEventListener('keypress', function (e) { e.stopPropagation(); });
++        this.input.addEventListener('focus', function () { me.host.api && me.host.api.asc_enableKeyEvents(false); });
++        // Escape closes the bar even when the focus went back to the document
++        document.addEventListener('keydown', function (e) {
++            if (e.key !== 'Escape' || !me.isOpen() || me.el.contains(e.target)) return;
++            if (Common.Utils && Common.Utils.ModalWindow && Common.Utils.ModalWindow.isVisible()) return;
++            me.state === 'running' ? me.stop() : me.close();
++        }, true);
++        window.addEventListener('resize', function () { me.position(); });
++    };
++
++    CommandBar.prototype.position = function () {
++        if (!this.el) return;
++        var sdk = document.getElementById('editor_sdk');
++        var r = sdk ? sdk.getBoundingClientRect() : { left: 0, top: 80, width: window.innerWidth, bottom: window.innerHeight };
++        var w = Math.min(640, window.innerWidth - 32);
++        // Docked at the bottom of the document area, so the selection it works on stays visible;
++        // the progress panel grows upwards.
++        this.el.style.left = Math.max(16, r.left + (r.width - w) / 2) + 'px';
++        this.el.style.top = 'auto';
++        this.el.style.bottom = Math.max(16, window.innerHeight - r.bottom + 28) + 'px';
++    };
++
++    CommandBar.prototype.isOpen = function () { return this.state !== 'closed'; };
++
++    // The state is mirrored in data-state for automation and styling
++    CommandBar.prototype.setState = function (state) {
++        this.state = state;
++        if (this.el) this.el.setAttribute('data-state', state);
++    };
++
++    CommandBar.prototype.open = function () {
++        this.render();
++        this.position();
++        this.el.style.display = '';
++        if (this.state === 'closed') this.reset();
++        var configured = ElixirAI.Settings.isConfigured();
++        var sel = '';
++        try { sel = this.host.api.asc_GetSelectedText ? this.host.api.asc_GetSelectedText() : ''; } catch (e) {}
++        this.el.querySelector('.elixir-ai-scope').textContent = (sel && sel.replace(/\s/g, '').length) ? t('scopeSelection') : t('scopeDocument');
++        if (!configured) {
++            this.setState('unconfigured');
++            this.showPanel();
++            this.setStatus(t('notConfigured'));
++            this.setActions([{ label: t('configure'), primary: true, fn: this.host.openSettings }, { label: t('close'), fn: this.close.bind(this) }]);
++            this.input.disabled = true;
++            this.btnSend.disabled = true;
++        } else {
++            if (this.state === 'unconfigured') this.reset();
++            if (this.state !== 'review' && this.state !== 'running') this.setState('idle');
++            this.input.disabled = this.state === 'running';
++            this.btnSend.disabled = false;
++        }
++        var me = this;
++        setTimeout(function () {
++            var first = me.el.querySelector('.elixir-ai-actions .elixir-ai-btn');
++            if (!me.input.disabled) me.input.focus();
++            else if (first) first.focus();
++        }, 0);
++    };
++
++    CommandBar.prototype.reset = function () {
++        this.setState('idle');
++        this.result = null;
++        this.input.value = '';
++        this.input.disabled = false;
++        this.input.style.height = '';
++        this.btnSend.textContent = t('send');
++        this.btnSend.disabled = false;
++        this.el.classList.remove('busy');
++        this.panel.classList.remove('show');
++        this.panel.querySelector('.elixir-ai-plan').textContent = '';
++        this.panel.querySelector('.elixir-ai-steps').innerHTML = '';
++        this.panel.querySelector('.elixir-ai-notes').innerHTML = '';
++        this.setStatus('');
++        this.setActions([]);
++    };
++
++    CommandBar.prototype.close = function () {
++        if (!this.el || this.state === 'closed') return;
++        if (this.state === 'running') return;
++        // Closing while reviewing keeps the AI changes as ordinary tracked changes in the document.
++        this.el.style.display = 'none';
++        this.setState('closed');
++        this.result = null;
++        if (this.host.api) this.host.api.asc_enableKeyEvents(true);
++        this.host.onClosed && this.host.onClosed();
++    };
++
++    CommandBar.prototype.showPanel = function () { this.panel.classList.add('show'); };
++
++    CommandBar.prototype.setStatus = function (text, isError) {
++        var s = this.panel.querySelector('.elixir-ai-status');
++        s.textContent = text || '';
++        s.classList.toggle('error', !!isError);
++    };
++
++    CommandBar.prototype.setActions = function (list) {
++        var box = this.panel.querySelector('.elixir-ai-actions');
++        box.innerHTML = '';
++        list.forEach(function (a) {
++            var b = document.createElement('button');
++            b.className = 'elixir-ai-btn' + (a.primary ? ' primary' : '');
++            b.textContent = a.label;
++            if (a.id) b.setAttribute('data-act', a.id);
++            b.addEventListener('click', a.fn);
++            box.appendChild(b);
++        });
++    };
++
++    CommandBar.prototype.addStep = function (tc) {
++        var li = document.createElement('li');
++        li.textContent = toolLabel(tc.name, tc.args);
++        this.panel.querySelector('.elixir-ai-steps').appendChild(li);
++        tc._li = li;
++    };
++
++    CommandBar.prototype.endStep = function (tc) {
++        var li = tc._li;
++        if (!li) return;
++        var ok = tc.result && tc.result.ok !== false;
++        li.className = ok ? 'ok' : 'err';
++        if (!ok) {
++            var m = document.createElement('span');
++            m.className = 'err-msg';
++            m.textContent = (tc.result && tc.result.error && tc.result.error.message) || 'error';
++            li.appendChild(m);
++        }
++        delete tc._li;
++    };
++
++    CommandBar.prototype.submit = function () {
++        var text = this.input.value.trim();
++        if (!text || this.state === 'running') return;
++        if (this.state === 'review') this.finishReview(); // a new request keeps the previous result as tracked changes
++        var me = this, s = ElixirAI.Settings.get();
++        if (!ElixirAI.Settings.isConfigured(s)) { this.open(); return; }
++        var toolset = this.host.toolsetFactory();
++        this.reset();
++        this.input.value = text;
++        this.setState('running');
++        this.input.disabled = true;
++        this.btnSend.textContent = t('stop');
++        this.el.classList.add('busy');
++        this.showPanel();
++        this.setStatus(t('reading'));
++        this.abort = new AbortController();
++        ElixirAI.Orchestrator.run({
++            instruction: text, toolset: toolset, settings: s, signal: this.abort.signal,
++            onEvent: function (type, data) {
++                if (type === 'context') {
++                    me.el.querySelector('.elixir-ai-scope').textContent = data.scope === 'selection' ? t('scopeSelection') : t('scopeDocument');
++                    me.setStatus(t('working'));
++                } else if (type === 'delta') {
++                    me.panel.querySelector('.elixir-ai-plan').textContent = data.text;
++                } else if (type === 'tool:start') me.addStep(data);
++                else if (type === 'tool:end') me.endStep(data);
++            }
++        }).then(function (res) {
++            me.abort = null;
++            me.el.classList.remove('busy');
++            me.btnSend.textContent = t('send');
++            me.input.disabled = false;
++            if (!res.ok) {
++                me.setState('idle');
++                var aborted = res.entry && res.entry.outcome === 'cancelled';
++                me.setStatus(aborted ? t('cancelled') : t('failed') + (res.error && res.error.message || res.error), !aborted);
++                me.setActions([{ label: t('close'), fn: me.close.bind(me) }]);
++                return;
++            }
++            me.result = res;
++            if (res.summary) me.panel.querySelector('.elixir-ai-plan').textContent = res.summary;
++            var notes = me.panel.querySelector('.elixir-ai-notes');
++            notes.innerHTML = '';
++            res.untracked.forEach(function (n) {
++                var d = document.createElement('div');
++                d.className = 'elixir-ai-note';
++                d.textContent = t('untracked') + ' — ' + n;
++                notes.appendChild(d);
++            });
++            if (!res.changed) {
++                me.setState('idle');
++                me.setStatus(t('noChange'));
++                me.setActions([{ label: t('close'), fn: me.close.bind(me) }]);
++                return;
++            }
++            me.setState('review');
++            me.historyIndex = me.host.historyIndex();
++            var tracked = res.ctx && res.ctx.revisionsAfter && res.ctx.revisionsAfter.count > (res.ctx.revisionsBefore ? res.ctx.revisionsBefore.count : 0);
++            me.setStatus(tracked ? t('done') : t('doneUntracked'));
++            me.setActions([
++                { id: 'discard', label: t('discard'), fn: me.discard.bind(me) },
++                { id: 'accept', label: t('accept'), primary: true, fn: me.accept.bind(me) }
++            ]);
++            var acc = me.el.querySelector('[data-act=accept]');
++            acc && acc.focus();
++        });
++    };
++
++    CommandBar.prototype.stop = function () {
++        if (this.abort) this.abort.abort();
++    };
++
++    CommandBar.prototype.finishReview = function () {
++        this.setState('idle');
++        this.result = null;
++    };
++
++    CommandBar.prototype.accept = function () {
++        var me = this, res = this.result;
++        if (!res) return;
++        this.host.toolsetFactory().accept(res.ctx).then(function () {
++            me.journalOutcome(res, 'accepted');
++            me.setStatus(t('accepted'));
++            me.finishReview();
++            me.setActions([{ label: t('close'), fn: me.close.bind(me) }]);
++            setTimeout(function () { me.close(); }, 600);
++        });
++    };
++
++    CommandBar.prototype.discard = function () {
++        var me = this, res = this.result;
++        if (!res) return;
++        var ts = this.host.toolsetFactory();
++        // One undo restores the document as it was before the action, untracked layout included,
++        // as long as nothing was edited since. Otherwise only the tracked changes can be rejected.
++        var sameHistory = this.host.historyIndex() === this.historyIndex;
++        (sameHistory ? ts.undo() : ts.reject(res.ctx)).then(function () {
++            me.journalOutcome(res, sameHistory ? 'discarded' : 'discarded-reject');
++            me.setStatus(sameHistory ? t('discarded') : t('discardedReject'));
++            me.finishReview();
++            me.setActions([{ label: t('close'), fn: me.close.bind(me) }]);
++            setTimeout(function () { me.close(); }, sameHistory ? 600 : 3000);
++        });
++    };
++
++    CommandBar.prototype.journalOutcome = function (res, outcome) {
++        if (!res.entry || !res.entry.id) return;
++        res.entry.outcome = outcome;
++        ElixirAI.Journal.update(res.entry);
++    };
++
++    ElixirAI.CommandBar = CommandBar;
++
++    // ---------------------------------------------------------------------------------------------
++    // Settings and journal dialog
++    // ---------------------------------------------------------------------------------------------
++
++    function SettingsDialog(host) { this.host = host; }
++
++    SettingsDialog.prototype.open = function (focusJournal) {
++        injectStyles();
++        this.close();
++        var me = this, s = ElixirAI.Settings.get();
++        if (this.host.api) this.host.api.asc_enableKeyEvents(false);
++        var mask = this.mask = document.createElement('div');
++        mask.className = 'elixir-ai-modal-mask';
++        var dlg = this.dlg = document.createElement('div');
++        dlg.className = 'elixir-ai-dlg';
++        dlg.id = 'elixir-ai-settings';
++        dlg.setAttribute('role', 'dialog');
++        dlg.innerHTML =
++            '<h2>' + esc(t('dlgTitle')) + '</h2>' +
++            '<label for="elixir-ai-endpoint">' + esc(t('endpoint')) + '</label>' +
++            '<input id="elixir-ai-endpoint" type="url" placeholder="https://api.openai.com/v1" value="' + esc(s.endpoint) + '">' +
++            '<label for="elixir-ai-key">' + esc(t('apiKey')) + '</label>' +
++            '<input id="elixir-ai-key" type="password" autocomplete="off" value="' + esc(s.apiKey) + '">' +
++            '<label for="elixir-ai-model">' + esc(t('model')) + '</label>' +
++            '<input id="elixir-ai-model" list="elixir-ai-models" value="' + esc(s.model) + '">' +
++            '<datalist id="elixir-ai-models"><option value="gpt-4.1-mini"><option value="gpt-5.4-mini"></datalist>' +
++            '<label for="elixir-ai-extra">' + esc(t('extra')) + '</label>' +
++            '<input id="elixir-ai-extra" placeholder=\'{"reasoning_effort":"low"}\' value="' + esc(s.extraParams) + '">' +
++            '<label for="elixir-ai-rounds">' + esc(t('rounds')) + '</label>' +
++            '<input id="elixir-ai-rounds" type="number" min="1" max="20" value="' + esc(s.maxRounds) + '" style="width:90px">' +
++            '<div class="hint">' + esc(t('privacy')) + '</div>' +
++            '<div class="elixir-ai-actions" style="justify-content:flex-start">' +
++                '<button class="elixir-ai-btn primary" data-act="save">' + esc(t('save')) + '</button>' +
++                '<button class="elixir-ai-btn" data-act="test">' + esc(t('test')) + '</button>' +
++                '<button class="elixir-ai-btn" data-act="clear">' + esc(t('clear')) + '</button>' +
++                '<span class="msg"></span>' +
++            '</div>' +
++            '<h3 id="elixir-ai-journal">' + esc(t('journalTitle')) + '</h3>' +
++            '<div class="elixir-ai-actions" style="justify-content:flex-start;margin-top:0">' +
++                '<button class="elixir-ai-btn" data-act="export">' + esc(t('exportJ')) + '</button>' +
++                '<button class="elixir-ai-btn" data-act="clearj">' + esc(t('clearJ')) + '</button>' +
++            '</div>' +
++            '<div class="journal-list"></div>' +
++            '<div class="elixir-ai-actions"><button class="elixir-ai-btn" data-act="close">' + esc(t('close')) + '</button></div>';
++        document.body.appendChild(mask);
++        document.body.appendChild(dlg);
++        mask.addEventListener('click', function () { me.close(); });
++        dlg.addEventListener('keydown', function (e) { if (e.key === 'Escape') me.close(); e.stopPropagation(); });
++        dlg.addEventListener('keyup', function (e) { e.stopPropagation(); });
++        dlg.addEventListener('keypress', function (e) { e.stopPropagation(); });
++        var $ = function (sel) { return dlg.querySelector(sel); };
++        var msg = function (text, err) { var m = $('.msg'); m.textContent = text; m.classList.toggle('error', !!err); };
++        var read = function () {
++            var n = {
++                endpoint: $('#elixir-ai-endpoint').value.trim(), apiKey: $('#elixir-ai-key').value.trim(),
++                model: $('#elixir-ai-model').value.trim(), extraParams: $('#elixir-ai-extra').value.trim(),
++                maxRounds: Math.max(1, Math.min(20, parseInt($('#elixir-ai-rounds').value, 10) || 8)),
++                prices: ElixirAI.Settings.get().prices
++            };
++            if (n.endpoint && !/^https?:\/\//i.test(n.endpoint)) { msg(t('invalidUrl'), true); return null; }
++            if (n.extraParams) {
++                try { var j = JSON.parse(n.extraParams); if (!j || typeof j !== 'object' || Array.isArray(j)) throw 0; }
++                catch (e) { msg(t('invalidJson'), true); return null; }
++            }
++            return n;
++        };
++        $('[data-act=save]').addEventListener('click', function () {
++            var n = read();
++            if (n && ElixirAI.Settings.save(n)) { msg(t('saved')); me.host.onSettingsChanged && me.host.onSettingsChanged(); }
++        });
++        $('[data-act=test]').addEventListener('click', function () {
++            var n = read();
++            if (!n) return;
++            msg(t('testing'));
++            ElixirAI.Connector.chat({ settings: n, messages: [{ role: 'user', content: 'Reply with: ok' }] }).then(function (r) {
++                msg(t('testOk') + ' (' + Math.round(r.ms) + ' ms)');
++            }, function (e) { msg(String(e.message || e), true); });
++        });
++        $('[data-act=clear]').addEventListener('click', function () {
++            ElixirAI.Settings.clear();
++            me.open();
++            me.host.onSettingsChanged && me.host.onSettingsChanged();
++        });
++        $('[data-act=export]').addEventListener('click', function () {
++            ElixirAI.Journal.exportJSON().then(function (json) {
++                var a = document.createElement('a');
++                a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
++                a.download = 'elixir-ai-journal-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
++                document.body.appendChild(a); a.click();
++                setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
++            });
++        });
++        $('[data-act=clearj]').addEventListener('click', function () { ElixirAI.Journal.clear().then(function () { me.renderJournal(); }); });
++        $('[data-act=close]').addEventListener('click', function () { me.close(); });
++        this.renderJournal();
++        setTimeout(function () {
++            if (focusJournal) $('#elixir-ai-journal').scrollIntoView();
++            else $('#elixir-ai-endpoint').focus();
++        }, 0);
++    };
++
++    SettingsDialog.prototype.renderJournal = function () {
++        var box = this.dlg && this.dlg.querySelector('.journal-list');
++        if (!box) return;
++        ElixirAI.Journal.list().then(function (all) {
++            if (!all.length) { box.innerHTML = '<div class="hint">' + esc(t('emptyJ')) + '</div>'; return; }
++            var rows = all.slice(0, 100).map(function (e) {
++                var tok = e.usage ? (e.usage.prompt_tokens + ' / ' + e.usage.completion_tokens) : '';
++                var cost = (e.costUsd !== null && e.costUsd !== undefined) ? '$' + e.costUsd.toFixed(5) : '–';
++                var tools = [];
++                (e.rounds || []).forEach(function (r) { (r.tool_calls || []).forEach(function (c) { tools.push(c.name); }); });
++                return '<tr class="entry" data-id="' + e.id + '"><td>' + esc((e.ts || '').replace('T', ' ').slice(0, 19)) + '</td><td>' + esc(e.model) +
++                    '</td><td>' + esc(e.prompt) + '<div class="hint">' + esc(tools.join(', ')) + '</div></td><td>' + esc(e.outcome) + '</td><td>' + ((e.ms / 1000) || 0).toFixed(1) + ' s</td><td>' + tok + '</td><td>' + cost + '</td></tr>' +
++                    '<tr class="detail" data-for="' + e.id + '" style="display:none"><td colspan="7"><pre>' + esc(JSON.stringify(e, null, 1)) + '</pre></td></tr>';
++            }).join('');
++            box.innerHTML = '<table><thead><tr><th>' + [t('when'), t('model'), t('prompt'), t('outcome'), t('time'), t('tokens'), t('cost')].map(esc).join('</th><th>') + '</th></tr></thead><tbody>' + rows + '</tbody></table>';
++            Array.prototype.forEach.call(box.querySelectorAll('tr.entry'), function (tr) {
++                tr.addEventListener('click', function () {
++                    var d = box.querySelector('tr.detail[data-for="' + tr.getAttribute('data-id') + '"]');
++                    d.style.display = d.style.display === 'none' ? '' : 'none';
++                });
++            });
++        });
++    };
++
++    SettingsDialog.prototype.close = function () {
++        if (this.dlg) { this.dlg.remove(); this.dlg = null; }
++        if (this.mask) { this.mask.remove(); this.mask = null; }
++        if (this.host.api && !(this.host.bar && this.host.bar.isOpen())) this.host.api.asc_enableKeyEvents(true);
++    };
++
++    ElixirAI.SettingsDialog = SettingsDialog;
++
++    return ElixirAI;
++});
+-- 
+2.43.0
+

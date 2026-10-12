@@ -1,0 +1,275 @@
+From d3acd27a9684692d7df558a020219d09ca94d373 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:51:32 +0200
+Subject: [PATCH 6/7] feat(documenteditor): About in the File menu, title bar
+ fit, print title
+
+- About (version and legal notices) moves to the bottom of the File menu
+  next to Options, since the left icon rail that held it is gone.
+- The file name shows its save state as an icon only when name and
+  state do not fit before the search box.
+- The Print page title has the size of the other File menu pages.
+
+[branding]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/elixir-chrome/Backstage.js             | 13 +++++++++++--
+ .../main/app/elixir-chrome/TitleBar.js              |  7 +++++--
+ apps/documenteditor/main/locale/de.json             |  1 +
+ apps/documenteditor/main/locale/en.json             |  1 +
+ apps/documenteditor/main/locale/es.json             |  1 +
+ apps/documenteditor/main/locale/fr.json             |  1 +
+ apps/documenteditor/main/locale/it.json             |  1 +
+ apps/documenteditor/main/locale/ja.json             |  1 +
+ apps/documenteditor/main/locale/nl.json             |  1 +
+ apps/documenteditor/main/locale/pl.json             |  1 +
+ apps/documenteditor/main/locale/pt-pt.json          |  1 +
+ apps/documenteditor/main/locale/pt.json             |  1 +
+ apps/documenteditor/main/locale/ru.json             |  1 +
+ apps/documenteditor/main/locale/zh.json             |  1 +
+ .../main/resources/less/elixir-chrome.less          | 12 ++++++------
+ 15 files changed, 34 insertions(+), 10 deletions(-)
+
+diff --git a/apps/documenteditor/main/app/elixir-chrome/Backstage.js b/apps/documenteditor/main/app/elixir-chrome/Backstage.js
+index 616f2ad6de..f2f25f33c8 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/Backstage.js
++++ b/apps/documenteditor/main/app/elixir-chrome/Backstage.js
+@@ -44,7 +44,7 @@ define([
+     var STRINGS = {
+         txtHome: 'Home', txtNew: 'New', txtOpen: 'Open', txtInfo: 'Info', txtSaveCopy: 'Save a Copy', txtSaveAs: 'Save As',
+         txtDownload: 'Download', txtPrint: 'Print', txtShare: 'Share', txtExport: 'Export', txtClose: 'Close', txtOptions: 'Options',
+-        txtHelp: 'Help', txtBack: 'Back',
++        txtHelp: 'Help', txtBack: 'Back', txtAbout: 'About',
+         txtGoodMorning: 'Good morning', txtGoodAfternoon: 'Good afternoon', txtGoodEvening: 'Good evening',
+         txtMoreTemplates: 'More templates', txtMoreDocuments: 'More documents', txtRecent: 'Recent', txtName: 'Name', txtModified: 'Date modified',
+         txtNoRecent: 'Documents you open recently appear here.', txtNoMatch: 'No document matches your search.',
+@@ -181,6 +181,9 @@ define([
+             this.items['elx-export'] = addItem('fm-btn-elx-export', 'elx-export', this.txtExport, 'export', 'insertAfter', $menu.find('#fm-btn-elx-share'));
+             this.items['elx-close'] = addItem('fm-btn-elx-close', 'elx-close', this.txtClose, 'close', 'insertAfter', $menu.find('#fm-btn-elx-export'));
+             this.items['elx-close'].on('click', function () { me.onClose(); });
++            // About (legal notices) used to sit in the left icon rail, which the window no longer has
++            this.items['elx-about'] = addItem('fm-btn-elx-about', 'elx-about', this.txtAbout, 'info', 'insertBefore', $menu.find('#fm-btn-settings'));
++            this.items['elx-about'].on('click', function () { me.onAbout(); });
+ 
+             // pages
+             var addPage = function (action, cls) {
+@@ -253,7 +256,7 @@ define([
+                 'print': 'print', 'printpreview': 'print', 'elx-share': 'share', 'rights': 'people', 'elx-export': 'export',
+                 'elx-close': 'close', 'opts': 'options', 'help': 'help', 'edit': 'edit', 'file:open': 'open',
+                 'file:exit': 'close', 'close-editor': 'close', 'exit': 'folder', 'history': 'history',
+-                'protect': 'lock', 'rename': 'rename', 'switch:mobile': 'window-new'
++                'protect': 'lock', 'rename': 'rename', 'switch:mobile': 'window-new', 'elx-about': 'info'
+             })[action];
+         },
+ 
+@@ -269,6 +272,12 @@ define([
+ 
+         select: function (action) { this.fm.selectMenu(action); },
+ 
++        onAbout: function () {
++            var lm = DE.getController('LeftMenu').leftMenu;
++            this.fm.hide();
++            lm && lm.btnAbout && lm.btnAbout.toggle(true);
++        },
++
+         onClose: function () {
+             var mode = this.mode || {};
+             this.fm.hide();
+diff --git a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+index c1ee58beb4..88196809b5 100644
+--- a/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
++++ b/apps/documenteditor/main/app/elixir-chrome/TitleBar.js
+@@ -131,8 +131,10 @@ define([
+             if (!this.$doc || !this.$search) return;
+             var rtl = Common.UI.isRTL(), d = this.$doc[0].getBoundingClientRect(), s = this.$search[0].getBoundingClientRect();
+             var room = rtl ? d.right - s.right - 12 : s.left - d.left - 12;
+-            // narrow windows keep the name and show the state as an icon only
+-            this.$doc.toggleClass('elx-compact', room < 240);
++            // when the name and its state do not fit, the state shows as an icon only
++            this.$doc.removeClass('elx-compact').css('max-width', 'none');
++            var need = this.$doc[0].scrollWidth;
++            this.$doc.toggleClass('elx-compact', need > room);
+             this.$doc.css('max-width', Math.max(80, Math.floor(room)) + 'px');
+         },
+ 
+@@ -173,6 +175,7 @@ define([
+                 $st.show().attr('data-state', key).attr('title', key === 'saved' ? me.txtSavedTip : txt);
+                 $st.find('.elx-docstate-ic').html(me.icon(ic, 20));
+                 $st.find('.elx-docstate-txt').text(txt);
++                me.fitName();
+             };
+             // "Saved" settles a moment after the last change, like Word
+             if (key === 'saved' && $st.attr('data-state') === 'saving') this._stateTimer = setTimeout(apply, 700);
+diff --git a/apps/documenteditor/main/locale/de.json b/apps/documenteditor/main/locale/de.json
+index cabfaee25f..2de7eccdac 100644
+--- a/apps/documenteditor/main/locale/de.json
++++ b/apps/documenteditor/main/locale/de.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Der Anzeigename darf nicht leer sein.",
+   "DE.Views.EditListItemDialog.textValue": "Wert",
+   "DE.Views.EditListItemDialog.textValueError": "Ein Element mit demselben Wert ist bereits vorhanden.",
++  "DE.Views.ElixirBackstage.txtAbout": "Info",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Digitale Signatur hinzufügen",
+   "DE.Views.ElixirBackstage.txtBack": "Zurück",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Leeres Dokument",
+diff --git a/apps/documenteditor/main/locale/en.json b/apps/documenteditor/main/locale/en.json
+index 7c551453a9..be25324c1c 100644
+--- a/apps/documenteditor/main/locale/en.json
++++ b/apps/documenteditor/main/locale/en.json
+@@ -2672,6 +2672,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Display name must not be empty.",
+   "DE.Views.EditListItemDialog.textValue": "Value",
+   "DE.Views.EditListItemDialog.textValueError": "An item with the same value already exists.",
++  "DE.Views.ElixirBackstage.txtAbout": "About",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Add a digital signature",
+   "DE.Views.ElixirBackstage.txtBack": "Back",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Blank document",
+diff --git a/apps/documenteditor/main/locale/es.json b/apps/documenteditor/main/locale/es.json
+index 6963967020..91a9c76a35 100644
+--- a/apps/documenteditor/main/locale/es.json
++++ b/apps/documenteditor/main/locale/es.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "El nombre para mostrar no debe estar vacío.",
+   "DE.Views.EditListItemDialog.textValue": "Valor",
+   "DE.Views.EditListItemDialog.textValueError": "Ya existe un elemento con el mismo valor.",
++  "DE.Views.ElixirBackstage.txtAbout": "Acerca de",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Agregar una firma digital",
+   "DE.Views.ElixirBackstage.txtBack": "Atrás",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Documento en blanco",
+diff --git a/apps/documenteditor/main/locale/fr.json b/apps/documenteditor/main/locale/fr.json
+index 24aee081e2..c4768239f0 100644
+--- a/apps/documenteditor/main/locale/fr.json
++++ b/apps/documenteditor/main/locale/fr.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Veuillez renseigner le nom d'affichage.",
+   "DE.Views.EditListItemDialog.textValue": "Valeur",
+   "DE.Views.EditListItemDialog.textValueError": "Un élément avec la même valeur existe déjà.",
++  "DE.Views.ElixirBackstage.txtAbout": "À propos",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Ajouter une signature numérique",
+   "DE.Views.ElixirBackstage.txtBack": "Retour",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Document vierge",
+diff --git a/apps/documenteditor/main/locale/it.json b/apps/documenteditor/main/locale/it.json
+index 93692517cf..2edd0b5c47 100644
+--- a/apps/documenteditor/main/locale/it.json
++++ b/apps/documenteditor/main/locale/it.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Mostra nome non può essere vuoto.",
+   "DE.Views.EditListItemDialog.textValue": "Valore",
+   "DE.Views.EditListItemDialog.textValueError": "Esiste già un'elemento con lo stesso valore.",
++  "DE.Views.ElixirBackstage.txtAbout": "Informazioni su",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Aggiungi una firma digitale",
+   "DE.Views.ElixirBackstage.txtBack": "Indietro",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Documento vuoto",
+diff --git a/apps/documenteditor/main/locale/ja.json b/apps/documenteditor/main/locale/ja.json
+index b0dfa8d6a0..9a008a8fea 100644
+--- a/apps/documenteditor/main/locale/ja.json
++++ b/apps/documenteditor/main/locale/ja.json
+@@ -2646,6 +2646,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "表示名は空白にできません。",
+   "DE.Views.EditListItemDialog.textValue": "値",
+   "DE.Views.EditListItemDialog.textValueError": "同じ値の項目がすでに存在します。",
++  "DE.Views.ElixirBackstage.txtAbout": "バージョン情報",
+   "DE.Views.ElixirBackstage.txtAddSignature": "デジタル署名の追加",
+   "DE.Views.ElixirBackstage.txtBack": "戻る",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "白紙の文書",
+diff --git a/apps/documenteditor/main/locale/nl.json b/apps/documenteditor/main/locale/nl.json
+index c2f29f07c6..dc5fa59c68 100644
+--- a/apps/documenteditor/main/locale/nl.json
++++ b/apps/documenteditor/main/locale/nl.json
+@@ -1958,6 +1958,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Weergaven naam mag niet leeg zijn",
+   "DE.Views.EditListItemDialog.textValue": "Waarde",
+   "DE.Views.EditListItemDialog.textValueError": "Er bestaat al een item met dezelfde waarde.",
++  "DE.Views.ElixirBackstage.txtAbout": "Over",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Een digitale handtekening toevoegen",
+   "DE.Views.ElixirBackstage.txtBack": "Terug",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Leeg document",
+diff --git a/apps/documenteditor/main/locale/pl.json b/apps/documenteditor/main/locale/pl.json
+index 07152d3971..5fa84bdd31 100644
+--- a/apps/documenteditor/main/locale/pl.json
++++ b/apps/documenteditor/main/locale/pl.json
+@@ -2141,6 +2141,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Wyświetlana nazwa nie może być pusta.",
+   "DE.Views.EditListItemDialog.textValue": "Wartość",
+   "DE.Views.EditListItemDialog.textValueError": "Element o tej samej wartości już istnieje.",
++  "DE.Views.ElixirBackstage.txtAbout": "Informacje",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Dodaj podpis cyfrowy",
+   "DE.Views.ElixirBackstage.txtBack": "Wstecz",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Pusty dokument",
+diff --git a/apps/documenteditor/main/locale/pt-pt.json b/apps/documenteditor/main/locale/pt-pt.json
+index 5f665d3ac2..5f826bcb2c 100644
+--- a/apps/documenteditor/main/locale/pt-pt.json
++++ b/apps/documenteditor/main/locale/pt-pt.json
+@@ -1999,6 +1999,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "O nome de exibição não deve estar vazio.",
+   "DE.Views.EditListItemDialog.textValue": "Valor",
+   "DE.Views.EditListItemDialog.textValueError": "Já existe um item com este mesmo valor.",
++  "DE.Views.ElixirBackstage.txtAbout": "Acerca de",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Adicionar uma Assinatura Digital",
+   "DE.Views.ElixirBackstage.txtBack": "Voltar",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Documento em branco",
+diff --git a/apps/documenteditor/main/locale/pt.json b/apps/documenteditor/main/locale/pt.json
+index ff03c4f743..53fdd9329e 100644
+--- a/apps/documenteditor/main/locale/pt.json
++++ b/apps/documenteditor/main/locale/pt.json
+@@ -2661,6 +2661,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "O nome de exibição não deve estar vazio.",
+   "DE.Views.EditListItemDialog.textValue": "Valor",
+   "DE.Views.EditListItemDialog.textValueError": "Um item com o mesmo valor já existe.",
++  "DE.Views.ElixirBackstage.txtAbout": "Sobre",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Adicionar uma Assinatura Digital",
+   "DE.Views.ElixirBackstage.txtBack": "Voltar",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Documento em branco",
+diff --git a/apps/documenteditor/main/locale/ru.json b/apps/documenteditor/main/locale/ru.json
+index 2b15c42552..78677664e3 100644
+--- a/apps/documenteditor/main/locale/ru.json
++++ b/apps/documenteditor/main/locale/ru.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "Отображаемое имя не должно быть пустым.",
+   "DE.Views.EditListItemDialog.textValue": "Значение",
+   "DE.Views.EditListItemDialog.textValueError": "Элемент с таким значением уже существует.",
++  "DE.Views.ElixirBackstage.txtAbout": "О программе",
+   "DE.Views.ElixirBackstage.txtAddSignature": "Добавить цифровую подпись",
+   "DE.Views.ElixirBackstage.txtBack": "Назад",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "Новый документ",
+diff --git a/apps/documenteditor/main/locale/zh.json b/apps/documenteditor/main/locale/zh.json
+index 6895450f1e..494d8da883 100644
+--- a/apps/documenteditor/main/locale/zh.json
++++ b/apps/documenteditor/main/locale/zh.json
+@@ -2662,6 +2662,7 @@
+   "DE.Views.EditListItemDialog.textNameError": "显示名称不能为空。",
+   "DE.Views.EditListItemDialog.textValue": "值",
+   "DE.Views.EditListItemDialog.textValueError": "具有相同值的项已存在。",
++  "DE.Views.ElixirBackstage.txtAbout": "关于",
+   "DE.Views.ElixirBackstage.txtAddSignature": "添加数字签名",
+   "DE.Views.ElixirBackstage.txtBack": "返回",
+   "DE.Views.ElixirBackstage.txtBlankDocument": "空白文档",
+diff --git a/apps/documenteditor/main/resources/less/elixir-chrome.less b/apps/documenteditor/main/resources/less/elixir-chrome.less
+index bca50afddc..8c899de758 100644
+--- a/apps/documenteditor/main/resources/less/elixir-chrome.less
++++ b/apps/documenteditor/main/resources/less/elixir-chrome.less
+@@ -466,13 +466,13 @@ svg.elx-icon {
+     }
+ 
+     // Print: the browser prints, settings column like Word
++    #panel-print.elx-print .main-header {
++        font-size: 28px;
++        font-weight: 400;
++        line-height: 36px;
++        margin: 16px 0 20px;
++    }
+     .elx-print {
+-        .main-header {
+-            font-size: 28px;
+-            font-weight: 400;
+-            line-height: 36px;
+-            margin: 16px 0 20px;
+-        }
+         .elx-print-top {
+             margin: 0 0 18px;
+             .footer { display: flex; gap: 8px; padding: 0; }
+-- 
+2.43.0
+

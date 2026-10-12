@@ -1,0 +1,89 @@
+From 9db9b5bc20dbfca6c33610e10132593c8c0e331d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:02:53 +0200
+Subject: [PATCH] fix(file-menu): hide Suggest a Feature when no suggest URL is
+ configured
+
+With an empty SUGGEST_URL the menu entry opened a blank tab. Only show it
+when the theme or environment provides a URL.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ apps/documenteditor/main/app/controller/Main.js     | 2 +-
+ apps/pdfeditor/main/app/controller/Main.js          | 2 +-
+ apps/presentationeditor/main/app/controller/Main.js | 2 +-
+ apps/spreadsheeteditor/main/app/controller/Main.js  | 2 +-
+ apps/visioeditor/main/app/controller/Main.js        | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/apps/documenteditor/main/app/controller/Main.js b/apps/documenteditor/main/app/controller/Main.js
+index d2d6069246..e957d1cb17 100644
+--- a/apps/documenteditor/main/app/controller/Main.js
++++ b/apps/documenteditor/main/app/controller/Main.js
+@@ -1756,7 +1756,7 @@ define([
+                 this.appOptions.canDownloadOrigin = false;
+                 this.appOptions.canDownload       = this.permissions.download !== false;
+                 this.appOptions.showSaveButton = this.appOptions.isEdit || !this.appOptions.isRestrictedEdit && this.appOptions.isPDFForm && this.appOptions.canDownload; // save to file or save to file copy (for pdf-form viewer)
+-                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false);
++                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false) && !!'{{SUGGEST_URL}}';
+                 this.appOptions.canCopy        = this.permissions.copy !== false;
+ 
+                 if (this.appOptions.isPDFForm && !this.appOptions.isEdit && !this.appOptions.isRestrictedEdit) {
+diff --git a/apps/pdfeditor/main/app/controller/Main.js b/apps/pdfeditor/main/app/controller/Main.js
+index 181fa8c70c..80dc684be6 100644
+--- a/apps/pdfeditor/main/app/controller/Main.js
++++ b/apps/pdfeditor/main/app/controller/Main.js
+@@ -1383,7 +1383,7 @@ define([
+                 this.appOptions.canDownloadOrigin = false;
+                 this.appOptions.canDownload       = this.permissions.download !== false;
+                 this.appOptions.showSaveButton = this.appOptions.isEdit && !this.appOptions.isPDFFill && (this.appOptions.canSaveToFile || this.appOptions.canDownload);
+-                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false);
++                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false) && !!'{{SUGGEST_URL}}';
+                 this.appOptions.canCopy        = this.permissions.copy !== false;
+ 
+                 this.appOptions.compactHeader = this.appOptions.customization && (typeof (this.appOptions.customization) == 'object') && !!this.appOptions.customization.compactHeader;
+diff --git a/apps/presentationeditor/main/app/controller/Main.js b/apps/presentationeditor/main/app/controller/Main.js
+index f53b6b945e..054cc0723b 100644
+--- a/apps/presentationeditor/main/app/controller/Main.js
++++ b/apps/presentationeditor/main/app/controller/Main.js
+@@ -1378,7 +1378,7 @@ define([
+                 this.appOptions.isRestrictedEdit = !this.appOptions.isEdit && this.appOptions.canComments;
+                 this.appOptions.canSaveToFile = this.appOptions.isEdit || this.appOptions.isRestrictedEdit;
+                 this.appOptions.showSaveButton = this.appOptions.isEdit;
+-                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false);
++                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false) && !!'{{SUGGEST_URL}}';
+                 this.appOptions.canCopy        = this.permissions.copy !== false;
+ 
+                 this.appOptions.compactHeader = this.appOptions.customization && (typeof (this.appOptions.customization) == 'object') && !!this.appOptions.customization.compactHeader;
+diff --git a/apps/spreadsheeteditor/main/app/controller/Main.js b/apps/spreadsheeteditor/main/app/controller/Main.js
+index 6e516f7eed..f839861924 100644
+--- a/apps/spreadsheeteditor/main/app/controller/Main.js
++++ b/apps/spreadsheeteditor/main/app/controller/Main.js
+@@ -1506,7 +1506,7 @@ define([
+                 this.appOptions.isRestrictedEdit = !this.appOptions.isEdit && this.appOptions.canComments;
+                 this.appOptions.canSaveToFile = this.appOptions.isEdit || this.appOptions.isRestrictedEdit;
+                 this.appOptions.showSaveButton = this.appOptions.isEdit;
+-                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false);
++                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false) && !!'{{SUGGEST_URL}}';
+                 this.appOptions.canCopy        = this.permissions.copy !== false;
+ 
+                 this.appOptions.compactHeader = this.appOptions.customization && (typeof (this.appOptions.customization) == 'object') && !!this.appOptions.customization.compactHeader;
+diff --git a/apps/visioeditor/main/app/controller/Main.js b/apps/visioeditor/main/app/controller/Main.js
+index 05ad3de88b..b2ee303982 100644
+--- a/apps/visioeditor/main/app/controller/Main.js
++++ b/apps/visioeditor/main/app/controller/Main.js
+@@ -1175,7 +1175,7 @@ define([
+                 this.appOptions.isRestrictedEdit = !this.appOptions.isEdit && this.appOptions.canComments;
+                 this.appOptions.canSaveToFile = this.appOptions.isEdit || this.appOptions.isRestrictedEdit;
+                 this.appOptions.showSaveButton = this.appOptions.isEdit;
+-                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false);
++                this.appOptions.canSuggest     = !((typeof (this.editorConfig.customization) == 'object') && this.editorConfig.customization.suggestFeature===false) && !!'{{SUGGEST_URL}}';
+                 this.appOptions.canCopy        = this.permissions.copy !== false;
+ 
+                 this.appOptions.compactHeader = this.appOptions.customization && (typeof (this.appOptions.customization) == 'object') && !!this.appOptions.customization.compactHeader;
+-- 
+2.43.0
+

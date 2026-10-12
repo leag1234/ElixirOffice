@@ -1,0 +1,10 @@
+{
+  "id": "e-image-right",
+  "title": "Picture on the right of the text",
+  "instruction": "Mets l'image à droite du texte",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

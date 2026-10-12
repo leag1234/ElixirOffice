@@ -1,0 +1,11 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// Desktop About dialog logo.
+// Mobile uses @theme-about-logo-light / @theme-about-logo-dark via theme.config.mjs
+// (same config.json keys drive both contexts).
+.about-dlg .asc-about-office:before {
+    content: ~"url('@{common-image-const-path}/about/logo.svg')";
+
+    .theme-type-dark & {
+        content: ~"url('@{common-image-const-path}/about/logo.svg')";
+    }
+}

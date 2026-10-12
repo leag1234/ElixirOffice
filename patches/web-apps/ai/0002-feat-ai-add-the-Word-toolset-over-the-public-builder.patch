@@ -1,0 +1,655 @@
+From 2bd8f9d2be8dd1070a6435664fd8c0443ca4c3ad Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 12:18:09 +0200
+Subject: [PATCH 2/4] feat(ai): add the Word toolset over the public builder
+ API
+
+read_context, insert_paragraphs, apply_style, apply_styles,
+list_to_table, create_table, set_columns and replace_text. Each tool is
+a closure-free function run through api.callCommand, the internal
+analog of a plugin's callCommand, and only uses the public builder API
+(the methods that are recorded as tracked revisions). The action runs
+in one GroupActions undo step with SetAssistantTrackRevisions on.
+Column layout cannot be tracked in Word and is reported as such.
+
+[ai]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../main/app/elixir-ai/WordTools.js           | 623 ++++++++++++++++++
+ 1 file changed, 623 insertions(+)
+ create mode 100644 apps/documenteditor/main/app/elixir-ai/WordTools.js
+
+diff --git a/apps/documenteditor/main/app/elixir-ai/WordTools.js b/apps/documenteditor/main/app/elixir-ai/WordTools.js
+new file mode 100644
+index 0000000000..b6cb898264
+--- /dev/null
++++ b/apps/documenteditor/main/app/elixir-ai/WordTools.js
+@@ -0,0 +1,623 @@
++/*
++ * SPDX-FileCopyrightText: 2026 ElixirOffice contributors
++ * SPDX-License-Identifier: AGPL-3.0-only
++ *
++ * Elixir AI, Word toolset.
++ *
++ * Every tool is a small deterministic function over the public document builder API
++ * (the `Api` object a plugin sees in callCommand). The functions below are serialized
++ * with toString() and executed through api.callCommand(), the editor's internal analog
++ * of a plugin's callCommand: same queue, same sandbox (AscCommon.safePluginEval), same
++ * history handling. They must therefore not use closures: arguments are embedded as
++ * JSON and the shared helpers are passed as the second parameter.
++ */
++
++define([], function () {
++    'use strict';
++
++    var ElixirAI = (window.Common = window.Common || {}).ElixirAI = window.Common.ElixirAI || {};
++    ElixirAI.toolsets = ElixirAI.toolsets || {};
++
++    var ASSISTANT_NAME = 'Elixir AI';
++    var MAX_BLOCKS = 400;
++    var MAX_TEXT = 400;
++
++    // ---------------------------------------------------------------------------------
++    // Code executed inside the editor sandbox
++    // ---------------------------------------------------------------------------------
++
++    /* eslint-disable no-undef */
++    function HELPERS() {
++        var doc = Api.GetDocument();
++        var H = { doc: doc };
++        H.count = function () { return doc.GetElementsCount(); };
++        H.el = function (i) { return doc.GetElement(i); };
++        H.kind = function (el) { return el ? el.GetClassType() : null; };
++        H.styleName = function (p) {
++            var s = p.GetStyle();
++            return s ? s.GetName() : 'Normal';
++        };
++        H.text = function (el) {
++            var k = H.kind(el);
++            if (k === 'paragraph')
++                return el.GetText({ Numbering: false, Math: false, NewLineSeparator: ' ', TabSymbol: '\t' }).replace(/[\r\n]+$/, '');
++            if (k === 'table') {
++                var rows = [];
++                for (var r = 0; r < el.GetRowsCount(); r++) {
++                    var row = el.GetRow(r), cells = [];
++                    for (var c = 0; c < row.GetCellsCount(); c++)
++                        cells.push(row.GetCell(c).GetContent().GetText().replace(/[\r\n]+/g, ' ').trim());
++                    rows.push(cells);
++                }
++                return rows;
++            }
++            return '';
++        };
++        H.clip = function (t, max) { return (t.length > max) ? t.slice(0, max) + '…' : t; };
++        H.block = function (i, max) {
++            var el = H.el(i), k = H.kind(el), b = { i: i, type: k };
++            if (k === 'paragraph') {
++                b.style = H.styleName(el);
++                b.text = H.clip(H.text(el), max);
++                var num = el.GetNumbering();
++                if (num) {
++                    b.list = true;
++                    try { b.level = num.GetLevelIndex(); } catch (e) {}
++                }
++                var sec = el.GetSection();
++                if (sec && sec.GetColumnsCount() > 1) b.columns = sec.GetColumnsCount();
++            } else if (k === 'table') {
++                var rows = H.text(el);
++                b.rows = rows.length;
++                b.cols = rows.length ? rows[0].length : 0;
++                b.cells = rows.slice(0, 6).map(function (r) { return r.map(function (c) { return H.clip(c, 60); }); });
++            }
++            return b;
++        };
++        // Index of the top-level body element that contains paragraph p
++        H.topIndex = function (p) {
++            var t = p.GetParentTable();
++            if (t) {
++                while (t.GetParentTable()) t = t.GetParentTable();
++                return t.GetPosInParent();
++            }
++            var cc = p.GetParentContentControl();
++            if (cc && cc.GetPosInParent) return cc.GetPosInParent();
++            return p.GetPosInParent();
++        };
++        // Range from the start of block `from` to the end of block `to`
++        H.range = function (from, to) {
++            var a = H.el(from).GetRange();
++            if (to > from) a = a.ExpandTo(H.el(to).GetRange());
++            return a;
++        };
++        H.paragraphStyles = function () {
++            return doc.GetAllStyles().filter(function (s) { return s.GetType() === 'paragraph'; })
++                .map(function (s) { return s.GetName(); })
++                .filter(function (n) { return !/^(toc \d|footnote text|endnote text|table of figures|Header|Footer|Caption|TOC Heading)$/i.test(n); });
++        };
++        H.revisions = function () {
++            var rep = doc.GetReviewReport(), n = 0, byAuthor = {};
++            for (var a in rep) { if (!Object.prototype.hasOwnProperty.call(rep, a) || !Array.isArray(rep[a])) continue; byAuthor[a] = rep[a].length; n += rep[a].length; }
++            return { count: n, byAuthor: byAuthor };
++        };
++        // Apply a paragraph style to the paragraphs of blocks from..to (tables are skipped)
++        H.applyStyle = function (from, to, style, clear) {
++            var st = doc.GetStyle(style);
++            if (!st || st.GetType() !== 'paragraph' || st.GetName() !== style)
++                return H.fail('unknown_style', 'No paragraph style named "' + style + '".', { available: H.paragraphStyles() });
++            var done = 0;
++            for (var i = from; i <= to; i++) {
++                var el = H.el(i);
++                if (H.kind(el) !== 'paragraph') continue;
++                // ApiRange.SetStyle is recorded as a paragraph-properties revision; ApiParagraph.SetStyle is not.
++                el.GetRange().SetStyle(st);
++                if (clear) {
++                    var tp = Api.CreateTextPr();
++                    tp.SetBold(null); tp.SetItalic(null); tp.SetUnderline(null); tp.SetStrikeout(null); tp.SetCaps(null); tp.SetSmallCaps(null);
++                    el.GetRange().SetTextPr(tp);
++                }
++                done++;
++            }
++            return { ok: true, styled_paragraphs: done, style: style };
++        };
++        H.fail = function (code, message, extra) {
++            var e = { ok: false, error: { code: code, message: message } };
++            for (var k in extra || {}) e.error[k] = extra[k];
++            return e;
++        };
++        return H;
++    }
++
++    var CMD = {};
++
++    // Initial context: selection -> block range, or the whole document
++    CMD.init = function (a, H) {
++        var total = H.count(), from = 0, to = total - 1, scope = 'document';
++        var r = H.doc.GetRangeBySelect();
++        if (r && r.GetText() && r.GetText().replace(/[\s\r\n]/g, '').length > 0) {
++            var paras = r.GetAllParagraphs();
++            if (paras.length) {
++                from = H.topIndex(paras[0]);
++                to = H.topIndex(paras[paras.length - 1]);
++                scope = 'selection';
++            }
++        }
++        return { ok: true, scope: scope, from: from, to: to, total: total, styles: H.paragraphStyles(), revisions: H.revisions() };
++    };
++
++    CMD.read_context = function (a, H) {
++        var blocks = [], last = Math.min(a.to, H.count() - 1), truncated = false;
++        for (var i = a.from; i <= last; i++) {
++            if (blocks.length >= a.maxBlocks) { truncated = true; break; }
++            blocks.push(H.block(i, a.maxText));
++        }
++        var out = { ok: true, scope: a.scope, from: a.from, to: last, blocks: blocks };
++        if (truncated) out.truncated = true;
++        return out;
++    };
++
++    CMD.begin = function (a, H) {
++        H.doc.SetAssistantTrackRevisions(true, a.name);
++        return { ok: true, track: H.doc.IsTrackRevisions() };
++    };
++
++    CMD.end = function (a, H) {
++        H.doc.SetAssistantTrackRevisions(false);
++        return { ok: true, revisions: H.revisions() };
++    };
++
++    CMD.revisions = function (a, H) {
++        return { ok: true, revisions: H.revisions() };
++    };
++
++    CMD.select = function (a, H) {
++        var last = Math.min(a.to, H.count() - 1);
++        H.range(a.from, last).Select();
++        return { ok: true };
++    };
++
++    CMD.insert_paragraphs = function (a, H) {
++        var pos = a.after + 1;
++        for (var k = 0; k < a.items.length; k++) {
++            var it = a.items[k];
++            var p = Api.CreateParagraph();
++            p.AddText(it.text);
++            var st = H.doc.GetStyle(it.style || 'Normal');
++            if (st && st.GetType() === 'paragraph') p.SetStyle(st);
++            H.doc.AddElement(pos + k, p);
++        }
++        return { ok: true, inserted: a.items.length, first_index: pos, last_index: pos + a.items.length - 1, tracked: true };
++    };
++
++    CMD.apply_style = function (a, H) {
++        var r = H.applyStyle(a.from, a.to, a.style, a.clear_direct_formatting);
++        if (r.ok) r.tracked = true;
++        return r;
++    };
++
++    CMD.apply_styles = function (a, H) {
++        var results = [], total = 0;
++        for (var k = 0; k < a.changes.length; k++) {
++            var c = a.changes[k];
++            var r = H.applyStyle(c.from, c.to, c.style, c.clear_direct_formatting);
++            if (!r.ok) { r.error.change = k; r.applied_before_error = results; return r; }
++            total += r.styled_paragraphs;
++            results.push({ from: c.from, to: c.to, style: c.style });
++        }
++        return { ok: true, styled_paragraphs: total, changes: results.length, tracked: true };
++    };
++
++    CMD.list_to_table = function (a, H) {
++        var texts = [];
++        for (var i = a.from; i <= a.to; i++) {
++            var el = H.el(i);
++            if (H.kind(el) !== 'paragraph')
++                return H.fail('not_a_paragraph', 'Block ' + i + ' is a ' + H.kind(el) + ', expected list paragraphs only.');
++            var t = H.text(el).trim();
++            if (t.length) texts.push(t);
++        }
++        if (!texts.length) return H.fail('empty_range', 'The range contains no text.');
++
++        var sep = a.separator;
++        if (!sep) {
++            var candidates = ['\t', ' | ', '|', ';', ' – ', ' — ', ' - ', ': ', ','];
++            for (var c = 0; c < candidates.length && !sep; c++) {
++                var n = texts[0].split(candidates[c]).length;
++                if (n < 2) continue;
++                var same = texts.every(function (t) { return t.split(candidates[c]).length === n; });
++                if (same) sep = candidates[c];
++            }
++            if (!sep) {
++                for (c = 0; c < candidates.length && !sep; c++)
++                    if (texts.every(function (t) { return t.indexOf(candidates[c]) >= 0; })) sep = candidates[c];
++            }
++        }
++        var rows = texts.map(function (t) {
++            return (sep ? t.split(sep) : [t]).map(function (s) { return s.trim(); });
++        });
++        var hasHeader = false;
++        if (Array.isArray(a.header)) { rows.unshift(a.header.map(String)); hasHeader = true; }
++        else if (a.header === true) hasHeader = true;
++
++        var cols = 0;
++        rows.forEach(function (r) { cols = Math.max(cols, r.length); });
++        // Content past the last column is kept in the last cell
++        rows = rows.map(function (r) {
++            if (r.length > cols) r = r.slice(0, cols - 1).concat([r.slice(cols - 1).join(sep || ' ')]);
++            while (r.length < cols) r.push('');
++            return r;
++        });
++
++        var table = Api.CreateTable(cols, rows.length);
++        table.SetWidth('percent', 100);
++        var st = H.doc.GetStyle(a.style || 'Table Grid');
++        if (st && st.GetType() === 'table') table.SetStyle(st);
++        table.SetTableLook(false, hasHeader, false, false, false, false);
++        for (var r = 0; r < rows.length; r++) {
++            for (var cc = 0; cc < cols; cc++) {
++                var para = table.GetCell(r, cc).GetContent().GetElement(0);
++                var run = para.AddText(rows[r][cc]);
++                if (hasHeader && r === 0 && run) run.SetBold(true);
++            }
++        }
++        if (hasHeader) table.GetRow(0).SetTableHeader(true);
++
++        // Insert the table before the list, then delete the list as a tracked deletion.
++        H.doc.AddElement(a.from, table);
++        var first = a.from + 1, last = a.to + 1;
++        var del = H.range(first, last);
++        if (last + 1 < H.count()) del = del.ExpandTo(H.el(last + 1).GetRange(0, 0));
++        del.Delete();
++        return {
++            ok: true, table_index: a.from, rows: rows.length, cols: cols, header_row: hasHeader,
++            separator: sep || null, deleted_blocks: [first, last], tracked: true,
++            note: 'The table is block ' + a.from + '; the original list now spans blocks ' + first + '-' + last +
++                ' and stays visible as a tracked deletion until accepted. Indices of later blocks moved by +1.'
++        };
++    };
++
++    CMD.create_table = function (a, H) {
++        var rows = a.rows.map(function (r) { return r.map(String); }), cols = 0;
++        rows.forEach(function (r) { cols = Math.max(cols, r.length); });
++        rows.forEach(function (r) { while (r.length < cols) r.push(''); });
++        var table = Api.CreateTable(cols, rows.length);
++        table.SetWidth('percent', 100);
++        var st = H.doc.GetStyle(a.style || 'Table Grid');
++        if (st && st.GetType() === 'table') table.SetStyle(st);
++        table.SetTableLook(false, !!a.header, false, false, false, false);
++        for (var r = 0; r < rows.length; r++)
++            for (var c = 0; c < cols; c++) {
++                var run = table.GetCell(r, c).GetContent().GetElement(0).AddText(rows[r][c]);
++                if (a.header && r === 0 && run) run.SetBold(true);
++            }
++        if (a.header) table.GetRow(0).SetTableHeader(true);
++        H.doc.AddElement(a.after + 1, table);
++        return { ok: true, table_index: a.after + 1, rows: rows.length, cols: cols, tracked: true };
++    };
++
++    CMD.set_columns = function (a, H) {
++        var total = H.count();
++        var space = Math.round((a.spacing_mm || 12.5) * 56.6929); // mm -> twips
++        var last = H.el(a.to);
++        if (a.from > 0 && H.kind(H.el(a.from - 1)) !== 'paragraph')
++            return H.fail('unsupported_layout', 'Block ' + (a.from - 1) + ' (just before the range) is a table; a section break cannot be placed there.');
++        if (a.to < total - 1 && H.kind(last) !== 'paragraph')
++            return H.fail('unsupported_layout', 'Block ' + a.to + ' (end of the range) is a table; a section break cannot be placed there.');
++        var target;
++        // Close the previous section just before the range (it keeps the original layout)
++        if (a.from > 0) H.doc.CreateSection(H.el(a.from - 1));
++        if (a.to < total - 1) {
++            target = H.doc.CreateSection(last);
++            var next = target.GetNext();
++            if (next) next.SetType('continuous'); // the content after the range continues on the same page
++        } else {
++            target = H.doc.GetFinalSection();
++        }
++        if (a.from > 0) target.SetType('continuous');
++        target.SetEqualColumns(a.count, space);
++        return {
++            ok: true, columns: a.count, from: a.from, to: a.to, tracked: false,
++            note: 'Column layout is a section property: Word cannot record it as a tracked revision. It is part of the single undo step.'
++        };
++    };
++
++    CMD.replace_text = function (a, H) {
++        var el = H.el(a.block);
++        if (H.kind(el) !== 'paragraph') return H.fail('not_a_paragraph', 'Block ' + a.block + ' is not a paragraph.');
++        var ranges = [];
++        if (a.find) {
++            ranges = el.Search(a.find, true) || [];
++            if (!ranges.length) return H.fail('not_found', 'Text "' + a.find + '" not found in block ' + a.block + '.', { block_text: H.clip(H.text(el), 400) });
++            if (!a.all) ranges = [ranges[0]];
++        } else {
++            ranges = [el.GetRange()];
++        }
++        // Deletion first, then insertion after it: both are tracked revisions
++        for (var i = ranges.length - 1; i >= 0; i--) {
++            ranges[i].Delete();
++            ranges[i].AddText(a.text, 'after');
++        }
++        return { ok: true, replaced: ranges.length, tracked: true };
++    };
++    /* eslint-enable no-undef */
++
++    // ---------------------------------------------------------------------------------
++    // Host side: schemas, validation, execution
++    // ---------------------------------------------------------------------------------
++
++    var RANGE_PROPS = {
++        from: { type: 'integer', description: 'Index of the first block (inclusive), as given by read_context.' },
++        to: { type: 'integer', description: 'Index of the last block (inclusive).' }
++    };
++
++    function tool(name, description, properties, required) {
++        return { type: 'function', 'function': { name: name, description: description, parameters: { type: 'object', properties: properties, required: required || [], additionalProperties: false } } };
++    }
++
++    var TOOLS = [
++        tool('read_context', 'Re-read the blocks (paragraphs and tables) of the working scope, with their index, style and text. The initial context is already in the conversation; call this only after changes that moved indices.', {
++            from: { type: 'integer', description: 'Optional first block index (defaults to the start of the scope).' },
++            to: { type: 'integer', description: 'Optional last block index (defaults to the end of the scope).' }
++        }),
++        tool('insert_paragraphs', 'Insert new paragraphs after block `after` (-1 inserts at the very start). Recorded as tracked insertions.', {
++            after: { type: 'integer', description: 'Index of the block after which to insert, or -1.' },
++            items: {
++                type: 'array', minItems: 1, description: 'Paragraphs to insert, in order.',
++                items: { type: 'object', properties: { style: { type: 'string', description: 'Paragraph style name, e.g. "Normal", "Heading 2".' }, text: { type: 'string' } }, required: ['text'], additionalProperties: false }
++            }
++        }, ['after', 'items']),
++        tool('apply_style', 'Apply a paragraph style (e.g. "Heading 1", "Normal") to every paragraph of blocks from..to. Recorded as tracked formatting changes.', {
++            from: RANGE_PROPS.from, to: RANGE_PROPS.to,
++            style: { type: 'string', description: 'Exact paragraph style name from the list of available styles.' },
++            clear_direct_formatting: { type: 'boolean', description: 'Also remove direct bold/italic/underline/strikeout/caps so the style shows.' }
++        }, ['from', 'to', 'style']),
++        tool('apply_styles', 'Apply several paragraph styles in one call: one entry per range of blocks. Use it to restyle a whole document or selection, listing every block that must change. Recorded as tracked formatting changes.', {
++            changes: {
++                type: 'array', minItems: 1, description: 'Style changes, each on an inclusive block range.',
++                items: {
++                    type: 'object', additionalProperties: false, required: ['from', 'to', 'style'],
++                    properties: {
++                        from: RANGE_PROPS.from, to: RANGE_PROPS.to,
++                        style: { type: 'string', description: 'Exact paragraph style name.' },
++                        clear_direct_formatting: { type: 'boolean', description: 'Also remove direct bold/italic/underline/strikeout/caps.' }
++                    }
++                }
++            }
++        }, ['changes']),
++        tool('list_to_table', 'Convert the list paragraphs from..to into a table placed where the list was. Each paragraph becomes a row, split into cells on `separator` (auto-detected when omitted). The list is removed as a tracked deletion; the table is a tracked insertion.', {
++            from: RANGE_PROPS.from, to: RANGE_PROPS.to,
++            header: {
++                description: 'true if the first list item is the header row; an array of column titles to add a new header row; false for no header.',
++                anyOf: [{ type: 'boolean' }, { type: 'array', items: { type: 'string' } }]
++            },
++            separator: { type: 'string', description: 'Text that separates cells inside an item, e.g. " – ", ";", "\\t". Omit to auto-detect.' },
++            style: { type: 'string', description: 'Optional table style name (default "Table Grid").' }
++        }, ['from', 'to', 'header']),
++        tool('create_table', 'Create a table from explicit rows and insert it after block `after` (-1 for the start). Tracked insertion.', {
++            after: { type: 'integer', description: 'Index of the block after which to insert, or -1.' },
++            rows: { type: 'array', minItems: 1, items: { type: 'array', items: { type: 'string' } }, description: 'Table rows, each an array of cell texts.' },
++            header: { type: 'boolean', description: 'true if the first row is a header row.' },
++            style: { type: 'string', description: 'Optional table style name (default "Table Grid").' }
++        }, ['after', 'rows']),
++        tool('set_columns', 'Lay out blocks from..to in `count` newspaper columns, using continuous section breaks around them (no page break). Not trackable in Word: the change is undone with the action as a whole.', {
++            from: RANGE_PROPS.from, to: RANGE_PROPS.to,
++            count: { type: 'integer', minimum: 1, maximum: 6, description: 'Number of columns (1 restores a single column).' },
++            spacing_mm: { type: 'number', description: 'Space between columns in millimetres (default 12.5).' }
++        }, ['from', 'to', 'count']),
++        tool('replace_text', 'Replace text in one paragraph: the occurrence(s) of `find`, or the whole paragraph text when `find` is omitted. Tracked deletion + insertion.', {
++            block: { type: 'integer', description: 'Index of the paragraph.' },
++            find: { type: 'string', description: 'Exact text to replace (case-sensitive). Omit to replace the whole paragraph text.' },
++            text: { type: 'string', description: 'Replacement text.' },
++            all: { type: 'boolean', description: 'Replace every occurrence of `find` in the paragraph (default: first only).' }
++        }, ['block', 'text'])
++    ];
++
++    var MUTATING = { insert_paragraphs: 1, apply_style: 1, apply_styles: 1, list_to_table: 1, create_table: 1, set_columns: 1, replace_text: 1 };
++    var UNTRACKED = { set_columns: 'Column layout cannot be recorded as a tracked change in Word. Use Discard (or Ctrl+Z) to undo it.' };
++
++    function invalid(field, message, extra) {
++        var e = { ok: false, error: { code: 'invalid_argument', field: field, message: message } };
++        for (var k in extra || {}) e.error[k] = extra[k];
++        return e;
++    }
++    function isInt(v) { return typeof v === 'number' && isFinite(v) && Math.floor(v) === v; }
++
++    // Validate arguments against the schema and the current scope. Returns null when valid.
++    function validate(name, args, ctx) {
++        var def = TOOLS.filter(function (t) { return t['function'].name === name; })[0];
++        if (!def) return { ok: false, error: { code: 'unknown_tool', message: 'Unknown tool "' + name + '".', available: TOOLS.map(function (t) { return t['function'].name; }) } };
++        if (!args || typeof args !== 'object' || Array.isArray(args)) return invalid(null, 'Arguments must be a JSON object.');
++        var schema = def['function'].parameters;
++        for (var i = 0; i < schema.required.length; i++)
++            if (args[schema.required[i]] === undefined) return invalid(schema.required[i], 'Missing required argument "' + schema.required[i] + '".');
++        for (var key in args) {
++            var p = schema.properties[key];
++            if (!p) return invalid(key, 'Unknown argument "' + key + '".', { allowed: Object.keys(schema.properties) });
++            var v = args[key];
++            if (p.type === 'integer' && !isInt(v)) return invalid(key, '"' + key + '" must be an integer.');
++            if (p.type === 'number' && (typeof v !== 'number' || !isFinite(v))) return invalid(key, '"' + key + '" must be a number.');
++            if (p.type === 'string' && typeof v !== 'string') return invalid(key, '"' + key + '" must be a string.');
++            if (p.type === 'boolean' && typeof v !== 'boolean') return invalid(key, '"' + key + '" must be a boolean.');
++            if (p.type === 'array' && !Array.isArray(v)) return invalid(key, '"' + key + '" must be an array.');
++            if (p.minimum !== undefined && v < p.minimum) return invalid(key, '"' + key + '" must be >= ' + p.minimum + '.');
++            if (p.maximum !== undefined && v > p.maximum) return invalid(key, '"' + key + '" must be <= ' + p.maximum + '.');
++        }
++        var lo = ctx.from, hi = ctx.to;
++        var inScope = function (field, v) {
++            return (v < lo || v > hi) ? invalid(field, 'Block ' + v + ' is outside the working scope (' + lo + '-' + hi + ').', { scope: [lo, hi] }) : null;
++        };
++        var err = null;
++        if (args.from !== undefined && args.to !== undefined && args.from > args.to) return invalid('from', '"from" must be <= "to".');
++        if (args.from !== undefined) err = err || inScope('from', args.from);
++        if (args.to !== undefined) err = err || inScope('to', args.to);
++        if (args.block !== undefined) err = err || inScope('block', args.block);
++        if (args.after !== undefined && args.after !== -1) err = err || inScope('after', args.after);
++        if (args.after === -1 && ctx.scope === 'selection' && lo > 0) err = err || invalid('after', 'Inserting before the selection is outside the working scope; use after >= ' + lo + '.');
++        if (err) return err;
++        if (name === 'insert_paragraphs') {
++            for (var j = 0; j < args.items.length; j++) {
++                var it = args.items[j];
++                if (!it || typeof it.text !== 'string') return invalid('items[' + j + '].text', 'Each item needs a "text" string.');
++                if (it.style !== undefined && ctx.styles.indexOf(it.style) < 0) return invalid('items[' + j + '].style', 'Unknown paragraph style "' + it.style + '".', { available: ctx.styles });
++            }
++        }
++        if (name === 'apply_styles') {
++            for (var m = 0; m < args.changes.length; m++) {
++                var ch = args.changes[m], f = 'changes[' + m + ']';
++                if (!ch || typeof ch !== 'object') return invalid(f, 'Each change must be an object {from, to, style}.');
++                if (!isInt(ch.from) || !isInt(ch.to)) return invalid(f, '"from" and "to" must be integers.');
++                if (ch.from > ch.to) return invalid(f, '"from" must be <= "to".');
++                err = inScope(f + '.from', ch.from) || inScope(f + '.to', ch.to);
++                if (err) return err;
++                if (typeof ch.style !== 'string' || ctx.styles.indexOf(ch.style) < 0) return invalid(f + '.style', 'Unknown paragraph style "' + ch.style + '".', { available: ctx.styles });
++                for (var key2 in ch) if (['from', 'to', 'style', 'clear_direct_formatting'].indexOf(key2) < 0) return invalid(f + '.' + key2, 'Unknown argument "' + key2 + '".');
++            }
++        }
++        if (name === 'apply_style' && ctx.styles.indexOf(args.style) < 0)
++            return invalid('style', 'Unknown paragraph style "' + args.style + '".', { available: ctx.styles });
++        if (name === 'list_to_table' && !(typeof args.header === 'boolean' || (Array.isArray(args.header) && args.header.every(function (h) { return typeof h === 'string'; }))))
++            return invalid('header', '"header" must be a boolean or an array of strings.');
++        if (name === 'create_table' && !args.rows.every(function (r) { return Array.isArray(r) && r.every(function (c) { return typeof c === 'string'; }); }))
++            return invalid('rows', '"rows" must be an array of arrays of strings.');
++        return null;
++    }
++
++    // Embed the arguments as JSON. The macro sanitizer of safePluginEval rejects any source matching
++    // /\bimport\s+/ (even inside a string literal), so that word is escaped in the payload.
++    function payload(obj) {
++        return JSON.stringify(obj).replace(/import/g, 'imp\\u006frt');
++    }
++
++    function source(cmdName, args) {
++        return '(function(){var H=(' + HELPERS.toString() + ')();try{return JSON.stringify((' + CMD[cmdName].toString() + ')(' + payload(args) + ',H));}' +
++            'catch(e){return JSON.stringify({ok:false,error:{code:"exception",message:String(e&&e.message||e)}});}})()';
++    }
++
++    function callCommand(api, cmdName, args) {
++        return new Promise(function (resolve) {
++            var attempt = function (n) {
++                api.callCommand(source(cmdName, args || {}), true, function (ret) {
++                    if (typeof ret === 'string') {
++                        try { return resolve(JSON.parse(ret)); } catch (e) {}
++                    }
++                    // undefined: the editor skipped the command (long action in progress) or the sandbox threw
++                    if (n > 0) return setTimeout(function () { attempt(n - 1); }, 300);
++                    resolve({ ok: false, error: { code: 'editor_busy', message: 'The editor did not run the command.' } });
++                });
++            };
++            attempt(2);
++        });
++    }
++
++    function callMethod(api, name, params) {
++        return new Promise(function (resolve) { api.callMethod(name, params || [], function (r) { resolve(r); }); });
++    }
++
++    function createToolset(api) {
++        return {
++            id: 'word',
++            assistantName: ASSISTANT_NAME,
++            tools: TOOLS,
++            isMutating: function (name) { return !!MUTATING[name]; },
++            untrackedNote: function (name) { return UNTRACKED[name] || null; },
++
++            init: function () {
++                return callCommand(api, 'init').then(function (r) {
++                    if (!r.ok) throw new Error(r.error && r.error.message || 'cannot read the document');
++                    var ctx = { scope: r.scope, from: r.from, to: r.to, total: r.total, styles: r.styles, revisionsBefore: r.revisions };
++                    return callCommand(api, 'read_context', { scope: ctx.scope, from: ctx.from, to: ctx.to, maxBlocks: MAX_BLOCKS, maxText: MAX_TEXT })
++                        .then(function (c) { ctx.context = c; return ctx; });
++                });
++            },
++
++            systemPrompt: function (ctx) {
++                return [
++                    'You are Elixir AI, the assistant of a word processor compatible with Microsoft Word.',
++                    'You change the STRUCTURE of the document (styles, tables, columns, paragraphs) only through the tools provided. Never invent document content that the user did not ask for.',
++                    'The document is a list of blocks (paragraphs and tables) with a 0-based index. You only see the working scope (' + (ctx.scope === 'selection' ? 'the user\'s selection' : 'the whole document') + '): blocks ' + ctx.from + ' to ' + ctx.to + '. Only edit blocks inside it.',
++                    'Use only these paragraph styles: ' + ctx.styles.join(', ') + '.',
++                    'Changes are recorded as tracked changes and the user will accept or discard them as a whole.',
++                    'Word conventions for structure: the document title uses Title (Heading 1 if Title is not available); section titles use Heading 1, sub-sections Heading 2, then Heading 3, following their numbering (1., 1.1, 1.1.1); a subtitle, author or date line under the title is not a heading (use Subtitle if available, otherwise Normal); body text uses Normal. When a title is faked with direct formatting (bold, large size), apply the heading style with clear_direct_formatting: true. When restyling, consider every block of the scope once.',
++                    'Work efficiently: call several tools in the same turn when they are independent; ranges are inclusive; to restyle several blocks use a single apply_styles call that lists every change. Indices move only after list_to_table, create_table and insert_paragraphs: read the tool result.',
++                    'Before the first tool call, write one short sentence with your plan. When done, reply with one short sentence describing what you changed, in the user\'s language. If the request cannot be done with the tools, say so briefly without calling tools.'
++                ].join('\n');
++            },
++
++            userMessage: function (instruction, ctx) {
++                return 'Instruction: ' + instruction + '\n\nWorking scope (' + ctx.scope + ', blocks ' + ctx.from + '-' + ctx.to + ' of ' + ctx.total + '):\n' + JSON.stringify(ctx.context.blocks);
++            },
++
++            validate: function (name, args, ctx) { return validate(name, args, ctx); },
++
++            execute: function (name, args, ctx) {
++                if (name === 'read_context') {
++                    var from = args.from !== undefined ? Math.max(args.from, ctx.from) : ctx.from;
++                    var to = args.to !== undefined ? Math.min(args.to, ctx.to) : ctx.to;
++                    return callCommand(api, 'read_context', { scope: ctx.scope, from: from, to: to, maxBlocks: MAX_BLOCKS, maxText: MAX_TEXT });
++                }
++                return callCommand(api, name, args).then(function (r) {
++                    if (r && r.ok) {
++                        // keep the working scope in sync with inserted blocks
++                        var grow = 0;
++                        if (name === 'insert_paragraphs') grow = args.items.length;
++                        if (name === 'create_table' || name === 'list_to_table') grow = 1;
++                        ctx.to += grow;
++                        ctx.total += grow;
++                        ctx.touched = ctx.touched || { from: Infinity, to: -1 };
++                        if (name === 'apply_styles') {
++                            args = { from: Math.min.apply(null, args.changes.map(function (c) { return c.from; })), to: Math.max.apply(null, args.changes.map(function (c) { return c.to; })) };
++                        }
++                        var a = args.from !== undefined ? args.from : (args.block !== undefined ? args.block : args.after + 1);
++                        var b = args.to !== undefined ? args.to + grow : (args.block !== undefined ? args.block : args.after + grow);
++                        ctx.touched.from = Math.min(ctx.touched.from, Math.max(a, 0));
++                        ctx.touched.to = Math.max(ctx.touched.to, b);
++                    }
++                    return r;
++                });
++            },
++
++            // Open the undo group and switch tracking on (assistant identity)
++            begin: function (ctx) {
++                return callMethod(api, 'StartAction', ['GroupActions']).then(function () {
++                    return callCommand(api, 'begin', { name: ASSISTANT_NAME });
++                }).then(function (r) { ctx.groupOpen = true; return r; });
++            },
++
++            end: function (ctx, ok) {
++                if (!ctx.groupOpen) return Promise.resolve(null);
++                return callCommand(api, 'end', {}).then(function (r) {
++                    ctx.groupOpen = false;
++                    ctx.revisionsAfter = r && r.revisions;
++                    return callMethod(api, 'EndAction', ['GroupActions', '', ok ? '' : 'cancel']).then(function () { return r; });
++                });
++            },
++
++            // Accept the assistant's revisions: everything when the document had none before, else only
++            // those in the touched range (the plugin API cannot filter revisions by author).
++            accept: function (ctx) {
++                var before = ctx.revisionsBefore ? ctx.revisionsBefore.count : 0;
++                if (!before) return callMethod(api, 'AcceptReviewChanges', [true]);
++                var t = ctx.touched || { from: ctx.from, to: ctx.to };
++                return callCommand(api, 'select', { from: t.from, to: t.to }).then(function () {
++                    return callMethod(api, 'AcceptReviewChanges', [false]);
++                });
++            },
++
++            reject: function (ctx) {
++                var before = ctx.revisionsBefore ? ctx.revisionsBefore.count : 0;
++                if (!before) return callMethod(api, 'RejectReviewChanges', [true]);
++                var t = ctx.touched || { from: ctx.from, to: ctx.to };
++                return callCommand(api, 'select', { from: t.from, to: t.to }).then(function () {
++                    return callMethod(api, 'RejectReviewChanges', [false]);
++                });
++            },
++
++            undo: function () { return callMethod(api, 'Undo', []); },
++            revisions: function () { return callCommand(api, 'revisions', {}); }
++        };
++    }
++
++    ElixirAI.toolsets.word = { create: createToolset, tools: TOOLS, _commands: CMD, _source: source };
++    return ElixirAI.toolsets.word;
++});
+-- 
+2.43.0
+

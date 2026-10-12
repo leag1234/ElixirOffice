@@ -1,0 +1,10 @@
+{
+  "id": "e-number-exercises",
+  "title": "Number the exercises",
+  "instruction": "Numérote les exercices",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

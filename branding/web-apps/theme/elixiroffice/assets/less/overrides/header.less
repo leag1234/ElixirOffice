@@ -1,0 +1,112 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// --------------------------------------------------------------------------
+// Header Logo — per-editor-type icons
+// Upstream: apps/common/main/resources/less/header.less:176-189
+// Uses data-editor-type attribute on <body> (set in each editor's index.html)
+// to select the correct icon at runtime via CSS attribute selectors.
+// --------------------------------------------------------------------------
+
+// Shared sizing override (icons are 24×24 instead of 86×20 text logos)
+.extra #header-logo {
+  padding: 6px 6px 6px 12px;
+  i {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+  }
+}
+
+// Document editor
+body[data-editor-type="document"] {
+  .extra #header-logo i,
+  .extra #header-logo.logo-light i {
+    background-image: ~"url('@{common-image-const-path}/header/icon-document.svg')";
+  }
+
+  &.theme-light,
+  &.theme-classic-light,
+  &.theme-dark,
+  &.theme-contrast-dark,
+  &.theme-night {
+    .extra #header-logo i,
+    .extra #header-logo.logo-light i {
+      background-image: ~"url('@{common-image-const-path}/header/icon-document-white.svg')";
+    }
+  }
+}
+
+// Spreadsheet editor
+body[data-editor-type="spreadsheet"] {
+  .extra #header-logo i,
+  .extra #header-logo.logo-light i {
+    background-image: ~"url('@{common-image-const-path}/header/icon-spreadsheet.svg')";
+  }
+
+  &.theme-light,
+  &.theme-classic-light,
+  &.theme-dark,
+  &.theme-contrast-dark,
+  &.theme-night {
+    .extra #header-logo i,
+    .extra #header-logo.logo-light i {
+      background-image: ~"url('@{common-image-const-path}/header/icon-spreadsheet-white.svg')";
+    }
+  }
+}
+
+// Presentation editor
+body[data-editor-type="presentation"] {
+  .extra #header-logo i,
+  .extra #header-logo.logo-light i {
+    background-image: ~"url('@{common-image-const-path}/header/icon-presentation.svg')";
+  }
+
+  &.theme-light,
+  &.theme-classic-light,
+  &.theme-dark,
+  &.theme-contrast-dark,
+  &.theme-night {
+    .extra #header-logo i,
+    .extra #header-logo.logo-light i {
+      background-image: ~"url('@{common-image-const-path}/header/icon-presentation-white.svg')";
+    }
+  }
+}
+
+// PDF editor
+body[data-editor-type="pdf"] {
+  .extra #header-logo i,
+  .extra #header-logo.logo-light i {
+    background-image: ~"url('@{common-image-const-path}/header/icon-pdf.svg')";
+  }
+
+  &.theme-light,
+  &.theme-classic-light,
+  &.theme-dark,
+  &.theme-contrast-dark,
+  &.theme-night {
+    .extra #header-logo i,
+    .extra #header-logo.logo-light i {
+      background-image: ~"url('@{common-image-const-path}/header/icon-pdf-white.svg')";
+    }
+  }
+}
+
+// Visio (drawing) editor
+body[data-editor-type="drawing"] {
+  .extra #header-logo i,
+  .extra #header-logo.logo-light i {
+    background-image: ~"url('@{common-image-const-path}/header/icon-drawing.svg')";
+  }
+
+  &.theme-light,
+  &.theme-classic-light,
+  &.theme-dark,
+  &.theme-contrast-dark,
+  &.theme-night {
+    .extra #header-logo i,
+    .extra #header-logo.logo-light i {
+      background-image: ~"url('@{common-image-const-path}/header/icon-drawing-white.svg')";
+    }
+  }
+}

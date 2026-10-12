@@ -1,0 +1,18 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+// --------------------------------------------------------------------------
+// Mobile Header Logo — hidden
+// The logo strip takes up 26px of navbar height. Collapsing all three rules
+// (the logo element, the navbar height, and the page offset) ensures no gap.
+// --------------------------------------------------------------------------
+
+.main-logo {
+    display: none;
+}
+
+.navbar.main-navbar.navbar-with-logo {
+    height: 0;
+}
+
+.page.page-with-subnavbar.page-with-logo .page-content {
+    --f7-page-subnavbar-offset: 0px;
+}

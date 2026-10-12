@@ -1,0 +1,10 @@
+{
+  "id": "e-landscape",
+  "title": "Landscape page",
+  "instruction": "Put the page in landscape",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "en",
+  "notes": ""
+}

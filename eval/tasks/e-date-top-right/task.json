@@ -1,0 +1,10 @@
+{
+  "id": "e-date-top-right",
+  "title": "Date at the top right",
+  "instruction": "Ajoute la date en haut à droite",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

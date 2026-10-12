@@ -1,0 +1,10 @@
+{
+  "id": "e-reduce-spacing",
+  "title": "Less space between paragraphs",
+  "instruction": "Réduis l'espace entre les paragraphes",
+  "select": null,
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

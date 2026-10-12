@@ -1,0 +1,52 @@
+From 980961857097494d8ba49425ed0f99499bd2ab7c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 14:44:16 +0200
+Subject: [PATCH 2/2] perf(fonts): do not pick a fallback font for Private Use
+ Area characters [upstreamable]
+
+At open, every character of the document goes through the font picker,
+which adds the font that AllFonts.js assigns to its Unicode range to the
+fonts to download. Word stores symbol-font characters in the Private Use
+Area (the standard bullet is U+F0B7 in Symbol), and with the bundled
+fonts that range resolves to NanumBarunGothic, so every document with
+ordinary bullets downloaded and loaded a Korean font in two styles
+(8.6 MB, 4.1 MB compressed). PUA code points only mean something in the
+font that defines them and symbol fonts are drawn through their own
+mapping, so a fallback font is never right for them: return no font.
+
+Rendering unchanged: first pages of perf-10p.docx (tools/perf) and of
+the public corpus documents a09 and a10 (Symbol bullets) are
+pixel-identical before and after; NanumBarunGothic is no longer loaded.
+
+Opening a 10-page document with bullets (tools/perf, own instance,
+CPU x1, 5 runs, medians): transferred 14.3 -> 10.2 MB, requests 74 -> 72;
+editable cold cache 1405 -> 1281 ms, warm cache 1038 -> 985 ms.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/libfont/character.js | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/common/libfont/character.js b/common/libfont/character.js
+index 45628d4435..4123dbe364 100644
+--- a/common/libfont/character.js
++++ b/common/libfont/character.js
+@@ -125,6 +125,14 @@
+ 			if (undefined === _char || 0 == _char)
+ 				return "";
+ 
++			// Private Use Area code points mean something only in the font that defines them
++			// (Word stores symbol-font characters there, e.g. U+F0B7, the Symbol bullet, which
++			// is drawn with the symbol font): another font is never the right fallback, so do
++			// not pick one - picking it made every document with standard bullets download a
++			// Korean font (NanumBarunGothic, 2 x 4 MB) at open.
++			if ((_char >= 0xE000 && _char <= 0xF8FF) || _char >= 0xF0000)
++				return "";
++
+ 			if (this.LastRange)
+ 			{
+ 				if (this.LastRange.Start <= _char && _char <= this.LastRange.End)
+-- 
+2.43.0
+

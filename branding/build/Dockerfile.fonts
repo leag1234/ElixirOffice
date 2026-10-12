@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Final layer of the ElixirOffice production image (tools/image/build.sh): the font pack
+# (branding/fonts: metric substitutes, Playwrite Seyes/FR Moderne derivatives, Elixir Symbols,
+# licences in branding/fonts/LICENSES.md) installed in the image built by the bake, then
+# AllFonts.js / font_selection.bin regenerated. Context: branding/fonts.
+#   docker build -f branding/build/Dockerfile.fonts --build-arg BASE=<image> branding/fonts
+ARG BASE=scratch
+ARG PY=python:3.12-slim
+FROM ${PY} AS pack
+ARG FONT_GROUPS=metric
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+RUN pip install --no-cache-dir fonttools==4.54.1
+COPY . /src
+# downloads are pinned by sha256 in sources.json; the cache only saves bandwidth
+RUN --mount=type=cache,target=/cache python /src/build.py --cache /cache --out /out --groups "${FONT_GROUPS}"
+
+FROM ${BASE}
+COPY --from=pack /out/ /usr/share/fonts/truetype/elixiroffice/
+# "true": data-container mode, no service restart during the build
+RUN documentserver-generate-allfonts.sh true && grep -q '"Gelasio Metric"' "${EO_ROOT}/sdkjs/common/AllFonts.js"
+ARG REVISION=unknown
+LABEL org.opencontainers.image.title="ElixirOffice document server" \
+      org.opencontainers.image.revision="${REVISION}" \
+      org.opencontainers.image.licenses="AGPL-3.0-only"

@@ -1,0 +1,835 @@
+From e5bf7d4c5b9fbe86b6665f0f2a279672add09cac Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Tue, 6 Oct 2026 15:47:41 +0200
+Subject: [PATCH 2/6] feat(example): Nextcloud storage connector (Login Flow
+ v2, WebDAV)
+
+Connect any Nextcloud server (murena.io by default) with Login Flow v2: the app password stays on the server, Disconnect deletes it on Nextcloud. Browse (PROPFIND), recent files (SEARCH), open through signed download and callback URLs, save back with If-Match (conflict copy on 412, retry on 423), new document, upload.
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../nodejs/helpers/elixirNextcloud.js         | 811 ++++++++++++++++++
+ 1 file changed, 811 insertions(+)
+ create mode 100644 web/documentserver-example/nodejs/helpers/elixirNextcloud.js
+
+diff --git a/web/documentserver-example/nodejs/helpers/elixirNextcloud.js b/web/documentserver-example/nodejs/helpers/elixirNextcloud.js
+new file mode 100644
+index 00000000..02585854
+--- /dev/null
++++ b/web/documentserver-example/nodejs/helpers/elixirNextcloud.js
+@@ -0,0 +1,811 @@
++/**
++ *
++ * (c) Copyright ElixirOffice contributors 2026
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ */
++
++// Nextcloud storage for the ElixirOffice start page (any Nextcloud server,
++// e.g. Murena Workspace at murena.io).
++//
++// - Login: Nextcloud Login Flow v2. The user signs in on the Nextcloud side
++//   in a browser window; this server polls Nextcloud and receives an app
++//   password, never the user's main password. "Disconnect" deletes the app
++//   password on the Nextcloud server (OCS core/apppassword) and here.
++// - The app password stays on this server, in the encrypted session store
++//   (elixirSession.js); the browser only has an opaque session cookie.
++// - Files: WebDAV (PROPFIND to browse, SEARCH for recent files, GET, PUT).
++//   The document server downloads a file through /elixir/nc/download and
++//   reports saves to /elixir/nc/track; both URLs carry a short signed token,
++//   no credential. Saves go back with If-Match on the ETag; when the file was
++//   changed elsewhere meanwhile, the edit is saved next to it as
++//   "name (conflict).ext" and the user is told on the start page.
++// - Network: only the Nextcloud server the user typed is contacted (https
++//   only unless elixir.nextcloud.allowHttp), optionally restricted to
++//   elixir.nextcloud.allowedServers.
++
++const crypto = require('crypto');
++const path = require('path');
++const fileSystem = require('fs');
++const { Readable } = require('stream');
++const express = require('express');
++const config = require('config');
++const jwt = require('jsonwebtoken');
++const formidable = require('formidable');
++const { XMLParser } = require('fast-xml-parser');
++const DocManager = require('./docManager');
++const fileUtility = require('./fileUtility');
++const session = require('./elixirSession');
++const identityLib = require('./elixirIdentity');
++
++const configServer = config.get('server');
++const ncConfig = (session.elixirConfig && session.elixirConfig.nextcloud) || {};
++const allowHttp = ncConfig.allowHttp === true || process.env.ELIXIR_NC_ALLOW_HTTP === '1';
++const allowedServers = (ncConfig.allowedServers || []).map((s) => String(s).replace(/\/+$/, '').toLowerCase());
++const defaultServer = ncConfig.defaultServer || 'https://murena.io';
++const PRODUCT = (configServer.has('appName') && configServer.get('appName')) || 'ElixirOffice';
++const TIMEOUT = 30000;
++const LOGIN_TTL = 20 * 60 * 1000;
++const TOKEN_TTL = 7 * 24 * 3600;
++
++const cfgSignatureEnable = configServer.get('token.enable');
++const cfgSignatureUseForRequest = configServer.get('token.useforrequest');
++const cfgSignatureAuthorizationHeader = configServer.get('token.authorizationHeader');
++const cfgSignatureAuthorizationHeaderPrefix = configServer.get('token.authorizationHeaderPrefix');
++const cfgSignatureSecret = configServer.get('token.secret');
++
++const home = require('./elixirHome');
++
++home.nextcloudDefaults.defaultServer = defaultServer;
++home.nextcloudDefaults.allowHttp = allowHttp;
++const homeLib = () => home;
++let renderEditor = null; // set by app.js: (req, res, doc) => renders views/editor
++
++// ---------------------------------------------------------------- helpers
++
++class NcError extends Error {
++  constructor(code, message, status) {
++    super(message || code);
++    this.code = code;
++    this.status = status || 0;
++  }
++}
++
++// "murena.io", "https://cloud.example.org/nextcloud/index.php/apps/files" -> base URL
++const normalizeServer = (input) => {
++  let s = String(input || '').trim();
++  if (!s) throw new NcError('badServer');
++  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) s = `https://${s}`;
++  let u;
++  try {
++    u = new URL(s);
++  } catch (e) {
++    throw new NcError('badServer');
++  }
++  if (u.username || u.password || u.search || u.hash) throw new NcError('badServer');
++  if (u.protocol !== 'https:' && !(u.protocol === 'http:' && allowHttp)) throw new NcError('httpsRequired');
++  let p = u.pathname.replace(/\/(index\.php|apps|login|remote\.php|ocs)(\/.*)?$/, '').replace(/\/+$/, '');
++  if (p === '/') p = '';
++  const base = `${u.protocol}//${u.host}${p}`;
++  if (allowedServers.length && allowedServers.indexOf(base.toLowerCase()) < 0) throw new NcError('serverNotAllowed');
++  return base;
++};
++
++const sameOrigin = (a, b) => {
++  try {
++    return new URL(a).origin === new URL(b).origin;
++  } catch (e) {
++    return false;
++  }
++};
++
++const basicAuth = (nc) => `Basic ${Buffer.from(`${nc.loginName}:${nc.appPassword}`).toString('base64')}`;
++
++const ncFetch = (nc, url, opts = {}) => fetch(url, {
++  method: opts.method || 'GET',
++  headers: {
++    Authorization: basicAuth(nc),
++    'User-Agent': PRODUCT,
++    ...(opts.headers || {}),
++  },
++  body: opts.body,
++  redirect: 'manual',
++  signal: AbortSignal.timeout(opts.timeout || TIMEOUT),
++});
++
++// "/Documents/a b.docx" -> "/Documents/a%20b.docx"; rejects traversal
++const cleanPath = (p) => {
++  const s = String(p || '/');
++  if (s.indexOf('\0') >= 0 || s[0] !== '/') throw new NcError('badPath');
++  const parts = s.split('/').filter(Boolean);
++  if (parts.some((x) => x === '..' || x === '.')) throw new NcError('badPath');
++  return `/${parts.join('/')}`;
++};
++const encodePath = (p) => cleanPath(p).split('/').map(encodeURIComponent).join('/');
++const davBase = (nc) => `${nc.server}/remote.php/dav/files/${encodeURIComponent(nc.userId)}`;
++const davUrl = (nc, p) => davBase(nc) + encodePath(p);
++const parentOf = (p) => {
++  const c = cleanPath(p);
++  const i = c.lastIndexOf('/');
++  return i <= 0 ? '/' : c.slice(0, i);
++};
++const baseName = (p) => cleanPath(p).split('/').pop() || '';
++
++const PROPS = '<d:prop><d:displayname/><d:getlastmodified/><d:getcontentlength/><d:getcontenttype/>'
++  + '<d:getetag/><d:resourcetype/><oc:fileid/><oc:permissions/><oc:size/></d:prop>';
++const NS = 'xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns"';
++
++const parser = new XMLParser({
++  removeNSPrefix: true,
++  ignoreAttributes: true,
++  parseTagValue: false,
++  processEntities: true,
++  isArray: (name) => name === 'response' || name === 'propstat',
++});
++
++const supportedExts = () => fileUtility.getSuppotredExtensions();
++
++// multistatus -> [{ path, name, type, ... }]
++const parseMultistatus = (nc, xml) => {
++  const doc = parser.parse(xml);
++  const ms = doc && doc.multistatus;
++  const responses = (ms && ms.response) || [];
++  const prefix = `${new URL(nc.server).pathname.replace(/\/+$/, '')}/remote.php/dav/files/${nc.userId}`;
++  return responses.map((r) => {
++    let href = String(r.href || '');
++    try { href = decodeURIComponent(href); } catch (e) { /* keep raw */ }
++    if (/^https?:\/\//.test(href)) href = new URL(href).pathname;
++    let rel = href.indexOf(prefix) === 0 ? href.slice(prefix.length) : null;
++    if (rel === null) return null;
++    rel = rel.replace(/\/+$/, '') || '/';
++    const ok = (r.propstat || []).find((ps) => /\s200\s/.test(String(ps.status || ''))) || (r.propstat || [])[0];
++    const prop = (ok && ok.prop) || {};
++    const isDir = prop.resourcetype && typeof prop.resourcetype === 'object' && 'collection' in prop.resourcetype;
++    const name = rel === '/' ? '' : rel.split('/').pop();
++    const ext = isDir ? '' : fileUtility.getFileExtension(name, true);
++    const perms = String(prop.permissions || '');
++    return {
++      path: rel,
++      name,
++      type: isDir ? 'dir' : 'file',
++      ext,
++      documentType: isDir ? null : fileUtility.getFileType(name) || null,
++      supported: !isDir && supportedExts().indexOf(ext) >= 0,
++      size: Number(isDir ? prop.size : prop.getcontentlength) || 0,
++      time: prop.getlastmodified ? Date.parse(prop.getlastmodified) || 0 : 0,
++      etag: String(prop.getetag || ''),
++      fileid: String(prop.fileid || ''),
++      canWrite: perms.indexOf('W') >= 0 || (isDir && perms.indexOf('C') >= 0),
++      canCreate: perms.indexOf('C') >= 0 || perms.indexOf('K') >= 0,
++    };
++  }).filter(Boolean);
++};
++
++const checkStatus = (r, what) => {
++  if (r.status === 401) throw new NcError('unauthorized', `${what}: 401`, 401);
++  if (r.status === 404) throw new NcError('notFound', `${what}: 404`, 404);
++  if (r.status === 507) throw new NcError('quota', `${what}: 507`, 507);
++  if (r.status >= 300) throw new NcError('serverError', `${what}: ${r.status}`, r.status);
++};
++
++const propfind = async (nc, p, depth) => {
++  const r = await ncFetch(nc, davUrl(nc, p), {
++    method: 'PROPFIND',
++    headers: { Depth: String(depth), 'Content-Type': 'application/xml; charset=utf-8' },
++    body: `<?xml version="1.0"?><d:propfind ${NS}>${PROPS}</d:propfind>`,
++  });
++  checkStatus(r, 'PROPFIND');
++  return parseMultistatus(nc, await r.text());
++};
++
++const stat = async (nc, p) => {
++  const list = await propfind(nc, p, 0);
++  if (!list.length) throw new NcError('notFound');
++  return list[0];
++};
++
++// exact types: Nextcloud's search only accepts "type/subtype" or "type/%"
++const OFFICE_MIMES = [
++  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
++  'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
++  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
++  'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
++  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
++  'application/vnd.openxmlformats-officedocument.presentationml.template',
++  'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
++  'application/vnd.ms-word.document.macroEnabled.12',
++  'application/vnd.ms-excel.sheet.macroEnabled.12',
++  'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
++  'application/vnd.oasis.opendocument.text',
++  'application/vnd.oasis.opendocument.spreadsheet',
++  'application/vnd.oasis.opendocument.presentation',
++  'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint',
++  'application/pdf', 'text/csv', 'application/rtf', 'text/rtf',
++];
++
++const recent = async (nc, limit) => {
++  const like = OFFICE_MIMES.map((m) => `<d:eq><d:prop><d:getcontenttype/></d:prop><d:literal>${m}</d:literal></d:eq>`).join('');
++  const body = `<?xml version="1.0" encoding="UTF-8"?><d:searchrequest ${NS}><d:basicsearch>`
++    + `<d:select>${PROPS}</d:select>`
++    + `<d:from><d:scope><d:href>/files/${encodeURIComponent(nc.userId)}</d:href><d:depth>infinity</d:depth></d:scope></d:from>`
++    + `<d:where><d:or>${like}</d:or></d:where>`
++    + '<d:orderby><d:order><d:prop><d:getlastmodified/></d:prop><d:descending/></d:order></d:orderby>'
++    + `<d:limit><d:nresults>${limit}</d:nresults></d:limit>`
++    + '</d:basicsearch></d:searchrequest>';
++  const r = await ncFetch(nc, `${nc.server}/remote.php/dav/`, {
++    method: 'SEARCH',
++    headers: { 'Content-Type': 'text/xml; charset=utf-8' },
++    body,
++  });
++  checkStatus(r, 'SEARCH');
++  return parseMultistatus(nc, await r.text()).filter((f) => f.type === 'file' && f.supported);
++};
++
++const etagOf = (r) => r.headers.get('oc-etag') || r.headers.get('etag') || '';
++
++// PUT; ifMatch: ETag the file must still have; create: fail if it exists
++const put = async (nc, p, data, opts = {}) => {
++  const headers = { 'Content-Type': 'application/octet-stream' };
++  if (opts.ifMatch) headers['If-Match'] = opts.ifMatch;
++  if (opts.create) headers['If-None-Match'] = '*';
++  let r;
++  for (let attempt = 0; ; attempt++) {
++    r = await ncFetch(nc, davUrl(nc, p), { method: 'PUT', headers, body: data, timeout: 120000 }); // eslint-disable-line no-await-in-loop
++    // 423: the file is locked for a moment (another save, a sync client): retry
++    if (r.status !== 423 || attempt >= 5) break;
++    await new Promise((resolve) => { setTimeout(resolve, 1000 * (attempt + 1)); }); // eslint-disable-line no-await-in-loop
++  }
++  if (r.status === 412) return { conflict: true };
++  checkStatus(r, 'PUT');
++  return { etag: etagOf(r) };
++};
++
++// PUT to a free name in the folder: "name.ext", "name (2).ext", …
++const putNew = async (nc, folder, name, data, suffix) => {
++  const ext = fileUtility.getFileExtension(name);
++  const stem = name.slice(0, name.length - ext.length);
++  for (let i = 1; i < 50; i++) {
++    let candidate;
++    if (suffix) candidate = `${stem} (${suffix}${i > 1 ? ` ${i}` : ''})${ext}`;
++    else candidate = i === 1 ? name : `${stem} (${i})${ext}`;
++    const p = `${folder === '/' ? '' : folder}/${candidate}`;
++    const res = await put(nc, p, data, { create: true }); // eslint-disable-line no-await-in-loop
++    if (!res.conflict) return { path: p, name: candidate, etag: res.etag };
++  }
++  throw new NcError('serverError', 'no free name');
++};
++
++const safeName = (name) => String(name || '').replace(/[\\/:*?"<>|\0]/g, '_').trim().slice(0, 200);
++
++// ---------------------------------------------------------------- sessions
++
++const connection = (req) => {
++  const nc = req.elixir.data().nc;
++  return nc && nc.appPassword ? nc : null;
++};
++
++const requireConnection = (req) => {
++  const nc = connection(req);
++  if (!nc) throw new NcError('notConnected', 'not connected', 401);
++  return nc;
++};
++
++const addNotice = (hash, notice) => session.update(hash, (data) => {
++  data.notices = (data.notices || []).concat([{ ...notice, at: Date.now() }]).slice(-20);
++});
++
++// state of Nextcloud files open in the document server, per server+fileid:
++// { key, etag, path per session, sessions } (shared by co-editors)
++const STATE = 'nc-open';
++const fileRef = (nc, fileid) => crypto.createHash('sha256').update(`${nc.server}\n${fileid}`).digest('hex');
++const pruneState = (st) => {
++  const limit = Date.now() - 14 * 24 * 3600 * 1000;
++  Object.keys(st).forEach((k) => { if (!st[k].updated || st[k].updated < limit) delete st[k]; });
++  return st;
++};
++
++// key of the editing session of this file: reused while the file is open,
++// new when the file changed on the Nextcloud side since our last save
++const documentKey = (nc, item, sessionHash) => {
++  const st = pruneState(session.loadState(STATE));
++  const ref = fileRef(nc, item.fileid);
++  let entry = st[ref];
++  if (!entry || entry.etag !== item.etag) {
++    const key = `nc${crypto.createHash('sha256').update(`${ref}\n${item.etag}`).digest('hex').slice(0, 32)}`;
++    entry = { key, etag: item.etag, sessions: {}, server: nc.server, fileid: item.fileid };
++  }
++  entry.sessions[sessionHash] = item.path;
++  entry.updated = Date.now();
++  st[ref] = entry;
++  session.saveState(STATE, st);
++  return { key: entry.key, ref };
++};
++
++// ---------------------------------------------------------------- document server side
++
++const checkDocumentServerJwt = (req) => {
++  if (!(cfgSignatureEnable && cfgSignatureUseForRequest)) return { ok: true, body: req.body };
++  let token = req.body && req.body.token;
++  let fromHeader = false;
++  if (!token) {
++    const auth = req.get(cfgSignatureAuthorizationHeader);
++    if (auth && auth.startsWith(cfgSignatureAuthorizationHeaderPrefix)) {
++      token = auth.substring(cfgSignatureAuthorizationHeaderPrefix.length);
++      fromHeader = true;
++    }
++  }
++  if (!token) return { ok: false };
++  try {
++    const decoded = jwt.verify(token, cfgSignatureSecret);
++    return { ok: true, body: fromHeader && decoded.payload ? decoded.payload : decoded };
++  } catch (e) {
++    return { ok: false };
++  }
++};
++
++// The document server builds the URL of the saved file from the browser's address of the
++// server (e.g. http://localhost:8190/cache/...), which this app may not reach. When the
++// document server is served next to this app (relative server.siteUrl, the packaged
++// setup), fetch it from the internal address instead (elixir.documentServerInternalUrl,
++// default http://localhost/). The URL comes in a callback signed with the JWT secret.
++const siteUrl = configServer.get('siteUrl');
++const dsInternal = (session.elixirConfig && session.elixirConfig.documentServerInternalUrl)
++  || (/^https?:\/\//.test(siteUrl) ? null : 'http://localhost/');
++const internalDocumentServerUrl = (url) => {
++  if (!dsInternal) return url;
++  try {
++    const u = new URL(url);
++    return new URL(u.pathname + u.search, dsInternal).toString();
++  } catch (e) {
++    return url;
++  }
++};
++
++// save what the document server sends back into Nextcloud
++const saveBack = async (tok, body) => {
++  const st = session.loadState(STATE);
++  const entry = st[tok.r];
++  const downloadUrl = body.url;
++  if (!downloadUrl) throw new NcError('serverError', 'no url');
++  const dl = await fetch(internalDocumentServerUrl(downloadUrl), { signal: AbortSignal.timeout(120000) });
++  if (dl.status !== 200) throw new NcError('serverError', `document server download: ${dl.status}`);
++  const data = Buffer.from(await dl.arrayBuffer());
++
++  // any connected session that has this file open can write it back
++  const candidates = [tok.s].concat(entry ? Object.keys(entry.sessions) : []).filter((v, i, a) => a.indexOf(v) === i);
++  let nc = null;
++  let filePath = null;
++  let sessionHash = null;
++  candidates.some((h) => {
++    const s = session.load(h);
++    if (s.nc && s.nc.appPassword && (!entry || s.nc.server === entry.server)) {
++      nc = s.nc;
++      sessionHash = h;
++      filePath = (entry && entry.sessions[h]) || (h === tok.s ? tok.p : null);
++      return !!filePath;
++    }
++    return false;
++  });
++  if (!nc || !filePath) throw new NcError('notConnected', 'no connected session for this file');
++
++  const ext = fileUtility.getFileExtension(filePath, true);
++  const outExt = String(body.filetype || body.fileType || ext).toLowerCase();
++  const sessionsToTell = entry ? Object.keys(entry.sessions) : [sessionHash];
++  let result;
++  if (outExt !== ext) {
++    // saved in another format (e.g. a converted file): keep the original, add a sibling
++    const name = `${baseName(filePath).slice(0, -(ext.length + 1))}.${outExt}`;
++    result = await putNew(nc, parentOf(filePath), name, data);
++  } else {
++    const res = await put(nc, filePath, data, { ifMatch: entry ? entry.etag : tok.e });
++    if (res.conflict) {
++      // changed on the Nextcloud side meanwhile: keep both versions
++      result = await putNew(nc, parentOf(filePath), baseName(filePath), data, 'conflict');
++      await Promise.all(sessionsToTell.map((h) => addNotice(h, {
++        type: 'conflict', name: baseName(filePath), copy: result.name, path: result.path,
++      })));
++    } else {
++      result = { path: filePath, etag: res.etag };
++    }
++  }
++
++  // the editing session now follows the saved file (or its conflict copy)
++  const st2 = session.loadState(STATE);
++  const e2 = st2[tok.r];
++  if (e2) {
++    if (result.path !== filePath) Object.keys(e2.sessions).forEach((h) => { e2.sessions[h] = result.path; });
++    e2.etag = result.etag || e2.etag;
++    e2.updated = Date.now();
++    session.saveState(STATE, st2);
++  }
++  return result;
++};
++
++const closeEntry = (ref) => {
++  const st = session.loadState(STATE);
++  if (st[ref]) {
++    delete st[ref];
++    session.saveState(STATE, st);
++  }
++};
++
++// ---------------------------------------------------------------- editor
++
++const ncEditorDoc = async (req, nc, p) => {
++  const item = await stat(nc, p);
++  if (item.type !== 'file') throw new NcError('notFound');
++  const docManager = new DocManager(req, null);
++  const dsBase = docManager.getServerUrl(true);
++  const { key, ref } = documentKey(nc, item, req.elixir.hash);
++  const tok = { s: req.elixir.hash, p: item.path, r: ref, e: item.etag };
++  let folder = parentOf(item.path);
++  let host = nc.server;
++  try { host = new URL(nc.server).host; } catch (e) { /* keep */ }
++  folder = folder === '/' ? host : `${host}${folder}`;
++  let recentFiles = [];
++  try {
++    recentFiles = (await recent(nc, 30)).filter((f) => f.fileid !== item.fileid);
++  } catch (e) {
++    recentFiles = [];
++  }
++  const server = docManager.getServerUrl();
++  const csrf = req.elixir.csrf();
++  return {
++    title: item.name,
++    key,
++    url: `${dsBase}/elixir/nc/download?t=${session.signToken(tok, TOKEN_TTL)}`,
++    callbackUrl: `${dsBase}/elixir/nc/track?t=${session.signToken(tok, TOKEN_TTL)}`,
++    canWrite: item.canWrite,
++    forcesave: true,
++    recent: recentFiles.map((f) => ({
++      title: f.name,
++      url: `${server}/elixir/nc/open?path=${encodeURIComponent(f.path)}`,
++      folder: parentOf(f.path) === '/' ? host : `${host}${parentOf(f.path)}`,
++      modified: new Date(f.time).toISOString(),
++      size: f.size,
++    })),
++    elixir: {
++      folder,
++      uploadUrl: `${server}/elixir/nc/upload?folder=${encodeURIComponent(parentOf(item.path))}&csrf=${encodeURIComponent(csrf)}`,
++      editorUrl: `${server}/elixir/nc/open?path={name}`,
++      shareUrl: item.fileid ? `${nc.server}/index.php/f/${encodeURIComponent(item.fileid)}` : null,
++    },
++  };
++};
++
++// ---------------------------------------------------------------- router
++
++const errorJson = (res, err) => {
++  const code = err instanceof NcError ? err.code : (err && err.name === 'TimeoutError' ? 'timeout' : 'network');
++  if (!(err instanceof NcError) || code === 'serverError') console.log('[elixir/nc]', err && err.message);
++  if (code === 'unauthorized') {
++    res.status(401).json({ error: code });
++    return;
++  }
++  const status = { notConnected: 401, notFound: 404, badPath: 400, badServer: 400, httpsRequired: 400, serverNotAllowed: 403, csrf: 403 }[code] || 422; // not 502: nginx replaces 5xx with its own page
++  res.status(status).json({ error: code });
++};
++
++// state-changing requests need our header (forces a CORS preflight) or the session's CSRF token
++const checkCsrf = (req) => {
++  if (req.get('X-Elixir') === '1') return;
++  const csrf = req.elixir.data().csrf;
++  const given = String(req.query.csrf || (req.body && req.body.csrf) || '');
++  if (!csrf || given.length !== csrf.length || !crypto.timingSafeEqual(Buffer.from(given), Buffer.from(csrf))) {
++    throw new NcError('csrf');
++  }
++};
++
++// an expired app password (revoked on the Nextcloud side): forget it
++const dropConnection = (req) => req.elixir.update((data) => {
++  if (data.nc && data.nc.avatarId) session.removeAvatar(data.nc.avatarId);
++  delete data.nc;
++});
++
++const handle = (fn) => async (req, res) => {
++  res.removeHeader('Access-Control-Allow-Origin');
++  res.setHeader('Cache-Control', 'no-store');
++  try {
++    await fn(req, res);
++  } catch (err) {
++    if (err instanceof NcError && err.code === 'unauthorized' && connection(req)) await dropConnection(req);
++    if (res.headersSent) {
++      console.log('[elixir/nc]', err && err.message);
++      res.end();
++      return;
++    }
++    if (req.method === 'GET' && (req.accepts(['json', 'html']) === 'html')) {
++      res.status(err.status && err.status < 500 ? err.status : 422);
++      res.render('error', { message: `Nextcloud: ${err.code || err.message}` });
++      return;
++    }
++    errorJson(res, err);
++  }
++};
++
++const itemJson = (f) => ({
++  path: f.path, name: f.name, type: f.type, documentType: f.documentType, ext: f.ext, supported: f.supported,
++  size: f.size, time: f.time, canWrite: f.canWrite, canCreate: f.canCreate, fileid: f.fileid,
++});
++
++const blankTemplate = (req, ext) => {
++  const lang = new DocManager(req, null).getLang();
++  const assets = path.join(__dirname, '..', 'public', 'assets', 'document-templates', 'new');
++  const p = path.join(assets, lang, `new.${ext}`);
++  return fileSystem.existsSync(p) ? p : path.join(assets, 'default', `new.${ext}`);
++};
++
++module.exports = function elixirNextcloud() {
++  const router = express.Router();
++  const json = express.json({ limit: '64kb' });
++
++  // ---- login flow v2
++  router.post('/elixir/nc/connect', json, handle(async (req, res) => {
++    checkCsrf(req);
++    const server = normalizeServer(req.body && req.body.server);
++    const r = await fetch(`${server}/index.php/login/v2`, {
++      method: 'POST',
++      headers: { 'User-Agent': PRODUCT, Accept: 'application/json' },
++      redirect: 'manual',
++      signal: AbortSignal.timeout(TIMEOUT),
++    });
++    if (r.status !== 200) throw new NcError('noLoginFlow', `login/v2: ${r.status}`);
++    let flow;
++    try {
++      flow = await r.json();
++    } catch (e) {
++      throw new NcError('noLoginFlow');
++    }
++    if (!flow || !flow.poll || !flow.poll.token || !flow.login
++      || !sameOrigin(flow.poll.endpoint, server) || !sameOrigin(flow.login, server)) {
++      throw new NcError('noLoginFlow');
++    }
++    await req.elixir.update((data) => {
++      data.pending = { server, token: flow.poll.token, endpoint: flow.poll.endpoint, at: Date.now() };
++    });
++    res.json({ login: flow.login, server });
++  }));
++
++  router.post('/elixir/nc/connect/poll', json, handle(async (req, res) => {
++    checkCsrf(req);
++    const { pending } = req.elixir.data();
++    if (!pending || Date.now() - pending.at > LOGIN_TTL) {
++      res.json({ status: 'expired' });
++      return;
++    }
++    const r = await fetch(pending.endpoint, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': PRODUCT, Accept: 'application/json' },
++      body: new URLSearchParams({ token: pending.token }).toString(),
++      redirect: 'manual',
++      signal: AbortSignal.timeout(TIMEOUT),
++    });
++    if (r.status === 404) {
++      res.json({ status: 'pending' });
++      return;
++    }
++    if (r.status !== 200) throw new NcError('serverError', `login poll: ${r.status}`);
++    const cred = await r.json();
++    if (!cred || !cred.loginName || !cred.appPassword) throw new NcError('serverError', 'login poll: no credentials');
++    // the API base stays the URL the user chose (same origin as the login flow)
++    const nc = { server: pending.server, loginName: cred.loginName, appPassword: cred.appPassword };
++    const ur = await ncFetch(nc, `${nc.server}/ocs/v2.php/cloud/user?format=json`, {
++      headers: { 'OCS-APIRequest': 'true', Accept: 'application/json' },
++    });
++    checkStatus(ur, 'cloud/user');
++    const info = ((await ur.json()).ocs || {}).data || {};
++    nc.userId = String(info.id || cred.loginName);
++    nc.displayName = String(info['display-name'] || info.displayname || nc.userId);
++    nc.email = info.email ? String(info.email) : '';
++    nc.connectedAt = Date.now();
++    try {
++      const ar = await ncFetch(nc, `${nc.server}/index.php/avatar/${encodeURIComponent(nc.userId)}/128`, { timeout: 10000 });
++      const type = (ar.headers.get('content-type') || '').split(';')[0];
++      if (ar.status === 200 && /^image\/(png|jpeg|gif|webp)$/.test(type)) {
++        nc.avatarId = crypto.randomBytes(16).toString('hex');
++        session.saveAvatar(nc.avatarId, Buffer.from(await ar.arrayBuffer()), type);
++      }
++    } catch (e) {
++      /* initials then */
++    }
++    await req.elixir.update((data) => {
++      if (data.nc && data.nc.avatarId) session.removeAvatar(data.nc.avatarId);
++      data.nc = nc;
++      delete data.pending;
++      data.devUser = null;
++    });
++    res.json({ status: 'connected', user: { id: nc.userId, name: nc.displayName, email: nc.email } });
++  }));
++
++  router.post('/elixir/nc/disconnect', json, handle(async (req, res) => {
++    checkCsrf(req);
++    const nc = connection(req);
++    let revoked = false;
++    if (nc) {
++      try {
++        const r = await ncFetch(nc, `${nc.server}/ocs/v2.php/core/apppassword`, {
++          method: 'DELETE',
++          headers: { 'OCS-APIRequest': 'true', Accept: 'application/json' },
++          timeout: 15000,
++        });
++        revoked = r.status === 200 || r.status === 401;
++      } catch (e) {
++        revoked = false;
++      }
++    }
++    await req.elixir.update((data) => {
++      if (data.nc && data.nc.avatarId) session.removeAvatar(data.nc.avatarId);
++      delete data.nc;
++      delete data.pending;
++    });
++    res.json({ ok: true, revoked });
++  }));
++
++  // ---- browsing
++  router.get('/elixir/nc/list', handle(async (req, res) => {
++    const nc = requireConnection(req);
++    const p = cleanPath(req.query.path || '/');
++    const list = await propfind(nc, p, 1);
++    const self = list.find((f) => f.path === p) || { path: p, canCreate: true };
++    const items = list.filter((f) => f.path !== p).map(itemJson)
++      .sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }) : (a.type === 'dir' ? -1 : 1)));
++    if (req.elixir.data().lastFolder !== p) req.elixir.update((data) => { data.lastFolder = p; }).catch(() => {});
++    res.json({ path: p, canCreate: self.canCreate !== false, items });
++  }));
++
++  router.get('/elixir/nc/recent', handle(async (req, res) => {
++    const nc = requireConnection(req);
++    const files = await recent(nc, Math.min(100, Number(req.query.limit) || 50));
++    res.json({ files: files.map(itemJson) });
++  }));
++
++  // ---- open in the editor
++  router.get('/elixir/nc/open', handle(async (req, res) => {
++    const nc = requireConnection(req);
++    const doc = await ncEditorDoc(req, nc, cleanPath(req.query.path));
++    renderEditor(req, res, doc);
++  }));
++
++  // the user's own download (row menu)
++  router.get('/elixir/nc/file', handle(async (req, res) => {
++    const nc = requireConnection(req);
++    const p = cleanPath(req.query.path);
++    const r = await ncFetch(nc, davUrl(nc, p), { timeout: 120000 });
++    checkStatus(r, 'GET');
++    res.setHeader('Content-Type', r.headers.get('content-type') || 'application/octet-stream');
++    if (r.headers.get('content-length')) res.setHeader('Content-Length', r.headers.get('content-length'));
++    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(baseName(p))}`);
++    Readable.fromWeb(r.body).pipe(res);
++  }));
++
++  // ---- create and upload
++  router.get('/elixir/nc/new', handle(async (req, res) => {
++    checkCsrf(req);
++    const nc = requireConnection(req);
++    const folder = cleanPath(req.query.folder || req.elixir.data().lastFolder || '/');
++    const { resolveLanguage, translator, loadTemplates, templatesDir, localized } = homeLib();
++    const lang = resolveLanguage(req);
++    const t = translator(lang.ui);
++    let src;
++    let name;
++    if (req.query.template) {
++      const tpl = loadTemplates().find((x) => x.id === req.query.template);
++      if (!tpl) throw new NcError('notFound');
++      src = path.join(templatesDir, tpl.file);
++      name = `${safeName(localized(tpl.title, lang.ui)) || 'Document'}${fileUtility.getFileExtension(tpl.file)}`;
++    } else {
++      const ext = String(req.query.type || 'docx').toLowerCase();
++      if (['docx', 'xlsx', 'pptx', 'pdf'].indexOf(ext) < 0) throw new NcError('badPath');
++      src = blankTemplate(req, ext);
++      const type = fileUtility.getFileType(`x.${ext}`);
++      name = `${safeName(t(`nc.newName.${type}`))}.${ext}`;
++    }
++    const created = await putNew(nc, folder, name, fileSystem.readFileSync(src));
++    res.redirect(`${new DocManager(req, res).getServerUrl()}/elixir/nc/open?path=${encodeURIComponent(created.path)}`);
++  }));
++
++  router.post('/elixir/nc/upload', handle(async (req, res) => {
++    checkCsrf(req);
++    const nc = requireConnection(req);
++    const form = new formidable.IncomingForm({ maxFileSize: configServer.get('maxFileSize'), keepExtensions: true });
++    const { fields, files } = await new Promise((resolve, reject) => {
++      form.parse(req, (err, f, fl) => (err ? reject(err) : resolve({ fields: f, files: fl })));
++    });
++    const first = (v) => (Array.isArray(v) ? v[0] : v);
++    const folder = cleanPath(first(fields.folder) || req.query.folder || '/');
++    const file = first(files.uploadedFile) || first(files.file);
++    if (!file) throw new NcError('badPath', 'no file');
++    const name = safeName(file.originalFilename || file.name);
++    const ext = fileUtility.getFileExtension(name, true);
++    try {
++      if (!name || supportedExts().indexOf(ext) < 0) {
++        res.status(400).json({ error: 'unsupported' });
++        return;
++      }
++      const created = await putNew(nc, folder, name, fileSystem.readFileSync(file.filepath));
++      res.json({ path: created.path, name: created.name, filename: created.path });
++    } finally {
++      fileSystem.unlink(file.filepath, () => {});
++    }
++  }));
++
++  // ---- document server endpoints (signed URLs, no session cookie)
++  router.get('/elixir/nc/download', handle(async (req, res) => {
++    const tok = session.readToken(req.query.t);
++    if (!tok) {
++      res.sendStatus(403);
++      return;
++    }
++    if (cfgSignatureEnable && cfgSignatureUseForRequest) {
++      const auth = req.get(cfgSignatureAuthorizationHeader) || '';
++      try {
++        jwt.verify(auth.substring(cfgSignatureAuthorizationHeaderPrefix.length), cfgSignatureSecret);
++      } catch (e) {
++        res.sendStatus(403);
++        return;
++      }
++    }
++    const s = session.load(tok.s);
++    if (!s.nc || !s.nc.appPassword) {
++      res.sendStatus(410);
++      return;
++    }
++    const st = session.loadState(STATE);
++    const p = (st[tok.r] && st[tok.r].sessions[tok.s]) || tok.p;
++    const r = await ncFetch(s.nc, davUrl(s.nc, p), { timeout: 120000 });
++    checkStatus(r, 'GET');
++    res.setHeader('Content-Type', r.headers.get('content-type') || 'application/octet-stream');
++    if (r.headers.get('content-length')) res.setHeader('Content-Length', r.headers.get('content-length'));
++    Readable.fromWeb(r.body).pipe(res);
++  }));
++
++  router.post('/elixir/nc/track', json, async (req, res) => {
++    res.removeHeader('Access-Control-Allow-Origin');
++    const tok = session.readToken(req.query.t);
++    const auth = checkDocumentServerJwt(req);
++    if (!tok || !auth.ok || !auth.body) {
++      res.status(403).json({ error: 1, message: 'forbidden' });
++      return;
++    }
++    const body = auth.body;
++    if (body.status !== 1 && body.status !== 4) console.log(`[elixir/nc] track status ${body.status} ${body.key}`);
++    try {
++      if (body.status === 2 || body.status === 3) {
++        await saveBack(tok, body);
++        closeEntry(tok.r);
++      } else if (body.status === 6 || body.status === 7) {
++        await saveBack(tok, body);
++      } else if (body.status === 4) {
++        closeEntry(tok.r);
++      }
++      res.json({ error: 0 });
++    } catch (err) {
++      console.log('[elixir/nc] save failed:', err && err.message, err && err.cause && err.cause.code, String(body.url || '').replace(/\?.*/, ''));
++      if (tok.s) {
++        addNotice(tok.s, { type: 'saveFailed', name: baseName(tok.p), reason: err.code || 'network' }).catch(() => {});
++      }
++      res.json({ error: 1, message: 'save failed' });
++    }
++  });
++
++  return router;
++};
++
++module.exports.setRenderer = (fn) => { renderEditor = fn; };
++module.exports.connection = connection;
++module.exports.normalizeServer = normalizeServer;
++module.exports.defaultServer = defaultServer;
++module.exports.allowHttp = allowHttp;
++module.exports.parentOf = parentOf;
++module.exports.identity = identityLib.identity;
+-- 
+2.43.0
+

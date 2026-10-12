@@ -1,0 +1,96 @@
+From eb0ea28c9563844eb9c37ae48400994c1006b110 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 15:40:51 +0200
+Subject: [PATCH] perf(docker): serve precompressed static files, one nginx
+ worker per core [upstreamable]
+
+Static files were gzipped on the fly at level 5 for every request by a
+single nginx worker: on a cold load the editor bundles (sdk-all.js is
+18.5 MB) and fonts (10 to 16 MB) queue behind one core, sdk-all.js had a
+317 ms time to first byte.
+
+- entrypoint: STATIC_GZIP (default true) runs documentserver-static-gzip.sh
+  in the background after the fonts are generated; it turns gzip_static
+  on when done, nginx compresses on the fly until then.
+- entrypoint: NGINX_WORKER_PROCESSES defaults to auto instead of 1.
+- develop/setup/Makefile: once gzip_static is on, every cache flush
+  recompresses what a rebuild replaced, so dev builds never serve a
+  stale .gz.
+
+Measured with tools/perf (ElixirOffice repo), own instance with the
+same settings applied by hand, 10-page document, CPU x1, 5 runs, medians,
+editable after navigation:
+  localhost, cold cache: 1281 ms -> 1079 ms (gzip_static)
+                          -> 1053 ms (+ auto workers, within noise
+                             for a single client)
+  40 ms RTT / 50 Mbit/s, cold cache: 1467 ms -> 1230 ms
+  warm caches unchanged within noise (985 -> 875 ms, different load).
+Bytes: 10.2 -> 10.0 MB (gzip -9 instead of -5).
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ build/scripts/standalone/entrypoint.sh | 13 ++++++++++++-
+ develop/setup/Makefile                 | 11 +++++++++++
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/build/scripts/standalone/entrypoint.sh b/build/scripts/standalone/entrypoint.sh
+index d489c85..3a4d63a 100644
+--- a/build/scripts/standalone/entrypoint.sh
++++ b/build/scripts/standalone/entrypoint.sh
+@@ -51,7 +51,11 @@ GENERATE_FONTS="${GENERATE_FONTS:-true}"
+ 
+ MAX_FILE_SIZE="${MAX_FILE_SIZE:-104857600}"
+ 
+-NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-1}"
++# auto = one worker per core: a single worker serialises every request of every
++# client, including the on-the-fly compression of the editor bundles
++NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-auto}"
++# serve precompressed static files (documentserver-static-gzip.sh, nginx gzip_static)
++STATIC_GZIP="${STATIC_GZIP:-true}"
+ NGINX_ACCESS_LOG="${NGINX_ACCESS_LOG:-false}"
+ NGINX_CLIENT_MAX_BODY_SIZE="${NGINX_CLIENT_MAX_BODY_SIZE:-100m}"
+ SSL_VERIFY_CLIENT="${SSL_VERIFY_CLIENT:-off}"
+@@ -571,6 +575,13 @@ if [ "$GENERATE_FONTS" = "true" ] && command -v /usr/bin/documentserver-generate
+   /usr/bin/documentserver-generate-allfonts.sh
+ fi
+ 
++# Precompress the static files (editor bundles, fonts, dictionaries) once at -9 instead of
++# compressing them on the fly at every request; in the background: nginx keeps compressing on
++# the fly until the script turns gzip_static on and reloads it. Incremental after a restart.
++if [ "$STATIC_GZIP" = "true" ] && command -v /usr/bin/documentserver-static-gzip.sh >/dev/null 2>&1; then
++  ( /usr/bin/documentserver-static-gzip.sh >/dev/null 2>&1 && echo "[static-gzip] precompressed static files served" ) &
++fi
++
+ if [ "$PLUGINS_ENABLED" = "true" ] && command -v documentserver-pluginsmanager.sh >/dev/null 2>&1 \
+    && [ -f "${EO_ROOT}/sdkjs-plugins/plugin-list-default.json" ]; then
+   (
+diff --git a/develop/setup/Makefile b/develop/setup/Makefile
+index 7acba63..7f03f87 100644
+--- a/develop/setup/Makefile
++++ b/develop/setup/Makefile
+@@ -34,10 +34,21 @@ define FLUSH_CACHE
+ 	if grep -q '{{HASH_POSTFIX}}' $$API; then cp -f $$API $$API.tpl; fi; \
+ 	cp -f $$API.tpl $$API && sed -i "s/{{HASH_POSTFIX}}/$$HASH/g" $$API && rm -f $$API.gz && chown ds:ds $$API $$API.tpl; \
+ 	echo "set \$$cache_tag \"$$HASH\";" > /etc/nginx/includes/ds-cache.conf; \
++	$(REFRESH_GZIP) \
+ 	service nginx reload >/dev/null; \
+ 	echo "cache flushed: $$HASH"
+ endef
+ 
++# With gzip_static on (documentserver-static-gzip.sh), nginx serves file.gz when it exists,
++# even if it is older than the file: recompress what a rebuild replaced.
++define REFRESH_GZIP
++	if grep -qE '^[[:space:]]*gzip_static on' /etc/nginx/includes/ds-docservice.conf 2>/dev/null; then \
++	  cd $(EO_ROOT) && find ./sdkjs ./web-apps -type f \( -name '*.js' -o -name '*.json' -o -name '*.html' -o -name '*.css' -o -name '*.bin' -o -name '*.wasm' -o -name '*.svg' \) -print0 | \
++	  xargs -0 -r -n 64 -P $$(nproc) sh -c 'for f; do [ "$$f.gz" -nt "$$f" ] || gzip -kf9 "$$f"; done' _; \
++	  echo "gzip_static: stale .gz refreshed"; \
++	fi;
++endef
++
+ sdkjs:    DEBUG_FLAGS = $(SDKJS_FLAGS)
+ 
+ 
+-- 
+2.43.0
+

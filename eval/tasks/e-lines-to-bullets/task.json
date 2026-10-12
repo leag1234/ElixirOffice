@@ -1,0 +1,13 @@
+{
+  "id": "e-lines-to-bullets",
+  "title": "Lines to a bulleted list",
+  "instruction": "Transforme ces lignes en liste à puces",
+  "select": [
+    2,
+    5
+  ],
+  "input": "input.docx",
+  "kind": "everyday",
+  "lang": "fr",
+  "notes": ""
+}

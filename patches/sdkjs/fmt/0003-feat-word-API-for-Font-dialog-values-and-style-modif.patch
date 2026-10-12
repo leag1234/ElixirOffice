@@ -1,0 +1,349 @@
+From c85040f96f8b33b8e3e6f4a590939e4183d498aa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:24:25 +0200
+Subject: [PATCH 3/7] feat(word): API for Font dialog values and style
+ modification
+
+- asc_GetFontDialogProps() / asc_SetFontDialogProps(props): the text
+  properties a Font dialog shows (font, size, bold, italic, underline,
+  strikethrough, double strikethrough, superscript/subscript, small caps,
+  all caps, hidden, colour, spacing, position, ligatures) and their
+  application to the selection in one undo step, after loading the font.
+- asc_GetStyleForModify(name) / asc_ModifyStyle(name, changes): a
+  style's name, type, based on, next style and effective formatting, and
+  its modification (name, based on without cycles, next style, Quick
+  Style flag, text and paragraph properties) without applying it to the
+  selection, in one undo step.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ word/api.js | 310 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 310 insertions(+)
+
+diff --git a/word/api.js b/word/api.js
+index e7d737bf3f..32c6a043ba 100644
+--- a/word/api.js
++++ b/word/api.js
+@@ -13939,6 +13939,316 @@ background-repeat: no-repeat;\
+ 		return !!this.isStylePreview;
+ 	};
+ 
++	//------------------------------------------------------------------------------------------------------------------
++	// Font dialog and style modification (Word-like Font, Modify Style dialogs)
++	//------------------------------------------------------------------------------------------------------------------
++	/**
++	 * Text properties as shown by a Font dialog. Values that differ inside the selection are undefined.
++	 * Lengths (Spacing, Position) are in millimetres; Color is an asc color (see asc_onTextColor).
++	 */
++	function private_FontPropsFromTextPr(textPr, isStyle)
++	{
++		let props = {};
++		if (!textPr)
++			return props;
++
++		// the selection reports its font in FontFamily (as for the toolbar), a compiled style in RFonts
++		let rFontName = textPr.RFonts && textPr.RFonts.Ascii ? textPr.RFonts.Ascii.Name : undefined;
++		props["FontName"]   = isStyle ? (rFontName || (textPr.FontFamily ? textPr.FontFamily.Name : undefined)) : (textPr.FontFamily ? textPr.FontFamily.Name : rFontName);
++		props["FontSize"]   = textPr.FontSize;
++		props["Bold"]       = textPr.Bold;
++		props["Italic"]     = textPr.Italic;
++		props["Underline"]  = textPr.Underline;
++		props["Strikeout"]  = textPr.Strikeout;
++		props["DStrikeout"] = textPr.DStrikeout;
++		props["VertAlign"]  = textPr.VertAlign;
++		props["Caps"]       = textPr.Caps;
++		props["SmallCaps"]  = textPr.SmallCaps;
++		props["Vanish"]     = textPr.Vanish;
++		props["Spacing"]    = textPr.Spacing;
++		props["Position"]   = textPr.Position;
++		props["Ligatures"]  = textPr.Ligatures;
++
++		if (textPr.Unifill && textPr.Unifill.fill && textPr.Unifill.fill.type === c_oAscFill.FILL_TYPE_SOLID && textPr.Unifill.fill.color)
++			props["Color"] = AscCommon.CreateAscColor(textPr.Unifill.fill.color);
++		else if (textPr.Color)
++			props["Color"] = AscCommon.CreateAscColorCustom(textPr.Color.r, textPr.Color.g, textPr.Color.b, textPr.Color.Auto);
++
++		return props;
++	}
++	/**
++	 * Writes Font dialog values into a CTextPr (only the keys present in props).
++	 */
++	function private_FontPropsToTextPr(props, textPr, isStyle)
++	{
++		if (undefined !== props["FontName"] && null !== props["FontName"])
++		{
++			textPr.RFonts.SetAll(props["FontName"], -1);
++			if (isStyle)
++			{
++				textPr.RFonts.AsciiTheme    = undefined;
++				textPr.RFonts.EastAsiaTheme = undefined;
++				textPr.RFonts.HAnsiTheme    = undefined;
++				textPr.RFonts.CSTheme       = undefined;
++			}
++			else
++			{
++				textPr.FontFamily = {Name : props["FontName"], Index : -1};
++			}
++		}
++
++		if (undefined !== props["FontSize"] && null !== props["FontSize"])
++		{
++			textPr.FontSize   = Math.max(1, Math.min(props["FontSize"], 1638));
++			textPr.FontSizeCS = textPr.FontSize;
++		}
++
++		var bools = ["Bold", "Italic", "Underline", "Caps", "SmallCaps", "Vanish"];
++		for (var i = 0; i < bools.length; ++i)
++		{
++			if (undefined !== props[bools[i]] && null !== props[bools[i]])
++				textPr[bools[i]] = !!props[bools[i]];
++		}
++		if (undefined !== props["Bold"] && null !== props["Bold"])
++			textPr.BoldCS = !!props["Bold"];
++		if (undefined !== props["Italic"] && null !== props["Italic"])
++			textPr.ItalicCS = !!props["Italic"];
++
++		// Word: strikethrough/double strikethrough and small caps/all caps exclude each other
++		if (true === props["Strikeout"])
++		{
++			textPr.Strikeout  = true;
++			textPr.DStrikeout = false;
++		}
++		else if (true === props["DStrikeout"])
++		{
++			textPr.Strikeout  = false;
++			textPr.DStrikeout = true;
++		}
++		else
++		{
++			if (false === props["Strikeout"])
++				textPr.Strikeout = false;
++			if (false === props["DStrikeout"])
++				textPr.DStrikeout = false;
++		}
++		if (true === props["SmallCaps"])
++			textPr.Caps = false;
++		else if (true === props["Caps"])
++			textPr.SmallCaps = false;
++
++		if (undefined !== props["VertAlign"] && null !== props["VertAlign"])
++			textPr.VertAlign = props["VertAlign"];
++		if (undefined !== props["Spacing"] && null !== props["Spacing"])
++			textPr.Spacing = props["Spacing"];
++		if (undefined !== props["Position"] && null !== props["Position"])
++			textPr.Position = props["Position"];
++		if (undefined !== props["Ligatures"] && null !== props["Ligatures"])
++			textPr.Ligatures = props["Ligatures"];
++
++		var color = props["Color"];
++		if (color)
++		{
++			if (true === color.Auto || (color.get_auto && color.get_auto()))
++			{
++				textPr.Color   = new AscCommonWord.CDocumentColor(0, 0, 0, true);
++				textPr.Unifill = undefined;
++			}
++			else if (color.asc_getType && color.asc_getType() === Asc.c_oAscColor.COLOR_TYPE_SRGB)
++			{
++				textPr.Color   = new AscCommonWord.CDocumentColor(color.r, color.g, color.b, false);
++				textPr.Unifill = undefined;
++			}
++			else
++			{
++				var unifill        = new AscFormat.CUniFill();
++				unifill.fill       = new AscFormat.CSolidFill();
++				unifill.fill.color = AscFormat.CorrectUniColor(color, unifill.fill.color, 1);
++				textPr.Unifill     = unifill;
++				textPr.Color       = undefined;
++			}
++		}
++		return textPr;
++	}
++	window["asc_docs_api"].prototype["asc_GetFontDialogProps"] = function()
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		return logicDocument ? private_FontPropsFromTextPr(logicDocument.GetCalculatedTextPr()) : {};
++	};
++	/**
++	 * Applies the values of a Font dialog to the selection, as one undo step.
++	 */
++	window["asc_docs_api"].prototype["asc_SetFontDialogProps"] = function(props)
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		if (!logicDocument || !props)
++			return;
++
++		let _t = this;
++		let fontName = props["FontName"];
++		if (fontName)
++		{
++			let fontInfo = AscFonts.g_fontApplication.GetFontInfo(fontName);
++			this.asyncMethodCallback = function()
++			{
++				_t["asc_SetFontDialogProps"](props);
++			};
++			let isAsync = AscCommon.g_font_loader.LoadFont(fontInfo);
++			if (false !== isAsync)
++				return;
++			this.asyncMethodCallback = undefined;
++		}
++
++		if (logicDocument.IsSelectionLocked(AscCommon.changestype_Paragraph_TextProperties))
++			return;
++
++		logicDocument.StartAction(AscDFH.historydescription_Document_SetTextFontName);
++		let textPr = private_FontPropsToTextPr(props, new AscCommonWord.CTextPr(), false);
++		logicDocument.AddToParagraph(new AscCommonWord.ParaTextPr(textPr));
++		logicDocument.Recalculate();
++		logicDocument.UpdateInterface();
++		logicDocument.FinalizeAction();
++	};
++	/**
++	 * Description of a style for a Modify Style dialog: name, type, based on, next, whether it is a
++	 * built-in style, and its effective text (Font dialog format) and paragraph properties.
++	 */
++	window["asc_docs_api"].prototype["asc_GetStyleForModify"] = function(styleName)
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		if (!logicDocument)
++			return null;
++
++		let styles  = logicDocument.GetStyles();
++		let styleId = styles.GetStyleIdByName(styleName);
++		let style   = styleId ? styles.Get(styleId) : null;
++		if (!style)
++			return null;
++
++		let type = style.GetType();
++		let pr   = styles.Get_Pr(styleId, type);
++		let theme = logicDocument.GetTheme();
++		let textPr = pr.TextPr.Copy();
++		if (theme)
++			textPr.ReplaceThemeFonts(theme.themeElements.fontScheme);
++
++		let paraPr  = pr.ParaPr;
++		let basedOn = style.GetBasedOn() ? styles.Get(style.GetBasedOn()) : null;
++		let next    = style.GetNext() ? styles.Get(style.GetNext()) : null;
++		return {
++			"Name"      : style.GetName(),
++			"Type"      : type,
++			"BasedOn"   : basedOn ? basedOn.GetName() : null,
++			"Next"      : next ? next.GetName() : null,
++			"IsDefault" : styles.IsStyleDefaultById(styleId),
++			"QFormat"   : true === style.GetQFormat(),
++			"TextPr"    : private_FontPropsFromTextPr(textPr, true),
++			"ParaPr"    : paraPr ? {
++				"Jc"        : paraPr.Jc,
++				"Line"      : paraPr.Spacing ? paraPr.Spacing.Line : undefined,
++				"LineRule"  : paraPr.Spacing ? paraPr.Spacing.LineRule : undefined,
++				"Before"    : paraPr.Spacing ? paraPr.Spacing.Before : undefined,
++				"After"     : paraPr.Spacing ? paraPr.Spacing.After : undefined,
++				"IndLeft"   : paraPr.Ind ? paraPr.Ind.Left : undefined,
++				"FirstLine" : paraPr.Ind ? paraPr.Ind.FirstLine : undefined
++			} : null
++		};
++	};
++	/**
++	 * Modifies a style (Word's Modify Style dialog) without applying it to the selection.
++	 * data: {Name, BasedOn, Next, QFormat, TextPr: Font dialog values, ParaPr: {Jc, Line, LineRule, Before,
++	 * After, IndLeft, FirstLine}}; only the given keys change. One undo step.
++	 * @returns {boolean}
++	 */
++	window["asc_docs_api"].prototype["asc_ModifyStyle"] = function(styleName, data)
++	{
++		let logicDocument = this.private_GetLogicDocument();
++		if (!logicDocument || !data)
++			return false;
++
++		let styles  = logicDocument.GetStyles();
++		let styleId = styles.GetStyleIdByName(styleName);
++		let style   = styleId ? styles.Get(styleId) : null;
++		if (!style || logicDocument.IsSelectionLocked(AscCommon.changestype_Document_Styles))
++			return false;
++
++		let textData = data["TextPr"];
++		let fontName = textData ? textData["FontName"] : null;
++		if (fontName)
++		{
++			let _t = this;
++			this.asyncMethodCallback = function()
++			{
++				_t["asc_ModifyStyle"](styleName, data);
++			};
++			if (false !== AscCommon.g_font_loader.LoadFont(AscFonts.g_fontApplication.GetFontInfo(fontName)))
++				return true;
++			this.asyncMethodCallback = undefined;
++		}
++
++		logicDocument.StartAction(AscDFH.historydescription_Document_AddNewStyle);
++
++		if (textData)
++			style.Set_TextPr(private_FontPropsToTextPr(textData, style.GetTextPr().Copy(), true));
++
++		let paraData = data["ParaPr"];
++		if (paraData)
++		{
++			let paraPr = style.GetParaPr().Copy();
++			if (undefined !== paraData["Jc"])
++				paraPr.Jc = paraData["Jc"];
++			if (undefined !== paraData["Line"] || undefined !== paraData["Before"] || undefined !== paraData["After"])
++			{
++				paraPr.Spacing = paraPr.Spacing ? paraPr.Spacing.Copy() : new AscWord.ParaSpacing();
++				if (undefined !== paraData["Line"])
++				{
++					paraPr.Spacing.Line     = paraData["Line"];
++					paraPr.Spacing.LineRule = undefined !== paraData["LineRule"] ? paraData["LineRule"] : Asc.linerule_Auto;
++				}
++				if (undefined !== paraData["Before"])
++					paraPr.Spacing.Before = paraData["Before"];
++				if (undefined !== paraData["After"])
++					paraPr.Spacing.After = paraData["After"];
++			}
++			if (undefined !== paraData["IndLeft"] || undefined !== paraData["FirstLine"])
++			{
++				paraPr.Ind = paraPr.Ind ? paraPr.Ind.Copy() : new AscWord.CParaInd();
++				if (undefined !== paraData["IndLeft"])
++					paraPr.Ind.Left = paraData["IndLeft"];
++				if (undefined !== paraData["FirstLine"])
++					paraPr.Ind.FirstLine = paraData["FirstLine"];
++			}
++			style.Set_ParaPr(paraPr, true);
++		}
++
++		if (undefined !== data["BasedOn"])
++		{
++			let basedOnId = data["BasedOn"] ? styles.GetStyleIdByName(data["BasedOn"]) : null;
++			// no cycle: the new parent must not be based on this style
++			let check = basedOnId, guard = 0;
++			while (check && check !== styleId && guard++ < 100)
++				check = styles.Get(check) ? styles.Get(check).GetBasedOn() : null;
++			if (check !== styleId && styleId !== styles.Get_Default_Paragraph())
++				style.Set_BasedOn(basedOnId);
++		}
++		if (undefined !== data["Next"])
++			style.Set_Next(data["Next"] ? styles.GetStyleIdByName(data["Next"]) : null);
++		if (undefined !== data["QFormat"])
++			style.Set_QFormat(!!data["QFormat"]);
++		if (data["Name"] && data["Name"] !== style.GetName() && !styles.IsStyleDefaultById(styleId) && null === styles.GetStyleIdByName(data["Name"]))
++			style.Set_Name(data["Name"]);
++
++		style.GetRelatedParagraphs().forEach(function(paragraph)
++		{
++			paragraph.RecalcCompiledPr();
++		});
++
++		logicDocument.Recalculate();
++		logicDocument.UpdateInterface();
++		logicDocument.FinalizeAction();
++		return true;
++	};
++
+ 	asc_docs_api.prototype.SetDrawImagePlaceContents = function(id, props)
+ 	{
+ 		if (this.WordControl.m_oDrawingDocument)
+-- 
+2.43.0
+

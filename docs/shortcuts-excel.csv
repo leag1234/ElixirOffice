@@ -1,0 +1,288 @@
+id,category,action,windows,macos,ms_section,scope,alternative,notes
+file.close,file,Close a workbook,Ctrl+W,Cmd+W or Ctrl+W,Frequently used shortcuts,browser,File > Close,Ctrl+W and Cmd+W are reserved by every browser: closing asks first when the workbook has unsaved changes (beforeunload guard)
+file.close.ctrl-f4,file,Close the selected workbook window,Ctrl+F4,Cmd+F4,Function keys,browser,Close the browser tab,"Closes the tab in Chrome, Edge, Firefox"
+file.quit,file,Close Excel,Alt+F4,Cmd+Q,Function keys,os,,
+file.open,file,Open a workbook,Ctrl+O,Cmd+O or Ctrl+O,Frequently used shortcuts,editor,,Expected: File > Open/Recent in the backstage
+file.open.cmd-f12,file,Display the Open dialog box,,Cmd+F12,Use function key shortcuts,editor,,
+file.new,file,Open a new blank workbook,,Cmd+N or Ctrl+N,Frequently used shortcuts,browser,"Ctrl+Alt+Shift+N (Cmd+Option+Shift+N), or File > New (Alt, F, N)","Cmd+N and Ctrl+N open a browser window; Ctrl+N itself opens File > New when it reaches the editor (installed app, full screen)"
+file.new-template,file,Create a new workbook from template,,Cmd+Shift+P,Frequently used shortcuts,editor,,Expected: File > New
+file.save,file,Save a workbook,Ctrl+S,Cmd+S or Ctrl+S,Frequently used shortcuts,editor,,Co-editing saves continuously; Ctrl+S forces the save
+file.save-as,file,Display the Save As dialog box,F12,Cmd+Shift+S or F12,Function keys,editor,,Expected: File > Save a copy / Download as
+file.save.option-f2,file,Open the Save dialog box,,Option+F2,Use function key shortcuts,editor,,
+file.print,file,Print workbook,Ctrl+P,Cmd+P or Ctrl+P,Preview and print,editor,,Not in the Windows tab of the page; Excel binds it. Opens File > Print
+file.help,file,Display the Excel Help task pane,F1,F1 or Cmd+Forward slash (/),Function keys,editor,,
+file.stats,file,Open the Workbook Statistics dialog box,Ctrl+Shift+G,,Formatting cells,absent,,No workbook statistics
+file.macro-sheet,file,Insert an Excel 4.0 macro sheet,,Cmd+F11,Use function key shortcuts,absent,,No XLM macro sheets
+window.ribbon-collapse,window,Expand or collapse the ribbon,Ctrl+F1,Cmd+Option+R,Ribbon keyboard shortcuts,editor,,
+window.fullscreen,window,Toggle full screen mode,Ctrl+Shift+F1,Cmd+Ctrl+F,Function keys,absent,"Browser full screen (F11, Ctrl+Cmd+F)",Cmd+Ctrl+F is the macOS full-screen key
+window.formula-bar,window,Expand or collapse the formula bar,Ctrl+Shift+U,Ctrl+Shift+U,"Data, functions, and the formula bar",editor,,
+window.cycle-panes,window,"Switch between the worksheet, ribbon, task pane, and Zoom controls",F6,F6 or Shift+F6,Function keys,editor,,
+window.cycle-panes.back,window,"Switch between the worksheet, Zoom controls, task pane, and ribbon",Shift+F6,,Function keys,editor,,
+window.next-window,window,Switch between two Excel windows,Ctrl+F6,,Function keys,browser,One workbook per browser tab,
+window.all-windows,window,Switch between all Excel windows,Ctrl+Shift+F6,,Function keys,browser,One workbook per browser tab,
+window.restore,window,Restore the window size of the selected workbook window,Ctrl+F5,,Function keys,browser,,Ctrl+F5 reloads the page without cache
+window.move,window,Perform the Move command on the workbook window,Ctrl+F7,,Function keys,os,,No workbook windows inside the browser tab
+window.size,window,Perform the Size command on the workbook window,Ctrl+F8,,Function keys,os,,
+window.minimize,window,Minimize a workbook window,Ctrl+F9,Ctrl+F9,Function keys,os,,
+window.maximize,window,Maximize or restore the selected workbook window,Ctrl+F10,Ctrl+F10 or Cmd+F10,Function keys,os,,
+window.next-app,window,Switch to the next application,,Cmd+Tab,Work in windows and dialog boxes,os,,
+window.prev-app,window,Switch to the previous application,,Shift+Cmd+Tab,Work in windows and dialog boxes,os,,
+window.screenshot,window,Take a screenshot and save it on your desktop,,Shift+Cmd+3,Work in windows and dialog boxes,os,,
+window.hide,window,Hide Excel,,Cmd+H,Work in windows and dialog boxes,os,,
+window.zoom-in,window,Zoom in,Ctrl+Alt+Equal sign (=),,Navigating in cells,editor,,
+window.zoom-out,window,Zoom out,Ctrl+Alt+Minus sign (-),,Navigating in cells,editor,,
+window.scroll-horizontal,window,Scroll horizontally,"Ctrl+Shift, then scroll your mouse wheel up to go left, down to go right","Shift, then scroll the mouse wheel up for left, down for right",Navigating in cells,mouse,,
+window.search,window,Access search (when in a cell or when a cell is selected),,Cmd+F,Move and scroll in a sheet or workbook,editor,,The Find bar
+window.smart-lookup,window,Open the Smart Lookup pane,,Ctrl+Option+Cmd+L,Work in cells or the Formula bar,absent,,
+window.drawing-mode,window,Toggle Drawing mode on and off,,Cmd+Ctrl+Z,Drawing,absent,Draw tab,No keyboard toggle for drawing mode
+ribbon.search,ribbon,Move to the Search field on the ribbon,Alt+Q,,Ribbon keyboard shortcuts,absent,,No command search; Alt+Q opens the editor's chat
+ribbon.file,ribbon,Open the File menu,Alt+F,,Ribbon keyboard shortcuts,keytips,,
+ribbon.home,ribbon,Go to the Home tab,Alt+H,,Frequently used shortcuts,keytips,,
+ribbon.insert,ribbon,Go to the Insert tab,Alt+N,,Frequently used shortcuts,keytips,,
+ribbon.page-layout,ribbon,Go to the Page Layout tab,Alt+P,,Frequently used shortcuts,keytips,,
+ribbon.formulas,ribbon,Go to the Formulas tab,Alt+M,,Frequently used shortcuts,keytips,,
+ribbon.data,ribbon,Go to the Data tab,Alt+A,,Frequently used shortcuts,keytips,,
+ribbon.review,ribbon,Open the Review tab,Alt+R,,Ribbon keyboard shortcuts,keytips,,
+ribbon.view,ribbon,Go to the View tab,Alt+W,,Frequently used shortcuts,keytips,,"Alt, W, P / L / I: page layout, normal, page break preview"
+ribbon.fill-color,ribbon,Choose a fill color,"Alt+H, H",,Frequently used shortcuts,keytips,,
+ribbon.center,ribbon,Center align cell contents,"Alt+H, A, C",,Frequently used shortcuts,keytips,,
+ribbon.borders,ribbon,Add borders,"Alt+H, B",,Frequently used shortcuts,keytips,,
+ribbon.delete-column,ribbon,Delete column,"Alt+H, D, C",,Frequently used shortcuts,keytips,,
+ribbon.define-name,ribbon,Define a name to use in references,"Alt+M, M, D",,"Data, functions, and the formula bar",keytips,,
+ribbon.keytips,ribbon,Select the active tab on the ribbon and activate the access keys,Alt or F10,,Ribbon keyboard shortcuts,keytips,,
+ribbon.focus-commands,ribbon,Move the focus to commands on the ribbon or add-in pane,Tab key or Shift+Tab,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.items,ribbon,Move among the items on the ribbon,Arrow keys,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.tooltip,ribbon,Show the tooltip for the ribbon element currently in focus,Ctrl+Shift+F10,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.activate,ribbon,Activate a selected button,Spacebar or Enter,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.open-list,ribbon,Open the list for a selected command,Down arrow key,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.open-menu,ribbon,Open the menu for a selected button,Alt+Down arrow key,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.menu-next,ribbon,"When a menu or submenu is open, move to the next command",Down arrow key,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.submenu,ribbon,Move to the submenu when a main menu is open or selected,Left arrow key,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.groups,ribbon,Move from one group of controls to another,Ctrl+Left or Right arrow key,,Ribbon keyboard shortcuts,ribbon,,
+ribbon.menu-first,ribbon,Select the first command on the menu when a menu or submenu is visible,Home,,Making selections and performing actions,ribbon,,
+ribbon.context-menu,ribbon,Open the context menu,Shift+F10 or Windows Menu key,Shift+F10,Frequently used shortcuts,editor,,
+ribbon.error-menu,ribbon,Display the menu or message for an Error Checking button or paste options,Alt+Shift+F10,Option+Shift+F10,"Data, functions, and the formula bar",editor,,Expected: the paste options menu after a paste
+dialog.next,dialog,"Move to the next box, option, control, or command",Tab key,Tab key,Work in windows and dialog boxes,native,,
+dialog.previous,dialog,"Move to the previous box, option, control, or command",Shift+Tab,Shift+Tab,Work in windows and dialog boxes,native,,
+dialog.cancel,dialog,Exit a dialog box or cancel an action,Esc,Esc,Work in windows and dialog boxes,editor,,
+dialog.default,dialog,Perform the action assigned to the default button,Enter,Return,Work in windows and dialog boxes,native,,
+dialog.space,dialog,"In a dialog box, perform the action for the selected button, or select or clear a checkbox",Spacebar,,Other useful shortcut keys,native,,
+dialog.next-tab,dialog,Switch to the next tab in a dialog box,Ctrl+Tab,,Other useful shortcut keys,browser,Ctrl+Alt+Shift+Tab does not apply; click the tab,Ctrl+Tab switches browser tabs outside an installed app and full screen
+nav.up,nav,Move one cell up,Up arrow key,Up arrow key,Navigating in cells,editor,,
+nav.down,nav,Move one cell down,Down arrow key,Down arrow key,Navigating in cells,editor,,
+nav.left,nav,Move one cell left,Left arrow key,Left arrow key,Navigating in cells,editor,,
+nav.right,nav,Move one cell right,Right arrow key,Right arrow key,Navigating in cells,editor,,
+nav.tab,nav,"Move one cell to the right; in a protected sheet, move between unlocked cells",Tab key,Tab key,Navigating in cells,editor,,
+nav.shift-tab,nav,Move to the previous cell in a worksheet,Shift+Tab,Shift+Tab,Navigating in cells,editor,,
+nav.edge,nav,Move to the edge of the current data region,Ctrl+Arrow key,Cmd+Arrow key,Navigating in cells,editor,,
+nav.end-mode,nav,End mode: move to the next nonblank cell in the same column or row,"End, Arrow key",,Navigating in cells,editor,,
+nav.last-cell,nav,Move to the last cell used on the worksheet,Ctrl+End,Ctrl+End,Navigating in cells,editor,,MacBook: Ctrl+Fn+Right
+nav.first-cell,nav,Move to the beginning of a worksheet,Ctrl+Home,Ctrl+Home,Navigating in cells,editor,,MacBook: Ctrl+Fn+Left
+nav.row-start,nav,Move to the beginning of a row,Home,Home,Other useful shortcut keys,editor,,MacBook: Fn+Left
+nav.scroll-lock-home,nav,Move to the upper-left cell of the window when Scroll lock is on,Home+Scroll lock,,Navigating in cells,absent,,No Scroll Lock mode
+nav.page-down,nav,Move one screen down,Page down,Page down,Navigating in cells,editor,,MacBook: Fn+Down
+nav.page-up,nav,Move one screen up,Page up,Page up,Navigating in cells,editor,,MacBook: Fn+Up
+nav.screen-right,nav,Move one screen to the right,Alt+Page down,Option+Page down,Navigating in cells,editor,,The editor binds Alt+Page down to the next sheet
+nav.screen-left,nav,Move one screen to the left,Alt+Page up,Option+Page up,Navigating in cells,editor,,The editor binds Alt+Page up to the previous sheet
+nav.next-sheet,nav,Move to the next sheet in a workbook,Ctrl+Page down,Ctrl+Page down or Option+Right arrow key,Navigating in cells,browser,"Ctrl+Alt+Page down (Ctrl+Option+Page down), Option+Right arrow on macOS",Ctrl+Page down switches browser tabs outside an installed app and full screen; Ctrl+Alt+Page down always reaches the editor. The macOS tab of the page prints Ctrl+Page down by mistake
+nav.prev-sheet,nav,Move to the previous sheet in a workbook,Ctrl+Page up,Ctrl+Page up or Option+Left arrow key,Navigating in cells,browser,"Ctrl+Alt+Page up (Ctrl+Option+Page up), Option+Left arrow on macOS",Ctrl+Page up switches browser tabs outside an installed app and full screen; Ctrl+Alt+Page up always reaches the editor
+nav.validation-list,nav,Open the list of validation choices on a cell that has data validation,Alt+Down arrow key,Option+Down arrow key,Navigating in cells,editor,,Also the AutoFilter list and the AutoComplete list (macOS)
+nav.shapes,nav,"Cycle through floating shapes, such as text boxes or images","Ctrl+Alt+5, then the Tab key repeatedly",,Navigating in cells,editor,,
+nav.shapes-exit,nav,Exit the floating shape navigation and return to the normal navigation,Esc,,Navigating in cells,editor,,
+nav.scroll-to-active,nav,Scroll to display the active cell,,Ctrl+Delete,Move and scroll in a sheet or workbook,editor,,
+nav.goto,nav,Display the Go To dialog box,F5,Ctrl+G or F5,Function keys,editor,,"Go To dialog, or the Name Box focused"
+nav.goto.ctrl-g,nav,Display the Go To dialog box,Ctrl+G,,Function keys,editor,,Not on the Windows tab of the page; Excel binds it
+nav.find,nav,Display the Find dialog box,Ctrl+F,Ctrl+F or Shift+F5,Move and scroll in a sheet or workbook,editor,,
+nav.replace,nav,Display the Replace dialog box,Ctrl+H,Ctrl+H or Cmd+Shift+H,Frequently used shortcuts,editor,,
+nav.search-sheet,nav,Move to the Search Sheet dialog box,,Ctrl+F5,Use function key shortcuts,editor,,The Find bar
+nav.protected-tab,nav,Move between unlocked cells on a protected sheet,Tab key,Tab key,Move and scroll in a sheet or workbook,editor,,Tested without protection (nav.tab)
+sel.all,sel,"Select the current region, then the entire worksheet",Ctrl+A or Ctrl+Shift+Spacebar,Cmd+A or Cmd+Shift+Spacebar,Making selections and performing actions,editor,,
+sel.next-sheet,sel,Select the current and next sheet in a workbook,Ctrl+Shift+Page down,,Making selections and performing actions,browser,"Ctrl+Alt+Shift+Page down (Ctrl+Option+Shift+Page down), or Ctrl+click a sheet tab","Ctrl+Shift+Page down moves the browser tab outside an installed app and full screen; Ctrl+Alt+Shift+Page down always reaches the editor, and repeating it extends the selection"
+sel.prev-sheet,sel,Select the current and previous sheet in a workbook,Ctrl+Shift+Page up,,Making selections and performing actions,browser,"Ctrl+Alt+Shift+Page up (Ctrl+Option+Shift+Page up), or Ctrl+click a sheet tab",Ctrl+Shift+Page up moves the browser tab outside an installed app and full screen; Ctrl+Alt+Shift+Page up always reaches the editor
+sel.extend,sel,Extend the selection by one cell,Shift+Arrow key,Shift+Arrow key,Making selections and performing actions,editor,,
+sel.extend-edge,sel,Extend the selection to the last nonblank cell in the same column or row,Ctrl+Shift+Arrow key,Shift+Cmd+Arrow key,Making selections and performing actions,editor,,
+sel.extend-last,sel,Extend the selection to the last used cell on the worksheet,Ctrl+Shift+End,Ctrl+Shift+End,Navigating in cells,editor,,
+sel.extend-first,sel,Extend the selection to the beginning of the worksheet,Ctrl+Shift+Home,Ctrl+Shift+Home,Making selections and performing actions,editor,,
+sel.extend-row-start,sel,Extend the selection to the beginning of the row,Shift+Home,Shift+Home,"Select cells, columns, or rows",editor,,
+sel.extend-page-down,sel,Extend the selection down one screen,Shift+Page down,Shift+Page down,"Select cells, columns, or rows",editor,,
+sel.extend-page-up,sel,Extend the selection up one screen,Shift+Page up,Shift+Page up,"Select cells, columns, or rows",editor,,
+sel.extend-mode,sel,Turn extend mode on and extend the selection with the arrow keys,F8,F8,Making selections and performing actions,editor,,
+sel.add-mode,sel,Add a non-adjacent cell or range to a selection with the arrow keys,Shift+F8,Shift+F8,Making selections and performing actions,editor,,
+sel.column,sel,Select an entire column,Ctrl+Spacebar,Ctrl+Spacebar,Making selections and performing actions,editor,,
+sel.row,sel,Select an entire row,Shift+Spacebar,Shift+Spacebar,Making selections and performing actions,editor,,
+sel.objects,sel,Select all objects on a worksheet when an object is selected,Ctrl+Shift+Spacebar,,Making selections and performing actions,editor,,
+sel.region,sel,Select the current region around the active cell,Ctrl+Shift+Asterisk sign (*),,Making selections and performing actions,editor,,
+sel.visible,sel,Select only visible cells,,Shift+Cmd+Asterisk (*),"Select cells, columns, or rows",absent,,No Go To Special
+sel.active-only,sel,Select only the active cell when multiple cells are selected,,Shift+Delete,"Select cells, columns, or rows",editor,,
+sel.array,sel,Select the current array,,Ctrl+Forward slash (/),"Select cells, columns, or rows",absent,,No Go To Special
+sel.row-diff,sel,Select cells in a row that don't match the value in the active cell,,Ctrl+Backward slash (\),"Select cells, columns, or rows",absent,,
+sel.precedents,sel,Select only cells that are directly referred to by formulas in the selection,,Ctrl+Shift+Left bracket ([),"Select cells, columns, or rows",absent,Formulas > Trace Precedents,"Tracing arrows only, no selection"
+sel.precedents-all,sel,Select all cells directly or indirectly referred to by formulas in the selection,,Ctrl+Shift+Left brace ({),"Select cells, columns, or rows",absent,,
+sel.dependents,sel,Select only cells with formulas that refer directly to the active cell,,Ctrl+Right bracket (]),"Select cells, columns, or rows",absent,Formulas > Trace Dependents,
+sel.dependents-all,sel,Select all cells with formulas that refer directly or indirectly to the active cell,,Ctrl+Shift+Right brace (}),"Select cells, columns, or rows",absent,,
+sel.down,sel,Move from top to bottom within the selection,Enter,Return,Work with a selection,editor,,
+sel.up,sel,Move from bottom to top within the selection,Shift+Enter,Shift+Return,Work with a selection,editor,,
+sel.right,sel,Move from left to right within the selection,Tab key,Tab key,Work with a selection,editor,,
+sel.left,sel,Move from right to left within the selection,Shift+Tab,Shift+Tab,Work with a selection,editor,,
+sel.corner,sel,Move clockwise to the next corner of the selection,Ctrl+Period (.),Ctrl+Period (.),Work with a selection,editor,,Excel for Windows binds it too
+sel.move-drag,sel,"Move selected rows, columns, or cells (Shift+drag inserts them)",Shift,Shift,Other useful shortcut keys,mouse,,
+edit.copy,edit,Copy selection,Ctrl+C,Cmd+C or Ctrl+C,Frequently used shortcuts,editor,,
+edit.cut,edit,Cut selection,Ctrl+X,Cmd+X or Ctrl+X,Frequently used shortcuts,editor,,macOS page also lists Shift+Forward Delete
+edit.paste,edit,Paste selection,Ctrl+V,Cmd+V or Ctrl+V,Frequently used shortcuts,editor,,
+edit.paste-special,edit,Open the Paste Special dialog box,Ctrl+Alt+V,Cmd+Ctrl+V or Ctrl+Option+V or Cmd+Option+V,Formatting cells,editor,,
+edit.undo,edit,Undo the last action,Ctrl+Z,Cmd+Z or Ctrl+Z,Frequently used shortcuts,editor,,
+edit.redo,edit,Redo / repeat the last command or action,Ctrl+Y,Cmd+Y or Ctrl+Y or Cmd+Shift+Z,Making selections and performing actions,editor,,
+edit.repeat,edit,Repeat the last command or action,F4,,Function keys,editor,,
+edit.clear,edit,Remove cell contents,Delete,Delete,Frequently used shortcuts,editor,,macOS Delete is Backspace
+edit.clear-active,edit,Clear the content of the active cell and edit it,Backspace,Delete,Other useful shortcut keys,editor,,
+edit.delete-cells,edit,Open the Delete dialog box to delete selected cells,Ctrl+Minus sign (-),Cmd+Hyphen (-) or Ctrl+Hyphen (-),Formatting cells,editor,,
+edit.insert-cells,edit,Open the Insert dialog box to insert blank cells,Ctrl+Shift+Plus sign (+),Ctrl+Shift+Equal sign ( = ),Formatting cells,editor,,
+edit.fill-down,edit,Fill Down: copy the topmost cell of a selected range into the cells below,Ctrl+D,Cmd+D or Ctrl+D,Formatting cells,editor,,
+edit.fill-right,edit,Fill cells right,Ctrl+R,Cmd+R or Ctrl+R,Frequently used shortcuts,editor,,Not on the Windows tab of the page; Excel binds it
+edit.flash-fill,edit,Invoke Flash Fill,Ctrl+E,Ctrl+E,"Data, functions, and the formula bar",editor,,"Basic patterns: words (from the start or the end), initials, whole cells, case changes, literal text"
+edit.hide-rows,edit,Hide the selected rows,Ctrl+9,Ctrl+9 or Cmd+Left parenthesis ((),Frequently used shortcuts,editor,,macOS page: Cmd+( / Ctrl+(
+edit.unhide-rows,edit,Unhide the selected rows,Ctrl+Shift+9,Ctrl+Shift+Left parenthesis (() or Shift+Cmd+Left parenthesis ((),Outline data,editor,,"Windows key from Excel, not on the page"
+edit.hide-cols,edit,Hide the selected columns,Ctrl+0,Ctrl+Zero (0) or Cmd+Right parenthesis ()),Frequently used shortcuts,editor,,
+edit.unhide-cols,edit,Unhide the selected columns,,Ctrl+Shift+Right parenthesis ()) or Shift+Cmd+Right parenthesis ()),Outline data,editor,,
+edit.outline-symbols,edit,Display or hide the outline symbols,Ctrl+8,Ctrl+8,Formatting cells,absent,Data > Ungroup,"Grouping exists, but no setting hides the outline symbols"
+edit.group,edit,Group selected cells,Alt+Shift+Right arrow key,Cmd+Shift+K,Work with a selection,editor,,"Windows key from Excel, not on the page"
+edit.ungroup,edit,Ungroup selected cells,Alt+Shift+Left arrow key,Cmd+Shift+J,Work with a selection,editor,,"Windows key from Excel, not on the page"
+edit.expand-group,edit,Expand grouped rows or columns (Shift+wheel down over them),Shift+scroll down,,Making selections and performing actions,mouse,,
+edit.collapse-group,edit,Collapse grouped rows or columns (Shift+wheel up over them),Shift+scroll up,,Making selections and performing actions,mouse,,
+edit.objects-toggle,edit,"Switch between hiding objects, displaying objects, and placeholders",Ctrl+6,Ctrl+6,Formatting cells,absent,,No object display modes
+edit.special-chars,edit,"Insert special characters like symbols, including emoji",,Ctrl+Cmd+Spacebar,Format and edit data,os,,macOS character viewer
+edit.new-sheet,edit,Insert a new worksheet,Shift+F11,Shift+F11,Function keys,editor,,Windows page also lists Alt+Shift+F1
+edit.new-sheet.alt-shift-f1,edit,Insert a new worksheet,Alt+Shift+F1,,Function keys,editor,,
+edit.chart-sheet,edit,Create a chart of the current range in a separate Chart sheet,F11,F11,"Data, functions, and the formula bar",absent,Insert > Chart,No chart sheets; F11 is the browser full-screen key
+edit.chart,edit,Create an embedded chart of the data in the current range,Alt+F1,,"Data, functions, and the formula bar",editor,,
+edit.chart-objects,edit,Cycle through chart object selection,,Arrow keys,Use charts,absent,,No keyboard selection of chart elements
+edit.sort,edit,Open the Sort dialog box,,Cmd+Shift+R,"Sort, filter, and use PivotTable reports",editor,,
+edit.filter,edit,Add or remove a filter,Ctrl+Shift+L,Cmd+Shift+F or Ctrl+Shift+L,Frequently used shortcuts,editor,,
+edit.table,edit,Display the Create Table dialog box,Ctrl+L or Ctrl+T,Cmd+T or Ctrl+T,Formatting cells,editor,"Ctrl+L, Ctrl+Alt+Shift+T (Cmd+Option+Shift+T)",Ctrl+T and Cmd+T open a browser tab; reaches the editor in an installed app or in full screen
+edit.quick-analysis,edit,Display the Quick Analysis options,Ctrl+Q,,Formatting cells,editor,Quick Analysis button at the corner of the selection,"Formatting, Charts, Totals, Tables; Ctrl+Q also on macOS"
+edit.hyperlink,edit,Open the Insert hyperlink dialog box,Ctrl+K,Cmd+K or Ctrl+K,Formatting cells,editor,,
+edit.spelling,edit,Check spelling in the active worksheet or selected range,F7,F7,Formatting cells,editor,,
+edit.thesaurus,edit,Open the thesaurus,Shift+F7,Shift+F7 or Ctrl+Option+Cmd+R,Use function key shortcuts,absent,Thesaurus plugin,No built-in thesaurus
+edit.note,edit,Insert a note; open and edit a cell note,Shift+F2,Shift+F2,Formatting cells,editor,,The editor's comments play the role of notes
+edit.comment,edit,Insert a threaded comment; open and reply to a threaded comment,Ctrl+Shift+F2,Cmd+Shift+F2,Formatting cells,editor,,
+edit.comment.cmd-return,edit,Insert or reply to a threaded comment,,Cmd+Return,Frequently used shortcuts,editor,,
+edit.macros,edit,"Create, run, edit, or delete a macro",Alt+F8,Option+F8,"Data, functions, and the formula bar",editor,,Macros dialog (JavaScript)
+edit.vba,edit,Open the Visual Basic for Applications Editor,Alt+F11,Option+F11,"Data, functions, and the formula bar",editor,,"Macros dialog (JavaScript, no VBA)"
+edit.power-query,edit,Open the Power Query Editor,Alt+F12,Option+F12,"Data, functions, and the formula bar",absent,,No Power Query
+edit.refresh-stop,edit,Stop a refresh operation,Esc,,Refreshing external data,absent,,No external data connections
+edit.refresh,edit,Refresh data in the current worksheet,Ctrl+F5,,Refreshing external data,browser,Data > Refresh,Ctrl+F5 reloads the page
+edit.refresh-all,edit,Refresh all data in the workbook,Ctrl+Alt+F5,,Refreshing external data,editor,,Refreshes the pivot tables; Linux: Ctrl+Alt+F5 switches virtual console
+edit.drag-insert,edit,Hold Shift while dragging to insert the cells,Shift,,Other useful shortcut keys,mouse,,
+entry.edit,entry,"Edit the active cell, insertion point at the end",F2,F2,Formatting cells,editor,,
+entry.edit.ctrl-u,entry,Edit the active cell and position the insertion point at the end of the line,,Ctrl+U,Work in cells or the Formula bar,editor,,
+entry.edit-formula-bar,entry,Edit the active cell in the formula bar,Ctrl+F2,,Function keys,editor,,
+entry.newline,entry,Start a new line in the same cell,Alt+Enter,Option+Return or Ctrl+Option+Return,Making selections and performing actions,editor,,
+entry.newline.cmd-option,entry,Insert a line break in a cell,,Cmd+Option+Return or Ctrl+Option+Return,Format and edit data,editor,,
+entry.fill,entry,Fill the selected cell range with the current entry,Ctrl+Enter,Cmd+Return or Ctrl+Return,Making selections and performing actions,editor,,
+entry.complete-down,entry,Complete a cell entry and select the cell below,Enter,Return,"Data, functions, and the formula bar",editor,,
+entry.complete-up,entry,Complete a cell entry and select the cell above,Shift+Enter,Shift+Return,Making selections and performing actions,editor,,
+entry.complete-right,entry,Complete a cell entry and move to the right,Tab key,Tab key,Enter data on a sheet,editor,,
+entry.complete-left,entry,Complete a cell entry and move to the left,Shift+Tab,Shift+Tab,Enter data on a sheet,editor,,
+entry.cancel,entry,Cancel an entry in the cell or formula bar,Esc,Esc,"Data, functions, and the formula bar",editor,,
+entry.array,entry,Enter a formula as an array formula,Ctrl+Shift+Enter,Shift+Cmd+Return or Ctrl+Shift+Return,Work in cells or the Formula bar,editor,,"Windows key from Excel, not on the page"
+entry.backspace,entry,Delete the character to the left of the insertion point,Backspace,Delete,Enter data on a sheet,editor,,
+entry.delete,entry,Delete the character to the right of the insertion point,Delete,Forward Delete,Enter data on a sheet,editor,,MacBook: Fn+Delete
+entry.delete-eol,entry,Delete text to the end of the line,Ctrl+Delete,Ctrl+Forward Delete,Enter data on a sheet,editor,,MacBook: Ctrl+Fn+Delete
+entry.move-char,entry,"Move one character up, down, left, or right",Arrow keys,Arrow keys,Enter data on a sheet,editor,,
+entry.line-start,entry,Move to the beginning of the line,Home,Home,Enter data on a sheet,editor,,
+entry.formula-end,entry,Move the cursor to the end of the text in the formula bar,Ctrl+End,,"Data, functions, and the formula bar",editor,,
+entry.formula-select-end,entry,Select all text in the formula bar from the cursor to the end,Ctrl+Shift+End,,"Data, functions, and the formula bar",editor,,
+entry.start-formula,entry,Start a formula,Equal sign ( = ),Equal sign ( = ),Work in cells or the Formula bar,editor,,
+entry.date,entry,Enter the current date,Ctrl+Semicolon (;),Ctrl+Semicolon (;),Formatting cells,editor,,
+entry.time,entry,Enter the current time,Ctrl+Shift+Colon (:),Cmd+Semicolon (;),Formatting cells,editor,,
+entry.copy-formula-above,entry,Copy a formula from the cell above into the cell or the formula bar,Ctrl+Apostrophe ('),Ctrl+Apostrophe ('),Formatting cells,editor,,
+entry.copy-value-above,entry,Copy the value from the cell above into the cell or the formula bar,"Ctrl+Shift+Straight quotation mark ("")","Ctrl+Shift+Inch mark/Straight double quote ("")","Data, functions, and the formula bar",editor,,
+entry.autocomplete,entry,Display the AutoComplete list,,Option+Down arrow key,Work in cells or the Formula bar,editor,,Same key as nav.validation-list
+entry.define-name,entry,Define a name,,Ctrl+L,Enter data on a sheet,editor,,
+entry.define-name.cmd-f3,entry,Open the Define Name dialog box,,Cmd+F3,Use function key shortcuts,editor,,
+entry.create-names,entry,Open the Create names dialog box,,Cmd+Shift+F3,Frequently used shortcuts,absent,,No Create Names from Selection
+entry.paste-name,entry,Paste a name from the Paste Name dialog box,F3,,"Data, functions, and the formula bar",editor,,Needs a defined name
+entry.data-form,entry,Move to the first field in the next record of a data form,Enter,,"Data, functions, and the formula bar",absent,,No data forms
+formula.tooltips,formula,Turn on or off tooltips for checking formulas,Ctrl+Alt+P,Ctrl+Option+P,"Data, functions, and the formula bar",absent,,No formula-checking tooltips toggle
+formula.show,formula,Switch between displaying cell values or formulas,Ctrl+Grave accent (`),Ctrl+Grave accent (`),Formatting cells,editor,,
+formula.calc-all,formula,Calculate all worksheets in all open workbooks,F9,Cmd+Equal sign ( = ) or F9,"Data, functions, and the formula bar",editor,,
+formula.calc-sheet,formula,Calculate the active worksheet,Shift+F9,Shift+F9,"Data, functions, and the formula bar",editor,,
+formula.calc-full,formula,"Calculate all worksheets, changed or not",Ctrl+Alt+F9,Ctrl+Option+F9,"Data, functions, and the formula bar",editor,,Linux: Ctrl+Alt+F9 may switch virtual console
+formula.calc-rebuild,formula,"Check dependent formulas, then calculate all cells",Ctrl+Alt+Shift+F9,Ctrl+Option+Shift+F9,"Data, functions, and the formula bar",editor,,
+formula.args-dialog,formula,Display the Function Arguments dialog box (insertion point right of a function name),Ctrl+A,Ctrl+A,"Data, functions, and the formula bar",editor,,macOS: the Formula Builder
+formula.arg-names,formula,Insert argument names and parentheses (insertion point right of a function name),Ctrl+Shift+A,,"Data, functions, and the formula bar",absent,Ctrl+A (Function Arguments),
+formula.autosum,formula,Insert the Sum formula,Alt+Equal sign (=),Shift+Cmd+T,"Data, functions, and the formula bar",editor,,
+formula.abs-ref,formula,Cycle through absolute and relative references,F4,Cmd+T or F4,"Data, functions, and the formula bar",editor,,
+formula.insert-function,formula,Insert a function,Shift+F3,Shift+F3,"Data, functions, and the formula bar",editor,,macOS: the Formula Builder
+formula.point-mode,formula,"When editing a formula, toggle Point mode",F2,,Function keys,editor,,
+fmt.cells-dialog,fmt,Open the Format Cells dialog box,Ctrl+1,Cmd+1 or Ctrl+1,Formatting cells,editor,,
+fmt.font-dialog,fmt,Format fonts in the Format Cells dialog box,Ctrl+Shift+F,,Formatting cells,absent,Home > Font group,The Format Cells dialog has no Font tab
+fmt.cell-style,fmt,Display the Modify Cell Style dialog box,,Shift+Cmd+L,Format and edit data,absent,Home > Cell Styles,No cell style editor
+fmt.bold,fmt,Bold text or remove bold formatting,Ctrl+B or Ctrl+2,Cmd+B or Ctrl+B,Formatting cells,editor,,
+fmt.italic,fmt,Italicize text or remove italic formatting,Ctrl+I or Ctrl+3,Cmd+I or Ctrl+I,Formatting cells,editor,,
+fmt.underline,fmt,Underline text or remove underline,Ctrl+U or Ctrl+4,Cmd+U,Formatting cells,editor,,
+fmt.strike,fmt,Apply or remove strikethrough formatting,Ctrl+5,Shift+Cmd+X,Formatting cells,editor,,
+fmt.grow-font,fmt,Increase font size,,Shift+Cmd+Right angle bracket (>),Format and edit data,editor,,
+fmt.shrink-font,fmt,Decrease font size,,Shift+Cmd+Left angle bracket (<),Format and edit data,editor,,
+fmt.align-center,fmt,Align center,,Cmd+E,Format and edit data,editor,,
+fmt.align-left,fmt,Align left,,Cmd+L,Format and edit data,editor,,
+fmt.border-outline,fmt,Apply an outline border to the selected cells,Ctrl+Shift+Ampersand sign (&),Cmd+Option+Zero (0),Formatting cells,editor,,
+fmt.border-right,fmt,Add an outline border to the right of the selection,,Cmd+Option+Right arrow key,Format and edit data,editor,,
+fmt.border-left,fmt,Add an outline border to the left of the selection,,Cmd+Option+Left arrow key,Format and edit data,editor,,
+fmt.border-top,fmt,Add an outline border to the top of the selection,,Cmd+Option+Up arrow key,Format and edit data,editor,,
+fmt.border-bottom,fmt,Add an outline border to the bottom of the selection,,Cmd+Option+Down arrow key,Format and edit data,editor,,
+fmt.border-remove,fmt,Remove the outline border from the selected cells,Ctrl+Shift+Underscore (_),Cmd+Option+Hyphen,Formatting cells,editor,,
+fmt.general,fmt,Apply the General number format,Ctrl+Shift+Tilde sign (~),Ctrl+Shift+Tilde (~),Formatting cells,editor,,
+fmt.currency,fmt,Apply the Currency format with two decimal places,Ctrl+Shift+Dollar sign ($),Ctrl+Shift+Dollar sign ($),Formatting cells,editor,,
+fmt.percent,fmt,Apply the Percentage format with no decimal places,Ctrl+Shift+Percent sign (%),Ctrl+Shift+Percent sign (%),Formatting cells,editor,,
+fmt.scientific,fmt,Apply the Scientific number format with two decimal places,Ctrl+Shift+Caret sign (^),Ctrl+Shift+Caret (^),Formatting cells,editor,,
+fmt.date,fmt,"Apply the Date format with the day, month, and year",Ctrl+Shift+Number sign (#),Ctrl+Shift+Number sign (#),Formatting cells,editor,,
+fmt.time,fmt,"Apply the Time format with the hour and minute, and AM or PM",Ctrl+Shift+At sign (@),Ctrl+Shift+At symbol (@),Formatting cells,editor,,
+fmt.number,fmt,Apply the Number format with two decimal places and thousands separator,Ctrl+Shift+Exclamation point (!),Ctrl+Shift+Exclamation point (!),Formatting cells,editor,,
+paste.all,paste,Paste Special: all cell contents and formatting,A,,Paste Special dialog box,editor,,Letter keys in the Paste Special dialog
+paste.formulas,paste,Paste Special: only the formulas,F,,Paste Special dialog box,editor,,
+paste.values,paste,Paste Special: only the values,V,,Paste Special dialog box,editor,,
+paste.formats,paste,Paste Special: only the copied formatting,T,,Paste Special dialog box,editor,,
+paste.comments,paste,Paste Special: only comments and notes,C,,Paste Special dialog box,editor,,
+paste.validation,paste,Paste Special: only the data validation settings,N,,Paste Special dialog box,absent,,Not an option of the editor's Paste Special
+paste.source-theme,paste,Paste Special: all contents and formatting from copied cells (source theme),H,,Paste Special dialog box,absent,,
+paste.no-borders,paste,Paste Special: all contents without borders,X,,Paste Special dialog box,editor,,
+paste.col-widths,paste,Paste Special: only column widths,W,,Paste Special dialog box,editor,,
+paste.formulas-numfmt,paste,Paste Special: formulas and number formats,R,,Paste Special dialog box,editor,,
+paste.values-numfmt,paste,Paste Special: values and number formats,U,,Paste Special dialog box,editor,,
+pp.context-menu,pp,"Power Pivot: open the context menu for the selected cell, column, or row",Shift+F10,,Power Pivot,absent,,No Power Pivot window
+pp.select-table,pp,Power Pivot: select the entire table,Ctrl+A,,Power Pivot,absent,,
+pp.copy,pp,Power Pivot: copy selected data,Ctrl+C,,Power Pivot,absent,,
+pp.delete-table,pp,Power Pivot: delete the table,Ctrl+D,,Power Pivot,absent,,
+pp.move-table,pp,Power Pivot: move the table,Ctrl+M,,Power Pivot,absent,,
+pp.rename-table,pp,Power Pivot: rename the table,Ctrl+R,,Power Pivot,absent,,
+pp.save,pp,Power Pivot: save the file,Ctrl+S,,Power Pivot,absent,,
+pp.redo,pp,Power Pivot: redo the last action,Ctrl+Y,,Power Pivot,absent,,
+pp.undo,pp,Power Pivot: undo the last action,Ctrl+Z,,Power Pivot,absent,,
+pp.select-column,pp,Power Pivot: select the current column,Ctrl+Spacebar,,Power Pivot,absent,,
+pp.select-row,pp,Power Pivot: select the current row,Shift+Spacebar,,Power Pivot,absent,,
+pp.select-col-down,pp,Power Pivot: select to the last cell of the column,Shift+Page down,,Power Pivot,absent,,
+pp.select-col-up,pp,Power Pivot: select to the first cell of the column,Shift+Page up,,Power Pivot,absent,,
+pp.select-row-end,pp,Power Pivot: select to the last cell of the row,Shift+End,,Power Pivot,absent,,
+pp.select-row-start,pp,Power Pivot: select to the first cell of the row,Shift+Home,,Power Pivot,absent,,
+pp.prev-table,pp,Power Pivot: move to the previous table,Ctrl+Page up,,Power Pivot,absent,,
+pp.next-table,pp,Power Pivot: move to the next table,Ctrl+Page down,,Power Pivot,absent,,
+pp.first-cell,pp,Power Pivot: move to the first cell of the selected table,Ctrl+Home,,Power Pivot,absent,,
+pp.last-cell,pp,Power Pivot: move to the last cell of the selected table,Ctrl+End,,Power Pivot,absent,,
+pp.row-first,pp,Power Pivot: move to the first cell of the selected row,Ctrl+Left arrow key,,Power Pivot,absent,,
+pp.row-last,pp,Power Pivot: move to the last cell of the selected row,Ctrl+Right arrow key,,Power Pivot,absent,,
+pp.col-first,pp,Power Pivot: move to the first cell of the selected column,Ctrl+Up arrow key,,Power Pivot,absent,,
+pp.col-last,pp,Power Pivot: move to the last cell of the selected column,Ctrl+Down arrow key,,Power Pivot,absent,,
+pp.cancel,pp,Power Pivot: close a dialog box or cancel a process,Ctrl+Esc,,Power Pivot,absent,,
+pp.autofilter,pp,Power Pivot: open the AutoFilter Menu dialog box,Alt+Down arrow key,,Power Pivot,absent,,
+pp.goto,pp,Power Pivot: open the Go To dialog box,F5,,Power Pivot,absent,,
+pp.recalc,pp,Power Pivot: recalculate all formulas,F9,,Power Pivot,absent,,
+copilot.send,copilot,Copilot: send your prompt,Enter,Return,Copilot in Excel,absent,,No Copilot; Elixir AI has its own keys
+copilot.stop,copilot,Copilot: stop or cancel the request,Esc,Esc,Copilot in Excel,absent,,
+copilot.accept,copilot,Copilot: accept changes,Ctrl+Enter,Cmd+Return,Copilot in Excel,absent,,
+copilot.mode,copilot,"Copilot: switch between edit, chat, and plan mode",Ctrl+Shift+M,Cmd+Shift+M,Copilot in Excel,absent,,
+copilot.responses,copilot,Copilot: navigate between chat responses,Alt+C,Option+C,Copilot in Excel,absent,,
+copilot.files,copilot,Copilot: confirm use of selected files,Ctrl+J,Cmd+J,Copilot in Excel,absent,,
+copilot.dictation,copilot,Copilot: start dictation,Alt+Shift+H,Option+Shift+H,Copilot in Excel,absent,,
+copilot.open,copilot,Copilot: open the task pane,Alt+C,Cmd+Ctrl+I,Copilot in Excel,absent,,
+copilot.focus,copilot,Copilot: move focus between the grid and the task pane,F6,Shift+F6,Copilot in Excel,absent,,

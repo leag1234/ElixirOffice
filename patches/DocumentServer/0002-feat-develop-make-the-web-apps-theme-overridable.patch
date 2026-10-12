@@ -1,0 +1,52 @@
+From f6c45602b732851d0369b0eb1eea2b46e2bd8e72 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:02:54 +0200
+Subject: [PATCH] feat(develop): make the web-apps theme overridable
+
+THEME was hard-coded to elixiroffice in the web-apps dev targets. Default
+to elixiroffice and let downstream brands pass THEME=<name>.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ develop/setup/Makefile | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/develop/setup/Makefile b/develop/setup/Makefile
+index dbe294a..7acba63 100644
+--- a/develop/setup/Makefile
++++ b/develop/setup/Makefile
+@@ -18,6 +18,10 @@ WEBAPPS_FLAGS :=
+ #   PRODUCT_VERSION=9.4.0 make web-apps-dev
+ PRODUCT_VERSION ?= $(shell cat $(EO_DEV)/VERSION)
+ 
++# web-apps theme (web-apps/theme/<name>). Override for a downstream brand:
++#   make web-apps-dev THEME=mybrand
++THEME ?= elixiroffice
++
+ CHECK_WEBAPPS_DEPS = @test -d $(EO_DEV)/web-apps/build/node_modules || { echo "Run 'make web-apps' first to install dependencies"; exit 1; }
+ 
+ # Dev cache flush. Static files are served with a one-year immutable cache under
+@@ -62,7 +66,7 @@ web-apps:
+ 	python3 merge_and_check.py && \
+ 	cd $(EO_DEV)/web-apps/build && \
+ 	npm ci && \
+-	BUILD_ROOT=$(EO_ROOT) PRODUCT_VERSION=$(PRODUCT_VERSION) THEME=elixiroffice \
++	BUILD_ROOT=$(EO_ROOT) PRODUCT_VERSION=$(PRODUCT_VERSION) THEME=$(THEME) \
+ 	node scripts/build-pipeline.js
+ 	$(FLUSH_CACHE)
+ 
+@@ -71,7 +75,7 @@ web-apps-dev:
+ 	cd $(EO_DEV)/web-apps/translation && \
+ 	python3 merge_and_check.py && \
+ 	cd $(EO_DEV)/web-apps/build && \
+-	BUILD_ROOT=$(EO_ROOT) PRODUCT_VERSION=$(PRODUCT_VERSION) THEME=elixiroffice \
++	BUILD_ROOT=$(EO_ROOT) PRODUCT_VERSION=$(PRODUCT_VERSION) THEME=$(THEME) \
+ 	node scripts/build-pipeline.js
+ 	$(FLUSH_CACHE)
+ 
+-- 
+2.43.0
+

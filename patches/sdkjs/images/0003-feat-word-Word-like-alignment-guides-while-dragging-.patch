@@ -1,0 +1,163 @@
+From 31fc020183581d0c4f34c558018c22e05a94f4ab Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 23:49:04 +0200
+Subject: [PATCH 3/6] feat(word): Word-like alignment guides while dragging an
+ object
+
+The guides drawn when a dragged object snaps were light grey dashed
+lines across the whole view. Draw them like Word's alignment guides:
+solid green lines across the page only. Also snap to the top of the
+first line of the body paragraphs of the page, as Word's paragraph
+alignment guides do, in addition to the margins, the page centre and
+the other objects.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/Overlay.js                           | 24 +++++++++++++++
+ word/Drawing/DrawingDocument.js             | 26 ++++++++--------
+ word/Editor/GraphicObjects/DrawingStates.js | 33 +++++++++++++++++++++
+ 3 files changed, 69 insertions(+), 14 deletions(-)
+
+diff --git a/common/Overlay.js b/common/Overlay.js
+index 2ca9f3c228..c384e49b16 100644
+--- a/common/Overlay.js
++++ b/common/Overlay.js
+@@ -229,6 +229,30 @@
+             this.Show();
+         },
+ 
++        // Solid alignment guide between two points of the overlay (CSS pixels), like the
++        // green guides Word shows while an object is dragged
++        AlignmentGuide : function(x0, y0, x1, y1, color)
++        {
++            var rPR = AscCommon.AscBrowser.retinaPixelRatio;
++            var ctx = this.m_oContext;
++            var _old_global = ctx.globalAlpha;
++            ctx.globalAlpha = 1;
++            ctx.lineWidth = Math.max(1, Math.round(rPR));
++            var indent = 0.5 * ctx.lineWidth;
++            x0 = ((x0 * rPR + indent) >> 0) + indent; x1 = ((x1 * rPR + indent) >> 0) + indent;
++            y0 = ((y0 * rPR + indent) >> 0) + indent; y1 = ((y1 * rPR + indent) >> 0) + indent;
++            this.CheckPoint(x0 - 1, y0 - 1);
++            this.CheckPoint(x1 + 1, y1 + 1);
++            ctx.strokeStyle = color;
++            ctx.beginPath();
++            ctx.moveTo(x0, y0);
++            ctx.lineTo(x1, y1);
++            ctx.stroke();
++            ctx.beginPath();
++            this.Show();
++            ctx.globalAlpha = _old_global;
++        },
++
+         VertLine2 : function(position)
+         {
+             var rPR = AscCommon.AscBrowser.retinaPixelRatio;
+diff --git a/word/Drawing/DrawingDocument.js b/word/Drawing/DrawingDocument.js
+index 83b8dd7391..af2b0a849a 100644
+--- a/word/Drawing/DrawingDocument.js
++++ b/word/Drawing/DrawingDocument.js
+@@ -37,6 +37,8 @@ var global_mouseEvent = AscCommon.global_mouseEvent;
+ var History = AscCommon.History;
+ var global_MatrixTransformer = AscCommon.global_MatrixTransformer;
+ var g_dKoef_pix_to_mm = AscCommon.g_dKoef_pix_to_mm;
++// Colour of the alignment guides shown while an object is dragged (Word draws them green)
++var ALIGNMENT_GUIDE_COLOR = "#00B050";
+ var g_dKoef_mm_to_pix = AscCommon.g_dKoef_mm_to_pix;
+ 
+ // columns ---
+@@ -5680,13 +5682,11 @@ function CDrawingDocument()
+ 			return;
+ 		}
+ 
+-		var _pos = this.ConvertCoordsToCursor4(xPos, 0, pageNum);
+-		if (_pos.Error === false)
+-		{
+-			this.m_oWordControl.m_oOverlayApi.DashLineColor = "#C8C8C8";
+-			this.m_oWordControl.m_oOverlayApi.VertLine2(_pos.X);
+-			this.m_oWordControl.m_oOverlayApi.DashLineColor = "#000000";
+-		}
++		var _page = this.m_arrPages[pageNum];
++		var _pos0 = this.ConvertCoordsToCursor4(xPos, 0, pageNum, true);
++		var _pos1 = _page ? this.ConvertCoordsToCursor4(xPos, _page.height_mm, pageNum, true) : _pos0;
++		if (_pos0.Error === false && _pos1.Error === false)
++			this.m_oWordControl.m_oOverlayApi.AlignmentGuide(_pos0.X, _pos0.Y, _pos1.X, _pos1.Y, ALIGNMENT_GUIDE_COLOR);
+ 	};
+ 
+ 	this.DrawHorAnchor = function (pageNum, yPos, bIsFromDrawings)
+@@ -5700,13 +5700,11 @@ function CDrawingDocument()
+ 			return;
+ 		}
+ 
+-		var _pos = this.ConvertCoordsToCursor4(0, yPos, pageNum);
+-		if (_pos.Error === false)
+-		{
+-			this.m_oWordControl.m_oOverlayApi.DashLineColor = "#C8C8C8";
+-			this.m_oWordControl.m_oOverlayApi.HorLine2(_pos.Y);
+-			this.m_oWordControl.m_oOverlayApi.DashLineColor = "#000000";
+-		}
++		var _page = this.m_arrPages[pageNum];
++		var _pos0 = this.ConvertCoordsToCursor4(0, yPos, pageNum, true);
++		var _pos1 = _page ? this.ConvertCoordsToCursor4(_page.width_mm, yPos, pageNum, true) : _pos0;
++		if (_pos0.Error === false && _pos1.Error === false)
++			this.m_oWordControl.m_oOverlayApi.AlignmentGuide(_pos0.X, _pos0.Y, _pos1.X, _pos1.Y, ALIGNMENT_GUIDE_COLOR);
+ 	};
+ 
+ 	this.DrawHorVerAnchor = function ()
+diff --git a/word/Editor/GraphicObjects/DrawingStates.js b/word/Editor/GraphicObjects/DrawingStates.js
+index c8afcedd6c..773dab69aa 100644
+--- a/word/Editor/GraphicObjects/DrawingStates.js
++++ b/word/Editor/GraphicObjects/DrawingStates.js
+@@ -2098,6 +2098,35 @@ PreMoveState.prototype =
+     }
+ };
+ 
++/**
++ * Adds the top of the first line of every body paragraph shown on the page to the vertical
++ * snap positions of a drag (Word's alignment guides for paragraphs).
++ */
++function AddParagraphTopsToSnapArray(logicDocument, pageIndex, snapArray)
++{
++    if (!logicDocument || !logicDocument.Content || !logicDocument.Pages || !logicDocument.Pages[pageIndex])
++        return;
++    var page = logicDocument.Pages[pageIndex];
++    var start = page.Pos, end = page.EndPos;
++    if (!AscFormat.isRealNumber(start) || !AscFormat.isRealNumber(end))
++        return;
++    for (var index = start; index <= end && index < logicDocument.Content.length && snapArray.length < 200; ++index)
++    {
++        var element = logicDocument.Content[index];
++        if (!element || !element.IsParagraph || !element.IsParagraph())
++            continue;
++        for (var curPage = 0; curPage < element.Pages.length; ++curPage)
++        {
++            if (element.GetAbsolutePage(curPage) !== pageIndex)
++                continue;
++            var paraPage = element.Pages[curPage];
++            var line = element.Lines[paraPage.StartLine];
++            if (line && paraPage.EndLine >= paraPage.StartLine)
++                snapArray.push(paraPage.Y + line.Y - line.Metrics.Ascent);
++        }
++    }
++}
++
+ function MoveState(drawingObjects, majorObject, startX, startY)
+ {
+     this.drawingObjects = drawingObjects;
+@@ -2172,6 +2201,10 @@ MoveState.prototype =
+             snapVerArray.push(page.Margins.Top);
+             snapVerArray.push(page.Margins.Bottom);
+             snapVerArray.push(page.Height/2);
++            // Word also aligns a dragged object with the top of the paragraphs of the page
++            AscFormat.ExecuteNoHistory(function () {
++                AddParagraphTopsToSnapArray(this.drawingObjects.document, pageIndex, snapVerArray);
++            }, this, []);
+         }
+         
+         if(result_x === this.startX)
+-- 
+2.43.0
+

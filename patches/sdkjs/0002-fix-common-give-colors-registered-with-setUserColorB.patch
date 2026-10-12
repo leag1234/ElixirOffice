@@ -1,0 +1,59 @@
+From 1a7084301be6e677440fb7151253b3e6fc28c55d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 11:43:10 +0200
+Subject: [PATCH 2/3] fix(common): give colors registered with setUserColorById
+ a normal variant
+
+setUserColorById (used by ApiDocument.SetAssistantTrackRevisions) stored
+only the Light and Dark variants, while getUserColorById also returns
+the Normal one (asc_getUserColorById, current-user highlights). The
+review balloon of an assistant revision then threw "Cannot read
+properties of undefined (reading 'r')" in web-apps.
+
+Test added to tests/word/js-api/api-track-revisions.js.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/editorscommon.js                  | 6 ++++--
+ tests/word/js-api/api-track-revisions.js | 4 ++++
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/common/editorscommon.js b/common/editorscommon.js
+index 15e9b9f73b..4463a954ec 100644
+--- a/common/editorscommon.js
++++ b/common/editorscommon.js
+@@ -11175,9 +11175,11 @@
+ 	}
+ 	function setUserColorById(userId, light, dark)
+ 	{
++		// Same shape as CUserCacheColor: callers ask for the Normal variant too (e.g. asc_getUserColorById)
+ 		g_oUserColorById[userId] = {
+-			Light : new CColor(light.r, light.g, light.b, 255),
+-			Dark : new CColor(dark.r, dark.g, dark.b, 255),
++			Light  : new CColor(light.r, light.g, light.b, 255),
++			Dark   : new CColor(dark.r, dark.g, dark.b, 255),
++			Normal : new CColor(light.r, light.g, light.b, 255)
+ 		};
+ 	}
+ 	function getUserColorById(userId, userName, isDark, isNumericValue)
+diff --git a/tests/word/js-api/api-track-revisions.js b/tests/word/js-api/api-track-revisions.js
+index 65fe9d4d60..020f793af1 100644
+--- a/tests/word/js-api/api-track-revisions.js
++++ b/tests/word/js-api/api-track-revisions.js
+@@ -88,6 +88,10 @@ $(function ()
+ 		assert.strictEqual(getParagraphRunReviewType(p, 0), reviewtype_Add, "new text is a tracked insertion");
+ 		assert.strictEqual(p.GetElement(0).Run.GetReviewInfo().GetUserName(), "Elixir AI", "the revision author is the assistant");
+ 
++		let assistantColor = AscCommon.getUserColorById("uid-Elixir AI", "Elixir AI", false, true);
++		assert.strictEqual(typeof assistantColor, "number", "the assistant color has a normal variant (asc_getUserColorById)");
++		assert.strictEqual(assistantColor, (8 << 16) | (145 << 8) | 178, "the assistant color is the one set by SetAssistantTrackRevisions");
++
+ 		doc.SetAssistantTrackRevisions(false);
+ 		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), false, "local flag restored");
+ 		assert.strictEqual(logicDocument.GetGlobalTrackRevisions(), false, "global flag restored");
+-- 
+2.43.0
+

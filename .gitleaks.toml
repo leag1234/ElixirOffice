@@ -1,0 +1,13 @@
+title = "ElixirOffice gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives"
+paths = [
+  # throwaway JWT secret of a short-lived validation container
+  '''tools/image/validate\.sh''',
+  # context line of an exported patch: the public demo secret of the upstream ONLYOFFICE Nextcloud connector
+  '''patches/elixiroffice-nextcloud/0001-.*\.patch''',
+]

@@ -1,0 +1,79 @@
+From 586bea8edd4d814bff602e087be25774383fba50 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ga=C3=ABl=20Duval?= <gael@murena.io>
+Date: Mon, 5 Oct 2026 13:47:17 +0200
+Subject: [PATCH] feat(word): optional soft page shadow from the UI theme
+
+New skin colour PageShadow, read from the theme token
+--canvas-page-shadow like PageOutline reads --canvas-page-border. When
+a theme sets it, the page is drawn over a soft shadow (6 px blur, 1 px
+offset), as Word draws its pages; the shadow comes from a plain
+rectangle under the page, not from the page image, so it stays cheap.
+Off by default and with a dark document, so the stock themes are
+unchanged.
+
+[upstreamable]
+
+Assisted-by: ClaudeCode:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ common/skin.js                  |  3 +++
+ word/Drawing/DrawingDocument.js | 15 +++++++++++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/common/skin.js b/common/skin.js
+index 668a3dd047..e0f4e799a2 100644
+--- a/common/skin.js
++++ b/common/skin.js
+@@ -39,6 +39,7 @@ var EditorSkins = {
+ 
+ 		BackgroundColor           : "#EEEEEE",
+ 		PageOutline               : "#BBBEC2",
++		PageShadow                : "rgba(0,0,0,0)",
+ 
+ 		RulerDark                 : "#D9D9D9",
+ 		RulerLight                : "#FFFFFF",
+@@ -189,6 +190,7 @@ var EditorSkins = {
+ 
+ 		BackgroundColor           : "#666666",
+ 		PageOutline               : "#BBBEC2",
++		PageShadow                : "rgba(0,0,0,0)",
+ 
+ 		RulerDark                 : "#373737",
+ 		RulerLight                : "#555555",
+@@ -356,6 +358,7 @@ function updateGlobalSkinColors(theme)
+ 	var colorMap = {
+ 		BackgroundColor                : "canvas-background",
+ 		PageOutline                    : "canvas-page-border",
++		PageShadow                     : "canvas-page-shadow",
+ 
+ 		RulerDark                      : "canvas-ruler-margins-background",
+ 		RulerLight                     : "canvas-ruler-background",
+diff --git a/word/Drawing/DrawingDocument.js b/word/Drawing/DrawingDocument.js
+index daefcd22e5..83b8dd7391 100644
+--- a/word/Drawing/DrawingDocument.js
++++ b/word/Drawing/DrawingDocument.js
+@@ -1066,6 +1066,21 @@ CPage.prototype.Draw = function (context, xDst, yDst, wDst, hDst, api)
+ 	if (!g_page_outline_inner)
+ 		strokeColor = GlobalSkin.PageOutline;
+ 
++	// soft page shadow (theme token canvas-page-shadow, none by default): a plain
++	// rectangle drawn under the page, so the shadow is not computed from the page image
++	var pageShadow = GlobalSkin.PageShadow;
++	if (pageShadow && "rgba(0,0,0,0)" !== pageShadow && !(api && api.isDarkMode))
++	{
++		var shadowRatio = AscCommon.AscBrowser.retinaPixelRatio;
++		context.save();
++		context.shadowColor = pageShadow;
++		context.shadowBlur = 6 * shadowRatio;
++		context.shadowOffsetY = shadowRatio;
++		context.fillStyle = "#FFFFFF";
++		context.fillRect(xDst, yDst, wDst, hDst);
++		context.restore();
++	}
++
+ 	if (null != this.drawingPage.cachedImage)
+ 	{
+ 		// потом посмотреть на кусочную отрисовку
+-- 
+2.43.0
+
