@@ -2,9 +2,9 @@
 
 **An open source office suite for people used to Microsoft Office.**
 
-ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs in the browser on your own server, or as a desktop app that works entirely offline. It is free software (AGPLv3), private by design, and fast.
+ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs in the browser on your own server and, from beta 2, as a desktop app that works entirely offline. It is free software (AGPLv3), private by design, and fast.
 
-> Status: **beta**. This first public version is a beta: the server version and the Linux and Windows desktop apps are ready to try, the macOS app is coming. Expect rough edges, and please report them. Desktop builds are not signed yet. Known limitations are listed in the release notes.
+> Status: **beta**. The first public beta is the **server version**. The desktop apps for Linux, Windows and macOS are planned for beta 2. Expect rough edges, and please report them. Known limitations are listed in the [release notes](../../releases).
 
 ## Why this project
 
@@ -16,10 +16,10 @@ They would love an office suite that is open source **and** easy to use. ElixirO
 
 - **It behaves like Microsoft Office.** The same ribbon tabs and groups, KeyTips (Alt), mini toolbar, quick access toolbar, contextual tabs, and the same keyboard shortcuts: 228 Word shortcuts work on Windows and 171 on macOS, including Repeat (F4 / Ctrl+Y), Outline, Read and Draft views, fields, block selection, mail merge, Flash Fill, Quick Analysis, sections and the Slide Sorter. Muscle memory keeps working.
 - **Your documents look right.** Layout fidelity to Word is measured on a document corpus, release after release. Free metric-compatible fonts keep line and page breaks without Microsoft fonts, and in Chrome or Edge one click lets the editor use the fonts installed on your computer. School fonts (Marelle and Seyes-ruled cursive substitutes) are included.
-- **Private by design.** No telemetry, nothing sent to the publisher. In local mode and in the desktop app, documents never leave your computer: they are converted, edited and exported to PDF entirely on your machine.
+- **Private by design.** No telemetry, nothing sent to the publisher. In the optional "convert locally" mode and in the desktop app (beta 2), documents never leave your computer: they are converted and edited entirely on your machine.
 - **AI only if you want it.** The suite is complete without AI. If you configure a model (any OpenAI-compatible service, including Ollama on your own computer), it can work on the structure of your document (styles, lists, tables, table of contents, page setup), with every change shown as a tracked change and undone in one step.
-- **Your own cloud: Murena Workspace and Nextcloud.** Connect your Murena Workspace or Nextcloud from the start page (secure Login Flow, revocable app password, nothing stored in the browser): browse, open, save back with conflict protection, recent files, new documents and uploads; or edit directly from Nextcloud Files with the bundled Nextcloud app. Your real name appears on comments, tracked changes and co-editing. Coming to the desktop app after the first release.
-- **International.** Every feature works in many languages: 45 interface languages, spelling in 49 languages, a thesaurus in 17.
+- **Your own cloud: Murena Workspace and Nextcloud.** Connect your Murena Workspace or Nextcloud from the start page (secure Login Flow, revocable app password, nothing stored in the browser): browse, open, save back with conflict protection, recent files, new documents and uploads. Your real name appears on comments, tracked changes and co-editing. An app to edit directly from Nextcloud Files is coming in an upcoming beta, and the connection is coming to the desktop app later.
+- **International.** Every feature works in many languages: 45 interface languages, 49 spelling dictionaries (39 languages), a thesaurus in 17 languages.
 
 ### More things you will like
 
@@ -67,25 +67,22 @@ In your language (here French, German and Japanese):
 | | Server version | Desktop app |
 |---|---|---|
 | For | organisations, Murena Workspace / Nextcloud, shared documents | individuals, offline use |
-| How | your own server (Docker), in the browser | Linux (AppImage, .deb), Windows (installer), macOS (coming) |
+| How | your own server (Docker), in the browser | Linux, Windows and macOS (planned for beta 2) |
 | Documents | real-time co-editing, cloud storage; optional "convert locally" mode | 100 % local, no document server |
+| Available | **now (beta 1)** | beta 2 |
 | Install | [docs/install-server.md](docs/install-server.md) | [docs/desktop.md](docs/desktop.md) |
 
 ## Try it
 
-All downloads are on the **[Releases](../../releases)** page (the first beta packages are being published there shortly after the source code).
-
-**Desktop app (offline, nothing to install on a server)**
-
-- **Linux**: download the `.AppImage`, make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the `.deb` with `sudo apt install ./elixiroffice_*.deb`.
-- **Windows**: download and run the installer. The preview is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
-- **macOS**: coming soon.
-
-Then open a .docx, .xlsx, .pptx, .odt, .ods or .odp file (double-click, drag and drop, or File > Open), edit it and save: the file stays on your computer.
+Downloads are on the **[Releases](../../releases)** page.
 
 **Server version (in the browser, for a team or an organisation)**
 
-On a Linux host with Docker, download the server bundle from the Releases page and follow [docs/install-server.md](docs/install-server.md): an init script generates the secrets, `docker compose up -d` starts the suite behind HTTPS, and you open it in your browser. AI is off unless you configure it; connecting Murena Workspace or Nextcloud is described in the guide.
+On a Linux host with Docker and a public DNS name, download the deployment bundle from the Releases page and follow its install guide: an init script generates the secrets, `docker compose up -d` downloads the image from `ghcr.io/leag1234/elixiroffice-server` and starts the suite behind HTTPS. The start page (local files, Murena Workspace and Nextcloud accounts) is off by default and has no user accounts of its own: enable it on a trusted network, behind a VPN or behind your own authentication. AI is off unless you configure it.
+
+**Desktop app (offline, nothing to install on a server)**
+
+Planned for beta 2, for Linux, Windows and macOS.
 
 ## Features
 
