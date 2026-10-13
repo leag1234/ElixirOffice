@@ -17,7 +17,12 @@
     "authorName": "Your name",
     "aiConsent": "Allow document data to be sent to this AI endpoint?",
     "aiLocal": "Allow document data to be sent to this AI endpoint?",
-    "aiRemote": "Allow document data to be sent to this AI endpoint?"
+    "aiRemote": "Allow document data to be sent to this AI endpoint?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -37,7 +42,12 @@
     "authorName": "Votre nom",
     "aiConsent": "Autoriser l’envoi des données du document à ce service IA ?",
     "aiLocal": "Autoriser l’envoi des données du document à ce service IA ?",
-    "aiRemote": "Autoriser l’envoi des données du document à ce service IA ?"
+    "aiRemote": "Autoriser l’envoi des données du document à ce service IA ?",
+    "fontComputer": "Utiliser les polices installées sur cet ordinateur",
+    "fontEnabled": "Les polices de cet ordinateur sont activées.",
+    "fontDisabled": "Les polices de cet ordinateur sont désactivées.",
+    "fontUnset": "Les polices de cet ordinateur n’ont pas été activées.",
+    "fontReopen": "Après désactivation, rouvrez le document pour utiliser uniquement les polices fournies. Enregistrez d’abord vos modifications."
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -57,7 +67,12 @@
     "authorName": "Ihr Name",
     "aiConsent": "Dokumentdaten an diesen KI-Dienst senden?",
     "aiLocal": "Dokumentdaten an diesen KI-Dienst senden?",
-    "aiRemote": "Dokumentdaten an diesen KI-Dienst senden?"
+    "aiRemote": "Dokumentdaten an diesen KI-Dienst senden?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -77,7 +92,12 @@
     "authorName": "Su nombre",
     "aiConsent": "¿Permitir enviar datos del documento a este servicio de IA?",
     "aiLocal": "¿Permitir enviar datos del documento a este servicio de IA?",
-    "aiRemote": "¿Permitir enviar datos del documento a este servicio de IA?"
+    "aiRemote": "¿Permitir enviar datos del documento a este servicio de IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -97,7 +117,12 @@
     "authorName": "Il tuo nome",
     "aiConsent": "Consentire l’invio dei dati del documento a questo servizio IA?",
     "aiLocal": "Consentire l’invio dei dati del documento a questo servizio IA?",
-    "aiRemote": "Consentire l’invio dei dati del documento a questo servizio IA?"
+    "aiRemote": "Consentire l’invio dei dati del documento a questo servizio IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -117,7 +142,12 @@
     "authorName": "Seu nome",
     "aiConsent": "Permitir o envio dos dados do documento a este serviço de IA?",
     "aiLocal": "Permitir o envio dos dados do documento a este serviço de IA?",
-    "aiRemote": "Permitir o envio dos dados do documento a este serviço de IA?"
+    "aiRemote": "Permitir o envio dos dados do documento a este serviço de IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -137,7 +167,12 @@
     "authorName": "O seu nome",
     "aiConsent": "Permitir o envio dos dados do documento a este serviço de IA?",
     "aiLocal": "Permitir o envio dos dados do documento a este serviço de IA?",
-    "aiRemote": "Permitir o envio dos dados do documento a este serviço de IA?"
+    "aiRemote": "Permitir o envio dos dados do documento a este serviço de IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -157,7 +192,12 @@
     "authorName": "Uw naam",
     "aiConsent": "Documentgegevens naar deze AI-dienst verzenden?",
     "aiLocal": "Documentgegevens naar deze AI-dienst verzenden?",
-    "aiRemote": "Documentgegevens naar deze AI-dienst verzenden?"
+    "aiRemote": "Documentgegevens naar deze AI-dienst verzenden?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -177,7 +217,12 @@
     "authorName": "Twoje imię",
     "aiConsent": "Zezwolić na wysyłanie danych dokumentu do tej usługi AI?",
     "aiLocal": "Zezwolić na wysyłanie danych dokumentu do tej usługi AI?",
-    "aiRemote": "Zezwolić na wysyłanie danych dokumentu do tej usługi AI?"
+    "aiRemote": "Zezwolić na wysyłanie danych dokumentu do tej usługi AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -197,7 +242,12 @@
     "authorName": "Ваше имя",
     "aiConsent": "Разрешить отправку данных документа в этот сервис ИИ?",
     "aiLocal": "Разрешить отправку данных документа в этот сервис ИИ?",
-    "aiRemote": "Разрешить отправку данных документа в этот сервис ИИ?"
+    "aiRemote": "Разрешить отправку данных документа в этот сервис ИИ?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -217,7 +267,12 @@
     "authorName": "お名前",
     "aiConsent": "文書データをこのAIサービスに送信しますか？",
     "aiLocal": "文書データをこのAIサービスに送信しますか？",
-    "aiRemote": "文書データをこのAIサービスに送信しますか？"
+    "aiRemote": "文書データをこのAIサービスに送信しますか？",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -237,7 +292,12 @@
     "authorName": "您的姓名",
     "aiConsent": "允许将文档数据发送到此 AI 服务吗？",
     "aiLocal": "允许将文档数据发送到此 AI 服务吗？",
-    "aiRemote": "允许将文档数据发送到此 AI 服务吗？"
+    "aiRemote": "允许将文档数据发送到此 AI 服务吗？",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -260,7 +320,12 @@
     "authorName": "您的姓名",
     "aiConsent": "允許將文件資料傳送至此 AI 服務嗎？",
     "aiLocal": "允許將文件資料傳送至此 AI 服務嗎？",
-    "aiRemote": "允許將文件資料傳送至此 AI 服務嗎？"
+    "aiRemote": "允許將文件資料傳送至此 AI 服務嗎？",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -283,7 +348,12 @@
     "authorName": "اسمك",
     "aiConsent": "هل تسمح بإرسال بيانات المستند إلى خدمة الذكاء الاصطناعي هذه؟",
     "aiLocal": "هل تسمح بإرسال بيانات المستند إلى خدمة الذكاء الاصطناعي هذه؟",
-    "aiRemote": "هل تسمح بإرسال بيانات المستند إلى خدمة الذكاء الاصطناعي هذه؟"
+    "aiRemote": "هل تسمح بإرسال بيانات المستند إلى خدمة الذكاء الاصطناعي هذه؟",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -306,7 +376,12 @@
     "authorName": "Adınız",
     "aiConsent": "Sənəd məlumatlarını bu süni intellekt xidmətinə göndərməyə icazə verilsin?",
     "aiLocal": "Sənəd məlumatlarını bu süni intellekt xidmətinə göndərməyə icazə verilsin?",
-    "aiRemote": "Sənəd məlumatlarını bu süni intellekt xidmətinə göndərməyə icazə verilsin?"
+    "aiRemote": "Sənəd məlumatlarını bu süni intellekt xidmətinə göndərməyə icazə verilsin?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -329,7 +404,12 @@
     "authorName": "Ваша імя",
     "aiConsent": "Дазволіць адпраўку даных дакумента ў гэты сэрвіс ШІ?",
     "aiLocal": "Дазволіць адпраўку даных дакумента ў гэты сэрвіс ШІ?",
-    "aiRemote": "Дазволіць адпраўку даных дакумента ў гэты сэрвіс ШІ?"
+    "aiRemote": "Дазволіць адпраўку даных дакумента ў гэты сэрвіс ШІ?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -355,7 +435,12 @@
     "authorName": "Вашето име",
     "aiConsent": "Разрешавате ли изпращане на данни от документа към тази AI услуга?",
     "aiLocal": "Разрешавате ли изпращане на данни от документа към тази AI услуга?",
-    "aiRemote": "Разрешавате ли изпращане на данни от документа към тази AI услуга?"
+    "aiRemote": "Разрешавате ли изпращане на данни от документа към тази AI услуга?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -378,7 +463,12 @@
     "authorName": "El vostre nom",
     "aiConsent": "Voleu permetre enviar dades del document a aquest servei d’IA?",
     "aiLocal": "Voleu permetre enviar dades del document a aquest servei d’IA?",
-    "aiRemote": "Voleu permetre enviar dades del document a aquest servei d’IA?"
+    "aiRemote": "Voleu permetre enviar dades del document a aquest servei d’IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -401,7 +491,12 @@
     "authorName": "Vaše jméno",
     "aiConsent": "Povolit odesílání dat dokumentu do této služby AI?",
     "aiLocal": "Povolit odesílání dat dokumentu do této služby AI?",
-    "aiRemote": "Povolit odesílání dat dokumentu do této služby AI?"
+    "aiRemote": "Povolit odesílání dat dokumentu do této služby AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -424,7 +519,12 @@
     "authorName": "Dit navn",
     "aiConsent": "Tillad at sende dokumentdata til denne AI-tjeneste?",
     "aiLocal": "Tillad at sende dokumentdata til denne AI-tjeneste?",
-    "aiRemote": "Tillad at sende dokumentdata til denne AI-tjeneste?"
+    "aiRemote": "Tillad at sende dokumentdata til denne AI-tjeneste?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -447,7 +547,12 @@
     "authorName": "Το όνομά σας",
     "aiConsent": "Να επιτρέπεται η αποστολή δεδομένων εγγράφου σε αυτή την υπηρεσία AI;",
     "aiLocal": "Να επιτρέπεται η αποστολή δεδομένων εγγράφου σε αυτή την υπηρεσία AI;",
-    "aiRemote": "Να επιτρέπεται η αποστολή δεδομένων εγγράφου σε αυτή την υπηρεσία AI;"
+    "aiRemote": "Να επιτρέπεται η αποστολή δεδομένων εγγράφου σε αυτή την υπηρεσία AI;",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -470,7 +575,12 @@
     "authorName": "Zure izena",
     "aiConsent": "Dokumentuko datuak AA zerbitzu honetara bidaltzea baimendu?",
     "aiLocal": "Dokumentuko datuak AA zerbitzu honetara bidaltzea baimendu?",
-    "aiRemote": "Dokumentuko datuak AA zerbitzu honetara bidaltzea baimendu?"
+    "aiRemote": "Dokumentuko datuak AA zerbitzu honetara bidaltzea baimendu?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -495,7 +605,12 @@
     "authorName": "Nimesi",
     "aiConsent": "Sallitaanko asiakirjan tietojen lähetys tähän tekoälypalveluun?",
     "aiLocal": "Sallitaanko asiakirjan tietojen lähetys tähän tekoälypalveluun?",
-    "aiRemote": "Sallitaanko asiakirjan tietojen lähetys tähän tekoälypalveluun?"
+    "aiRemote": "Sallitaanko asiakirjan tietojen lähetys tähän tekoälypalveluun?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -518,7 +633,12 @@
     "authorName": "O seu nome",
     "aiConsent": "Permitir o envío dos datos do documento a este servizo de IA?",
     "aiLocal": "Permitir o envío dos datos do documento a este servizo de IA?",
-    "aiRemote": "Permitir o envío dos datos do documento a este servizo de IA?"
+    "aiRemote": "Permitir o envío dos datos do documento a este servizo de IA?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -541,7 +661,12 @@
     "authorName": "השם שלך",
     "aiConsent": "לאפשר שליחת נתוני המסמך לשירות AI זה?",
     "aiLocal": "לאפשר שליחת נתוני המסמך לשירות AI זה?",
-    "aiRemote": "לאפשר שליחת נתוני המסמך לשירות AI זה?"
+    "aiRemote": "לאפשר שליחת נתוני המסמך לשירות AI זה?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -564,7 +689,12 @@
     "authorName": "Az Ön neve",
     "aiConsent": "Engedélyezi a dokumentumadatok küldését erre az AI-szolgáltatásra?",
     "aiLocal": "Engedélyezi a dokumentumadatok küldését erre az AI-szolgáltatásra?",
-    "aiRemote": "Engedélyezi a dokumentumadatok küldését erre az AI-szolgáltatásra?"
+    "aiRemote": "Engedélyezi a dokumentumadatok küldését erre az AI-szolgáltatásra?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -587,7 +717,12 @@
     "authorName": "Ձեր անունը",
     "aiConsent": "Թույլատրե՞լ փաստաթղթի տվյալների ուղարկումը այս AI ծառայությանը։",
     "aiLocal": "Թույլատրե՞լ փաստաթղթի տվյալների ուղարկումը այս AI ծառայությանը։",
-    "aiRemote": "Թույլատրե՞լ փաստաթղթի տվյալների ուղարկումը այս AI ծառայությանը։"
+    "aiRemote": "Թույլատրե՞լ փաստաթղթի տվյալների ուղարկումը այս AI ծառայությանը։",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -610,7 +745,12 @@
     "authorName": "Nama Anda",
     "aiConsent": "Izinkan pengiriman data dokumen ke layanan AI ini?",
     "aiLocal": "Izinkan pengiriman data dokumen ke layanan AI ini?",
-    "aiRemote": "Izinkan pengiriman data dokumen ke layanan AI ini?"
+    "aiRemote": "Izinkan pengiriman data dokumen ke layanan AI ini?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -633,7 +773,12 @@
     "authorName": "이름",
     "aiConsent": "문서 데이터를 이 AI 서비스로 전송하도록 허용할까요?",
     "aiLocal": "문서 데이터를 이 AI 서비스로 전송하도록 허용할까요?",
-    "aiRemote": "문서 데이터를 이 AI 서비스로 전송하도록 허용할까요?"
+    "aiRemote": "문서 데이터를 이 AI 서비스로 전송하도록 허용할까요?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -656,7 +801,12 @@
     "authorName": "ຊື່ຂອງທ່ານ",
     "aiConsent": "ອະນຸຍາດໃຫ້ສົ່ງຂໍ້ມູນເອກະສານໄປຫາບໍລິການ AI ນີ້ບໍ?",
     "aiLocal": "ອະນຸຍາດໃຫ້ສົ່ງຂໍ້ມູນເອກະສານໄປຫາບໍລິການ AI ນີ້ບໍ?",
-    "aiRemote": "ອະນຸຍາດໃຫ້ສົ່ງຂໍ້ມູນເອກະສານໄປຫາບໍລິການ AI ນີ້ບໍ?"
+    "aiRemote": "ອະນຸຍາດໃຫ້ສົ່ງຂໍ້ມູນເອກະສານໄປຫາບໍລິການ AI ນີ້ບໍ?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -679,7 +829,12 @@
     "authorName": "Jūsu vārds",
     "aiConsent": "Atļaut sūtīt dokumenta datus šim AI pakalpojumam?",
     "aiLocal": "Atļaut sūtīt dokumenta datus šim AI pakalpojumam?",
-    "aiRemote": "Atļaut sūtīt dokumenta datus šim AI pakalpojumam?"
+    "aiRemote": "Atļaut sūtīt dokumenta datus šim AI pakalpojumam?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -702,7 +857,12 @@
     "authorName": "Nama anda",
     "aiConsent": "Benarkan penghantaran data dokumen ke perkhidmatan AI ini?",
     "aiLocal": "Benarkan penghantaran data dokumen ke perkhidmatan AI ini?",
-    "aiRemote": "Benarkan penghantaran data dokumen ke perkhidmatan AI ini?"
+    "aiRemote": "Benarkan penghantaran data dokumen ke perkhidmatan AI ini?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -734,7 +894,12 @@
     "authorName": "Navnet ditt",
     "aiConsent": "Tillate sending av dokumentdata til denne KI-tjenesten?",
     "aiLocal": "Tillate sending av dokumentdata til denne KI-tjenesten?",
-    "aiRemote": "Tillate sending av dokumentdata til denne KI-tjenesten?"
+    "aiRemote": "Tillate sending av dokumentdata til denne KI-tjenesten?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -757,7 +922,12 @@
     "authorName": "Numele dvs.",
     "aiConsent": "Permiteți trimiterea datelor documentului către acest serviciu AI?",
     "aiLocal": "Permiteți trimiterea datelor documentului către acest serviciu AI?",
-    "aiRemote": "Permiteți trimiterea datelor documentului către acest serviciu AI?"
+    "aiRemote": "Permiteți trimiterea datelor documentului către acest serviciu AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -780,7 +950,12 @@
     "authorName": "ඔබේ නම",
     "aiConsent": "ලේඛන දත්ත මෙම AI සේවාවට යැවීමට අවසර දෙන්නද?",
     "aiLocal": "ලේඛන දත්ත මෙම AI සේවාවට යැවීමට අවසර දෙන්නද?",
-    "aiRemote": "ලේඛන දත්ත මෙම AI සේවාවට යැවීමට අවසර දෙන්නද?"
+    "aiRemote": "ලේඛන දත්ත මෙම AI සේවාවට යැවීමට අවසර දෙන්නද?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -803,7 +978,12 @@
     "authorName": "Vaše meno",
     "aiConsent": "Povoliť odosielanie údajov dokumentu do tejto služby AI?",
     "aiLocal": "Povoliť odosielanie údajov dokumentu do tejto služby AI?",
-    "aiRemote": "Povoliť odosielanie údajov dokumentu do tejto služby AI?"
+    "aiRemote": "Povoliť odosielanie údajov dokumentu do tejto služby AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -829,7 +1009,12 @@
     "authorName": "Vaše ime",
     "aiConsent": "Dovolite pošiljanje podatkov dokumenta tej storitvi AI?",
     "aiLocal": "Dovolite pošiljanje podatkov dokumenta tej storitvi AI?",
-    "aiRemote": "Dovolite pošiljanje podatkov dokumenta tej storitvi AI?"
+    "aiRemote": "Dovolite pošiljanje podatkov dokumenta tej storitvi AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -852,7 +1037,12 @@
     "authorName": "Emri juaj",
     "aiConsent": "Lejoni dërgimin e të dhënave të dokumentit te ky shërbim AI?",
     "aiLocal": "Lejoni dërgimin e të dhënave të dokumentit te ky shërbim AI?",
-    "aiRemote": "Lejoni dërgimin e të dhënave të dokumentit te ky shërbim AI?"
+    "aiRemote": "Lejoni dërgimin e të dhënave të dokumentit te ky shërbim AI?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -875,7 +1065,12 @@
     "authorName": "Vaše ime",
     "aiConsent": "Dozvoliti slanje podataka dokumenta ovom AI servisu?",
     "aiLocal": "Dozvoliti slanje podataka dokumenta ovom AI servisu?",
-    "aiRemote": "Dozvoliti slanje podataka dokumenta ovom AI servisu?"
+    "aiRemote": "Dozvoliti slanje podataka dokumenta ovom AI servisu?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -898,7 +1093,12 @@
     "authorName": "Ваше име",
     "aiConsent": "Дозволити слање података документа овом AI сервису?",
     "aiLocal": "Дозволити слање података документа овом AI сервису?",
-    "aiRemote": "Дозволити слање података документа овом AI сервису?"
+    "aiRemote": "Дозволити слање података документа овом AI сервису?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -921,7 +1121,12 @@
     "authorName": "Ditt namn",
     "aiConsent": "Tillåta att dokumentdata skickas till denna AI-tjänst?",
     "aiLocal": "Tillåta att dokumentdata skickas till denna AI-tjänst?",
-    "aiRemote": "Tillåta att dokumentdata skickas till denna AI-tjänst?"
+    "aiRemote": "Tillåta att dokumentdata skickas till denna AI-tjänst?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -944,7 +1149,12 @@
     "authorName": "Adınız",
     "aiConsent": "Belge verilerinin bu AI hizmetine gönderilmesine izin verilsin mi?",
     "aiLocal": "Belge verilerinin bu AI hizmetine gönderilmesine izin verilsin mi?",
-    "aiRemote": "Belge verilerinin bu AI hizmetine gönderilmesine izin verilsin mi?"
+    "aiRemote": "Belge verilerinin bu AI hizmetine gönderilmesine izin verilsin mi?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -967,7 +1177,12 @@
     "authorName": "Ваше ім’я",
     "aiConsent": "Дозволити надсилання даних документа до цього сервісу ШІ?",
     "aiLocal": "Дозволити надсилання даних документа до цього сервісу ШІ?",
-    "aiRemote": "Дозволити надсилання даних документа до цього сервісу ШІ?"
+    "aiRemote": "Дозволити надсилання даних документа до цього сервісу ШІ?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -990,7 +1205,12 @@
     "authorName": "آپ کا نام",
     "aiConsent": "کیا دستاویز کا ڈیٹا اس AI سروس کو بھیجنے کی اجازت دیں؟",
     "aiLocal": "کیا دستاویز کا ڈیٹا اس AI سروس کو بھیجنے کی اجازت دیں؟",
-    "aiRemote": "کیا دستاویز کا ڈیٹا اس AI سروس کو بھیجنے کی اجازت دیں؟"
+    "aiRemote": "کیا دستاویز کا ڈیٹا اس AI سروس کو بھیجنے کی اجازت دیں؟",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -1017,6 +1237,11 @@
     "authorName": "Tên của bạn",
     "aiConsent": "Cho phép gửi dữ liệu tài liệu tới dịch vụ AI này?",
     "aiLocal": "Cho phép gửi dữ liệu tài liệu tới dịch vụ AI này?",
-    "aiRemote": "Cho phép gửi dữ liệu tài liệu tới dịch vụ AI này?"
+    "aiRemote": "Cho phép gửi dữ liệu tài liệu tới dịch vụ AI này?",
+    "fontComputer": "Use fonts installed on this computer",
+    "fontEnabled": "Computer fonts are enabled.",
+    "fontDisabled": "Computer fonts are disabled.",
+    "fontUnset": "Computer fonts have not been enabled.",
+    "fontReopen": "After disabling, reopen the document to use only bundled fonts. Save your changes first."
   }
 }

@@ -180,7 +180,7 @@ async function showOptions(){
  const aiController=(frame?.DE||frame?.SSE||frame?.PE)?.getController('Common.Controllers.ElixirAI');
  if(aiController)modalButton(box,'Elixir — '+t('settings'),()=>{box.close();aiController.openSettings(false)});
  const note=document.createElement('p');note.textContent=t('saveCopy')+'. '+t('privacy');box.append(note);
- modalButton(box,t('fontUse'),()=>{box.close();return fontConsent()});
+ await addFontOptions(box);
  modalButton(box,t('save'),async()=>{await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
  modalButton(box,t('cancel'),()=>box.close());
 }
@@ -194,7 +194,23 @@ async function offerRecovery(){
  }
  modalButton(box,t('cancel'),()=>box.close());
 }
-async function fontConsent(){try{if(await eoDesktop.fontConsent()){if(frame){await installFonts(frame);await frame.Common.ElixirLocalFonts.readList();await frame.Common.ElixirLocalFonts.enable(main.api)}status(t('fontUse'))}}catch(error){fail(error)}}
+async function fontConsent(){try{if(!await eoDesktop.fontConsent())return false;if(frame){await installFonts(frame);await frame.Common.ElixirLocalFonts.readList();await frame.Common.ElixirLocalFonts.enable(main.api)}status(t('fontUse'));return true}catch(error){fail(error);return false}}
+async function addFontOptions(box){
+ const label=document.createElement('label'),enabled=document.createElement('input'),state=document.createElement('p'),hint=document.createElement('p');
+ enabled.type='checkbox';enabled.id='computer-fonts-enabled';state.id='computer-fonts-status';hint.id='computer-fonts-hint';
+ label.append(enabled,document.createTextNode(t('fontComputer')));hint.textContent=t('fontReopen');box.append(label,state,hint);
+ async function refresh(){enabled.checked=await eoDesktop.fontPermission();const choice=await eoDesktop.fontChoice();state.textContent=t(enabled.checked?'fontEnabled':choice==='declined'?'fontDisabled':'fontUnset');}
+ await refresh();
+ enabled.addEventListener('change',async()=>{
+  enabled.disabled=true;
+  try{
+   if(enabled.checked)await fontConsent();
+   else{await eoDesktop.fontDisable();const LF=frame?.Common?.ElixirLocalFonts;if(LF){LF.fonts=null;LF.setConsent(false);LF.setStatus('off');}}
+  }catch(error){fail(error)}
+  finally{try{await refresh()}catch(error){fail(error)}enabled.disabled=false;}
+ });
+}
+
 async function drop(event){
   if(!event.dataTransfer?.files.length)return;
   // Only intercept Office documents; other drops retain the editor's behavior.

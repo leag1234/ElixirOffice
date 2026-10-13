@@ -132,3 +132,26 @@ test('native Help follows selected UI language when system preferences differ, i
   assert(env.windows.at(-1).url.endsWith('/documenteditor/main/resources/help/fr/index.htm'));
  }finally{await env.cleanup()}
 });
+
+
+test('desktop font choice consent and revocation persist (native dialog unit injection)',async()=>{
+ const env=await boot();
+ try{
+  assert.equal(await env.invoke('font-choice'),'unset');
+  assert.equal(await env.invoke('font-permission'),false);
+  assert.deepEqual(Array.from(await env.invoke('fonts')),[]);
+  env.responses.push(0);assert.equal(await env.invoke('font-consent'),false);
+  assert.equal(await env.invoke('font-choice'),'declined');assert.equal(await env.invoke('font-permission'),false);
+  assert.deepEqual(Array.from(await env.invoke('fonts')),[]);
+  env.responses.push(1);assert.equal(await env.invoke('font-consent'),true);
+  assert.equal(await env.invoke('font-choice'),'granted');assert.equal(await env.invoke('font-permission'),true);
+  let saved=JSON.parse(await fs.readFile(path.join(env.directory,'desktop-settings.json'),'utf8'));
+  assert.equal(saved.fontConsent,true);assert.equal(saved.fontChoice,'granted');
+  assert.equal(await env.invoke('font-disable'),true);
+  assert.equal(await env.invoke('font-choice'),'declined');assert.equal(await env.invoke('font-permission'),false);
+  saved=JSON.parse(await fs.readFile(path.join(env.directory,'desktop-settings.json'),'utf8'));
+  assert.equal(saved.fontConsent,false);assert.equal(saved.fontChoice,'declined');
+  assert.deepEqual(Array.from(await env.invoke('fonts')),[]);
+  assert.equal(env.dialogs.length,2);assert(env.dialogs.every(d=>d.type==='question'));
+ }finally{await env.cleanup()}
+});
