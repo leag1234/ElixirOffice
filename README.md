@@ -2,9 +2,18 @@
 
 **An open source office suite for people used to Microsoft Office.**
 
-ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs in the browser on your own server and, from beta 2, as a desktop app that works entirely offline. It is free software (AGPLv3), private by design, and fast.
+ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs as a desktop app that works entirely offline, or in the browser on your own server. It is free software (AGPLv3), private by design, and fast.
 
-> Status: **beta**. The first public beta is the **server version**. The desktop apps for Linux, Windows and macOS are planned for beta 2. Expect rough edges, and please report them. Known limitations are listed in the [release notes](../../releases).
+> Status: **beta**. Expect rough edges, and please [report them](../../issues). Known limitations are listed in the release notes.
+
+## Get ElixirOffice
+
+| Version | For whom | Why choose it | Get it |
+|---|---|---|---|
+| **Desktop app** (beta 2) | Anyone, on their own computer | 100 % local and offline: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-win-x64.exe) · [macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-mac-arm64.dmg) · [Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-linux-x86_64.AppImage) · [Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-linux-amd64.deb) |
+| **Server version** (beta 1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1` |
+
+Release notes, checksums and source archives: [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
 
 ## Why this project
 
@@ -16,7 +25,7 @@ They would love an office suite that is open source **and** easy to use. ElixirO
 
 - **It behaves like Microsoft Office.** The same ribbon tabs and groups, KeyTips (Alt), mini toolbar, quick access toolbar, contextual tabs, and the same keyboard shortcuts: 228 Word shortcuts work on Windows and 171 on macOS, including Repeat (F4 / Ctrl+Y), Outline, Read and Draft views, fields, block selection, mail merge, Flash Fill, Quick Analysis, sections and the Slide Sorter. Muscle memory keeps working.
 - **Your documents look right.** Layout fidelity to Word is measured on a document corpus, release after release. Free metric-compatible fonts keep line and page breaks without Microsoft fonts, and in Chrome or Edge one click lets the editor use the fonts installed on your computer. School fonts (Marelle and Seyes-ruled cursive substitutes) are included.
-- **Private by design.** No telemetry, nothing sent to the publisher. In the optional "convert locally" mode and in the desktop app (beta 2), documents never leave your computer: they are converted and edited entirely on your machine.
+- **Private by design.** No telemetry, nothing sent to the publisher. In the desktop app and in the optional "convert locally" mode, documents never leave your computer: they are converted and edited entirely on your machine.
 - **AI only if you want it.** The suite is complete without AI. If you configure a model (any OpenAI-compatible service, including Ollama on your own computer), it can work on the structure of your document (styles, lists, tables, table of contents, page setup), with every change shown as a tracked change and undone in one step.
 - **Your own cloud: Murena Workspace and Nextcloud.** Connect your Murena Workspace or Nextcloud from the start page (secure Login Flow, revocable app password, nothing stored in the browser): browse, open, save back with conflict protection, recent files, new documents and uploads. Your real name appears on comments, tracked changes and co-editing. An app to edit directly from Nextcloud Files is coming in an upcoming beta, and the connection is coming to the desktop app later.
 - **International.** Every feature works in many languages: 45 interface languages, 49 spelling dictionaries (39 languages), a thesaurus in 17 languages.
@@ -67,22 +76,24 @@ In your language (here French, German and Japanese):
 | | Server version | Desktop app |
 |---|---|---|
 | For | organisations, Murena Workspace / Nextcloud, shared documents | individuals, offline use |
-| How | your own server (Docker), in the browser | Linux, Windows and macOS (planned for beta 2) |
+| How | your own server (Docker), in the browser | Windows, macOS (Apple Silicon), Linux |
 | Documents | real-time co-editing, cloud storage; optional "convert locally" mode | 100 % local, no document server |
-| Available | **now (beta 1)** | beta 2 |
+| Available | beta 1 | beta 2 |
 | Install | [docs/install-server.md](docs/install-server.md) | [docs/desktop.md](docs/desktop.md) |
 
 ## Try it
 
-Downloads are on the **[Releases](../../releases)** page.
+**Desktop app (offline, nothing to install on a server)**
+
+- **Windows**: download the [installer](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-win-x64.exe) and run it. It is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
+- **macOS** (Apple Silicon): download the [disk image](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-mac-arm64.dmg), open it and drag ElixirOffice to Applications. It is not notarized yet: if macOS blocks it, open **System Settings > Privacy & Security** and click **Open Anyway**.
+- **Linux**: download the [AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-linux-x86_64.AppImage), make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the [.deb](https://github.com/leag1234/elixiroffice/releases/download/v0.1.0-beta.2/ElixirOffice-0.1.0-linux-amd64.deb) with `sudo apt install ./ElixirOffice-*.deb`.
+
+Then create a document or open a .docx, .xlsx, .pptx, .odt, .ods or .odp file, edit it and save: the file stays on your computer.
 
 **Server version (in the browser, for a team or an organisation)**
 
-On a Linux host with Docker and a public DNS name, download the deployment bundle from the Releases page and follow its install guide: an init script generates the secrets, `docker compose up -d` downloads the image from `ghcr.io/leag1234/elixiroffice-server` and starts the suite behind HTTPS. The start page (local files, Murena Workspace and Nextcloud accounts) is off by default and has no user accounts of its own: enable it on a trusted network, behind a VPN or behind your own authentication. AI is off unless you configure it.
-
-**Desktop app (offline, nothing to install on a server)**
-
-Planned for beta 2, for Linux, Windows and macOS.
+On a Linux host with Docker and a public DNS name, download the deployment bundle from the [server release](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1) and follow its install guide: an init script generates the secrets, `docker compose up -d` downloads the image from `ghcr.io/leag1234/elixiroffice-server` and starts the suite behind HTTPS. The start page (local files, Murena Workspace and Nextcloud accounts) is off by default and has no user accounts of its own: enable it on a trusted network, behind a VPN or behind your own authentication. AI is off unless you configure it.
 
 ## Features
 
