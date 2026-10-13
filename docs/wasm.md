@@ -481,7 +481,7 @@ rows; its exit 1 and logs are retained, with a scoped JSON postcheck exit 0 and
 full counts. No suite was altered or weakened.
 
 The acceptance container and its volumes were removed, absence verified, and
-both SSH test tunnels closed. Hardy source/build/image evidence remains under
+both SSH test tunnels closed. <build-host> source/build/image evidence remains under
 $EO_WORK/w5-review/logs; browser evidence and task protocol
 are on <dev-host> at $EO_WORK/wt/w5-review-work (outside Git). Minor lead comments
 on portable doc paths, runtime security-header inheritance and proxy identity
@@ -769,7 +769,7 @@ both charts and95source values. Six-format media/conversion/privacy, mixed
 series and distinct inline-image byte references pass. No published package
 or demo changed.
 
-Approved ODS-only native Venus edit/save/PDF/fresh reopen remains the native
+Approved ODS-only native <test-desktop> edit/save/PDF/fresh reopen remains the native
 proof. Final528 native PDF is unverified because the graphical session is
 locked; independent review accepts source integration under the owner's updated
 conditions without claiming final native or package acceptance.
@@ -810,7 +810,7 @@ Historical A4–A6 review pin (superseded): **528e920e4f34-9aa540d2fd30-st**, ma
 
 Historical desktop beta2 pipeline D review: parameterized full converter used528e920e4f34-cd1d25d5a3e1-st (manifest25e744a592bc325c10f6df09edfe653414a316db45ba437d938401bcc2225c8e); independent PDF pin retained. Isolated metadata/generated dependency overlay records hashes without shared SDK edits. Real Linux AppImage/DEB and Windows installer/resource audits pass; full Mac and direct remote packaged gates remain unverified pending SSH access. See docs/desktop-release.md. No integration or publication.
 
-D beta2 actual Venus relay:18383resource hashes/samplechecksPASS, packaged sixformat matrix5/6 (ODT saved-clean timeout, exit1), first nativeWord CDPstartupFAIL. DirectFire/Mac remain unverified. Review65c25b49aafe667622accda90a3e055557569ce32940ccc0e0f5373ed72fbc78 clears environment/path findings in final driver; real final-driver build in progress. No full release pass claimed.
+D beta2 actual <test-desktop> relay:18383resource hashes/samplechecksPASS, packaged sixformat matrix5/6 (ODT saved-clean timeout, exit1), first nativeWord CDPstartupFAIL. DirectFire/Mac remain unverified. Review65c25b49aafe667622accda90a3e055557569ce32940ccc0e0f5373ed72fbc78 clears environment/path findings in final driver; real final-driver build in progress. No full release pass claimed.
 
 Final-driver validation: /data/elixiroffice/release/beta2-2026-10-12-D-final-driver/ records all build/audit phases0, exact current five driver hashes, SHA256SUMS4/4PASS and deliberate partial-unverified exit2. The warmed native Word test opens/edits/saves, then fails to find the native PDF dialog; native PDF remains failed. No Mac artifact or direct-transport gate was inferred.
 

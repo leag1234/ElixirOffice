@@ -104,7 +104,7 @@ The original document has estimates and a proposed bench, not shell results.
 | Installed GTK package | libgtk-3-0t64 3.24.41; Installed-Size 9,772 KiB | Same limitation |
 | Benchmark prerequisites | No DISPLAY/WAYLAND_DISPLAY, Xvfb, cargo or rustc | GUI startup, RSS/PSS and compatibility unverified |
 | Existing full W0 wasm | 53,064,743 raw bytes / 8,778,766 Brotli; glue 141,843 raw | Historical converter measurement, not complete app |
-| Existing 97-page conversion, wasm study section 12 | 412 ms warm; 525 ms cold conversion + 408 ms init | Hardy Node; excludes shell, editor and file I/O |
+| Existing 97-page conversion, wasm study section 12 | 412 ms warm; 525 ms cold conversion + 408 ms init | <build-host> Node; excludes shell, editor and file I/O |
 
 Reproduction: Python urllib fetched GitHub /repos/electron/electron/releases/latest,
 selected the Linux x64 ZIP, downloaded it and summed ZipInfo.file_size. The JSON
