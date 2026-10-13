@@ -3,7 +3,7 @@
 // a hand-made drawing-command stream drawn with a TrueType font, an OpenType CFF font, the second face
 // of a TrueType collection, a symbol font by glyph id, a ligature glyph, paths, a gradient, a link,
 // headings; then poppler checks the PDF (fonts embedded with the right types, text, rendering).
-//   SDKJS=$EO_WORK/wt/cpdf/sdkjs node tests/client-pdf/writer.test.mjs
+//   SDKJS=$EO_WORK/DocumentServer/sdkjs node tests/client-pdf/writer.test.mjs
 // Font files are taken from the host (FONT_TTF, FONT_OTF, FONT_TTC override them); never committed.
 import fs from "node:fs";
 import os from "node:os";
@@ -12,7 +12,7 @@ import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const SDKJS = process.env.SDKJS || path.join(os.homedir(), "elixiroffice/wt/cpdf/sdkjs");
+const SDKJS = process.env.SDKJS || path.join(os.homedir(), "elixiroffice/DocumentServer/sdkjs");
 const fontkit = require(path.join(SDKJS, "common/clientpdf/vendor/fontkit/fontkit.umd.min.js"));
 require(path.join(SDKJS, "common/clientpdf/eo-pdf.js"));
 const EOPdf = globalThis.EOPdf;

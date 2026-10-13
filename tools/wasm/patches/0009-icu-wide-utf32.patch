@@ -1,0 +1,109 @@
+diff --git a/UnicodeConverter/UnicodeConverter.cpp b/UnicodeConverter/UnicodeConverter.cpp
+index 776e0c5941..e701de6787 100644
+--- a/UnicodeConverter/UnicodeConverter.cpp
++++ b/UnicodeConverter/UnicodeConverter.cpp
+@@ -29,6 +29,7 @@
+ #include "unicode/ustring.h"
+ #include "unicode/ucnv.h"     /* C   Converter API    */
+ #include "unicode/usprep.h"
++#include <vector>
+ 
+ #if !defined (_WIN32) && !defined (_WIN64)
+ #if defined (_LINUX) && !defined(__ANDROID__) && !defined(_IOS) && !defined(_MAC)
+@@ -98,6 +99,11 @@ namespace NSUnicodeConverter
+ 			UErrorCode status = U_ZERO_ERROR;
+ 
+ 			int32_t nUCharCapacity = (int32_t)nInputLen;// UTF-16 uses 2 code-points per char
++#ifdef EO_WASM
++            // ICU's WCS functions use libc multibyte conversion in Emscripten.
++            // Core wchar_t holds Unicode scalars; use the explicit UTF-32 bridge.
++            nUCharCapacity *= 2; // supplementary scalars need two UTF-16 units
++#endif
+ 
+ 			UChar* pUChar = new UChar[(uint32_t)nUCharCapacity * sizeof(UChar)];
+ 			if (pUChar)
+@@ -105,7 +111,12 @@ namespace NSUnicodeConverter
+ 				const UChar* pUCharStart = pUChar;
+ 				int32_t nUCharLength = 0;
+ 
+-				u_strFromWCS(pUChar, nUCharCapacity, &nUCharLength, sInput, (int32_t)nInputLen, &status);
++				#ifdef EO_WASM
++                std::vector<UChar32> utf32(sInput, sInput + nInputLen);
++                u_strFromUTF32(pUChar, nUCharCapacity, &nUCharLength, utf32.data(), (int32_t)nInputLen, &status);
++#else
++                u_strFromWCS(pUChar, nUCharCapacity, &nUCharLength, sInput, (int32_t)nInputLen, &status);
++#endif
+ 				if (U_SUCCESS(status))
+ 				{
+ 					UStringPrepProfile *profile = usprep_openByType(USPREP_RFC4013_SASLPREP, &status);
+@@ -162,6 +173,11 @@ namespace NSUnicodeConverter
+ 			if (U_SUCCESS(status))
+ 			{
+ 				int32_t nUCharCapacity = (int32_t)nInputLen;// UTF-16 uses 2 code-points per char
++#ifdef EO_WASM
++            // ICU's WCS functions use libc multibyte conversion in Emscripten.
++            // Core wchar_t holds Unicode scalars; use the explicit UTF-32 bridge.
++            nUCharCapacity *= 2; // supplementary scalars need two UTF-16 units
++#endif
+ 
+ 				//UChar* pUChar = new UChar[nUCharCapacity];
+ 				UChar* pUChar = (UChar*)malloc((uint32_t)nUCharCapacity * sizeof(UChar));
+@@ -170,7 +186,12 @@ namespace NSUnicodeConverter
+ 					const UChar* pUCharStart = pUChar;
+ 					int32_t nUCharLength = 0;
+ 
+-					u_strFromWCS(pUChar, nUCharCapacity, &nUCharLength, sInput, (int32_t)nInputLen, &status);
++					#ifdef EO_WASM
++                std::vector<UChar32> utf32(sInput, sInput + nInputLen);
++                u_strFromUTF32(pUChar, nUCharCapacity, &nUCharLength, utf32.data(), (int32_t)nInputLen, &status);
++#else
++                u_strFromWCS(pUChar, nUCharCapacity, &nUCharLength, sInput, (int32_t)nInputLen, &status);
++#endif
+ 					if (U_SUCCESS(status))
+ 					{
+ 						const UChar* pUCharLimit = pUCharStart + nUCharLength;
+@@ -203,6 +224,12 @@ namespace NSUnicodeConverter
+ 		}
+ 		std::wstring toUnicode(const char* sInput, const unsigned int& nInputLen, int nCodePage, bool isExact)
+ 		{
++#ifdef EO_WASM
++            // Windows codepage numbers are not ICU CCSIDs (notably UTF-16).
++            auto encoding = mapEncodingsICU.find(nCodePage);
++            if (encoding != mapEncodingsICU.end())
++                return toUnicode(sInput, nInputLen, encoding->second.c_str(), isExact);
++#endif
+ 			std::wstring sRes = L"";
+ 			UErrorCode status = U_ZERO_ERROR;
+ 			UConverter* conv = ucnv_openCCSID(nCodePage, UCNV_UNKNOWN, &status);
+@@ -229,7 +256,14 @@ namespace NSUnicodeConverter
+ 							sRes.resize(nTargetSize * 2);// UTF-16 uses 2 code-points per char
+ 							int32_t nResLen = 0;
+ 
+-							u_strToWCS(&sRes[0], (int32_t)sRes.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++							#ifdef EO_WASM
++                            std::vector<UChar32> utf32(sRes.size());
++                            u_strToUTF32(utf32.data(), (int32_t)utf32.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++                            if (U_SUCCESS(status))
++                                std::copy(utf32.begin(), utf32.begin() + nResLen, sRes.begin());
++#else
++                            u_strToWCS(&sRes[0], (int32_t)sRes.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++#endif
+ 							if (U_SUCCESS(status))
+ 							{
+ 								sRes.resize((size_t)nResLen);
+@@ -284,7 +318,14 @@ namespace NSUnicodeConverter
+ 							sRes.resize(nTargetSize * 2);// UTF-16 uses 2 code-points per char
+ 							int32_t nResLen = 0;
+ 
+-							u_strToWCS(&sRes[0], (int32_t)sRes.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++							#ifdef EO_WASM
++                            std::vector<UChar32> utf32(sRes.size());
++                            u_strToUTF32(utf32.data(), (int32_t)utf32.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++                            if (U_SUCCESS(status))
++                                std::copy(utf32.begin(), utf32.begin() + nResLen, sRes.begin());
++#else
++                            u_strToWCS(&sRes[0], (int32_t)sRes.size(), &nResLen, targetStart, (int32_t)nTargetSize, &status);
++#endif
+ 							if (U_SUCCESS(status))
+ 							{
+ 								sRes.resize((size_t)nResLen);

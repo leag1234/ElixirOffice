@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# ElixirOffice production image (docs/dev.md). Runs on the build host (<build-host>).
+# ElixirOffice production image (docs/install-server.md section "Image"). Runs on the build host (build-host).
 #
 #   tools/image/build.sh [base|fonts|runtime|all]     (default all; env below)
 #
@@ -71,7 +71,7 @@ fonts() {
 
 prepare_runtime() {
   local version
-  version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["artifact_version"])' "$REPO/tools/wasm/runtime-release.json")
+  version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["artifact_version"])' "$REPO/tools/wasm/pdf-runtime-release.json")
   RUNTIME_CONTEXT="$LOGS/runtime-$TAG"
   python3 "$HERE/prepare-runtime.py" "${X2T_RELEASE:-$REPO/../wasm-artifacts/$version}" "$RUNTIME_CONTEXT"
 }
@@ -90,7 +90,7 @@ record() {
   id=$(docker image inspect "$REGISTRY/documentserver:$TAG" --format '{{.Id}}')
   size=$(docker image inspect "$REGISTRY/documentserver:$TAG" --format '{{.Size}}')
   python3 - "$REC" "$TAG" "$id" "$size" "$DS_REV" "$REPO_REV" "$FONT_GROUPS" "$DS_VERSION_HASH" \
-    "$(cat "$LOGS/image-$TAG.base.sec" 2>/dev/null || echo null)" "$(cat "$LOGS/image-$TAG.fonts.sec" 2>/dev/null || echo null)" "$(cat "$LOGS/image-$TAG.runtime.sec" 2>/dev/null || echo null)" "$REPO/tools/wasm/runtime-release.json" <<'PY'
+    "$(cat "$LOGS/image-$TAG.base.sec" 2>/dev/null || echo null)" "$(cat "$LOGS/image-$TAG.fonts.sec" 2>/dev/null || echo null)" "$(cat "$LOGS/image-$TAG.runtime.sec" 2>/dev/null || echo null)" "$REPO/tools/wasm/pdf-runtime-release.json" <<'PY'
 import json, sys, time
 p, tag, iid, size, ds, repo, groups, h, b, f, runtime, pin_path = sys.argv[1:]
 pin = json.load(open(pin_path))

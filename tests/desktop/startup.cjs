@@ -22,7 +22,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
   assert.match(await env.page.evaluate(()=>window.EOLocalFailure),/cancelled/i);
   assert(workers.length>0&&workers.every(worker=>worker.closed),'Cancelled opening must terminate every observed worker');
   assert.deepEqual(await fs.readFile(file),original,'Cancellation must preserve the original');
-  await env.page.locator('#open').click();await modal(env,'Open document');
+  await require('./file-action.cjs')(env.page,'open');await modal(env,'Open document');
   keys(env,'path',await fixture('sample.docx'));await editable(env);
   assert.equal(await env.page.evaluate(()=>EOLocalSession.format),'docx');
   assert(workers.every(worker=>worker.closed),'Conversion must terminate its prepared worker');

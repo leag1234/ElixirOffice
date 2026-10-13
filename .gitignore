@@ -16,3 +16,7 @@ fonts-user/
 
 # Generated test and measurement outputs
 results/
+
+# Generated Python bytecode
+__pycache__/
+*.pyc

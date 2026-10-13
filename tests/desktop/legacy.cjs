@@ -8,7 +8,7 @@ async function check(source,format){
  const env=await launch({file,profile:'legacy-'+source+'-'+Date.now()});
  try{
   await editable(env);assert.equal(await env.page.evaluate(()=>EOLocalSession.format),format);await edit(env);
-  await env.page.locator('#save').click();await modal(env);keys(env,'save-path',target);
+  await require('./file-action.cjs')(env.page,'save');await modal(env);keys(env,'save-path',target);
   await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   assert(text(target).includes('EODESKTOP'));assert.equal(sha(await fs.readFile(file)),before);assert.deepEqual(env.errors,[]);

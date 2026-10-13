@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
 # Local conversion acceptance
 
 Use an isolated instance and an explicit EO_BASE; these tests reject :8080.
@@ -65,3 +66,62 @@ file permissions, reopens the edit and exports PDF through the native dialog.
 The original fixture has an empty image element with no source or inline bytes;
 it must not become a phantom SDK image. The existing native object-loss guard
 remains active for other documents the converter cannot preserve.
+
+
+## D1–D2 offline review and pictures
+
+Run python3 tests/local-mode/prepare-review-fixtures.py PUBLIC_TEMPLATES_DIR OUTPUT_DIR to generate fixtures from pristine public new.docx/new.xlsx/new.pptx templates. Use generated/public fixtures only: offline-review.docx with a comment by
+Baseline Author and an Existing Reviewer tracked insertion, blank new.xlsx and
+new.pptx, and image.png. D evidence uses the public fixtures in the task work
+folder; no private corpus is required. The normal launcher needs the separately
+owned A iframe-height correction; do not inject a viewport override for final
+acceptance.
+
+- EO_BASE=... EO_REVIEW_DOCX=... EO_REVIEW_OUT=... node tests/local-mode/review-browser.mjs
+- EO_BASE=... EO_COMMENT_FIXTURES=... EO_COMMENT_OUT=... node tests/local-mode/comments-editors-browser.mjs
+- EO_BASE=... EO_PICTURE_FIXTURES=... EO_PICTURE_OUT=... node tests/local-mode/clipboard-drop-browser.mjs
+- EO_BASE=... EO_REVIEW_DOCX=... EO_PICTURE_OUT=... node tests/local-mode/picture-formats-browser.mjs
+- EO_LOCAL_IMAGES_SOURCE=/absolute/path/to/web-apps/apps/common/main/lib/elixir-local/Images.js node --test tests/local-mode/images-boundary.test.mjs
+
+Clipboard acceptance writes a generated PNG through the browser clipboard API,
+then sends real Ctrl+V. File drop uses Chromium's trusted drag input with an
+actual fixture file. The test waits for the paste action and image queue to
+finish before the next gesture. It saves and reopens every editor in a fresh
+context. Neither the document model nor image callbacks are replaced.
+
+pictures-browser.mjs covers the SDK callbacks and URL failures. For its HTTP
+matrix, expose only its public image fixture through a task-owned proxy below
+/example/local-assets/web-apps/test-fixtures/http/; production CSP stays
+unchanged. Set EO_IMAGE_HTTP_BIND to the private Docker bridge address,
+EO_IMAGE_HTTP_PORT to an allocated task port and EO_IMAGE_HTTP_PREFIX to that
+local-assets path, in addition to EO_BASE/EO_PICTURE_FIXTURES/EO_PICTURE_OUT.
+The receiver checks omitted cookies/authorization/referrers, rejected redirects,
+streamed byte limits and timeouts. Arbitrary external URL access is not claimed.
+
+Linux desktop checks use the same production editor bundles in an owned
+throwaway runtime, with EO_DESKTOP_ROOT and EO_DESKTOP_EXECUTABLE explicitly
+set: node tests/desktop/native-review.cjs, native-pictures.cjs and
+native-formats.cjs. native-pictures starts only its own Python GTK clipboard
+provider (clipboard-fixture.py), writes a public PNG and stops that exact child.
+Use owned TMPDIR/XDG/profile paths. These checks do not publish a package or
+establish native Windows/macOS acceptance.
+
+The packaged Word save-state regression is tests/desktop/odt-save-state.cjs. Run with EO_DESKTOP_ROOT, EO_PLAYWRIGHT and EO_PACKAGE_EXECUTABLE pointing at an owned packaged test export after its real six-format matrix has derived the public ODT fixture. It controls only the timing of actual conversion results and uses real SDK edit/undo/redo operations and saved XML checks; it does not substitute converter output.
+
+The packaged odt-save-state suite now has eight cases: its real-Wasm paste case preserves a newer edit while saving an older snapshot; undo-to-saved performs no conversion or file rewrite; disposal checks the three exact callbacks against actual SDK dispatch with a positive control. Run against an explicit EO_PACKAGE_EXECUTABLE and isolated EO_DESKTOP_ROOT.
+Mission F Session E acceptance (own EO_BASE is mandatory):
+
+- exports-browser.mjs: real edits, File cards, every supported copy format/PDF, Print iframe bytes, retained dirty state, hidden local commands and request boundary.
+- imports-browser.mjs: RTF/TXT/CSV/templates/macro-enabled/PPSX/legacy converted copies, original checksums and fresh reopen. EO_EXPORT_OUT points to the exports test's seed outputs.
+- csv-ui-browser.mjs: real File CSV warning/settings, UTF-8 and semicolon selection, retained dirty state and interaction mask release; EO_LOCAL_FILE is required.
+- unicode-browser.mjs: strict UTF-8 TXT/CSV imports/exports and RTF export/open/re-export containing Latin, Greek, Arabic, CJK and supplementary scalars; EO_LOCAL_OUT is required.
+- export-media-browser.mjs: pending real image chooser bytes in the input editor office format, downloaded PDF and actual dispatched Print PDF pixels (run Word, sheet and slide fixtures), cancellation, dirty state and privacy; EO_LOCAL_FILE and EO_LOCAL_IMAGE are required.
+- protect-range-browser.mjs: the actual Review tab's manager/New dialog, local user/range metadata and XLSX save/reopen; EO_LOCAL_FILE is required.
+
+The media pixel check requires Poppler pdftoppm and Python Pillow; text export checks use pdftotext. The Print assertion verifies real PDF bytes and dispatch to the browser print iframe. Physical OS printer dialogs require separate acceptance.
+
+Desktop: tests/desktop/protect-range.cjs uses the normal sandboxed CDP harness and temporary public fixture copies. EO_DESKTOP_RANGE_FILE is required; EO_DESKTOP_WORD_FILE adds Word's hidden Insert text check. EO_PACKAGE_EXECUTABLE selects a package; EO_DESKTOP_DISPLAY optionally selects an isolated display without changing the existing :0 default. Native OS print acceptance is separate.
+
+The review media test starts PDF and Print in fresh documents while the real D image queue is pending. Visibility checks cover the Insert > Object mirror as well as the hidden source button. packaging.py verifies product/SDK full-selector equality, the separate explicit PDF pin, all artifact hashes and identical nine-patch build inputs. http-runtime.py reads the actual deployed pin/manifest rather than a historical version/size.
+
+The Linux review runs use a newly assembled AppImage with production bundles and a normal sandbox on an owned Xvfb display. A local-unicode.cjs and local-formats.cjs also run on that package; EO_CONVERT_ONLY reports actual conversion/roundtrip/converted-copy opens and does not replace native-dialog acceptance.

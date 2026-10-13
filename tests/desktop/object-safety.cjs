@@ -16,7 +16,7 @@ const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
   }
   for(const destination of [target,path.join(root,'fixtures/guard-alias.ods')]){
    if(destination!==target){await fs.unlink(destination).catch(e=>{if(e.code!=='ENOENT')throw e});await fs.link(target,destination)}
-   await env.page.locator('#save-as').click();await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',destination);
+   await require('./file-action.cjs')(env.page,'save-as');await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',destination);
    console.log('Checking refused copy destination',path.basename(destination));
    console.log('Native chooser result',await env.page.evaluate(()=>({failure:window.EOLocalFailure,saved:window.EOLastSave,message:document.getElementById('message').textContent})));
    try{await env.page.waitForFunction(()=>window.EOLocalFailure,null,{timeout:3000})}
@@ -28,7 +28,7 @@ const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
   const moved=path.join(root,'fixtures/guard-moved-original.ods');
   await fs.unlink(moved).catch(e=>{if(e.code!=='ENOENT')throw e});await fs.rename(target,moved);
   try{
-   await env.page.locator('#save-as').click();await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',moved);
+   await require('./file-action.cjs')(env.page,'save-as');await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',moved);
    console.log('Native chooser result',await env.page.evaluate(()=>({failure:window.EOLocalFailure,saved:window.EOLastSave,message:document.getElementById('message').textContent})));
    try{await env.page.waitForFunction(()=>window.EOLocalFailure,null,{timeout:3000})}
    catch(error){if(error.name!=='TimeoutError')throw error;await modal(env);keys(env,'replace')}
@@ -37,14 +37,14 @@ const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
    assert.equal(sha(await fs.readFile(moved)),original);assert(await env.page.evaluate(()=>EOLocalSession.controller.isModified()));
   }finally{await fs.rename(moved,target)}
   const copy=path.join(root,'fixtures/guard-objects-copy.ods');await fs.unlink(copy).catch(e=>{if(e.code!=='ENOENT')throw e});
-  await env.page.locator('#save-as').click();await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',copy);
+  await require('./file-action.cjs')(env.page,'save-as');await modal(env);keys(env,'copy');await modal(env,'Save File');keys(env,'save-path',copy);
   await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);assert.equal(sha(await fs.readFile(target)),original);
   assert.equal(await env.page.evaluate(()=>EOLocalSession.controller.isModified()),false);
   const guard=require(path.join(root,'desktop/package-guard.cjs'));
   assert.equal(guard.embeddedObjects(await fs.readFile(target)),2);assert.equal(guard.embeddedObjects(await fs.readFile(copy)),1);
   assert(text(copy).includes('EODESKTOP'));
-  await env.page.locator('#pdf').click();
+  await require('./file-action.cjs')(env.page,'pdf');
   await env.page.waitForFunction(()=>window.EOLocalFailure?.includes('unsupported image'),null,{timeout:90000});
   assert.equal(sha(await fs.readFile(target)),original);
   const result={sameFileSaveCancelled:true,saveAsCancelled:true,originalPathRefused:true,hardLinkAliasRefused:true,movedOriginalRefused:true,explicitCopySaved:true,pdfRejected:true,originalUnchanged:true,copyClean:true,knownConverterDefect:'two embedded charts become one; missing media/image-1.jpg preview',errors:env.errors};

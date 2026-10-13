@@ -40,12 +40,12 @@ async function switchAndSaveCancel(){
  const before=await fs.readFile(file),env=await launch({file,profile:'switch-cancel-'+Date.now()});
  try{
   await editable(env);await edit(env);
-  await env.page.locator('#save-as').click();await modal(env);keys(env,'escape');
+  await require('./file-action.cjs')(env.page,'save-as');await modal(env);keys(env,'escape');
   await env.page.waitForFunction(()=>!document.getElementById('save').disabled);
   assert(await env.page.evaluate(()=>EOLocalSession.controller.isModified()));assert.deepEqual(await fs.readFile(file),before);
-  await env.page.locator('#open').click();await modal(env);keys(env,'escape');await sleep(300);
+  await require('./file-action.cjs')(env.page,'open');await modal(env);keys(env,'escape');await sleep(300);
   assert.equal(await env.page.evaluate(()=>EOLocalSession.format),'docx');assert(await env.page.evaluate(()=>EOLocalSession.controller.isModified()));
-  await env.page.locator('#open').click();await modal(env);keys(env,'discard');await modal(env);keys(env,'path',await fixture('sample.xlsx'));
+  await require('./file-action.cjs')(env.page,'open');await modal(env);keys(env,'discard');await modal(env);keys(env,'path',await fixture('sample.xlsx'));
   await env.page.waitForFunction(()=>window.EOLocalSession?.format==='xlsx',null,{timeout:120000});
   assert.deepEqual(await fs.readFile(file),before);
   await record({check:'save-as-cancel-preserves-dirty/replace-cancel-discard',originalBytes:before.length});
@@ -54,7 +54,7 @@ async function switchAndSaveCancel(){
 async function printCancel(){
  const env=await launch({file:await fixture('sample.docx'),profile:'print-'+Date.now()});
  try{
-  await editable(env);await env.page.locator('#print').click();await modal(env,'Print');
+  await editable(env);await require('./file-action.cjs')(env.page,'print');await modal(env,'Print');
   const pages=env.browser.contexts()[0].pages();
   assert(pages.some(page=>page.url().startsWith('data:application/pdf;base64,')),'Native print must load the resulting PDF');
   keys(env,'escape');await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});

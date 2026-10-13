@@ -14,7 +14,8 @@ const fs=require('node:fs/promises'),path=require('node:path'),cp=require('node:
   'e2ff465c4559f42e979859c68351b5972f328abfac3a09e0df0adb4dc228ec18','Unexpected public fixture');
  const checker=path.join(root,'tests/local-mode/ods-objects.py');
  const expected=JSON.parse(cp.execFileSync('python3',[checker,'--expected',source],{encoding:'utf8'}));
- const directory=await fs.mkdtemp(path.join(root,'fixtures/ods-objects-'));
+ await fs.mkdir(path.join(root,'tmp'),{recursive:true});
+ const directory=await fs.mkdtemp(path.join(root,'tmp/ods-objects-'));
  const target=path.join(directory,'edited.ods'),pdf=target.replace(/\.ods$/,'.pdf'),report=[];
  await fs.copyFile(source,target,constants.COPYFILE_EXCL);await fs.chmod(target,0o664);
  const failed=[];
@@ -42,13 +43,13 @@ const fs=require('node:fs/promises'),path=require('node:path'),cp=require('node:
   await env.page.evaluate(()=>EOLocalSession.api.asc_setZoom(0.4));
   await env.page.waitForTimeout(500);
   await env.page.screenshot({path:path.join(root,'results/ods-objects-open.png')});
-  await edit(env);await env.page.locator('#save').click();
+  await edit(env);await require('./file-action.cjs')(env.page,'save');
   await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   cp.execFileSync('python3',[checker,source,target],{stdio:'inherit'});
   cp.execFileSync('python3',['-c',"import sys,zipfile; assert b'EODESKTOP' in zipfile.ZipFile(sys.argv[1]).read('content.xml')",target]);
   assert.equal((await fs.stat(target)).mode&0o777,0o664);
-  await env.page.locator('#pdf').click();await modal(env);keys(env,'save-path',pdf);
+  await require('./file-action.cjs')(env.page,'pdf');await modal(env);keys(env,'save-path',pdf);
   await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   const text=cp.execFileSync('pdftotext',[pdf,'-'],{encoding:'utf8'}).replace(/\s/g,'');

@@ -9,7 +9,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
  const file=await fixture('sample.docx'),profile='mac-unattended-'+Date.now(),env=await launch({executable,file:require('node:url').pathToFileURL(file).href,profile});
  try{
   await editable(env);assert((await fs.stat(path.join(env.directory,'desktop-settings.json'))).isFile());
-  assert.deepEqual(await env.page.evaluate(()=>eoDesktop.fonts()),[]);await edit(env);await env.page.locator('#save').click();
+  assert.deepEqual(await env.page.evaluate(()=>eoDesktop.fonts()),[]);await edit(env);await require('./file-action.cjs')(env.page,'save');
   await env.page.waitForFunction(()=>window.EOLastSave&&!EOLocalSession.controller.isModified(),null,{timeout:90000});
   assert(text(file).includes('EODESKTOP'));assert.equal(await env.page.evaluate(()=>typeof require),'undefined');assert.deepEqual(env.errors,[]);
   await require('./privacy.cjs').networkDenied(env.page);console.log('PASS rebuilt image fileURI/edit/atomic-save/profile/no-Node/network denial');
@@ -33,7 +33,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
  const reopened=await launch({executable,file,profile});try{await editable(reopened);assert.deepEqual(reopened.errors,[]);assert.equal(await reopened.page.evaluate(()=>typeof require),'undefined');assert.equal(text(file).includes('EODESKTOP'),true);assert.deepEqual(await reopened.page.evaluate(()=>eoDesktop.fonts()),[]);console.log('PASS rebuilt image fresh reopen/denied consent persistence');}finally{await stop(reopened)}
  for(const format of ['docx','xlsx','pptx','odt','ods','odp']){
   const source=['odt','ods','odp'].includes(format)?'sample-from-x2t.'+format:'sample.'+format,target=await fixture(source);
-  const run=await launch({executable,file:target,profile:'mac-six-'+format+'-'+Date.now()});try{await editable(run);await edit(run);await run.page.locator('#save').click();await run.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});assert.equal(await run.page.evaluate(()=>window.EOLocalFailure),null);assert(text(target).includes('EODESKTOP'));assert.deepEqual(run.errors,[]);console.log('PASS new ElixirOffice fixture temporary edit/save',format);}finally{await stop(run)}
+  const run=await launch({executable,file:target,profile:'mac-six-'+format+'-'+Date.now()});try{await editable(run);await edit(run);await require('./file-action.cjs')(run.page,'save');await run.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});assert.equal(await run.page.evaluate(()=>window.EOLocalFailure),null);assert(text(target).includes('EODESKTOP'));assert.deepEqual(run.errors,[]);console.log('PASS new ElixirOffice fixture temporary edit/save',format);}finally{await stop(run)}
  }
  for(const format of ['docx','xlsx','pptx'])assert.equal(crypto.createHash('sha256').update(await fs.readFile(path.join(root,'fixtures/sample.'+format))).digest('hex'),originals[format]);
  console.log('PASS immutable sample hashes unchanged after all edits');

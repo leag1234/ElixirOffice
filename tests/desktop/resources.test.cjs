@@ -28,3 +28,22 @@ test('native file transport serves only manifest assets and retains bytes and HE
   assert.equal((await handler({url:ORIGIN.replace('://','://attacker@')+'/index.html',method:'GET'})).status,403);
  }finally{await fs.rm(dir,{recursive:true,force:true})}
 });
+
+test('thesaurus byte ranges stream exact slices, clamp ends, support suffix and reject invalid ranges',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'eo-range-'));
+ try{
+  await fs.mkdir(path.join(dir,'dictionaries/en_US'),{recursive:true});
+  await fs.writeFile(path.join(dir,'dictionaries/en_US/test.dat'),'0123456789');
+  const url=ORIGIN+'/example/local-assets/dictionaries/en_US/test.dat';
+  for(const [value,wanted,contentRange] of [['bytes=2-5','2345','bytes 2-5/10'],['bytes=8-999','89','bytes 8-9/10'],['bytes=-3','789','bytes 7-9/10'],['bytes=7-','789','bytes 7-9/10']]){
+   const r=await response(new Request(url,{headers:{Range:value}}),dir,dir);
+   assert.equal(r.status,206);assert.equal(await r.text(),wanted);assert.equal(r.headers.get('content-range'),contentRange);assert.equal(r.headers.get('content-length'),String(wanted.length));
+  }
+  for(const value of ['bytes=10-','bytes=4-2','bytes=-0','bytes=1-2,4-5','bytes=9007199254740993-','units=0-2']){
+   const r=await response(new Request(url,{headers:{Range:value}}),dir,dir);assert.equal(r.status,416);assert.equal(r.headers.get('content-range'),'bytes */10');
+  }
+  const head=await response(new Request(url,{method:'HEAD',headers:{Range:'bytes=2-5'}}),dir,dir);assert.equal(head.status,200);assert.equal(await head.text(),'');assert.equal(head.headers.get('content-length'),'10');
+  await fs.symlink('/etc/passwd',path.join(dir,'dictionaries/en_US/link.dat'));
+  assert.equal((await response(new Request(url.replace('test.dat','link.dat'),{headers:{Range:'bytes=0-3'}}),dir,dir)).status,403);
+ }finally{await fs.rm(dir,{recursive:true,force:true})}
+});

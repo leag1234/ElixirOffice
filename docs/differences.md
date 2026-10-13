@@ -1,6 +1,6 @@
 # ElixirOffice vs LibreOffice and OnlyOffice: key differences
 
-Living document, kept up to date as features land (requested by the owner, 2026-10-05). Only list differences that a user would notice; each line links to the doc or test that backs it.
+Living document, kept up to date as features land (requested by Gaël, 2026-10-05). Only list differences that a user would notice; each line links to the doc or test that backs it.
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
@@ -36,7 +36,7 @@ Living document, kept up to date as features land (requested by the owner, 2026-
 | Performance (Word editor) | 10-page doc editable 1.2 s, typing 27 ms p50 | Desktop app | upstream baseline 1.5 s, 43 ms | docs/perf.md |
 | Storage and identity | Your own Nextcloud or Murena Workspace: from the start page (Login Flow v2, app password kept encrypted on the server, revocable; browse, recent, open, save with conflict copy, new, upload) or inside Nextcloud Files (rebranded app), always alongside the server's own storage (never required: New, templates, Open, upload work with no cloud; a location choice appears once connected); your real name on comments, tracked changes and co-editing presence | Local files; WebDAV via the file dialog | Nextcloud/ownCloud/Seafile connectors (inside the storage only); example app with fixed test users | docs/storage.md |
 | Marelle school fonts | Ships the 8 national-education Marelle fonts (free, OFL) in the default pack, so teachers' Marelle documents render with the real font | Not shipped | Not shipped | docs/fonts.md § 10 |
-| French school cursive fonts | Seyes-ruled school cursive drawn with free Playwrite FR derivatives that keep the original line height and ruled lines; cursive substitutes for script fonts | Own substitution tables (no school fonts) | Falls back to a sans-serif | docs/fonts.md § 9 |
+| French school cursive fonts | Seyes-ruled school cursive ("ruled school cursive") drawn with free Playwrite FR derivatives that keep the original line height and ruled lines; cursive substitutes for script fonts | Own substitution tables (no school fonts) | Falls back to a sans-serif | docs/fonts.md § 9 |
 | Spreadsheet keyboard | Every Excel shortcut the editor can serve works on Windows and macOS (152/152 / 169/169 key variants): Repeat (F4, Ctrl+Y), End mode, F8 / Shift+F8 Extend and Add modes, Ctrl+., Ctrl+Shift+*, Ctrl+' / Ctrl+Shift+", Point mode (F2), Function Arguments (Ctrl+A), Paste Special (Ctrl+Alt+V), macOS keys (Cmd+T, Cmd+;, Option+arrows...) | Own defaults, partial Excel keys | Partial (79/141 before our work), no Repeat, End or Extend modes | docs/shortcuts-excel.md section 6 |
 | Flash Fill and Quick Analysis | Ctrl+E fills a column from one or two examples (words, initials, whole cells, case, literal text, header row detected, one undo); Quick Analysis button and Ctrl+Q (data bar, color scale, icon set, top 10 %, charts, totals below or to the right, table) | No Flash Fill, no Quick Analysis | None | tests/shortcuts-excel/features.mjs |
 | Auto Fill Options | After a fill handle drag a button at the corner of the filled range offers Copy Cells, Fill Series, Fill Formatting Only, Fill Without Formatting and Flash Fill (one column); the fill is undone and redone with the new option, one undo step; no button for Ctrl+D / Ctrl+R or a right-button drag (those have their own menu) | The fill handle fills with the default and has no options button (only a right-button drag menu, without the two formatting options) | None | tests/shortcuts-excel/autofill.mjs |
@@ -58,14 +58,14 @@ nondeterminism is normalized. This step changes build verification only; see
 
 W1 review: browser PDF discovers the installed runtime once per editor session. Images without it use the JS writer directly; installed runtime versions are selected by an atomic current.json pointer, without editing the backend.
 
-W5 image preparation: new builds install the checksum-pinned browser PDF runtime automatically and serve its 8.89 MB module as 3.13 MB Brotli (3.84 MB gzip), with correct MIME and immutable version caching. Runtime pointers are no-store. Prepared/tested on an own <dev-host> image; fresh <build-host> build and deployment remain lead acceptance. docs/wasm.md section 15.
+W5 image preparation: new builds install the checksum-pinned browser PDF runtime automatically and serve its 8.89 MB module as 3.13 MB Brotli (3.84 MB gzip), with correct MIME and immutable version caching. Runtime pointers are no-store. Prepared/tested on an own <dev-host> image; fresh build-host build and deployment remain lead acceptance. docs/wasm.md section 15.
 
 W4 browser acceptance: public local saves and native PDF pass Chromium/Firefox/WebKit; WebKit local handoff uses file bytes in IndexedDB. Local Font Access is Chromium-only. The100-page native1 GiB profile fails with real OOM in Firefox/WebKit;2 GiB passes all. Native Mac Safari is prepared, not yet run. See docs/wasm.md section18 and tests/browsers/README.md.
 
 D4 Word opening: small measured gain of about 0.3 s on 97 pages; ten pages and typing unchanged. Measurement limits and remaining costs: docs/perf.md section 9.
 
 Single-host server deployment: production image + HTTPS compose, optional AI, persistent state and stopped-volume backup/restore. Upstream packaging remains available. This is a review candidate; native DEB/RPM fresh-install acceptance and the public release source offer remain pending. See [install-server.md](install-server.md).
-Linux second-review preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md.
+Linux second-review preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md and docs/handoff/desktop-linux-preview-release-notes.md.
 
 Windows desktop preview: unsigned x64 NSIS cross-build using a digest-pinned isolated Wine builder. Installer payload/resources/PE/source checks run on Linux; native Windows installation, dialogs, associations and privacy remain unverified pending the owner host. See [Desktop](desktop.md).
 
@@ -81,6 +81,37 @@ edit/save/reopen, escaping the ampersand title and omitting the empty phantom
 image. Private literal cache tables preserve worksheet-bound formulas.
 Separate default-color initializations remove pre-existing DOCX nondeterminism;
 three unchanged strict corpus runs pass, with only the approved ODS delta.
-Published desktop packages retain their older runtime. Final528 native PDF
-remains unverified due the locked <test-desktop> session; the prior approved ODS native
-proof supports source integration.
+Desktop previews were rebuilt with the final528 runtime and passed the public ODS95-value/PDF/reopen checks on Linux and macOS. They are deferred to beta2; the first public beta ships the server only. See docs/handoff/wasm-ods-embedded-objects.md.
+
+Beta Mac packaging explicitly signs native code and nested bundles in dependency order with an ad-hoc identity only when publisher identity is null. Both build-tree and DMG copies pass strict deep verification. No signing credentials, extra entitlements or notarization are used.
+
+Desktop review revision: feature-detected preload font consent replaces Local Font Access calls on the desktop only; hosted browser behavior, including cross-origin PDF font permission checks, is unchanged. Shared web Home CSS/Fluent components/two template previews and45shell locales replace the extra toolbar. Native File actions, explicit translated Discard choices and guarded own-window capture mode were approved and integrated; desktop distribution is deferred to beta2.
+
+Desktop Mailings limitation: Not yet available in the desktop app: mail merge (Mailings), available in the server version. The SDK can merge locally, but the desktop bridge does not implement recipient JSON conversion or merged-document output; the offline tab remains hidden.
+
+
+
+Shared local D1–D2 review candidates enable single-user comments and Word tracked changes while collaboration/history remain disabled. Local picture clipboard/drop/file paths embed media; PNG/JPEG bytes remain intact and GIF/BMP/safe SVG/WebP become PNG. Arbitrary external URLs remain blocked with a clear message. The configured author setting is A6-owned; web PDF/Print/formats and protection/link work is E-owned. See desktop.md and the draft beta2 notes; no integration yet.
+Desktop beta2 A1–A3 candidates add all supplied spelling/thesaurus/hyphenation data with HTTP Range support, separate periodic local recovery copies and next-start restore, and validated native web/mail hyperlink dispatch. Browser-local recovery is not implemented by this group. A1–A3 were approved and integrated; desktop distribution remains beta2. See desktop-beta2-release-notes.md.
+
+Desktop beta2 A4–A6 review candidates add other-format export/copy imports, explicitly consented native AI with encrypted keys, localized offline Help/F1, author preferences, embedded local media and verified Word/PowerPoint chart data editing. Extra picture types share session D’s local pipeline. UTF-8 conversion requires the new private Wasm overlay/pin; no public runtime is replaced by this task. Source and package receipts are recorded in docs/handoff/codex-log.md. No A4–A6 integration yet.
+
+
+A4–A6 review fixes protect the configured AI model/conversation from extra parameters, verify encrypted key persistence and refuse plaintext storage, hide unsupported spreadsheet/presentation AI settings, and guard numeric Wasm UTF-8 conversion for null/empty input. All 45 shell locale names and new labels are checked against the editor inventory. Help platform evidence explicitly distinguishes all-platform menu units from Linux native acceptance. The guarded full runtime and Linux packages remain private review candidates; no integration yet.
+
+Desktop release engineering: tools/release/desktop-beta.sh orchestrates isolated Linux/Windows/Mac candidate builds from explicit integrated revisions, independently verified full/PDF Wasm releases, artifact checksums and actual packaged test evidence. It adds no editor feature and does not publish. See desktop-release.md for unverified platform gates and machine boundaries.
+
+Local Word/ODT saves distinguish actual history/actions from duplicate layout notifications. Concurrent typing and undo/redo remain unsaved until persisted, including undo back to the original state during the first save. The hosted server keeps its existing permissions and handlers. See desktop.md and tests/desktop/odt-save-state.cjs.
+
+Desktop beta2 A1–A3 candidates add all supplied spelling/thesaurus/hyphenation data with HTTP Range support, separate periodic local recovery copies and next-start restore, and validated native web/mail hyperlink dispatch. Browser-local recovery is not implemented by this group. Further local features remain under the separate A4–A6/D missions; see desktop-beta2-release-notes.md. No integration yet.
+
+
+### Local modes: Mission F E D3–D4 candidate
+
+Web-local File downloads convert to supported Office/OpenDocument/text formats on this computer, with PDF/Print through the client bundle. Legacy and additional input formats open as modern converted copies; downloads preserve originals and unsaved state. Spreadsheet Protect Range works offline with XLSX permission persistence. Local Insert text from file/Edit Links controls are hidden; hosted behavior stays available. The newly exposed text conversions include a wasm-only ICU UTF-32 bridge so Unicode is preserved. These branches await review; acceptance and runtime pins: Session E handoff.
+
+D3–D4 review follow-up: spreadsheet Protect Range is verified in browser local mode and the Linux package. Newly rebuilt native Windows/macOS D4 checks and physical printer dialogs remain unverified. In local Word, both the original text-file button and its visible Insert > Object menu are hidden. Hosted commands remain available.
+
+Desktop Help review candidate: File > Help bypasses the hosted Help panel through a desktop-only native action. All three shared menus guard absent Help panels in every mode; hosted Help permissions are unchanged. Help uses the selected editor UI language with English fallback, independently of document spelling or system locale. Desktop AI disclosure now describes operating-system encryption and never redisplaying the saved key, with45locale English fallbacks; browser localStorage disclosure remains unchanged. Recovery test cleanup checks signalCode before killing its own live child group.
+
+Desktop capture startup rejects malformed requests without an uncaught main-process error dialog: the error is logged and the app exits 1 before an instance lock, browser window or document opens. Normal Mac test launches explicitly isolate user data; capture-only profiles stay inside the requested output folder. No debug or document argument was added to capture mode.

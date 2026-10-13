@@ -12,7 +12,14 @@ const path=require('node:path'),assert=require('node:assert/strict');
    });
    assert.equal(result.customization,false);assert.equal(result.engine,false);assert.deepEqual(result.visibleMacroActions,[]);
    assert.equal(env.requests.filter(r=>/\/monaco\//.test(r.url)).length,0);assert.deepEqual(env.errors,[]);
-   console.log('PASS macros inaccessible/Monaco unused',format,JSON.stringify(result));
+   const frame=env.page.frames().find(frame=>/main\/index.html/.test(frame.url()));
+   assert(frame,'Editor frame is present');
+   await frame.locator('#file[role=tab]').click();await frame.locator('#fm-btn-settings').click();
+   await env.page.locator('.desktop-options').waitFor({state:'visible'});
+   const ai=env.page.locator('.desktop-options button').filter({hasText:/^Elixir — /});
+   assert.equal(await ai.count(),format==='docx'?1:0,'AI settings only appear in the supported Word editor');
+   if(format==='docx')assert.equal(await ai.isEnabled(),true);
+   console.log('PASS macros inaccessible/Monaco unused and supported AI options only',format,JSON.stringify(result));
   }finally{await stop(env)}
  }
 })().catch(error=>{console.error(error);process.exitCode=1});

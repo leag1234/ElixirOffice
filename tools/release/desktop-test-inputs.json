@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "files": [
+    "apps/common/main/lib/elixir-ai/Core.js",
+    "apps/common/main/lib/elixir-ai/View.js",
+    "apps/common/main/lib/elixir-ai/Strings.js",
+    "apps/documenteditor/main/app/view/FileMenu.js",
+    "apps/spreadsheeteditor/main/app/view/FileMenu.js",
+    "apps/presentationeditor/main/app/view/FileMenu.js"
+  ],
+  "locales": {
+    "apps/documenteditor/main/locale": 45,
+    "apps/spreadsheeteditor/main/locale": 45,
+    "apps/presentationeditor/main/locale": 45
+  },
+  "optional_files": [
+    "LICENSE",
+    "LICENSE.txt",
+    "NOTICE"
+  ]
+}

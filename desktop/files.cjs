@@ -6,7 +6,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const packageGuard=require('./package-guard.cjs');
 const {validatePath,saveFailure}=require('./file-policy.cjs');
-const formats = ['docx', 'xlsx', 'pptx', 'odt', 'ods', 'odp', 'doc', 'xls', 'ppt'];
+const formats = Object.keys(require('./formats.cjs').codes);
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const extension = filename => path.extname(filename).slice(1).toLowerCase();
 async function realDirectory(directory) {
@@ -32,6 +32,7 @@ async function read(filename) {
     if (!stat.isFile() || stat.size > 512 * 1024 * 1024) throw Error('Choose a regular document under 512 MiB');
     const bytes = await handle.readFile();
     if (bytes.length > 512 * 1024 * 1024) throw Error('Document grew beyond 512 MiB during read');
+    if(['txt','csv'].includes(extension(target))){try{new TextDecoder('utf-8',{fatal:true}).decode(bytes)}catch{throw Error('Text and CSV documents must use UTF-8');}}
     return {target, bytes, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, embeddedObjects:['odt','ods','odp'].includes(extension(target))?packageGuard.embeddedObjects(bytes):0};
   } finally { await handle.close(); }
 }
@@ -40,7 +41,7 @@ async function atomic(target,bytes,expected) {
 }
 async function atomicWrite(target, bytes, expected) {
   target = validatePath(path.resolve(target));
-  if (!(bytes instanceof Uint8Array) || bytes.length < 4 || bytes.length > 512 * 1024 * 1024) throw Error('Invalid output size');
+  if (!(bytes instanceof Uint8Array) || bytes.length > 512 * 1024 * 1024) throw Error('Invalid output size');
   const parent = await realDirectory(path.dirname(target));
   let original;
   try {

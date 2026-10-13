@@ -47,7 +47,7 @@
       "maintainer": "ElixirOffice contributors",
       "desktop": {
         "entry": {
-          "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;"
+          "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/rtf;text/plain;text/csv;application/vnd.openxmlformats-officedocument.wordprocessingml.template;application/vnd.ms-word.document.macroEnabled.12;application/vnd.openxmlformats-officedocument.spreadsheetml.template;application/vnd.ms-excel.sheet.macroEnabled.12;application/vnd.openxmlformats-officedocument.presentationml.template;application/vnd.openxmlformats-officedocument.presentationml.slideshow;"
         }
       },
       "icon": "icon.png",
@@ -64,7 +64,16 @@
           "odp",
           "doc",
           "xls",
-          "ppt"
+          "ppt",
+          "rtf",
+          "txt",
+          "csv",
+          "dotx",
+          "docm",
+          "xltx",
+          "xlsm",
+          "potx",
+          "ppsx"
         ],
         "name": "Office document",
         "role": "Editor"

@@ -30,12 +30,14 @@ async function modal(env,expectedTitle) {
   const xenv={...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority')};
   const list=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:xenv,encoding:'utf8'}).match(/0x[0-9a-f]+/g)||[];
   for(const id of list){
+   try{
    const properties=cp.execFileSync('xprop',['-id',id,'_NET_WM_PID','WM_TRANSIENT_FOR','_NET_WM_WINDOW_TYPE'],{env:xenv,encoding:'utf8'});
    const parent=/WM_TRANSIENT_FOR.*?(0x[0-9a-f]+)/.exec(properties);
    if(parent && properties.includes('_NET_WM_WINDOW_TYPE_DIALOG')){
    const ownPid=properties.includes('= '+env.application.pid);
    if(expectedTitle&&!cp.execFileSync('xprop',['-id',id,'WM_NAME'],{env:xenv,encoding:'utf8'}).includes('= "'+expectedTitle+'"'))continue;
    if(ownPid && cp.execFileSync('xprop',['-id',id,'WM_NAME'],{env:xenv,encoding:'utf8'}).includes('= "Print document PDF"'))continue;const owner=cp.execFileSync('xprop',['-id',parent[1],'_NET_WM_PID'],{env:xenv,encoding:'utf8'});if(owner.includes('= '+env.application.pid)){keys(env,'focus',id);await sleep(200);return}}
+   }catch(error){if(!String(error.stderr||error.message).includes('BadWindow'))throw error;}
   }
   await sleep(200);
  }
@@ -54,19 +56,19 @@ async function roundtrip(format,entry='argument') {
    await cdp.detach();
   }
   if(entry==='dialog'){
-   await env.page.locator('#open').click();await modal(env);keys(env,'path',target);
+   await require('./file-action.cjs')(env.page,'open');await modal(env);keys(env,'path',target);
   }
   await editable(env);if(process.env.EO_DIRTY_TRACE==='1')await env.page.evaluate(()=>{const api=EOLocalSession.api,original=api.SetDocumentModified;window.EODirtyTrace=[];api.SetDocumentModified=function(value){EODirtyTrace.push({value,time:performance.now(),index:EOLocalSession.win.AscCommon.History.Index,stack:new Error().stack.split('\n').slice(1,5)});return original.apply(this,arguments)}});await edit(env);
   const dirtyTitle=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority')},encoding:'utf8'});
   await env.page.waitForFunction(()=>document.getElementById('save').disabled===false);
-  await env.page.locator('#save').click();await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
+  await require('./file-action.cjs')(env.page,'save');await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   try{await env.page.waitForFunction(()=>!EOLocalSession.controller.isModified())}catch(error){console.log('DIRTY SAVE STATE',JSON.stringify(await env.page.evaluate(()=>({canSave:EOLocalSession.api.canSave,modified:EOLocalSession.api.isDocumentModify,frame:EOLocalSession.api.isOpenedFrameEditor,saved:window.EOLastSave,error:window.EOLocalFailure,trace:window.EODirtyTrace?.slice(-12)})),null,2));throw error}
   assert(text(target).includes(marker),'Saved document lost edit');assert.equal((await fs.stat(target)).mode&0o777,0o664);
   const nativeBridge=await env.page.evaluate(async()=>{try{await eoDesktop.save('invalid',new Uint8Array([80,75,3,4]));return false}catch(error){return /active document/.test(error.message)}});
   assert(nativeBridge,'Invalid handle accepted');
   if(entry==='argument'){
-   await env.page.locator('#pdf').click();await modal(env);keys(env,'save-path',target.replace(/\.[^.]+$/,'.pdf'));
+   await require('./file-action.cjs')(env.page,'pdf');await modal(env);keys(env,'save-path',target.replace(/\.[^.]+$/,'.pdf'));
    await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});
    assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
    const pdf=await env.page.evaluate(()=>window.EOLastPdf),pdfFile=target.replace(/\.[^.]+$/,'.pdf');

@@ -31,7 +31,7 @@ test('symbolic link targets cannot grant file access or overwrite another file',
 test('unsupported format and oversized document rejected before exposing bytes',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'eo-desktop-size-'));
  try {
-  await assert.rejects(files.read(path.join(dir,'secret.txt')),/Unsupported/);
+  await assert.rejects(files.read(path.join(dir,'secret.exe')),/Unsupported/);
   const big=path.join(dir,'big.docx');const f=await fs.open(big,'w');await f.truncate(512*1024*1024+1);await f.close();
   await assert.rejects(files.read(big),/512 MiB/);
  }finally{await fs.rm(dir,{recursive:true,force:true})}

@@ -7,12 +7,12 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
  await fs.copyFile(path.join(root,'fixtures/sample.docx'),file);
  const env=await launch({executable,file:require('node:url').pathToFileURL(file).href,profile:label+'-'+Date.now()});
  try{
-  await editable(env);await edit(env);await env.page.locator('#save').click();
+  await editable(env);await edit(env);await require('./file-action.cjs')(env.page,'save');
   await env.page.waitForFunction(()=>window.EOLastSave&&!EOLocalSession.controller.isModified(),null,{timeout:90000});
   assert(text(file).includes('EODESKTOP'));assert.deepEqual(env.errors,[]);
   assert.equal(await env.page.evaluate(()=>typeof require),'undefined');
   await require('./privacy.cjs').networkDenied(env.page);
-  await env.page.locator('#pdf').click();await modal(env);keys(env,'save-path',file.replace(/docx$/,'pdf'));
+  await require('./file-action.cjs')(env.page,'pdf');await modal(env);keys(env,'save-path',file.replace(/docx$/,'pdf'));
   await env.page.waitForFunction(()=>window.EOLastPdf,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>EOLastPdf.stats.backend),'wasm');
   const pdf=file.replace(/docx$/,'pdf');assert(cp.execFileSync('pdftotext',[pdf,'-'],{encoding:'utf8'}).includes('EODESKTOP'));

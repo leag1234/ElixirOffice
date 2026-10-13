@@ -1,16 +1,19 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-from pathlib import Path
 from urllib.request import Request,urlopen
-import os
+import json,os
 base=os.environ['EO_BASE']
 assert ':8080' not in base
-path='/example/local-assets/sdkjs/common/wasm-convert/runtime/9ee6831853aa-fd40349d310d-st/x2t.wasm'
-for accepted,expected,size in [('br','br',8778766),('gzip','gzip',12876821),('identity',None,53064743),('br;q=0,gzip;q=1','gzip',12876821),('br;q=0.1,gzip;q=1','gzip',12876821),('br;q=1,gzip;q=0.1','br',8778766),('br;q=0,gzip;q=0',None,53064743)]:
- r=urlopen(Request(base+path,method='HEAD',headers={'Accept-Encoding':accepted}))
+service=base+'/example/local-assets/sdkjs/common/wasm-convert/'
+pin=json.load(urlopen(service+'runtime-release.json'))
+release=service+'runtime/'+pin['artifact_version']+'/'
+manifest=json.load(urlopen(release+'manifest.json'))
+sizes={suffix:manifest['artifacts']['x2t.wasm'+suffix]['bytes'] for suffix in ['', '.br', '.gz']}
+for accepted,expected,suffix in [('br','br','.br'),('gzip','gzip','.gz'),('identity',None,''),('br;q=0,gzip;q=1','gzip','.gz'),('br;q=0.1,gzip;q=1','gzip','.gz'),('br;q=1,gzip;q=0.1','br','.br'),('br;q=0,gzip;q=0',None,'')]:
+ r=urlopen(Request(release+'x2t.wasm',method='HEAD',headers={'Accept-Encoding':accepted}))
  assert r.status==200
  assert r.headers['Content-Type']=='application/wasm'
  assert r.headers['Content-Encoding']==expected,(accepted,r.headers['Content-Encoding'])
- assert int(r.headers['Content-Length'])==size
+ assert int(r.headers['Content-Length'])==sizes[suffix]
  assert 'Accept-Encoding' in r.headers['Vary']
  assert '/example/local-assets/' in r.headers['Content-Security-Policy']
-print('PASS seven raw/Brotli/gzip/quality cases, wasm MIME, Vary and CSP')
+print('PASS pinned release seven raw/Brotli/gzip/quality cases, wasm MIME, Vary and CSP')

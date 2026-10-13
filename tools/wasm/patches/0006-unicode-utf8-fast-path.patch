@@ -1,0 +1,110 @@
+--- a/UnicodeConverter/UnicodeConverter.cpp
++++ b/UnicodeConverter/UnicodeConverter.cpp
+@@ -25,6 +25,9 @@
+ #include "stdint.h"
+ #include "./UnicodeConverter.h"
++#ifdef EO_WASM
++#include "../DesktopEditor/common/File.h"
++#endif
+ 
+ #include "unicode/utypes.h"
+ #include "unicode/ustring.h"
+ #include "unicode/ucnv.h"     /* C   Converter API    */
+@@ -51,6 +51,15 @@
+ 
+ namespace NSUnicodeConverter
+ {
++#ifdef EO_WASM
++	// UTF-8 needs no ICU converter data; avoid byte truncation on fallback.
++	static bool wasmUtf8(const char* name)
++	{
++		return name && (std::string(name) == "UTF-8" || std::string(name) == "utf-8" ||
++			std::string(name) == "UTF8" || std::string(name) == "utf8");
++	}
++#endif
++
+ 	class CUnicodeConverter_Private
+ 	{
+ 	public:
+@@ -449,6 +458,9 @@
+ 
+ 	std::string CUnicodeConverter::fromUnicode(const wchar_t* sInput, const unsigned int& nInputLen, const char* converterName)
+ 	{
++		#ifdef EO_WASM
++		if (wasmUtf8(converterName)) return NSFile::CUtf8Converter::GetUtf8StringFromUnicode2(sInput, (LONG)nInputLen);
++#endif
+ 		return m_pInternal->fromUnicode(sInput, nInputLen, converterName);
+ 	}
+ 	std::string CUnicodeConverter::fromUnicode(const std::wstring &sInput, const char *converterName)
+@@ -457,6 +469,9 @@
+ 	}
+ 	std::wstring CUnicodeConverter::toUnicode(const char* sInput, const unsigned int& nInputLen, const char* converterName, bool isExact)
+ 	{
++		#ifdef EO_WASM
++		if (wasmUtf8(converterName)) return NSFile::CUtf8Converter::GetUnicodeStringFromUTF8((BYTE*)sInput, (LONG)nInputLen);
++#endif
+ 		return m_pInternal->toUnicode(sInput, nInputLen, converterName, isExact);
+ 	}
+ 	std::wstring CUnicodeConverter::toUnicode(const std::string &sInput, const char *converterName, bool isExact)
+@@ -465,6 +480,9 @@
+ 	}
+ 	std::wstring CUnicodeConverter::toUnicode(const char* sInput, const unsigned int& nInputLen, int nCodePage, bool isExact)
+ 	{
++#ifdef EO_WASM
++		if (nCodePage == 65001) return (!sInput || nInputLen < 1) ? std::wstring() : NSFile::CUtf8Converter::GetUnicodeStringFromUTF8((BYTE*)sInput, (LONG)nInputLen);
++#endif
+ 		if (nInputLen < 1) return std::wstring(L"");
+ 
+ 		std::wstring result;
+--- a/UnicodeConverter/UnicodeConverter_internal_empty.cpp
++++ b/UnicodeConverter/UnicodeConverter_internal_empty.cpp
+@@ -27,6 +27,15 @@
+ 
+ namespace NSUnicodeConverter
+ {
++#ifdef EO_WASM
++	// UTF-8 needs no ICU converter data; avoid byte truncation on fallback.
++	static bool wasmUtf8(const char* name)
++	{
++		return name && (std::string(name) == "UTF-8" || std::string(name) == "utf-8" ||
++			std::string(name) == "UTF8" || std::string(name) == "utf8");
++	}
++#endif
++
+     class CUnicodeConverter_Private
+     {
+     public:
+@@ -90,7 +99,10 @@
+ 
+     std::string CUnicodeConverter::fromUnicode(const wchar_t* sInput, const unsigned int& nInputLen, const char* converterName)
+     {
+-        return m_pInternal->fromUnicode(sInput, nInputLen, converterName);
++        #ifdef EO_WASM
++		if (wasmUtf8(converterName)) return NSFile::CUtf8Converter::GetUtf8StringFromUnicode2(sInput, (LONG)nInputLen);
++#endif
++		return m_pInternal->fromUnicode(sInput, nInputLen, converterName);
+     }
+     std::string CUnicodeConverter::fromUnicode(const std::wstring &sInput, const char *converterName)
+     {
+@@ -98,7 +110,10 @@
+     }
+     std::wstring CUnicodeConverter::toUnicode(const char* sInput, const unsigned int& nInputLen, const char* converterName, bool isExact)
+     {
+-        return m_pInternal->toUnicode(sInput, nInputLen, converterName, isExact);
++        #ifdef EO_WASM
++		if (wasmUtf8(converterName)) return NSFile::CUtf8Converter::GetUnicodeStringFromUTF8((BYTE*)sInput, (LONG)nInputLen);
++#endif
++		return m_pInternal->toUnicode(sInput, nInputLen, converterName, isExact);
+     }
+     std::wstring CUnicodeConverter::toUnicode(const std::string &sInput, const char *converterName, bool isExact)
+     {
+@@ -106,6 +121,9 @@
+     }
+     std::wstring CUnicodeConverter::toUnicode(const char* sInput, const unsigned int& nInputLen, int nCodePage, bool isExact)
+     {
++#ifdef EO_WASM
++		if (nCodePage == 65001) return (!sInput || nInputLen < 1) ? std::wstring() : NSFile::CUtf8Converter::GetUnicodeStringFromUTF8((BYTE*)sInput, (LONG)nInputLen);
++#endif
+         return m_pInternal->toUnicode(sInput, nInputLen, nCodePage, isExact);
+     }
+     std::wstring CUnicodeConverter::toUnicode(const std::string &sInput, int nCodePage, bool isExact)

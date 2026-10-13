@@ -9,7 +9,7 @@ test('Mac menus preserve editor undo/redo and standard close role',()=>{
 });
 test('Mac metadata never advertises unused permissions or default ownership',()=>{
  const plist=clean({...Object.fromEntries(unused.map(key=>[key,'unused'])),CFBundleIconFile:'icon.icns'},true);
- for(const key of unused)assert(!Object.hasOwn(plist,key));assert.equal(plist.CFBundleDocumentTypes.length,9);
+ for(const key of unused)assert(!Object.hasOwn(plist,key));assert.deepEqual(plist.CFBundleDocumentTypes.flatMap(entry=>entry.CFBundleTypeExtensions).sort(),require('../../desktop/files.cjs').formats.slice().sort());
  for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
 });
 test('Signing preparation is unsigned by default and notarization is explicit',()=>{
@@ -26,4 +26,11 @@ test('Queued OS and argument paths accept only supported document extensions',()
  for(const invalid of [null,{},'', '--inspect','/tmp/image.png','/tmp/document.docx.exe','file://bad%host/a.docx'])assert.equal(documentPath(invalid),null);
  assert.equal(documentPath('/tmp/sample.DOCX'),'/tmp/sample.DOCX');
  assert.equal(documentPath('file:///tmp/sample%20file.xlsx'),'/tmp/sample file.xlsx');
+});
+
+test('Local ad-hoc sealing never replaces an explicit publisher identity',()=>{
+ const {needsAdHoc}=require('../../tools/desktop/mac-after-pack.cjs');
+ assert.equal(needsAdHoc({electronPlatformName:'darwin',packager:{platformSpecificBuildOptions:{identity:null}}}),true);
+ assert.equal(needsAdHoc({electronPlatformName:'darwin',packager:{platformSpecificBuildOptions:{identity:'Developer ID Application: Test'}}}),false);
+ assert.equal(needsAdHoc({electronPlatformName:'win32'}),false);
 });

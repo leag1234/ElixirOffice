@@ -31,6 +31,8 @@ copy(args.sdk/'sdkjs',out/'sdkjs')
 copy(args.themes,out/'sdkjs/slide/themes')
 copy(args.apps/'web-apps',out/'web-apps')
 copy(args.fonts,out/'fonts')
+# Preserve every bundled language, thesaurus, hyphenation table and licence.
+copy(args.upstream/'dictionaries',out/'dictionaries')
 copy(args.allfonts,out/'sdkjs/common/AllFonts.js')
 copy(args.font_images,out/'sdkjs/common/Images')
 for index,source in enumerate(args.font_source):
@@ -60,6 +62,8 @@ for editor in ['documenteditor','spreadsheeteditor','presentationeditor']:
 identities={}
 for name in ['sdkjs','web-apps','core','document-server-integration']:
     identities[name]=subprocess.check_output(['git','-C',str(args.upstream/name),'rev-parse','HEAD'],text=True).strip()
+from shell_assets import assemble
+assemble(args.upstream,Path(__file__).resolve().parents[2],out)
 pruning=prune(out)
 manifest={'pruning':pruning,'fontSet':args.font_set,'source':identities,'conversion':pin,'pdf':pdf,'files':{}}
 for file in sorted(out.rglob('*')):

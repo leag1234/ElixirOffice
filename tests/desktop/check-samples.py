@@ -5,7 +5,13 @@ docs=[p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in {'.docx'
 manifest=json.loads((root/'desktop-manifest.json').read_text())
 themes={name for name in manifest['files'] if name.startswith('sdkjs/slide/themes/') and name.endswith('.pptx')}
 assert len(themes)==22, 'Expected the 22 approved generated/source theme documents'
-expected={'templates/new.docx','templates/new.xlsx','templates/new.pptx'} | themes
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2]/'tools/desktop'))
+from blank_templates import LANGUAGES,localized
+for language in LANGUAGES:
+ p=root/'desktop-home/blanks'/(language+'.docx')
+ assert p.read_bytes()==localized(root/'templates/new.docx',language),'Localized blank differs beyond approved language default'
+localized_blanks={'desktop-home/blanks/'+language+'.docx' for language in LANGUAGES}
+expected={'templates/new.docx','templates/new.xlsx','templates/new.pptx','desktop-home/templates/letterhead.docx','desktop-home/templates/resume-two-columns.docx'} | themes | localized_blanks
 assert {p.relative_to(root).as_posix() for p in docs}==expected, 'Samples/test artifacts must not be packaged'
 for p in docs:
  with zipfile.ZipFile(p) as z:
@@ -15,4 +21,4 @@ for p in docs:
    assert b'EODESKTOP' not in xml and b'CLOSERACE' not in xml, 'Test marker in packaged document'
    text=' '.join(E.fromstring(xml).itertext()).lower()
    assert 'welcome to onlyoffice' not in text and 'onlyoffice online editors' not in text, 'Old upstream welcome sample'
-print('PASS no old sample or test-modified Office payload; three clean new templates and22 approved theme files')
+print('PASS no old sample or test-modified Office payload; three clean blank templates,45 exact language-only blank variants, two approved home templates and22 approved theme files')

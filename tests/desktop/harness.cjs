@@ -9,15 +9,16 @@ async function fixture(name) {
  const copy=path.join(await fs.mkdtemp(path.join(os.tmpdir(),'eo-fixture-')),path.basename(source));
  await fs.copyFile(source,copy);return copy;
 }
-async function launch({file,profile='test-'+Date.now(),executable,args=[],onSpawn,onPage}={}) {
+async function launch({file,profile='test-'+Date.now(),executable=process.env.EO_PACKAGE_EXECUTABLE,args=[],onSpawn,onPage}={}) {
  const {chromium}=require(process.env.EO_PLAYWRIGHT || '../../tools/node_modules/playwright-core');
  if(file&&path.dirname(path.resolve(file))===path.join(root,'fixtures')&&/^sample/.test(path.basename(file)))file=await fixture(file);
  const directory=path.join(root,'profiles',profile);await fs.mkdir(directory,{recursive:true});
  const listener=net.createServer();await new Promise(resolve=>listener.listen(0,'127.0.0.1',resolve));const port=listener.address().port;await new Promise(resolve=>listener.close(resolve));
  const log=await fs.open(path.join(root,'results',profile+'.log'),'w');
  const launchEpochMs=Date.now();
- const application=cp.spawn(executable||path.join(root,'tools/electron/electron'),['--remote-debugging-address=127.0.0.1','--remote-debugging-port='+port,...(executable?[]:[path.join(root,'desktop/main.cjs')]),...args,...(file?[file]:[])],
- {detached:true,cwd:root,env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:directory,XDG_CONFIG_HOME:path.join(directory,'config'),XDG_DATA_HOME:path.join(directory,'data'),XDG_CACHE_HOME:path.join(directory,'cache'),GSETTINGS_BACKEND:'memory',GTK_USE_PORTAL:'0',LANG:'C.UTF-8',LC_ALL:'C.UTF-8',DBUS_SESSION_BUS_ADDRESS:'unix:path='+path.join(directory,'no-session-bus')},stdio:['ignore',log.fd,log.fd]});
+ // Capture mode creates its own unique profile; its strict parser rejects debug flags.
+ const application=cp.spawn(executable||path.join(root,'tools/electron/electron'),[...(process.platform==='darwin'&&!args.includes('--capture-screens')?['--user-data-dir='+directory]:[]),'--remote-debugging-address=127.0.0.1','--remote-debugging-port='+port,...(executable?[]:[path.join(root,'desktop/main.cjs')]),...args,...(file?[file]:[])],
+ {detached:true,cwd:root,env:{...process.env,DISPLAY:process.env.EO_DESKTOP_DISPLAY||':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:directory,XDG_CONFIG_HOME:path.join(directory,'config'),XDG_DATA_HOME:path.join(directory,'data'),XDG_CACHE_HOME:path.join(directory,'cache'),GSETTINGS_BACKEND:'memory',GTK_USE_PORTAL:'0',LANG:'C.UTF-8',LC_ALL:'C.UTF-8',DBUS_SESSION_BUS_ADDRESS:'unix:path='+path.join(directory,'no-session-bus')},stdio:['ignore',log.fd,log.fd]});
  let browser;
  try {
   if(onSpawn)onSpawn(application);
@@ -39,14 +40,14 @@ async function launch({file,profile='test-'+Date.now(),executable,args=[],onSpaw
   if(onPage)await onPage(page);
   await page.waitForFunction(()=>window.EODesktopReady||window.EOLocalFailure,null,{timeout:120000});
   return {application,browser,page,errors,requests,root,directory,log,port,launchEpochMs};
- }catch(error) {if(application.pid){try{process.kill(-application.pid,'SIGTERM')}catch(cleanup){if(cleanup.code!=='ESRCH')throw cleanup}}await log.close();throw error}
+ }catch(error) {if(application.pid&&application.exitCode===null&&application.signalCode===null){try{process.kill(-application.pid,'SIGTERM')}catch(cleanup){if(cleanup.code!=='ESRCH')throw cleanup}}await log.close();throw error}
 }
 async function stop(env) {
  // A native Mac sheet can block CDP Browser.close during test cleanup.
  // Kill only this harness's live, detached child group; documents are temp copies.
- if(process.platform==='darwin'&&env.application.exitCode===null){try{process.kill(-env.application.pid,'SIGKILL')}catch(error){if(error.code!=='ESRCH')throw error}}
+ if(process.platform==='darwin'&&env.application.exitCode===null&&env.application.signalCode===null){try{process.kill(-env.application.pid,'SIGKILL')}catch(error){if(error.code!=='ESRCH')throw error}}
  await env.browser.close().catch(()=>{});
- if(process.platform!=='darwin'&&env.application.exitCode===null){try{process.kill(-env.application.pid,'SIGTERM')}catch(error){if(error.code!=='ESRCH')throw error}}
+ if(process.platform!=='darwin'&&env.application.exitCode===null&&env.application.signalCode===null){try{process.kill(-env.application.pid,'SIGTERM')}catch(error){if(error.code!=='ESRCH')throw error}}
  await sleep(500);await env.log.close();
 }
 async function editable(env) {

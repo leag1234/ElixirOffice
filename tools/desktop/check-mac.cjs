@@ -21,9 +21,9 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    assert.equal(plist.CFBundleIdentifier,config.build.appId);assert.equal(plist.CFBundleShortVersionString,config.version);assert.equal(plist.CFBundleDisplayName,'ElixirOffice');
    assert.equal(plist.LSApplicationCategoryType,'public.app-category.productivity');
    const extensions=plist.CFBundleDocumentTypes.flatMap(type=>type.CFBundleTypeExtensions||[]).sort();
-   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx'].sort());
+   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx'].sort());
    const {types,unused}=require('./mac-after-pack.cjs');
-   assert.equal(plist.CFBundleDocumentTypes.length,9);
+   assert.equal(plist.CFBundleDocumentTypes.length,18);
    for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
    function checkPlists(folder){for(const entry of fs.readdirSync(folder,{withFileTypes:true})){
     const file=path.join(folder,entry.name);if(entry.isDirectory())checkPlists(file);else if(entry.name==='Info.plist'){
@@ -39,6 +39,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
 
    const executable=path.join(contents,'MacOS',plist.CFBundleExecutable),bytes=fs.readFileSync(executable);
    assert.equal(bytes.readUInt32LE(0),0xfeedfacf);assert.equal(bytes.readUInt32LE(4),0x0100000c);
+   run('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
    const signature=cp.spawnSync('/usr/bin/codesign',['-dv','--verbose=2',bundle],{encoding:'utf8'});
    assert.equal(signature.status,0);assert.match(signature.stderr,/Signature=adhoc/);assert.match(signature.stderr,/TeamIdentifier=not set/);
    const icon=path.join(contents,'Resources',plist.CFBundleIconFile.endsWith('.icns')?plist.CFBundleIconFile:plist.CFBundleIconFile+'.icns');

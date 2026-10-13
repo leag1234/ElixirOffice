@@ -8,7 +8,7 @@ async function create(format){
  try{
   assert.equal(await env.page.locator('[data-new]').count(),3);
   await env.page.locator('[data-new="'+format+'"]').click();await editable(env);await edit(env);
-  await env.page.locator('#save-as').click();await modal(env);keys(env,'save-path',target);
+  await require('./file-action.cjs')(env.page,'save-as');await modal(env);keys(env,'save-path',target);
   await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);assert(text(target).includes('EODESKTOP'));
   assert.equal(await env.page.evaluate(()=>EOLocalSession.controller.isModified()),false);

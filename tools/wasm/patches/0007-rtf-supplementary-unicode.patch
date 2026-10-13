@@ -1,0 +1,18 @@
+--- a/RtfFile/Format/RtfChar.cpp
++++ b/RtfFile/Format/RtfChar.cpp
+@@ -258,6 +258,15 @@
+ 		else if (0x8000 < nUnicode && nUnicode <= 0xffff) {
+ 			sResult += L"\\u" + std::to_wstring(nUnicode - 0x10000) + L"*"; //??? font alt name china ALL FONTS NEW.docx (Mekanik LET)
+ 		}
++#ifdef EO_WASM
++        else if (nUnicode >= 0x10000 && nUnicode <= 0x10ffff)
++        {
++            // RTF Unicode escapes contain signed UTF-16 code units.
++            const int scalar = nUnicode - 0x10000;
++            sResult += L"\\u" + std::to_wstring((0xd800 + (scalar >> 10)) - 0x10000) + L"*";
++            sResult += L"\\u" + std::to_wstring((0xdc00 + (scalar & 0x3ff)) - 0x10000) + L"*";
++        }
++#endif
+ 		else {
+ 			sResult += L"\\u9633*";
+ 		}

@@ -66,9 +66,9 @@ for(const name of fs.readdirSync(path.join(root,'desktop')).filter(n=>/\.(cjs|js
 }
 console.log('PASS packaged application sources');
 const extensions=config.build.fileAssociations.flatMap(a=>a.ext).sort();
-assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx'].sort());
+assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx'].sort());
 assert.equal(config.build.nsis.oneClick,false);assert.equal(config.build.nsis.allowToChangeInstallationDirectory,true);
 assert.equal(config.build.win.signExecutable,false);assert.equal(config.build.win.icon,'icon.png');
-console.log('PASS configured nine associations/interactive install/unsigned metadata');
+console.log('PASS configured eighteen associations/interactive install/unsigned metadata');
 console.log('UNVERIFIED native Windows install/uninstall, double-click, dialogs, open/edit/save/reopen/PDF/Print, fonts, offline/no-Node, SmartScreen');
 console.log('INSTALLER',fs.statSync(installer).size,'bytes','SHA256',sha(fs.readFileSync(installer)));

@@ -11,7 +11,7 @@
 	}
 }
 
-# LAN names/addresses of the test host: set HOST (environment variable, e.g. HOST=192.168.1.10 or a .local name); it is also used as default_sni above.
+# LAN names/addresses of the test host: set HOST (environment variable, e.g. HOST=office.example.invalid or a .local name); it is also used as default_sni above.
 https://{$HOST}:8443, https://localhost:8443 {
 	tls internal
 

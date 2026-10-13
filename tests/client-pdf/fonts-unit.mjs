@@ -10,8 +10,8 @@ const source = fs.readFileSync(process.env.EO_FONT_SOURCE || path.resolve(proces
 const font = new Uint8Array(fs.readFileSync(process.env.LF_FONT_FILE || path.join(os.homedir(), '.local/share/fonts/elixir-localfonts-test/FiraSans-Regular.ttf')));
 const guid = [160,102,214,32,20,150,71,250,149,105,184,80,176,65,73,72];
 const wire = font.slice(); for (let i = 0; i < 32; i++) wire[i] ^= guid[i % 16];
-const cache = new Map(); let fetched = [], localReads = 0, permission = 'granted', allowed = false, queried = 0;
-function context(availableStyles) {
+const cache = new Map(); let fetched = [], localReads = 0, permission = 'granted', allowed = false, queried = 0, permissionQueries = 0;
+function context(availableStyles, desktopBridge) {
   const file = { Id: 'selected.ttf', Status: -1, stream_index: -1 };
   const localFile = { Id: 'local-font:Fira', Status: -1, localFontData: {} };
   const info = { GetFontID: (_, style) => !availableStyles || availableStyles.includes(style) ? ({ file, faceIndex: 0 }) : null, GetNeedInfo: () => ({}) };
@@ -20,12 +20,13 @@ function context(availableStyles) {
     AscFonts: { g_map_font_index: { Selected: 0, Local: 1 }, g_font_infos: [info, localInfo], g_fonts_streams: [] },
     AscCommon: { g_font_loader: { fontFilesPath: '/fonts/' }, ClientPdf: { fonts: { get: async () => { localReads++; return { key: 'local', bytes: font, faceIndex: 0 }; } } } },
     Common: { ElixirLocalFonts: { hasConsent: () => allowed, isLocal: n => n === 'Local' } },
-    navigator: { permissions: { query: async () => ({ state: permission }) } },
+    navigator: { permissions: { query: async () => { permissionQueries++; return { state: permission }; } } },
     queryLocalFonts: () => { queried++; throw new Error('must never enumerate'); },
     caches: { open: async name => { assert.equal(name, 'eo-wasm-fonts-v1'); return {
       match: async key => cache.has(key) ? new Response(cache.get(key)) : undefined,
       put: async (key, response) => { cache.set(key, await response.arrayBuffer()); }
     }; } } };
+  if(desktopBridge)window.parent=desktopBridge==='cross-origin'?Object.defineProperty({},'eoDesktop',{get(){throw new Error('Cross-origin parent')}}):{eoDesktop:desktopBridge};
   vm.runInNewContext(source, { window, Uint8Array, ArrayBuffer, DataView, TextEncoder, TextDecoder, URL, Response,
     Map, Set, fetch: async url => { fetched.push(url); return new Response(wire); } });
   return window.EOWasmFonts;
@@ -75,6 +76,20 @@ assert.equal(result.missing.length, 0); assert.equal(localReads, 1); assert.equa
 allowed = false;
 result = await api.ensureFonts([{ name: 'Local', style: 0 }]);
 assert.equal(result.written.length, 0); assert.equal(localReads, 1); assert.equal(queried, 0);
+// Desktop PDF font loading must check native consent without prompting or browser permissions.
+allowed=true;let desktopGranted=false,desktopChecks=0,desktopPrompts=0;
+const desktopApi=context(undefined,{fontConsent:async()=>{desktopPrompts++;throw Error('PDF must not prompt')},fontPermission:async()=>{desktopChecks++;return desktopGranted}});
+const browserChecks=permissionQueries,readsBefore=localReads;
+result=await desktopApi.ensureFonts([{name:'Local',style:0}]);
+assert.equal(result.written.length,0);assert.equal(localReads,readsBefore);assert.equal(permissionQueries,browserChecks);
+desktopGranted=true;result=await desktopApi.ensureFonts([{name:'Local',style:0}]);
+assert.equal(result.missing.length,0);assert.equal(localReads,readsBefore+1);assert.equal(permissionQueries,browserChecks);assert.equal(desktopPrompts,0);
+allowed=false;const checksBefore=desktopChecks;result=await desktopApi.ensureFonts([{name:'Local',style:0}]);
+assert.equal(result.written.length,0);assert.equal(desktopChecks,checksBefore);assert.equal(permissionQueries,browserChecks);
+console.log('PASS desktop PDF native consent/no prompt/no browser permissions; web font behavior retained');
+allowed=true;permission='granted';const webEmbedded=context(undefined,'cross-origin');
+result=await webEmbedded.ensureFonts([{name:'Local',style:0}]);assert.equal(result.missing.length,0);
+console.log('PASS web Local Font Access unchanged inside cross-origin embedding');
 function str(s) { const u = Buffer.from(s, 'utf16le'), n = Buffer.alloc(2); n.writeUInt16LE(s.length); return Buffer.concat([n, u]); }
 const drawing = Uint8Array.from(Buffer.concat([Buffer.from([202,41]), str('Selected'), Buffer.from([80]), str('hello'), Buffer.alloc(8), Buffer.from([203])]));
 const entries = api.fontsOfDocument(drawing);

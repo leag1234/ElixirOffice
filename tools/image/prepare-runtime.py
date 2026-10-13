@@ -13,7 +13,7 @@ here = Path(__file__).resolve().parent
 parser = argparse.ArgumentParser()
 parser.add_argument("release", type=Path)
 parser.add_argument("output", type=Path)
-parser.add_argument("--pin", type=Path, default=here.parent / "wasm/runtime-release.json")
+parser.add_argument("--pin", type=Path, default=here.parent / "wasm/pdf-runtime-release.json")
 args = parser.parse_args()
 pin = json.loads(args.pin.read_text())
 manifest_bytes = (args.release / "manifest.json").read_bytes()

@@ -1,0 +1,51 @@
+--- a/RtfFile/Format/RtfReader.h
++++ b/RtfFile/Format/RtfReader.h
+@@ -109,6 +109,9 @@
+ 
+ private:
+ 	RtfToken	m_oTok;
++#ifdef EO_WASM
++    unsigned int m_pendingHighSurrogate = 0;
++#endif
+ 	bool		m_bCanStartNewReader;
+ 
+ 	int			m_nSkipChars;
+--- a/RtfFile/Format/RtfReader.cpp
++++ b/RtfFile/Format/RtfReader.cpp
+@@ -257,11 +257,26 @@
+ 	{
+ 		if (true == bHasPar)
+ 		{
++#ifdef EO_WASM
++            // RTF \u values are signed UTF-16 units; Wasm wchar_t is UTF-32.
++            const unsigned int unit = static_cast<unsigned int>(nPar) & 0xffff;
++            if (unit >= 0xd800 && unit <= 0xdbff)
++                m_pendingHighSurrogate = unit;
++            else
++            {
++                if (unit >= 0xdc00 && unit <= 0xdfff && m_pendingHighSurrogate)
++                    sResult += wchar_t(0x10000 + ((m_pendingHighSurrogate - 0xd800) << 10) + (unit - 0xdc00));
++                else if (unit < 0xd800 || unit > 0xdfff)
++                    sResult += wchar_t(unit);
++                m_pendingHighSurrogate = 0;
++            }
++#else
+ 			if (m_bUseGlobalCodepage && sizeof(wchar_t) != 2)
+ 			{
+ 				nPar = nPar & 0x0FFF;
+ 			}
+ 			sResult += wchar_t(nPar);
++#endif
+ 		}
+ 	}
+ 	else
+@@ -294,6 +309,9 @@
+ 		
+ 		if (false == sResult.empty())
+ 		{
++#ifdef EO_WASM
++            m_pendingHighSurrogate = 0;
++#endif
+ 			ExecuteText(oDocument, oReader, sResult);
+ 		}
+ 	}

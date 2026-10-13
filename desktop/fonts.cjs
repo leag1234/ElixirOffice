@@ -30,11 +30,11 @@ function names(bytes, offset) {
 class Fonts {
   constructor() { this.allowed=roots(); this.files=new Map(); }
   async enumerate() {
-    this.files.clear(); const found=[];
+    const previous=new Map(Array.from(this.files,([id,file])=>[file.real+'|'+(file.offset||0),id])),next=new Map(),found=[];
     const walk=async directory=>{
       let entries;try{entries=await fs.readdir(directory,{withFileTypes:true})}catch(e){if(['ENOENT','EACCES'].includes(e.code))return;throw e}
       for(const entry of entries) {
-        if(this.files.size>=5000)throw Error('Too many system fonts');
+        if(next.size>=5000)throw Error('Too many system fonts');
         const filename=path.join(directory,entry.name);
         if(entry.isDirectory()) { await walk(filename); continue; }
         if(!/\.(ttf|otf|ttc)$/i.test(entry.name))continue;
@@ -45,12 +45,12 @@ class Fonts {
           const stat=await fs.stat(real);if(!stat.isFile()||stat.size>20*1024*1024)continue;
           bytes=await fs.readFile(real);if(bytes.length>20*1024*1024)continue;
           const offsets=bytes.toString('ascii',0,4)==='ttcf'?Array.from({length:Math.min(bytes.readUInt32BE(8),64)},(_,i)=>bytes.readUInt32BE(12+i*4)):[0];
-          for(const offset of offsets) { const face=names(bytes,offset); if(face){const id=crypto.randomUUID();this.files.set(id,{real});found.push({...face,id});} }
-        } catch(e) { if(!['ENOENT','EACCES'].includes(e.code) && e instanceof RangeError)continue; }
+          for(const offset of offsets) { const face=names(bytes,offset); if(face){if(next.size>=5000)throw Error('Too many system fonts');const id=previous.get(real+'|'+offset)||crypto.randomUUID();next.set(id,{real,offset});found.push({...face,id});} }
+        } catch(e) { if(e.message==='Too many system fonts')throw e; if(!['ENOENT','EACCES'].includes(e.code) && e instanceof RangeError)continue; }
       }
     };
     for(const root of this.allowed)await walk(root);
-    return found;
+    this.files=next;return found;
   }
   async read(id) {
     const font=this.files.get(id);if(!font)throw Error('Unknown font handle');
