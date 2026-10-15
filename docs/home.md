@@ -23,7 +23,7 @@ IP address, upload, conversion, JWT, callbacks, editor opening).
 - **Language**: English by default; `?lang=xx` then `Accept-Language`. Catalogs
   `public/elixir/i18n/<language>.json` (en, fr). The language is passed to the editor (`&lang=`).
 - **Test bench** (user selector, languages, roles, WOPI…): `/example/?dev=1`, unchanged.
-- **Performance** (<dev-host>, headless Chromium, page served locally): first paint ~50 ms,
+- **Performance** (development host, headless Chromium, page served locally): first paint ~50 ms,
   136 KB in total of which 112 KB of thumbnails, HTML 38 KB (11 KB gzip). No web font, no
   framework, no external call.
 
@@ -64,8 +64,8 @@ The container must mount a checkout where `document-server-integration` is on `e
 ```bash
 # standard dev container (make up):
 make example
-# isolated instance launched by develop/eo.sh (e.g. eo-home, worktree $EO_WORK/wt/home):
-make example CONTAINER=eo-home UPSTREAM=$EO_WORK/wt/home
+# isolated instance launched by develop/eo.sh (e.g. eo-home, worktree /srv/elixiroffice/wt/home):
+make example CONTAINER=eo-home UPSTREAM=/srv/elixiroffice/wt/home
 ```
 
 `make example` = `make example-brand` (copy of the brand into the submodule) then
@@ -82,8 +82,8 @@ Redeploying after a change:
 - brand (logo, templates): `make example-brand`, then `make example-thumbnails` if the templates
   changed.
 
-Working instance: `eo-home`, http://localhost:32769/example/ on <dev-host> (port assigned by
-`eo.sh up home`, `./eo.sh ls` to find it again; `ssh -fN -L 32769:localhost:32769 <dev-host>`
+Working instance: `eo-home`, http://localhost:32769/example/ on development host (port assigned by
+`eo.sh up home`, `./eo.sh ls` to find it again; `ssh -fN -L 32769:localhost:32769 dev-host`
 from the Mac).
 
 ## Image build (untested)
@@ -108,8 +108,8 @@ EOT
 
 ## Screenshots
 
-`screenshots/home/` (1440×900 and 1280×720, headless Chromium, script
-`$EO_WORK/pw/home/flow.mjs` on <dev-host>): empty start page, after creating an empty document,
+`docs/screenshots/home/` (1440×900 and 1280×720, headless Chromium, script
+`/srv/elixiroffice/pw/home/flow.mjs` on development host): empty start page, after creating an empty document,
 editor, after uploading `t01-fiche-fractions-cm1.docx`, recents, search, menu, deletion,
 drop, New / Open / Document views, interface in French, test bench. Titles verified:
 `ElixirOffice`, `new.docx - ElixirOffice`, `t01-fiche-fractions-cm1.docx - ElixirOffice`.
@@ -122,10 +122,33 @@ upstream's 404s (`preload.html`: `app.css`, `docserviceworker.js`).
 - Password-protected file, or format requiring a type choice at conversion:
   error message, opening to be done from the test bench.
 - Recents = the sample's storage folder, by client IP address (upstream behavior).
-- Displayed user = the sample's first test user.
-- No dark theme; template content in French (provisional corpus).
+- Displayed user = the sample's first test user ("John Smith").
+- No dark theme.
 - The upstream's `public/images/favicon.ico` (ONLYOFFICE logo) is still served on `/example/favicon.ico`
   (not referenced by our pages); the editor's tab icons are the upstream's
   (generic pictograms).
 - pkg binary not rebuilt: reading the catalogs (`readdirSync` in the pkg snapshot) is
   to be verified at the first image build.
+
+## Localized shared templates
+All four CC0 Home examples (letterhead, two-column resume, fractions worksheet and skills-assessment grid) have generated content and proofing language for the 45 supported UI languages. The 0.2.0 bundled font pack covers 39 template languages; Japanese, simplified/traditional Chinese, Korean, Sinhala and Urdu use the English template until a Unicode font-pack update. These six generated variants remain under tools/example/template-layouts/localized, outside served and packaged assets. They contain only fictional details, example.org addresses and clearly fictional all-zero telephone numbers. School examples use a neutral fictional school and generic tasks/points, without a national curriculum or registry identifier. French school font aliases are confined to French; other variants use the existing free font pack.
+
+Shared files are branding/example/nodejs/public/elixir/brand/templates/<language>/<id>.docx and .png. templates.json keeps file/thumb basenames, translated title and a languages list for each id; choose the UI language when listed, otherwise English. No flat default files remain. template-sources.json records CC0/fictional status, byte size and SHA256 per file. Text-free reproducible layout inputs live in tools/example/template-layouts and are not served or packaged as Home documents. Generate DOCX with tools/desktop/home_templates.py; render their actual first pages with tools/example/localized-thumbnails.py using an explicitly selected owned dev container. Desktop assembly follows this shared schema; matching server selection is owned by session E and must be integrated before an image refresh.
+
+RTL variants (Arabic, Hebrew and the unshipped Urdu source) have paragraph direction,
+complex-script run direction, visually reversed tables, mirrored alignment, indents,
+tab stops and anchored headers. ASCII identifiers retain left-to-right run direction.
+Complex-script and East Asian font slots explicitly name bundled DejaVu Sans.
+The current pack renders Arabic, Hebrew and Lao without computer-font permission.
+Owned Mac screenshots confirmed missing glyphs for CJK/Sinhala and three Urdu
+characters (U+06C1, U+06D2, U+06D4); fallback to English avoids shipping broken
+template text. Computer-font access remains optional and requires explicit consent.
+
+Run tools/desktop/template_font_coverage.py against the actual desktop assets to
+reproduce the complete 45-language/four-template matrix. Its standard-library cmap
+reader was independently checked against fontTools for all 44 bundled regular faces.
+The unit test checks each visible character against its declared font slot, so a
+new manifest language fails when the pack cannot render its characters.
+The 45 language keys match the desktop/editor locale set; Thai and Hindi are not
+supported UI locales in this release. Layout inputs derive only from the public
+synthetic corpus/provisional examples t01, t02, s06 and s08.

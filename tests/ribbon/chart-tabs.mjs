@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Chart Design and Format contextual tabs (docs/ui.md, "Ribbon autonomy"): a chart is edited from the
 // ribbon, the right panel only opens on "More Options" (Chart Styles launcher).
 //   node tests/ribbon/chart-tabs.mjs [--out results.json] [--shots dir]      (EO_BASE=http://host:port)

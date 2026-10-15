@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Draws the Borders icons of the ElixirOffice ribbon (Home > Borders split button, its drop-down,
 // Table Design > Borders, and the same glyphs in the spreadsheet editor).
 //

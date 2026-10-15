@@ -3,10 +3,10 @@
 Updated: 2026-10-06 ("ai2" redesign). Replaces `docs/ai-v0.md` (v0 of 2026-10-05, whose history stays in git).
 
 Branches:
-- `elixir/ai2` in `web-apps` and `sdkjs` (worktree `$EO_WORK/wt/ai2`);
-- `feat/ai2` in this repository (worktree `$EO_WORK/wt/ai2-repo`).
+- `elixir/ai2` in `web-apps` and `sdkjs` (worktree `/srv/elixiroffice/wt/ai2`);
+- `feat/ai2` in this repository (worktree `/srv/elixiroffice/wt/ai2-repo`).
 
-Reliability work ("aistab" work item, §6.6): `elixir/aistab` in `web-apps` (worktree `$EO_WORK/wt/aistab`) and `feat/aistab` in this repository (`$EO_WORK/wt/aistab-repo`), integrated into `elixir/dev` and `main` on 2026-10-06.
+Reliability work ("aistab" work item, §6.6): `elixir/aistab` in `web-apps` (worktree `/srv/elixiroffice/wt/aistab`) and `feat/aistab` in this repository (`/srv/elixiroffice/wt/aistab-repo`), integrated into `elixir/dev` and `main` on 2026-10-06.
 
 Integrated into `elixir/dev` (sdkjs and web-apps) and `main` on 2026-10-06: the main dev instance (`eo`, port **8080**, `make ai-proxy`) carries the redesign; the test instance `eo-ai2` (port 8092) is stopped. Since the integration, the "Search or ask Elixir" search lives in the shared title bar (`apps/common/main/lib/elixir-chrome/TitleBar.js`): the "Ask Elixir" row only appears there if Elixir AI is loaded in the editor (Word only for now); Excel and PowerPoint keep command search alone.
 
@@ -16,7 +16,7 @@ Integrated into `elixir/dev` (sdkjs and web-apps) and `main` on 2026-10-06: the 
 - **Tools**: 35 tools on the document (8 in v0), plus 7 orchestration tools (plan, verification, question, refusal). All validate their arguments, return structured errors and have a deterministic Playwright test (`tools/eval/tools-check.mjs`, 97 checks with the safeguards of §6.6).
 - **Planner**: to make the task easy for the model (including, later, a small local model) rather than taking a big model: mandatory structured plan on the first turn, analysis tools that pre-digest the document, recipes for compound requests, verification of the final state with a repair turn.
 - **Clear failure**: if the request is impossible, one sentence says what Elixir cannot do and a button offers the closest action. Never a silent "nothing happened". What was done is said plainly ("Heading 1 style applied to 3 paragraphs").
-- **Evaluation**: 32 tasks (the 10 from the brief, the 2 real requests from the owner, 20 common teacher requests in French and English), each played 3 times per configuration. Results in §6: **97%** success with gpt-4.1-mini and the scaffolding (84% without), median latency 4.0 s; default model unchanged. Then measured 10 times per task (§6.6): 90% before the reliability work, **98%** after (temperature 0, plan safeguards), no task under 8/10, median latency 3.8 s.
+- **Evaluation**: 32 tasks (the 10 from the brief, the 2 real requests from the test user, 20 common teacher requests in French and English), each played 3 times per configuration. Results in §6: **97%** success with gpt-4.1-mini and the scaffolding (84% without), median latency 4.0 s; default model unchanged. Then measured 10 times per task (§6.6): 90% before the reliability work, **98%** after (temperature 0, plan safeguards), no task under 8/10, median latency 3.8 s.
 
 ## 1. Entry points
 
@@ -35,7 +35,7 @@ Suggestions of the "Ask Elixir" menu (the label is sent as is as the instruction
 - several paragraphs: Put in two columns, Harmonize the headings, Turn into a bulleted list;
 - text: Rephrase, Shorten, Fix spelling and grammar, Translate… (prefills "Translate to").
 
-Screenshots (`screenshots/ai2/`): `search-1-commands-then-ask`, `search-2-ask-elixir`, `search-3-bar-running`, `ask-1-mini-toolbar-menu`, `ask-2-context-menu`, `ask-3-context-menu-suggestions`, `ask-4-picture-suggestions`, `slash-1-hint`, `slash-2-menu`, and the `result-*` results (table of contents, 2×A5, refusal with suggestion).
+Screenshots (`docs/screenshots/ai2/`): `search-1-commands-then-ask`, `search-2-ask-elixir`, `search-3-bar-running`, `ask-1-mini-toolbar-menu`, `ask-2-context-menu`, `aEXAMPLE_TOKEN_NOT_VALID`, `aEXAMPLE_TOKEN_NOT_VALID`, `slash-1-hint`, `slash-2-menu`, and the `result-*` results (table of contents, 2×A5, refusal with suggestion).
 
 Test: `node tools/eval/entry-check.mjs [screenshots-folder]` (22 checks: order of the search rows, Enter / Shift+Enter, suggestions by selection type, mini toolbar, right click, hint, "/" menu, Esc, "/" in a text, Alt+I).
 
@@ -155,7 +155,7 @@ Observed and worked around, to be documented upstream: `ApiRange.SetFontSize` ex
 
 ## 5. the owner's two real requests
 
-**1. Table of contents from unstyled headings** (`eval/tasks/g-toc-unstyled`). the owner had selected headings and subheadings that were not in a Heading style (bold lines, numbered "1.", "1.1") and asked for a table of contents; v0 only inserted a "Table of contents" paragraph. Expected and obtained behavior: `submit_plan` → `get_outline_candidates` (levels deduced from numbering and formatting) → `apply_styles` Heading 1 / Heading 2 in revision → `insert_table_of_contents` before the first section → plan verification. Criteria: a real TOC field, 3 level-1 entries and 4 level-2 entries in order, headings styled, body still Normal, texts intact, one Ctrl+Z undoes everything.
+**1. Table of contents from unstyled headings** (`eval/tasks/g-toc-unstyled`). the test user had selected headings and subheadings that were not in a Heading style (bold lines, numbered "1.", "1.1") and asked for a table of contents; v0 only inserted a "Table of contents" paragraph. Expected and obtained behavior: `submit_plan` → `get_outline_candidates` (levels deduced from numbering and formatting) → `apply_styles` Heading 1 / Heading 2 in revision → `insert_table_of_contents` before the first section → plan verification. Criteria: a real TOC field, 3 level-1 entries and 4 level-2 entries in order, headings styled, body still Normal, texts intact, one Ctrl+Z undoes everything.
 
 **2. "Turn this A4 document into 2×A5"** (`eval/tasks/g-a4-to-2xa5`). Interpretation retained: A5 portrait format for all sections, so that "2 pages per sheet" printing gives two A5 on each A4; it is not a two-column layout (error of v0 and of direct mode). Behavior: `set_page_setup` A5 (margins ~15 mm) → `fit_content` (170 mm image and 4-column table brought back to the text column) → `get_layout_summary` to check → print note displayed. Clarification question (`ask_user`) only if the request is truly ambiguous; the evaluation would answer it with the first option. Criteria: all sections A5 portrait, no image nor table wider than the column, plausible page count, texts intact, print instruction displayed, one Ctrl+Z undoes everything.
 
@@ -188,8 +188,8 @@ Observed and worked around, to be documented upstream: `ApiRange.SetFontSize` ex
 | `e-title-big-center` | common | fr | « Mets le titre en gros et centré » (Make the title big and centered) | — |
 | `e-two-columns-fr` | common | fr | « Mets ça en deux colonnes » (Put this in two columns) | blocks 2-6 |
 | `e-word-count` | common | en | "How many words are in this document?" | — |
-| `g-a4-to-2xa5` | the owner | fr | « Transforme ce document A4 en 2×A5 » (Turn this A4 document into 2×A5) | — |
-| `g-toc-unstyled` | the owner | fr | « Fais une table des matières avec ces titres et sous-titres » (Make a table of contents with these headings and subheadings) | blocks 2-15 |
+| `g-a4-to-2xa5` | the test user | fr | « Transforme ce document A4 en 2×A5 » (Turn this A4 document into 2×A5) | — |
+| `g-toc-unstyled` | the test user | fr | « Fais une table des matières avec ces titres et sous-titres » (Make a table of contents with these headings and subheadings) | blocks 2-15 |
 | `list-to-table` | brief (v0) | en | "Turn this list into a table with a header row" | blocks 2-6 |
 | `r-brand` | brief | fr | « Applique notre charte : titres en bleu foncé #1F3864 et en Arial, texte courant en Calibri 11. » (Apply our style guide: headings in dark blue #1F3864 and in Arial, body text in Calibri 11.) | — |
 | `r-exercise-sheet` | brief | fr | « Crée une fiche d'exercices d'une page sur les fractions pour des CM2, avec le corrigé à la fin. » (Create a one-page exercise sheet on fractions for CM2 pupils, with the answer key at the end.) | — |
@@ -206,7 +206,7 @@ A run is successful if (1) all the criteria of `check.mjs` pass, on the "final" 
 
 ### 6.2 Comparison of models and scaffolding
 
-`node tools/eval/run.mjs --tasks all --runs 3 --models gpt-4.1-mini,gpt-5.4-mini,gpt-5.4 --modes scaffold,direct --concurrency 6` (2026-10-06, `eval/results/2026-10-06/`). 6 configurations × 32 tasks × 3 runs = 576 runs. Latency = from Enter to the displayed result (all turns included), measured with 6 browsers in parallel on <dev-host>.
+`node tools/eval/run.mjs --tasks all --runs 3 --models gpt-4.1-mini,gpt-5.4-mini,gpt-5.4 --modes scaffold,direct --concurrency 6` (2026-10-06, `eval/results/2026-10-06/`). 6 configurations × 32 tasks × 3 runs = 576 runs. Latency = from Enter to the displayed result (all turns included), measured with 6 browsers in parallel on development host.
 
 | Model | Mode | Success | Tasks 3/3 | Median latency | p90 | Turns (med.) | Tokens (med.) | Estimated cost (med.) |
 |---|---|---|---|---|---|---|---|---|
@@ -349,11 +349,11 @@ Reading:
 - Integrated on 8080 (E): **314/320 (98%, CI 96–99%)**, no task under 8/10, median latency 3.8 s (3.7 s before). Remaining failures: `e-number-exercises` 8/10 (one numbered text line in addition to the exercise titles), `r-exercise-sheet` 8/10 (exercise titles in Normal, or a single exercise before the answer key), `r-fit-one-page` 9/10 (body reduced to 8 pt instead of going through the margins first), `r-translate` 9/10 (a list style lost). `e-number-exercises` goes from 10/10 (A) to 8/10: to be watched (the difference is not significant over 10 runs).
 - gpt-5.4-mini (3 runs per task, on 8080 after integration, without temperature): **94/96 (98%)**, median latency 5.9 s; failures on `e-fix-spelling` and `e-reduce-spacing` (once each). gpt-4.1-mini remains the default model (same success, lower latency and cost).
 
-Results: `eval/results/2026-10-06-aistab/` (`summary-*.json` and `runs-*.json`, one line per run: task, success, latency, failed criteria, tools called; the request bodies, 50 MB per measurement, stay on <dev-host> in `$EO_WORK/wt/aistab-work/*/requests/`).
+Results: `eval/results/2026-10-06-aistab/` (`summary-*.json` and `runs-*.json`, one line per run: task, success, latency, failed criteria, tools called; the request bodies, 50 MB per measurement, stay on development host in `/srv/elixiroffice/wt/aistab-work/*/requests/`).
 
 ## 7. Adding a task from a user's AI log
 
-When the owner (or a tester) sends a failure:
+When the test user (or a tester) sends a failure:
 1. They export their log: **Elixir › AI Log › Export (JSON)** tab; the file never contains the key. They attach the document (or an anonymized version).
 2. Find the entry: `prompt` (the instruction), `scope` (selection or document, blocks `from`-`to`), `mode`, `model`, `plan`, `rounds[].tool_calls` (tools, arguments, results), `verification`, `outcome`.
 3. Create `eval/tasks/<id>/`:
@@ -377,9 +377,9 @@ When the owner (or a tester) sends a failure:
 
 ```bash
 # instance
-cd $EO_WORK/wt/ai2/develop && ./eo.sh up ai2 8092
-$EO_WORK/wt/ai2-work/build.sh sdkjs-full web-apps-full example   # first time
-$EO_WORK/wt/ai2-work/build.sh sdkjs web-apps                     # afterwards
+cd /srv/elixiroffice/wt/ai2/develop && ./eo.sh up ai2 8092
+/srv/elixiroffice/wt/ai2-work/build.sh sdkjs-full web-apps-full example   # first time
+/srv/elixiroffice/wt/ai2-work/build.sh sdkjs web-apps                     # afterwards
 tools/ai-proxy/install.sh eo-ai2 [model]                               # server-managed mode
 
 # tests (in this repository; EO_BASE defaults to http://localhost:8080, the main instance)
@@ -416,7 +416,7 @@ Three variables, in the container environment (image: `docker run -e ...`, compo
 | `ELIXIR_AI_API_KEY` | key for that endpoint; empty is fine for Ollama and keyless gateways |
 | `OPENAI_API_KEY` | legacy: alone, means OpenAI with `gpt-4.1-mini` |
 
-How it works: `build/scripts/standalone/elixir-ai-conf.sh` (in DocumentServer) turns the variables into the nginx include `/etc/nginx/includes/ds-elixir-ai.conf` (mode 600): `/elixir-ai/config.json` (`{"enabled":true,"endpoint":"/elixir-ai/v1","model":...,"managed":true,"host":...}`, **never the key**; `host` is only used for the notice "Your text is sent to this server, which forwards it to <host>") and `POST /elixir-ai/v1/chat/completions` proxied to `BASE_URL/chat/completions` with the `Authorization` header added, cookies and client IP removed. Invalid values keep AI off and are reported on stderr. The image entrypoint runs the script at each start when a variable is set; with none set it writes the "off" include only if there is none (an include written by an operator, or by a demo setup script, is kept). The dev container uses `make ai-proxy` (`CONTAINER=eo-<item>` for another one), which feeds the same script.
+How it works: `build/scripts/standalone/elixir-ai-conf.sh` (in DocumentServer) turns the variables into the nginx include `/etc/nginx/includes/ds-elixir-ai.conf` (mode 600): `/elixir-ai/config.json` (`{"enabled":true,"endpoint":"/elixir-ai/v1","model":...,"managed":true,"host":...}`, **never the key**; `host` is only used for the notice "Your text is sent to this server, which forwards it to <host>") and `POST /elixir-ai/v1/chat/completions` proxied to `BASE_URL/chat/completions` with the `Authorization` header added, cookies and client IP removed. Invalid values keep AI off and are reported on stderr. The image entrypoint runs the script at each start when a variable is set; with none set it writes the "off" include only if there is none (an include written by an operator, or by `tools/demo/container-setup.sh`, is kept). The dev container uses `make ai-proxy` (`CONTAINER=eo-<item>` for another one), which feeds the same script.
 
 Admin check: `make ai-check [SERVER=http://host:port]` (`tools/ai-proxy/check.sh`): prints the configuration (the key is never shown), calls the provider with a one-token request (reachability, key, model), then checks the server: `config.json` consistent with the configuration and free of the key, and a request through the proxy. "AI is OFF" is a valid answer (exit 0).
 
@@ -430,7 +430,7 @@ Strings: `Strings.js`, 12 languages (en, fr, de, es, it, pt, pt-pt, nl, ru, pl, 
 
 ### 7.4 Public demo
 
-Unchanged: a demo setup script writes its own `ds-elixir-ai.conf` (client configuration `{"endpoint":"/elixir-ai/v1","model":...,"managed":true}`, no `enabled` field, read as enabled), the gateway in front holds the key and the limits. The new image entrypoint keeps an include that already exists. Checked by `tests/ai-config/config.mjs` (a configuration without `enabled` is a server configuration) and by the generator's tests.
+Unchanged: `tools/demo/container-setup.sh` writes its own `ds-elixir-ai.conf` (client configuration `{"endpoint":"/elixir-ai/v1","model":...,"managed":true}`, no `enabled` field, read as enabled), the gateway in front holds the key and the limits. The new image entrypoint keeps an include that already exists. Checked by `tests/ai-config/config.mjs` (a configuration without `enabled` is a server configuration) and by the generator's tests.
 
 ### 7.5 Tests
 

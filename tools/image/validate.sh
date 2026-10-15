@@ -1,7 +1,6 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Image check (docs/install-server.md): health, services, install paths, and no upstream-name occurrence in paths and served
-# content of elixiroffice/documentserver:<tag>. Usage: tools/image/validate.sh <image> [outdir]. Build host (<build-host>).
+# content of elixiroffice/documentserver:<tag>. Usage: tools/image/validate.sh <image> [outdir]. Build host (build-host).
 IMG=${1:?usage: validate.sh <image> [outdir]}
 N=eo-validate; P=${VALIDATE_PORT:-8098}
 U="eu""ro[-_ ]?off""ice"   # the upstream name, written in pieces so this file is not an occurrence itself

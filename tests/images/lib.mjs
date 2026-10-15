@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Helpers of the multi-image layout stability suite (docs/images.md).
 // The editor is driven like a user (file chooser, clipboard, mouse drags on the canvas);
 // the layout is read back from the recalculated logic document (probe.js).

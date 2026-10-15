@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<component type="desktop-application">
+  <id>org.elixiroffice.desktop</id>
+  <name>ElixirOffice</name>
+  <summary>Local documents, spreadsheets, presentations and PDF</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <developer_name>ElixirOffice contributors</developer_name>
+  <launchable type="desktop-id">org.elixiroffice.desktop.desktop</launchable>
+  <description><p>ElixirOffice edits office documents locally with bundled conversion, fonts, spelling and Help. It supports documents, spreadsheets and presentations, and local PDF workflows. AI is optional and requires a separately configured endpoint and network permission.</p></description>
+  <url type="homepage">https://github.com/leag1234/elixiroffice</url>
+  <url type="bugtracker">https://github.com/leag1234/elixiroffice/issues</url>
+  <url type="vcs-browser">https://github.com/leag1234/elixiroffice</url>
+  <provides><binary>elixiroffice-flatpak</binary></provides>
+  <categories><category>Office</category><category>WordProcessor</category><category>Spreadsheet</category><category>Presentation</category></categories>
+  <content_rating type="oars-1.1"/>
+  <releases><release version="0.2.0" date="2026-10-13" type="development"><description><p>Desktop beta update. Exact release tag and acceptance are recorded in the accompanying release notes and build information.</p></description></release></releases>
+</component>

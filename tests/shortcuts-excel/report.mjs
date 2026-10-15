@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Per-shortcut summary of run.mjs result files (one or several, e.g. a Windows
 // and a macOS run).
 //   node tests/shortcuts-excel/report.mjs [results.json ...] [--md] [--compare before.json[,before2.json]]

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Mode B, "from ElixirOffice": the start page connects to a Nextcloud server with Login Flow v2
 // and works on the user's files there (browse, recent, open, save with ETag check, conflict copy,
 // new document, upload), with the real identity in the editor; then disconnects (app password
@@ -88,7 +87,7 @@ try {
     const f = await L.editorFrame(tab);
     await f.click(".elx-account-btn");
     const acct = await f.evaluate(() => { const el = document.querySelector(".elx-accflyout"); return el && el.offsetParent !== null ? el.innerText : ""; });
-    ok("editor account menu: name, Connect, Change name, test users", /Claire Locale/.test(acct) && /Connect (Murena Workspace \/ )?Nextcloud/.test(acct) && /Change name/.test(acct) && /Smith/.test(acct), acct.replace(/\s+/g, " "));
+    ok("editor account menu: name, Connect, Change name, test users", /Claire Locale/.test(acct) && /Connect (Murena Workspace \/ )?Nextcloud/.test(acct) && /Change name/.test(acct) && /John Smith/.test(acct), acct.replace(/\s+/g, " "));
     await tab.keyboard.press("Escape");
     const user = await f.evaluate(() => DE.getController("Main").appOptions.user);
     ok("editor user = local profile", user.fullname === "Claire Locale" && /^local-/.test(user.id), JSON.stringify(user));

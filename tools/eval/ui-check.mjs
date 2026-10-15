@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // UI checks of the Elixir AI host, without any model call:
 //  - the Elixir tab is in the ribbon;
 //  - Alt+I opens the command bar, types nothing in the document and shows no key tips;
@@ -54,7 +53,7 @@ await page.keyboard.press("Escape");
 await frame.evaluate(() => DE.getController("Common.Controllers.ElixirAI").openSettings(false));
 await frame.waitForTimeout(300);
 await frame.fill("#elixir-ai-endpoint", "https://api.openai.com/v1");
-await frame.fill("#elixir-ai-key", "sk-placeholder-not-a-real-key");
+await frame.fill("#elixir-ai-key", "EXAMPLE_TOKEN_NOT_VALID");
 res["key field is masked"] = await frame.evaluate(() => document.getElementById("elixir-ai-key").type === "password");
 await shot(page, "ui-4-settings");
 await frame.evaluate(() => DE.getController("Common.Controllers.ElixirAI").dialog.close());

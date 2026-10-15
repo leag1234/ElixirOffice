@@ -1,16 +1,16 @@
 # Development environment (`make dev`)
 
-Linux development host. `$EO_WORK` is a working directory that holds the orchestrator checkout (`$EO_WORK/DocumentServer`, with its submodules, branch `elixiroffice`) and this repository (`$EO_WORK/elixiroffice`).
+Machine: development host. The upstream repository is in `/srv/elixiroffice/DocumentServer` (branch `elixir/dev`), our repository in `/srv/elixiroffice/elixiroffice`.
 
 ## Principle
 
 We reuse the upstream's dev environment (`DocumentServer/develop`): a container `eo` launched from the ready-made image `ghcr.io/euro-office/documentserver:latest-dev`. The checkout is mounted at `/develop`. Each component is rebuilt **inside** the container and then deployed into the installed tree (`$EO_ROOT`; the dev image is the upstream's and keeps the upstream's paths, under `/var/www/<upstream name>/documentserver`: our scripts read `EO_ROOT`, `EO_CONF` and `EO_LOG` in the container, never a hard-coded path). The image is never rebuilt to test a change; the C++ (core) is not recompiled.
 
-## Commands (from `$EO_WORK/elixiroffice`)
+## Commands (from `/srv/elixiroffice/elixiroffice`)
 
-| Command | Effect | Measured duration (<dev-host>, 2026-10-05) |
+| Command | Effect | Measured duration (development host, 2026-10-05) |
 |---|---|---|
-| `make up` | creates `$EO_WORK/dev-build-cache` if needed, starts the container (compose project "ElixirOffice development environment", `/build` volume), waits for `/healthcheck` | 40 s on first start |
+| `make up` | creates `/srv/elixiroffice/dev-build-cache` if needed, starts the container (compose project "ElixirOffice development environment", `/build` volume), waits for `/healthcheck` | 40 s on first start |
 | `make dev-tools` | installs in the container the C++ toolchain (clang, lld, `llvm-ar`…) for `make core/x2t`; idempotent, to be replayed after each recreation | 15 s |
 | `make dev` | `up`, then sdkjs and web-apps (full targets the first time, fast afterwards) | 39 s warm |
 | `make sdkjs` | webpack rebuild of sdkjs (4 editors) + deployment + cache invalidation | 3 to 4 s after a change, warm webpack cache |
@@ -34,7 +34,7 @@ make up && make dev && make example && make ai-proxy && make perf-tuning && make
 
 ## C++ compilation cache (`/build`)
 
-The long compilations done in the container (V8, 3rdParty, x2t, sdkjs stage) write into `/build`. This directory is mounted from the host (`$EO_WORK/dev-build-cache`, variable `BUILD_CACHE`) by `tools/dev/docker-compose.override.yml`, which the `Makefile` adds to the compose command: recreating the container therefore no longer loses anything. The upstream's compose file is not modified. `make dev-tools` reinstalls clang and creates the `llvm-*` links (the toolchain is not in the upstream image).
+The long compilations done in the container (V8, 3rdParty, x2t, sdkjs stage) write into `/build`. This directory is mounted from the host (`/srv/elixiroffice/dev-build-cache`, variable `BUILD_CACHE`) by `tools/dev/docker-compose.override.yml`, which the `Makefile` adds to the compose command: recreating the container therefore no longer loses anything. The upstream's compose file is not modified. `make dev-tools` reinstalls clang and creates the `llvm-*` links (the toolchain is not in the upstream image).
 
 State as of 2026-10-07: the x2t compilation (`make core/x2t`, V8 included) had failed at step 97/1202 for lack of an unversioned `llvm-ar`; the fix is in `tools/dev/setup-toolchain.sh`. Relaunch in the background: `docker exec -d eo sh -c 'cd / && nice make -f /develop/develop/setup/Makefile core/x2t > /build/x2t-build3.log 2>&1'`.
 
@@ -43,11 +43,11 @@ State as of 2026-10-07: the x2t compilation (`make core/x2t`, V8 included) had f
 A work item that changes the C++ converter (example: `w:fldLock`, core `elixir/parity2`) builds x2t in the `eo` container, which has the toolchain and the cached `/build/3rdParty` (V8 and the other libraries), from a copy of the worktree's core, into its own folders, then installs the result in the instance of the item:
 
 ```bash
-rsync -a --delete --exclude=.git $EO_WORK/wt/<item>/core/ $EO_WORK/dev-build-cache/core-<item>/
+rsync -a --delete --exclude=.git /srv/elixiroffice/wt/<item>/core/ /srv/elixiroffice/dev-build-cache/core-<item>/
 docker exec -d eo sh -c 'mkdir -p /build/x2t-<item> && cd /build/x2t-<item> && cmake -GNinja -DEO_CORE_OUTPUT_DIR=/build/x2t-<item>-out -DEO_CORE_TOOLS_DIR=/build/x2t-<item>-tools -DEO_CORE_3RD_PARTY_DIR=/build/3rdParty /build/core-<item>/X2tConverter/build/cmake && nice cmake --build . > /build/x2t-<item>.log 2>&1'
 # about 16 min the first time (3962 steps), incremental afterwards
 docker exec eo-<item> sh -c '[ -d /root/bin-orig ] || cp -a "$EO_ROOT/server/FileConverter/bin" /root/bin-orig'
-(cd $EO_WORK/dev-build-cache/x2t-<item>-out && tar cf - .) | docker exec -i eo-<item> sh -c 'cd "$EO_ROOT/server/FileConverter/bin" && tar xf - && chown -R ds:ds .'
+(cd /srv/elixiroffice/dev-build-cache/x2t-<item>-out && tar cf - .) | docker exec -i eo-<item> sh -c 'cd "$EO_ROOT/server/FileConverter/bin" && tar xf - && chown -R ds:ds .'
 ```
 
 The whole output folder is installed (x2t, libx2tlib.so and the libraries built with it), not x2t alone. A round trip without the editor: `x2t` with a parameter file (`m_sFileFrom`, `m_sFileTo`, `m_nFormatTo` 8192 for the editor binary, 65 for .docx), run in `eo` with `LD_LIBRARY_PATH=/build/x2t-<item>-out`.
@@ -55,7 +55,7 @@ The whole output folder is installed (x2t, libx2tlib.so and the libraries built 
 ## Access from the Mac
 
 ```bash
-ssh -fN -L 18080:localhost:8080 <dev-host>
+ssh -fN -L 18080:localhost:8080 dev-host
 ```
 
 then http://localhost:18080/example/editor?fileExt=docx&sample=true (sample document) or `?fileExt=docx` (empty document).

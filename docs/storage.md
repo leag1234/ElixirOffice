@@ -18,8 +18,8 @@ Nextcloud ≥ 16 (Login Flow v2) and A with Nextcloud 33 to 36 (constraint of th
 application).
 
 Branches (nothing is pushed): `elixir/nc` in the DocumentServer superproject, web-apps and
-document-server-integration (worktree `$EO_WORK/wt/nc`); `feat/nc` here; fork of the
-Nextcloud application in `$EO_WORK/upstream-extra/elixiroffice-nextcloud`, branch
+document-server-integration (worktree `/srv/elixiroffice/wt/nc`); `feat/nc` here; fork of the
+Nextcloud application in `/srv/elixiroffice/upstream-extra/elixiroffice-nextcloud`, branch
 `elixir/nc`. Patch series: `patches/elixiroffice-nextcloud/`,
 `patches/document-server-integration/nc/`, `patches/web-apps/nc/`.
 
@@ -138,7 +138,7 @@ any storage.
 
 ## 3. Identity
 
-No more fixed upstream sample user. The editor's identity (`editorConfig.user`: id, name, image) comes from:
+No more "John Smith". The editor's identity (`editorConfig.user`: id, name, image) comes from:
 
 1. **connected to Nextcloud**: the Nextcloud user (`display-name`, email, avatar
    `index.php/avatar/<id>/128`, copied at login and served by
@@ -162,14 +162,14 @@ does not use `editorConfig.user`.
 
 Mode A: Nextcloud identity, managed by the upstream app.
 
-## 4. Setup (development, <dev-host>)
+## 4. Setup (development, development host)
 
 ```bash
 # isolated document server (worktree wt/nc) and start page from the sources
-cd $EO_WORK/wt/nc/develop && ./eo.sh up nc 8190
-cd $EO_WORK/wt/nc-repo && make example CONTAINER=eo-nc UPSTREAM=$EO_WORK/wt/nc
+cd /srv/elixiroffice/wt/nc/develop && ./eo.sh up nc 8190
+cd /srv/elixiroffice/wt/nc-repo && make example CONTAINER=eo-nc UPSTREAM=/srv/elixiroffice/wt/nc
 # ElixirOffice Nextcloud app (fork) and local Nextcloud (compose project "elixir-nc", port 8191)
-tools/nextcloud-app/build.sh $EO_WORK/upstream-extra/elixiroffice-nextcloud
+tools/nextcloud-app/build.sh /srv/elixiroffice/upstream-extra/elixiroffice-nextcloud
 tools/nextcloud-app/setup.sh eo-nc http://localhost:8190/
 ```
 
@@ -180,8 +180,8 @@ from the container) and disables the first-run wizard and rate limiting
 (test instance only).
 
 Address to enter in "Connect" for the local Nextcloud: `http://172.17.0.1:8191`
-(reachable both by the browser on <dev-host> and by the container). From the Mac:
-`ssh -fN -L 8190:localhost:8190 -L 8191:localhost:8191 <dev-host>`, then
+(reachable both by the browser on development host and by the container). From the Mac:
+`ssh -fN -L 8190:localhost:8190 -L 8191:localhost:8191 dev-host`, then
 http://localhost:8190/example/ (mode B, connecting `http://localhost:8191` does not work because the
 container cannot reach it: use Nextcloud in the browser for mode A,
 http://localhost:8191/).
@@ -200,12 +200,12 @@ in `custom_apps/elixiroffice` and set `DocumentServerUrl`, `DocumentServerIntern
 | `tests/nextcloud/connector.mjs` (B) | local profile (requested name, initials, author of comments and revisions), developer mode, end-to-end Login Flow v2, cookie, recents, folders, New, upload, opening, Nextcloud identity (name, avatar, author of comments and revisions), Ctrl+S, close, reopen, conflict (copy + notice), co-editing between two connected users (names, comment), session files (modes, no data in the clear), logout (app password deleted on the server) | see § 7 |
 
 ```bash
-cd $EO_WORK/wt/nc-repo
+cd /srv/elixiroffice/wt/nc-repo
 node tests/nextcloud/inside.mjs
 node tests/nextcloud/connector.mjs     # NC_LOGIN_URL, EO_BASE, EO_CONTAINER if another instance
 ```
 
-## 6. murena.io: checklist for the owner
+## 6. murena.io: operator checklist
 
 Not tested on murena.io (no connection to a real account during development). To be done
 with your account, on an ElixirOffice instance reachable over https or locally:
@@ -241,7 +241,7 @@ search. Note the exact error messages.
 
 ## 7. Results
 
-Runs of 2026-10-06 on <dev-host> (instance `eo-nc` :8190, local Nextcloud 35.0.1 :8191, headless Chromium):
+Runs of 2026-10-06 on development host (instance `eo-nc` :8190, local Nextcloud 35.0.1 :8191, headless Chromium):
 
 - **A, `inside.mjs`: 13/13.** "Open in ElixirOffice" by default in Files; no visible upstream
   brand (Files, editor); editor user = Nextcloud user;
@@ -260,3 +260,33 @@ Fixed along the way: document server save URL rewritten to the internal address;
 `SEARCH` with exact MIME types (Nextcloud rejects partial wildcards); retry on 423
 (locked file); editing sessions indexed by document key (a late callback from a
 session ended in conflict overwrote the next session of the same file).
+
+## 8. Rename and Save As folders (Session E review candidate)
+
+This server remains example-app storage scoped by client address (including X-Forwarded-For), not an authenticated per-user boundary. Existing download/history addressing can target another address folder; the new file-operation session grants do not change that pre-existing limitation. Use the connected cloud account for account-based storage access.
+
+The start-page connector (architecture B) supplies Rename and Save a Copy callbacks for its hosted editors. This server renames the stored file and its version/force-save history; subsequent callbacks continue to use the active document key and the new path. New editors join that active key until the document-server session ends. Local folder names are confined to the current client-address storage root; symlink folders, traversal, reserved history names and collisions are rejected. The existing delete validator remains in place.
+
+Nextcloud/Murena Rename uses WebDAV MOVE with Overwrite:F and If-Match, after checking the open file's rename permission and saved ETag. A file changed externally must be reopened before renaming. The registry follows different folder-share mount paths and retains valid single-file aliases. File operations and callbacks serialize by file identity. Conflict/converted copies are resolved separately in each connected account’s mounted folder; an account without access to the new copy is removed from that copy’s registry. The provider protocol is documented in [Nextcloud's WebDAV API](https://docs.nextcloud.com/server/stable/developer_manual/client_apis/WebDAV/basic.html).
+
+Local/cloud registries bind Rename and copy grants to the authenticated browser and existing editor user policy. Direct requests cannot bypass the legacy restricted-user download policy. Cloud destination/provider permissions are checked separately. Reopen documents from older registry entries before these operations.
+
+In Save As, the Save a Copy format cards convert the current editor content, then open a picker in the current storage. The separate Download copy cards retain browser downloads, including hosted PDF export. A copy has an independent destination and never silently replaces an existing file. This server can create a new folder; the cloud picker lists folders available to the connected account and checks destination file-creation permission (WebDAV C). The original editor remains open; use Open copy to continue with the new file. Zipped image/web-page exports offer Download copy instead. No app password is sent to the editor.
+
+Desktop Rename operates on its selected stored file without discarding unsaved edits; saving later follows the new path. Case-only renames work on a case-insensitive filesystem. A new or converted document has no destination until its first native save. Native Save As uses the OS folder/file dialog and updates the active name for the current format. Other-format exports preserve the active source.
+
+Browser-local input is an immutable selected File. Rename downloaded copy changes the name of future downloads; it cannot rename the original on disk. Save As downloads the chosen format; folder choice is controlled by the browser's download settings/dialog. This preserves the original-file boundary of local conversion.
+
+Acceptance commands use owned instances and public fixtures:
+
+- tests/fileops/copy-formats.mjs (EO_BASE): pending edits in PDF/RTF storage copies, including real RTF reopen.
+- tests/fileops/hosted.mjs (EO_BASE; EO_FILEOPS_FORMAT and EO_FILEOPS_FIXTURE for Excel/PowerPoint).
+- tests/fileops/nextcloud.mjs and nextcloud-aliases.mjs (EO_BASE, owned NC_BASE/NC_ENV); credentials are never printed.
+- tests/fileops/callback-retry.cjs (inside an owned example environment, EO_EXAMPLE_ROOT/EO_CALLBACK_FIXTURE and normal Node config); tests a failed download, retry and actual delayed RTF conversion.
+- tests/fileops/browser-local.mjs (EO_BASE, EO_LOCAL_FIXTURES, EO_LOCAL_OUT).
+- tests/fileops/native.cjs (isolated EO_DESKTOP_ROOT, packaged executable, PID-scoped native input helper).
+- tests/desktop/rename.test.cjs and tests/fileops/storage-paths.test.cjs (EO_UPSTREAM for the latter).
+
+The review evidence and platform limits are recorded in the file operations handoff. Actual Murena, native Windows/macOS GUI dialogs and personal cloud documents are outside the automated fixture runs.
+
+New Rename/copy/folder names normalize to NFC and reject Windows device names, bidi controls and names over 255 UTF-8 bytes; existing stored file/folder paths retain their previous lookup rules. Rename hashes stream under the active-key lock. Picker labels and common errors use English/French catalogs with the existing English fallback. On upgrade, This server keys change once; reopen documents that were open during deployment before shared editing resumes. Nextcloud keys are unaffected.

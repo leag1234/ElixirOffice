@@ -41,9 +41,9 @@ with their original license; the modification notice is in the "version" field (
 | URW Gothic Metric | URW Gothic (URW base 35) | Century Gothic | 0.01% | AGPL-3.0 + exception |
 | URW Gothic Ecole Metric | URW Gothic (URW base 35) | Script École (non-redistributable school font) | 0.6% | AGPL-3.0 + exception |
 
-_Playwrite FR Moderne Metric_ and _Playwrite Seyes Metric_: likewise, vertical metrics, scales and position of the Seyès lines read from private references (real corpus), supplied by `FONT_METRICS_EXTRA` (entries `Cursivestandard` and `RuledCursive`); without them these two families are not built (Playwrite FR Moderne and Trad remain, shipped as is).
+_Playwrite FR Moderne Metric_ and _Playwrite Seyes Metric_: likewise, vertical metrics, scales and position of the Seyès lines read from private references (real corpus), supplied by `FONT_METRICS_EXTRA` (entries `Cursivestandard` and `CursifLignes`); without them these two families are not built (Playwrite FR Moderne and Trad remain, shipped as is).
 
-_URW Gothic Ecole Metric_: the vertical metrics of Script École were taken from a private reference and are not versioned; `build.py` only builds this family if `FONT_METRICS_EXTRA` supplies them (on <build-host>: `corpus-private/font-metrics-private.json`). To be published when a public copy of Script École (or the owner's agreement) allows versioning them.
+_URW Gothic Ecole Metric_: the vertical metrics of Script École were taken from a private reference and are not versioned; `build.py` only builds this family if `FONT_METRICS_EXTRA` supplies them (on build-host: `corpus-private/font-metrics-private.json`). To be published when a public copy of Script École (or the owner's agreement) allows versioning them.
 
 | Comic Relief Metric | Comic Relief 1.210 (via google/fonts) | Comic Sans MS | 0.03% | OFL 1.1 |
 | Archivo Black Metric | Archivo Black (Omnibus-Type) | Arial Black | < 0.01% | OFL 1.1 |
@@ -53,7 +53,7 @@ _URW Gothic Ecole Metric_: the vertical metrics of Script École were taken from
 | Playwrite FR Moderne | Playwrite FR Moderne (TypeTogether / Typotheque; google/fonts commit 7085eb8, v1.003), static instance wght 400 | – (free school cursive, fallback of the derivatives below; no "Reserved Font Name" in Playwrite's OFL: the name is kept) | – | OFL 1.1 |
 | Playwrite FR Trad | Playwrite FR Trad (same), static instance wght 400 | – (same) | – | OFL 1.1 |
 | Playwrite FR Moderne Metric | Playwrite FR Moderne, widths scaled (private factor), GPOS/GDEF removed, vertical metrics of Cursive standard | Cursive standard, Belle Allure, unknown school cursives (font declared "script" by the document) | see `docs/fonts.md` § 5 (weak sample) | OFL 1.1 |
-| Playwrite Seyes Metric | Playwrite FR Trad, widths and x-height scaled (factors read from a private reference), Seyès lines drawn in each glyph, GPOS/GDEF removed, vertical metrics of ruled school cursive | ruled school cursive (school font with embedded Seyès lines, non-redistributable) | 3.9% (20 characters) | OFL 1.1 |
+| Playwrite Seyes Metric | Playwrite FR Trad, widths and x-height scaled (factors read from a private reference), Seyès lines drawn in each glyph, GPOS/GDEF removed, vertical metrics of Cursif & Lignes | Cursif & Lignes (school font with embedded Seyès lines, non-redistributable) | 3.9% (20 characters) | OFL 1.1 |
 | Elixir Symbols | Noto Sans Symbols 2 + Noto Sans Symbols (instance 400), merged subset | Wingdings, Wingdings 2, Wingdings 3, Webdings (glyphs at the Unicode code points of the symbols, vertical metrics of Wingdings) | – | OFL 1.1 |
 
 "Width gap": average, weighted by occurrences, of the absolute width gap of the characters
@@ -63,7 +63,7 @@ actually used in the reference PDFs (as a fraction of an em).
 
 | Font | Reason |
 |---|---|
-| Luciole | text fonts under CC BY 4.0 (only the math font is under OFL): license outside the list; to be decided by the owner (CC BY allows redistribution with attribution) |
+| Luciole | text fonts under CC BY 4.0 (only the math font is under OFL): license outside the list; to be decided by Gaël (CC BY allows redistribution with attribution) |
 | Belle Allure (Jean Boyault) | free for teachers and pupils, redistribution not allowed: replaced by Playwrite FR Moderne Metric |
 | Cursive standard | distributed on dafont without an identifiable license: replaced by Playwrite FR Moderne Metric |
 | Script École, KG Primary Penmanship, "Hello" fonts | free for personal use / without a redistribution license: replaced by a measured derivative when a free candidate is close enough, otherwise by the default rule (Calibri → Carlito) |

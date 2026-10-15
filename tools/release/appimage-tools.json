@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "architecture": "x86_64",
+  "channel": "latest-all",
+  "builder_image": "sha256:4ed7b16d6e94e9dd6bd55a1e6123f010e976c5bb6125df5322129173038fbffd",
+  "builder_recipe": "tools/flatpak/Dockerfile at 409381ff1cc94ee463aa6ea22613e5c02d7640e5; source config8d19470 normalized on Docker29, identical rootfs/config",
+  "files": {
+    "appimagetool.AppImage": {
+      "url": "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage",
+      "sha256": "95cbe7cce9717fce90c484e34052ee7c7f1d7635b33c12525b4776826a7d29b6",
+      "bytes": 15092216,
+      "release": "continuous",
+      "asset_id": 610035789,
+      "source_commit": "854e19e951900cf141245b384d45735942521abe",
+      "repository": "AppImage/appimagetool"
+    },
+    "runtime.elf": {
+      "url": "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64",
+      "sha256": "156f4bdbde9c52d01814600013e0a273f0118dc2de98975f3c8c63427ec79074",
+      "bytes": 944632,
+      "release": "continuous",
+      "asset_id": 596078161,
+      "source_commit": "8f39b89e2ac31e1640b3d3f7e9a5108e6ce805fa",
+      "repository": "AppImage/type2-runtime"
+    },
+    "zsync.deb": {
+      "url": "https://deb.debian.org/debian/pool/main/z/zsync/zsync_0.6.2-5_amd64.deb",
+      "sha256": "b54229c2cf64efeee5cce12ec3e48c910a36e509bdf644825328e71be3a254ad",
+      "bytes": 76524,
+      "version": "0.6.2-5",
+      "package_index_url": "https://deb.debian.org/debian/dists/bookworm/main/binary-amd64/Packages.xz",
+      "package_index_sha256": "9e0b5aabb2465b3d2e7a7fe27f9913846277833f7a2826e7767acccff5b588c5"
+    },
+    "appimagetool.LICENSE": {
+      "url": "https://raw.githubusercontent.com/AppImage/appimagetool/854e19e951900cf141245b384d45735942521abe/LICENSE",
+      "bytes": 1513,
+      "sha256": "d726eb47bb96b7e7f8971a1431575ab4fd8780b5d2efde3552c70ef71469015f"
+    },
+    "runtime.LICENSE": {
+      "url": "https://raw.githubusercontent.com/AppImage/type2-runtime/8f39b89e2ac31e1640b3d3f7e9a5108e6ce805fa/LICENSE",
+      "bytes": 1678,
+      "sha256": "aa154fc9070614bbe7921f89db11efd1dba7a1f3a41685958110e2230f9c0ca1"
+    },
+    "file.deb": {
+      "url": "https://deb.debian.org/debian/pool/main/f/file/file_5.44-3_amd64.deb",
+      "sha256": "2c57221bf8cc0ff5d2295ececb9215cc1b9ff9040dacb152c385bba3087ab1df",
+      "bytes": 42472,
+      "version": "1:5.44-3",
+      "package_index_url": "https://deb.debian.org/debian/dists/bookworm/main/binary-amd64/Packages.xz",
+      "package_index_sha256": "9e0b5aabb2465b3d2e7a7fe27f9913846277833f7a2826e7767acccff5b588c5"
+    },
+    "libmagic-mgc.deb": {
+      "url": "https://deb.debian.org/debian/pool/main/f/file/libmagic-mgc_5.44-3_amd64.deb",
+      "sha256": "bad01673ba5dfb9b5db4f3ae6a71f18d492cb6801eab45ad3c7d483c0a1f6ad2",
+      "bytes": 304888,
+      "version": "1:5.44-3",
+      "package_index_url": "https://deb.debian.org/debian/dists/bookworm/main/binary-amd64/Packages.xz",
+      "package_index_sha256": "9e0b5aabb2465b3d2e7a7fe27f9913846277833f7a2826e7767acccff5b588c5"
+    },
+    "libmagic1.deb": {
+      "url": "https://deb.debian.org/debian/pool/main/f/file/libmagic1_5.44-3_amd64.deb",
+      "sha256": "a241c2adc7438a7e217f32544028489981768a349d3e48673392703255c7b88e",
+      "bytes": 103752,
+      "version": "1:5.44-3",
+      "package_index_url": "https://deb.debian.org/debian/dists/bookworm/main/binary-amd64/Packages.xz",
+      "package_index_sha256": "9e0b5aabb2465b3d2e7a7fe27f9913846277833f7a2826e7767acccff5b588c5"
+    }
+  },
+  "zsync_copyright_sha256": "735768da1a7363922bcf867e721ad1276b165fbcdcb7a811117bf84b628f72dd",
+  "licences": {
+    "appimagetool": "MIT",
+    "runtime": "MIT",
+    "zsync": "See pinned Debian copyright, including Artistic and zlib terms",
+    "file/libmagic": "See pinned Debian copyright files retained in the verified tool cache"
+  },
+  "file_copyright_sha256": {
+    "file": "96c8c6ab85931f81120eb40d42f3c40c76ee328d024cfc7ae31acaa99971d54c",
+    "libmagic1": "96c8c6ab85931f81120eb40d42f3c40c76ee328d024cfc7ae31acaa99971d54c",
+    "libmagic-mgc": "96c8c6ab85931f81120eb40d42f3c40c76ee328d024cfc7ae31acaa99971d54c"
+  }
+}

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const FR = /\b(le|la|les|des|nous|vous|et|est|sont|à|aux|du|une|doivent)\b/i, EN = /\b(the|and|to|of|we|will|at|must|are|is|back|bring|parents|museum|school)\b/i;
 export function check(before, after, run) {

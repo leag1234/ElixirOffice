@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Private corpus, bench side (docs/client-pdf.md): no file name in bench output, forced error included.
 // Run: node --test tools/client-pdf/test-anon.mjs
 import { test } from "node:test";

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // A column chart written by openpyxl (axPos="l" on both axes) keeps a horizontal category axis and a vertical value axis.
 //   EO_BASE=http://localhost:PORT node tests/beta-fixes/chart-axes.mjs
 import path from "node:path";

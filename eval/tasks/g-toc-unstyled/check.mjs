@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const H1 = ["1. Diagnostic", "2. Objectifs", "3. Actions et calendrier"];
 const H2 = ["1.1 Résultats des évaluations", "1.2 Climat scolaire", "2.1 Lecture et écriture", "2.2 Mathématiques"];

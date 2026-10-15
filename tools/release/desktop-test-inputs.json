@@ -6,7 +6,11 @@
     "apps/common/main/lib/elixir-ai/Strings.js",
     "apps/documenteditor/main/app/view/FileMenu.js",
     "apps/spreadsheeteditor/main/app/view/FileMenu.js",
-    "apps/presentationeditor/main/app/view/FileMenu.js"
+    "apps/presentationeditor/main/app/view/FileMenu.js",
+    "apps/common/main/lib/elixir-local/Pdf.js",
+    "apps/common/main/lib/elixir-local/PdfMessages.js",
+    "apps/common/main/lib/elixir-local/PdfWriter.js",
+    "apps/pdfeditor/main/app/controller/Main.js"
   ],
   "locales": {
     "apps/documenteditor/main/locale": 45,

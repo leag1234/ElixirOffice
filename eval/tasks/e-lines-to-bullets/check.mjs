@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const L = ["une trousse complète", "un cahier de brouillon", "une règle de 30 cm", "des crayons de couleur"];
 export function check(before, after, run) {

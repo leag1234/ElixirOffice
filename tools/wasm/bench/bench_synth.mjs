@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Cold/warm open+save benchmark of x2t.wasm on one file (run once per file).
 // usage: node --expose-gc bench_synth.mjs X2T_JS FILE FONTS_DIR [RUNS]
 // cold  = fresh process: compile + first instance (+fonts) + first conversion

@@ -18,7 +18,10 @@ const root=path.resolve(__dirname,'../..');
  assert(fs.statSync(archive).size>0,'Missing x64 application payload');
  run(zip,['t',archive]);
  run(zip,['x',archive,'-o'+path.join(out,'payload')]);
- for(const base of [path.join(dist,'win-unpacked'),path.join(out,'payload')])run('python3',[path.join(root,'tests/desktop/verify-resources.py'),path.join(base,'resources/assets')]);
+ for(const base of [path.join(dist,'win-unpacked'),path.join(out,'payload')]){
+  run(process.execPath,[path.join(root,'tools/desktop/check-version.cjs'),path.join(base,'resources/app.asar')]);
+  run('python3',[path.join(root,'tests/desktop/verify-resources.py'),path.join(base,'resources/assets')]);
+ }
  run(process.execPath,[path.join(root,'tests/desktop/windows-package.cjs'),dist,path.join(out,'payload')]);
  console.log('PASS Windows installer artifact acceptance; native Windows checks remain unverified');
 })().catch(error=>{console.error(error);process.exitCode=1});

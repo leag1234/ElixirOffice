@@ -1,0 +1,4 @@
+#!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-only
+set -eu
+exec zypak-wrapper /app/lib/elixiroffice/elixiroffice "$@"

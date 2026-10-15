@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const ITEMS = [["Lucas", "14/20", "Très bien"], ["Emma", "17/20", "Excellent"], ["Noah", "11/20", "Assez bien"], ["Chloé", "15/20", "Très bien"]];
 export function check(before, after, run) {

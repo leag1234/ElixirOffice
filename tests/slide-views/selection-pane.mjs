@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Selection pane of the presentation editor (Alt+F10; Home > Arrange > Selection Pane).
 // Usage: node tests/slide-views/selection-pane.mjs http://localhost:8121 [mac]
 import { createRequire } from "module";

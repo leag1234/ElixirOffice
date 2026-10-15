@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Test cases of the Word shortcut matrix (docs/shortcuts-word.csv).
 //
 // A case: { id, win, mac, doc, at|sel|pre, check }

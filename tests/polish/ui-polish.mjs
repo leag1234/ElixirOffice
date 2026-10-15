@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // UI polish checks (docs/ui.md, "Finitions") in Chromium, Firefox and WebKit at 1440x900, 2x:
 //  - start page rail: no label text overflows its box or the rail (several languages,
 //    disconnected and connected), account avatar fully visible;

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Exercise the production entrypoint: off -> managed mock -> off, by recreation.
 // Reads only this test installation's generated private env; never emits its contents.
 import assert from 'node:assert/strict';

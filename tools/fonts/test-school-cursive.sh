@@ -1,5 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
 # Regression test of the French school cursive substitutes on synthetic fixtures (no real documents).
 # Usage: tools/fonts/test-school-cursive.sh [IMAGE]   (image with the font pack, e.g. elixiroffice/documentserver:fonts-7;
 # the "script" check needs an x2t that writes w:family to the font table binary table, see docs/fonts.md)

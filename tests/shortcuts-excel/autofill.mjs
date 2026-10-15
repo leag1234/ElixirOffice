@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Auto Fill Options (Microsoft Excel): the button after a fill handle drag and its five options.
 //   node tests/shortcuts-excel/autofill.mjs [--platform win|mac] [--out results.json]   (EO_BASE=http://host:port)
 import fs from "node:fs";
@@ -104,11 +103,11 @@ await test("autofill.fill-without-formatting", async () => {
   return eq([before, await cells(["D3", "D4", "D5"]), await bold("D3"), await bold("D2")], [true, ["3", "4", "5"], false, true], "bold D3 before, values, bold D3 after, source bold");
 });
 await test("autofill.flash-fill", async () => {
-  await setValues(`s.GetRange("D1").SetValue("Jane Doe"); s.GetRange("D2").SetValue("Mary Jones"); s.GetRange("D3").SetValue("Peter Brown"); s.GetRange("E1").SetValue("Jane");`);
+  await setValues(`s.GetRange("D1").SetValue("John Smith"); s.GetRange("D2").SetValue("Mary Jones"); s.GetRange("D3").SetValue("Peter Brown"); s.GetRange("E1").SetValue("John");`);
   await dragFill("E1", "E3");
   const i1 = await info();
   await choose(FT.flash);
-  return eq([i1 && i1.flash, await cells(["E1", "E2", "E3"]), (await info()).selected], [true, ["Jane", "Mary", "Peter"], FT.flash], "flash offered, values, selected");
+  return eq([i1 && i1.flash, await cells(["E1", "E2", "E3"]), (await info()).selected], [true, ["John", "Mary", "Peter"], FT.flash], "flash offered, values, selected");
 });
 await test("autofill.flash-fill-not-offered-for-rows", async () => {
   await setValues(`s.GetRange("D1").SetValue(1); s.GetRange("E1").SetValue(2);`);

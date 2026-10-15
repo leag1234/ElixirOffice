@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Shared helpers of the keyboard-shortcut suites (Playwright against a running editor).
 //
 // Environment:
 //   EO_BASE   editor instance (default http://localhost:8095)
-//   PW_DIR    directory where the playwright package is installed (default $EO_WORK/pw)
+//   PW_DIR    directory where the playwright package is installed (default /srv/elixiroffice/pw)
 //
 // The editor is driven like a user: real key presses in the document, then the
 // effect is read back from the editor (logic document, builder API, DOM).

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Word keyboard shortcut matrix: curated source of docs/shortcuts-word.csv.
 
   python3 tools/shortcuts/matrix.py            # writes docs/shortcuts-word.csv

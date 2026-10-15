@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Shared helper for the private corpus (docs/client-pdf.md, docs/fidelity.md): the same rule as
 // tools/fidelity/corpus_anon.py. A corpus is private with --private, EO_PRIVATE_CORPUS=1 or a path
 // containing "corpus-private". Then every id a tool prints or writes is anonId(relative path), and

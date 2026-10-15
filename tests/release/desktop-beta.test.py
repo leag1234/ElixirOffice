@@ -11,6 +11,7 @@ from unittest.mock import patch
 import unittest
 from types import SimpleNamespace
 import os
+import xml.etree.ElementTree as ET
 
 source = Path(__file__).resolve().parents[2] / "tools/release/desktop_beta.py"
 spec = importlib.util.spec_from_file_location("desktop_beta", source)
@@ -18,6 +19,102 @@ release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 
 class ReleaseInputs(unittest.TestCase):
+    def build_python(self):
+        helper = source.parents[2] / "tools/desktop/build-python.py"
+        spec = importlib.util.spec_from_file_location("build_python", helper)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_build_python_commands_are_private_and_ignore_user_pip_configuration(self):
+        helper = self.build_python()
+        root, cache = Path("/owned source"), Path("/owned cache")
+        commands = helper.commands(root, cache, "/usr/bin/python3")
+        self.assertEqual(commands[0], ["/usr/bin/python3", "-m", "venv",
+                                      "--without-pip", str(cache / "python")])
+        for command in commands[1:]:
+            self.assertEqual(command[:5], [str(cache / "python/bin/python3"),
+                                          "-m", "pip", "--isolated", "install"])
+            self.assertNotIn("--user", command)
+        self.assertIn("--no-index", commands[1])
+        self.assertIn("--no-deps", commands[1])
+        self.assertEqual(commands[1][-1], str(cache / "pip/pip-25.2-py3-none-any.whl"))
+        self.assertEqual(commands[2][-2:], ["-r", str(root / "tools/desktop/requirements.txt")])
+        self.assertEqual(commands[2][commands[2].index("--cache-dir") + 1], str(cache / "pip"))
+        env = helper.clean_environment(cache, "/portable/node:/usr/bin:/bin")
+        self.assertEqual(env, {"HOME": str(cache / "home"), "TMPDIR": str(cache / "tmp"),
+                               "PATH": "/portable/node:/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE": "1"})
+        self.assertNotIn("PYTHONPATH", env)
+
+    def test_platform_wrappers_select_private_python_before_verification_and_npm(self):
+        mac = (source.parents[2] / "tools/desktop/mac.sh").read_text()
+        setup = mac.index('python3 "$ROOT/tools/desktop/build-python.py" "$ROOT" "$MAC_BUILD_CACHE"')
+        activate = mac.index('export PATH="$MAC_BUILD_CACHE/python/bin:$PATH"')
+        self.assertLess(setup, activate)
+        self.assertLess(activate, mac.index('tests/desktop/verify-resources.py'))
+        self.assertLess(activate, mac.index('npm run test'))
+        self.assertIn('env -i HOME="$MAC_BUILD_CACHE/home"', mac[:activate])
+        windows = (source.parents[2] / "tools/desktop/windows.sh").read_text()
+        self.assertLess(windows.index('build-python.py /project /work'),
+                        windows.index('export PATH="/work/python/bin:$PATH"'))
+        self.assertLess(windows.index('export PATH="/work/python/bin:$PATH"'),
+                        windows.index('npm ci; npm run test; npm run package:windows'))
+
+    def test_build_python_rejects_changed_cached_bootstrap_before_execution(self):
+        helper = self.build_python()
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder) / "cache"
+            wheel = cache / "pip/pip-25.2-py3-none-any.whl"
+            wheel.parent.mkdir(parents=True)
+            wheel.write_bytes(b"not the approved bootstrap")
+            with patch.object(helper.subprocess, "run") as run:
+                with self.assertRaisesRegex(RuntimeError, "bootstrap checksum"):
+                    helper.provision(Path(folder), cache)
+                run.assert_not_called()
+
+    def test_build_python_rejects_a_symlinked_cache(self):
+        helper = self.build_python()
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            target = root / "other"
+            target.mkdir()
+            cache = root / "cache"
+            cache.symlink_to(target, target_is_directory=True)
+            with self.assertRaisesRegex(RuntimeError, "symbolic link"):
+                helper.provision(root, cache)
+            self.assertEqual(list(target.iterdir()), [])
+
+    def test_final_pdf_units_have_frozen_upstream_inputs(self):
+        inventory = json.loads((source.parent / "desktop-test-inputs.json").read_text())
+        required = {
+            "apps/common/main/lib/elixir-local/Pdf.js",
+            "apps/common/main/lib/elixir-local/PdfMessages.js",
+            "apps/common/main/lib/elixir-local/PdfWriter.js",
+            "apps/pdfeditor/main/app/controller/Main.js",
+        }
+        self.assertTrue(required <= set(inventory["files"]))
+        self.assertEqual(len(inventory["files"]), len(set(inventory["files"])))
+
+
+    def test_published_version_cannot_be_repackaged(self):
+        package = json.loads((source.parents[2] / "desktop/package.json").read_text())
+        self.assertEqual(release.validate_desktop_version(package), "0.2.0")
+        with self.assertRaisesRegex(ValueError, "already published"):
+            release.validate_desktop_version({**package, "version": "0.1.0"})
+        lock = json.loads((source.parents[2] / "desktop/package-lock.json").read_text())
+        self.assertEqual(lock["version"], package["version"])
+        self.assertEqual(lock["packages"][""]["version"], package["version"])
+        metainfo = ET.parse(source.parents[2] / "tools/flatpak/org.elixiroffice.desktop.metainfo.xml")
+        entry = metainfo.find("./releases/release")
+        self.assertEqual(entry.attrib["version"], package["version"])
+        self.assertEqual(entry.attrib["date"], "2026-10-13")
+        notes = (source.parent / "desktop-beta3-release-notes.md").read_text()
+        self.assertTrue(notes.startswith("# ElixirOffice 0.2.0 beta (desktop)"))
+        self.assertIn("`v0.2.0`", notes)
+        for suffix in ("x86_64.AppImage", "x86_64.AppImage.zsync", "linux-amd64.deb", "win-x64.exe", "mac-arm64.dmg", "x86_64.flatpak"):
+            self.assertIn("ElixirOffice-0.2.0-" + suffix, notes)
+
+
     def test_archive_places_upstream_inputs_in_mac_isolated_home(self):
         # Public fixtures test export layout only, never a packaged-app gate.
         with tempfile.TemporaryDirectory() as folder:
@@ -56,6 +153,20 @@ class ReleaseInputs(unittest.TestCase):
             selected_inventory = build.product / "tools/release/desktop-test-inputs.json"
             selected_inventory.parent.mkdir(parents=True)
             selected_inventory.write_bytes((build.driver / "desktop-test-inputs.json").read_bytes() + b"\n")
+            template_sources = {
+                "branding/example/nodejs/public/elixir/brand/templates/templates.json": b'{"templates":[]}',
+                "branding/example/nodejs/public/elixir/brand/templates/ar/letterhead.docx": b"public localized source",
+                "branding/example/nodejs/public/elixir/brand/templates/ar/letterhead.png": b"public source preview",
+                "tools/example/template-layouts/letterhead.docx": b"public source layout",
+                "tools/example/template-layouts/localized/ur/letterhead.docx": b"public unshipped unit variant",
+            }
+            for name, data in template_sources.items():
+                file = build.product / name
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(data)
+            stale_cache = build.product / "tools/example/template-layouts/__pycache__/stale.pyc"
+            stale_cache.parent.mkdir()
+            stale_cache.write_bytes(b"unrelated build cache")
             archive = build.archive()
             with tarfile.open(archive) as exported:
                 self.assertEqual(exported.extractfile("tools/release/desktop-test-inputs.json").read(), selected_inventory.read_bytes())
@@ -66,6 +177,10 @@ class ReleaseInputs(unittest.TestCase):
                 for name in manifest["files"]:
                     self.assertTrue(exported.getmember("desktop/assets/" + name).isfile())
                 self.assertNotIn("desktop/dist/stale.exe", exported.getnames())
+                for name, data in template_sources.items():
+                    self.assertTrue(exported.getmember(name).isfile())
+                    self.assertEqual(exported.extractfile(name).read(), data)
+                self.assertNotIn(str(stale_cache.relative_to(build.product)), exported.getnames())
             self.assertEqual(release.verify_archive_resources(archive, assets), len(manifest["files"]))
 
     def test_upstream_export_uses_recorded_blobs_not_ambient_head(self):
@@ -119,7 +234,7 @@ class ReleaseInputs(unittest.TestCase):
             self.assertEqual(manifest["locale_count"], 135)
             self.assertEqual(manifest["locale_counts"], {name:45 for name in inventory["locales"]})
             self.assertEqual(manifest["inventory_sha256"], release.digest(source.parent / "desktop-test-inputs.json"))
-            self.assertEqual(len(manifest["files"]), 142)
+            self.assertEqual(len(manifest["files"]), len(inventory["files"]) + sum(inventory["locales"].values()) + 1)
             for name in inventory["files"]:
                 self.assertEqual((destination / "web-apps" / name).read_bytes(), subprocess.check_output(["git", "-C", repo, "show", recorded + ":" + name]))
             self.assertEqual(manifest["manifest_sha256"], release.digest(destination / "INPUTS.json"))
@@ -138,6 +253,50 @@ class ReleaseInputs(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 release.export_test_upstream(root, recorded, "recorded-DS", destination)
 
+    def test_appimage_update_inventory_is_paired_and_excludes_updater_feeds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image, control = release.appimage_names("0.2.0")
+            self.assertEqual(image, "ElixirOffice-0.2.0-x86_64.AppImage")
+            (root / image).write_bytes(b"public fixture")
+            with self.assertRaisesRegex(ValueError, "Missing"):
+                release.public_artifact_names(root)
+            (root / control).write_bytes(b"public control fixture")
+            (root / "ElixirOffice-0.2.0-linux-amd64.deb").write_bytes(b"unchanged deb")
+            (root / "builder-effective-config.yaml").write_text("internal build-only receipt")
+            names = release.public_artifact_names(root)
+            self.assertIn(image, names)
+            self.assertIn(control, names)
+            self.assertNotIn("builder-effective-config.yaml", names)
+            inventory = release.checksum_inventory(root, names)
+            self.assertEqual(set(inventory), set(names))
+            self.assertIn(control, (root / "SHA256SUMS").read_text())
+            for feed in ["latest-linux.yml", "beta-linux.yml", "app-update.yml"]:
+                (root / feed).write_text("unwanted updater feed")
+                with self.assertRaisesRegex(ValueError, "updater feed"):
+                    release.public_artifact_names(root)
+                (root / feed).unlink()
+            alias = root / "ElixirOffice-0.2.0-win-x64.exe"
+            alias.symlink_to(root / image)
+            with self.assertRaisesRegex(ValueError, "regular"):
+                release.public_artifact_names(root)
+            alias.unlink()
+            alias.mkdir()
+            with self.assertRaisesRegex(ValueError, "regular"):
+                release.public_artifact_names(root)
+            alias.rmdir()
+            (root / image).unlink()
+            with self.assertRaisesRegex(ValueError, "Orphan"):
+                release.public_artifact_names(root)
+
+    def test_appimage_update_config_cannot_infer_an_application_feed(self):
+        package = json.loads((source.parents[1] / "../desktop/package.json").resolve().read_text())
+        release.validate_update_packaging(package)
+        self.assertEqual(package["build"]["artifactName"], "ElixirOffice-${version}-${os}-${arch}.${ext}")
+        package["build"]["linux"]["publish"] = {"provider": "github"}
+        with self.assertRaisesRegex(ValueError, "feeds"):
+            release.validate_update_packaging(package)
+
     def test_build_environment_is_an_allowlist(self):
         env = release.clean_environment("/owned/node/bin/node", "/owned/cache")
         self.assertEqual(set(env), {"PATH", "HOME", "LANG", "LC_ALL", "npm_config_cache", "PYTHONDONTWRITEBYTECODE"})
@@ -155,23 +314,23 @@ class ReleaseInputs(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             args = release.parser().parse_args(base)
             self.assertIsNone(args.mac_root)
-            self.assertIsNone(args.test_desktop_root)
-            self.assertIsNone(args.test_desktop_host)
+            self.assertIsNone(args.linux_root)
+            self.assertIsNone(args.linux_host)
             self.assertIsNone(args.playwright_core)
             self.assertEqual(args.node, "node")
         configured = {"EO_RELEASE_MAC_ROOT": "/srv/mac/release-beta2",
-                      "EO_RELEASE_TEST_DESKTOP_ROOT": "/srv/linux/release-beta2",
-                      "EO_RELEASE_TEST_DESKTOP_HOST": "builder@linux",
+                      "EO_RELEASE_LINUX_ROOT": "/srv/linux/release-beta2",
+                      "EO_RELEASE_LINUX_HOST": "builder@linux",
                       "EO_RELEASE_PLAYWRIGHT_CORE": "/srv/tools/playwright-core",
                       "EO_RELEASE_NODE": "/srv/tools/bin/node"}
         with patch.dict(os.environ, configured, clear=True):
             args = release.parser().parse_args(base)
             self.assertEqual(args.mac_root, configured["EO_RELEASE_MAC_ROOT"])
-            self.assertEqual(args.test_desktop_host, configured["EO_RELEASE_TEST_DESKTOP_HOST"])
+            self.assertEqual(args.linux_host, configured["EO_RELEASE_LINUX_HOST"])
             self.assertEqual(args.playwright_core, Path(configured["EO_RELEASE_PLAYWRIGHT_CORE"]))
-            override = release.parser().parse_args(base + ["--test-desktop-root", "/srv/other/release-beta2",
+            override = release.parser().parse_args(base + ["--linux-root", "/srv/other/release-beta2",
                                                           "--playwright-core", "/srv/other/playwright-core"])
-            self.assertEqual(override.test_desktop_root, "/srv/other/release-beta2")
+            self.assertEqual(override.linux_root, "/srv/other/release-beta2")
             self.assertEqual(override.playwright_core, Path("/srv/other/playwright-core"))
         for root in (None, "", "/", "/home/builder", "/srv/work/../release-beta2"):
             with self.assertRaises(ValueError):
@@ -314,16 +473,16 @@ class ReleaseInputs(unittest.TestCase):
             subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=root, check=True, capture_output=True)
 
     def test_date_label_and_ssh_arguments_are_bounded(self):
-        self.assertEqual(release.output_path("2026-10-12", "D-preview"), Path("/data/elixiroffice/release/beta2-2026-10-12-D-preview"))
+        self.assertEqual(release.output_path("2026-10-12", "D-preview"), Path("/srv/elixiroffice/release/desktop-0.2.0-2026-10-12-D-preview"))
         for label in ["../prod", "x;touch canary", "x/y"]:
             with self.assertRaises(ValueError):
                 release.output_path("2026-10-12", label)
         with self.assertRaises(ValueError):
             release.endpoint("-oProxyCommand=bad", "/tmp/owned")
         with self.assertRaises(ValueError):
-            release.endpoint("gael@test-desktop", "/tmp/../other")
+            release.endpoint("gael@linux", "/tmp/../other")
         self.assertEqual(release.endpoint("user@mac", "/srv/owned/release-beta2")["root"], "/srv/owned/release-beta2")
-        for root in ("/Users/user/Own Folder", "$EO_WORK/bench/local-gaps-D", "/tmp/owned"):
+        for root in ("/Users/user/Own Folder", "/srv/elixiroffice/bench/local-gaps-D", "/tmp/owned"):
             with self.assertRaises(ValueError):
                 release.endpoint("user@mac", root)
 

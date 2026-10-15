@@ -23,7 +23,7 @@ rendered by Word desktop; only aggregates appear here). Pack: `branding/fonts/` 
   the upstream image.
 - **Non-redistributable** (not shipped, replaced): Belle Allure, Cursive standard, Script École, KG
   Primary Penmanship, Marianne, all the Microsoft fonts. Marelle is not in this list any more: it is free (OFL) and shipped (§ 10). **Rejected for lack of an accepted license**:
-  Luciole (CC BY 4.0, to be decided by the owner).
+  Luciole (CC BY 4.0, to be decided by the test user).
 
 ## 2. How the engine handles fonts
 
@@ -96,7 +96,7 @@ rendered by Word desktop; only aggregates appear here). Pack: `branding/fonts/` 
 | Andika, OpenDyslexic, Comic Neue | the pack's | the pack's | the pack's | the pack's | the pack's | depending on the server choice (§ 6) |
 | Script École | installed? otherwise URW Gothic Ecole Metric | same | same | same | URW Gothic Ecole Metric | URW Gothic Ecole Metric |
 | KG Primary Penmanship (1 / 2) | installed? otherwise Caveat / Neucha Penmanship Metric | same | same | same | Caveat / Neucha Penmanship Metric | same |
-| ruled school cursive (cursive with Seyès lines) | installed? otherwise Playwrite Seyes Metric | same | same | same | Playwrite Seyes Metric | Playwrite Seyes Metric |
+| Cursif & Lignes (cursive with Seyès lines) | installed? otherwise Playwrite Seyes Metric | same | same | same | Playwrite Seyes Metric | Playwrite Seyes Metric |
 | Cursive standard, Belle Allure…, if the document carries its alias (`w:altName`, § 9) | installed? otherwise Playwrite FR Moderne Metric | same | same | same | Playwrite FR Moderne Metric | Playwrite FR Moderne Metric |
 | Unknown font declared `w:family="script"` with a `w:altName` (§ 9) | installed? otherwise Playwrite FR Moderne Compact | same | same | same | Playwrite FR Moderne Compact | Playwrite FR Moderne Compact |
 | Belle Allure, Cursive standard without alias, unknown font | installed? otherwise Calibri | same | installed? otherwise Carlito | Carlito | Carlito | Carlito |
@@ -178,7 +178,7 @@ server, t01 and t05 are rendered in these fonts, wider and taller than the Calib
 desktop with the font installed), Calibri is what a recipient without the font sees.
 **Default retained for the server image and the baseline: `metric` group only** (`FONT_GROUPS=metric`),
 which degrades no document; the desktop and the server option `FONT_GROUPS=metric,school` also install
-Andika, OpenDyslexic, Comic Neue. Decision to be confirmed by the owner.
+Andika, OpenDyslexic, Comic Neue. Decision to be confirmed by the test user.
 
 ## 7. Implementation
 
@@ -209,7 +209,7 @@ Andika, OpenDyslexic, Comic Neue. Decision to be confirmed by the owner.
   average width (weak Cursive standard sample: digits and a few letters); the "Hello…" fonts have no derivative
   (Marelle needs none any more: the real font is shipped, § 10). Belle Allure and Cursive Dumont have no
   Word desktop reference in the real corpus.
-- ruled school cursive: only the line drawing and the x-height are reproduced; the letter shape is that of
+- Cursif & Lignes: only the line drawing and the x-height are reproduced; the letter shape is that of
   Playwrite FR Trad (taller capitals, shorter descenders); GPOS (kerning) removed from the scaled derivatives.
 - The criterion "the document carries the font's alias" (`w:altName` = PostScript name) is a heuristic: it
   separates documents by authors who had the font (rendered by Word with the font) from those whose font Word
@@ -227,7 +227,7 @@ content of the document is reproduced here.
 
 ### Diagnosis (document.xml, fontTable.xml, `pdffonts` and glyphs of the reference)
 
-- The font in question (a ruled school cursive) is not an ordinary cursive: **each glyph contains the six
+- The font in question ("Cursif & Lignes") is not an ordinary cursive: **each glyph contains the six
   Seyès lines** (thin horizontal bars, thicker baseline, extending beyond the advance width so that the
   lines of neighboring glyphs join up). Word writes and draws with a single font. Its line height
   is **about 2.5 em**, against 1.22 em for Carlito.
@@ -241,7 +241,7 @@ content of the document is reproduced here.
   (Carlito has the same widths; the 8 pt gap between the two PDFs is a trailing space that Word
   adds to each line). The perceived difference comes from the third line (cursive), replaced by Carlito.
 - In the same corpus: "Cursive standard" (numeration worksheet, line height of about 1.7 em) and an author script font
-  (a script font: `w:family="script"`, replacement name `Viner Hand ITC`, absent from the system).
+  (Bradley Hand ITC: `w:family="script"`, replacement name `Viner Hand ITC`, absent from the system).
 
 ### Fixes
 
@@ -249,7 +249,7 @@ content of the document is reproduced here.
   Playwrite FR Trad (TypeTogether / Typotheque, **OFL 1.1**, no "Reserved Font Name"; pinned URL
   google/fonts commit 7085eb8, SHA-256 in `sources.json`) are shipped as a static 400 instance
   (`derive.instance`) and serve as the base of three renamed derivatives:
-  - *Playwrite Seyes Metric* (Trad base): widths and x-height scaled to ruled school cursive,
+  - *Playwrite Seyes Metric* (Trad base): widths and x-height scaled to Cursif & Lignes,
     **Seyès lines drawn in each glyph** (`derive.ruled`), vertical metrics of the original;
   - *Playwrite FR Moderne Metric* (Moderne base): line height and width of Cursive standard;
   - *Playwrite FR Moderne Compact* (Moderne base): public values (1.25 em line, average width of a
@@ -259,11 +259,12 @@ content of the document is reproduced here.
   GSUB kept for ligatures); line bars added to all glyphs that advance. Tests:
   `branding/fonts/test_build.py` (synthetic font, no network).
   Private metrics (line heights, scales, line position), measured on the real corpus references:
-  `FONT_METRICS_EXTRA` (entries `RuledCursive`, `Cursivestandard` of `corpus-private/font-metrics-private.json`),
+  `FONT_METRICS_EXTRA` (entries `CursifLignes`, `Cursivestandard` of `corpus-private/font-metrics-private.json`),
   never versioned; without them, the two "Metric" derivatives are not built. The "Compact" derivative
   only uses `reference-metrics.json`. A small `hhea.lineGap` of Cursive standard was enough to push a line per
   page: the private metrics of Cursive standard are therefore supplied with `lineGap` at 0 (Word follows `win`).
-- **sdkjs** (`common/libfont/map.js`, `[upstreamable]`): `FD_SubstitutePatterns` (several spellings of the ruled school cursive name, "Seyès…" → Playwrite Seyes Metric, Playwrite FR Trad; "Cursive standard",
+- **sdkjs** (`common/libfont/map.js`, `[upstreamable]`): `FD_SubstitutePatterns` (names that vary: "Cursif &
+  Lignes", "Cursif et Lignes", "Seyès…" → Playwrite Seyes Metric, Playwrite FR Trad; "Cursive standard",
   "Belle Allure…", "Écolier…", "Écriture…" → Playwrite FR Moderne Metric, Playwrite FR Moderne) and the
   "script font" rule (`FD_ScriptFontSubstitutes`). An installed font, then an installed `w:altName`, take
   precedence (like Word).
@@ -280,7 +281,7 @@ content of the document is reproduced here.
   Old readers ignore the element. **This part requires a rebuilt x2t** (see the integration report);
   without it, only the name patterns are active.
 - **Non-regression test on synthetic fixtures**: `tools/fonts/test-school-cursive.sh IMAGE`
-  (generates a .docx without real content: three paragraphs in a ruled school cursive, a script font with
+  (generates a .docx without real content: three paragraphs in "Cursif & Lignes", a script font with
   `w:altName`, an unknown swiss font; checks through `pdffonts` / `pdftotext -bbox` the font retained and the line pitch of
   about 90 pt). qunit tests: `tests/common/libfont/fontSubstitution.html` (substitutions); `test_build.py` (derivation).
 

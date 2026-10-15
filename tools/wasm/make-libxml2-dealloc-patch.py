@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate patches/0003: the bundled libxml2 casts one-argument free
 functions to xmlHashDeallocator (two arguments). Native ABIs tolerate it;
 WebAssembly traps ("function signature mismatch") on such indirect calls.

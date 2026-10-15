@@ -1,7 +1,6 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Local fonts test (Playwright Chromium + Firefox): the browser sees real local fonts, the editor uses them
 // after consent. Run on the host that has the test font installed (Fira Sans, see docs/localfonts.md):
-//   EO_BASE=http://localhost:8082 [EO_INSECURE_BASE=http://$HOST:8082] [EO_HTTPS_BASE=https://$HOST:8443] \
+//   EO_BASE=http://localhost:8082 [EO_INSECURE_BASE=http://192.0.2.10:8082] [EO_HTTPS_BASE=https://192.0.2.10:8443] \
 //   node tests/localfonts/run.mjs
 // Prints "ok"/"FAIL" lines and exits non-zero on any failure.
 import fs from "node:fs";

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate the deterministic .docx documents used by the performance harness.
 
     python3 tools/perf/gen_docs.py [outdir]     (default: tools/perf/docs)

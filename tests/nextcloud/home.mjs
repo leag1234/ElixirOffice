@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Regression: creating and opening documents never needs a cloud connection (docs/storage.md).
 // Fresh profile, no Nextcloud: blank document, template, upload, open recent, dismissible connect
 // banner, zero console errors. Then connected to the local Nextcloud demo: the location choice

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Render first-page thumbnails of the start-page templates with the document
 // server's own converter (no other renderer needed). Runs INSIDE a dev
 // container (node is there), against the brand overlay already deployed:

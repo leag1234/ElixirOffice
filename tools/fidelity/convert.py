@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Convert every corpus document (.docx, .odt...) to PDF through the DocumentServer conversion API.
 
 The script runs inside the tooling container, on the same Docker network as the

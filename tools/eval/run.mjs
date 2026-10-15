@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // End-to-end evaluation of the Elixir AI tasks against a running editor instance.
 //
 //   node tools/eval/run.mjs [--tasks a,b|all] [--models m1,m2] [--modes scaffold,direct] [--runs 3]

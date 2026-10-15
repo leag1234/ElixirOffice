@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Synthetic .docx fixtures and checks for the French school cursive substitutes (no real content).
 
   school_cursive_fixture.py gen DIR            write DIR/sc01.docx and DIR/manifest.csv (harness corpus)

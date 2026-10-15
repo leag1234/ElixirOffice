@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Home > Font size box is filled at the start of a document (new, generated .docx; ribbon and mini toolbar).
 //   EO_BASE=http://localhost:PORT node tests/beta-fixes/fontsize.mjs
 import fs from "node:fs";

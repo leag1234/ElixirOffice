@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate realistic .pptx test decks for the presentation editor UI work.
 
 Usage: python3 make_fixtures.py [outdir]   (needs python-pptx and Pillow)

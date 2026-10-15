@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Test cases of the second wave of Word commands (docs/shortcuts-word.csv): block selection
 // (word/Editor/word-block-selection.js), window split and Show First Line Only (controller WordViews,
 // word/Editor/word-views.js), the Mailings tab keys (controller WordMailings).

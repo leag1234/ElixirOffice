@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Render real editor drawing commands through the native PDF worker.
 import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import {createRequire} from 'node:module';
 const {chromium}=createRequire(path.join(process.env.PW_DIR||path.join(os.homedir(),'elixiroffice/pw'),'package.json'))('playwright');

@@ -11,7 +11,21 @@ for language in LANGUAGES:
  p=root/'desktop-home/blanks'/(language+'.docx')
  assert p.read_bytes()==localized(root/'templates/new.docx',language),'Localized blank differs beyond approved language default'
 localized_blanks={'desktop-home/blanks/'+language+'.docx' for language in LANGUAGES}
-expected={'templates/new.docx','templates/new.xlsx','templates/new.pptx','desktop-home/templates/letterhead.docx','desktop-home/templates/resume-two-columns.docx'} | themes | localized_blanks
+brand=pathlib.Path(__file__).resolve().parents[2]/'branding/example/nodejs/public/elixir/brand/templates'
+catalog=json.loads((brand/'templates.json').read_text())['templates']
+assert {entry['id'] for entry in catalog}=={'letterhead','resume-two-columns','worksheet-fractions','assessment-grid'}, 'Unexpected Home template kind'
+approved_languages=set(LANGUAGES)-{'ja','zh','zh-tw','ko','si','ur'}
+assert len(approved_languages)==39
+home_templates=set()
+for entry in catalog:
+ assert entry['file']==entry['id']+'.docx' and entry['license']=='CC0-1.0', 'Invalid Home template declaration'
+ assert len(entry['languages'])==39 and set(entry['languages'])==approved_languages, 'Expected each Home template in all 39 supported languages'
+ for language in entry['languages']:
+  relative='desktop-home/templates/'+language+'/'+entry['file']
+  assert (root/relative).read_bytes()==(brand/language/entry['file']).read_bytes(), 'Home template differs from approved source'
+  home_templates.add(relative)
+assert len(home_templates)==156, 'Expected four Home templates in 39 supported languages'
+expected={'templates/new.docx','templates/new.xlsx','templates/new.pptx'} | themes | localized_blanks | home_templates
 assert {p.relative_to(root).as_posix() for p in docs}==expected, 'Samples/test artifacts must not be packaged'
 for p in docs:
  with zipfile.ZipFile(p) as z:
@@ -21,4 +35,4 @@ for p in docs:
    assert b'EODESKTOP' not in xml and b'CLOSERACE' not in xml, 'Test marker in packaged document'
    text=' '.join(E.fromstring(xml).itertext()).lower()
    assert 'welcome to onlyoffice' not in text and 'onlyoffice online editors' not in text, 'Old upstream welcome sample'
-print('PASS no old sample or test-modified Office payload; three clean blank templates,45 exact language-only blank variants, two approved home templates and22 approved theme files')
+print('PASS no old sample or test-modified Office payload; three clean blank templates,45 exact language-only blank variants, 156 exact approved localized home templates and22 approved theme files')

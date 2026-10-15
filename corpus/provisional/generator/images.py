@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Corpus images: all drawn here with Pillow (geometric shapes only,
 no rendered text -> no dependency on a system font; deterministic output)."""
 import math

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {createRequire} from 'node:module';
 const {chromium}=createRequire(path.join(os.homedir(),'elixiroffice/pw/package.json'))('playwright');
 const base=process.env.EO_BASE,file=process.env.EO_LOCAL_FILE;assert.ok(base&&!/:8080(?:\/|$)/.test(base)&&file);

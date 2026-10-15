@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Write the run metadata (meta.json) recorded in results.json and the report."""
 import argparse
 import glob

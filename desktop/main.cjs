@@ -2,7 +2,7 @@
 'use strict';
 const {app, BrowserWindow, ipcMain, dialog, Menu, session, protocol, net, shell} = require('electron');
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
-const packageGuard=require('./package-guard.cjs');
+const packageGuard=require('./package-guard.cjs'),password=require('./password.cjs');
 const files = require('./files.cjs'), resources = require('./resources.cjs'), {Fonts} = require('./fonts.cjs');
 if (process.env.EO_DESKTOP_PROFILE) app.setPath('userData',path.resolve(process.env.EO_DESKTOP_PROFILE));
 app.commandLine.appendSwitch('disable-background-networking');
@@ -12,11 +12,23 @@ const assets = app.isPackaged ? path.join(process.resourcesPath,'assets') : path
 let conversionRuntime;
 let win, settings={recents:[],fontConsent:false}, current, dirty=false, busy=false, closing=false, ready=false, pending=[], closePending=false;
 const fonts = new Fonts();
+const captureConsoleError=console.error.bind(console);
+const safety=require('./safety-log.cjs').create(()=>app.getPath('userData'));
+safety.install(process,console,async()=>{
+ closing=true;
+ try{
+  if(!app.isReady?.()){app.exit(1);return;}
+  const options={type:'error',message:t('fatalMessage'),detail:t('fatalDetail'),buttons:[t('close')],normalizeAccessKeys:true,defaultId:0,cancelId:0};
+  if(win&&!win.isDestroyed())await dialog.showMessageBox(win,options);else await dialog.showMessageBox(options);
+ }catch{await safety.log('fatal-dialog-failure');}
+ finally{await safety.flush();app.exit(1);}
+});
 let preferences,recovery;
 const locale=require('./locale.cjs'),capture=require('./capture.cjs'),decisions=require('./decisions.cjs');
 let captureOptions,captureStartupError;
 let languageInfo;
-const t=key=>languageInfo?.strings[key]||key;
+const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
+const t=key=>languageInfo?.strings[key]||fatalFallback[key]||key;
 // Invalid capture requests fail before startup, without Electron's uncaught-error dialog.
 try{
  captureOptions=capture.parse(process.argv.slice(app.isPackaged?1:2));
@@ -31,31 +43,54 @@ try{
 const {documentPath}=require('./document-path.cjs');
 const argument=argv=>argv.map(documentPath).find(Boolean);
 const initial = captureOptions||captureStartupError?null:argument(process.argv.slice(app.isPackaged?1:2)); if(initial)pending.push(initial);
-if(captureStartupError){console.error('ElixirOffice capture startup failed:\n'+captureStartupError.stack);app.exit(1);}
-else if(!app.requestSingleInstanceLock()){if(captureOptions)cleanupCapture().then(()=>app.exit(1));else app.quit();}
+if(captureStartupError){try{captureConsoleError('ElixirOffice capture startup failed:\n'+captureStartupError.stack);}catch{void safety.log('console-error');}app.exit(1);}
+else if(!app.requestSingleInstanceLock()){if(captureOptions)cleanupCapture().catch(()=>safety.log('capture-cleanup-failure')).then(()=>app.exit(1)).catch(()=>{void safety.log('capture-cleanup-failure');app.exit(1)});else app.quit();}
 else {
 app.on('second-instance',(_event,argv)=>{if(captureOptions)return;const file=argument(argv.slice(1));if(file)pending.push(file);win?.show();win?.focus();if(ready)win.webContents.send('eo:action','pending');});
 app.on('open-file',(event,file)=>{event.preventDefault();if(captureOptions)return;const selected=documentPath(file);if(selected)pending.push(selected);if(selected&&ready)win.webContents.send('eo:action','pending');});
 app.whenReady().then(start).catch(async error=>{
- if(captureOptions){console.error(error.message);closing=true;if(win&&!win.isDestroyed())win.destroy();await cleanupCapture();app.exit(1)}
+ if(captureOptions){console.error(error.message);closing=true;if(win&&!win.isDestroyed())win.destroy();try{await cleanupCapture()}catch{await safety.log('capture-cleanup-failure')}finally{app.exit(1)}}
  else {dialog.showErrorBox('ElixirOffice',t('error'));app.quit();}
-});
+}).catch(()=>{void safety.log('startup-failure');app.exit(1)});
 }
 async function cleanupCapture(){
  if(captureOptions?.profile){app.releaseSingleInstanceLock();await fs.rm(captureOptions.profile,{recursive:true,force:true,maxRetries:5,retryDelay:200});}
 }
 function authorize(event) {
+  if(safety.failed)throw Error(t('fatalMessage'));
   if(!win || event.sender!==win.webContents || event.senderFrame!==win.webContents.mainFrame || event.senderFrame.url!==resources.ORIGIN+'/index.html')throw Error('This command requires the desktop start window');
 }
 function persist(){return preferences.save(settings)}
 
 function title() { win.setTitle((dirty?'* ':'')+(current?.name?current.name+' — ':'')+'ElixirOffice'); }
-async function rendererState(lock=true) {
+function finishClose() {
+  // Called only after saved/clean state or an explicit native Discard decision.
+  // Destroy also finishes when a frozen iframe cannot acknowledge unload.
+  closing=true;win.destroy();
+}
+let closeLogWrite=Promise.resolve();
+function closeReason(reason) {
+  // Fixed reason codes only; serialize writes and retain at most 64 KiB.
+  closeLogWrite=closeLogWrite.then(async()=>{
+    const flags=require('node:fs').constants;
+    const handle=await fs.open(path.join(app.getPath('userData'),'desktop-close.log'),flags.O_WRONLY|flags.O_CREAT|flags.O_APPEND|flags.O_NOFOLLOW,0o600);
+    try{
+      await handle.chmod(0o600);
+      const line=Buffer.from(new Date().toISOString()+' '+reason+'\n');
+      if((await handle.stat()).size+line.length>64*1024)await handle.truncate(0);
+      await handle.write(line);
+    }finally{await handle.close()}
+  }).catch(()=>{});
+  return closeLogWrite;
+}
+async function closeDeadline(work) {
   let timer;
-  try{return await Promise.race([
-    win.webContents.executeJavaScript('globalThis.EODesktopState ? globalThis.EODesktopState('+JSON.stringify(lock)+') : {dirty:true,opening:true}'),
-    new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(Error('Editor did not confirm its save state')),3000)})
-  ])}finally{clearTimeout(timer)}
+  try{return await Promise.race([work,new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(Error('Close state unavailable')),3000)})])}
+  finally{clearTimeout(timer)}
+}
+async function rendererState(lock=true) {
+  const state=await closeDeadline(win.webContents.executeJavaScript('globalThis.EODesktopState ? globalThis.EODesktopState(false) : {dirty:true,opening:true}'));
+  if(lock)win.webContents.send('eo:action','prepare-close');return state;
 }
 async function discard() {
   if(!current)return true;
@@ -80,6 +115,7 @@ async function select(filename) {
   const {bytes,...metadata}=opened;
   const sourceFormat=files.extension(opened.target),format=require('./formats.cjs').canonical[sourceFormat]||sourceFormat;
   current={...metadata,token:crypto.randomUUID(),name:path.basename(opened.target),format,sourceFormat};
+  current.protected=password.encrypted(bytes,sourceFormat);current.recoveryLocked=current.protected;
   if(format!==sourceFormat){current.target=null;current.name=path.basename(opened.target).replace(/\.[^.]+$/,'.'+format)}
   dirty=false;title();await remember(opened.target);
   return {token:current.token,name:current.name,bytes:new Uint8Array(bytes),format:current.format,sourceFormat,runtime:conversionRuntime};
@@ -95,7 +131,7 @@ async function operation(run) {
   if(busy)throw Error('Another file operation is running');
   busy=true;try{return await run()}finally{busy=false}
 }
-function handle(name,run) { ipcMain.handle('eo:'+name,(event,...args)=>{authorize(event);return run(...args)}); }
+function handle(name,run) { ipcMain.handle('eo:'+name,(event,...args)=>{authorize(event);return (async()=>{try{return await run(...args)}catch(error){if(/^(?:E[A-Z0-9_]+|UNKNOWN)$/.test(error?.code||'')){await safety.log('file-error');await safety.log(error.code)}throw error}})()}); }
 async function start() {
   preferences=require('./settings-store.cjs')(app.getPath('userData'));
   recovery=new (require('./recovery.cjs').Recovery)(app.getPath('userData'));
@@ -125,19 +161,23 @@ async function start() {
     (async()=>{
       try {
         const state=await rendererState();
-        if(busy||state.opening){win.webContents.send('eo:action','resume-close');return}
-        dirty=state.dirty===true;
-        await preferences.flush();
-        if(!dirty){if(current)await recovery.remove(current.recoveryId||current.token);closing=true;win.close();return}
+        if(busy||state.opening)throw Error('close-busy')
+        await closeDeadline(preferences.flush());
+        const confirmed=await rendererState(false);
+        if(busy||confirmed.opening)throw Error('close-busy');
+        dirty=confirmed.dirty===true;
+        if(!dirty){if(current)await closeDeadline(recovery.remove(current.recoveryId||current.token));finishClose();return}
         const result=await dialog.showMessageBox(win,decisions.unsaved(t,true));
         if(result.response===0)win.webContents.send('eo:action','save-close');
-        else if(decisions.discard(result)){if(current){current.recoveryVersion=(current.recoveryVersion||0)+1;await recovery.remove(current.recoveryId||current.token);}closing=true;win.close()}
+        else if(decisions.discard(result)){if(current){current.recoveryVersion=(current.recoveryVersion||0)+1;await closeDeadline(recovery.remove(current.recoveryId||current.token));}finishClose()}
         else win.webContents.send('eo:action','resume-close');
       } catch(error) {
-        const result=await dialog.showMessageBox(win,{type:'warning',message:t('saveError'),buttons:decisions.buttons([t('cancel'),t('discard')]),normalizeAccessKeys:true,defaultId:0,cancelId:0});
-        if(result.response===1){closing=true;win.close()}else {closing=false;win.webContents.send('eo:action','resume-close');}
-      } finally {closePending=false}
-    })();
+        closeReason(error.message==='close-busy'?'busy-choice':'state-or-cleanup-failure');
+        win.show();
+        const result=await dialog.showMessageBox(win,{type:'warning',message:t('closeUnavailable'),detail:t('closeUnsavedRisk'),buttons:decisions.buttons([t('cancel'),t('discard')]),normalizeAccessKeys:true,defaultId:0,cancelId:0});
+        if(result.response===1){finishClose()}else {closing=false;win.webContents.send('eo:action','resume-close');}
+      } finally {closePending=false;if(!closing&&!win.isDestroyed())win.webContents.send('eo:action','resume-close')}
+    })().catch(()=>{closing=false;closePending=false;if(!win.isDestroyed())win.webContents.send('eo:action','resume-close');closeReason('dialog-failure')});
   });
   handle('initial',()=>operation(async()=>{
     ready=true;if(!pending.length)return null;
@@ -159,17 +199,18 @@ async function start() {
       recents.push({id:item.id,name:item.name,folder:path.dirname(item.target),modified});
     }
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
-    return {templates,recents};
+    return {templates:templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language)),recents};
   });
   handle('return-home',()=>operation(async()=>{
     if(!await discard())return false;current=null;dirty=false;title();return true;
   }));
   handle('template',id=>operation(async()=>{
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
-    const template=templates.find(item=>item.id===id);if(!template)throw Error('Unknown template');
+    const selected=templates.find(item=>item.id===id);if(!selected)throw Error('Unknown template');
+    const template=require('./templates.cjs').resolve(selected,languageInfo.language);
     if(!await discard())return null;
     const bytes=await fs.readFile(path.join(assets,'desktop-home/templates',template.file));
-    current={token:crypto.randomUUID(),name:t(template.titleKey)+'.'+template.format,format:template.format,target:null};dirty=false;title();
+    current={token:crypto.randomUUID(),name:(template.title||t(template.titleKey))+'.'+template.format,format:template.format,target:null};dirty=false;title();
     return {token:current.token,name:current.name,format:current.format,bytes:new Uint8Array(bytes),runtime:conversionRuntime};
   }));
   handle('open',()=>operation(async()=>{
@@ -189,8 +230,23 @@ async function start() {
     return {token:current.token,name:current.name,format,bytes:new Uint8Array(bytes),runtime:conversionRuntime};
   }));
   handle('state',(token,modified)=>{if(!current||token!==current.token)return false;dirty=modified===true;title();return true});
-  handle('save',(token,input,as)=>operation(async()=>{
-    active(token);const bytes=output(input);let target=current.target,copy=false;
+  handle('rename',(token,name)=>operation(async()=>{
+    active(token);if(captureOptions)throw Error('Rename is unavailable in capture mode');
+    if(current.target){
+      const previous=current.target,{bytes,...renamed}=await files.rename(current,name);
+      current={...current,...renamed};
+      settings.recents=settings.recents.filter(item=>item.target!==previous);
+      await remember(current.target);
+    }else current.name=files.renameName(name,'.'+current.format);
+    current.recoveryVersion=(current.recoveryVersion||0)+1;title();
+    return {name:current.name,recoveryVersion:current.recoveryVersion};
+  }));
+  handle('password-lock',async token=>{
+    active(token);const collided=busy,version=await password.lock(current,recovery);active(token);
+    if(collided)throw Error('Another file operation is running');return {recoveryVersion:version};
+  });
+  handle('save',(token,input,as,protection)=>operation(async()=>{
+    active(token);if(current.format==='pdf'&&protection?.protected)throw Error('PDF password protection is unavailable');const bytes=current.format==='pdf'?output(input,current.format):password.validate(input,current.format,protection||{protected:current.protected===true,remove:false},current);let target=current.target,copy=false;
     try{packageGuard.protect(bytes,current.format,current.embeddedObjects)}
     catch(error){
       if(error.code!=='OBJECT_LOSS')throw error;
@@ -213,16 +269,17 @@ async function start() {
         if(destination.dev===original.dev&&destination.ino===original.ino)throw Error('Save the copy to a different file. Your original file was not changed.');
       }catch(error){if(error.code!=='ENOENT')throw error}
     }
-    const saved=await files.atomic(target,bytes,!as&&!copy&&current.target?current:undefined);
-    current={...current,...saved,name:path.basename(target),embeddedObjects:['odt','ods','odp'].includes(current.format)?packageGuard.embeddedObjects(bytes):0};await remember(target);title();
+    const saved=await password.write(files,target,bytes,!as&&!copy&&current.target?current:undefined);
+    current={...current,...saved,protected:password.encrypted(bytes,current.format),name:path.basename(target),embeddedObjects:['odt','ods','odp'].includes(current.format)?packageGuard.embeddedObjects(bytes):0};let preferencesSaved=true;try{await remember(target)}catch{preferencesSaved=false}title();
     current.recoveryVersion=(current.recoveryVersion||0)+1;
-    return {name:current.name,bytes:saved.bytes,recoveryVersion:current.recoveryVersion};
+    return {name:current.name,bytes:saved.bytes,recoveryVersion:current.recoveryVersion,preferencesSaved,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
   }));
   handle('export-formats',token=>{active(token);return require('./formats.cjs').exports[require('./formats.cjs').kind(current.format)]});
-  handle('export',(token,input,format)=>operation(async()=>{
+  handle('export',(token,input,format,protection)=>operation(async()=>{
     active(token);const formats=require('./formats.cjs');
     if(!formats.exports[formats.kind(current.format)]?.includes(format)||format==='pdf')throw Error('Unsupported export format');
-    const bytes=formats.output(input,format);
+    if(current.protected&&protection?.protected!==true&&protection?.remove!==true)throw Error('Confirm an unprotected export copy');
+    const bytes=['docx','xlsx','pptx','odt','ods','odp'].includes(format)?password.validate(input,format,protection||{protected:false,remove:false},current):formats.output(input,format);
     if(['odt','ods','odp'].includes(format))packageGuard.protect(bytes,format,current.embeddedObjects);
     const result=await dialog.showSaveDialog(win,{defaultPath:(current.target||current.name).replace(/\.[^.]+$/,'.'+format),filters:[{name:format.toUpperCase(),extensions:[format]}]});
     if(result.canceled)throw Error('Save cancelled');
@@ -234,6 +291,7 @@ async function start() {
     const saved=await files.atomic(result.filePath,bytes);
     return {name:path.basename(saved.target),bytes:saved.bytes,format};
   }));
+  handle('recovery-failure',()=>safety.log('recovery-failure').then(()=>true));
   handle('recovery-options',()=>({enabled:settings.recoveryEnabled!==false,seconds:[15,30,60,120,300].includes(settings.recoverySeconds)?settings.recoverySeconds:60}));
   handle('recovery-settings',async(value)=>{
     if(!value||typeof value.enabled!=='boolean'||![15,30,60,120,300].includes(value.seconds))throw Error('Invalid recovery settings');
@@ -242,9 +300,10 @@ async function start() {
   handle('recovery-list',()=>captureOptions?[]:recovery.list());
   handle('recovery-save',(token,version,input)=>operation(async()=>{
     active(token);
-    if(captureOptions||closing||closePending||settings.recoveryEnabled===false)return false;
+    if(current.format==='pdf')return false;
+    if(captureOptions||closing||closePending||settings.recoveryEnabled===false||current.recoveryLocked)return false;
     if(version!==(current.recoveryVersion||0))return false;
-    const state=await rendererState(false);if(state.opening||!state.dirty)return false;
+    const state=await rendererState(false);if(state.opening||!state.dirty||current.recoveryLocked||version!==(current.recoveryVersion||0))return false;
     const bytes=output(input);packageGuard.protect(bytes,current.format,current.embeddedObjects);
     return recovery.save({id:current.recoveryId||current.token,name:current.name,format:current.format},bytes);
   }));
@@ -258,6 +317,7 @@ async function start() {
     if(!await discard())return null;
     const restored=await recovery.read(id);
     current={token:crypto.randomUUID(),recoveryId:id,name:restored.name,format:restored.format,target:null,embeddedObjects:['odt','ods','odp'].includes(restored.format)?packageGuard.embeddedObjects(restored.data):0};
+    current.protected=password.encrypted(restored.data,restored.format);current.recoveryLocked=current.protected;
     dirty=true;title();
     return {token:current.token,name:current.name,format:current.format,bytes:restored.data,recovered:true,runtime:conversionRuntime};
   }));
@@ -300,15 +360,22 @@ async function start() {
   }));
   handle('fonts',async()=>settings.fontConsent===true?fonts.enumerate():[]);
   handle('font',async id=>{if(settings.fontConsent!==true)throw Error('Font permission required');return fonts.read(id)});
-  handle('pdf',(token,input,print)=>operation(async()=>{
-    active(token);const bytes=output(input,true);
+  handle('pdf',(token,input,print,plainCopy)=>operation(async()=>{
+    active(token);if(current.protected&&plainCopy!==true)throw Error('Confirm an unprotected PDF copy');const bytes=output(input,true);
     if(print)return printPdf(bytes);
-    const result=await dialog.showSaveDialog(win,{defaultPath:(current.target||current.name).replace(/\.[^.]+$/,'.pdf'),filters:[{name:'PDF',extensions:['pdf']}]});
+    const policy=require('./pdf-policy.cjs');
+    if(!await policy.confirmCopy(current,dialog,win,t))return null;
+    const result=await dialog.showSaveDialog(win,{defaultPath:policy.defaultPath(current),filters:[{name:'PDF',extensions:['pdf']}]});
     if(result.canceled)return null;
     if(files.extension(result.filePath)!=='pdf')throw Error('Choose a PDF destination');
+    await policy.assertCopyDestination(current,result.filePath);
     const saved=await files.atomic(result.filePath,bytes);return {bytes:saved.bytes};
   }));
-  handle('closed-saved',()=>{if(!dirty&&!busy){closing=true;win.close()}});
+  handle('closed-saved',async()=>{
+    // Recheck edits made after the save snapshot before authorizing destruction.
+    const state=await rendererState(false);dirty=state.dirty===true;
+    if(!dirty&&!busy&&!state.opening)finishClose();else win.webContents.send('eo:action','resume-close');
+  });
   const action=name=>()=> {
     if(name!=='settings'){win.webContents.send('eo:action',name);return}
     win.webContents.send('eo:action','settings');
@@ -333,8 +400,8 @@ async function start() {
     })().then(async()=>{
       closing=true;win.destroy();try{await cleanupCapture();app.exit(0)}catch(error){console.error('Capture profile cleanup: '+error.message);app.exit(1)}
     },async error=>{
-      console.error(error.message);closing=true;win.destroy();try{await cleanupCapture()}finally{app.exit(1)}
-    });
+      console.error(error.message);closing=true;win.destroy();try{await cleanupCapture()}catch{await safety.log('capture-cleanup-failure')}finally{app.exit(1)}
+    }).catch(()=>{void safety.log('capture-cleanup-failure');app.exit(1)});
   }
 
 }

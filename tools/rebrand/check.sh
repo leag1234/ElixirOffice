@@ -1,5 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
 # List every upstream name (upstream fork name, visible ONLYOFFICE branding) that
 # rename.sh would still rewrite, as file:line, and exit 1 if there is any (CI).
 # Scans the whole of this repository (every tracked text file: code, docs, patches,

@@ -74,7 +74,7 @@ index 0000000000..65fe9d4d60
 +
 +		let userInfo = new Asc.asc_CUserInfo();
 +		userInfo.put_Id("uid-1");
-+		userInfo.put_FullName("Jane Doe");
++		userInfo.put_FullName("John Smith");
 +		let docInfo = new Asc.asc_CDocInfo();
 +		docInfo.put_UserInfo(userInfo);
 +		editor.DocInfo = docInfo;
@@ -126,7 +126,7 @@ index 0000000000..65fe9d4d60
 +		doc.SetAssistantTrackRevisions(false);
 +		assert.strictEqual(logicDocument.GetLocalTrackRevisions(), false, "local flag restored");
 +		assert.strictEqual(logicDocument.GetGlobalTrackRevisions(), false, "global flag restored");
-+		assert.strictEqual(editor.DocInfo.get_UserInfo().get_FullName(), "Jane Doe", "user name restored");
++		assert.strictEqual(editor.DocInfo.get_UserInfo().get_FullName(), "John Smith", "user name restored");
 +		assert.strictEqual(editor.DocInfo.get_UserInfo().get_Id(), "uid-1", "user id restored");
 +
 +		logicDocument.SetLocalTrackRevisions(null);

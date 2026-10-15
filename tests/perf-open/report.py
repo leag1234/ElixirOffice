@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Aggregate the matched D4 visits; retain outliers and report sample ranges."""
 import json,statistics,sys
 from pathlib import Path

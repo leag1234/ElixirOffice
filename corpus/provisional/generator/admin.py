@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Administrative documents of a FICTIONAL local authority (commune of Valmont-sur-Ourse).
 No State branding (brand block, Marianne logo) is reproduced; fictional people."""
 from ooxml import *  # noqa

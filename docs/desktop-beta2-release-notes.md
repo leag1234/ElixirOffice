@@ -26,6 +26,10 @@ The first public beta ships the server version only. This is a development/revie
 - Insert text from file and Edit Links are hidden in local modes; their server-dependent actions remain unavailable. Existing external link refresh stays outside beta 2.
 - A wasm-only ICU wide-string fix preserves Unicode in newly enabled TXT/CSV conversions, including supplementary characters. The shared wasm RTF surrogate correction also preserves emoji through export/reopen. Runtime identities and acceptance are recorded in the Session E handoff.
 
+## Server upgrade note
+
+The Rename/storage-copy update changes document keys for This server storage once during upgrade. Documents from This server that are open at deployment lose co-editing continuity; reopen them after deployment before continuing shared editing. Nextcloud keys retain their existing file-id/ETag model.
+
 ## Not yet available or still under development
 
 - Not yet available in the desktop app: mail merge (Mailings), available in the server version.
@@ -43,3 +47,5 @@ Text/CSV imports and exports use UTF-8; alternate text encodings and import deli
 Desktop AI configuration and tools currently apply to the Word editor. Spreadsheet and presentation editors do not yet load an AI toolset; their AI actions and configuration button remain unavailable.
 
 D3–D4 follow-up uses a common nine-patch core for full/PDF-only runtime builds. Local Word's visible Insert > Object text-file menu is hidden; exports and Print wait for queued pictures. Fresh Linux review AppImage/deb and actual3editor smoke/D4/Unicode pass. New Windows/macOS D4, native Save As/Print chooser and physical printer checks are not claimed; current receipts describe the exact coverage.
+
+PDF limitations: original text editing is not available yet; supported local work is annotations, comments and ordinary form filling, subject to the preservation policy. Tagged PDFs (including browser print and Word export) cannot yet be saved in place; use Save a copy with its preservation warning. PDF AutoRecover is unavailable; save manually. A policy extension is planned with a newly verified runtime.

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # Test image for the fidelity harness: upstream DocumentServer + ElixirOffice font pack
 # (+ optionally a built sdkjs tree). Build context: a directory with fonts/ (output of
 # build.py) and sdkjs/ (built sdkjs, may be empty).

@@ -2,7 +2,7 @@
 
 > Naming convention: the upstream is the first-level fork of ONLYOFFICE we derive from. Its name was mechanically rewritten to "ElixirOffice" in this document by `tools/rebrand` (requirement: no more occurrence of the upstream name outside attribution); here, "ElixirOffice" therefore designates the upstream, unless stated otherwise ("our ElixirOffice").
 
-> Read-only, done on 2026-10-05 on `<build-host>:$EO_WORK/upstream/`.
+> Read-only, done on 2026-10-05 on `build-host:/srv/elixiroffice/upstream/`.
 > Each statement points to a file that was read. Paths are relative to the cited repository.
 > "Not verified" means I ran nothing and the source does not allow a conclusion.
 
@@ -26,7 +26,7 @@ The 11 submodules match exactly the gitlinks of HEAD, and each is at tag `v9.3.5
 | sdkjs-forms | Forms add-on for sdkjs (`SDK_ADDONS`) | main | e7859d1 | 2026-03-27 | 300 K |
 | server | DocService, FileConverter, Metrics, AdminPanel (Node) | main | f5142e9 | 2026-09-22 | 12 M |
 | web-apps | Editors' UI (Backbone/RequireJS, React mobile) | main | 9f05726 | 2026-09-23 | 686 M |
-| DesktopEditors | Desktop super-repository (submodules **not initialized** on <build-host>) | main | 16d1a01 | 2026-07-01 | 1.5 M |
+| DesktopEditors | Desktop super-repository (submodules **not initialized** on build-host) | main | 16d1a01 | 2026-07-01 | 1.5 M |
 | desktop-apps | Qt/CEF desktop shell (win-linux, macos) | main | 0302e7c | 2026-09-28 | 335 M |
 | desktop-sdk | `ChromiumBasedEditors` (CEF lib) | main | 6f39508 | 2026-06-30 | 82 M |
 | plugin-aiautofill | "AI Auto Fill" plugin (forms) | main | 67df1df | 2026-03-27 | 1.1 M |
@@ -226,7 +226,7 @@ The `en.json` locales of documenteditor main/mobile contain neither "ONLYOFFICE"
 
 ## 6. Desktop
 
-- **DesktopEditors** (`VERSION.txt` = `9.3.1build`): super-repository, latest commit on 2026-07-01 (submodule bump, H. Leidinger), submodules not cloned on <build-host>.
+- **DesktopEditors** (`VERSION.txt` = `9.3.1build`): super-repository, latest commit on 2026-07-01 (submodule bump, H. Leidinger), submodules not cloned on build-host.
 - **Build** (`build/README.md`): single CMake definition in `desktop-apps/win-linux/CMakeLists.txt`, with vcpkg (`core/vcpkg.json`, feature `desktop-editors`), Ninja and ccache/sccache.
 - **Linux**: `docker buildx bake` on the `desktop-common` targets (JS+WASM payload), then `desktop-linux` (stage `desktop-apps/.docker/desktop-apps.bake.Dockerfile` on `core-base` ubuntu 22.04 amd64 / 24.04 arm64, Qt via `aqtinstall`), then `packages` (deb, rpm, tar.xz).
 - **Windows**: `build/windows/build.ps1` (MSVC, ZIP and Inno installer, optional MSI), arm64 by cross-compilation.

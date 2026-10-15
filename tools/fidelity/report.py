@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Single-page HTML report for a fidelity run (written next to results.json).
 
 Usage as a script: python3 report.py RUN/results.json  (re-renders RUN/report/index.html)

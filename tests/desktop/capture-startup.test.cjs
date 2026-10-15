@@ -15,9 +15,9 @@ for(const kind of ['inspect','cdp','locale-only','duplicate','missing-folder','n
    if(kind==='nonempty-folder'){fs.mkdirSync(folder);fs.writeFileSync(path.join(folder,'public.txt'),'public test');}
    if(kind==='invalid-parent'){fs.writeFileSync(folder,'public test');args=['--capture-screens',path.join(folder,'child')];}
    const exits=[],errors=[];let locks=0,ready=0,windows=0,dialogs=0;
-   const app=new EventEmitter();Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},exit:code=>exits.push(code),requestSingleInstanceLock(){locks++;return true},whenReady(){ready++;return new Promise(()=>{})},quit(){}});
+   const app=new EventEmitter();Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},getPath:()=>root,exit:code=>exits.push(code),requestSingleInstanceLock(){locks++;return true},whenReady(){ready++;return new Promise(()=>{})},quit(){}});
    const electron={app,BrowserWindow:class{constructor(){windows++}},protocol:{registerSchemesAsPrivileged(){}},dialog:{showErrorBox(){dialogs++}},ipcMain:{},Menu:{},session:{},net:{},shell:{}};
-   const context={require:name=>name==='electron'?electron:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:{...process,argv:['electron',source,...args],env:{}},console:{error:(...values)=>errors.push(values.join(' ')),log(){}},Buffer,setTimeout,clearTimeout,URL};
+   const context={require:name=>name==='electron'?electron:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:Object.assign(new EventEmitter(),{platform:process.platform,getuid:process.getuid,stdout:new EventEmitter(),stderr:new EventEmitter(),argv:['electron',source,...args],env:{}}),console:{error:(...values)=>errors.push(values.join(' ')),log(){}},Buffer,setTimeout,clearTimeout,URL};
    assert.doesNotThrow(()=>vm.runInNewContext(fs.readFileSync(source,'utf8'),context,{filename:source}));
    assert.deepEqual(exits,[1]);assert.equal(errors.length,1);assert.match(errors[0],/Error:/);assert.match(errors[0],/main\.cjs/);
    assert.equal(locks,0);assert.equal(ready,0);assert.equal(windows,0);assert.equal(dialogs,0);

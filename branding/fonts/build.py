@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Build the ElixirOffice free font pack (branding/fonts).
 
 Downloads every source listed in sources.json (pinned URLs, sha256-checked),
@@ -226,7 +225,7 @@ def main():
     refm = json.load(open(os.path.join(HERE, "reference-metrics.json")))
     # Metrics that cannot be published (measured on private references) are merged from FONT_METRICS_EXTRA;
     # a derived family whose reference metrics are unknown is skipped.
-    # School-font metrics (pure numbers: line heights, scales, ruling geometry) are published, (2026-10-07).
+    # School-font metrics (pure numbers: line heights, scales, ruling geometry) are published, with Gaël's OK (2026-10-07).
     _school = os.path.join(os.path.dirname(os.path.abspath(__file__)), "metrics-school.json")
     if os.path.exists(_school):
         refm.update(json.load(open(_school)))

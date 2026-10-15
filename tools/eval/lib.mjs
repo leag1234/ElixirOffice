@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Shared helpers of the AI evaluation harness (Playwright against a running editor instance).
 //
 // Environment:
 //   EO_BASE   editor instance (default http://localhost:8080, the main dev instance)
-//   PW_DIR    directory where the playwright package is installed (default $EO_WORK/pw)
+//   PW_DIR    directory where the playwright package is installed (default /srv/elixiroffice/pw)
 //   EO_ENV    .env file holding OPENAI_API_KEY (default <repo>/.env). The key is never printed.
 import fs from "node:fs";
 import os from "node:os";

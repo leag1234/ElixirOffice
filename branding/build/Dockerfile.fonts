@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # Final layer of the ElixirOffice production image (tools/image/build.sh): the font pack
 # (branding/fonts: metric substitutes, Playwrite Seyes/FR Moderne derivatives, Elixir Symbols,
 # licences in branding/fonts/LICENSES.md) installed in the image built by the bake, then

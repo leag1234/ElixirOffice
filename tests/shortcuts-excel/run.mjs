@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Plays every testable shortcut of docs/shortcuts-excel.csv in the spreadsheet
 // editor and checks its effect through the editor API.
 //

@@ -1,0 +1,11 @@
+--- a/PdfFile/SrcWriter/Document.cpp
++++ b/PdfFile/SrcWriter/Document.cpp
+@@ -1882,7 +1882,7 @@
+ 		sCreatorA += VALUE2STR(INTVER);
+ #endif
+ 
+-		const char* cCreator = m_pInfo->GetInfo(InfoProducer);
++		const char* cCreator = m_pInfo->GetInfo(InfoCreator);
+ 		m_pInfo->SetInfo(InfoCreator, cCreator ? cCreator : sCreatorA.c_str());
+ 		m_pInfo->SetInfo(InfoProducer, sCreatorA.c_str());
+ 

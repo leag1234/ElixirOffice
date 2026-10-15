@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Markdown tables from bench.mjs result files (medians over runs; p90 for "editable").
 //   node tools/perf/report.mjs results/a.json [results/b.json ...]
 // With two files, prints a before/after comparison for the scenarios they share.

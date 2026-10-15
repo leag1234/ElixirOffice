@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Exclusive CPU sample categories and function stacks (not additive wall phases)."""
 import json,sys,collections
 from pathlib import Path

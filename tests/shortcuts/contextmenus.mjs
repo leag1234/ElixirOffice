@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Word-like right-click menus: order, captions, shortcuts, spelling suggestions on top.
 //   node tests/shortcuts/contextmenus.mjs [screenshot dir] [--out results.json]
 import fs from "node:fs";

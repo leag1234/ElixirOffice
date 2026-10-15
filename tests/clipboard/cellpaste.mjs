@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
-// Copy and paste of table cells keeps the cell formatting, like Word:
+// Copy and paste of table cells keeps the cell formatting, like Word (docs/backlog.md F11):
 // rotated text (btLr, tbRl), shading, vertical alignment, cell margins, cell borders, row height
 // rule, merged cells; pasted into existing cells (Overwrite Cells), into an empty paragraph (new
 // table), into another document, with Ctrl+C/V, the right-click menu and Paste Special; the HTML

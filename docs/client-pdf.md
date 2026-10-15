@@ -28,7 +28,7 @@
 
 pdf-lib is not used any more (the prototype needed it; it cannot draw by glyph id).
 
-### Results (provisional corpus, 30 documents, 74 pages, 2026-10-08, instance `eo-cpdf` on <dev-host>)
+### Results (provisional corpus, 30 documents, 74 pages, 2026-10-08, instance `eo-cpdf` on development host)
 
 Reference: the PDF the same editor gets from the server for the same command (client path switched off), so the comparison isolates the writer. `tools/client-pdf/bench.mjs` then `tools/client-pdf/gate.sh` (SSIM with `tools/fidelity/compare.py`, 120 dpi).
 
@@ -42,7 +42,7 @@ Reference: the PDF the same editor gets from the server for the same command (cl
 | Requests carrying data during the export | 0 | **0** (the server path sends the command stream: 46 KB for a03) |
 | Fallbacks | | 0 |
 
-Times (Chromium, <dev-host>): writer 20 to 333 ms per document (median 57 ms, ~28 ms per page), stream capture 3 to 25 ms, click-to-file 100 to 408 ms (median 135 ms) against 89 to 730 ms (median 117 ms) for the server path on the same machine (no network latency here; through a real network the server path adds the upload of the stream and the download of the PDF). First export: +0.8 MB of libraries (fontkit 0.76 MB minified, writer 30 KB), cached afterwards.
+Times (Chromium, development host): writer 20 to 333 ms per document (median 57 ms, ~28 ms per page), stream capture 3 to 25 ms, click-to-file 100 to 408 ms (median 135 ms) against 89 to 730 ms (median 117 ms) for the server path on the same machine (no network latency here; through a real network the server path adds the upload of the stream and the download of the PDF). First export: +0.8 MB of libraries (fontkit 0.76 MB minified, writer 30 KB), cached afterwards.
 
 The three pages below 0.97 are differences of the server, not of the browser file:
 - `t02` p.2 (0.956): rows of leader dots. The server writes glyph widths truncated to the unit (277 instead of 277.83) and ignores the small position corrections of the stream, so its dots drift (1.7 pt over a line); the browser file keeps the positions of the stream, which are the screen's.
@@ -55,7 +55,7 @@ Tests:
 
 ### Startup cost
 
-A/B on the same instance (`tools/perf/bench.mjs --scenarios load --runs 5 --throttle 1`, 10-page document, <dev-host> under a machine load of ~8 from other builds), branch vs the same commits without the change:
+A/B on the same instance (`tools/perf/bench.mjs --scenarios load --runs 5 --throttle 1`, 10-page document, development host under a machine load of ~8 from other builds), branch vs the same commits without the change:
 
 | Median "editable" (ms) | without | with |
 |---|---|---|
@@ -96,15 +96,15 @@ bring PDF/A, form fields and EMF/WMF in vector form without new code.
 docker run -d --name eo-cpdf-https --network host caddy:2 caddy reverse-proxy --from https://localhost:8446 --to localhost:8084 --internal-certs
 node tools/client-pdf/bench.mjs /tmp/cpdf-bench corpus/provisional      # IDS=a03,t02 to restrict
 tools/client-pdf/gate.sh /tmp/cpdf-bench                                 # summary, gate.json, exit 1 on failure
-EO_BASE=https://localhost:8446 EO_HTTP_BASE=http://$HOST:8084 node tests/client-pdf/run.mjs
-SDKJS=$EO_WORK/wt/cpdf/sdkjs node tests/client-pdf/writer.test.mjs
+EO_BASE=https://localhost:8446 EO_HTTP_BASE=http://192.0.2.10:8084 node tests/client-pdf/run.mjs
+SDKJS=/srv/elixiroffice/wt/cpdf/sdkjs node tests/client-pdf/writer.test.mjs
 ```
 
-Private real corpus: run the bench and `GATE_FLAGS=--aggregate-only tools/client-pdf/gate.sh` on <build-host> only (outputs stay in `$EO_WORK/fidelity/runs-real`, `chmod go-rwx`). Not run yet: the lead runs it with the next <build-host> deployment (agents do not touch <build-host>).
+Private real corpus: run the bench and `GATE_FLAGS=--aggregate-only tools/client-pdf/gate.sh` on build-host only (outputs stay in `/srv/elixiroffice/fidelity/runs-real`, `chmod go-rwx`). Not run yet: the lead runs it with the next build-host deployment (agents do not touch build-host).
 
 ### Next steps (frozen for A until the wasm study concludes; most apply to either backend)
 
-1. **Real corpus** on <build-host> (aggregate scores only), then the Word reference (`--ref word-desktop`) on the client PDF.
+1. **Real corpus** on build-host (aggregate scores only), then the Word reference (`--ref word-desktop`) on the client PDF.
 2. **Fonts**: CFF subsets work (the `offSize` work-around should go to fontkit upstream); CFF2 variable fonts fall back to the server; a variable TrueType font uses its named instance (fontkit applies the variation when subsetting: to verify with Ubuntu Sans and a real variable font of a teacher); TTC faces work (face index from the engine); OTF collections of CJK size (20 MB) are read fully by fontkit before subsetting: measure memory. `fsType` "restricted" fonts fall back to the server today: offer instead "embed anyway (your document)" or a substitute, as Word does.
 3. **Content**: tiled image fills are drawn stretched (33 occurrences in the corpus, no visible gap; a tiling pattern is the exact form), linear gradients with varying alpha (soft-mask shading), EMF/WMF in vector form (today: the SVG of the screen rasterized at 300 dpi; SVG to PDF paths would keep them vector), form fields (command 162: write AcroForm widgets, today server fallback), comments/annotations and tracked changes in "markup" print mode are drawn as the stream gives them.
 4. **Other editors**: PowerPoint and Excel have the same `CDocumentRenderer` stream (`asc_nativeGetPDF` in `slide/api.js`, `cell/api.js`): same writer, a `canHandle` per editor; Excel needs the print-area / scaling options of its print dialog in the capture.
@@ -156,7 +156,7 @@ Files (removed with step 1, see git history of `tools/client-pdf/`): `eo-client-
 
 What the prototype does: decodes the stream; one PDF page per page; paths (lines, curves, closing, fill/stroke, even-odd), colors and opacity, dashes, clipping, transforms (rotation included), text by embedded subset font (bytes taken from `AscFonts` as above), PNG/JPEG images fetched via `fetch` from the document's URL, texture fill (logos), hyperlinks, document title.
 
-Results (dev editor on <dev-host>, 10 documents: administrative a01 a03 a05, association s01 s02 s03 s04 s06 s08, teacher t04; rendering `pdftoppm -r 120`; comparison **client PDF against server PDF** with `tools/fidelity/compare.py` run in a tools container):
+Results (dev editor on development host, 10 documents: administrative a01 a03 a05, association s01 s02 s03 s04 s06 s08, teacher t04; rendering `pdftoppm -r 120`; comparison **client PDF against server PDF** with `tools/fidelity/compare.py` run in a tools container):
 
 | Measure | Result |
 |---|---|
@@ -214,7 +214,7 @@ Writer: start from the prototype; replace pdf-lib with a thin in-house writer (~
 ### Tests
 
 1. Bench `tools/client-pdf/proto.mjs` generalized as a harness mode: `tools/fidelity/run.sh --cand client` produces the candidate PDFs through Playwright and compares them to the **server PDF** then, as today, to the Word reference. Target: mean client/server SSIM ≥ 0.99, no page < 0.97, same page counts; no SSIM regression against the Word reference.
-2. Corpus: full provisional (t01-t10, s01-s09, a01-a05), then real corpus (<build-host> `corpus-private/`, never in git).
+2. Corpus: full provisional (t01-t10, s01-s09, a01-a05), then real corpus (build-host `corpus-private/`, never in git).
 3. Automatic checks on each PDF: `pdffonts` (all fonts embedded), `pdftotext` (the expected text is there), `qpdf --check`, opening by pdf.js and by `pdftoppm`, link extraction.
 4. Font cases: Carlito/Liberation (on the server), a local font added by hand, TTC, OpenType CFF, font with restricted `fsType`, absent font (fallback).
 5. Performance: documents of 50 and 200 pages, memory and duration (budget: < 2 s for 20 pages; no interface blocking: spread over pages or in a worker).

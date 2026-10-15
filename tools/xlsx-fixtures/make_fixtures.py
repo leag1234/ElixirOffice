@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate realistic, deterministic .xlsx fixtures for the spreadsheet editor.
 
 Usage: python3 tools/xlsx-fixtures/make_fixtures.py [output_dir]

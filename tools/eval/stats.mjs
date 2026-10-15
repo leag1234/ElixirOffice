@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Per-task success with 95 % confidence intervals (Wilson score) and median latency, for one or
 // more evaluation result sets (tools/eval/run.mjs output directories or results.json files).
 //

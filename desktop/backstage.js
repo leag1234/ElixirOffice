@@ -3,7 +3,16 @@
 (() => {
 'use strict';
 window.EODesktopBackstage=async function(win,main,info,action){
- const app=win.DE||win.SSE||win.PE;
+ const app=win.DE||win.SSE||win.PE||win.PDFE;
+ if(win.PDFE&&!app.getController('ElixirChrome')){
+  const fm=app.getController('LeftMenu').leftMenu.menuFile,originalGet=app.getController.bind(app);
+  const bs=new win.Common.Views.ElixirBackstage({controller:{getApplication:()=>app},menu:fm});
+  bs.defaultFileType='pdf';bs.defaultFormat=()=>win.Asc.c_oAscFileType.PDF;bs.formats=()=>[{type:win.Asc.c_oAscFileType.PDF,ext:'.pdf',icon:'pdf',name:'txtFmtPdf',desc:'txtFmtPdfDesc',group:'pdf'}];
+  const adapter={backstage:bs,openBackstage:panel=>{originalGet('LeftMenu').leftMenu.showMenu('file');fm.selectMenu(panel)}};
+  app.getController=name=>name==='ElixirChrome'?adapter:originalGet(name);
+  const render=fm.render;fm.render=function(){const result=render.apply(this,arguments);bs.onRender();return result;};
+  if(fm.rendered)bs.onRender();
+ }
  const chrome=app.getController('ElixirChrome'),bs=chrome?.backstage;
  if(!bs)throw Error('Bundled backstage unavailable');
  const fm=bs.fm,$=win.$,t=key=>info.strings[key],parent=window;
@@ -24,6 +33,8 @@ window.EODesktopBackstage=async function(win,main,info,action){
   fm.miInfo?.show();fm.miInfo?.setCaption(t('info'));fm.$el.find('#fm-btn-info').insertAfter(fm.$el.find('#fm-btn-elx-open'));
   for(const item of [fm.miNew,fm.miSave,fm.miDownload,fm.miPrint]){item?.show();item?.setDisabled(false)}
   if(fm.miPrint)fm.miPrintWithPreview?.hide();else{fm.miPrintWithPreview?.show();fm.miPrintWithPreview?.setDisabled(false);fm.miPrintWithPreview?.setCaption(t('print'));}
+  fm.miRename?.show();fm.miRename?.setDisabled(false);fm.miRename?.setCaption(bs.txtRename);
+  if(win.PDFE)fm.miSave?.setDisabled(!main.api.elixirPdfSaveAllowed?.());
   fm.miSave?.setCaption(t('save'));fm.miDownload?.setCaption(t('saveAs'));
   fm.miPrint?.setCaption(t('print'));
   this.items['elx-export']?.setCaption(t('pdf'));
@@ -52,14 +63,14 @@ window.EODesktopBackstage=async function(win,main,info,action){
   panel.refresh=async()=>{const data=await parent.eoDesktop.home();Object.assign(data,{language:info.language,strings:info.strings,embedded:true});parent.EODesktopHome.render(panel.$el[0],data,action,'new')};
   const show=panel.show;if(!panel.eoDesktopShow){panel.eoDesktopShow=true;panel.show=function(){show.apply(this,arguments);this.refresh()};}
  };
- bs.enhanceSaveAs=function(){const panel=ensurePanel('saveas');if(!panel)return;panel.$el.empty().append($('<button class="btn btn-primary" type="button"/>').text(t('saveAs')).on('click',()=>action('save-as')))};
+ bs.enhanceSaveAs=function(){const panel=ensurePanel('saveas');if(!panel)return;panel.$el.empty().append($('<button class="btn btn-primary" type="button"/>').text(t('saveAs')).on('click',()=>action('save-as')),$('<button data-action="rename" type="button"/>').text(bs.txtRename).on('click',()=>{fm.hide();action('rename')}))};
  bs.enhancePrint=function(){};
  bs.onClose=()=>action('home');
  // Controller callbacks were bound before this desktop extension was installed.
  // Dispatch native commands before those existing web handlers receive the event.
  const fireEvent=fm.fireEvent;
  fm.fireEvent=function(event,args,...rest){
-  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as','save-copy':'save-as',print:'print',printpreview:'print',exit:'home','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
+  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'home','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
   if(command){this.hide();return action(command)}
   return fireEvent.call(this,event,args,...rest);
  };
@@ -68,11 +79,11 @@ window.EODesktopBackstage=async function(win,main,info,action){
  main.api.downloadAs=(_action,options)=>options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
  const link=win.document.createElement('link');link.rel='stylesheet';link.href='/example/local-assets/desktop-home/backstage-home.css';win.document.head.append(link);
  const style=win.document.createElement('style');
- style.textContent='body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
+ style.textContent='.eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
  win.document.head.append(style);
  chrome.titleBar?.fitName();
  bs.afterApplyMode();bs.enhanceNew();
- return {open:async()=>{
+ return {renameLabel:bs.txtRename,setName:()=>fm.loadDocument({doc:main.document||main.appOptions.spreadsheet}),open:async()=>{
   const deadline=Date.now()+30000;
   while(!win.Common.Controllers.LaunchController.isScriptLoaded()){
    if(Date.now()>deadline)throw Error('File menu scripts did not finish loading');

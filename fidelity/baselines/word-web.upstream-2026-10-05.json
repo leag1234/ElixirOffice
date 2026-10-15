@@ -3,7 +3,7 @@
  "meta": {
   "run_id": "20261005T130452Z-word-web",
   "date_utc": "2026-10-05T13:05:21Z",
-  "host": "<build-host>",
+  "host": "build-host",
   "image": {
    "name": "ghcr.io/euro-office/documentserver:latest",
    "id": "sha256:2aad6bd4df634d4b3ac04beac6b60c7b093f483655758ccc7caf84db465aa0c6",
@@ -12,7 +12,7 @@
    "ds_version": "9.3.1"
   },
   "corpus": {
-   "path": "$EO_WORK/corpus-provisional",
+   "path": "/srv/elixiroffice/corpus-provisional",
    "provisional": true,
    "label": "provisional@manifest-sha256:b0c458ae9365",
    "manifest_sha256": "b0c458ae936594550bd6606e878a7c38e50aecccdebd7a9b559255c08f462a08",
@@ -21,9 +21,9 @@
   "reference": {
    "source": "word-web",
    "label": "word-web",
-   "dir": "$EO_WORK/fidelity/refs/word-web",
+   "dir": "/srv/elixiroffice/fidelity/refs/word-web",
    "is_fidelity_reference": true,
-   "provenance": "description=Microsoft Word for the web (free Microsoft account, OneDrive personal), File > Export > Download as PDF (without comments); exported=2026-10-05; exported_by=the Gaël Duval (final click) and Claude Code (navigation); settings={'documents_unchanged': True, 'fields_updated': False, 'tracked_changes_display': \"a01 and a04: Simple Markup (Word for the web offers no 'No Markup'); other documents: default view\", 'comments': \"not exported (plain 'Download as PDF')\"}; anomalies=['Word for the web was opened in edit mode; no edit was made, but autosave was active', \"Fonts available to Word for the web's cloud renderer may differ from Word desktop\"]"
+   "provenance": "description=Microsoft Word for the web (free Microsoft account, OneDrive personal), File > Export > Download as PDF (without comments); exported=2026-10-05; exported_by=Gaël Duval (final click) and Claude Code (navigation); settings={'documents_unchanged': True, 'fields_updated': False, 'tracked_changes_display': \"a01 and a04: Simple Markup (Word for the web offers no 'No Markup'); other documents: default view\", 'comments': \"not exported (plain 'Download as PDF')\"}; anomalies=['Word for the web was opened in edit mode; no edit was made, but autosave was active', \"Fonts available to Word for the web's cloud renderer may differ from Word desktop\"]"
   },
   "harness": {
    "version": "sha256:17fb48d11701d009",

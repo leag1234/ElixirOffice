@@ -1,5 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
 # Runs inside the eo-fidelity-lo container. Converts every corpus .docx to
 # /out/<id>.pdf with LibreOffice headless and writes /out/SOURCE.json.
 # STAND-IN ONLY: LibreOffice output is NOT a fidelity reference.

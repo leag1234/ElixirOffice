@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Right-click menus of the Word editor: open every context menu, click every item (and
 // submenu items) from a fresh menu, record errors, popups and effects.
 //   node tests/ctxmenu/sweep-word.mjs [--only id1,id2] [--out file.json] [--max-sub N]

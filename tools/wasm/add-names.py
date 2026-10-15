@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Add a wasm "name" section built from an Emscripten symbol map (idx:name).
 
 usage: add-names.py IN.wasm IN.js.symbols OUT.wasm

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn} from 'node:child_process';

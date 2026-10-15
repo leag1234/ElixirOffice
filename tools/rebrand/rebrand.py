@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """ElixirOffice source rebrand: rewrite the upstream (first-level fork and
 ONLYOFFICE) names left in a DocumentServer checkout and in this repository, or
 list them.
@@ -75,6 +74,7 @@ _NAME = r"(?:" + _E + r"[-_ ]?office|ONLYOFFICE)"
 KEEP_STRICT = re.compile(
     r"copyright|\(c\)\s*(?:\d{4}|copyright)|©|SPDX-|all rights reserved|"
     r'"attribution"\s*:|'
+    r"^ElixirOffice is not affiliated with or endorsed by Microsoft, Ascensio System SIA or the " + _NAME + r" project\.(?: Microsoft, Word, Excel and PowerPoint are trademarks of Microsoft Corporation\.)?$|"
     r"\b(?:based on|fork of|forked from|derived from|rebranded to|fork d['’]|fork de|fork|dérivé de)\b[^.\n]{0,60}?" + _NAME + "|"
     + _NAME + r"[^.\n]{0,40}?\b(?:was |is |itself )?(?:based on|a fork of|derived from)\b",
     re.I)

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Word-style comment balloons in the right margin (docs/ui.md, "Comments in the margin"):
 // balloons next to their anchors, page shifted left, selection and connector line, inline reply,
 // edit, resolve, delete, caret in commented text, Comments pane and "Show comments" hide them, scrolling.

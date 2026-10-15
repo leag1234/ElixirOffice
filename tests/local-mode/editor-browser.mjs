@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {createRequire} from 'node:module';import {execFileSync} from 'node:child_process';

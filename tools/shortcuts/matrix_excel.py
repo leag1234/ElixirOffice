@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Excel keyboard shortcut matrix: curated source of docs/shortcuts-excel.csv.
 
   python3 tools/shortcuts/matrix_excel.py            # writes docs/shortcuts-excel.csv

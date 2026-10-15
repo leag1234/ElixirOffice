@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # LibreOffice headless, used ONLY as a stand-in reference to exercise the
 # harness end to end while Word references do not exist.
 # Its output is NOT a fidelity reference and must never be reported as one.

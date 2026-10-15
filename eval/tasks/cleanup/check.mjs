@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Success criteria of the "clean up" task. before/after: tools/eval/lib.mjs snapshots.
 // Block roles in input.docx:
 const TITLE = 0, SUBTITLE = 1, SECTIONS = [2, 4, 9, 11], SUBSECTIONS = [5, 7], BODY = [3, 6, 8, 10, 12];

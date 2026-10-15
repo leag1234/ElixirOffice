@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Install the Elixir AI server-managed proxy into a running dev container.
 # The browser calls /elixir-ai/v1/chat/completions on the document server; nginx forwards it to the
 # configured OpenAI-compatible endpoint and adds the key (never sent to the browser). With no

@@ -30,7 +30,10 @@ assert manifest["build_flags"]["module_kind"] == "full"
 assert pdf_manifest["build_flags"]["module_kind"] == "pdf"
 for field in ["core_commit", "product_commit", "tools_sha256", "patches", "sources"]:
     assert manifest[field] == pdf_manifest[field], field
-assert len(manifest["patches"]) == 9
+assert len(manifest["patches"]) == 11
+assert "0011-pdf-preserve-creator.patch" in manifest["patches"]
+assert "0010-office-integrity-rejection.patch" in manifest["patches"]
+assert pdf_manifest["build_flags"]["pdf_original_append"] is True
 for name, expected in pdf_manifest["artifacts"].items():
     data = (pdf_release / name).read_bytes()
     assert len(data) == expected["bytes"] and hashlib.sha256(data).hexdigest() == expected["sha256"], name
@@ -38,8 +41,8 @@ for name in ["clientpdf.js", "wasm-pdf.js", "wasm-worker.js", "wasm-fonts.js"]:
     assert (pdf / name).stat().st_size > 0, name
 for name in ["api.js", "worker.js", "pdf.js"]:
     assert (service / name).stat().st_size > 0, name
-for editor in ["documenteditor", "spreadsheeteditor", "presentationeditor"]:
+for editor in ["documenteditor", "spreadsheeteditor", "presentationeditor", "pdfeditor"]:
     bundle = apps / "web-apps/apps" / editor / "main/app.js"
     assert "ElixirLocal" in bundle.read_text(), editor
 assert not (apps / "web-apps/apps/common/main/lib/elixir-local/Controller.js").exists()
-print("PASS both deployed pins/manifests/artifact hashes, conversion/PDF helpers and all three production bundles; no raw Controller")
+print("PASS both deployed pins/manifests/artifact hashes, conversion/PDF helpers and all four production bundles (including PDF); no raw Controller")

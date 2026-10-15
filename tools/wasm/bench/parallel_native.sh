@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Same throughput test for the native x2t: K concurrent processes.
 # usage: parallel_native.sh X2T CORPUS_DIR K OUT_DIR
 set -euo pipefail

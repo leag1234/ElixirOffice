@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Second wave of Word commands: Show First Line Only in the Outline view, block (column) selection, window split,
 // field lock saved in .docx (w:fldLock, needs the x2t of core elixir/parity2), the Mailings tab (mail merge).
 // Engine: sdkjs word/Editor/word-block-selection.js and word-views.js; interface: controllers WordViews, WordMailings.

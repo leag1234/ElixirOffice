@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # ElixirOffice brand for DocumentServer/build/docker-bake.hcl (docs/branding.md).
 # Loaded after the upstream bake file, it only overrides variables and the
 # brand-icons target; no upstream Dockerfile is forked.

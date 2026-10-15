@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test ../tests/desktop/*.test.cjs",
-    "package": "electron-builder --linux AppImage && bash ../tools/desktop/deb.sh",
+    "package": "electron-builder --linux AppImage --publish never && bash ../tools/desktop/deb.sh",
     "package:windows": "electron-builder --win nsis --x64",
     "package:mac": "electron-builder --config ../tools/desktop/mac-config.cjs --mac dmg --arm64"
   },
@@ -73,7 +73,8 @@
           "xltx",
           "xlsm",
           "potx",
-          "ppsx"
+          "ppsx",
+          "pdf"
         ],
         "name": "Office document",
         "role": "Editor"
@@ -108,7 +109,11 @@
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist"
     },
-    "artifactName": "ElixirOffice-${version}-${os}-${arch}.${ext}"
+    "artifactName": "ElixirOffice-${version}-${os}-${arch}.${ext}",
+    "publish": null,
+    "appImage": {
+      "artifactName": "ElixirOffice-${version}-x86_64.${ext}"
+    }
   },
   "desktopName": "org.elixiroffice.desktop.desktop"
 }

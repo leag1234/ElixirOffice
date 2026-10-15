@@ -8,11 +8,11 @@ Branches: `elixir/ui` in web-apps (submodule of `DocumentServer`), `feat/ui` in 
 
 | | Before | After |
 |---|---|---|
-| Home | screenshot `before-home.png` (not published) | screenshot `after-home.png` (not published) |
-| Insert | screenshot `before-insert.png` (not published) | screenshot `after-insert.png` (not published) |
-| Layout | screenshot `before-layout.png` (not published) | screenshot `after-layout.png` (not published) |
-| Review | screenshot `before-review.png` (not published) (Collaboration) | screenshot `after-review.png` (not published) |
-| File | screenshot `before-file.png` (not published) | screenshot `after-file.png` (not published) |
+| Home | ![](screenshots/ui/before-home.png) | ![](screenshots/ui/after-home.png) |
+| Insert | ![](screenshots/ui/before-insert.png) | ![](screenshots/ui/after-insert.png) |
+| Layout | ![](screenshots/ui/before-layout.png) | ![](screenshots/ui/after-layout.png) |
+| Review | ![](screenshots/ui/before-review.png) (Collaboration) | ![](screenshots/ui/after-review.png) |
+| File | ![](screenshots/ui/before-file.png) | ![](screenshots/ui/after-file.png) |
 
 Other screenshots: `after-design.png`, `after-references.png`, `after-view.png`, `after-home-1280x720.png`, `after-home-dark.png`, `after-home-rtl-ar.png` (Arabic, right-to-left interface), `after-t04-home.png` (another corpus document). Document: `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx`. Headless Chromium browser (Playwright), 1440x900 unless stated otherwise. The Segoe fonts do not exist on the capture machine, hence the fallback to Arial or DejaVu.
 
@@ -88,7 +88,7 @@ Other screenshots: `after-design.png`, `after-references.png`, `after-view.png`,
 
 ## Second pass: File menu, title bar and window frame
 
-Session of 2026-10-05 (second pass, "chrome" part). Branches: `elixir/chrome` in web-apps, sdkjs, document-server-integration and the DocumentServer superproject; `feat/chrome` in this repository. Nothing is pushed. Working instance: `eo-chrome`, http://localhost:32770/example/ on <dev-host> (`./eo.sh up chrome`, sample launched from the sources by `make example CONTAINER=eo-chrome UPSTREAM=$EO_WORK/wt/chrome`).
+Session of 2026-10-05 (second pass, "chrome" part). Branches: `elixir/chrome` in web-apps, sdkjs, document-server-integration and the DocumentServer superproject; `feat/chrome` in this repository. Nothing is pushed. Working instance: `eo-chrome`, http://localhost:32770/example/ on development host (`./eo.sh up chrome`, sample launched from the sources by `make example CONTAINER=eo-chrome UPSTREAM=/srv/elixiroffice/wt/chrome`).
 
 The code lives in a separate module, `web-apps/apps/documenteditor/main/app/elixir-chrome/` (controller `DE.Controllers.ElixirChrome`), which extends the existing views (File menu, header, left menu) without rewriting them. The only hooks in the upstream's files: the controller declaration in `app.js` / `app_dev.js`, an `@import` in `app.less`, a line of `Main.js` (print preview on the web) and a line of `Themes.js` (`canvas-page-shadow` token).
 
@@ -96,12 +96,12 @@ The code lives in a separate module, `web-apps/apps/documenteditor/main/app/elix
 
 | | Before | After (light) | After (dark) |
 |---|---|---|---|
-| Editor | screenshot `chrome-before-editor.png` (not published) | screenshot `chrome-after-editor.png` (not published) | screenshot `chrome-after-dark-editor.png` (not published) |
-| File | screenshot `chrome-before-file.png` (not published) (Info) | screenshot `chrome-after-home.png` (not published) (Home) | screenshot `chrome-after-dark-home.png` (not published) |
-| Ctrl+F | screenshot `chrome-before-ctrlf.png` (not published) | screenshot `chrome-after-nav-results.png` (not published) | screenshot `chrome-after-dark-nav-pages.png` (not published) (Pages) |
-| Dark | screenshot `chrome-before-dark.png` (not published) | | screenshot `chrome-after-dark-search.png` (not published) (search) |
+| Editor | ![](screenshots/ui2/chrome-before-editor.png) | ![](screenshots/ui2/chrome-after-editor.png) | ![](screenshots/ui2/chrome-after-dark-editor.png) |
+| File | ![](screenshots/ui2/chrome-before-file.png) (Info) | ![](screenshots/ui2/chrome-after-home.png) (Home) | ![](screenshots/ui2/chrome-after-dark-home.png) |
+| Ctrl+F | ![](screenshots/ui2/chrome-before-ctrlf.png) | ![](screenshots/ui2/chrome-after-nav-results.png) | ![](screenshots/ui2/chrome-after-dark-nav-pages.png) (Pages) |
+| Dark | ![](screenshots/ui2/chrome-before-dark.png) | | ![](screenshots/ui2/chrome-after-dark-search.png) (search) |
 
-Other screenshots (`screenshots/ui2/chrome-after-*.png`): `open`, `info`, `saveas`, `print`, `share`, `export`, `export-type`, `search`, `flyout`, `nav-pages`, `comments`, `dark-comments`, `dark-info`, `dark-print`, `fr-home` (French interface), `rtl-ar-home` (Arabic, right-to-left), `1100x720` (narrow window). Document: `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx`, headless Chromium (Playwright, `$EO_WORK/pw/chrome/shot.mjs`), 1440×900 unless stated otherwise.
+Other screenshots (`docs/screenshots/ui2/chrome-after-*.png`): `open`, `info`, `saveas`, `print`, `share`, `export`, `export-type`, `search`, `flyout`, `nav-pages`, `comments`, `dark-comments`, `dark-info`, `dark-print`, `fr-home` (French interface), `rtl-ar-home` (Arabic, right-to-left), `1100x720` (narrow window). Document: `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx`, headless Chromium (Playwright, `/srv/elixiroffice/pw/chrome/shot.mjs`), 1440×900 unless stated otherwise.
 
 ### 1. File menu like Word's backstage
 
@@ -164,19 +164,19 @@ Fluent UI System Icons (MIT), "regular" 20 and 24 px variants, inline and in `cu
 
 ## Second pass: formatting (Home tab, dialog boxes, styles)
 
-Session of 2026-10-05, "formatting" slice. Branches: `elixir/fmt` in web-apps, sdkjs and document-templates (submodules of `DocumentServer`, worktree `wt/fmt`), `feat/fmt` in this repository. Nothing is pushed. Test instance: `eo-fmt` (port 32771 on <dev-host>).
+Session of 2026-10-05, "formatting" slice. Branches: `elixir/fmt` in web-apps, sdkjs and document-templates (submodules of `DocumentServer`, worktree `wt/fmt`), `feat/fmt` in this repository. Nothing is pushed. Test instance: `eo-fmt` (port 32771 on development host).
 
-Screenshots: `screenshots/ui2/fmt-*.png` (before: `fmt-before-*`, after: `fmt-after-*`), headless Chromium, 1440x900, document `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx` unless stated otherwise.
+Screenshots: `docs/screenshots/ui2/fmt-*.png` (before: `fmt-before-*`, after: `fmt-after-*`), headless Chromium, 1440x900, document `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx` unless stated otherwise.
 
 | | Before | After |
 |---|---|---|
-| Blank document | screenshot `fmt-before-blank.png` (not published) | screenshot `fmt-after-blank.png` (not published) |
-| Style gallery | screenshot `fmt-before-styles.png` (not published) | screenshot `fmt-after-styles-gallery.png` (not published) |
-| Font box | screenshot `fmt-before-font-dialog.png` (not published) | screenshot `fmt-after-font-dialog.png` (not published) |
-| Paragraph box | screenshot `fmt-before-paragraph-dialog.png` (not published) | screenshot `fmt-after-paragraph-dialog.png` (not published) |
-| Paste | screenshot `fmt-before-paste.png` (not published) | screenshot `fmt-after-paste-menu.png` (not published) |
-| Font list | screenshot `fmt-before-fontname.png` (not published) | screenshot `fmt-after-fontlist.png` (not published) |
-| Highlight | screenshot `fmt-before-highlight.png` (not published) | screenshot `fmt-after-highlight.png` (not published) |
+| Blank document | ![](screenshots/ui2/fmt-before-blank.png) | ![](screenshots/ui2/fmt-after-blank.png) |
+| Style gallery | ![](screenshots/ui2/fmt-before-styles.png) | ![](screenshots/ui2/fmt-after-styles-gallery.png) |
+| Font box | ![](screenshots/ui2/fmt-before-font-dialog.png) | ![](screenshots/ui2/fmt-after-font-dialog.png) |
+| Paragraph box | ![](screenshots/ui2/fmt-before-paragraph-dialog.png) | ![](screenshots/ui2/fmt-after-paragraph-dialog.png) |
+| Paste | ![](screenshots/ui2/fmt-before-paste.png) | ![](screenshots/ui2/fmt-after-paste-menu.png) |
+| Font list | ![](screenshots/ui2/fmt-before-fontname.png) | ![](screenshots/ui2/fmt-after-fontlist.png) |
+| Highlight | ![](screenshots/ui2/fmt-before-highlight.png) | ![](screenshots/ui2/fmt-after-highlight.png) |
 
 Other screenshots: `fmt-after-style-live-preview.png` (preview on hover), `fmt-after-styles-pane-modify.png` (Styles pane and "Modify Style"), `fmt-after-apply-styles.png`, `fmt-after-font-dialog-advanced.png`, `fmt-after-font-dialog-fr.png` (French interface), `fmt-after-paragraph-dialog-breaks.png`, `fmt-after-tabs-dialog.png`, `fmt-after-paste-chip.png` (options button after paste), `fmt-after-paste-merge.png`, `fmt-after-linespace.png`, `fmt-after-borders.png`, `fmt-after-changecase.png`, `fmt-after-home.png`, `fmt-after-home-dark.png`.
 
@@ -246,7 +246,7 @@ Other screenshots: `fmt-after-style-live-preview.png` (preview on hover), `fmt-a
 
 ## Ribbon, second pass: contextual tabs and tab content
 
-Session of 2026-10-05 (afternoon). Branches: `elixir/ribbon` in web-apps (submodule of `DocumentServer`, worktree `$EO_WORK/wt/ribbon`), `feat/ribbon` in this repository. Nothing is pushed. Test instance: `eo-ribbon`, port 8097 on <dev-host>.
+Session of 2026-10-05 (afternoon). Branches: `elixir/ribbon` in web-apps (submodule of `DocumentServer`, worktree `/srv/elixiroffice/wt/ribbon`), `feat/ribbon` in this repository. Nothing is pushed. Test instance: `eo-ribbon`, port 8097 on development host.
 
 Scope: all tabs except Home (another work item), plus the contextual tabs and ribbon behavior. The engine (sdkjs) is not modified.
 
@@ -273,7 +273,7 @@ They appear on the right of the tab row, label in the accent color, as in Word, 
 
 Inserting a table, an image, a shape, a text box, Text Art or an equation opens the corresponding tab, like Word. The group launchers open the Table Properties boxes (Cell or Borders tab), Insert Cells, Layout (Size, Position, Rotation, Alt Text) and the Shape panel.
 
-screenshot `ribbon-ctx-all.png` (not published)
+![](screenshots/ui2/ribbon-ctx-all.png)
 
 ### Classic tabs
 
@@ -288,7 +288,7 @@ screenshot `ribbon-ctx-all.png` (not published)
 
 | | Before (elixir/dev) | After |
 |---|---|---|
-| All tabs | screenshot `ribbon-before-all.png` (not published) | screenshot `ribbon-after-all.png` (not published) |
+| All tabs | ![](screenshots/ui2/ribbon-before-all.png) | ![](screenshots/ui2/ribbon-after-all.png) |
 
 Per-tab screenshots: `ribbon-before-<tab>.png`, `ribbon-after-<tab>.png` (1440 px), `ribbon-1280-*.png`, `ribbon-1920-*.png`, contextual `ribbon-ctx-*.png` (and `ribbon-1280-ctx-*`, `ribbon-1920-ctx-*`), menus and boxes `ribbon-menu-margins|breaks|wraptext|shapes|watermark.png`, `ribbon-dialog-wordcount.png`, `ribbon-dialog-icons.png`, behavior `ribbon-1280-collapsed-group.png`, `ribbon-folded-pinnable.png`. Document: `corpus/provisional/teachers/t01-fiche-fractions-cm1.docx` (and `t03` for shapes).
 
@@ -329,25 +329,25 @@ Branches `elixir/interact` (web-apps, sdkjs) and `feat/interact` (this repositor
 - **Mini toolbar** on mouse selection and above the context menu, fade according to the distance from the pointer.
 - **Context menus** in Word's order, with labels, Fluent icons and shortcuts on the right; spelling suggestions first, in bold.
 - **ScreenTips**: title and shortcut in bold, one description line, Office's delay; common focus ring; tab change with a fade; no layout jump.
-Screenshots: `screenshots/ui2/interact-*.png`.
+Screenshots: `docs/screenshots/ui2/interact-*.png`.
 
 ## Spreadsheet
 
-Session of 2026-10-05, "spreadsheet" slice. Goal: make the workbook editor (`web-apps/apps/spreadsheeteditor/main`) look like Excel for the web / Excel 2024 and handle the same way, at the level already reached by the text editor. Branches: `elixir/cell` in web-apps and sdkjs (worktree `$EO_WORK/wt/cell`), `feat/cell` in this repository. Nothing is pushed. Test instance: `eo-cell`, port **8099** on <dev-host> (`./eo.sh up cell 8099`, build by `$EO_WORK/wt/cell-work/build.sh`).
+Session of 2026-10-05, "spreadsheet" slice. Goal: make the workbook editor (`web-apps/apps/spreadsheeteditor/main`) look like Excel for the web / Excel 2024 and handle the same way, at the level already reached by the text editor. Branches: `elixir/cell` in web-apps and sdkjs (worktree `/srv/elixiroffice/wt/cell`), `feat/cell` in this repository. Nothing is pushed. Test instance: `eo-cell`, port **8099** on development host (`./eo.sh up cell 8099`, build by `/srv/elixiroffice/wt/cell-work/build.sh`).
 
-Test workbooks: `tests/fixtures/xlsx/` (generated by `tools/xlsx-fixtures/make_fixtures.py`, sent to the instance by `tools/xlsx-fixtures/upload.sh`): sales report (table, formulas, charts, conditional formatting, four colored sheets), grade book, budget, small workbook for shortcuts, data for a pivot table. Screenshots: headless Chromium (Playwright, `$EO_WORK/pw/cell/shot.mjs`), 1440×900 unless stated otherwise, `c01-sales-report.xlsx`.
+Test workbooks: `tests/fixtures/xlsx/` (generated by `tools/xlsx-fixtures/make_fixtures.py`, sent to the instance by `tools/xlsx-fixtures/upload.sh`): sales report (table, formulas, charts, conditional formatting, four colored sheets), grade book, budget, small workbook for shortcuts, data for a pivot table. Screenshots: headless Chromium (Playwright, `/srv/elixiroffice/pw/cell/shot.mjs`), 1440×900 unless stated otherwise, `c01-sales-report.xlsx`.
 
 ### Before / after
 
 | | Before | After |
 |---|---|---|
-| Home | screenshot `before-c01.png` (not published) | screenshot `after-home.png` (not published) |
-| Insert | screenshot `before-c01-insert.png` (not published) | screenshot `after-ins.png` (not published) |
-| Formulas | screenshot `before-c01-formula.png` (not published) | screenshot `after-formula.png` (not published) |
-| Data | screenshot `before-c01-data.png` (not published) | screenshot `after-data.png` (not published) |
-| File | screenshot `before-c01-file.png` (not published) | screenshot `after-file-home.png` (not published) |
+| Home | ![](screenshots/cell/before-c01.png) | ![](screenshots/cell/after-home.png) |
+| Insert | ![](screenshots/cell/before-c01-insert.png) | ![](screenshots/cell/after-ins.png) |
+| Formulas | ![](screenshots/cell/before-c01-formula.png) | ![](screenshots/cell/after-formula.png) |
+| Data | ![](screenshots/cell/before-c01-data.png) | ![](screenshots/cell/after-data.png) |
+| File | ![](screenshots/cell/before-c01-file.png) | ![](screenshots/cell/after-file-home.png) |
 
-Other screenshots (`screenshots/cell/after-*.png`): `layout`, `review`, `view`, `draw`, `numfmt` (format list), `condformat` and `condformat-rule`, `formatastable`, `contextmenu`, `minitoolbar`, `tabmenu`, `chartdesign`, `chartformat`, `keytips` (Alt, H), `search` (Alt+Q), `file-info`, `file-print`, `file-export`, `file-saveas`, `insert-function`, `formula-autocomplete`, `function-tooltip`, `autofill`, `dark`, `dark-file`, `dark-chart`, `fr`, `fr-file` (French interface), `1280` (1280×800 window). Icon board: not redone (see "Icons").
+Other screenshots (`docs/screenshots/cell/after-*.png`): `layout`, `review`, `view`, `draw`, `numfmt` (format list), `condformat` and `condformat-rule`, `formatastable`, `contextmenu`, `minitoolbar`, `tabmenu`, `chartdesign`, `chartformat`, `keytips` (Alt, H), `search` (Alt+Q), `file-info`, `file-print`, `file-export`, `file-saveas`, `insert-function`, `formula-autocomplete`, `function-tooltip`, `autofill`, `dark`, `dark-file`, `dark-chart`, `fr`, `fr-file` (French interface), `1280` (1280×800 window). Icon board: not redone (see "Icons").
 
 ### 1. What is shared with the text editor
 
@@ -416,23 +416,23 @@ Fluent UI System Icons (MIT) for all the spreadsheet's own icons (128 `spreadshe
 
 ## Presentation
 
-Session of 2026-10-05/06. Goal: make the presentation editor (`web-apps/apps/presentationeditor/main`) look like PowerPoint for the web / PowerPoint 2024 and handle the same way. Branches: `elixir/slide` in web-apps and the DocumentServer superproject (sdkjs unmodified, up to date with `elixir/dev`), `feat/slide` in this repository. Nothing is pushed. Working instance: `eo-slide`, http://localhost:32773/example/ on <dev-host> (`./eo.sh up slide`, start page from the sources through `make example CONTAINER=eo-slide UPSTREAM=$EO_WORK/wt/slide`).
+Session of 2026-10-05/06. Goal: make the presentation editor (`web-apps/apps/presentationeditor/main`) look like PowerPoint for the web / PowerPoint 2024 and handle the same way. Branches: `elixir/slide` in web-apps and the DocumentServer superproject (sdkjs unmodified, up to date with `elixir/dev`), `feat/slide` in this repository. Nothing is pushed. Working instance: `eo-slide`, http://localhost:32773/example/ on development host (`./eo.sh up slide`, start page from the sources through `make example CONTAINER=eo-slide UPSTREAM=/srv/elixiroffice/wt/slide`).
 
-Test documents: `tests/fixtures/pptx/` (python-pptx generator `make_fixtures.py`): `p01-cours-photosynthese.pptx` (8 slides: title, bullets, image, chart, table, two contents, section header, presenter notes, transitions) and `p02-blank-16x9.pptx` (3 slides, shortcut tests). Screenshots: `screenshots/slide/` (headless Chromium, 1440x900, p01).
+Test documents: `tests/fixtures/pptx/` (python-pptx generator `make_fixtures.py`): `p01-cours-photosynthese.pptx` (8 slides: title, bullets, image, chart, table, two contents, section header, presenter notes, transitions) and `p02-blank-16x9.pptx` (3 slides, shortcut tests). Screenshots: `docs/screenshots/slide/` (headless Chromium, 1440x900, p01).
 
 ### Before / after
 
 | | Before (elixir/dev) | After |
 |---|---|---|
-| Home | screenshot `before-home.png` (not published) | screenshot `after-home.png` (not published) |
-| Insert | screenshot `before-insert.png` (not published) | screenshot `after-insert.png` (not published) |
-| Design | screenshot `before-design.png` (not published) | screenshot `after-design.png` (not published) |
-| Transitions | screenshot `before-transitions.png` (not published) | screenshot `after-transitions.png` (not published) |
-| Animations | screenshot `before-animations.png` (not published) | screenshot `after-animations.png` (not published) |
-| View | screenshot `before-view.png` (not published) | screenshot `after-view.png` (not published) |
-| File | screenshot `before-file.png` (not published) | screenshot `after-file.png` (not published) (Home) |
-| Status bar | screenshot `before-statusbar.png` (not published) | screenshot `after-statusbar.png` (not published) |
-| Presenter view | screenshot `before-presenter.png` (not published) | screenshot `after-presenter.png` (not published) |
+| Home | ![](screenshots/slide/before-home.png) | ![](screenshots/slide/after-home.png) |
+| Insert | ![](screenshots/slide/before-insert.png) | ![](screenshots/slide/after-insert.png) |
+| Design | ![](screenshots/slide/before-design.png) | ![](screenshots/slide/after-design.png) |
+| Transitions | ![](screenshots/slide/before-transitions.png) | ![](screenshots/slide/after-transitions.png) |
+| Animations | ![](screenshots/slide/before-animations.png) | ![](screenshots/slide/after-animations.png) |
+| View | ![](screenshots/slide/before-view.png) | ![](screenshots/slide/after-view.png) |
+| File | ![](screenshots/slide/before-file.png) | ![](screenshots/slide/after-file.png) (Home) |
+| Status bar | ![](screenshots/slide/before-statusbar.png) | ![](screenshots/slide/after-statusbar.png) |
+| Presenter view | ![](screenshots/slide/before-presenter.png) | ![](screenshots/slide/after-presenter.png) |
 
 Other screenshots: `after-slideshow.png` (Slide Show tab), `after-review.png`, `after-ctx-shape.png`, `after-ctx-picture.png`, `after-ctx-tabledesign.png`, `after-ctx-tablelayout.png` (contextual tabs), `after-print.png` (Print with preview), `after-export.png`, `after-saveas.png`, `after-comments-pane.png` (Comments pane on the right, thumbnails kept), `after-keytips.png` (Alt, H then Alt, S), `after-dark.png` (dark theme), `after-fr-insert.png` (French interface), `after-1280-insert.png` (1280 px window), `after-editor.png`.
 
@@ -502,7 +502,7 @@ New strings in English (default), fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh,
 
 ## Polish from real use (Firefox on macOS, murena.io)
 
-Session of 2026-10-06. Branches `elixir/polish` (web-apps, document-server-integration), `feat/polish` here. Before / after screenshots: `screenshots/polish/` (`before-<browser>-*.png`, `after-<browser>-*.png`, Chromium, Firefox, WebKit, 1440x900 at 2x scale like a Retina screen). Test: `tests/polish/ui-polish.mjs` (see below).
+Session of 2026-10-06. Branches `elixir/polish` (web-apps, document-server-integration), `feat/polish` here. Before / after screenshots: `docs/screenshots/polish/` (`before-<browser>-*.png`, `after-<browser>-*.png`, Chromium, Firefox, WebKit, 1440x900 at 2x scale like a Retina screen). Test: `tests/polish/ui-polish.mjs` (see below).
 
 ### Fixes
 
@@ -551,7 +551,7 @@ Chromium, Firefox, WebKit at 1440x900, 2x scale: no left-bar text overflows its 
 
 ## First tester feedback: Language control and Borders icons (2026-10-07)
 
-Branches `elixir/fb13` (web-apps) and `feat/fb13` (this repository). Screenshots: `screenshots/fb13/` (`before-*`, `after-*`, and the test captures `fb13-*`). Test: `tests/shortcuts/language-borders.mjs` (51 checks).
+Branches `elixir/fb13` (web-apps) and `feat/fb13` (this repository). Screenshots: `docs/screenshots/fb13/` (`before-*`, `after-*`, and the test captures `fb13-*`). Test: `tests/shortcuts/language-borders.mjs` (51 checks).
 
 ### F1. Language
 
@@ -572,7 +572,7 @@ Branches `elixir/fb13` (web-apps) and `feat/fb13` (this repository). Screenshots
 
 ## Inline spelling correction (F2, 2026-10-07)
 
-Branches `elixir/spell` (sdkjs, web-apps) and `feat/spell` (this repository). Test: `tests/spell/spell.mjs` (Word and Presentation, 33 checks) and the `misspelled*` scenarios of `tests/ctxmenu/sweep-word.mjs`. Screenshots: `screenshots/spell/before-spelling-menu.png`, `after-spelling-menu.png`.
+Branches `elixir/spell` (sdkjs, web-apps) and `feat/spell` (this repository). Test: `tests/spell/spell.mjs` (Word and Presentation, 33 checks) and the `misspelled*` scenarios of `tests/ctxmenu/sweep-word.mjs`. Screenshots: `docs/screenshots/spell/before-spelling-menu.png`, `after-spelling-menu.png`.
 
 - Before: the menu on a misspelled word already listed the engine's suggestions, but only three (the others behind "More variants..."), with Ignore and Ignore all, "Select language" (a 250 entry list), and "Add to dictionary" only in the desktop app (the browser had no user dictionary).
 - Now (Word's design): up to five suggestions in bold at the top (the engine's best first; no sub-menu), separator, **Ignore All**, **Add to Dictionary**, **Language**, then the usual items. Picking a suggestion replaces the word in one undo step (`asc_replaceMisspelledWord`, one `StartAction`). When the engine has none: a greyed "No Spelling Suggestions" entry (the other commands stay). Ignore (once) is not offered, as in Word's context menu.
@@ -582,13 +582,13 @@ Branches `elixir/spell` (sdkjs, web-apps) and `feat/spell` (this repository). Te
 - F7 (next misspelling, opens its suggestions: no Editor pane here) and Review > Spelling (switch of the checking, then the menu has no spelling item) are unchanged and tested.
 - Spreadsheet: unchanged (the Spellcheck panel of that editor; no underline in cells).
 - Strings: en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh (Word and PowerPoint locales).
-- Dictionaries: the dev container ships 49 Hunspell dictionaries (`$EO_ROOT/dictionaries`, `/<version>/dictionaries/<lang>/<lang>.dic`, 200 for en_US and fr_FR) and the engine (`sdkjs/common/spell/spell/spell.wasm`). In the production image they come from the `dictionaries` submodule of DocumentServer through `COPY dictionaries` of `build/.docker/bundle.bake.Dockerfile` (nothing in our brand HCL, Dockerfile.fonts or the entrypoint removes them); `tools/image/validate.sh` now checks them (folder count and HTTP 200 on en_US, fr_FR, the engine). Not run against the demo image from <dev-host> (<build-host> untouched): see docs/install-server.md.
+- Dictionaries: the dev container ships 49 Hunspell dictionaries (`$EO_ROOT/dictionaries`, `/<version>/dictionaries/<lang>/<lang>.dic`, 200 for en_US and fr_FR) and the engine (`sdkjs/common/spell/spell/spell.wasm`). In the production image they come from the `dictionaries` submodule of DocumentServer through `COPY dictionaries` of `build/.docker/bundle.bake.Dockerfile` (nothing in our brand HCL, Dockerfile.fonts or the entrypoint removes them); `tools/image/validate.sh` now checks them (folder count and HTTP 200 on en_US, fr_FR, the engine). Not run against the demo image from development host (build-host untouched): see docs/install-server.md.
 - Not done: AutoCorrect of common typos while typing; grammar (the engine only checks spelling).
 - Test harness note: the engine stops checking a document that `setDoc` rebuilt several times (also on the unmodified build; fixing eight words in a normal document works), and text put by the builder (cells, replaced paragraphs) is only checked once edited. The tests build the misspelled text once and retype a character before each opening.
 
 ## UI gaps with Word, third pass (2026-10-08)
 
-Branches `elixir/uigaps` (sdkjs, web-apps) and `feat/uigaps` (this repository). Tests: `tests/comments/margin.mjs`, `tests/ribbon/chart-tabs.mjs`, `tests/ribbon/word-gaps.mjs`. Screenshots: `screenshots/uigaps/` (our editor; the side-by-side with Word on a real Windows or macOS machine is still to do, see "What remains").
+Branches `elixir/uigaps` (sdkjs, web-apps) and `feat/uigaps` (this repository). Tests: `tests/comments/margin.mjs`, `tests/ribbon/chart-tabs.mjs`, `tests/ribbon/word-gaps.mjs`. Screenshots: `docs/screenshots/uigaps/` (our editor; the side-by-side with Word on a real Windows or macOS machine is still to do, see "What remains").
 
 Each addition is a separate web-apps module, loaded by `app.js` / `app_dev.js` and styled by an `@import` in `app.less`; the engine side is a small set of `asc_Elixir*` API methods in `sdkjs/word/api.js`.
 
@@ -602,7 +602,7 @@ Each addition is a separate web-apps module, loaded by `app.js` / `app_dev.js` a
 
 | All comments | Selected comment | Comments pane |
 |---|---|---|
-| screenshot `margin-all.png` (not published) | screenshot `margin-selected.png` (not published) | screenshot `margin-pane.png` (not published) |
+| ![](screenshots/uigaps/margin-all.png) | ![](screenshots/uigaps/margin-selected.png) | ![](screenshots/uigaps/margin-pane.png) |
 
 ### 2. Ribbon autonomy: the right panel only for "More Options"
 
@@ -646,7 +646,7 @@ Document Formatting: **Themes** | **Style Set** gallery | Colors | **Fonts** | *
 
 ### 6. Real user identity
 
-Already delivered by the Nextcloud connector work (`docs/storage.md` section 3): no fixed upstream sample user, local profile ("Me" by default, Change name, initials avatar) or Nextcloud identity, Office-style account menu on the start page and in the title bar, correct names on comments, revisions and co-editing (`tests/nextcloud/connector.mjs`). Checked again here: the comment balloons show the user's name and initials.
+Already delivered by the Nextcloud connector work (`docs/storage.md` section 3): no "John Smith", local profile ("Me" by default, Change name, initials avatar) or Nextcloud identity, Office-style account menu on the start page and in the title bar, correct names on comments, revisions and co-editing (`tests/nextcloud/connector.mjs`). Checked again here: the comment balloons show the user's name and initials.
 
 ### 7. AutoCorrect while typing
 
@@ -659,7 +659,7 @@ Already delivered by the Nextcloud connector work (`docs/storage.md` section 3):
 
 On eo-uigaps (port 8107), elixir/uigaps rebased on elixir/dev of 2026-10-08 (cpdf, parity2 wave 1, cellpaste, tableshade): `tests/comments/margin.mjs` 31/31, `tests/ribbon/chart-tabs.mjs` 16/16, `tests/ribbon/word-gaps.mjs` 45/45. No regression: smoke 0 failed checks (5 console errors, all the 404 of `elixir-ai/config.json`: no AI proxy on a test instance), shortcuts 219/219 (Windows) and 167/167 (macOS), mini toolbar 18/18, context menus 15/15, language and borders 51/51, spelling 33/33, layout 24/24, ctxmenu sweeps Word 407/408 (one "menu did not reopen", a different item on each run, also on the reference gate), Spreadsheet 427/427, Presentation 149/149. `make rebrand-check`: 0.
 
-Screenshots (`screenshots/uigaps/`): `margin-all`, `margin-selected`, `margin-pane`, `margin-new`, `ribbon-ctx-chartdesign`, `ribbon-ctx-chartformat`, `ribbon-design`, `ribbon-design-themes`, `ribbon-design-borders`, `ribbon-insert-cover`, `ribbon-insert-table-preview`, `ribbon-references`, `refs-create-source`, `refs-bibliography-mla`, `autocorrect-dialog` (1440x900, headless Chromium).
+Screenshots (`docs/screenshots/uigaps/`): `margin-all`, `margin-selected`, `margin-pane`, `margin-new`, `ribbon-ctx-chartdesign`, `ribbon-ctx-chartformat`, `ribbon-design`, `ribbon-design-themes`, `ribbon-design-borders`, `ribbon-insert-cover`, `ribbon-insert-table-preview`, `ribbon-references`, `refs-create-source`, `refs-bibliography-mla`, `autocorrect-dialog` (1440x900, headless Chromium).
 
 ### What remains different from Word
 
@@ -673,7 +673,7 @@ Screenshots (`screenshots/uigaps/`): `margin-all`, `margin-selected`, `margin-pa
 
 ## Familiar ground for Word users (2026-10-09)
 
-Branches `elixir/familiar` (web-apps) and `feat/familiar` (this repository). Goal from the owner: no pixel copy, but a Word user finds the same places, order, names and behaviours. Method: screenshots of our editor at 1930x1040 and 120% (en and fr, `tests/ribbon/familiar-shots.mjs`) compared with private references of Word 365 for Windows (French UI, not in the repository). Before and after: `screenshots/familiar/` (`before-*`, `after-*`).
+Branches `elixir/familiar` (web-apps) and `feat/familiar` (this repository). Goal from the test user: no pixel copy, but a Word user finds the same places, order, names and behaviours. Method: screenshots of our editor at 1930x1040 and 120% (en and fr, `tests/ribbon/familiar-shots.mjs`) compared with private references of Word 365 for Windows (French UI, not in the repository). Before and after: `docs/screenshots/familiar/` (`before-*`, `after-*`).
 
 ### Already like Word (nothing to do)
 

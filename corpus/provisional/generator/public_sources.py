@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Selected public documents (open licence, published by the producing organisation on data.gouv.fr).
 Retrieved on 2026-10-05. pages = <Pages> property of docProps/app.xml (computed by Word). sha256 = digest of the ORIGINAL downloaded file (before metadata anonymisation)."""
 

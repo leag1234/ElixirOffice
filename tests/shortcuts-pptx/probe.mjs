@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Debug helper: node probe.mjs <base> — prints the editor state around the title edit
 import { createRequire } from 'module';
 import fs from 'fs'; import path from 'path';

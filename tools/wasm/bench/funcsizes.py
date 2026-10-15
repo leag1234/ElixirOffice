@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """List the largest functions of a wasm binary (V8 refuses functions > 7.65 MB).
 usage: funcsizes.py x2t.wasm [x2t.js.symbols] [N]"""
 import sys

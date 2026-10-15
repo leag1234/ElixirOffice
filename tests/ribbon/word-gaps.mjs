@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Word ribbon gaps (docs/ui.md, "UI gaps with Word, third pass"): Design (themes, style sets, theme fonts,
 // paragraph spacing, page borders), Insert (cover page, Quick Tables, live table preview, header and footer
 // galleries), References (sources, citations APA/MLA, bibliography, Mark Entry Alt+Shift+X, index),

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Excel features behind the keyboard: Repeat (F4, Ctrl+Y), End / Extend / Add modes, Flash Fill
 // (Ctrl+E) patterns, Quick Analysis (button and Ctrl+Q: formatting, charts, totals).
 //   node tests/shortcuts-excel/features.mjs [--platform win|mac] [--out results.json]   (EO_BASE=http://host:port)
@@ -92,9 +91,9 @@ await test("add-mode.event", async () => {
 
 // ---- Flash Fill -----------------------------------------------------------------------------------
 const names = `s.GetRange("D1").SetValue("Full name"); s.GetRange("E1").SetValue("First");
-  var n = ["Jane Doe", "mary jones", "Ann Lee Brown", "Paul Martin"]; for (var i = 0; i < n.length; i++) s.GetRange("D" + (i + 2)).SetValue(n[i]);`;
+  var n = ["John Smith", "mary jones", "Ann Lee Brown", "Paul Martin"]; for (var i = 0; i < n.length; i++) s.GetRange("D" + (i + 2)).SetValue(n[i]);`;
 await test("flash-fill.first-name-header", async () => {
-  await setValues(names + ` s.GetRange("E2").SetValue("Jane");`);
+  await setValues(names + ` s.GetRange("E2").SetValue("John");`);
   await select(frame, "E3"); await press("Control+e"); await wait(300);
   return eq([await cell("E1"), await cell("E3"), await cell("E4"), await cell("E5")], ["First", "mary", "Ann", "Paul"], "E1, E3:E5");
 });
@@ -110,14 +109,14 @@ await test("flash-fill.initials", async () => {
 });
 await test("flash-fill.combine-columns", async () => {
   await setValues(`s.GetRange("D1").SetValue("john"); s.GetRange("E1").SetValue("Smith"); s.GetRange("D2").SetValue("mary"); s.GetRange("E2").SetValue("Jones");
-    s.GetRange("F1").SetValue("Doe, Jane");`);
+    s.GetRange("F1").SetValue("Smith, John");`);
   await select(frame, "F2"); await press("Control+e"); await wait(300);
   return eq(await cell("F2"), "Jones, Mary", "F2");
 });
 await test("flash-fill.one-undo", async () => {
-  await setValues(names + ` s.GetRange("E2").SetValue("Jane");`);
+  await setValues(names + ` s.GetRange("E2").SetValue("John");`);
   await select(frame, "E3"); await press("Control+e"); await wait(300); await press(`${ctrl}+z`); await wait(200);
-  return eq([await cell("E3"), await cell("E5"), await cell("E2")], ["", "", "Jane"], "E3, E5, E2 after one undo");
+  return eq([await cell("E3"), await cell("E5"), await cell("E2")], ["", "", "John"], "E3, E5, E2 after one undo");
 });
 await test("flash-fill.no-pattern", async () => {
   await setValues(`s.GetRange("D1").SetValue("abc"); s.GetRange("E1").SetValue("xyz"); s.GetRange("D2").SetValue("def");`);

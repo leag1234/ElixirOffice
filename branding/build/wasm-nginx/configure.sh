@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Shared by the runtime image layer and explicit dev installation.
 set -euo pipefail
 SOURCE="${1:?usage: configure.sh nginx-template-directory}"

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Validate a versioned artifact set and install it into a selected SDK worktree.
 
 No generated wasm/glue is committed. W5 will wire this into production images.

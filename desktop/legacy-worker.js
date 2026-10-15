@@ -24,6 +24,8 @@ self.onmessage=async function(event){
  var start=performance.now(),nativeStatus;
  function progress(stage){self.postMessage({progress:{stage:stage}});}
  try{
+  importScripts('/example/local-assets/sdkjs/common/wasm-convert/password-options.js');
+  self.EOWasmPasswordOptions.check(job);
   progress('loading-runtime');
   var compiled=await prepare(job.runtime);
   progress('initializing');
@@ -45,9 +47,10 @@ self.onmessage=async function(event){
    '<m_nFormatFrom>'+codes[job.from]+'</m_nFormatFrom><m_nFormatTo>'+codes[job.to]+'</m_nFormatTo>'+
    '<m_bIsNoBase64>true</m_bIsNoBase64><m_sFontDir>/fonts</m_sFontDir>'+
    '<m_nCsvTxtEncoding>46</m_nCsvTxtEncoding><m_nCsvDelimiter>4</m_nCsvDelimiter>'+
-   '<m_sTempDir>/tmp/conversion</m_sTempDir></TaskQueueDataConvert>');
+   '<m_sTempDir>/tmp/conversion</m_sTempDir>'+self.EOWasmPasswordOptions.tags(job)+'</TaskQueueDataConvert>');
   var initMs=performance.now()-start,at=performance.now();progress('converting');
   try{nativeStatus=mod.callMain(['/task.xml']);}catch(e){if(typeof e.status==='number')nativeStatus=e.status;else throw e;}
+  if(nativeStatus===90||nativeStatus===91)throw self.EOWasmPasswordOptions.nativeError(nativeStatus);
   if(nativeStatus!==0)throw new Error('Native conversion failed: '+nativeStatus);
   var bytes=FS.readFile(output);if(!bytes.length&&!['txt','csv'].includes(job.to))throw new Error('Conversion produced no output');
   var resources=[];
@@ -55,5 +58,6 @@ self.onmessage=async function(event){
   ['media','themes'].forEach(function(p){try{walk('/work/'+p);}catch(e){if(e.code!=='ENOENT'&&e.errno!==44)throw e;}});
   self.postMessage({bytes:bytes,resources:resources,stats:{initMs:Math.round(initMs),convertMs:Math.round(performance.now()-at),heapBytes:mod.HEAPU8.length}},
    [bytes.buffer].concat(resources.map(function(f){return f.bytes.buffer;})));
- }catch(e){self.postMessage({error:String(e.message||e),code:typeof nativeStatus==='number'?'conversion':'runtime',nativeStatus:nativeStatus});}
+ }catch(e){self.postMessage(self.EOWasmPasswordOptions?self.EOWasmPasswordOptions.failure(e,job,nativeStatus):{error:'Cannot load document password support',code:'runtime'});}
+ finally{job.openPassword=undefined;job.savePassword=undefined;}
 };

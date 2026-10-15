@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
-"""Synthetic .docx fixtures of the Word layout regression suite (tests/layout).
+"""Synthetic .docx fixtures of the Word layout regression suite (tests/layout, docs/backlog.md F8, F9, F11).
 
 Writes into the output directory (default: tests/fixtures/docx):
   observation-grid.docx   a teacher's observation grid: numbered headings ("1. Preparation" ...

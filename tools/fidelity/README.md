@@ -16,7 +16,7 @@ Options:
 |---|---|---|
 | `--ref SOURCE` | `word-web` | reference source: `word-web`, `word-desktop` (or any name), `libreoffice` (stand-in, **not a fidelity reference**), `self` (second ElixirOffice conversion: determinism check) |
 | `--image IMAGE` | `elixiroffice/documentserver:latest` | DocumentServer image to measure; must exist locally (never pulled) |
-| `--corpus DIR` | `$EO_WORK/corpus-provisional` | corpus (`manifest.csv`: columns `id`, `file`) |
+| `--corpus DIR` | `/srv/elixiroffice/corpus-provisional` | corpus (`manifest.csv`: columns `id`, `file`) |
 | `--refs-dir DIR` | `$FIDELITY_HOME/refs/<ref>` | reference PDFs (`<id>.pdf` + `SOURCE.json`) taken from somewhere other than under `refs/` |
 | `--runs-dir DIR` | `$FIDELITY_HOME/runs` | runs directory (and of the `latest-<ref>` link) |
 | `--baselines-dir DIR` | `$FIDELITY_HOME/baselines` | target of `--save-baseline` |
@@ -30,7 +30,7 @@ Options:
 | `--refresh-refs` | – | regenerate the LibreOffice references |
 | `--stop-server` | – | stop `eo-fidelity` at the end of the run (by default it stays running) |
 
-Variables: `FIDELITY_HOME` (default `$EO_WORK/fidelity`), `FIDELITY_CORPUS`.
+Variables: `FIDELITY_HOME` (default `/srv/elixiroffice/fidelity`), `FIDELITY_CORPUS`.
 
 Exit codes: 0 OK; 1 regression with respect to `--baseline`; 2 conversion failure;
 3 run not comparable with the baseline (different reference source or parameters).
@@ -97,7 +97,7 @@ docker run --rm -v $PWD/tools/fidelity:/app:ro -v $FIDELITY_HOME:/f eo-fidelity-
 
 Per-document tolerances (options `--tol-mean-ssim`, `--tol-pct-pages-ok`, `--tol-penalty`):
 mean SSIM 0.002; % pages OK 0; penalty score 0.5 point. The three metrics are
-checked as long as the owner has not chosen one. A different reference source or different parameters
+checked as long as the test user has not chosen one. A different reference source or different parameters
 (dpi, thresholds) make the comparison impossible (code 3): we only compare what is
 comparable.
 
@@ -109,7 +109,7 @@ provenance, copied into each run:
 
 ```json
 {"source": "word-web", "label": "Word for the web (Microsoft 365), PDF export",
- "exported_by": "the owner", "exported_utc": "2026-10-06", "word_build": "…",
+ "exported_by": "the test user", "exported_utc": "2026-10-06", "word_build": "…",
  "settings": "File > Export > PDF, revisions hidden (No Markup), fields not updated",
  "notes": "…"}
 ```
@@ -122,7 +122,7 @@ stand-ins to validate the chain without Word, **never presented as a fidelity me
 - `libreoffice`: headless LibreOffice 25.2 in a container (`Dockerfile.libreoffice`), generated
   automatically in `refs/libreoffice/`.
 
-### Exporting the Word for the web references (to be done by the owner)
+### Exporting the Word for the web references (to be done by the test user)
 
 For each corpus file, from Word for the web (browser, Microsoft 365 account):
 
@@ -137,21 +137,21 @@ For each corpus file, from Word for the web (browser, Microsoft 365 account):
    `refs/word-web/SOURCE.json` (date, Microsoft 365 account/edition, settings above, possible
    anomalies: file rejected, missing fonts reported by Word).
 
-Then copy to <build-host>: `rsync -a refs/word-web/ <build-host>:$EO_WORK/fidelity/refs/word-web/`
+Then copy to build-host: `rsync -a refs/word-web/ build-host:/srv/elixiroffice/fidelity/refs/word-web/`
 and run `tools/fidelity/run.sh --ref word-web --save-baseline`: this is the baseline (unmodified
 upstream) never to degrade.
 
 ## Private corpus (real documents)
 
-The real documents entrusted by the owner and everything derived from them (PDFs, rasterized pages, thumbnails, difference
+The real documents entrusted by the test user and everything derived from them (PDFs, rasterized pages, thumbnails, difference
 maps, extracted text, reports) must **never** enter a git repository, a patch or a
-versioned document, nor be sent to an outside service. They stay on <build-host>, in `chmod 700`:
-`$EO_WORK/corpus-private/` (sources, `docs/` with a private `manifest.csv` with
+versioned document, nor be sent to an outside service. They stay on build-host, in `chmod 700`:
+`/srv/elixiroffice/corpus-private/` (sources, `docs/` with a private `manifest.csv` with
 identifiers `r01`…, `refs/word-desktop/`) and `fidelity/runs-real/`. Only aggregated scores and
 non-identifying descriptions go into versioned documents.
 
 ```sh
-B=$EO_WORK
+B=/srv/elixiroffice
 tools/fidelity/run.sh --ref word-desktop --corpus $B/corpus-private/docs \
   --refs-dir $B/corpus-private/refs/word-desktop --runs-dir $B/fidelity/runs-real \
   --baselines-dir $B/fidelity/runs-real/baselines --keep-going \

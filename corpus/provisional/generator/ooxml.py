@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Mini OOXML library for the ElixirOffice provisional corpus.
 
 python-docx serves as the "package" layer (parts, relations, images, content types);

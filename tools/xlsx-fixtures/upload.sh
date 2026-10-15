@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Upload the xlsx fixtures to a running DocumentServer "example" app.
 #
 # Usage: tools/xlsx-fixtures/upload.sh [--no-replace] <base-url>

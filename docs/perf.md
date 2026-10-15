@@ -7,7 +7,7 @@ sets the measurement method, the baseline, the fixes made and what remains.
 
 ### Bench
 
-`tools/perf/` (Playwright 1.63, Chromium "new headless", driven from <dev-host> against a
+`tools/perf/` (Playwright 1.63, Chromium "new headless", driven from development host against a
 running instance):
 
 | Script | Role |
@@ -33,12 +33,12 @@ warm HTTP cache + V8 code cache** (the regime of a daily user). Before the measu
 navigation, the tab loads `/healthcheck`: neither the browser startup nor the opening of the
 TCP connection is counted (otherwise ~200 ms that are not ours).
 
-**Machine load.** <dev-host> (Ryzen 9 7940HS, 16 cores, 60 GB) is shared with other agents that
+**Machine load.** development host (Ryzen 9 7940HS, 16 cores, 60 GB) is shared with other agents that
 are compiling. Each measurement records `uptime` before and after; the bench waits for a load (1 min)
 < 4 before each run and **redoes** a run if the load exceeded 6 while it
 was running (`discarded` field of the JSON).
 
-**CPU profiles.** `Emulation.setCPUThrottlingRate` (CDP): **x1** = <dev-host> as is, i.e. a
+**CPU profiles.** `Emulation.setCPUThrottlingRate` (CDP): **x1** = development host as is, i.e. a
 recent high-end laptop (the 7940HS is a laptop chip); **x4** = entry-level laptop /
 5-year-old machine. The x4 ratio is the one Lighthouse uses for mobile;
 it approximates, not reproduces, a real slow CPU (no cache or turbo effect).
@@ -68,7 +68,7 @@ co-editing); generated documents, not the real corpus.
 
 ## 2. Baseline (5 October 2026, `elixir/dev`)
 
-Medians of 5 runs, headless Chromium on <dev-host>, localhost unless stated. Raw files:
+Medians of 5 runs, headless Chromium on development host, localhost unless stated. Raw files:
 `tools/perf/results/` (`main-base*` = main instance :8080; `perf-base*` = working
 instance eo-perf, same `elixir/dev` code without the branches that have since arrived on :8080).
 
@@ -150,7 +150,7 @@ the whole page** (`StartRenderingPage` → `CDocument.DrawPage` → `Paragraph.D
 ## 4. Fixes
 
 Branches: `elixir/perf` in sdkjs, web-apps, document-server-integration (base `elixir/home`),
-document-server-package and the superproject (worktree `$EO_WORK/wt/perf`); `feat/perf` here
+document-server-package and the superproject (worktree `/srv/elixiroffice/wt/perf`); `feat/perf` here
 (bench, results, this page). Patches: `patches/<repository>/perf/`. Before/after measurements on
 the eo-perf instance, each against the previous state.
 
@@ -247,7 +247,7 @@ scrolling) against Word for the web from a machine that has an account, same doc
 ## 8. Reproducing the measurements
 
 ```bash
-# on <dev-host>, from this repository
+# on development host, from this repository
 python3 tools/perf/gen_docs.py
 node tools/perf/bench.mjs --base http://localhost:8080 --label main --runs 5 --throttle 1,4
 node tools/perf/bench.mjs --base http://localhost:8080 --label main-wan --scenarios load --net 40,50
@@ -271,7 +271,7 @@ Medians of 5 measurements, CPU x1, load 1.7–3.1. File: tools/perf/results/main
 | Typing p50 / p95 | 43 / 64 ms | 27 / 33 ms |
 | Scrolling | 20 repaints/s | 60 repaints/s |
 
-The first display of the interface is slower than before (~500 ms against ~300 ms): probably an effect of fire's load and of the interaction modules added; to be analyzed.
+The first display of the interface is slower than before (~500 ms against ~300 ms): probably an effect of development host's load and of the interaction modules added; to be analyzed.
 
 ## 9. D4: Word opening profiles and two small optimizations (2026-10-10)
 
@@ -281,10 +281,10 @@ that gate 7 is done. The lead will rerun the gates. The supported result is a
 Larger before/after differences below are measurement noise, not a broad speed
 claim. These measurements predate the rebase onto current integration branches.
 Measurement SDK base: `6b2b217b0b3e`; product base:
-`1dbe19f`. Measurements used the dedicated `eo-open-D` instance on <dev-host>
-(port 32769), and physical Chrome 138.0.7204.49 on <test-desktop>. No shared instance
+`1dbe19f`. Measurements used the dedicated `eo-open-D` instance on development host
+(port 32769), and physical Chrome 138.0.7204.49 on linux. No shared instance
 or private corpus was used. Source and raw evidence remain in
-`<dev-host>:$EO_WORK/wt/open-D-work/` and `<test-desktop>:$EO_WORK/bench/d4/`.
+`development host:/srv/elixiroffice/wt/open-D-work/` and `linux:/srv/elixiroffice/bench/d4/`.
 The provisional-corpus rendering check passes, but the complete integration
 gate is **not green**: an unchanged Windows navigation failure and an image
 gesture score increase are retained as historical gate evidence. Conditional
@@ -307,15 +307,15 @@ so the numbers must not be substituted directly into its table.
 
 Untraced timings are medians of three fresh/reused profile pairs per document
 and host. Each visit opens a fresh source document; the second reuses browser
-and code caches. The <dev-host> renderer is headless Chromium, CPU throttled x4;
-<test-desktop> is headful Chrome at native speed with the W0 static loader. These are
+and code caches. The development host renderer is headless Chromium, CPU throttled x4;
+linux is headful Chrome at native speed with the W0 static loader. These are
 within-host comparisons, not equivalent deployments. The unchanged standalone
 driver is frozen by SHA256 in `d4/results/source-sha256.txt`; detailed CPU/trace
 diagnostics use a separate driver and do not enter timing medians.
 
-On shared <dev-host>, the runner waits for one-minute load below 4 and rejects a pair
+On shared development host, the runner waits for one-minute load below 4 and rejects a pair
 if either endpoint is at least 6. One after/large pair was rejected by that rule;
-all records and reasons remain. Slow accepted visits are retained. On <test-desktop>,
+all records and reasons remain. Slow accepted visits are retained. On linux,
 a before/reused large visit took 20.91 s, including a 17.21 s font-end callback.
 It remains in the three-visit sample. Small samples, sequential phases, JIT and
 host load limit causal conclusions.
@@ -329,26 +329,26 @@ percentile.
 
 | Host / document / visit | First page before → after | Accepted key before → after | Background p50 / p95 before → after |
 |---|---|---|---|
-| <dev-host> x4 / 97 / fresh | 5.83 → 5.20 | 5.89 → 5.26 | 96 / 139 → 94 / 146 |
-| <dev-host> x4 / 97 / reused | 6.48 → 6.07 | 6.56 → 6.17 | 94 / 141 → 106 / 162 |
-| <dev-host> x4 / 10 / fresh | 3.89 → 4.88 | 3.99 → 4.95 | 116 / 300 → 122 / 300 |
-| <dev-host> x4 / 10 / reused | 4.43 → 5.67 | 4.52 → 5.73 | 102 / 261 → 113 / 328 |
-| <test-desktop> / 97 / fresh | 6.77 → 5.19 | 6.80 → 5.25 | 48 / 73 → 47 / 83 |
-| <test-desktop> / 97 / reused | 4.98 → 3.90 | 5.01 → 4.02 | 45 / 77 → 46 / 79 |
-| <test-desktop> / 10 / fresh | 5.12 → 4.43 | 5.17 → 4.45 | 87 / 136 → 91 / 122 |
-| <test-desktop> / 10 / reused | 3.77 → 3.12 | 3.81 → 3.14 | 118 / 118 → 109 / 109 |
+| development host x4 / 97 / fresh | 5.83 → 5.20 | 5.89 → 5.26 | 96 / 139 → 94 / 146 |
+| development host x4 / 97 / reused | 6.48 → 6.07 | 6.56 → 6.17 | 94 / 141 → 106 / 162 |
+| development host x4 / 10 / fresh | 3.89 → 4.88 | 3.99 → 4.95 | 116 / 300 → 122 / 300 |
+| development host x4 / 10 / reused | 4.43 → 5.67 | 4.52 → 5.73 | 102 / 261 → 113 / 328 |
+| linux / 97 / fresh | 6.77 → 5.19 | 6.80 → 5.25 | 48 / 73 → 47 / 83 |
+| linux / 97 / reused | 4.98 → 3.90 | 5.01 → 4.02 | 45 / 77 → 46 / 79 |
+| linux / 10 / fresh | 5.12 → 4.43 | 5.17 → 4.45 | 87 / 136 → 91 / 122 |
+| linux / 10 / reused | 3.77 → 3.12 | 3.81 → 3.14 | 118 / 118 → 109 / 109 |
 
-<dev-host> large accepted-key ranges: fresh 5.65–6.12 → 5.25–5.50 s;
-reused 6.13–7.14 → 5.67–6.78 s. <dev-host> small: fresh
+development host large accepted-key ranges: fresh 5.65–6.12 → 5.25–5.50 s;
+reused 6.13–7.14 → 5.67–6.78 s. development host small: fresh
 3.97–4.16 → 4.04–5.45 s; reused 4.49–6.40 → 4.53–6.68 s.
-Full sample ranges and per-visit spans are in `<dev-host>-summary.json` and
-`evidence/<test-desktop>/results/summary.json`.
+Full sample ranges and per-visit spans are in `development host-summary.json` and
+`evidence/linux/results/summary.json`.
 
 The lead's reviewed conclusion is **about 0.3 s on 97 pages; ten pages and
 typing unchanged**. The larger gains and losses in these raw medians are noise,
 not evidence of a broad improvement or a demonstrated ten-page regression. Achieved large-document input rates were about
-8.3/8.5 → 8.3/7.7 Hz on <dev-host> (fresh/reused) and 9.9 Hz on <test-desktop>.
-<dev-host> large runs supply roughly 100 background keys each; <test-desktop> about 45–51.
+8.3/8.5 → 8.3/7.7 Hz on development host (fresh/reused) and 9.9 Hz on linux.
+development host large runs supply roughly 100 background keys each; linux about 45–51.
 Ten-page runs supply only 1–5 background keys, making their p95 unstable.
 Preparation/load variability dominates the larger median differences. Only the
 roughly 0.3 s reduction supported by the detailed opening callbacks is attributed
@@ -359,7 +359,7 @@ to the two source changes.
 Diagnostic traced visits below are **not** the timing samples above. The
 standalone reused 97-page profile provides the clearest matched phase comparison:
 
-| Diagnostic phase (<test-desktop>, reused 97 pages) | Before | After |
+| Diagnostic phase (linux, reused 97 pages) | Before | After |
 |---|---|---|
 | SDK min asset transfer | 14 ms | 13 ms |
 | SDK full asset transfer | 318 ms | 277 ms |
@@ -380,7 +380,7 @@ The W0 preparation path includes its existing full font-FS setup. Only conversio
 itself is around 0.2 s here. Reader phases are nested in OpenDocumentFromBin;
 fonts-end contains UI events, style previews and layout, not just font fetching.
 
-Exclusive CPU sample attribution for this reused <test-desktop> before → after profile:
+Exclusive CPU sample attribution for this reused linux before → after profile:
 binary decoding 140 → 121 ms, model construction 283 → 191 ms,
 model fixup 183 → 150 ms, layout 172 → 187 ms, style previews 159 → 133 ms,
 drawing 24 → 21 ms, web-apps/bootstrap 1183 → 936 ms,
@@ -388,15 +388,15 @@ VM/native 818 → 753 ms, GC 155 → 103 ms, other SDK 324 → 389 ms,
 idle 1874 → 1884 ms. These are heuristic stack categories, not independent
 wall phases. Worker preparation is not sampled by the main-thread profiler.
 
-The earlier fresh <test-desktop> profile identified inclusive hot functions:
+The earlier fresh linux profile identified inclusive hot functions:
 ReadFromStream (~1.14 s), ReadMainTable (~0.79 s),
 PostLoadPrepare (~0.35 s), CRunText (~0.26 s),
 updateRtlFlag/isRtlScript (~0.19 s), refreshHiddenText (~0.22 s),
 GenerateStyles (~0.18 s). UI sendEvent/toolbar callbacks also dominate.
 Raw top-60 self/inclusive tables and stack locations are retained in
-`phase-cpu.jsonl` and `<dev-host>-cpu.jsonl`.
+`phase-cpu.jsonl` and `development host-cpu.jsonl`.
 
-<dev-host> traced large before/after profiles had substantially different execution
+development host traced large before/after profiles had substantially different execution
 costs: OpenDocumentFromBin 1.374 → 1.738 s, fonts-end 1.693 → 1.962 s,
 initial continuation 315 → 509 ms, accepted key 7.281 → 8.023 s.
 After's detailed reader spans are ReadMainTable 1.101 s and PostLoadPrepare
@@ -410,9 +410,9 @@ a page-index condition that calculates four initial pages in these documents,
 then a nominal 10 ms budget with 10 ms continuation timers. A single complex
 page can exceed the budget. The first accepted key follows the first-page proxy
 by tens of milliseconds, rather than waiting for all 97 pages. After opening,
-<test-desktop> large runs spend roughly 2.47–2.54 s inside continuation loops over the
+linux large runs spend roughly 2.47–2.54 s inside continuation loops over the
 entire capture, including typing-triggered recalculation; the first sampled key
-with all pages and idle layout is at 8.71–8.88 s in fresh runs. <dev-host> can continue
+with all pages and idle layout is at 8.71–8.88 s in fresh runs. development host can continue
 pagination beyond the 100-key sequence. These are concurrent-layout observations,
 not an isolated, exact full-pagination wall-time measurement.
 
@@ -440,7 +440,7 @@ pane safely saves that cost. No font, image, spelling or pane behavior changed.
 
 Only the first two are implemented: five inserted lines, two removed, in
 Word api.js and Paragraph/RunContent/Text.js. There is no layout algorithm
-change or risky scheduling option enabled. The detailed <test-desktop> reused profile's
+change or risky scheduling option enabled. The detailed linux reused profile's
 combined open/finishing callbacks save about 0.32 s, consistent with the intended
 optimization and the lead's approximately 0.3 s conclusion. Broader median
 changes are noise; ten pages and typing remain unchanged.
@@ -484,7 +484,7 @@ gate 7 is done and authorizes integration; no tests were weakened.
 
 D5 uses current W2/W3 with the rebased D4 candidate, in isolated branches.
 The target is first accepted real key on the 97-page fixture at <=3.5 s fresh
-and <=3.0 s reused on <test-desktop>. Ten-page opening and typing p95 must not worsen.
+and <=3.0 s reused on linux. Ten-page opening and typing p95 must not worsen.
 This study does not authorize integration of D4 or D5.
 
 ### Production and measurement conditions
@@ -494,7 +494,7 @@ SDK is about 18.7 MB raw even when minified; raw size is not evidence of a
 development asset. Its gzip sidecar is 3.33 MB and an actual fresh transfer is
 about 3.42 MB. Reused CDP network transfers show about 933 bytes of revalidation;
 resource encodedBodySize can still report the cached body length. Current W2
-local worker preparation is roughly 0.43 s on <test-desktop>, rather than the older W0
+local worker preparation is roughly 0.43 s on linux, rather than the older W0
 1.6 s. Structural conversion reports zero worker font bytes on these fixtures;
 editor fonts are still required for layout.
 
@@ -509,9 +509,9 @@ waiting before event dispatch and does not prove that a deferred long task
 cannot delay a queued physical input. Reports
 include median per-run all-key p95 and background-layout-only p95.
 
-<test-desktop> runs physical headful Chrome 138. <dev-host> runs Playwright Chromium153 with
+test desktop runs physical headful Chrome 138. development host runs Playwright Chromium153 with
 main-renderer CPU x4; workers are not throttled by that setting. Both use the
-same owned eo-open2-D production instance on port32770. <test-desktop> reaches it via an
+same owned eo-open2-D production instance on port32770. test desktop reaches it via an
 owned reverse SSH tunnel at http://localhost:18777 through the Mac, allowing a
 secure context without browser security exceptions. Plain HTTP to a LAN IP
 fails crypto.randomUUID and is retained as a failed transport diagnostic.
@@ -519,7 +519,7 @@ This transport is part of the measured method, not an Internet-deployment claim.
 
 Initial quiet production medians (five fresh/reused pairs each) were 3.891 /
 3.563 s for 97 pages, 3.011 / 2.449 s for ten pages, and 2.597 / 2.164 s empty.
-They overlapped own <dev-host> regression jobs and are descriptive baseline evidence,
+They overlapped own development host regression jobs and are descriptive baseline evidence,
 not proof of a scheduling gain. The original contended series is retained
 separately (one pair reached 7.426 / 15.577 s at load1 around 12-13).
 The final matched experiment alternates OFF/ON order in five pairs per document,
@@ -559,7 +559,7 @@ ready for default-on on the strength of the passing keyboard cases alone.
 
 ### 97-page breakdown on current production baseline
 
-Separate traced/profiled <test-desktop> visits give the following landmarks. They are
+Separate traced/profiled linux visits give the following landmarks. They are
 diagnostic samples, not the n5 opening medians. Durations are milliseconds;
 start/end values are offsets from navigation. Layout CPU is the sum of
 Recalculate_Page calls before the accepted key. The callbacks nest, so these
@@ -583,13 +583,13 @@ categories below estimate those costs; no exact wall-time split into pure parse
 versus model build is available. Fonts-end includes nested UI/layout work and
 does not mean720 ms of font fetching. SDK resource end is load completion,
 not JavaScript evaluation completion. Resource encoded-body sizes can include
-cache hits; actual wire-byte accounting uses CDP. <dev-host> x4 diagnostic first
+cache hits; actual wire-byte accounting uses CDP. development host x4 diagnostic first
 viewer/accepted are5795/5828 ms fresh and5067/5094 ms reused, initial layout
 321/274 ms. Raw landmarks are in baseline/phase-breakdown.json.
 
 ### Remaining costs and deeper options (proposals only)
 
-A separate <test-desktop> baseline CPU profile gives 1.485 s of exclusive samples in
+A separate linux baseline CPU profile gives 1.485 s of exclusive samples in
 web-apps/bootstrap, 0.181 s binary decoding, 0.212 s model construction, 0.141 s
 model fixup, 0.160 s style previews and 0.269 s layout. These sampled categories
 cover the capture and are not additive opening wall phases. Inclusive callbacks
@@ -628,7 +628,7 @@ createDelayedElements90 ms, applyModeEditorElements377 ms, onAppShowed335 ms.
 
 ### Evidence and review status
 
-Final <test-desktop> matched results, n=5 per cell. Opening columns are median seconds
+Final linux matched results, n=5 per cell. Opening columns are median seconds
 [min,max]; p95 is the median of per-run all-key p95 in milliseconds.
 
 | Document / profile | OFF accepted key | ON accepted key | OFF / ON p95 |
@@ -663,7 +663,7 @@ opt-in Toolbar focus guard can also affect later style refresh callbacks; that
 interaction was not separately established as safe. This is another reason to
 review the experiment as rejected code rather than a production-ready change.
 The existing first-File failure is an additional open
-acceptance issue. <dev-host> main-renderer x4 matched results, n=5 per cell, same column units:
+acceptance issue. development host main-renderer x4 matched results, n=5 per cell, same column units:
 
 | Document / profile | OFF accepted key | ON accepted key | OFF / ON p95 |
 | --- | ---: | ---: | ---: |
@@ -678,7 +678,7 @@ All120 final visits validate:97/10/1 pages as expected,100 exact keys each,
 zero recorded page errors and the requested setting actually applied. Each
 host/setting/document/profile cell has n5. Recorded load1 endpoints range0-2.51;
 no final pair was rejected by the predefined contention threshold. Slow samples,
-including <dev-host> ON6.104/6.085 s for97 pages, remain in the ranges. <dev-host> reused
+including development host ON6.104/6.085 s for97 pages, remain in the ranges. development host reused
 opening is slower than fresh in this series; the data are retained without
 assuming cache warmth guarantees a faster opening. Differences between the
 initial production series and these matched OFF results are not attributed to
@@ -729,8 +729,8 @@ installation work follows the D5 review checkpoint.
 
 ### D5 follow-up after D4 integration (2026-10-11)
 
-The study is now based on integrated D4; rebasing preserves the experiment source and frozen measurements. Six final diagnostic profiles attribute approximately80–100ms of sampled inclusive CPU on <test-desktop> to ribbon caption width measurement. Each source call inserts a span, reads offsetWidth, and removes it; repeated caption measurements may force layout. These are whole-profile CPU values, not measured pre-key wall time or a promised saving. A document-editor opening batching/cache trial would require theme/font/locale invalidation and review of the shared Button component. Even removing the whole sampled cost cannot alone close the observed283ms fresh/549ms reused target gap. W3 worker overlap remains coordinated with A; deeper model changes remain proposals only. No default-on or integration recommended. Evidence: open2-D-work/ui-cost-followup.json and continuation-20261011.md.
+The study is now based on integrated D4; rebasing preserves the experiment source and frozen measurements. Six final diagnostic profiles attribute approximately80–100ms of sampled inclusive CPU on linux to ribbon caption width measurement. Each source call inserts a span, reads offsetWidth, and removes it; repeated caption measurements may force layout. These are whole-profile CPU values, not measured pre-key wall time or a promised saving. A document-editor opening batching/cache trial would require theme/font/locale invalidation and review of the shared Button component. Even removing the whole sampled cost cannot alone close the observed283ms fresh/549ms reused target gap. W3 worker overlap remains coordinated with A; deeper model changes remain proposals only. No default-on or integration recommended. Evidence: open2-D-work/ui-cost-followup.json and continuation-20261011.md.
 
 ### Lead conclusion (2026-10-11)
 
-D5 is accepted as a study, not as an integrated optimization. With production bundles and compression, the97-page document becomes editable in about3.5–3.8s on <test-desktop>. The scheduling experiment stays off and is not integrated: it provides no useful measured gain and does not establish typing/ten-page non-regression. Remaining gains from the studied UI changes are small; deeper work remains a proposal. The2–3s target was not achieved.
+D5 is accepted as a study, not as an integrated optimization. With production bundles and compression, the97-page document becomes editable in about3.5–3.8s on linux. The scheduling experiment stays off and is not integrated: it provides no useful measured gain and does not establish typing/ten-page non-regression. Remaining gains from the studied UI changes are small; deeper work remains a proposal. The2–3s target was not achieved.

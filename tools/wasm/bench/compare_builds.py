@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Compare two wasm benches, reporting binary and normalized Office equality.
 
 Only documented nondeterminism is normalized: ZIP order/timestamps, content-type

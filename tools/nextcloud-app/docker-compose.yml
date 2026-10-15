@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # Local Nextcloud for ElixirOffice development and tests (docs/storage.md).
 # Own compose project and network ("elixir-nc"); never touches the main dev
 # container "eo". Started by setup.sh, which also connects the document server

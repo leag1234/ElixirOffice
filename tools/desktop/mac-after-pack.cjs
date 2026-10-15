@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),cp=require('node:child_process');
-const types={
+const types={pdf:'com.adobe.pdf',
  docx:'org.openxmlformats.wordprocessingml.document',xlsx:'org.openxmlformats.spreadsheetml.sheet',pptx:'org.openxmlformats.presentationml.presentation',
  odt:'org.oasis-open.opendocument.text',ods:'org.oasis-open.opendocument.spreadsheet',odp:'org.oasis-open.opendocument.presentation',
  doc:'com.microsoft.word.doc',xls:'com.microsoft.excel.xls',ppt:'com.microsoft.powerpoint.ppt',

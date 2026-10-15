@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Layout probe injected into the editor frame (docs/images.md). Pure reads of the
 // recalculated layout of the logic document: nothing is modified.
 // window.__eoLayout() -> { pages:[{w,h,top,bottom,left,right}], paras:[...], images:[...] }

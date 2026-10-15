@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Layout Options button, flyout and object anchor (docs/images.md), played like a user:
 //   EO_BASE=http://localhost:32776 node tests/images/layout-options.mjs [--shots dir]
 import fs from "node:fs";

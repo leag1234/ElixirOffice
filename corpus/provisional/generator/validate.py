@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Structural validation of the corpus .docx files.
 
 Checks: valid zip, well-formed XML for each part, content types, relation

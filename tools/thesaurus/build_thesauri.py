@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Copies the free MyThes thesauri of the LibreOffice dictionaries project into the dictionaries submodule,
 with the .idx index that LibreOffice builds at packaging time (th_gen_idx.pl) and the licence files.
 

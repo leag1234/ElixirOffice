@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate the ElixirOffice sample documents shipped with the example app, the
 admin panel preview and the WOPI dummy file (replacing the upstream's samples).
 

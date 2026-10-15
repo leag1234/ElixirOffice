@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Reuse unchanged suites: only select the real Playwright browser type.
 const Module = require('node:module');
 const fs = require('node:fs');

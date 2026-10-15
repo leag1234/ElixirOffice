@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // "Familiar to a Word user" additions (docs/ui.md, "Familiar ground"): mini toolbar in a table cell (borders, shading,
 // Insert, Delete, New comment), status bar (word count with a selection, Display Settings), AutoSave switch of the title bar,
 // French Home group names. English and French interface.

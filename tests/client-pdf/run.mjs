@@ -1,7 +1,6 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Client-side PDF export test (Playwright Chromium). Run on the host that has the local test font
 // (Fira Sans, docs/localfonts.md section 5) and poppler-utils; pdfjs-dist installed next to playwright:
-//   EO_BASE=https://localhost:8446 [EO_HTTP_BASE=http://$HOST:8084] node tests/client-pdf/run.mjs
+//   EO_BASE=https://localhost:8446 [EO_HTTP_BASE=http://192.0.2.10:8084] node tests/client-pdf/run.mjs
 // EO_BASE must be a secure context (HTTPS, or http://localhost) so that "Use my fonts" can work;
 // EO_HTTP_BASE (optional) is a plain-HTTP address of the same instance (not a secure context).
 // Checks: File > Download as > PDF makes the PDF in the browser (no request carries the document or the

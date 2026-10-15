@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Test cases of the Word views and field commands of word/Editor/word-views.js (docs/shortcuts-word.csv):
 // Outline view and its keys, Draft view, Print Layout, Read Mode keys, Ctrl+F9, Ctrl+F11, Ctrl+Shift+F11,
 // and the task panes of controller WordPanes (Shift+F1, Alt+F10, Shift+F7).

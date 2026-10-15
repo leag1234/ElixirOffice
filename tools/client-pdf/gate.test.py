@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """The wasm gate must reject incomplete evidence and local fallback."""
 import contextlib
 import importlib.util

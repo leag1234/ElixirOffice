@@ -1,11 +1,10 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
 # Rewrite the upstream names (upstream fork name, visible ONLYOFFICE branding) left in a
 # DocumentServer checkout and its submodules; attribution is left intact.
 # Idempotent: re-run after every upstream rebase (docs/branding.md).
 #   tools/rebrand/rename.sh [--commit] [--branch elixir/rebrand] [--product] [DS_DIR]
 # --product also rewrites this repository (docs, patches, baselines): one-off, review the diff.
-# DS_DIR defaults to $UPSTREAM or $EO_WORK/DocumentServer.
+# DS_DIR defaults to $UPSTREAM or /srv/elixiroffice/DocumentServer.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ARGS=""

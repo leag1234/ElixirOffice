@@ -1,7 +1,7 @@
 # Layout fidelity: harness and choice of the metric
 
 State as of 2026-10-05. Harness: `tools/fidelity/` (user guide: `tools/fidelity/README.md`).
-Decision expected from the owner: **choose the metric (A, B or C below)**, then we freeze it.
+Decision expected from the test user: **choose the metric (A, B or C below)**, then we freeze it.
 
 > **Warning.** There is still no Word reference. The figures in this document
 > compare ElixirOffice to **LibreOffice 25.2 (NOT a fidelity reference)**: they serve
@@ -45,7 +45,7 @@ documents (B: share of the corpus's pages).
 
 ## 3. Three examples (ElixirOffice against LibreOffice, NOT a fidelity measure)
 
-Run `20261005T093928Z-libreoffice` on <build-host> (`$EO_WORK/fidelity/runs/`).
+Run `20261005T093928Z-libreoffice` on build-host (`/srv/elixiroffice/fidelity/runs/`).
 
 | Document | What we see | Pages | A mean SSIM | B % pages ≥ 0.98 | C penalties |
 |---|---|---|---|---|---|
@@ -88,15 +88,15 @@ A −0.002, B 0 pages, per document.
 - **Non-regression**: a second run against LibreOffice with `--baseline` gives scores
   identical to the first (PASS); a document score degraded by hand in a copy of the
   baseline is indeed detected (code 1); a baseline of another source is rejected (code 3).
-- Duration on <build-host> for 30 documents (70 pages on our side): ~60 to 90 s with the server already running
+- Duration on build-host for 30 documents (70 pages on our side): ~60 to 90 s with the server already running
   (conversion ~25 s, comparison ~30 s), ~3 min 10 s cold (DocumentServer startup and
   font generation ~110 s).
 
-## 6. What the owner needs to move on to real measurements
+## 6. What the test user needs to move on to real measurements
 
 The PDFs exported from **Word for the web**, one per document, named `<id>.pdf` (`t01.pdf` …
 `a10.pdf`, column `id` of `corpus/provisional/manifest.csv`), in
-`$EO_WORK/fidelity/refs/word-web/`, with a `SOURCE.json` (date, Microsoft 365
+`/srv/elixiroffice/fidelity/refs/word-web/`, with a `SOURCE.json` (date, Microsoft 365
 edition, settings). Export settings: see `tools/fidelity/README.md`, section
 "Exporting the Word for the web references" (file uploaded as is, fields not updated,
 revisions as "No Markup", comments hidden, "Download as PDF", not the browser's
@@ -105,11 +105,11 @@ baseline.
 
 ## Private corpus: anonymous ids (rule)
 
-The private corpus (`corpus-private`, private) is never named in output. When a corpus is private (`--private`, `EO_PRIVATE_CORPUS=1`, or a path containing `corpus-private`), every id a tool prints or writes is `doc-<hash>` (sha256 of a fixed salt, a NUL byte and the path relative to the corpus root; see `tools/fidelity/corpus_anon.py`). No file name or document title reaches stdout, stderr, `results.json`, the HTML report or the run files, and errors and tracebacks are scrubbed before printing. Tests with a fake private corpus: `tools/fidelity/test_private_anon.py` (in the tools image, see its header) and `tools/client-pdf/test-anon.mjs`. References for a private corpus are keyed by the anonymous id. The rule covers what the tools print and write; exported PDFs keep the document's own metadata.
+The real teacher corpus (`corpus-private`, private) is never named in output. When a corpus is private (`--private`, `EO_PRIVATE_CORPUS=1`, or a path containing `corpus-private`), every id a tool prints or writes is `doc-<hash>` (sha256 of a fixed salt, a NUL byte and the path relative to the corpus root; see `tools/fidelity/corpus_anon.py`). No file name or document title reaches stdout, stderr, `results.json`, the HTML report or the run files, and errors and tracebacks are scrubbed before printing. Tests with a fake private corpus: `tools/fidelity/test_private_anon.py` (in the tools image, see its header) and `tools/client-pdf/test-anon.mjs`. References for a private corpus are keyed by the anonymous id. The rule covers what the tools print and write; exported PDFs keep the document's own metadata.
 
 ## Upstream baseline (2026-10-05)
 
-Reference: Word for the web (free Microsoft account), export "Download as PDF file"; a01 and a04 in "Simple Markup". Image rendered: `ghcr.io/euro-office/documentserver:latest` built on <build-host> (unmodified upstream, 9.x). **Provisional** corpus. File: `fidelity/baselines/word-web.json` (copy of `<build-host>:$EO_WORK/fidelity/baselines/word-web.json`).
+Reference: Word for the web (free Microsoft account), export "Download as PDF file"; a01 and a04 in "Simple Markup". Image rendered: `ghcr.io/euro-office/documentserver:latest` built on build-host (unmodified upstream, 9.x). **Provisional** corpus. File: `fidelity/baselines/word-web.json` (copy of `build-host:/srv/elixiroffice/fidelity/baselines/word-web.json`).
 
 | Indicator | Value |
 |---|---|
@@ -121,13 +121,13 @@ Reference: Word for the web (free Microsoft account), export "Download as PDF fi
 
 Worst documents (C): s06 0, s07 0, t05 0, t06 8.7, s08 10.1, a09 18.1, a01 26.8, t01 28.6. Best: a07 99.8, t09 99.3, a02 97.5, t07 97.3, s09 96.1.
 
-**Decision (the owner, 2026-10-05)**: the C score (penalties) is the main fidelity score; A is displayed for information; C's weights (½, ½, 25) will be recalibrated on the Word references.
+**Decision (the test user, 2026-10-05)**: the C score (penalties) is the main fidelity score; A is displayed for information; C's weights (½, ½, 25) will be recalibrated on the Word references.
 
 ## Fonts and pagination (2026-10-05, branches `feat/fonts` / `elixir/fonts`)
 
-Font details: `docs/fonts.md`. Image measured: `elixiroffice/documentserver:fonts-6` on <build-host> =
+Font details: `docs/fonts.md`. Image measured: `elixiroffice/documentserver:fonts-6` on build-host =
 upstream image + font pack (group `metric`, `make fonts-image`, private Script École metrics supplied by `FONT_METRICS_EXTRA`) + sdkjs `elixir/fonts` + x2t
-`elixir/fonts` (core rebuilt on <build-host> with the `eo` builder: 209 s incremental).
+`elixir/fonts` (core rebuilt on build-host with the `eo` builder: 209 s incremental).
 
 ### Causes of the 7 pagination gaps
 
@@ -159,7 +159,7 @@ With the real school fonts installed on the server (group `school`): t01 and t05
 fonts and move away from Word for the web (which does not have them): C 69.7 instead of 75.0 (`docs/fonts.md` § 6).
 
 Private real corpus (4 teacher documents with a Word desktop reference, school fonts installed
-on the rendering machine; no file nor derivative outside `<build-host>:$EO_WORK/corpus-private`
+on the rendering machine; no file nor derivative outside `build-host:/srv/elixiroffice/corpus-private`
 and `fidelity/runs-real`): C 18.2 → **76.0**, SSIM 0.639 → **0.842**, documents with a different page count 2 → **1**.
 The substitution of Script École (URW Gothic Ecole Metric), KG Primary Penmanship and Comic Sans MS
 makes up most of the gain; the 69-page document remains one page off. A first version of
@@ -167,7 +167,7 @@ the use of `w:altName` (follow the altName even if absent) cost one document 7 p
 replaced by an altName that is itself absent): the altName is only retained if it is installed or has an
 installed replacement.
 
-Baselines: `<build-host>:$EO_WORK/fidelity/baselines/word-web.json` (new,
+Baselines: `build-host:/srv/elixiroffice/fidelity/baselines/word-web.json` (new,
 `fonts-6`); the old one (upstream) is kept under `word-web.upstream-2026-10-05.json`; real corpus:
 `fidelity/runs-real/baselines/word-desktop.json` (new, `fonts-6`) and `word-desktop.upstream-2026-10-05.json` (upstream). Copy of the provisional baseline in this repository: `fidelity/baselines/word-web.json` (and `word-web.upstream-2026-10-05.json`).
 

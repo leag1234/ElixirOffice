@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Download the corpus public documents from data.gouv.fr, check the sha256 digest of
 the original, blank the personal metadata (dc:creator, cp:lastModifiedBy) and write the file
 into teachers/ or admin/. The rest of the package is copied unchanged (part contents untouched).

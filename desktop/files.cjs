@@ -47,7 +47,7 @@ async function atomicWrite(target, bytes, expected) {
   try {
     const stat = await fs.lstat(target);
     if (!stat.isFile() || stat.isSymbolicLink()) throw Error('Destination must be a regular file');
-    original = {hash: hash(await fs.readFile(target)), mode: stat.mode, inode: stat.ino};
+    original = await fingerprint(target);
   } catch (e) { if (e.code !== 'ENOENT') throw e; }
   if (expected && (!original || original.hash !== expected.hash || original.inode !== expected.inode)) throw Error('The original changed on disk. Use Save As to preserve both versions.');
   const suffix = crypto.randomUUID();
@@ -61,12 +61,12 @@ async function atomicWrite(target, bytes, expected) {
     await handle.sync(); await handle.close(); handle = null;
     if (original) {
       const latest = await fs.lstat(target);
-      if (!latest.isFile() || latest.isSymbolicLink() || latest.ino !== original.inode || hash(await fs.readFile(target)) !== original.hash) throw Error('Destination changed during save');
+      if (!latest.isFile() || latest.isSymbolicLink() || latest.ino !== original.inode || (await fingerprint(target)).hash !== original.hash) throw Error('Destination changed during save');
       await fs.copyFile(target, backup, constants.COPYFILE_EXCL); backed = true;
       const copy = await fs.open(backup, 'r'); try { await copy.sync(); } finally { await copy.close(); }
-      if (hash(await fs.readFile(backup)) !== original.hash) throw Error('Destination changed while its backup was being saved');
+      if ((await fingerprint(backup)).hash !== original.hash) throw Error('Destination changed while its backup was being saved');
       const final = await fs.lstat(target);
-      if (!final.isFile() || final.isSymbolicLink() || final.ino !== original.inode || hash(await fs.readFile(target)) !== original.hash) throw Error('Destination changed before replacement');
+      if (!final.isFile() || final.isSymbolicLink() || final.ino !== original.inode || (await fingerprint(target)).hash !== original.hash) throw Error('Destination changed before replacement');
     }
     await fs.rename(temporary, target); replaced = true;
     if (process.platform !== 'win32') {
@@ -77,11 +77,90 @@ async function atomicWrite(target, bytes, expected) {
     return {target, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, bytes: bytes.length};
   } catch (e) {
     if (backed) e.message += ' Original backup: ' + backup;
-    if (replaced) e.message += ' Replacement completed, but durability could not be confirmed.';
+    if (replaced) {e.replacementCompleted=true;e.originalBackup=backed?backup:null;e.message += ' Replacement completed, but durability could not be confirmed.';}
     throw e;
   } finally {
     if (handle) await handle.close().catch(() => {});
     if (!replaced) await fs.unlink(temporary).catch(() => {});
   }
 }
-module.exports = {read, atomic, hash, formats, extension};
+// Rename the selected file without replacing another file or changing its bytes.
+function renameName(name,ext) {
+  if (typeof name !== 'string') throw Error('Choose a valid file name without a folder path');
+  name = name.normalize('NFC');
+  const leaf = name.trim(), stem = leaf.split('.')[0].replace(/ +$/, '');
+  const result = leaf.toLowerCase().endsWith(ext.toLowerCase()) ? leaf : leaf + ext;
+  if (!leaf || /[\x00-\x1f\x7f\\/:*?"<>|\u202a-\u202e\u2066-\u2069]/.test(name)
+      || leaf === '.' || leaf === '..' || /[. ]$/.test(name) || name.length > 200
+      || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(stem) || Buffer.byteLength(result,'utf8') > 255)
+    throw Error('Choose a valid file name without a folder path');
+  return result;
+}
+async function fingerprint(filename) {
+  const target=validatePath(path.resolve(filename)), selected=await fs.lstat(target,{bigint:true});
+  if(!selected.isFile()||selected.isSymbolicLink())throw Error('Choose a regular document, not a symbolic link');
+  const handle=await fs.open(target,constants.O_RDONLY|(process.platform==='win32'?0:(constants.O_NOFOLLOW||0)));
+  try{
+    const initial=await handle.stat({bigint:true}), named=await fs.lstat(target,{bigint:true});
+    if(initial.ino!==selected.ino||initial.dev!==selected.dev||named.isSymbolicLink()||named.ino!==initial.ino||named.dev!==initial.dev)
+      throw Error('Document changed during open');
+    if(initial.size>512n*1024n*1024n)throw Error('Choose a regular document under 512 MiB');
+    const digest=crypto.createHash('sha256');let size=0;
+    for await(const chunk of handle.createReadStream({autoClose:false})){
+      size+=chunk.length;if(size>512*1024*1024)throw Error('Document grew beyond 512 MiB during read');digest.update(chunk);
+    }
+    const latest=await handle.stat({bigint:true}), final=await fs.lstat(target,{bigint:true});
+    if(final.isSymbolicLink()||final.ino!==initial.ino||final.dev!==initial.dev||latest.size!==initial.size||latest.mtimeNs!==initial.mtimeNs)
+      throw Error('Document changed during read');
+    const stat=await handle.stat();
+    return {target,hash:digest.digest('hex'),mode:stat.mode,inode:stat.ino,device:stat.dev};
+  }finally{await handle.close()}
+}
+
+async function rename(expected, name) {
+  if (!expected || typeof expected.target !== 'string') throw Error('Save this document before renaming its file');
+  name = renameName(name,path.extname(expected.target));
+  const parent = await realDirectory(path.dirname(expected.target));
+  const target = validatePath(path.join(parent, name));
+  const selected = await fingerprint(expected.target);
+  if (selected.hash !== expected.hash || selected.inode !== expected.inode || selected.device !== expected.device)
+    throw Error('The original changed on disk. Reopen it before renaming.');
+  if (target === selected.target) return {...selected, name};
+  let alias;
+  try {alias=await fs.lstat(target)} catch (error) {if(error.code!=='ENOENT')throw error}
+  // A case-insensitive filesystem resolves the new spelling to the same entry.
+  if(alias && alias.ino===selected.inode && alias.dev===selected.device && !(await fs.readdir(parent)).includes(name)){
+    const current=await fingerprint(selected.target);
+    if(current.hash!==selected.hash||current.inode!==selected.inode||current.device!==selected.device)throw Error('The file changed during rename');
+    await fs.rename(selected.target,target);
+    const renamed=await fingerprint(target);
+    if(renamed.hash!==selected.hash || renamed.inode!==selected.inode || renamed.device!==selected.device)
+      throw Error('The file changed during rename');
+    if(process.platform!=='win32'){
+      const directory=await fs.open(parent,'r');try{await directory.sync()}finally{await directory.close()}
+    }
+    return {...renamed,name};
+  }
+  let linked = false;
+  try {
+    // link is exclusive: it rejects an existing destination instead of overwriting it.
+    await fs.link(selected.target, target);linked = true;
+    const original = await fingerprint(selected.target), destination = await fs.lstat(target);
+    if (original.hash !== selected.hash || original.inode !== selected.inode || original.device !== selected.device
+        || destination.ino !== selected.inode || destination.dev !== selected.device)
+      throw Error('The file changed during rename');
+    await fs.unlink(selected.target);linked = false;
+    if (process.platform !== 'win32') {
+      const directory = await fs.open(parent, 'r');try {await directory.sync()} finally {await directory.close()}
+    }
+    return {...selected, target, name};
+  } catch (error) {
+    if (linked) {
+      const stat = await fs.lstat(target).catch(()=>null);
+      if (stat && stat.ino === selected.inode && stat.dev === selected.device) await fs.unlink(target);
+    }
+    if (error.code === 'EEXIST') throw Error('A file with this name already exists. Choose another name.');
+    throw saveFailure(error);
+  }
+}
+module.exports = {read, atomic, rename, renameName, hash, formats, extension};

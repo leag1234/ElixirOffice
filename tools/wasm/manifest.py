@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Record reproducible build inputs and checksums for a versioned artifact set."""
 import argparse
 import hashlib
@@ -45,6 +44,6 @@ if __name__ == "__main__":
     generate(args.output, args.core, args.tools, {
         "exceptions": args.exceptions, "link_opt": args.link_opt,
         "post_opt": args.post_opt, "variant": args.variant,
-        "module_kind": args.kind, "emsdk": "5.0.4", "image_id": args.image_id,
+        "module_kind": args.kind, "pdf_original_append": args.kind == "pdf", "emsdk": "5.0.4", "image_id": args.image_id,
         "build_type": "Release", "boost_opt": "-Os", "initial_memory": 67108864,
         "maximum_memory": 4294967296, "stack_size": 8388608})

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Measurement scenarios of the performance harness. Each function measures ONE run and returns
 // a flat record; bench.mjs repeats them and aggregates. See docs/perf.md for the definitions.
 import path from "node:path";

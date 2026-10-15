@@ -1,11 +1,11 @@
 # ADR 0001: fidelity harness tooling in a container
 
-Date: 2026-10-05. Status: accepted (can be revisited by the owner).
+Date: 2026-10-05. Status: accepted (can be revisited by the test user).
 
 ## Context
 
 The fidelity harness (`tools/fidelity/`) must rasterize PDFs and compare images
-(SSIM, normalized correlation, morphological filters). <build-host> runs Ubuntu 20.04 / Python 3.8,
+(SSIM, normalized correlation, morphological filters). build-host runs Ubuntu 20.04 / Python 3.8,
 without sudo; results must be reproducible from one machine and date to another
 (the poppler version changes page rendering, hence the scores).
 

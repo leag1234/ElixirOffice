@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Production portal: actual keyboard edit, saved DOCX, close and reopen.
 // For the local-CA test only, Chromium trusts the supplied test certificate SPKI without system changes;
 // Node fetch must use NODE_EXTRA_CA_CERTS, and curl separately verifies TLS.

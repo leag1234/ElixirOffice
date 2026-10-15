@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Screenshot of the Presenter View window: node presenter-shot.mjs <base> <out.png> [--dark]
 import { createRequire } from 'module';
 import fs from 'fs'; import path from 'path';

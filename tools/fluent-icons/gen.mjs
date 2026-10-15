@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Generates the ElixirOffice web-apps toolbar icons from Microsoft's
 // Fluent UI System Icons (MIT, https://github.com/microsoft/fluentui-system-icons).
 //

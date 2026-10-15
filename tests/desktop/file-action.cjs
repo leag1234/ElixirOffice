@@ -2,7 +2,7 @@
 'use strict';
 // Use visible application controls; preserve native-dialog assertions in callers.
 module.exports=async function fileAction(page,action,format){
- const frame=page.frames().find(f=>/\/(documenteditor|spreadsheeteditor|presentationeditor)\/main\//.test(f.url()));
+ const frame=page.frames().find(f=>/\/(documenteditor|spreadsheeteditor|presentationeditor|pdfeditor)\/main\//.test(f.url()));
  if(!frame){if(action!=='open')throw Error('Editor unavailable for File action');await page.locator('#home button').filter({hasText:/Browse|Parcourir/}).click({timeout:20000});return;}
  for(let i=0;i<12;i++){let closed=false;for(const tip of await frame.locator('.asc-synchronizetip .close,.asc-synchronizetip .btn-div,.asc-synchronizetip .show-link').all())if(await tip.isVisible()){await tip.click({timeout:20000});closed=true;}if(!closed)break;}
  if(!await frame.locator('#fm-btn-save').isVisible())await frame.locator('#file[role=tab]').click({timeout:20000});

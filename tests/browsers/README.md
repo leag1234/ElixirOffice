@@ -1,6 +1,6 @@
 # Three-engine browser acceptance
 
-Run on <dev-host> with Node 22 and the existing $EO_WORK/pw Playwright installation.
+Run on development host with Node 22 and the existing /srv/elixiroffice/pw Playwright installation.
 Always set EO_BASE to your own loopback instance. The runner rejects :8080,
 selects the actual Chromium, Firefox or WebKit engine, and leaves suite assertions
 unchanged. Failed engines remain failed in results.json; subsequent engines run.
@@ -80,7 +80,7 @@ clone is needed. With a public DOCX already on the Mac:
 EO_MAC_EXPECT_PAGES=100 bash mac-run.sh /absolute/public-100-pages.docx /absolute/own/results
 ```
 Omit EO_MAC_EXPECT_PAGES for another public fixture. The script starts its own
-18083 tunnel to fire's own32786 instance, rejects :8080 and refuses occupied
+18083 tunnel to development host's own32786 instance, rejects :8080 and refuses occupied
 driver ports. Overrides: EO_FIRE, EO_REMOTE_PORT, EO_TUNNEL_PORT.
 It checks local open/edit/save (including clean save state), then uploads the
 public fixture deliberately for a separate hosted native-PDF probe. It records

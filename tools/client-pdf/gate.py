@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Quality gate of the client-side PDF export (docs/client-pdf.md).
 
 Input: a bench directory written by tools/client-pdf/bench.mjs (client/<id>.pdf, server/<id>.pdf,

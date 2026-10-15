@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # ElixirOffice production image (docs/install-server.md section "Image"). Runs on the build host (build-host).
 #
 #   tools/image/build.sh [base|fonts|runtime|all]     (default all; env below)

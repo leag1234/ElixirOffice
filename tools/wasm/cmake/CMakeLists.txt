@@ -102,11 +102,15 @@ set_target_properties(x2t PROPERTIES SUFFIX ".js" SKIP_BUILD_RPATH TRUE BUILD_RP
 # layouts). Linked together, the linker keeps one copy and the other library
 # corrupts memory (crash in the SVG/EMF path). Build both the same way.
 target_compile_definitions(graphics PRIVATE CSS_CALCULATOR_WITH_XHTML)
+# Generated PDF provenance names this product; existing document Creator is retained.
+target_compile_definitions(PdfFile PRIVATE "APPLICATION_NAME_DEFAULT=\"ElixirOffice\"")
 
 # PDF-only executable: the same PdfFile renderer, without x2t's Office converters.
 # Static linking still retains PdfFile's reader-facing vtable dependencies.
-add_executable(pdf_runtime pdf-main.cpp)
-target_include_directories(pdf_runtime PRIVATE "${EO_CORE_DIR}")
+add_executable(pdf_runtime pdf-main.cpp pdf-edit.cpp)
+target_include_directories(pdf_runtime PRIVATE "${EO_CORE_DIR}"
+    "${EO_CORE_DIR}/PdfFile/lib" "${EO_CORE_DIR}/PdfFile/lib/goo"
+    "${EO_CORE_DIR}/PdfFile/lib/fofi" "${EO_CORE_DIR}/PdfFile/lib/splash")
 target_link_libraries(pdf_runtime PRIVATE PdfFile HtmlFile2)
 target_link_options(pdf_runtime PRIVATE ${EO_WASM_LINK_FLAGS})
 set_target_properties(pdf_runtime PROPERTIES OUTPUT_NAME x2t SUFFIX ".js"

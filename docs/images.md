@@ -1,6 +1,6 @@
 # Images: stable placement of several images
 
-Session of 2026-10-05/06. Branches: `elixir/images` in sdkjs and web-apps (worktree `wt/images`), `feat/images` in this repository. Measurement instance: `eo-images` on <dev-host> (port 32776). Nothing is pushed.
+Session of 2026-10-05/06. Branches: `elixir/images` in sdkjs and web-apps (worktree `wt/images`), `feat/images` in this repository. Measurement instance: `eo-images` on development host (port 32776). Nothing is pushed.
 
 ## 1. The problem
 
@@ -77,9 +77,9 @@ Before = `elixir/dev` (sdkjs d286b4f314, web-apps 6f7e08fd68); after = `elixir/i
 | worksheet-8-compat14 | 675.7 | **20** | self 247 → 0 (scan that jumped a page when going to Square), D 60 → 0, U 269 → 0 |
 | **Total** | **2,957.6** | **265.1** | **−91%** |
 
-Screenshots (`screenshots/images/`): `before-table-cell.png` / `after-table-cell.png`, `before-insert-4.png` / `after-insert-4.png`, `before-worksheet-8.png` / `after-worksheet-8.png`, `layout-options-en.png`, `layout-options-fr.png`, `drag-guides.png`.
+Screenshots (`docs/screenshots/images/`): `before-table-cell.png` / `after-table-cell.png`, `before-insert-4.png` / `after-insert-4.png`, `before-worksheet-8.png` / `after-worksheet-8.png`, `layout-options-en.png`, `layout-options-fr.png`, `drag-guides.png`.
 
-### Fidelity (`tools/fidelity` harness, <build-host>, Word-for-web references, provisional corpus)
+### Fidelity (`tools/fidelity` harness, build-host, Word-for-web references, provisional corpus)
 
 Measurement image: `ghcr.io/euro-office/documentserver:latest` + built sdkjs (before: `elixir/dev`, after: `elixir/images`), own container and network (`eo-fidelity-images`, port 8097) so as not to disturb the fonts work.
 
@@ -90,7 +90,7 @@ Measurement image: `ghcr.io/euro-office/documentserver:latest` + built sdkjs (be
 
 Non-regression check: PASS (no document out of tolerance). Expected: no fix touches the layout of an open document, only the gestures (insertion, move, resize) and the interface.
 
-Real corpus (private, on <build-host>, 4 documents, Word desktop references): before and after identical (SSIM 0.63865, C 18.19). See §7.
+Real corpus (private, on build-host, 4 documents, Word desktop references): before and after identical (SSIM 0.63865, C 18.19). See §7.
 
 ## 6. Causes found and fixes
 
@@ -105,7 +105,7 @@ Real corpus (private, on <build-host>, 4 documents, Word desktop references): be
 
 Already conforming to Word in the upstream code (verified by measurement, nothing to change): image inserted **In Line with Text** by default; switching from In Line to a wrapping without moving the image (ribbon menus); "move with text" when typing above; anchor moved to the paragraph under the top of the image; Word 2013+ rule of the paragraph taken to the next page; images always "laid out in the cell" in Word 2013+ mode; no recomputation loop (no action exceeds 3.5 s, typing included).
 
-## 7. Real corpus (aggregated, nothing copied off <build-host>)
+## 7. Real corpus (aggregated, nothing copied off build-host)
 
 Analysis of the 4 real worksheets in .docx: 165 inline images, 456 floating objects, of which **433 "in front of text"** (no wrapping) and 35 behind, 16 "through", 7 square; 413 positioned relative to the paragraph, 42 relative to the page; **199 images in table cells**; 422 VML shapes; 3 documents in Word 2013+ mode, 1 without mode (Word 2007). Reading: teachers mostly place "in front of text" images anchored to paragraphs and many images in tables. Hence the importance of fitting to the cell (fix 1) and of "in front of text" having no effect on the text (already right). Fidelity on these 4 documents (Word desktop references): before SSIM 0.63865, C 18.19, 2 documents with a different page count; after: identical (gaps due to fonts, separate work item).
 
@@ -119,4 +119,4 @@ Analysis of the 4 real worksheets in .docx: 165 inline images, 456 floating obje
 - Word 2010 mode (compatibility 14): the "column" starting point takes into account the objects of the first line (sdkjs's emulation of Word 2010); an image can shift horizontally when another moves (M 1 in worksheet-8-compat14). This is Word 2010's behavior, not fixed.
 - Paragraph taken to the next page when an image overflows into the bottom margin: Word's rule reproduced, but surprising; the AI layer's "Why?" button will be able to explain it.
 - No anchor that can be moved with the mouse (the image is moved); no live preview on hover of the pane's choices.
-- Word references: the rules come from Microsoft documentation; no scenario was replayed in Word itself (to do with the owner on 2 or 3 scenarios: drop on a table, image that exceeds the page, image above its paragraph).
+- Word references: the rules come from Microsoft documentation; no scenario was replayed in Word itself (to do with the test user on 2 or 3 scenarios: drop on a table, image that exceeds the page, image above its paragraph).

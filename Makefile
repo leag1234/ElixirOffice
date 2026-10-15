@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-only
-# ElixirOffice developer entry points (run on the development host).
+# ElixirOffice developer entry points (run on the dev host, development host).
 # Wraps the upstream dev container (DocumentServer/develop): components are
 # rebuilt inside the running container and deployed into its installed tree.
 
@@ -7,7 +6,7 @@ UPSTREAM ?= $(HOME)/elixiroffice/DocumentServer
 # Upstream images we consume, the only place their names appear (docs/branding.md):
 # the dev container (keeps the upstream install paths: never
 # hard-code them, read $$EO_ROOT/$$EO_CONF/$$EO_LOG inside the container) and the
-# base of the font test images. Our own image is built by `make image` (<build-host>).
+# base of the font test images. Our own image is built by `make image` (build-host).
 DEV_IMAGE ?= ghcr.io/euro-office/documentserver:latest-dev
 UPSTREAM_IMAGE ?= ghcr.io/euro-office/documentserver:latest
 export EO_IMAGE := $(DEV_IMAGE)
@@ -16,7 +15,7 @@ BUILD_CACHE ?= $(HOME)/elixiroffice/dev-build-cache
 export EO_BUILD_CACHE := $(BUILD_CACHE)
 COMPOSE  := docker compose -f $(UPSTREAM)/develop/docker-compose.yml -f $(CURDIR)/tools/dev/docker-compose.override.yml
 # CONTAINER=<name> targets another dev container (e.g. one started by
-# develop/eo.sh: CONTAINER=eo-home UPSTREAM=$EO_WORK/wt/home)
+# develop/eo.sh: CONTAINER=eo-home UPSTREAM=/srv/elixiroffice/wt/home)
 CONTAINER ?=
 ifeq ($(CONTAINER),)
 EXEC     := $(COMPOSE) exec -T eo
@@ -33,7 +32,8 @@ THEME    := elixiroffice
 BRANDING := $(CURDIR)/branding
 
 .PHONY: fonts-pack fonts fonts-image up down dev dev-tools theme sdkjs web-apps sdkjs-full web-apps-full status logs restore-generated \
-        example example-brand example-restart example-thumbnails ai-proxy ai-check perf-tuning rebrand rebrand-check image image-base image-fonts
+        example example-brand example-restart example-thumbnails ai-proxy ai-check perf-tuning rebrand rebrand-check image image-base image-fonts \
+        demo-up demo-update demo-rollback demo-images demo-status demo-user demo-revoke demo-stop demo-start demo-purge demo-tls demo-proxy
 
 up:
 	mkdir -p $(BUILD_CACHE)
@@ -59,7 +59,7 @@ sdkjs:
 # checkout (untracked, excluded from git there) before each web-apps build.
 theme:
 	rsync -a --delete $(BRANDING)/web-apps/theme/$(THEME)/ $(UPSTREAM)/web-apps/theme/$(THEME)/
-	@EX=$$(git -C $(UPSTREAM)/web-apps rev-parse --absolute-git-dir)/info/exclude; \
+	@EX=$$(git -C $(UPSTREAM)/web-apps rev-parse --git-path info/exclude); \
 	grep -qx 'theme/$(THEME)/' $$EX 2>/dev/null || echo 'theme/$(THEME)/' >> $$EX
 
 web-apps: theme
@@ -97,7 +97,7 @@ APP_NAME    ?= ElixirOffice
 example-brand:
 	rsync -rlt $(BRANDING)/example/nodejs/ $(EXAMPLE_DIR)/
 	cp $(BRANDING)/web-apps/theme/$(THEME)/assets/img/header/logo_light.svg $(EXAMPLE_DIR)/public/elixir/brand/logo.svg
-	@EX=$$(git -C $(UPSTREAM)/document-server-integration rev-parse --absolute-git-dir)/info/exclude; \
+	@EX=$$(git -C $(UPSTREAM)/document-server-integration rev-parse --git-path info/exclude); \
 	mkdir -p $$(dirname $$EX); \
 	grep -qx '/web/documentserver-example/nodejs/public/elixir/brand/' $$EX 2>/dev/null || \
 	  echo '/web/documentserver-example/nodejs/public/elixir/brand/' >> $$EX
@@ -181,6 +181,51 @@ fonts-image: fonts-pack
 	$(if $(X2T_BUILD),cp -a $(X2T_BUILD)/. $(FONTS_CACHE)/ctx/x2t/)
 	docker build -f $(BRANDING)/fonts/Dockerfile.test --build-arg BASE=$(FONTS_BASE) -t $(FONTS_TAG) $(FONTS_CACHE)/ctx
 
+# ---------------------------------------------------------------------------
+# Public demo (docs/install-server.md): a separate container eo-demo (production image tag, loopback only) behind Caddy (HTTPS, Let's Encrypt) and a gateway (auth, rate limits, AI proxy).
+# Secrets live in ~/.config/elixiroffice/demo/ (mode 600), never in git.
+DEMO := tools/demo/demo.sh
+
+demo-up:                         ## first deployment from an image: make demo-up TAG=<tag> (default: newest)
+	$(DEMO) up $(TAG)
+
+demo-update:                     ## switch to another image: make demo-update TAG=<tag>
+	@test -n "$(TAG)" || { echo "usage: make demo-update TAG=<image tag>   (make demo-images lists them)"; exit 2; }
+	$(DEMO) update $(TAG)
+
+demo-rollback:                   ## back to the previous image
+	$(DEMO) rollback
+
+demo-images:
+	$(DEMO) images
+
+demo-status:
+	$(DEMO) status
+
+demo-user:                       ## make demo-user NAME=alice [ROTATE=1]
+	@test -n "$(NAME)" || { echo "usage: make demo-user NAME=<name>"; exit 2; }
+	$(DEMO) user $(NAME) $(if $(ROTATE),--rotate)
+
+demo-revoke:                     ## make demo-revoke NAME=alice
+	@test -n "$(NAME)" || { echo "usage: make demo-revoke NAME=<name>"; exit 2; }
+	$(DEMO) revoke $(NAME)
+
+demo-proxy:
+	$(DEMO) proxy
+
+demo-tls:                        ## make demo-tls MODE=acme|staging|internal
+	@test -n "$(MODE)" || { echo "usage: make demo-tls MODE=acme|staging|internal"; exit 2; }
+	$(DEMO) tls $(MODE)
+
+demo-purge:                      ## delete expired documents now (ALL=1: everything)
+	$(DEMO) purge $(if $(ALL),--all)
+
+demo-stop:
+	$(DEMO) stop
+
+demo-start:
+	$(DEMO) start
+
 # Rebrand (docs/branding.md). rebrand rewrites the upstream names left in the
 # DocumentServer checkout (run after every upstream rebase, then commit with
 # REBRAND_COMMIT=1); rebrand-check lists what is left (CI: exits 1 if anything).
@@ -190,7 +235,7 @@ rebrand:
 rebrand-check:
 	tools/rebrand/check.sh $(UPSTREAM)
 
-# Full ElixirOffice production image (build host, <build-host>; docs/dev.md):
+# Full ElixirOffice production image (build host, build-host; docs/install-server.md section "Image"):
 # 1. bake: upstream DocumentServer/build stages + our brand HCL (branding/build/elixiroffice.hcl) ->
 #    $(IMAGE_REGISTRY)/documentserver:$(IMAGE_TAG)-base (AI client overlay applied to the sources first);
 # 2. fonts: the font pack layer (branding/build/Dockerfile.fonts) -> $(IMAGE_REGISTRY)/documentserver:$(IMAGE_TAG).

@@ -1,6 +1,6 @@
 # Keyboard shortcuts, KeyTips and interaction polish (text editor)
 
-Session of 2026-10-05. Branches: `elixir/interact` in web-apps and sdkjs (worktree `$EO_WORK/wt/interact`), `feat/interact` in this repository. Test instance: container `eo-interact`, port **8095** on <dev-host>. Nothing is pushed.
+Session of 2026-10-05. Branches: `elixir/interact` in web-apps and sdkjs (worktree `/srv/elixiroffice/wt/interact`), `feat/interact` in this repository. Test instance: container `eo-interact`, port **8095** on development host. Nothing is pushed.
 
 ## 1. Source and matrix
 
@@ -309,7 +309,7 @@ Functions absent from the editor (30 `absent` rows of the CSV), by family:
 - Alt+H held together acts like Alt then H (not on macOS, where Option+letter types a character; not Alt+F, Alt+X nor Alt+I). Esc goes up one level.
 - Keyboard navigation: after Alt, Tab or the arrows enter the ribbon; Left/Right change tab, Down enters the commands, Tab/Shift+Tab and the arrows go from command to command, Ctrl+arrows from group to group, Down or Alt+Down opens the list, Esc goes back to the tab then to the document, Ctrl+Shift+F10 shows the tooltip.
 - macOS: Word for Mac has no KeyTips; we keep the editor's convention (Option pressed then released). AI keeps Alt+I and ⌃⌥I (no KeyTip reacts to I).
-- Look: small light labels with a thin border and soft shadow (dark in dark theme). Screenshots `screenshots/ui2/interact-keytips-tabs.png`, `interact-keytips-home.png`.
+- Look: small light labels with a thin border and soft shadow (dark in dark theme). Screenshots `docs/screenshots/ui2/interact-keytips-tabs.png`, `interact-keytips-home.png`.
 
 ## 7. Mini toolbar, context menus, ScreenTips
 
@@ -334,9 +334,9 @@ All the new strings go through the language files: en, fr, de, es, it, pt, pt-pt
 ## 9. Running
 
 ```bash
-cd $EO_WORK/wt/interact/develop && ./eo.sh up interact 8095
-$EO_WORK/wt/interact-work/build.sh web-apps-dev ; $EO_WORK/wt/interact-work/build.sh sdkjs-dev
-cd $EO_WORK/wt/interact-repo
+cd /srv/elixiroffice/wt/interact/develop && ./eo.sh up interact 8095
+/srv/elixiroffice/wt/interact-work/build.sh web-apps-dev ; /srv/elixiroffice/wt/interact-work/build.sh sdkjs-dev
+cd /srv/elixiroffice/wt/interact-repo
 EO_BASE=http://localhost:8095 node tests/shortcuts/run.mjs --platform both      # matrix
 node tests/shortcuts/report.mjs tests/shortcuts/results/latest.json --md         # table
 node tests/shortcuts/keytips.mjs docs/screenshots/ui2                           # and minitoolbar, contextmenus, screentips
@@ -345,13 +345,13 @@ python3 tools/shortcuts/matrix.py                                               
 
 ### 9.1 Running on a real Mac (Chromium, Chrome, WebKit)
 
-The Linux runs above emulate macOS (spoofed user agent and `navigator.platform`). On a Mac the same suites run against a <dev-host> instance through an SSH tunnel, with the real macOS key handling, the native clipboard and the fonts installed on the Mac (Local Font Access).
+The Linux runs above emulate macOS (spoofed user agent and `navigator.platform`). On a Mac the same suites run against a development host instance through an SSH tunnel, with the real macOS key handling, the native clipboard and the fonts installed on the Mac (Local Font Access).
 
 ```bash
 # once: Node 22, Playwright and its browsers in a local folder (no system change), and the tunnel to the instance
 mkdir -p ~/eo-mac-tests/pw && cd ~/eo-mac-tests/pw && npm init -y && npm i playwright
 PLAYWRIGHT_BROWSERS_PATH=~/eo-mac-tests/browsers npx playwright install chromium webkit
-ssh -fN -L 18080:localhost:8080 <dev-host>
+ssh -fN -L 18080:localhost:8080 dev-host
 # a copy of tests/ from this repository in ~/eo-mac-tests/repo, then, per browser:
 export PLAYWRIGHT_BROWSERS_PATH=~/eo-mac-tests/browsers PW_DIR=~/eo-mac-tests/pw EO_BASE=http://localhost:18080
 export EO_REAL_MAC=1 EO_BROWSER=chromium          # or chrome (installed Google Chrome), webkit (Safari engine)
@@ -402,7 +402,7 @@ Still absent after this work (see the CSV for the notes): numeric keypad / (Outl
 Reported: right-click menus "sometimes non-functional, sometimes an error popup". The sweep opens each context menu with a real right click, lists the items and submenu items from the DOM, then, from a fresh menu each time, clicks every item with a real mouse click (Playwright actionability: the item has to be visible and not covered). Per click it records console and page errors, error or warning popups (alert windows), whether the editor state, a dialog, the clipboard, a file chooser, a download or the Ask Elixir bar changed ("no visible effect"), and whether the menu closed. It also checks that each menu is inside the window and that a menu does not keep rewriting its own DOM while a submenu opens (the event loop that broke the Spreadsheet menus).
 
 ```bash
-cd $EO_WORK/wt/ctxmenu-repo && export EO_BASE=http://localhost:8098
+cd /srv/elixiroffice/wt/ctxmenu-repo && export EO_BASE=http://localhost:8098
 node tests/ctxmenu/sweep-word.mjs     # text, selection, misspelled word, tables, picture (inline and floating), shape, header, footer, hyperlink, comment, list, TOC, margin, track change, equation, footnote
 node tests/ctxmenu/sweep-cell.mjs     # cell, range, formula, empty cell, link, comment, row/column header, corner, sheet tabs, shape, picture, chart
 node tests/ctxmenu/sweep-slide.mjs    # slide, title text and shape, shape, picture, table, thumbnails
@@ -488,7 +488,7 @@ Browsers keep some shortcuts for themselves (tabs and windows), so a web page ne
 
 | Mechanism | Result |
 |---|---|
-| Keyboard Lock (`navigator.keyboard.lock(codes)`) | Chromium (Chrome, Edge, Opera) only; Firefox and Safari have no such API. Tested in headless Chromium: the API exists, `lock()` **resolves from the top-level page and is refused from an iframe** (`InvalidStateError`, "must be called from a primary top-level browsing context"). The editors run in an iframe, so the lock is requested by the top-level page: `web-apps/apps/api/documents/api.js` (`DocsAPI`, loaded by every integration) asks for `W N T Tab PageUp PageDown Digit1..9` at load and again on every `fullscreenchange`. Chromium applies the lock **while the page is in full screen** (hold Esc to leave); a request made outside full screen is accepted and inert. Not testable in Playwright: it sends keys to the page, so the browser's own shortcuts never <dev-host>. |
+| Keyboard Lock (`navigator.keyboard.lock(codes)`) | Chromium (Chrome, Edge, Opera) only; Firefox and Safari have no such API. Tested in headless Chromium: the API exists, `lock()` **resolves from the top-level page and is refused from an iframe** (`InvalidStateError`, "must be called from a primary top-level browsing context"). The editors run in an iframe, so the lock is requested by the top-level page: `web-apps/apps/api/documents/api.js` (`DocsAPI`, loaded by every integration) asks for `W N T Tab PageUp PageDown Digit1..9` at load and again on every `fullscreenchange`. Chromium applies the lock **while the page is in full screen** (hold Esc to leave); a request made outside full screen is accepted and inert. Not testable in Playwright: it sends keys to the page, so the browser's own shortcuts never development host. |
 | Full screen | The editor's "Keyboard shortcuts in the browser" dialog has a Full screen button (the editor asks the top-level page with `postMessage`, the page calls `requestFullscreen()`, then locks). Test: `fullscreen.from-editor`. |
 | Installed app (PWA window) | `manifest.webmanifest` (name, `display: standalone`, 192/512 and maskable icons, scope = the start page folder) is linked from the start page and the editor page; Chromium reports no installability error (`Page.getInstallabilityErrors`, test `manifest.installable`). No service worker, no offline cache. An app window has no tabs, so the tab keys (Ctrl+Tab, Ctrl+PageDown/Up and the Shift forms, Ctrl+T, Ctrl+1..9) are not browser commands there and are expected to reach the page; Ctrl+W, Ctrl+N, Ctrl+Shift+W and Ctrl+Shift+N stay window commands. **To confirm on a real Chrome and Edge** with `tests/browserkeys/probe.html` (below). The start page has an "Install app" item in its left bar (shown when the browser offers installation), and the dialog has an Install button. |
 | `beforeunload` guard | Already in the editors (`onBeforeUnload`): Ctrl+W, closing the window or reloading asks first when the document has unsaved changes (test `beforeunload.guard-when-modified`). It cannot stop the key, only ask. |

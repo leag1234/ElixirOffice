@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const DATA = [["The Little Prince", "Saint-Exupéry", "Emma"], ["Matilda", "Roald Dahl", "Noah"], ["Pinocchio", "Collodi", "Lina"]];
 export function check(before, after, run) {

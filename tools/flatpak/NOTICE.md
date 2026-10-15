@@ -1,0 +1,2 @@
+# Third-party notice
+seccomp-builder.json is adapted from Moby profiles (Docker contributors), commit4b8214fc4971e06172938a1f1554ccff6647ee80, under Apache License2.0. The upstream licence is LICENSE.moby-profile. Changes enable explicitly listed namespace/mount calls for a nonroot capability-dropped isolated builder; remaining rules retain upstream policy. This is not a runtime permission grant to ElixirOffice documents.

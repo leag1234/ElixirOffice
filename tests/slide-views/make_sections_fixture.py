@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Builds tests/fixtures/pptx/sections.pptx from p01-cours-photosynthese.pptx: the slide ids get gaps (as after
 deleting slides in PowerPoint) and a p14:sectionLst gives three sections: Intro (slides 1-3), Body (4-5), Wrap-up (6-8).
    python3 tests/slide-views/make_sections_fixture.py"""

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # Tooling image for the layout-fidelity harness: poppler (pdftoppm, pdfinfo,
 # pdftotext, pdffonts) + the Python image-comparison stack.
 # The harness code itself is NOT baked in: run.sh mounts tools/fidelity/ at /app.

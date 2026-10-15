@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // PDF writing in x2t.wasm from the sdkjs drawing-command stream (bin2pdf,
 // design B of docs/client-pdf.md): the same input the browser prototype uses.
 // usage: node bench_pdf.mjs X2T_JS STREAM_DIR OUT_DIR FONTS_DIR [RUNS]

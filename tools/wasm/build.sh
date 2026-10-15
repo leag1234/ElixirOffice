@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Reproducible build of the x2t converter (DocumentServer core) to WebAssembly.
 #
 # usage: tools/wasm/build.sh [WORK_DIR]
 #   CORE_REPO   git URL or path of the core repository   (default: $UPSTREAM/core, as in the Makefile)
 #   CORE_REF    branch/tag/commit to build                 (default: elixir/dev if present, else main)
 #   VARIANTS    "st" and/or "mt" (pthreads)                (default: st)
-#   PDF_ONLY    1 = drawing stream to PDF only; 0 = full x2t (default)
+#   PDF_ONLY    1 = PDF module (drawing export and bounded original editing); 0 = full x2t (default)
 #   JOBS        parallel jobs                              (default: nproc)
 #   LINK_OPT    optimisation level for the final link      (default: -O1)
 #   POST_OPT    wasm-opt level run after the link          (default: -O2; "" = none)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Fixtures of the multi-image layout stability suite (docs/images.md).
 
 Writes into the output directory (default: tests/images/fixtures, not tracked):

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Insert > Charts: one gallery per family of chart types (Column or Bar, Line or Area, Pie, Scatter, Stock or Radar, Combo).
 //   node tests/shortcuts-excel/chart-galleries.mjs [--platform win|mac] [--out results.json]   (EO_BASE=http://host:port)
 import fs from "node:fs";

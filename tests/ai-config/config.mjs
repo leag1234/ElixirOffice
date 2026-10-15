@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // AI is OFF unless configured (docs/ai.md §0): three configurations of the same instance, each in a fresh
 // browser with no stored settings, against a local mock OpenAI-compatible server (no real provider, no key).
 //   A  no configuration: the editor works, no AI entry point, a discreet "Set up AI…", zero AI network calls, no console error

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Extract Word's keyboard shortcuts from Microsoft's public support page.
 
 Source: "Keyboard shortcuts in Word", Microsoft Support

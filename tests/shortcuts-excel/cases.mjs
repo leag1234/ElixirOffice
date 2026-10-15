@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Test cases of the Excel shortcut matrix (docs/shortcuts-excel.csv).
 //
 // A case: { id, win, mac, sel, active, pre, check, after, control }

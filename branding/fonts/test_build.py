@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Unit tests of the glyph transformations of build.py (scale_outlines, add_ruled_lines) on a tiny
 synthetic TrueType font (no download, no private data): python3 -m unittest branding/fonts/test_build.py
 Needs fontTools."""

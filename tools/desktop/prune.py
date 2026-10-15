@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Trim unused desktop assets while preserving help and active editor languages."""
 import json, shutil, sys
 from pathlib import Path

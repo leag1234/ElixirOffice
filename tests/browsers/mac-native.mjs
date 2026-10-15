@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Owner-run only: real installed browsers via their native WebDriver servers.
 // This is independent of Playwright WebKit, which is not installed Safari.
 import assert from 'node:assert/strict';

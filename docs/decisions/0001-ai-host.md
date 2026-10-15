@@ -1,6 +1,6 @@
 # ADR 0001: host the AI interface in web-apps, tools limited to the public builder API
 
-Date: 2026-10-05. Status: accepted for v0 (to be reviewed with the owner: the brief left "plugin vs native" open).
+Date: 2026-10-05. Status: accepted for v0 (to be reviewed with the test user: the brief left "plugin vs native" open).
 
 ## Context
 

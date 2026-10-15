@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Deterministic checks of the Word tools, without any model: each tool is called with fixed
 // arguments on the task inputs, inside one undo group with assistant tracking, and the
 // resulting document structure, revisions and single-step undo are verified.

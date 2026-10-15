@@ -1,13 +1,13 @@
 {
   "id": "g-toc-unstyled",
-  "title": "Table of contents from unstyled titles (user request 1)",
+  "title": "Table of contents from unstyled titles (Gaël's request 1)",
   "instruction": "Fais une table des matières avec ces titres et sous-titres",
   "select": [
     2,
     15
   ],
   "input": "input.docx",
-  "kind": "user",
+  "kind": "gael",
   "lang": "fr",
   "notes": "Section titles '1. …' are bold 14 pt Normal, sub-sections '1.1 …' bold Normal: none is a heading. Expected: Heading 1 / Heading 2 applied (tracked), then a real TOC field before the first section listing 3 level-1 and 4 level-2 entries."
 }

@@ -21,9 +21,9 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    assert.equal(plist.CFBundleIdentifier,config.build.appId);assert.equal(plist.CFBundleShortVersionString,config.version);assert.equal(plist.CFBundleDisplayName,'ElixirOffice');
    assert.equal(plist.LSApplicationCategoryType,'public.app-category.productivity');
    const extensions=plist.CFBundleDocumentTypes.flatMap(type=>type.CFBundleTypeExtensions||[]).sort();
-   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx'].sort());
+   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf'].sort());
    const {types,unused}=require('./mac-after-pack.cjs');
-   assert.equal(plist.CFBundleDocumentTypes.length,18);
+   assert.equal(plist.CFBundleDocumentTypes.length,19);
    for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
    function checkPlists(folder){for(const entry of fs.readdirSync(folder,{withFileTypes:true})){
     const file=path.join(folder,entry.name);if(entry.isDirectory())checkPlists(file);else if(entry.name==='Info.plist'){
@@ -48,6 +48,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    console.log(run('python3',[path.join(root,'tests/desktop/verify-resources.py'),path.join(contents,'Resources','assets')]));
    console.log(run('python3',[path.join(root,'tests/desktop/check-samples.py'),path.join(contents,'Resources','assets')]));
    const asar=require('node:module').createRequire(path.join(root,'desktop/node_modules/app-builder-lib/package.json'))('@electron/asar'),archive=path.join(contents,'Resources','app.asar');
+   require('./check-version.cjs').verify(JSON.parse(asar.extractFile(archive,'package.json')),config.version);
    assert(!asar.listPackage(archive).some(name=>/\.(docx|xlsx|pptx|odt|ods|odp|doc|xls|ppt|pdf)$/i.test(name)),'Document fixture unexpectedly shipped in app.asar');
    for(const name of fs.readdirSync(path.join(root,'desktop')).filter(name=>/\.(cjs|js|html|css)$/.test(name)||name==='icon.png'))
     assert(fs.readFileSync(path.join(root,'desktop',name)).equals(asar.extractFile(archive,name)),name+' packaged source mismatch');
@@ -55,7 +56,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    assert.equal(manifest.fontSet,'standard');assert.equal(manifest.pruning.staticHelpAnimations,44);
    assert(!Object.keys(manifest.files).some(name=>/visio|monaco|_ie\.js$/.test(name)));
    for(const [name,dest] of [['LICENSE','LICENSE.electron'],['LICENSES.chromium.html','LICENSES.chromium.html']])assert.equal(hash(path.join(contents,'Resources',dest)),hash(path.join(root,'desktop/mac-licenses',name)));
-   console.log('PASS arm64 plist/nine associations/icon/ad-hoc-no-publisher/source/resources',bundle);
+   console.log('PASS arm64 plist/nineteen associations/icon/ad-hoc-no-publisher/source/resources',bundle);
   }
   function walk(base,relative=''){return fs.readdirSync(path.join(base,relative),{withFileTypes:true}).flatMap(entry=>{const name=path.join(relative,entry.name);return entry.isDirectory()?walk(base,name):[name]}).sort()}
   const original=path.join(dist,'mac-arm64','ElixirOffice.app'),copied=path.join(out,'ElixirOffice.app');

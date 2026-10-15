@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Locale coverage of the Mailings tab (all locales) and of the recent Word features (12 main locales).
-//   node tests/beta-fixes/i18n-coverage.mjs [path to web-apps]   (default $EO_WORK/DocumentServer/web-apps)
+//   node tests/beta-fixes/i18n-coverage.mjs [path to web-apps]   (default /srv/elixiroffice/DocumentServer/web-apps)
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";

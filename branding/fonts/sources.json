@@ -615,7 +615,7 @@
   {
    "family": "Playwrite Seyes Metric",
    "dir": "playwrite-seyes-metric",
-   "replaces": "ruled school cursive (school cursive with Seyès ruled lines drawn in the glyphs)",
+   "replaces": "Cursif & Lignes (school cursive with Seyès ruled lines drawn in the glyphs)",
    "license": "OFL-1.1",
    "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/playwritefrtrad/OFL.txt",
    "upstream": "https://github.com/TypeTogether/Playwrite",
@@ -628,8 +628,8 @@
       "instance": {
        "wght": 400
       },
-      "vmetrics": "RuledCursive",
-      "ruled": "RuledCursive"
+      "vmetrics": "CursifLignes",
+      "ruled": "CursifLignes"
      },
      "sha256": "0f20dd00ba639dc19e9095e8239a7667d92922c2fd6b69bd3ffb600b90ae4845"
     }

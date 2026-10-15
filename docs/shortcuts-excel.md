@@ -1,6 +1,6 @@
 # Keyboard shortcuts (spreadsheet)
 
-Session of 2026-10-05. Branch `feat/cell` of this repository (worktree `$EO_WORK/wt/cell-repo`). Test instance: container `eo-cell`, port **8099** on <dev-host>. "Before" column: elixir/dev without fixes; "After" column: branch `elixir/cell` (web-apps), `SSE.Controllers.ExcelShortcuts`. Nothing is pushed.
+Session of 2026-10-05. Branch `feat/cell` of this repository (worktree `/srv/elixiroffice/wt/cell-repo`). Test instance: container `eo-cell`, port **8099** on development host. "Before" column: elixir/dev without fixes; "After" column: branch `elixir/cell` (web-apps), `SSE.Controllers.ExcelShortcuts`. Nothing is pushed.
 
 ## 1. Source and matrix
 
@@ -69,7 +69,7 @@ macOS (66 shortcuts): the same families (Cmd+O, Cmd+F12, Cmd+Shift+P, F12, Optio
 ## 5. Running
 
 ```bash
-cd $EO_WORK/wt/cell-repo
+cd /srv/elixiroffice/wt/cell-repo
 python3 tools/shortcuts/extract_excel.py > /tmp/rows.json                        # reads the page (or a saved HTML file)
 python3 tools/shortcuts/matrix_excel.py && python3 tools/shortcuts/matrix_excel.py --check /tmp/rows.json
 EO_BASE=http://localhost:8099 node tests/shortcuts-excel/run.mjs --platform win --repeat 2 --out tests/shortcuts-excel/results/win.json
@@ -95,7 +95,7 @@ Still failing (17 Windows, 17 macOS), all in the engine (sdkjs): End mode (End t
 
 ## 6. Keys and features added by `elixir/xlppt` (2026-10-08)
 
-Branches `elixir/xlppt` (sdkjs, web-apps), `feat/xlppt` here; test instance `eo-xlppt`, port 8109 on <dev-host>. Every `editor` row of the matrix now passes: **152/152 key variants on Windows, 169/169 on macOS** (`tests/shortcuts-excel/run.mjs`, before: 131/149 and 146/165). Two rows moved from `absent` to `editor`: Ctrl+E (Flash Fill) and Ctrl+Q (Quick Analysis).
+Branches `elixir/xlppt` (sdkjs, web-apps), `feat/xlppt` here; test instance `eo-xlppt`, port 8109 on development host. Every `editor` row of the matrix now passes: **152/152 key variants on Windows, 169/169 on macOS** (`tests/shortcuts-excel/run.mjs`, before: 131/149 and 146/165). Two rows moved from `absent` to `editor`: Ctrl+E (Flash Fill) and Ctrl+Q (Quick Analysis).
 
 Engine (sdkjs, `[upstreamable]`):
 
@@ -119,7 +119,7 @@ Still absent: Ctrl+Shift+Page Down / Up (sheet group, kept by Chrome for tab mov
 
 ## 7. Excel UX beyond keys (`elixir/xlppt2`, 2026-10-09)
 
-Branches `elixir/xlppt2` (sdkjs, web-apps), `feat/xlppt2` here; test instance `eo-xlppt2`, port 8121 on <dev-host>.
+Branches `elixir/xlppt2` (sdkjs, web-apps), `feat/xlppt2` here; test instance `eo-xlppt2`, port 8121 on development host.
 
 - **Auto Fill Options**: sdkjs `cell/view/autofill-options.js` wraps `WorksheetView.applyFillHandle`, remembers the source, the dragged area and the direction, and raises `asc_onAutoFillOptions` (position and option in use, `null` to hide) while the selection is the filled range. `asc_ApplyAutoFillOption(type)` undoes the fill and replays it: Copy Cells / Fill Series through `applySeriesSettings`, Fill Formatting Only (copy, then clear the text of the new cells), Fill Without Formatting (series, then restore the formatting the cells had), Flash Fill (single column, `asc_FlashFill`; when no pattern is found the previous option is replayed). One history step. The button and menu are in `SSE.Controllers.ExcelShortcuts` (`afMenu`). A single numeric cell dragged plainly is copied (Copy Cells selected), with Ctrl a series, as in Excel. Quick Analysis stays hidden while the button is shown. Tests: `tests/shortcuts-excel/autofill.mjs [--platform win|mac]` (13/13 on both; real mouse drag of the handle).
 - **Chart galleries by type** (web-apps `SSE.Views.RibbonTabs.btnsCharts`, `SSE.Controllers.RibbonTabs.bindChartGallery`, slots `slot-elx-chart-*` in `Toolbar.template`): each button opens a `Common.UI.DataView` filtered to its families (`Common.define.chartData`), item click goes to `Toolbar.onSelectChart`, so charts are inserted (or the type of the selected chart changed) exactly as from the old gallery. Tests: `tests/shortcuts-excel/chart-galleries.mjs [--platform win|mac]` (19/19 on both): buttons and tips, gallery sizes and section names, one insert per family with the type checked, All Charts dialog, disabled while a cell is edited.

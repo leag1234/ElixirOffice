@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Input documents of the reference and everyday AI tasks added with the AI rework (docs/ai.md §6).
 
 Standard library only, like make_inputs.py (whose helpers it reuses). Run from the repository root:
@@ -103,7 +102,7 @@ def worksheet_body(title_rpr=""):
 
 
 def main():
-    # --- Requests from a real user ---
+    # --- Gaël's real requests ---
     big = '<w:b/><w:sz w:val="28"/>'
     write("g-toc-unstyled", "Projet d'école", [
         p("Projet d'école 2026-2027", rpr='<w:b/><w:sz w:val="40"/>'),
@@ -161,7 +160,7 @@ def main():
         p("Le programme", "Heading1"),
         p("Nous partirons de l'école à neuf heures et nous visiterons la galerie des dinosaures."),
         p("Les élèves doivent apporter un pique-nique.", bullet=True, style="ListParagraph"),
-        p("Les parents accompagnateurs sont les bienvenus.", bullet=True, style="ListParagraph"),
+        p("Les parents accompagnateurs sont les bienlinux.", bullet=True, style="ListParagraph"),
         p("Le retour", "Heading1"),
         p("Le car nous ramènera à l'école vers seize heures."),
     ])

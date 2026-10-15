@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Shared helper for the private (real teacher) corpus: anonymous document ids.
 
 A corpus is private when it is passed with --private, when EO_PRIVATE_CORPUS=1, or when its

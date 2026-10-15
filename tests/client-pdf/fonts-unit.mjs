@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // W2 shared font service: selective IO, persistent cache, consent and native FS records.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

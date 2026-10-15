@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // CPU profile of one editor load (navigation -> first accepted keystroke) and, optionally, of
 // typing; writes the .cpuprofile (open in Chrome DevTools > Performance, or speedscope.app) and
 // prints the top functions by self time and the time per script file.

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
-// Word layout regressions reported on an observation grid:
+// Word layout regressions reported on an observation grid (docs/backlog.md F8, F9):
 //   F8  grouping anchored shapes inside a table cell keeps the group in the cell (group, ungroup, undo, .docx)
 //   F9  page break before a heading that follows a table: one break paragraph, Backspace removes it and
 //       the heading keeps its style (.docx round trip)

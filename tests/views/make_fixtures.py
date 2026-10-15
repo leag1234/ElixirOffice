@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Writes the files of tests/views/wave2.mjs into a folder: field-lock.docx (a locked and a free DATE field,
 w:fldLock on a complex field and on a simple field) and recipients.xlsx (mail merge recipients).
    python3 tests/views/make_fixtures.py <folder>"""

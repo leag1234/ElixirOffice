@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Runs a QUnit page of sdkjs (default: the Word shortcut tests) in headless Chromium.
 //   node tests/shortcuts/sdkjs-qunit.mjs <sdkjs dir> [tests/word/shortcuts/shortcuts.html]
 // Generate develop/sdkjs/word/scripts.js first: node build/scripts/build-develop.cjs (in sdkjs).

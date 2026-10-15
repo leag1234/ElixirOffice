@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Check public ODS chart payloads across an editor save without byte equality."""
 import json
 import re

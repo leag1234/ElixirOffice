@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Unit test of the client PDF writer (sdkjs common/clientpdf/eo-pdf.js) in Node, without an editor:
 // a hand-made drawing-command stream drawn with a TrueType font, an OpenType CFF font, the second face
 // of a TrueType collection, a symbol font by glyph id, a ligature glyph, paths, a gradient, a link,
 // headings; then poppler checks the PDF (fonts embedded with the right types, text, rendering).
-//   SDKJS=$EO_WORK/DocumentServer/sdkjs node tests/client-pdf/writer.test.mjs
+//   SDKJS=/srv/elixiroffice/DocumentServer/sdkjs node tests/client-pdf/writer.test.mjs
 // Font files are taken from the host (FONT_TTF, FONT_OTF, FONT_TTC override them); never committed.
 import fs from "node:fs";
 import os from "node:os";

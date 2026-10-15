@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Success criteria of the "list to table" task. before/after: tools/eval/lib.mjs snapshots.
 const ITEMS = [
   ["Mme Martin", "Groupe A", "Salle 12"], ["M. Dubois", "Groupe B", "Salle 14"], ["Mme Leroy", "Groupe C", "Salle 3"],

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Dragging and resizing a picture like in Word (docs/images.md): alignment guides, snapping
 // to the margins and paragraphs, anchor rules, aspect ratio of the resize handles.
 //   EO_BASE=http://localhost:32776 node tests/images/drag-resize.mjs [--shots dir]

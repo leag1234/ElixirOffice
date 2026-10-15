@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Task panes of Word (controller WordPanes, sdkjs word/Editor/word-views.js): Reveal Formatting (Shift+F1),
 // Selection pane (Alt+F10: list, select, hide / show with undo, rename, a hidden picture kept on save),
 // Thesaurus (Shift+F7: offline MyThes lookup, follow a synonym, Insert).

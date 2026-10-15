@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Per-shortcut summary of a run.mjs result file.
 //   node tests/shortcuts/report.mjs [results.json] [--md] [--compare before.json]
 // A shortcut passes on a platform when every key variant tested for it passes.

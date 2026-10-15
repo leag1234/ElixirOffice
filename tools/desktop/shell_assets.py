@@ -16,14 +16,20 @@ def assemble(upstream, product, out):
     css=(home/'home.css').read_text()
     (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:left;border:0;background:transparent;padding:0}\n')
     brand=product/'branding/example/nodejs/public/elixir/brand/templates'
+    catalog=json.loads((brand/'templates.json').read_text())
     templates=[]
     (destination/'templates').mkdir()
-    for key,file in [('letterhead','letterhead'),('resume','resume-two-columns')]:
-        for suffix in ['.docx','.png']:shutil.copy2(brand/(file+suffix),destination/'templates'/(file+suffix))
-        templates.append({'id':file,'format':'docx','titleKey':key,'file':file+'.docx','thumb':file+'.png'})
+    for entry in catalog['templates']:
+        for language in LANGUAGES:
+            chosen=language if language in entry['languages'] else 'en'
+            for field in ['file','thumb']:
+                relative=chosen+'/'+entry[field]
+                target=destination/'templates'/relative;target.parent.mkdir(parents=True,exist_ok=True)
+                shutil.copy2(brand/relative,target)
+        templates.append(dict(entry,format='docx'))
     (out/'licenses/home').mkdir(parents=True,exist_ok=True)
-    shutil.copy2(brand/'templates.json',out/'licenses/home/template-sources.json')
-    (out/'licenses/home/README.txt').write_text('The two Home templates and previews come from the ElixirOffice public start-page template set under CC0-1.0. The included template-sources.json records its public provisional-corpus provenance. Fluent UI System Icons are copyright Microsoft Corporation, MIT; see desktop-home/fluent/LICENSE.\n')
+    shutil.copy2(brand/'template-sources.json',out/'licenses/home/template-sources.json')
+    (out/'licenses/home/README.txt').write_text('The four localized Home templates and previews come from the ElixirOffice public start-page template set under CC0-1.0. The included template-sources.json records its public provisional-corpus provenance. Fluent UI System Icons are copyright Microsoft Corporation, MIT; see desktop-home/fluent/LICENSE.\n')
     (destination/'templates.json').write_text(json.dumps(templates,indent=2)+'\n')
     extra=json.loads((product/'tools/desktop/i18n-extra.json').read_text())
     editors={kind:upstream/'web-apps/apps'/kind/'main/locale' for kind in ['documenteditor','spreadsheeteditor','presentationeditor']}
@@ -87,5 +93,5 @@ def assemble(upstream, product, out):
                 catalog=json.loads((destination/'i18n'/((language if language in supported else 'en')+'.json')).read_text())
                 title=catalog['help']
             (contents.parent/'index.htm').write_text('<!doctype html><html lang="'+html.escape(language)+'"><meta charset="utf-8"><title>ElixirOffice '+html.escape(title)+'</title><style>body{font:16px/1.6 system-ui;max-width:850px;margin:32px auto;padding:0 24px}a{color:#235f49}</style><h1>ElixirOffice '+html.escape(title)+'</h1><ul>'+''.join(links)+'</ul></html>')
-    print('PASS shared home CSS/Fluent assets, two approved templates and',len(supported),'complete desktop locales')
+    print('PASS shared home CSS/Fluent assets, four localized templates and',len(supported),'complete desktop locales')
 

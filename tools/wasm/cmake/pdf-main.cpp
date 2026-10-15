@@ -4,8 +4,14 @@
  */
 // PDF-only entry point for the browser worker's fixed in-memory paths.
 #include "PdfFile/OnlineOfficeBinToPdf.h"
-int main()
+#include "pdf-edit.h"
+#include <cstring>
+#include <cstdlib>
+int main(int argc, char** argv)
 {
+    setenv("APPLICATION_NAME", "ElixirOffice", 1);
+    if (argc == 2 && std::strcmp(argv[1], "--inspect-pdf") == 0) return elixirPdfEdit(true);
+    if (argc == 2 && std::strcmp(argv[1], "--edit-pdf") == 0) return elixirPdfEdit(false);
     NSFonts::IApplicationFonts* fonts = NSFonts::NSApplication::Create();
     fonts->InitializeFromFolder(L"/fonts");
     bool ok;

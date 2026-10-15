@@ -5,27 +5,28 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const source=path.resolve(__dirname,'../../desktop/main.cjs'),load=createRequire(source),{ORIGIN}=load('./resources.cjs');
 const tick=()=>new Promise(setImmediate);
 async function boot({document=false,failRemove=false,safeStorage,systemLanguages=["en"],systemLocale="en",captureLocales}={}){
- const directory=await fs.mkdtemp(path.join(os.tmpdir(),'eo-close-recovery-')),handlers=new Map(),dialogs=[],responses=[],saveResponses=[],state={dirty:false},windows=[],app=new EventEmitter();
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'eo-close-recovery-')),handlers=new Map(),dialogs=[],responses=[],saveResponses=[],state={dirty:false},sent=[],windows=[],app=new EventEmitter();
  let window,started=false,removeCalls=0;
- Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},getPath:()=>directory,requestSingleInstanceLock:()=>true,whenReady:()=>Promise.resolve(),getPreferredSystemLanguages:()=>systemLanguages,getLocale:()=>systemLocale,quit(){},getVersion:()=> '0.1.0'});
+ Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},getPath:()=>directory,requestSingleInstanceLock:()=>true,whenReady:()=>Promise.resolve(),getPreferredSystemLanguages:()=>systemLanguages,getLocale:()=>systemLocale,quit(){},isReady:()=>true,exit(code){this.exitCode=code;},getVersion:()=> '0.1.0'});
  class Window extends EventEmitter{
-  constructor(){super();window=this;windows.push(this);this.webContents=new EventEmitter();Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/index.html'},setWindowOpenHandler(){},send(){},executeJavaScript:async()=>({...state,opening:false})});this.webContents.session={};}
+  constructor(){super();window=this;windows.push(this);this.webContents=new EventEmitter();Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/index.html'},setWindowOpenHandler(){},send(...args){sent.push(args)},executeJavaScript:async()=>({...state,opening:state.opening===true})});this.webContents.session={};}
   setTitle(){} setContentSize(){} show(){} focus(){} isDestroyed(){return this.closed===true}
   async loadURL(url){this.url=url;started=true}
+  destroy(){this.closed=true;this.destroyed=true}
   close(){let stopped=false;this.emit('close',{preventDefault(){stopped=true}});if(!stopped)this.closed=true}
  }
  const ses={protocol:{handle(){}},webRequest:{onBeforeRequest(){}},setPermissionCheckHandler(){},setPermissionRequestHandler(){},on(){}};
  const electron={safeStorage,app,BrowserWindow:Window,ipcMain:{handle:(name,fn)=>handlers.set(name,fn)},protocol:{registerSchemesAsPrivileged(){}},session:{fromPartition:()=>ses},net:{fetch(){}},shell:{openExternal(){}},Menu:{buildFromTemplate:x=>x,setApplicationMenu(){}},dialog:{showSaveDialog:async()=>saveResponses.shift()||{canceled:true},showErrorBox:(...x)=>{throw Error('Unexpected startup error '+x)},showMessageBox:async(_win,options)=>{dialogs.push(options);const response=responses.shift();return typeof response==='function'?await response():{response:response??0}}}};
  const Base=load('./recovery.cjs').Recovery;
  class Recovery extends Base{remove(id){removeCalls++;if(failRemove)return Promise.reject(Error('Injected recovery cleanup failure'));return super.remove(id)}}
- const filename=path.join(directory,'test.docx');if(document)await fs.writeFile(filename,'PKtest-public-document');
- const context={require:name=>name==='electron'?electron:name==='./recovery.cjs'?{Recovery}:name==='./capture.cjs'&&captureLocales?{...load(name),run:()=>new Promise(()=>{})}:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:{...process,argv:['electron',source,...(captureLocales?['--capture-screens',path.join(directory,'captures'),'--locales',captureLocales]:[]),...(document?[filename]:[])],env:{}},console,Buffer,setTimeout,clearTimeout,URL};
+ const filename=path.join(directory,document==='pdf'?'test.pdf':'test.docx');if(document)await fs.writeFile(filename,document==='pdf'?'%PDF-public-source':'PKtest-public-document');
+ const context={require:name=>name==='electron'?electron:name==='./recovery.cjs'?{Recovery}:name==='./capture.cjs'&&captureLocales?{...load(name),run:()=>new Promise(()=>{})}:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:Object.assign(new EventEmitter(),{platform:process.platform,getuid:process.getuid,stdout:new EventEmitter(),stderr:new EventEmitter(),argv:['electron',source,...(captureLocales?['--capture-screens',path.join(directory,'captures'),'--locales',captureLocales]:[]),...(document?[filename]:[])],env:{}}),console:{...console},Buffer,Uint8Array,setTimeout,clearTimeout,URL};
  vm.runInNewContext(await fs.readFile(source,'utf8'),context,{filename:source});
  for(let i=0;i<100&&!started;i++)await new Promise(resolve=>setTimeout(resolve,10));assert(started,'Main did not initialize');
  const event={sender:window.webContents,senderFrame:window.webContents.mainFrame};
  const invoke=(name,...args)=>handlers.get('eo:'+name)(event,...args);
  const selected=document?await invoke('initial'):null;
- return {directory,window,windows,app,dialogs,responses,saveResponses,state,invoke,selected,discard:()=>vm.runInNewContext('discard()',context),get removeCalls(){return removeCalls},async cleanup(){await fs.rm(directory,{recursive:true,force:true})}};
+ return {directory,window,windows,app,process:context.process,dialogs,responses,saveResponses,state,sent,invoke,flushSafety:()=>vm.runInNewContext('safety.flush()',context),flushCloseLog:()=>vm.runInNewContext('closeLogWrite',context),logReason:reason=>vm.runInNewContext('closeReason('+JSON.stringify(reason)+')',context),stallPreferences:()=>vm.runInNewContext('preferences.flush=()=>new Promise(()=>{})',context),rejectDialogs:()=>{const original=electron.dialog.showMessageBox;electron.dialog.showMessageBox=()=>Promise.reject(Error('Injected native dialog rejection'));return ()=>{electron.dialog.showMessageBox=original}},selected,discard:()=>vm.runInNewContext('discard()',context),get removeCalls(){return removeCalls},async cleanup(){await vm.runInNewContext('closeLogWrite',context);await vm.runInNewContext('safety.flush()',context);await fs.rm(directory,{recursive:true,force:true})}};
 }
 test('fresh clean Home closes without a save/recovery error prompt',async()=>{
  const env=await boot();try{env.window.close();for(let n=0;n<30&&!env.window.closed;n++)await tick();assert.equal(env.window.closed,true);assert.deepEqual(env.dialogs,[]);assert.equal(env.removeCalls,0)}finally{await env.cleanup()}
@@ -153,5 +154,176 @@ test('desktop font choice consent and revocation persist (native dialog unit inj
   assert.equal(saved.fontConsent,false);assert.equal(saved.fontChoice,'declined');
   assert.deepEqual(Array.from(await env.invoke('fonts')),[]);
   assert.equal(env.dialogs.length,2);assert(env.dialogs.every(d=>d.type==='question'));
+ }finally{await env.cleanup()}
+});
+
+test('PDF copy export requires loss disclosure and cannot overwrite the original or a hard link',async()=>{
+ const env=await boot({document:'pdf'});
+ try{
+  const input=new Uint8Array(Buffer.from('%PDF-public-copy')),original=path.join(env.directory,'test.pdf'),target=path.join(env.directory,'copy.pdf');
+  env.responses.push(0);assert.equal(await env.invoke('pdf',env.selected.token,input,false),null);assert.match(env.dialogs.at(-1).message,/bookmarks/);
+  assert.equal(await fs.readFile(original,'utf8'),'%PDF-public-source');
+  env.responses.push(1);env.saveResponses.push({canceled:false,filePath:original});
+  await assert.rejects(env.invoke('pdf',env.selected.token,input,false),/different destination/);
+  const alias=path.join(env.directory,'alias.pdf');await fs.link(original,alias);env.responses.push(1);env.saveResponses.push({canceled:false,filePath:alias});
+  await assert.rejects(env.invoke('pdf',env.selected.token,input,false),/different destination/);
+  env.responses.push(1);env.saveResponses.push({canceled:false,filePath:target});assert.equal((await env.invoke('pdf',env.selected.token,input,false)).bytes,input.length);
+  assert.equal(await fs.readFile(target,'utf8'),'%PDF-public-copy');assert.equal(await fs.readFile(original,'utf8'),'%PDF-public-source');
+ }finally{await env.cleanup()}
+});
+
+test('PDF native atomic Save, cancelled Save As and concurrent replacement protect file identity',async()=>{
+ const b=await boot({document:'pdf'});
+ try{
+  const original=path.join(b.directory,'test.pdf'),bytes=new Uint8Array(Buffer.from('%PDF-public-preserved-copy'));
+  await b.invoke('save',b.selected.token,bytes,false);
+  assert.deepEqual(await fs.readFile(original),Buffer.from(bytes));
+  b.saveResponses.push({canceled:true});
+  await assert.rejects(b.invoke('save',b.selected.token,bytes,true),/cancelled/);
+  assert.deepEqual(await fs.readFile(original),Buffer.from(bytes));
+  const external=Buffer.from('%PDF-public-external-replacement');
+  await fs.writeFile(original,external);
+  await assert.rejects(b.invoke('save',b.selected.token,bytes,false),/changed|conflict|modified/i);
+  assert.deepEqual(await fs.readFile(original),external);
+ }finally{await b.cleanup();}
+});
+
+test('a stuck opening/save state offers a visible choice, Cancel unlocks and retry can discard',async()=>{
+ const env=await boot({document:true});
+ try{
+  env.state.opening=true;env.responses.push(0);env.window.close();
+  for(let n=0;n<30&&!env.dialogs.length;n++)await tick();
+  for(let n=0;n<5;n++)await tick();
+  assert.equal(env.dialogs.length,1,'Busy close must reach the user');
+  assert.equal(env.window.closed,undefined);
+  assert(env.sent.some(args=>args[0]==='eo:action'&&args[1]==='resume-close'),'Cancel must release the input lock');
+  env.responses.push(1);env.window.close();
+  for(let n=0;n<30&&!env.window.closed;n++)await tick();
+  assert.equal(env.window.closed,true,'A subsequent explicit Discard must close');
+  assert.equal(env.removeCalls,0,'Unknown/busy state must preserve recovery data');
+  // Await the real serialized writer; closing deliberately does not wait for logging.
+  await env.flushCloseLog();
+  const log=await fs.readFile(path.join(env.directory,'desktop-close.log'),'utf8');
+  assert.match(log,/busy-choice/);assert(!log.includes(env.directory));assert(!log.includes('test.docx'));
+ }finally{await env.cleanup()}
+});
+test('a hung renderer times out safely and a late state reply cannot lock the UI',async()=>{
+ const env=await boot({document:true});
+ try{
+  let resolveLate,script;
+  env.window.webContents.executeJavaScript=value=>{script=value;return new Promise(resolve=>{resolveLate=resolve})};
+  env.responses.push(0);env.window.close();
+  for(let n=0;n<80&&!env.dialogs.length;n++)await new Promise(resolve=>setTimeout(resolve,50));
+  assert.equal(env.dialogs.length,1,'Hung state query must show a conservative dialog');
+  assert.match(script,/EODesktopState\(false\)/,'Late query must never request an input lock');
+  resolveLate({dirty:false,opening:false});for(let n=0;n<5;n++)await tick();
+  assert.equal(env.window.closed,undefined);
+  env.window.webContents.executeJavaScript=async()=>({dirty:false,opening:false});
+  env.window.close();for(let n=0;n<100&&!env.window.closed;n++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(env.window.closed,true,'Timed-out request must not wedge subsequent close');
+ }finally{await env.cleanup()}
+});
+test('renderer save-close unlocks after cancelled save, rejected save or rejected acknowledgement',async()=>{
+ const sourceText=require('node:fs').readFileSync(path.join(__dirname,'../../desktop/renderer.js'),'utf8');
+ const match=sourceText.match(/eoDesktop\.onAction\((async action=>\{[\s\S]*?)\n\}\);/);assert(match);
+ for(const mode of ['cancel','save-rejection','ack-rejection']){
+  let handler,failures=0;
+  const context={closeCheck:true,pendingRequested:false,setTimeout,
+   save:async()=>{if(mode==='save-rejection')throw Error('Injected save error');return mode!=='cancel'},
+   fail:()=>{failures++},eoDesktop:{onAction:fn=>{handler=fn},closeSaved:async()=>{throw Error('Injected acknowledgement error')}}};
+  vm.runInNewContext('eoDesktop.onAction('+match[1]+'\n});',context);
+  await handler('save-close');assert.equal(context.closeCheck,false,mode);
+  assert.equal(failures,mode==='cancel'?0:1,mode);
+ }
+});
+
+test('approved Discard destroys the window despite a frozen iframe unload veto; Cancel does not',async()=>{
+ const env=await boot({document:true});
+ try{
+  env.state.dirty=true;env.responses.push(2,1);
+  const startClose=()=>env.window.emit('close',{preventDefault(){}});
+  env.window.close=()=>{throw Error('Injected iframe unload veto')};
+  startClose();for(let n=0;n<30&&!env.dialogs.length;n++)await tick();
+  for(let n=0;n<5;n++)await tick();assert.equal(env.window.destroyed,undefined);
+  startClose();for(let n=0;n<100&&!env.window.destroyed;n++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(env.window.destroyed,true);assert.equal(env.dialogs.length,2);
+ }finally{await env.cleanup()}
+});
+
+test('stalled preferences cannot wedge close-pending or silently discard recovery',async()=>{
+ const env=await boot({document:true});
+ try{
+  env.stallPreferences();env.responses.push(0,1);env.window.close();
+  for(let n=0;n<80&&!env.dialogs.length;n++)await new Promise(resolve=>setTimeout(resolve,50));
+  assert.equal(env.dialogs.length,1);for(let n=0;n<5;n++)await tick();assert.equal(env.window.closed,undefined);
+  env.window.close();for(let n=0;n<80&&!env.window.closed;n++)await new Promise(resolve=>setTimeout(resolve,50));
+  assert.equal(env.window.destroyed,true);assert.equal(env.removeCalls,0);
+ }finally{await env.cleanup()}
+});
+test('a rejected native close dialog releases the input lock and permits a later explicit decision',async()=>{
+ const env=await boot({document:true});
+ try{
+  env.state.dirty=true;const restore=env.rejectDialogs();env.window.close();
+  for(let n=0;n<100&&!env.sent.some(args=>args[1]==='resume-close');n++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert(env.sent.some(args=>args[1]==='resume-close'));assert.equal(env.window.destroyed,undefined);
+  restore();env.responses.push(1);env.window.close();
+  for(let n=0;n<100&&!env.window.destroyed;n++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(env.window.destroyed,true);
+ }finally{await env.cleanup()}
+});
+
+test('saved-close acknowledgement rechecks a late edit instead of destroying unsaved state',async()=>{
+ const env=await boot({document:true});
+ try{
+  env.state.dirty=true;await env.invoke('closed-saved');assert.equal(env.window.destroyed,undefined);
+  assert(env.sent.some(args=>args[1]==='resume-close'));
+  env.state.dirty=false;await env.invoke('closed-saved');assert.equal(env.window.destroyed,true);
+ }finally{await env.cleanup()}
+});
+
+test('close log caps existing/concurrent writes and secures existing permissions',async()=>{
+ const env=await boot(),file=path.join(env.directory,'desktop-close.log');
+ try{
+  await fs.writeFile(file,'x'.repeat(70000),{mode:0o644});await env.logReason('busy-choice');
+  assert((await fs.stat(file)).size<=65536);assert.equal((await fs.stat(file)).mode&0o777,0o600);
+  assert.match(await fs.readFile(file,'utf8'),/busy-choice/);
+  await fs.writeFile(file,'x'.repeat(65530));await Promise.all(Array.from({length:32},()=>env.logReason('busy-choice')));
+  assert((await fs.stat(file)).size<=65536);assert.equal((await fs.stat(file)).mode&0o777,0o600);
+ }finally{await env.cleanup()}
+});
+test('clean-close rechecks an edit arriving while prepare-close is delivered',async()=>{
+ const env=await boot({document:true});
+ try{
+  const original=env.window.webContents.send;env.window.webContents.send=(...args)=>{original(...args);if(args[1]==='prepare-close')env.state.dirty=true};
+  env.responses.push(2);env.window.close();
+  for(let n=0;n<100&&!env.dialogs.length;n++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(env.dialogs.length,1);assert.equal(env.window.destroyed,undefined);assert.equal(env.removeCalls,0);
+ }finally{await env.cleanup()}
+});
+
+test('PDF recovery is refused without conversion or writes; Office recovery remains available',async()=>{
+ const env=await boot({document:'pdf'});
+ try{env.state.dirty=true;assert.equal(await env.invoke('recovery-save',env.selected.token,0,new Uint8Array(Buffer.from('%PDF-public-recovery'))),false);assert.equal(await env.invoke('recovery-save',env.selected.token,0,null),false);assert.deepEqual(env.dialogs,[]);}
+ finally{await env.cleanup()}
+ const office=await boot({document:true});
+ try{office.state.dirty=true;const result=await office.invoke('recovery-save',office.selected.token,0,new Uint8Array(Buffer.from('PKpublic-recovery')));assert.equal(result.format,'docx');}
+ finally{await office.cleanup()}
+});
+test('unexpected fatal events show one friendly close message and reject later IPC writes',async()=>{
+ const env=await boot();
+ try{
+  env.process.emit('uncaughtException',Error('SYNTHETIC_PRIVATE_EXCEPTION'));
+  env.process.emit('unhandledRejection','SYNTHETIC_PRIVATE_REJECTION');
+  for(let i=0;i<40&&env.app.exitCode===undefined;i++)await tick();
+  await env.flushSafety();await tick();
+  assert.equal(env.dialogs.length,1);assert(!JSON.stringify(env.dialogs).includes('SYNTHETIC_PRIVATE'));
+  assert.equal(env.app.exitCode,1);assert.throws(()=>env.invoke('recovery-failure'),/unexpected problem/);
+ }finally{await env.cleanup()}
+});
+
+test('forgotten main-process rejection leaves IPC and the document alive',async()=>{
+ const env=await boot();
+ try{env.process.emit('unhandledRejection',Error('SYNTHETIC_PRIVATE_REJECTION'));await env.flushSafety();await tick();
+ assert.equal(env.app.exitCode,undefined);assert.equal(env.dialogs.length,0);assert.equal(await env.invoke('recovery-failure'),true);
  }finally{await env.cleanup()}
 });

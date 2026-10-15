@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Word views in the interface (controller WordViews, sdkjs word/Editor/word-views.js): View tab buttons and
 // KeyTips (Alt, W, F / P / U / E), the Outlining tab (Alt, U), Read Mode around the reading layout, the Draft
 // view with a floating picture, collapsed headings moved with their text.

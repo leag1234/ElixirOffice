@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Word's mini toolbar: on a mouse selection, fading with the distance to the pointer,
 // and above the context menu.
 //   node tests/shortcuts/minitoolbar.mjs [screenshot dir] [--out results.json]

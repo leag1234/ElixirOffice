@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // ElixirOffice performance harness (Word editor). Method and results: docs/perf.md.
 //
 //   node tools/perf/bench.mjs --base http://localhost:8080 --label main \

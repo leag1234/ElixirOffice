@@ -13,16 +13,16 @@ PDF runtime installed in the instance's static assets. No private corpus is used
 ## Opening and input probe
 
 ```sh
-# On <dev-host>, after preparing a dedicated instance:
+# On development host, after preparing a dedicated instance:
 node tests/perf-open/run.mjs --base http://localhost:32769 \
-  --doc $EO_WORK/wt/open-D-work/fixtures/synth100.docx \
-  --throttle 4 --visits 2 --out $EO_WORK/wt/open-D-work/measurements/run-0
+  --doc /srv/elixiroffice/wt/open-D-work/fixtures/synth100.docx \
+  --throttle 4 --visits 2 --out /srv/elixiroffice/wt/open-D-work/measurements/run-0
 
 # Separate diagnostics: CPU sampling and a DevTools Performance trace.
 node tests/perf-open/run.mjs --base http://localhost:32769 \
-  --doc $EO_WORK/wt/open-D-work/fixtures/perf-10p.docx \
+  --doc /srv/elixiroffice/wt/open-D-work/fixtures/perf-10p.docx \
   --throttle 4 --trace 1 --visits 1 \
-  --out $EO_WORK/wt/open-D-work/measurements/profile-0
+  --out /srv/elixiroffice/wt/open-D-work/measurements/profile-0
 ```
 
 Each output directory is a new persistent browser profile. Visit0 is fresh;
@@ -50,7 +50,7 @@ not mutually exclusive wall-clock phase durations. Worker runtime/Font FS setup
 and conversion timings are reported by the standalone loader when available.
 
 Keep traced diagnostic timings separate from untraced timing runs. On shared
-<dev-host>, wait for1-minute load<4 and reject a complete pair if either endpoint>=6;
+development host, wait for1-minute load<4 and reject a complete pair if either endpoint>=6;
 retain rejected JSON and its reason. Use multiple fresh/reused pairs. Never
 discard a sample merely because it is slow.
 
@@ -59,10 +59,10 @@ discard a sample merely because it is slow.
 ```sh
 EO_BASE=http://localhost:32769 node tests/perf-open/engine.mjs \
   corpus/provisional/teachers/t01-fiche-fractions-cm1.docx \
-  $EO_WORK/wt/open-D-work/checks/engine.json
+  /srv/elixiroffice/wt/open-D-work/checks/engine.json
 
 EO_BASE=http://localhost:32769 node tests/perf-open/fidelity.mjs \
-  corpus/provisional $EO_WORK/wt/open-D-work/checks/native-pdfs
+  corpus/provisional /srv/elixiroffice/wt/open-D-work/checks/native-pdfs
 ```
 
 The engine test compares every ASCII value, mixed-script examples and transitions
@@ -80,6 +80,6 @@ penalties; retain per-scenario values and investigate movement changes.
 report.py aggregates visits and retains sample ranges; summarize.py prints spans;
 profile.py emits exclusive sample categories plus function self/inclusive tables.
 The D4 physical-desktop driver and static-server adapter are retained under
-<test-desktop>:$EO_WORK/bench/d4/. Its frozen untraced driver is recorded by SHA256;
+linux:/srv/elixiroffice/bench/d4/. Its frozen untraced driver is recorded by SHA256;
 run-detail.mjs provides separate detailed diagnostics. See docs/perf.md for
 results, host differences and outstanding gates.

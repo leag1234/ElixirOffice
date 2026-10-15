@@ -1,0 +1,27 @@
+diff --git a/X2tConverter/src/lib/crypt.h b/X2tConverter/src/lib/crypt.h
+--- a/X2tConverter/src/lib/crypt.h
++++ b/X2tConverter/src/lib/crypt.h
+@@ -63,7 +63,11 @@
+ 
+ 		if (bDataIntegrity == false)
+ 		{
++#ifdef EO_WASM
++			return AVS_FILEUTILS_ERROR_CONVERT;
++#else
+ 		  // there was unauthorized tampering with the file
++#endif
+ 		}
+ 
+ 		COfficeFileFormatChecker OfficeFileFormatChecker;
+@@ -149,7 +153,11 @@
+ 
+ 		if (bDataIntegrity == false)
+ 		{
++#ifdef EO_WASM
++			return AVS_FILEUTILS_ERROR_CONVERT;
++#else
+ 		  // there was unauthorized tampering with the file
++#endif
+ 		}
+ 
+ 		return 0;

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Repeat (F4, and Ctrl+Y when there is nothing to redo), as in Word: the last command is applied again
 // to the current selection. Playwright against a running editor, real key presses and toolbar clicks.
 //

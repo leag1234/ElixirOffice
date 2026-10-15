@@ -7,7 +7,7 @@ Install the pinned full converter with
 DocumentServer worktree. The PDF-only runtime cannot handle office formats.
 Deploy the new SDK directory and local Controller before testing.
 
-Run with Node 22 and the existing $EO_WORK/pw Playwright installation:
+Run with Node 22 and the existing /srv/elixiroffice/pw Playwright installation:
 
 - `EO_BASE=... EO_LOCAL_FIXTURES=... EO_LOCAL_OUT=... node tests/local-mode/convert-browser.mjs`
 - `EO_BASE=... EO_LOCAL_FIXTURES=... EO_LOCAL_OUT=... node tests/local-mode/editor-browser.mjs`
@@ -125,3 +125,16 @@ Desktop: tests/desktop/protect-range.cjs uses the normal sandboxed CDP harness a
 The review media test starts PDF and Print in fresh documents while the real D image queue is pending. Visibility checks cover the Insert > Object mirror as well as the hidden source button. packaging.py verifies product/SDK full-selector equality, the separate explicit PDF pin, all artifact hashes and identical nine-patch build inputs. http-runtime.py reads the actual deployed pin/manifest rather than a historical version/size.
 
 The Linux review runs use a newly assembled AppImage with production bundles and a normal sandbox on an owned Xvfb display. A local-unicode.cjs and local-formats.cjs also run on that package; EO_CONVERT_ONLY reports actual conversion/roundtrip/converted-copy opens and does not replace native-dialog acceptance.
+
+## Local passwords
+
+Use Node22, an explicit own EO_BASE (never8080), EO_X2T_RELEASE pointing at the verified full runtime, EO_UPSTREAM at the owned DocumentServer checkout, and EO_PASSWORD_FIXTURES at pristine public new.docx/new.xlsx/new.pptx templates.
+
+- `node tests/local-mode/password-integrity.cjs`: actual encrypted Office HMAC mutation rejection; resets Emscripten's intentional rejected-job exit code only after every assertion succeeds.
+- `node tests/local-mode/password-worker.cjs`: actual web and desktop worker conversion for all six formats and native structural validation.
+- `node --test tests/local-mode/password-state.test.cjs`: local/hosted permissions, transactional state, Save As copy intent and after-conversion failure/abort cleanup.
+- `NODE_PATH=PLAYWRIGHT_NODE_MODULES node tests/local-mode/password-browser.cjs`: production browser wrong retry/open/edit/encrypted Save/reopen with no uploads/external requests.
+- `NODE_PATH=PLAYWRIGHT_NODE_MODULES node tests/local-mode/password-ui.cjs`: common real Keep/Change/Remove, normal Protect and unprotected PDF refusal dialogs.
+- `EO_DESKTOP_ROOT=OWN_TEST_ROOT EO_PACKAGE_EXECUTABLE=PACKAGED_EXECUTABLE EO_PLAYWRIGHT=PLAYWRIGHT_CORE node tests/desktop/password-native.cjs`: actual packaged six-format flow, Cancel/Home cleanup, native Save As choices, PDF refusal and password profile scan; needs an unlocked display and the existing PID-scoped native-input helper.
+
+Synthetic random passwords stay in process memory and are not written as test fixtures, logs or command-line arguments. Native fixtures are generated encrypted within the own test root; Remove deliberately writes an unprotected copy. Passwords and contents are never included in failure metadata. See docs/local-passwords.md for recovery, integrity and platform limits.

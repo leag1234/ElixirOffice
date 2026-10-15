@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Synthetic test document for tests/localfonts: paragraphs in a font the server does not have (Fira Sans,
 installed on the test machine only), in Calibri, and in a font installed nowhere. No font file is involved.
 usage: mkdocx.py out.docx [font-name]"""

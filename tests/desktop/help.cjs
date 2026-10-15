@@ -21,7 +21,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
    assert(help,'Native Help window missing for '+format);await help.waitForLoadState('domcontentloaded');
    const language=/\/help\/([^/]+)\/index\.htm$/.exec(help.url())?.[1];assert(language);
    assert(language===locale.language||language==='en','Help must use current UI language or documented English fallback');
-   const length=(await help.locator('body').innerText()).trim().length;assert(length>100);
+   await help.waitForFunction(()=>document.body.innerText.trim().length>100,null,{timeout:30000});const length=(await help.locator('body').innerText()).trim().length;assert(length>100);
    assert.equal(await help.evaluate(()=>typeof require),'undefined');assert.deepEqual(env.errors,[]);
    await help.screenshot({path:path.join(root,'results','help-'+process.platform+'-'+format+'.png')});
    rows.push({format,editor,uiLanguage:locale.language,helpLanguage:language,url:help.url(),contentChars:length});

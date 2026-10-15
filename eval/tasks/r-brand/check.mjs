@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 import { criteria, paras, texts, norm, unchanged, keptInOrder, answerText, near, tracked } from "../../tools/checks.mjs";
 const close = (c, t) => c && c.every((v, i) => Math.abs(v - t[i]) <= 10);
 export function check(before, after, run) {

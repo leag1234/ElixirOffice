@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Compare native and wasm outputs and summarise both CSVs.
 
 usage: compare.py RESULTS_DIR   (expects native.csv, wasm.csv, native/, wasm/)

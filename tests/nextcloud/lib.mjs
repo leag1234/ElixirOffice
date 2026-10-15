@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Helpers of the Nextcloud suites (docs/storage.md): a local Nextcloud started by
 // tools/nextcloud-app/setup.sh and an ElixirOffice document server.
 //   NC_BASE   Nextcloud as the browser sees it (default http://localhost:8191)

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Run the example integration app (start page) from the mounted source instead
 # of the pkg binary baked into the dev image. Executed INSIDE a dev container
 # (piped by `make example`). Idempotent; the change lasts until the container

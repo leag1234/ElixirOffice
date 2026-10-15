@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // F1 (Language dialog and drop-down, status bar language control) and F3 (Borders icons) of the
-// first tester feedback. Plays the controls like a user and reads the effect back
+// first tester feedback (docs/backlog.md). Plays the controls like a user and reads the effect back
 // from the editor.
 //   node tests/shortcuts/language-borders.mjs [screenshot dir] [--out results.json]
 //   EO_BASE  instance (default http://localhost:8095)

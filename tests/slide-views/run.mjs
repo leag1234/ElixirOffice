@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Slide Sorter and Presenter View (next-slide preview) of the presentation editor.
 // Usage: node tests/slide-views/run.mjs http://localhost:8109 [--platform mac]
 import { createRequire } from "module";

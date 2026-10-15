@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
-// F12: the selection stays visible in cells with a dark or saturated fill.
+// F12 (docs/backlog.md): the selection stays visible in cells with a dark or saturated fill.
 // The text in a cell shaded with the standard "Blue" (0070C0) could be selected (and made bold)
 // but the translucent blue selection did not show on it. For each fill: the mouse puts the caret
 // in the cell, double-click / triple-click / drag / Shift+arrows select (engine read-back), the

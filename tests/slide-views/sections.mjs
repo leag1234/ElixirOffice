@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Sections of the presentation editor (PowerPoint's p14:sectionLst): Home > Section menu, headers in the thumbnails
 // and in the Slide Sorter (collapse, select, right-click menu), the slide commands keeping sections consistent,
 // undo, and the round trip through .pptx (a synthetic file whose slide ids have gaps, and a file written by the editor).

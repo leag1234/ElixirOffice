@@ -4,6 +4,7 @@
 import argparse
 import datetime
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,51 @@ HERE = Path(__file__).resolve().parent
 DEFAULT_FONT_IMAGE = "sha256:88c561d6fb2bb8529df467fc0543becc6323e58d18734136e2396c683afeef96"
 DEFAULT_WIN_IMAGE = "electronuserland/builder@sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff"
 ARTIFACTS = {"x2t.js", "x2t.wasm", "x2t.js.gz", "x2t.js.br", "x2t.wasm.gz", "x2t.wasm.br"}
+
+_update_spec = importlib.util.spec_from_file_location("appimage_update", HERE / "appimage_update.py")
+appimage_update = importlib.util.module_from_spec(_update_spec)
+_update_spec.loader.exec_module(appimage_update)
+
+
+def appimage_names(version):
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}", version):
+        raise ValueError("Invalid package version")
+    name = "ElixirOffice-" + version + "-x86_64.AppImage"
+    return name, name + ".zsync"
+
+
+def validate_desktop_version(package):
+    version = package.get("version", "")
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}", version):
+        raise ValueError("Invalid desktop package version")
+    if version in {"0.1.0"}:
+        raise ValueError("Desktop version was already published; bump before packaging")
+    return version
+
+
+def validate_update_packaging(package):
+    config = package["build"]
+    if config.get("publish", "unset") is not None or any(config.get(key, {}).get("publish") is not None for key in ("linux", "appImage")):
+        raise ValueError("AppImage packaging must disable application update feeds explicitly")
+    if config.get("appImage", {}).get("artifactName") != "ElixirOffice-${version}-x86_64.${ext}" or "--publish never" not in package["scripts"]["package"]:
+        raise ValueError("AppImage naming/publish policy is not configured")
+
+
+def public_artifact_names(folder):
+    names = []
+    for file in Path(folder).iterdir():
+        if re.fullmatch(r"(?:(?:latest|beta|alpha)[^/]*|app-update)\.yml", file.name):
+            raise ValueError("Application updater feed must not be published")
+        if file.suffix in {".AppImage", ".zsync", ".deb", ".exe", ".dmg", ".flatpak"} or file.name.endswith("-evidence.tar") or file.name in {"RELEASE-NOTES.md", "MAC-INPUT.tar"}:
+            if not file.is_file() or file.is_symlink():
+                raise ValueError("Artifact must be a regular file")
+            if file.suffix == ".zsync" and not (file.parent / file.name.removesuffix(".zsync")).is_file():
+                raise ValueError("Orphan zsync artifact")
+            names.append(file.name)
+    for name in names:
+        if name.endswith(".AppImage") and name + ".zsync" not in names:
+            raise ValueError("Missing AppImage external update control file")
+    return sorted(names)
 
 def digest(path):
     h = hashlib.sha256()
@@ -89,7 +135,7 @@ def output_path(date, label):
     datetime.date.fromisoformat(date)
     if label and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]{0,40}", label):
         raise ValueError("Invalid run label")
-    return Path("/data/elixiroffice/release") / ("beta2-" + date + ("-" + label if label else ""))
+    return Path("/srv/elixiroffice/release") / ("desktop-0.2.0-" + date + ("-" + label if label else ""))
 
 def endpoint(host, root):
     if not host or host.startswith("-") or not re.fullmatch(r"[A-Za-z0-9_.@:-]+", host):
@@ -180,7 +226,7 @@ class Build:
         self.args, self.plan = args, plan
         self.out = Path(plan["output"])
         self.job = self.out.name
-        self.work = Path("/data/elixiroffice/wt") / ("release-beta2-D-" + self.job)
+        self.work = Path("/srv/elixiroffice/wt") / ("release-beta2-D-" + self.job)
         self.product, self.upstream = self.work / "product", self.work / "DocumentServer"
         self.driver = self.work / "release-driver"
         self.test_upstream = self.work / "test-upstream"
@@ -265,10 +311,13 @@ class Build:
     def archive(self, include_assets=True):
         file = self.work / ("mac-input.tar" if include_assets else "test-input.tar")
         with tarfile.open(file, "w") as tar:
-            for folder in ("desktop", "tools/desktop", "tests/desktop"):
+            folders = ("desktop", "tools/desktop", "tests/desktop",
+                       "branding/example/nodejs/public/elixir/brand/templates",
+                       "tools/example/template-layouts")
+            for folder in folders:
                 source = self.product / folder
                 def filtered(item):
-                    excluded = tuple(root + "/" + name for root in ("desktop", "tools/desktop", "tests/desktop")
+                    excluded = tuple(root + "/" + name for root in folders
                                      for name in ("node_modules", ".git", "__pycache__")) + ("desktop/dist",)
                     if any(item.name == path or item.name.startswith(path + "/") for path in excluded):
                         return None
@@ -323,13 +372,33 @@ job.mkdir()
         return target
 
     def packages(self):
-        version = json.loads((self.product / "desktop/package.json").read_text())["version"]
+        version = validate_desktop_version(json.loads((self.product / "desktop/package.json").read_text()))
         self.info["product_version"] = version
         if "linux" in self.args.targets:
             self.run("linux-packages", ["npm", "run", "package"], cwd=self.product / "desktop")
-            for name in (f"ElixirOffice-{version}-linux-x86_64.AppImage", f"ElixirOffice-{version}-linux-amd64.deb"):
-                shutil.copyfile(self.product / "desktop/dist" / name, self.out / name)
+            appimage, control = appimage_names(version)
+            unpacked = self.product / "desktop/dist/linux-unpacked"
+            if (unpacked / "resources/app-update.yml").exists():
+                raise ValueError("Unexpected application updater feed in resources")
+            self.run("linux-packaged-version", [self.args.node, self.product / "tools/desktop/check-version.cjs", unpacked / "resources/app.asar"])
+            update_work = self.work / "appimage-update"
+            self.run("appimage-external-update", ["python3", self.driver / "appimage_update.py",
+                     "--pins", self.driver / "appimage-tools.json", "--cache", Path(self.args.cache) / "appimage-tools",
+                     "--work", update_work, "--appimage", self.product / "desktop/dist" / appimage,
+                     "--channel", self.plan["appimage_update"]["channel"],
+                     "--image", self.plan["appimage_update"]["image"]])
+            for name in (appimage, control):
+                shutil.copy2(update_work / name, self.out / name)
+            appimage_update.verify_zsync(self.out / appimage, self.out / control)
+            self.info["appimage_update"] = json.loads((update_work / "receipt.json").read_text())
+            self.info["appimage_tools"] = json.loads((Path(self.args.cache) / "appimage-tools/receipt.json").read_text())
+            shutil.copyfile(self.product / "desktop/dist" / f"ElixirOffice-{version}-linux-amd64.deb", self.out / f"ElixirOffice-{version}-linux-amd64.deb")
+            self.save()
             self.run("deb-extract", ["dpkg-deb", "-x", self.out / f"ElixirOffice-{version}-linux-amd64.deb", self.work / "deb"])
+            deb_version = capture(["dpkg-deb", "-f", self.out / f"ElixirOffice-{version}-linux-amd64.deb", "Version"])
+            if deb_version != version:
+                raise ValueError("DEB version differs from selected desktop version")
+            self.run("deb-packaged-version", [self.args.node, self.product / "tools/desktop/check-version.cjs", self.work / "deb/opt/ElixirOffice/resources/app.asar"])
             self.run("deb-resource-audit", ["python3", self.product / "tests/desktop/verify-resources.py", self.work / "deb/opt/ElixirOffice/resources/assets"])
         if "windows" in self.args.targets:
             env = {**self.env, "WINDOWS_BUILDER_IMAGE": self.args.windows_image, "WINDOWS_BUILD_CACHE": str(Path(self.args.cache) / self.job / "windows")}
@@ -384,9 +453,9 @@ job.mkdir()
     def linux_smoke(self):
         archive = self.archive(False)
         app = next(self.out.glob("*.AppImage"))
-        target = self.transport(self.plan["test-desktop"], [archive, app], "linux")
-        self.run("linux-packaged-smoke", self.ssh(self.plan["test-desktop"], ["/bin/bash", "-c", 'cd "$1"; tar -xf test-input.tar; /bin/bash tools/release/remote-build.sh linux "$1" yes "$2"', "release", target, self.info["test_upstream"]["manifest_sha256"]]))
-        self.retrieve_results(self.plan["test-desktop"], target, "linux")
+        target = self.transport(self.plan["linux"], [archive, app], "linux")
+        self.run("linux-packaged-smoke", self.ssh(self.plan["linux"], ["/bin/bash", "-c", 'cd "$1"; tar -xf test-input.tar; /bin/bash tools/release/remote-build.sh linux "$1" yes "$2"', "release", target, self.info["test_upstream"]["manifest_sha256"]]))
+        self.retrieve_results(self.plan["linux"], target, "linux")
         self.info["gates"]["linux-six-format"] = "pass"
 
     def execute(self):
@@ -395,7 +464,7 @@ job.mkdir()
         (self.out / "logs").mkdir()
         self.save()
         try:
-            for key, system, machine in (("mac", "Darwin", "arm64"), ("test-desktop", "Linux", "x86_64")):
+            for key, system, machine in (("mac", "Darwin", "arm64"), ("linux", "Linux", "x86_64")):
                 if key in self.plan:
                     remote = self.plan[key]
                     code = "import platform,sys;assert platform.system()==sys.argv[1];assert platform.machine()==sys.argv[2]"
@@ -407,8 +476,8 @@ job.mkdir()
             self.packages()
             if "linux" in self.args.targets and not self.args.build_only:
                 self.linux_smoke()
-            shutil.copyfile(self.driver / "desktop-beta2-release-notes.md", self.out / "RELEASE-NOTES.md")
-            names = [file.name for file in self.out.iterdir() if file.suffix in {".AppImage", ".deb", ".exe", ".dmg"} or file.name.endswith("-evidence.tar") or file.name in {"RELEASE-NOTES.md", "MAC-INPUT.tar"}]
+            shutil.copyfile(self.driver / "desktop-beta3-release-notes.md", self.out / "RELEASE-NOTES.md")
+            names = public_artifact_names(self.out)
             self.info["artifacts"] = checksum_inventory(self.out, names)
             complete = set(self.args.targets) == {"linux", "windows", "mac"} and not self.args.build_only and all(self.info["gates"].get(x) == "pass" for x in ("linux-six-format", "mac-six-format"))
             self.info["state"] = "review-candidate" if complete else "partial-unverified"
@@ -434,12 +503,14 @@ def parser():
     p.add_argument("--date", default=datetime.datetime.now(ZoneInfo("Europe/Paris")).date().isoformat())
     p.add_argument("--label", default="")
     p.add_argument("--node", default=os.environ.get("EO_RELEASE_NODE", "node"))
-    p.add_argument("--cache", default="/data/elixiroffice/cache/release-beta2-D")
+    p.add_argument("--cache", default="/srv/elixiroffice/cache/release-beta2-D")
+    p.add_argument("--appimage-builder-image", help="Optional assertion of the reviewed isolated builder image pin")
+    p.add_argument("--appimage-channel", choices=["latest", "latest-all", "latest-pre"], default="latest-all")
     p.add_argument("--font-tool-image", default=DEFAULT_FONT_IMAGE)
     p.add_argument("--font-tool-root", default="/var/www/elixiroffice/documentserver")
     p.add_argument("--windows-image", default=DEFAULT_WIN_IMAGE)
-    p.add_argument("--test-desktop-host", default=os.environ.get("EO_RELEASE_TEST_DESKTOP_HOST"))
-    p.add_argument("--test-desktop-root", default=os.environ.get("EO_RELEASE_TEST_DESKTOP_ROOT"))
+    p.add_argument("--linux-host", default=os.environ.get("EO_RELEASE_LINUX_HOST"))
+    p.add_argument("--linux-root", default=os.environ.get("EO_RELEASE_LINUX_ROOT"))
     p.add_argument("--mac-export-only", action="store_true", help="Stage MAC-INPUT.tar for authorized local Mac builds; no SSH and never a complete candidate")
     p.add_argument("--mac-host")
     p.add_argument("--mac-root", default=os.environ.get("EO_RELEASE_MAC_ROOT"))
@@ -459,6 +530,10 @@ def make_plan(args):
     if not args.playwright_core or not (Path(args.playwright_core) / "package.json").is_file():
         raise ValueError("Provide --playwright-core or EO_RELEASE_PLAYWRIGHT_CORE with an installed package")
     product = revision(args.product_repo, args.product_rev, "main")
+    package = pin(args.product_repo, product, "desktop/package.json")
+    validate_desktop_version(package)
+    if "linux" in args.targets:
+        validate_update_packaging(package)
     ds = revision(args.documentserver_repo, args.documentserver_rev, "elixir/dev")
     modules = gitlinks(args.documentserver_repo, ds)
     full_pin = pin(args.documentserver_repo / "sdkjs", modules["sdkjs"], "common/wasm-convert/runtime-release.json")
@@ -476,15 +551,24 @@ def make_plan(args):
     if output.exists() or output.is_symlink() or output.parent.is_symlink():
         raise ValueError("Output already exists; never overwrite a prior candidate")
     cache = Path(args.cache).resolve()
-    if not cache.is_relative_to("/data/elixiroffice/cache"):
-        raise ValueError("Large caches must stay under /data/elixiroffice/cache")
-    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta2-release-notes.md", "desktop-test-inputs.json")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    if not cache.is_relative_to("/srv/elixiroffice/cache"):
+        raise ValueError("Large caches must stay under /srv/elixiroffice/cache")
+    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta3-release-notes.md", "desktop-test-inputs.json", "appimage_update.py", "appimage-tools.json")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    update_pins = appimage_update.pins(HERE / "appimage-tools.json")
+    image = args.appimage_builder_image or update_pins["builder_image"]
+    if not re.fullmatch(r"(?:[A-Za-z0-9./:_-]+@)?sha256:[0-9a-f]{64}", image) or image.startswith("-"):
+        raise ValueError("AppImage builder must be pinned")
+    if image != update_pins["builder_image"]:
+        raise ValueError("AppImage builder differs from reviewed manifest; re-pin with provenance review")
+    plan["appimage_update"] = {"channel": args.appimage_channel, "image": image,
+                              "information": appimage_update.update_information(args.appimage_channel),
+                              "pins_sha256": digest(HERE / "appimage-tools.json")}
     plan["pdf_source_pin_path"] = pdf_pin_path
     plan["mac_export_only"] = args.mac_export_only
     if "mac" in args.targets and not args.mac_export_only:
         plan["mac"] = endpoint(args.mac_host, args.mac_root or "")
     if "linux" in args.targets and not args.build_only:
-        plan["test-desktop"] = endpoint(args.test_desktop_host, args.test_desktop_root)
+        plan["linux"] = endpoint(args.linux_host, args.linux_root)
     return plan
 
 if __name__ == "__main__":

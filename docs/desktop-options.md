@@ -45,7 +45,7 @@ Same documents (10 and 100 pages, table, images, school fonts), same machines (A
 3. **Native x2t against WebAssembly**: opening and saving times, memory, PDF export.
 4. Comparison baseline: the upstream desktop application (option A) on Windows and Linux.
 
-Tools: `tools/perf` harness (Playwright, already written), Playwright WebKit (already installed on <dev-host>), `tools/fidelity` fidelity bench to check that rendering is identical.
+Tools: `tools/perf` harness (Playwright, already written), Playwright WebKit (already installed on development host), `tools/fidelity` fidelity bench to check that rendering is identical.
 
 ## 5. Provisional recommendation (to be confirmed by the test bench)
 
@@ -91,20 +91,20 @@ builds, signing and native glue for files, fonts and printing. W2 fonts, W3 loca
 open/save and W4 engine qualification are dependencies, not completed features
 assumed by this study. W1's PDF-only module cannot open Office files.
 
-### Baseline and measurements on <dev-host>
+### Baseline and measurements on development host
 
-Scratch evidence: $EO_WORK/wt/w6-D-work/electron-release.json.
+Scratch evidence: /srv/elixiroffice/wt/w6-D-work/electron-release.json.
 The original document has estimates and a proposed bench, not shell results.
 
 | Observation | Result | Limit |
 |---|---|---|
-| Official Electron v44.7.0 Linux x64 ZIP downloaded on <dev-host> | 122,998,223 compressed bytes; 296,307,552 uncompressed file bytes; 72 entries | Engine distribution only, excluding editor, converter, fonts, installer and block allocation |
+| Official Electron v44.7.0 Linux x64 ZIP downloaded on development host | 122,998,223 compressed bytes; 296,307,552 uncompressed file bytes; 72 entries | Engine distribution only, excluding editor, converter, fonts, installer and block allocation |
 | ZIP SHA-256 | 3ae7d5bdad61c664486c6ab61361dd084d064c8c08af8d13a687096e18ce555a | Artifact identity, not signature verification |
 | Installed WebKitGTK package | libwebkit2gtk-4.1-0 2.52.6; Installed-Size 93,416 KiB | Package metadata, excludes dependencies; not memory |
 | Installed GTK package | libgtk-3-0t64 3.24.41; Installed-Size 9,772 KiB | Same limitation |
 | Benchmark prerequisites | No DISPLAY/WAYLAND_DISPLAY, Xvfb, cargo or rustc | GUI startup, RSS/PSS and compatibility unverified |
 | Existing full W0 wasm | 53,064,743 raw bytes / 8,778,766 Brotli; glue 141,843 raw | Historical converter measurement, not complete app |
-| Existing 97-page conversion, wasm study section 12 | 412 ms warm; 525 ms cold conversion + 408 ms init | <build-host> Node; excludes shell, editor and file I/O |
+| Existing 97-page conversion, wasm study section 12 | 412 ms warm; 525 ms cold conversion + 408 ms init | build host Node; excludes shell, editor and file I/O |
 
 Reproduction: Python urllib fetched GitHub /repos/electron/electron/releases/latest,
 selected the Linux x64 ZIP, downloaded it and summed ZipInfo.file_size. The JSON
@@ -212,18 +212,18 @@ days 4–5 Tauri comparison/report, conditional on W2/W3 readiness. OS signing,
 printing and updates remain unverified until those platform tests. D stops
 with this study ready for lead review; owner approval precedes prototype work.
 
-### D2: physical Linux desktop benchmark on <test-desktop> (2026-10-10)
+### D2: physical Linux desktop benchmark on linux (2026-10-10)
 
 This owner-approved comparison uses two throwaway shells, without product
 integration. Evidence and reproducible shell/measurement scripts are kept under
-$EO_WORK/bench/ on <test-desktop>. The common payload is a snapshot of the built
-static editor from fire's eo container, full W0 x2t.wasm release
+/srv/elixiroffice/bench/ on linux. The common payload is a snapshot of the built
+static editor from development host's eo container, full W0 x2t.wasm release
 9ee6831853aa-fd40349d310d-st, and W1 PDF-only release
 9ee6831853aa-36c327f971c4-st. No personal/private corpus was used.
 
 The approved batch6 image was the initial source, but its compiled client-PDF
 bundle lacked the integrated native wasm route. The final common payload uses
-the newer built <dev-host> snapshot (DocsAPI 9.3.4), plus a minified current-main
+the newer built development host snapshot (DocsAPI 9.3.4), plus a minified current-main
 clientpdf.js override and the manifest-verified W1 runtime. This is explicitly
 a scratch adaptation, rather than a claim that the deployed image already
 supports standalone desktop operation. The local SDK adapter supplies local
@@ -232,7 +232,7 @@ and W0-converted synthetic document/image bytes. A loopback HTTP server provides
 assets and measurement transport; no DocumentServer process, database, remote
 document service is used.
 
-Hardware: <test-desktop>, elementary OS 6.1 / Ubuntu 20.04 base, i5-8265U,
+Hardware: linux, elementary OS 6.1 / Ubuntu 20.04 base, i5-8265U,
 approximately 15 GiB RAM, physical X11 session :0. Both editors have a
 1280 x 900 content viewport. Electron 44.7.0 uses its bundled Chromium 152
 and native host graphics. Tauri 2 uses WebKitGTK 4.1 version 2.52.6 in an
@@ -374,9 +374,9 @@ access, and an initial chooser cancellation. None contributes to the accepted
 five-run medians; the interrupted fast-input workload is not treated as a
 settled throughput comparison after the later harness/container corrections.
 
-Evidence is retained on <test-desktop> under $EO_WORK/bench/results and copied
-with reproducible scratch scripts to <dev-host>
-$EO_WORK/wt/w6-D2-work/evidence. Acceptance/progress records and
+Evidence is retained on linux under /srv/elixiroffice/bench/results and copied
+with reproducible scratch scripts to development host
+/srv/elixiroffice/wt/w6-D2-work/evidence. Acceptance/progress records and
 pdf-structure-check.json are in the D2 work folder. summarise.py requires all
 forty complete, exact-input, native-PDF, readable-tree runs before producing
 summary.json. The same recorded Tauri binary is retained separately from the
@@ -398,7 +398,7 @@ tauri-runtime-wry 2.12.1 and tauri-build 2.7.1 are pinned in Cargo.lock.
 ### D3: plain Chrome baseline (2026-10-10)
 
 The added Chrome rows use installed Google Chrome 138.0.7204.49 on the same
-unlocked physical <test-desktop> desktop, against the unchanged D2 static payload,
+unlocked physical linux desktop, against the unchanged D2 static payload,
 synthetic 97-page document and actual empty template. This is a normal browser
 window with its toolbar, rather than app/headless mode. Separate scoped browser
 profiles have no personal tabs or extensions. CDP adjusts the content viewport
@@ -440,18 +440,18 @@ Electron's Chromium 152, normal browser UI and CDP viewport setup prevent
 a clean version-matched engine/shell decomposition.
 
 Reproducible scripts are run-chrome.py, chrome-viewport.cjs,
-chrome-windows.py and summarise-chrome.py under $EO_WORK/bench/.
+chrome-windows.py and summarise-chrome.py under /srv/elixiroffice/bench/.
 Accepted empty IDs are 12/13/14/20/21; accepted large IDs are
 14/20/21/22/23, each with fresh and immediately reused profiles.
 Raw results and strict summary.json are in results/chrome; identity-check.json
 verifies the complete D2 payload manifest after the measurements.
-Review copies and protocol records are in fire's
-$EO_WORK/wt/w6-D3-work/. The normal browser is already installed;
+Review copies and protocol records are in development host's
+/srv/elixiroffice/wt/w6-D3-work/. The normal browser is already installed;
 this baseline does not claim a new packaged installer qualification.
 
 ### D3: throwaway W3 Electron file prototype
 
-The separate $EO_WORK/bench/proto-electron/ on <test-desktop> uses A's
+The separate /srv/elixiroffice/bench/proto-electron/ on linux uses A's
 read-only W3 conversion/controller snapshot, the retained static editor,
 full W0 conversion runtime and W1 native PDF runtime. No application code
 is integrated. Its README.md documents ./run.sh, an optional Office-file

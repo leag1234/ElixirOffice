@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Extract Excel's keyboard shortcuts from Microsoft's public support page.
 
 Source: "Keyboard shortcuts in Excel", Microsoft Support

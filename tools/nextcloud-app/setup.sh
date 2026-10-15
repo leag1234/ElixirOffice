@@ -1,10 +1,9 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Start (or update) the local Nextcloud of docs/storage.md and wire it to a
 # document server container:
 #   setup.sh <document server container> <document server public URL>
 # e.g. setup.sh eo-nc http://localhost:8190/
-# Env: NC_APP_DIR (app checkout, default $EO_WORK/upstream-extra/elixiroffice-nextcloud),
+# Env: NC_APP_DIR (app checkout, default /srv/elixiroffice/upstream-extra/elixiroffice-nextcloud),
 #      NC_PORT (8191), NC_ENV (local secrets file, default ~/.config/elixiroffice/nc-dev.env).
 # Creates the test users alice and bob; their passwords are in NC_ENV (mode 600).
 set -euo pipefail

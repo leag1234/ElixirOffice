@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
-"""Synthetic .docx fixtures of the table shading suite (tests/tableshade).
+"""Synthetic .docx fixtures of the table shading suite (tests/tableshade, docs/backlog.md F10, F12).
 
 Writes into the output directory (default: tests/fixtures/docx):
   coloured-cells.docx     a worksheet table whose coloured cells also carry the cell colour as paragraph

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Assemble manifest-verified production assets; never read documents or secrets."""
 import argparse, hashlib, json, shutil, subprocess
 from prune import prune
@@ -57,7 +56,7 @@ pin=json.loads((out/'sdkjs/common/wasm-convert/runtime-release.json').read_text(
 verify(out/'sdkjs/common/wasm-convert/runtime'/pin['artifact_version'],pin)
 pdf=json.loads((out/'sdkjs/common/clientpdf/runtime/current.json').read_text())
 verify(out/'sdkjs/common/clientpdf/runtime'/pdf['artifact_version'])
-for editor in ['documenteditor','spreadsheeteditor','presentationeditor']:
+for editor in ['documenteditor','spreadsheeteditor','presentationeditor','pdfeditor']:
     if 'ElixirLocal' not in (out/'web-apps/apps'/editor/'main/app.js').read_text():raise SystemExit('Local controller absent from production bundle')
 identities={}
 for name in ['sdkjs','web-apps','core','document-server-integration']:

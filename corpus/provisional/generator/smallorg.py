@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Very-small-business / association documents (fictional entities, people and contact details).
 Phone numbers in the 01 99 00 xx xx range, e-mails and sites on example.org (RFC 2606)."""
 from ooxml import *  # noqa

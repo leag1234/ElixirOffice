@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Browser-reserved keys (docs/shortcuts.md, "Browser-reserved keys"): Keyboard Lock request, install manifest, full screen,
 // the one-time hint, the help dialog, the unsaved-changes guard, and the alternatives of the three editors.
 //

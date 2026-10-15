@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Admin check of the Elixir AI server configuration (make ai-check).
 #   tools/ai-proxy/check.sh [server-url]
 # 1. shows the configuration found (the key is never printed);

@@ -1,5 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
 # Run inside the dev container (make dev-tools), idempotent. The core C++ build
 # (V8, 3rdParty, x2t; `make core/x2t`) needs clang, lld and the unversioned llvm-* tools
 # (llvm-ar...), which the upstream dev image does not ship; they are lost when the

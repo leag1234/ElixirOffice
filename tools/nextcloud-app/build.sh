@@ -1,5 +1,4 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Build the ElixirOffice Nextcloud app (fork of eurooffice-nextcloud, branch elixir/nc)
 # in place: front-end bundles (js/, css/) with Node and the vendored PHP JWT
 # library (lib/Vendor) with Composer in a container. Usage: build.sh <app checkout>

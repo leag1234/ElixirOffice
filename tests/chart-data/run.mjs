@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Chart "Edit Data" editor of the Word and PowerPoint editors (the nested spreadsheet
 // editor, index_internal.html): it loads without 404 or script errors, the chart is
 // inserted on OK, its data can be edited again, and undo restores the previous state.

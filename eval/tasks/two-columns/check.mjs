@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Success criteria of the "two columns" task. before/after: tools/eval/lib.mjs snapshots.
 export function check(before, after, run) {
   const r = [];

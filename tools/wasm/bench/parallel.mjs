@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Throughput with K independent x2t instances in worker threads (no
 // SharedArrayBuffer needed: each worker has its own module and memory).
 // usage: node parallel.mjs X2T_JS CORPUS_DIR K

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Install the same validated runtime and nginx configuration on an own dev instance.
 set -euo pipefail
 CONTAINER="${1:?usage: install-runtime-dev.sh own-container release-directory}"

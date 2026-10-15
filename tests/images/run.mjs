@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Multi-image layout stability suite (docs/images.md).
 //   EO_BASE=http://localhost:32776 node tests/images/run.mjs [--only a,b] [--out results/x.json] [--shots dir]
 // Each scenario opens a fresh copy of the worksheet fixture, plays user actions and measures

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Build the SVG sprite of the home page from Microsoft Fluent UI System Icons
 // (MIT, https://github.com/microsoft/fluentui-system-icons).
 // Only the icons listed below are vendored. Usage:

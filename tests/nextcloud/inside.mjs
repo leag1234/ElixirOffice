@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Mode A, "inside Nextcloud": the ElixirOffice app for Nextcloud (fork of eurooffice-nextcloud)
 // with an ElixirOffice document server. Upload a .docx to Nextcloud, open it from Files, edit,
 // save (close), reopen and see the edit, then co-edit with a second user.

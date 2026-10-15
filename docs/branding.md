@@ -29,11 +29,11 @@ List to re-verify at each upstream rebase. Principle: we do not modify the upstr
 - Paths, database, packages and server icons: done in our images, see "No more "elixiroffice" occurrence: implementation" below.
 - (done 2026-10-11) The upstream sample documents: replaced, see "Public release cleanup".
 
-## Pending decisions (the owner)
+## Pending decisions (Gaël)
 
 - Final logo and palette; availability of the "ElixirOffice" brand.
 
-## Requirement from the owner (2026-10-05): no more occurrence of the upstream's name
+## Requirement from Gaël (2026-10-05): no more occurrence of the upstream's name
 
 No occurrence of the upstream fork's name (all its spellings: hyphenated, spaced, joined, capitalized) in our repositories, paths, database, packages, registry, theme, URLs, documentation and **published git history**, **except** attributions: README and NOTICE, license headers and copyright notices of source files, lineage sentences ("ElixirOffice is based on Euro-Office, itself based on ONLYOFFICE by Ascensio System SIA").
 
@@ -44,13 +44,13 @@ Implemented in two layers (so the monthly rebase stays cheap): image brand varia
 ### 1. Image: brand variables and ElixirOffice HCL
 
 - `branding/build/elixiroffice.hcl` loads **after** `DocumentServer/build/docker-bake.hcl`: `COMPANY_NAME=ElixirOffice` (hence `COMPANY_NAME_LOW=elixiroffice`, `THEME=elixiroffice`), `REGISTRY=elixiroffice` (local image names, nothing is pushed), and the `brand-icons` target built from `branding/` by an inline Dockerfile in this HCL: web-apps theme, sample start page, favicons and logos rendered from our SVGs, placed at the upstream sources' paths. No upstream Dockerfile is forked.
-- Build (<build-host>): `make image UPSTREAM=<…>/DocumentServer`. Result: `elixiroffice/documentserver:<TAG>`, installed under `/var/www|/etc|/var/log/elixiroffice/documentserver`, package `elixiroffice-documentserver`, PostgreSQL role and database `elixiroffice`, supervisor programs `APPLICATION_NAME=elixiroffice`.
+- Build (build-host): `make image UPSTREAM=<…>/DocumentServer`. Result: `elixiroffice/documentserver:<TAG>`, installed under `/var/www|/etc|/var/log/elixiroffice/documentserver`, package `elixiroffice-documentserver`, PostgreSQL role and database `elixiroffice`, supervisor programs `APPLICATION_NAME=elixiroffice`.
 - `[upstreamable]` fixes (`elixir/*` branches of DocumentServer, web-apps, document-server-package) so that the hard-coded values follow these variables; upstream defaults unchanged.
 
 ### 2. Sources: `tools/rebrand`
 
 - `tools/rebrand/rename.sh [--commit] [DS_DIR]` (engine `rebrand.py`) rewrites, in DocumentServer and **all** its submodules (nested included), the text files tracked by git: the upstream name in all its forms → `elixiroffice` / `ElixirOffice` / `ELIXIROFFICE` depending on case; file paths too (the upstream theme `web-apps/theme/<upstream>` is deleted: ours lives in `branding/`); `ghcr.io/<upstream>/emsdk` → `emscripten/emsdk` (same image); `github.com/<upstream>` links → `HOME_URL` (`https://github.com/elixiroffice`, **organization not reserved, to be decided**; one line to change, or `ELIXIR_HOME_URL`); only **visible** ONLYOFFICE branding (page titles, locale strings, built-in help, start page links). Code identifiers (`asc_getOnlyOfficeTime`, `ONLYOFFICEFORM` signature…) are not touched.
-- **Product repository** (this repository): `rebrand.py rename-product .` does the same for all tracked files (`docs/`, `patches/`, `fidelity/baselines/`, `branding/`, `tools/`, `tests/`, `eval/`). Done once (2026-10-07); afterwards `check.sh` watches. `patches/`: informational exports, not applied automatically (see `patches/README.md`).
+- **Product repository** (this repository): `rebrand.py rename-product .` does the same for all tracked files (`docs/`, `CLAUDE.md`, `patches/`, `fidelity/baselines/`, `branding/`, `tools/`, `tests/`, `eval/`). Done once (2026-10-07); afterwards `check.sh` watches. `patches/`: informational exports, not applied automatically (see `patches/README.md`).
 - Never touched (attribution): `LICENSE*`, `NOTICE*`, `COPYING*`, `ATTRIBUTION*`, `AUTHORS*`, `3rd-Party*`, `CHANGELOG*` files, `licenses/`; license header block; lines (or sentences, on long lines) containing copyright, `(c) <year>`, ©, `SPDX-`, "all rights reserved" or a lineage ("based on", "fork of", "derived from", `"attribution"` key).
 - The tools themselves write the upstream name **in fragments** (`"eu" + "ro"`…) so as not to count as an occurrence; this also holds for the Nextcloud connector's rebranding script (`tools/nextcloud-app/rebrand.py`).
 - Idempotent (second pass: 0 files modified). `tools/rebrand/check.sh [--no-product] [--no-upstream] [DS_DIR]` lists (file:line) everything that remains, in DocumentServer, its submodules **and this whole repository**, and exits with an error if anything remains: this is the CI check. Shortcuts: `make rebrand`, `make rebrand-check`.
@@ -72,9 +72,9 @@ Implemented in two layers (so the monthly rebase stays cheap): image brand varia
 | PostgreSQL database, package, supervisor | upstream | `elixiroffice` |
 | web-apps theme, start page | ours (`make web-apps`, `make example`) | ours (`brand-icons` target) |
 | Mounted sources (`/develop`) | renamed | renamed |
-| `/build` compilation cache | mounted from the host (`$EO_WORK/dev-build-cache`) | not applicable |
+| `/build` compilation cache | mounted from the host (`/srv/elixiroffice/dev-build-cache`) | not applicable |
 
-Rule: our scripts code no container path; they read `EO_ROOT`, `EO_CONF`, `EO_LOG` and `COMPANY_NAME_LOW`, set by the image (upstream's or ours). The name of the upstream dev image only appears in `DEV_IMAGE` (`Makefile`, passed to compose as `EO_IMAGE`), `UPSTREAM_IMAGE` (base of the font test images), in the default of `EO_IMAGE` in `DocumentServer/develop/{docker-compose.yml,eo.sh}` (`PROTECT` rule of `rebrand.py`) and in the default of a demo script. For a fully renamed dev: build our dev image (bake target `develop` with the HCL) and pass it as `DEV_IMAGE`. The image `elixiroffice/documentserver:rebrand2` (<build-host>) is a complete image without upstream paths, but without the rebuild chain inside the container: dev stays on the upstream's image.
+Rule: our scripts code no container path; they read `EO_ROOT`, `EO_CONF`, `EO_LOG` and `COMPANY_NAME_LOW`, set by the image (upstream's or ours). The name of the upstream dev image only appears in `DEV_IMAGE` (`Makefile`, passed to compose as `EO_IMAGE`), `UPSTREAM_IMAGE` (base of the font test images), in the default of `EO_IMAGE` in `DocumentServer/develop/{docker-compose.yml,eo.sh}` (`PROTECT` rule of `rebrand.py`) and in the default of `tools/demo/demo.sh`. For a fully renamed dev: build our dev image (bake target `develop` with the HCL) and pass it as `DEV_IMAGE`. The image `elixiroffice/documentserver:rebrand2` (build-host) is a complete image without upstream paths, but without the rebuild chain inside the container: dev stays on the upstream's image.
 
 Effects of the rename on the dev environment (applied on 2026-10-07): compose project "ElixirOffice development environment" (network `elixirofficedevelopmentenvironment_default`), default JWT secret `elixiroffice-dev-jwt-secret-key-2026`, container `eo` recreated (`make dev`, `make example`, `make ai-proxy`, `make perf-tuning`, `make fonts`, `make restore-generated` replayed); the `/build` cache survives (see `docs/dev.md`).
 
@@ -82,19 +82,19 @@ Effects of the rename on the dev environment (applied on 2026-10-07): compose pr
 
 | Occurrence | Where | Why |
 |---|---|---|
-| Copyright notices, SPDX, license headers, "© Ascensio System SIA & …" footer of the start pages, banner of the sdkjs bundles | sources | attribution (AGPL, wanted by the owner) |
+| Copyright notices, SPDX, license headers, "© Ascensio System SIA & …" footer of the start pages, banner of the sdkjs bundles | sources | attribution (AGPL, wanted by Gaël) |
 | Lineage sentences and LICENSE/NOTICE/3rd-Party/ATTRIBUTION files | everywhere | attribution |
 | `.gitmodules` URLs | DocumentServer, document-server-integration | source of the rebase (functional), not shipped |
-| Name of the upstream dev and test image (`DEV_IMAGE`, `UPSTREAM_IMAGE`, `EO_IMAGE` defaults in `develop/`, a demo script, mentions in `docs/` and `fidelity/baselines/`) | `Makefile`, `DocumentServer/develop`, `tools/demo`, docs | upstream images consumed as is |
+| Name of the upstream dev and test image (`DEV_IMAGE`, `UPSTREAM_IMAGE`, `EO_IMAGE` defaults in `develop/`, `tools/demo/demo.sh`, mentions in `docs/` and `fidelity/baselines/`) | `Makefile`, `DocumentServer/develop`, `tools/demo`, docs | upstream images consumed as is |
 | Dev container paths (`/var/www/<upstream>/…`) | upstream dev image | the image is the upstream's; read through `EO_ROOT` |
 | Code identifiers (`asc_*OnlyOffice*` API, `ONLYOFFICEFORM` signature, `Referer == "onlyoffice"`, drag-and-drop type, `onlyoffice_ai_*` storage keys, `onlyoffice-docs-formats.json`, database defaults, plugin and proxy endpoints) | web-apps, server, installer | API or functional (renaming would break the code); listed one by one in `VISIBLE_ALLOW` of `rebrand.py` |
 
-### Validation (2026-10-06, <build-host>; 2026-10-07, <dev-host>)
+### Validation (2026-10-06, build-host; 2026-10-07, development host)
 
 - `check.sh` on DocumentServer, its submodules and this repository: `check: 0 finding(s)`; `rename.sh` rerun: 0 files modified.
-- Image `elixiroffice/documentserver` (<build-host>): `find / -xdev | grep -i <upstream>` returns nothing; package `elixiroffice-documentserver`, database and role `elixiroffice`, docservice/converter/example services started; first full build 66 min, following ones 35 to 43 min.
+- Image `elixiroffice/documentserver` (build-host): `find / -xdev | grep -i <upstream>` returns nothing; package `elixiroffice-documentserver`, database and role `elixiroffice`, docservice/converter/example services started; first full build 66 min, following ones 35 to 43 min.
 - Fidelity (`run.sh --ref word-web`): identical to the baseline (`REGRESSION CHECK: PASS`) with the font pack; without the pack, the image regresses: the `branding/fonts` pack is not yet in the bake build (`make fonts-image` to apply).
-- Product repository git history rewritten on 2026-10-07 (`git filter-repo`, same rule engine: `transform_*` functions of `rebrand.py`, strict exemption of lineage lines): no more occurrence outside lineage, copyright and upstream image names; neither real corpus nor key in the history.
+- Product repository git history rewritten on 2026-10-07 (`git filter-repo`, same rule engine: `transform_*` functions of `rebrand.py`, strict exemption of lineage lines): no more occurrence outside lineage, copyright and upstream image names; neither real corpus nor key in the history. The forced push to `code.example.org/elixiroffice/elixiroffice` (private, old history of 142 commits) was refused: `main` is protected there against force-push (see the project roadmap).
 
 ## Public release cleanup (2026-10-11)
 

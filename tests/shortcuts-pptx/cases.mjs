@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Cases of the PowerPoint shortcuts suite; ids match the "test" column of
 // docs/shortcuts-powerpoint.csv. check() returns true or a failure message.
 const eq = (a, b, what) => a === b ? true : `${what}: expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`;

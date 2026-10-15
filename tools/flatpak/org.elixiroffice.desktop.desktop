@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+[Desktop Entry]
+Name=ElixirOffice
+Comment=Local documents, spreadsheets, presentations and PDF
+Exec=elixiroffice-flatpak %U
+Icon=org.elixiroffice.desktop
+Type=Application
+Categories=Office;WordProcessor;Spreadsheet;Presentation;
+Terminal=false
+MimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/rtf;text/plain;text/csv;application/vnd.openxmlformats-officedocument.wordprocessingml.template;application/vnd.ms-word.document.macroEnabled.12;application/vnd.openxmlformats-officedocument.spreadsheetml.template;application/vnd.ms-excel.sheet.macroEnabled.12;application/vnd.openxmlformats-officedocument.presentationml.template;application/vnd.openxmlformats-officedocument.presentationml.slideshow;application/pdf;

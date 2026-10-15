@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Verify the same saved document after recreation or restoration; no new edit.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Check wire bytes, MIME, cache headers and encoding negotiation on an own instance."""
 import argparse
 import gzip

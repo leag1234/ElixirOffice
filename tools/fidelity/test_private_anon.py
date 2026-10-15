@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Private corpus: no file name or title in any tool output (docs/fidelity.md).
 
 Builds fake corpora whose file names and manifest titles carry MARKER. Checks that the marker

@@ -2,17 +2,17 @@
 (() => {
 'use strict';
 const $=id=>document.getElementById(id);let editor,controller,file,abort,opening=false,frame,main,savingAs=false,closeCheck=false,pendingRequested=false,pendingRunning=false;
-Object.defineProperty(window,'EODesktopState',{value:(lock=true)=>{if(lock)closeCheck=true;return {dirty:!!(controller&&(controller.isModified()||controller.hasPendingImages())),opening}}});
+Object.defineProperty(window,'EODesktopState',{value:(lock=true)=>{if(lock)closeCheck=true;return {dirty:!!(controller&&(controller.isModified()||controller.hasPendingImages())),opening:opening||!!controller?.isSaving?.()}}});
 function blockDuringClose(event){if(closeCheck||info?.capture){event.preventDefault();event.stopImmediatePropagation()}}
 for(const name of ['keydown','beforeinput','click','drop'])document.addEventListener(name,blockDuringClose,true);
-let info,operationBusy=false,backstage,recoveryBusy=false;
-const t=key=>info?.strings[key]||key;
-const status=text=>{$('message').textContent=text;$('message').hidden=!text;};
+let info,operationBusy=false,backstage,recoveryBusy=false,pdfCompatibility,recoveryNotified=false;
+const t=key=>info?.strings[key]||({recoveryFailed:'AutoRecover could not keep a recovery copy. Save your document manually.',pdfRecoveryOff:'AutoRecover is not available for PDF files. Save manually; these settings apply to Office files.'})[key]||key;
+const status=text=>{const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[text,recovery].filter(Boolean).join(' — ');$('message').textContent=message;$('message').hidden=!message;};
 async function refreshHome(view='home'){const data=await eoDesktop.home();EODesktopHome.render($('home'),{...data,...info},desktopAction,view);}
-async function returnHome(){if(!await eoDesktop.returnHome())return;controller?.dispose();controller=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();}
-function desktopAction(action,value){return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
+async function returnHome(){if(!await eoDesktop.returnHome())return;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();}
+function desktopAction(action,value){return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
 
-const fail=error=>{if(/Save cancelled$/.test(error.message)){window.EOLocalFailure=null;status(t('cancel'));return}window.EOLocalFailure=error.message;status(t('error'));console.error(error)};
+const fail=error=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status(t('cancel'));return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);};
 function buttons(busy) {
   operationBusy=busy;
   for(const button of $('home').querySelectorAll('button'))button.disabled=busy;
@@ -36,23 +36,23 @@ async function drainPending(){
 }
 async function open(selected) {
   if(!selected||opening)return;
-  opening=true;buttons(true);window.EOLocalFailure=null;window.EOLocalSession=null;abort=new AbortController();
+  opening=true;recoveryNotified=false;buttons(true);window.EOLocalFailure=null;window.EOLocalSession=null;abort=new AbortController();
   let preparedWorker;
   const cancelPreparation=()=>{preparedWorker?.terminate();preparedWorker=null};
   abort.signal.addEventListener('abort',cancelPreparation,{once:true});
   try {
-    controller?.dispose();controller=null;editor?.destroyEditor();file=selected;
+    pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();file=selected;
     const timings={selected:performance.now()};
     // Compile for this opening while the editor UI loads; never reuse a document FS.
-    preparedWorker=new Worker('/example/local-assets/sdkjs/common/desktop/legacy-worker.js');
-    preparedWorker.postMessage({prepare:true,runtime:file.runtime});
-    const format=file.format,kind={docx:'word',odt:'word',xlsx:'cell',ods:'cell',pptx:'slide',odp:'slide'}[format];
+    if(file.format!=='pdf'){preparedWorker=new Worker('/example/local-assets/sdkjs/common/desktop/legacy-worker.js');
+    preparedWorker.postMessage({prepare:true,runtime:file.runtime});}
+    const format=file.format,kind={pdf:'pdf',docx:'word',odt:'word',xlsx:'cell',ods:'cell',pptx:'slide',odp:'slide'}[format];
     if(!kind)throw Error('Unsupported local format');
     $('home').hidden=true;$('workspace').hidden=false;status(t('open')+' '+file.name+'…');
     const authorName=await eoDesktop.author();
     await new Promise((resolve,reject)=>{
       editor=new DocsAPI.DocEditor('editor',{documentType:kind,type:'desktop',width:'100%',height:'100%',
-        editorConfig:{mode:'edit',lang:info.language,user:{id:'local',name:authorName},customization:{autosave:false,forcesave:false,plugins:false,macros:false,features:{featuresTips:false}},coEditing:{mode:'strict',change:false}},
+        editorConfig:{mode:'edit',lang:info.language,user:{id:'local',name:authorName},customization:{elixirLocal:true,autosave:false,forcesave:false,plugins:false,macros:false,features:{featuresTips:false}},coEditing:{mode:'strict',change:false}},
         events:{onAppReady:async()=>{
           if(controller)return;
           try {
@@ -75,17 +75,18 @@ async function open(selected) {
             Object.assign(frame.EOWasmConvert.formats,{doc:66,xls:258,ppt:130,rtf:68,txt:69,docm:75,dotx:76,csv:260,xlsm:261,xltx:262,ppsx:132,potx:135});
             await EODesktopAI(frame);
             await installFonts(frame);
-            main=(kind==='word'?frame.DE:kind==='cell'?frame.SSE:frame.PE).getController('Main');
+            main=(kind==='word'?frame.DE:kind==='cell'?frame.SSE:kind==='pdf'?frame.PDFE:frame.PE).getController('Main');
             frame.Common.ElixirLocal.prepare(main.api,main);
-            main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:true,download:true,print:false,chat:false}}});
-            controller=frame.Common.ElixirLocal.install(main.api,{format,getSignal:()=>abort.signal,
-              onSave:async bytes=>{const saved=await eoDesktop.save(file.token,bytes,savingAs);file.name=saved.name;status(t('save')+' '+saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved},
+            main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:kind!=='pdf',comment:true,fillForms:true,download:true,print:false,chat:false}}});
+            controller=frame.Common.ElixirLocal.install(main.api,{format,lang:info.language,pdfStrings:info.strings,saveAcknowledgesOriginal:kind==='pdf',onExport:async(bytes,target,options,stats)=>{const saved=await eoDesktop.pdf(file.token,bytes,!!options.isPdfPrint,!!options.allowPlainCopy);window.EOLastPdf={...saved,stats:stats||{backend:'drawingfile'}};},getSignal:()=>abort.signal,
+              onSave:async (bytes,protection)=>{const saved=await eoDesktop.save(file.token,bytes,savingAs,protection);file.name=saved.name;setDocumentName(saved.name);status(saved.durabilityUnconfirmed?'The file was replaced, but disk durability could not be confirmed. '+(saved.backupName?'Keep the original backup, '+saved.backupName+', beside the saved file.':'Save again before closing.'):t('save')+' '+saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved},
+              onProtectionLock:async()=>{const locked=await eoDesktop.passwordLock(file.token);file.recoveryVersion=locked.recoveryVersion;status('AutoRecover is disabled for this session because password protection was used');},
               onBeforeSave:()=>{abort=new AbortController();buttons(true)},onAfterSave:()=>{buttons(false);updateDirty()},
               onError:fail,onProgress:progress=>status(t('open')+'…')});
             let input=new Uint8Array(file.bytes).buffer;
             if(!input.byteLength&&['txt','csv'].includes(file.sourceFormat))input=new Uint8Array([10]).buffer;
             if(file.sourceFormat && file.sourceFormat!==format)input=(await frame.EOWasmConvert.convert(new frame.Uint8Array(input),file.sourceFormat,format,{signal:abort.signal})).buffer;
-            timings.beforeConvert=performance.now();const stats=await controller.open(input);timings.contentReady=performance.now();
+            timings.beforeConvert=performance.now();const stats=await controller.open(input);timings.contentReady=performance.now();if(kind==='pdf')pdfCompatibility=EODesktopPdfCompatibility(frame,main,info.strings,status);
             main.api.asc_registerCallback('asc_onDocumentModifiedChanged',updateDirty);
             for(const name of ['keydown','beforeinput','click','drop'])frame.document.addEventListener(name,blockDuringClose,true);
             frame.document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files'))event.preventDefault()},true);
@@ -97,18 +98,36 @@ async function open(selected) {
             await updateDirty();backstage=await EODesktopBackstage(frame,main,info,desktopAction);
             // Report readiness only after the native file actions have been installed.
             window.EOLocalSession={controller,format,stats,api:main.api,file,win:frame,timings,editableMs:performance.now()};
-            status('');resolve();
+            status(kind==='pdf'&&!controller.canSave()?controller.readOnlyMessage():'');resolve();
           } catch(error){reject(error)}
         },onError:event=>reject(Error(event.data?.errorDescription||'Local editor failed'))}
       });
     });
-  } catch(error){controller=null;fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;buttons(false);recent().catch(fail)}
+  } catch(error){pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;await refreshHome();fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;buttons(false);recent().catch(fail)}
 }
 async function updateDirty(){if(controller)await eoDesktop.state(file.token,controller.isModified()||controller.hasPendingImages())}
 async function run(select){if(opening||operationBusy)return;window.EOLocalFailure=null;buttons(true);try{await open(await select())}catch(error){fail(error)}finally{buttons(false)}}
 async function save(as=false){
   if(!controller||operationBusy)return false;if(as)return chooseExport();window.EOLocalFailure=null;savingAs=as;
   try{await controller.save();await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error);return false}finally{savingAs=false}
+}
+function setDocumentName(name){
+ main.api.documentTitle=name;main.api.DocInfo?.put_Title(name);const doc=main.document||main.appOptions.spreadsheet;if(doc)doc.title=name;main.onDocumentName(name);backstage?.setName();
+}
+async function rename(){
+ if(!controller||operationBusy)return;
+ window.EOLocalFailure=null;
+ const label=backstage?.renameLabel||'Rename',box=modal(label),input=document.createElement('input'),notice=document.createElement('p');
+ input.id='desktop-rename-name';input.value=file.name.replace(/\.[^.]+$/,'');input.maxLength=200;input.setAttribute('aria-label',label);notice.setAttribute('role','status');box.append(input,notice);
+ const button=modalButton(box,t('save'),async()=>{
+  if(operationBusy)return;buttons(true);button.disabled=true;
+  try{
+   const renamed=await eoDesktop.rename(file.token,input.value);Object.assign(file,renamed);
+   setDocumentName(renamed.name);window.EOLastRename=renamed;box.close();await recoveryCopy();
+  }catch(error){notice.textContent=error.message;window.EOLocalFailure=error.message}
+  finally{buttons(false);button.disabled=false}
+ });
+ modalButton(box,t('cancel'),()=>box.close());input.focus();input.select();
 }
 async function chooseExport(){
  const formats=await eoDesktop.exportFormats(file.token),box=modal(t('saveAs'));
@@ -121,38 +140,39 @@ async function chooseExport(){
 }
 async function exportAs(format){
  if(!controller||operationBusy)return false;
- if(format==='pdf'){await pdf();return true;}
+ if(format==='pdf'&&(file.format!=='pdf'||!controller.canSave())){await pdf();return true;}
  if(format===file.format){
-  savingAs=true;try{await controller.save();await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error);return false}finally{savingAs=false}
+  savingAs=true;try{await (controller.saveAs?controller.saveAs():controller.save());await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error);return false}finally{savingAs=false}
  }
  buttons(true);abort=new AbortController();
  try{
-  const snap=await controller.snapshot();
-  const bytes=await frame.EOWasmConvert.convert(snap.bytes,snap.format,format,{resources:snap.resources,signal:abort.signal});
-  const saved=await eoDesktop.export(file.token,bytes,format);window.EOLastExport=saved;status(t('save')+' '+saved.name);return true;
+  let saved;await controller.exportCopy(format,async (bytes,protection)=>{saved=await eoDesktop.export(file.token,bytes,format,protection)});window.EOLastExport=saved;status(t('save')+' '+saved.name);return true;
  }catch(error){fail(error);return false}finally{buttons(false)}
 }
 async function pdf(print=false){
   if(!controller||operationBusy)return;window.EOLocalFailure=null;buttons(true);
   try {
     status(t('pdf')+'…');
+    if(file.format!=='pdf'){
     await script(frame,'/example/local-assets/sdkjs/common/clientpdf/clientpdf.js');
     await script(frame,'/example/local-assets/sdkjs/common/clientpdf/wasm-pdf.js');
     if(!frame.EODesktopPdf)await script(frame,'/example/local-assets/sdkjs/common/desktop/pdf.js');
-    const result=await frame.EODesktopPdf(main.api,file.format);
-    if(result.stats.backend!=='wasm')throw Error('Native local PDF export unavailable');
-    const saved=await eoDesktop.pdf(file.token,result.bytes,print);window.EOLastPdf={...saved,stats:result.stats};
+    }
+    const plainCopy=await controller.confirmUnprotectedExport?.();
+    const result=file.format==='pdf'?{bytes:await controller.serialize(),stats:{backend:controller.canSave()?'original-append':'drawingfile'}}:await frame.EODesktopPdf(main.api,file.format);
+    if(!['wasm','drawingfile','original-append'].includes(result.stats.backend))throw Error('Native local PDF export unavailable');
+    const saved=await eoDesktop.pdf(file.token,result.bytes,print,plainCopy);window.EOLastPdf={...saved,stats:result.stats};
     status(print?(saved.printed?t('print'):t('cancel')):saved?t('pdf'):t('cancel'));
   }catch(error){fail(error)}finally{buttons(false)}
 }
 async function recoveryCopy(){
- if(!controller||opening||operationBusy||recoveryBusy||closeCheck||info.capture||!controller.isModified())return;
+ if(!controller||file?.format==='pdf'||opening||operationBusy||recoveryBusy||closeCheck||info.capture||controller.isRecoveryLocked?.()||!controller.isModified())return;
  recoveryBusy=true;const selected=file,local=controller,editorWindow=frame,version=file.recoveryVersion||0;
  try{
   const snap=await local.snapshot();
-  const result=await editorWindow.EOWasmConvert.convert(snap.bytes,snap.format,selected.format,{resources:snap.resources});
+  const result=selected.format==='pdf'?snap.bytes:await editorWindow.EOWasmConvert.convert(snap.bytes,snap.format,selected.format,{resources:snap.resources});
   if(controller===local&&file===selected)await eoDesktop.recoverySave(selected.token,version,result);
- }catch(error){status(t('saveError'))}finally{recoveryBusy=false}
+ }catch(error){await eoDesktop.recoveryFailure().catch(()=>{});if(!recoveryNotified){recoveryNotified=true;status(t('recoveryFailed'));}}finally{recoveryBusy=false}
 }
 function scheduleRecovery(){
  let timer;
@@ -175,13 +195,14 @@ async function showOptions(){
  const options=await eoDesktop.recoveryOptions(),box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
  enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));box.append(label);
  const interval=document.createElement('select');interval.id='recovery-interval';interval.setAttribute('aria-label',t('autoRecover'));
+ if(file?.format==='pdf'){const pdfNote=document.createElement('p');pdfNote.textContent=t('pdfRecoveryOff');box.append(pdfNote);}
  for(const seconds of [15,30,60,120,300]){const option=document.createElement('option');option.value=seconds;option.textContent=String(seconds)+' s';option.selected=seconds===options.seconds;interval.append(option)}box.append(interval);
  const authorLabel=document.createElement('label'),author=document.createElement('input');author.id='author-name';author.maxLength=200;author.value=await eoDesktop.author();authorLabel.textContent=t('authorName');authorLabel.append(author);box.append(authorLabel);
- const aiController=(frame?.DE||frame?.SSE||frame?.PE)?.getController('Common.Controllers.ElixirAI');
+ const aiController=(frame?.DE||frame?.SSE||frame?.PE||frame?.PDFE)?.getController('Common.Controllers.ElixirAI');
  if(aiController)modalButton(box,'Elixir — '+t('settings'),()=>{box.close();aiController.openSettings(false)});
  const note=document.createElement('p');note.textContent=t('saveCopy')+'. '+t('privacy');box.append(note);
  await addFontOptions(box);
- modalButton(box,t('save'),async()=>{await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
+ modalButton(box,t('save'),async()=>{await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
  modalButton(box,t('cancel'),()=>box.close());
 }
 async function offerRecovery(){
@@ -214,16 +235,17 @@ async function addFontOptions(box){
 async function drop(event){
   if(!event.dataTransfer?.files.length)return;
   // Only intercept Office documents; other drops retain the editor's behavior.
-  if(!/\.(docx|doc|odt|rtf|txt|docm|dotx|xlsx|xls|ods|csv|xlsm|xltx|pptx|ppt|odp|ppsx|potx)$/i.test(event.dataTransfer.files[0].name))return;
+  if(!/\.(docx|doc|odt|rtf|txt|docm|dotx|xlsx|xls|ods|csv|xlsm|xltx|pptx|ppt|odp|ppsx|potx|pdf)$/i.test(event.dataTransfer.files[0].name))return;
   event.preventDefault();event.stopImmediatePropagation();document.body.classList.remove('drag');
   await run(()=>eoDesktop.drop(event.dataTransfer.files[0]));
 }
 
 eoDesktop.onAction(async action=>{
+  if(action==='prepare-close'){closeCheck=true;return}
   if(action==='resume-close'){closeCheck=false;if(pendingRequested)setTimeout(drainPending,0);return}
   if(action==='pending'){pendingRequested=true;return drainPending()}
   if(closeCheck && action!=='save-close')return;
-  if(action==='save-close'){if(await save())await eoDesktop.closeSaved();else closeCheck=false;return}
+  if(action==='save-close'){try{if(await save())await eoDesktop.closeSaved();}catch(error){fail(error)}finally{closeCheck=false;if(pendingRequested)setTimeout(drainPending,0)}return}
   ({'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
 });
 document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();document.body.classList.add('drag')}});

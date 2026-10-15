@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // D4 open-time probe. Injected input is CDP; viewer-frame is a paint proxy.
 import fs from 'node:fs';
 import path from 'node:path';

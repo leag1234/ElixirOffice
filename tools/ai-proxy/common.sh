@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 # Shared by install.sh and check.sh: reads the Elixir AI server configuration.
 # Sources, in this order: environment variables, then the file named by ELIXIR_AI_ENV (default: .env of
 # the repository). The file is parsed line by line (KEY=value), never executed.

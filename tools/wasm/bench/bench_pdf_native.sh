@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Native counterpart of bench_pdf.mjs: drawing-command stream -> PDF with x2t.
 # usage: bench_pdf_native.sh X2T STREAM_DIR OUT_DIR [RUNS]
 # font_selection.bin and AllFonts.js must sit next to X2T (its process directory).

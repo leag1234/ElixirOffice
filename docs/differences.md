@@ -1,9 +1,10 @@
 # ElixirOffice vs LibreOffice and OnlyOffice: key differences
 
-Living document, kept up to date as features land (requested by Gaël, 2026-10-05). Only list differences that a user would notice; each line links to the doc or test that backs it.
+Living document, kept up to date as features land (requested by the test user, 2026-10-05). Only list differences that a user would notice; each line links to the doc or test that backs it.
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
+| Local document encryption (H1 candidate) | Six Office/OpenDocument formats; masked open dialog, encrypted Save, explicit Keep/Change/Remove, session recovery disabled after protection; hosted unchanged | Independent encrypted-file interoperability not checked in this task | Local wasm workers previously lacked password options and offline protection UI was disabled | docs/local-passwords.md |
 | UI model | Word-identical ribbon (tabs, groups, contextual tabs, KeyTips, backstage) | Own UI (menus/toolbars, optional "tabbed" UI) | Ribbon, but own structure and vocabulary | docs/ui.md |
 | Familiar ground for Word users | Title bar with AutoSave switch (the real autosave setting), file name and Saved state, centred command search, Comments, Editing / Reviewing / Viewing and Share; mini toolbar in a table cell in Word's order (font, size, bullets, numbering, styles, bold, italic, underline, highlight, font colour, format painter, borders, shading, tall Insert, Delete, New comment); status bar "2 of 4,378 words" and Display Settings | Own layout, no mini toolbar in tables | Mini toolbar without table commands, no AutoSave switch | docs/ui.md (Familiar ground), tests/ribbon/familiar.mjs |
 | Keyboard shortcuts | 201/201 Word shortcut keys the editor can support (Windows), 149/149 (macOS), including Repeat (F4, Ctrl+Y when nothing to redo: the last command, typing included, is applied again to the new selection, one undo step), F2/Shift+F2 move or copy to a place, Spike, Paste Special, edit-place history, AutoText (Alt+F3), double and words-only underline and hidden text (stored in .docx), print preview and comment list keys | Partial, own defaults | Partial (76/171 before our work) | docs/shortcuts.md |
@@ -36,7 +37,7 @@ Living document, kept up to date as features land (requested by Gaël, 2026-10-0
 | Performance (Word editor) | 10-page doc editable 1.2 s, typing 27 ms p50 | Desktop app | upstream baseline 1.5 s, 43 ms | docs/perf.md |
 | Storage and identity | Your own Nextcloud or Murena Workspace: from the start page (Login Flow v2, app password kept encrypted on the server, revocable; browse, recent, open, save with conflict copy, new, upload) or inside Nextcloud Files (rebranded app), always alongside the server's own storage (never required: New, templates, Open, upload work with no cloud; a location choice appears once connected); your real name on comments, tracked changes and co-editing presence | Local files; WebDAV via the file dialog | Nextcloud/ownCloud/Seafile connectors (inside the storage only); example app with fixed test users | docs/storage.md |
 | Marelle school fonts | Ships the 8 national-education Marelle fonts (free, OFL) in the default pack, so teachers' Marelle documents render with the real font | Not shipped | Not shipped | docs/fonts.md § 10 |
-| French school cursive fonts | Seyes-ruled school cursive ("ruled school cursive") drawn with free Playwrite FR derivatives that keep the original line height and ruled lines; cursive substitutes for script fonts | Own substitution tables (no school fonts) | Falls back to a sans-serif | docs/fonts.md § 9 |
+| French school cursive fonts | Seyes-ruled school cursive ("Cursif & Lignes") drawn with free Playwrite FR derivatives that keep the original line height and ruled lines; cursive substitutes for script fonts | Own substitution tables (no school fonts) | Falls back to a sans-serif | docs/fonts.md § 9 |
 | Spreadsheet keyboard | Every Excel shortcut the editor can serve works on Windows and macOS (152/152 / 169/169 key variants): Repeat (F4, Ctrl+Y), End mode, F8 / Shift+F8 Extend and Add modes, Ctrl+., Ctrl+Shift+*, Ctrl+' / Ctrl+Shift+", Point mode (F2), Function Arguments (Ctrl+A), Paste Special (Ctrl+Alt+V), macOS keys (Cmd+T, Cmd+;, Option+arrows...) | Own defaults, partial Excel keys | Partial (79/141 before our work), no Repeat, End or Extend modes | docs/shortcuts-excel.md section 6 |
 | Flash Fill and Quick Analysis | Ctrl+E fills a column from one or two examples (words, initials, whole cells, case, literal text, header row detected, one undo); Quick Analysis button and Ctrl+Q (data bar, color scale, icon set, top 10 %, charts, totals below or to the right, table) | No Flash Fill, no Quick Analysis | None | tests/shortcuts-excel/features.mjs |
 | Auto Fill Options | After a fill handle drag a button at the corner of the filled range offers Copy Cells, Fill Series, Fill Formatting Only, Fill Without Formatting and Flash Fill (one column); the fill is undone and redone with the new option, one undo step; no button for Ctrl+D / Ctrl+R or a right-button drag (those have their own menu) | The fill handle fills with the default and has no options button (only a right-button drag menu, without the two formatting options) | None | tests/shortcuts-excel/autofill.mjs |
@@ -58,14 +59,14 @@ nondeterminism is normalized. This step changes build verification only; see
 
 W1 review: browser PDF discovers the installed runtime once per editor session. Images without it use the JS writer directly; installed runtime versions are selected by an atomic current.json pointer, without editing the backend.
 
-W5 image preparation: new builds install the checksum-pinned browser PDF runtime automatically and serve its 8.89 MB module as 3.13 MB Brotli (3.84 MB gzip), with correct MIME and immutable version caching. Runtime pointers are no-store. Prepared/tested on an own <dev-host> image; fresh build-host build and deployment remain lead acceptance. docs/wasm.md section 15.
+W5 image preparation: new builds install the checksum-pinned browser PDF runtime automatically and serve its 8.89 MB module as 3.13 MB Brotli (3.84 MB gzip), with correct MIME and immutable version caching. Runtime pointers are no-store. Prepared/tested on an own development host image; fresh build-host build and deployment remain lead acceptance. docs/wasm.md section 15.
 
 W4 browser acceptance: public local saves and native PDF pass Chromium/Firefox/WebKit; WebKit local handoff uses file bytes in IndexedDB. Local Font Access is Chromium-only. The100-page native1 GiB profile fails with real OOM in Firefox/WebKit;2 GiB passes all. Native Mac Safari is prepared, not yet run. See docs/wasm.md section18 and tests/browsers/README.md.
 
 D4 Word opening: small measured gain of about 0.3 s on 97 pages; ten pages and typing unchanged. Measurement limits and remaining costs: docs/perf.md section 9.
 
 Single-host server deployment: production image + HTTPS compose, optional AI, persistent state and stopped-volume backup/restore. Upstream packaging remains available. This is a review candidate; native DEB/RPM fresh-install acceptance and the public release source offer remain pending. See [install-server.md](install-server.md).
-Linux second-review preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md and docs/handoff/desktop-linux-preview-release-notes.md.
+Linux second-review preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md and the accompanying release acceptance record
 
 Windows desktop preview: unsigned x64 NSIS cross-build using a digest-pinned isolated Wine builder. Installer payload/resources/PE/source checks run on Linux; native Windows installation, dialogs, associations and privacy remain unverified pending the owner host. See [Desktop](desktop.md).
 
@@ -81,7 +82,7 @@ edit/save/reopen, escaping the ampersand title and omitting the empty phantom
 image. Private literal cache tables preserve worksheet-bound formulas.
 Separate default-color initializations remove pre-existing DOCX nondeterminism;
 three unchanged strict corpus runs pass, with only the approved ODS delta.
-Desktop previews were rebuilt with the final528 runtime and passed the public ODS95-value/PDF/reopen checks on Linux and macOS. They are deferred to beta2; the first public beta ships the server only. See docs/handoff/wasm-ods-embedded-objects.md.
+Desktop previews were rebuilt with the final528 runtime and passed the public ODS95-value/PDF/reopen checks on Linux and macOS. They are deferred to beta2; the first public beta ships the server only. See the accompanying release acceptance record
 
 Beta Mac packaging explicitly signs native code and nested bundles in dependency order with an ad-hoc identity only when publisher identity is null. Both build-tree and DMG copies pass strict deep verification. No signing credentials, extra entitlements or notarization are used.
 
@@ -94,7 +95,7 @@ Desktop Mailings limitation: Not yet available in the desktop app: mail merge (M
 Shared local D1–D2 review candidates enable single-user comments and Word tracked changes while collaboration/history remain disabled. Local picture clipboard/drop/file paths embed media; PNG/JPEG bytes remain intact and GIF/BMP/safe SVG/WebP become PNG. Arbitrary external URLs remain blocked with a clear message. The configured author setting is A6-owned; web PDF/Print/formats and protection/link work is E-owned. See desktop.md and the draft beta2 notes; no integration yet.
 Desktop beta2 A1–A3 candidates add all supplied spelling/thesaurus/hyphenation data with HTTP Range support, separate periodic local recovery copies and next-start restore, and validated native web/mail hyperlink dispatch. Browser-local recovery is not implemented by this group. A1–A3 were approved and integrated; desktop distribution remains beta2. See desktop-beta2-release-notes.md.
 
-Desktop beta2 A4–A6 review candidates add other-format export/copy imports, explicitly consented native AI with encrypted keys, localized offline Help/F1, author preferences, embedded local media and verified Word/PowerPoint chart data editing. Extra picture types share session D’s local pipeline. UTF-8 conversion requires the new private Wasm overlay/pin; no public runtime is replaced by this task. Source and package receipts are recorded in docs/handoff/codex-log.md. No A4–A6 integration yet.
+Desktop beta2 A4–A6 review candidates add other-format export/copy imports, explicitly consented native AI with encrypted keys, localized offline Help/F1, author preferences, embedded local media and verified Word/PowerPoint chart data editing. Extra picture types share session D’s local pipeline. UTF-8 conversion requires the new private Wasm overlay/pin; no public runtime is replaced by this task. Source and package receipts are recorded in the accompanying release acceptance record No A4–A6 integration yet.
 
 
 A4–A6 review fixes protect the configured AI model/conversation from extra parameters, verify encrypted key persistence and refuse plaintext storage, hide unsupported spreadsheet/presentation AI settings, and guard numeric Wasm UTF-8 conversion for null/empty input. All 45 shell locale names and new labels are checked against the editor inventory. Help platform evidence explicitly distinguishes all-platform menu units from Linux native acceptance. The guarded full runtime and Linux packages remain private review candidates; no integration yet.
@@ -115,3 +116,60 @@ D3–D4 review follow-up: spreadsheet Protect Range is verified in browser local
 Desktop Help review candidate: File > Help bypasses the hosted Help panel through a desktop-only native action. All three shared menus guard absent Help panels in every mode; hosted Help permissions are unchanged. Help uses the selected editor UI language with English fallback, independently of document spelling or system locale. Desktop AI disclosure now describes operating-system encryption and never redisplaying the saved key, with45locale English fallbacks; browser localStorage disclosure remains unchanged. Recovery test cleanup checks signalCode before killing its own live child group.
 
 Desktop capture startup rejects malformed requests without an uncaught main-process error dialog: the error is logged and the app exits 1 before an instance lock, browser window or document opens. Normal Mac test launches explicitly isolate user data; capture-only profiles stay inside the requested output folder. No debug or document argument was added to capture mode.
+
+### Storage Rename and folder-aware Save As (review candidate)
+
+Hosted This server and the Nextcloud/Murena connector now rename stored files, preserve their editing identity across callbacks and refuse collisions. Save As selects a destination folder and creates a separate copy, with permission and no-overwrite checks. Native Rename preserves pending edits and changes the subsequent save path; native Save As uses the OS dialog. Browser-local Rename explicitly names downloaded copies, preserving the original selected file. See storage.md section8 and tests/fileops/.
+
+This server example storage uses client-IP/X-Forwarded-For addressing, including explicit useraddress download/history parameters; it does not provide authenticated per-user isolation. The Rename/copy grants preserve this pre-existing model. See storage.md section8.
+
+## Local PDF preview (G1a, awaiting review)
+
+Desktop and browser convert-locally mode can open PDF bytes directly in the bundled PDF editor. View, text search/select/copy, page navigation, ordinary AcroForm filling and comments/annotations operate locally. Original text editing, OCR and PDF-to-DOCX are not enabled. PDF document JavaScript and form URI actions are disabled locally; scripted calculations and validation therefore are not supported. Hosted PDF behavior remains unchanged.
+
+This stage exports PDF copies and supports local printing, while Save to the original stays disabled pending G1b. The existing drawingfile SplitPages writer retains tested pages, basic form values and annotations, but drops document Title/Author/Subject and bookmarks; signatures are invalidated. Copy export asks for acknowledgement of these losses, defaults to a copy name on desktop and rejects the original path or hard-link identity. It never acknowledges the original as saved. The engine still emits upstream Creator/Producer metadata: this is an open G1b/release issue, not a branded writer acceptance. No newly built package is approved by this source-stage report.
+
+Acceptance on public synthetic fixtures: 94 desktop units; real sandboxed Linux Electron source/dev runs with two pages, a text field filled through keyboard input, old/new annotations and author names retained after export/reopen, unchanged original bytes, visible native copy-loss warning cancelled, real native print dialog cancelled (no print); Firefox browser raw open, search two matches, copy both pages, page navigation, form UI input, comment, actual PDF download and fresh reopen, no Node, 170 static GETs and no upload/server fallback/external request. A 250-page 74,391-byte synthetic PDF reached SDK-ready in about 1.2 seconds on development host; this is not a large-image-PDF memory or first-paint benchmark. New native macOS/Windows PDF acceptance and encrypted/signed/XFA cases remain unverified and belong to subsequent gates.
+
+## Initial G1b preservation candidate (superseded by the safety review below)
+
+Local desktop PDFs now use a bounded incremental writer for original Save and Save As. The complete original byte sequence must remain the output prefix. Native Save clears the unsaved state only after atomic persistence acknowledges the unchanged edit history; browser-local Save downloads a copy and keeps the source unsaved state. Autosave remains disabled. Unsupported or protected PDFs are read-only for original saving; copy export retains the explicit protection/property loss warning. Hosted PDF editing is unchanged.
+
+The parsed policy refuses encryption, signature markers (including compressed objects), XFA, non-text form fields, scripted actions, unsupported catalog/annotation structures and linearization markers. Bounds are 128 MiB input, 64 MiB changes, 256 MiB output, 2,000 pages, 200,000 objects, bounded traversal and a 60-second worker deadline. Producer and modification date change intentionally; original Creator, Title, Author, Subject and outline are retained in the public proof. This is a conservative supported subset, not unrestricted PDF editing.
+
+Evidence: 15 actual browser policy cases; eight independent Poppler preservation outputs; classic/compressed object and xref streams; text/highlight/ink annotations and URI links; first/repeated/second-edit/Undo fresh reopen; 250-page public sample; 116 desktop units after the bd2b998 rebase; sandboxed Linux two atomic saves and fresh reopen. Both runtimes were rebuilt from recipe 8b15cde and core 528e920e4f34 with patches 0001–0011: full 528e920e4f34-b84bad726b86-st and PDF-only 528e920e4f34-7e3dabf57ea2-st. D's password integrity (3) and actual workers (12 groups) pass. Hosted smoke and Windows/Mac shortcut scopes pass with zero errors/failures.
+
+Signature/XFA/linearization fixtures test presence refusal, not cryptographic signature validity or conformance. Image-heavy peak memory, original PDF saving on macOS/Windows, physical printing and new release packages are unverified. Native Linux Save As/print acceptance is recorded separately in the task checks. No integration or publication by session A.
+
+## G1b safety review follow-up (2026-10-13)
+
+Original PDF saving now requires both the complete original byte prefix and exact input/output page-count equality. A shared C++ validator is tested with a fault-injected writer that drops/duplicates pages. The native parser inspects stream dictionaries as well as plain dictionaries, and set AcroForm SigFlags cause a signature refusal. Policy remains writable=false before editing and on every failed branch, becoming true only after output parsing and preservation checks pass. Page-root identity is not separately compared.
+
+Current matched runtimes, built from product recipe05d8f7f and core528e920e4f34 plus patches0001–0011:
+- Full: **528e920e4f34-bd14d110aa08-st**, manifest SHA256 **0d97c1fcec3355ed9f5d43e52357d3dda197abe35d0ffc1a74c0a0cf17b73964**.
+- PDF-only: **528e920e4f34-98ab90f5d735-st**, manifest SHA256 **d9f0109b81130dbadb9f1e8b99e0e024899844a0874784bfc1310bf8fd34d0c6**.
+All12 artifact hashes and common source/patch/tool provenance match. The shared page-count guard header is recorded in both manifests. H1 and initial G1b runtime identifiers elsewhere are historical.
+
+Refusal reasons come from the existing45locale catalogs with English fallback and French translations. Desktop and browser-local modes show the reason, original safety and copy offer; cancellation does not falsely label a writable document read-only. Unsupported named destinations, portfolios and automatic catalog actions are explicitly disclosed. The existing copy loss confirmation and original-path/hard-link refusal remain mandatory.
+
+Acceptance:120desktop units;9password-state units;2legal-attribution units;1manifest test; fault-injected C++ guard;23actual native policy cases plus3failed-write false-policy cases; four first/repeated/second/Undo outputs and four classic/compressed annotation/link cases;8independent Poppler appearance/property/outline/order proofs; actual visible browser Save download keeps dirty state,200staticGET/0errors/250pages;3actual French read-only UI cases. D integrity3 and actual six-format web/desktop worker12groups pass on the final full runtime. Hosted own:32793 smoke0errors/fails and win228+14/mac171+13shortcut scopes pass.
+
+Final matched pair in sandboxed Linux source/dev overlay: two atomic original saves/fresh reopen (7091/8681bytes, old/new annotations retained) and3actual native refusal/copy-offer cases pass without focused input. Fresh native SaveAs/print-dialog reruns are UNVERIFIED: test desktop relocked (LockedHint=yes), owner unlock requested; no focused native event sent. Their earlier G1b native results remain recorded as historical evidence, not a fresh-module pass. Existing Help3/fonts native consent/rename/protected-DOCX menu checks passed before this hardening; those hooks are unchanged.
+
+Current development host assembly has18,393 exact hashed resources after removing only own inactive generated runtime versions; all four production editor bundles and45desktop catalogs are present. Linux evidence is a source/dev overlay, not a release package. macOS/Windows original PDF Save, physical printing, image-heavy peak memory and fresh release packages remain unverified. Signature/XFA/linearization samples are marker-presence fixtures, not cryptographic/conformance proofs. Startup deletion of stale .bak/.tmp is deferred: a backup may be the only recoverable original, and safe automatic cleanup requires a durable ownership/recovery ledger.
+
+No integration, push, demo change or publication by session A. Task/checks/evidence: /srv/elixiroffice/wt/pdf-local-A-G1b-work.
+
+- Desktop Close and Quit offer a native Cancel/Discard choice when busy or unresponsive; a confirmed Save/Discard finishes without a second browser unload veto. Unknown state preserves recovery. See docs/desktop.md.
+
+- Home templates: four localized CC0 examples cover 39 font-covered editor languages, including content/previews and proofing tags; six other languages use the English template; English fallback, no French-only default. See docs/home.md.
+
+RTL table visual direction: generated Arabic/Hebrew templates retain standards-correct
+w:bidiVisual. The current editor/converter renders their table columns left to right,
+where Word mirrors the visual columns. Paragraph/run direction, header anchors and
+signature alignment are mirrored. No double-mirroring workaround is applied.
+A focused SDK search found paragraph-level CTable.SetParagraphBidi only, with no
+bidiVisual table property or obvious hosted setting; an engine investigation is
+queued for the next release.
+
+Narrow desktop PDF correction candidate: PDF AutoRecover disabled, detailed manual errors, desktop-only modern wheel scrolling and clear original-text-editing limits. Tagged browser/Word PDFs still require a copy when in-place preservation is refused. Hosted editing and converter/PDF pins are unchanged; see docs/desktop.md for evidence and remaining native checks.

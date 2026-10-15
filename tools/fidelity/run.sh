@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Layout-fidelity harness, one command:
 #   start DocumentServer -> convert the corpus to PDF -> get the reference PDFs
 #   -> rasterise + compare page by page -> results.json + HTML report.
@@ -15,8 +14,8 @@ set -euo pipefail
 
 REF=word-web
 IMAGE=elixiroffice/documentserver:latest
-FID_HOME=${FIDELITY_HOME:-$EO_WORK/fidelity}
-CORPUS=${FIDELITY_CORPUS:-$EO_WORK/corpus-provisional}
+FID_HOME=${FIDELITY_HOME:-/srv/elixiroffice/fidelity}
+CORPUS=${FIDELITY_CORPUS:-/srv/elixiroffice/corpus-provisional}
 REFS_DIR="" RUNS_DIR="" BASELINES_DIR=""
 IDS="" BASELINE="" SAVE_BASELINE=0 DPI=120 PORT=8095 WORKERS=4
 KEEP_GOING=0 REFRESH_REFS=0 KEEP_SERVER=1

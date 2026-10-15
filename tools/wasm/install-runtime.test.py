@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Reject wrong module kinds and corrupted releases before installing any files."""
 import hashlib
 import json

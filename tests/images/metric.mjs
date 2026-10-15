@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Layout stability metric (docs/images.md, section 3, "Stability metric").
 //
 // Compares two layout snapshots (probe.js) taken before and after one user action and

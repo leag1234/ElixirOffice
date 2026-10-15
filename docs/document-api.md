@@ -1,6 +1,6 @@
 # Word editor document API: what the AI orchestrator can do
 
-> Read-only, done on 2026-10-05 on `<build-host>:$EO_WORK/upstream/DocumentServer` (submodules at tag `v9.3.5-rc.1`) and on `upstream/plugin-aiautofill`.
+> Read-only, done on 2026-10-05 on `build-host:/srv/elixiroffice/upstream/DocumentServer` (submodules at tag `v9.3.5-rc.1`) and on `upstream/plugin-aiautofill`.
 > Paths are relative to `DocumentServer/`. A `file:N` reference designates a line that was read. A range `N-M` designates a block that was read.
 > "Not verified" means: nothing was executed, and the code read is not enough to conclude. "Deduced" means: conclusion drawn from several readings, without a test.
 

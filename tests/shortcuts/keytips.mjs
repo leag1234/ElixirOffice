@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // KeyTips (ribbon access keys) like Word: Alt, then the tab letter, then the command letters.
 //   node tests/shortcuts/keytips.mjs [screenshot dir] [--out results.json]
 // Ids are those of docs/shortcuts-word.csv (scope keytips) plus kt.* checks of this suite.

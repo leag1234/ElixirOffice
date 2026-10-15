@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // W2 ten-page acceptance: selective fonts, persistent cache, memory and missing-font fallback.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Test cases of the Word editing shortcuts of word/Editor/word-edit-keys.js (docs/shortcuts-word.csv):
 // F2 / Shift+F2, Spike, Paste Special, edit locations, underline styles, hidden text, ...
 // Same case format as cases.mjs.

@@ -38,7 +38,7 @@ const {_electron}=require(process.env.EO_PLAYWRIGHT||'../../tools/node_modules/p
    for(let i=0;i<12;i++){const tips=frame.locator('.asc-synchronizetip .close,.asc-synchronizetip .btn-div,.asc-synchronizetip .show-link');let closed=false;for(const tip of await tips.all())if(await tip.isVisible()){await tip.click();closed=true;}await new Promise(resolve=>setTimeout(resolve,300));if(!closed&&i>2)break;}
    assert.equal(await frame.locator('.asc-synchronizetip:visible').count(),0,'Desktop feature tips must be suppressed');
    if(entry==='bar')await frame.locator('.elx-lf-btn.primary').filter({hasText:/Use my fonts|Utiliser mes polices/}).click({timeout:20000});
-   else {await page.evaluate(()=>{const win=EOLocalSession.win;(win.DE||win.SSE||win.PE).getController('ElixirChrome').openBackstage('elx-home')});await frame.locator('#fm-btn-settings').click();await frame.locator('#elx-lf-chb').click();}
+   else {await page.evaluate(()=>{const win=EOLocalSession.win;(win.DE||win.SSE||win.PE).getController('ElixirChrome').openBackstage('elx-home')});await frame.locator('#fm-btn-settings').click();await page.locator('.desktop-options #computer-fonts-enabled').click();}
    let dialogs=[];
    for(let i=0;i<100;i++){dialogs=await app.evaluate(()=>globalThis.EOFontDialogs);if(dialogs.length)break;await new Promise(resolve=>setTimeout(resolve,100));}
    const text=await frame.locator('body').innerText();

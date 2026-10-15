@@ -3,7 +3,7 @@
 node_modules/
 /out/
 
-# Private user documents: never in git. Keep them outside the repository (e.g. $EO_WORK/corpus-private/).
+# Real user documents (Gaël): never in git. They live on build-host in /srv/elixiroffice/corpus-private/
 corpus/real/
 corpus-private/
 *.real.docx
@@ -13,10 +13,3 @@ fonts-user/
 *.ttf
 *.otf
 *.ttc
-
-# Generated test and measurement outputs
-results/
-
-# Generated Python bytecode
-__pycache__/
-*.pyc

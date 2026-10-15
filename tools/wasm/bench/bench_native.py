@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Benchmark the native x2t: office -> editor format -> office, per file.
 
 usage: bench_native.py X2T CORPUS_DIR OUT_DIR [RUNS]

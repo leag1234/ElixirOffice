@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Summarize D4 raw load profiles and opening/typing evidence."""
 import json,sys,collections
 from pathlib import Path

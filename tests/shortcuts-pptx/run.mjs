@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // PowerPoint keyboard shortcuts suite for the ElixirOffice presentation editor.
 //
-// Usage (on the dev host, Playwright installed in $EO_WORK/pw):
+// Usage (on the dev host, Playwright installed in /srv/elixiroffice/pw):
 //   node tests/shortcuts-pptx/run.mjs http://localhost:32773 [--only id1,id2] [--out dir] [--platform win|mac]
 //
 // Each case of cases.mjs plays one shortcut of docs/shortcuts-powerpoint.csv

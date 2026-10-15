@@ -1,8 +1,7 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Shared helpers of the performance harness (docs/perf.md).
 //
 // Environment:
-//   PW_DIR   directory where the playwright package is installed (default $EO_WORK/pw)
+//   PW_DIR   directory where the playwright package is installed (default /srv/elixiroffice/pw)
 //   PERF_HEADFUL=1   run a visible browser (debugging only; numbers are not comparable)
 import fs from "node:fs";
 import os from "node:os";

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Client-side PDF gate: SSIM (tools/fidelity/compare.py, client vs server PDF) + text, fonts, size, uploads.
 # Usage: tools/client-pdf/gate.sh <bench dir> [corpus dir]   (bench dir written by bench.mjs)
 # Runs in the fidelity tools image (python, poppler); TOOLS_IMAGE overrides it.

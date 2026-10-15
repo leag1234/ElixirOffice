@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Give the blank .docx templates Word's defaults (Word 2016-2021 "Normal" template look).
 
 Usage: make_blank_docx.py <document-templates/new>

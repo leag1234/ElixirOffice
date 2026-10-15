@@ -1,5 +1,4 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Apply the server side of the elixir/perf fixes (docs/perf.md, fixes 3 to 5) to a
 # running dev container, without recreating it. Run as root inside the container
 # (make perf-tuning). Idempotent: a rerun only recompresses what changed.

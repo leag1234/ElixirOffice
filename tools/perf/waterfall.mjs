@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // debug: waterfall of one editor load with response ends, websocket frames and editor events
 import { launch, closeBrowser, instrument, uploadDocx, deleteFile, uniqueName, probeEditable, collect } from "./lib.mjs";
 const BASE = process.argv[2], file = process.argv[3], thr = +(process.argv[4] || 1), warm = process.argv[5] === "warm";

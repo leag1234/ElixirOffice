@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Verify that asset deployment preserved every release byte and its pointer."""
 import hashlib
 import json

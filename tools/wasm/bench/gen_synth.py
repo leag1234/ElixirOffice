@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate synthetic benchmark documents (no private data), deterministic.
 
 usage: gen_synth.py OUT_DIR

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Generate the input documents of the AI reference tasks (eval/tasks/*/input.docx).
 
 Standard library only (zipfile + raw WordprocessingML): python-docx is not installed on the

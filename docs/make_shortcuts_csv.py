@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Writes docs/shortcuts-powerpoint.csv: PowerPoint keyboard shortcuts (Windows, and the macOS keys tested) vs ElixirOffice.
 
 Sources (retrieved 2026-10-05):

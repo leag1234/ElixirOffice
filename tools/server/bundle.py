@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Build a deployment archive; optionally export its image, without publishing."""
 import argparse
 import gzip
@@ -49,6 +48,8 @@ def main():
     (stage / "docs").mkdir()
     for name in ("install-server.md", "storage.md", "ai.md"):
         shutil.copyfile(repo / "docs" / name, stage / "docs" / name)
+    (stage / "docs/handoff").mkdir()
+    shutil.copyfile(repo / "docs/handoff/codex-log.md", stage / "docs/handoff/codex-log.md")
     shutil.copytree(args.licences, stage / "licences")
     manifest = {
         "review_only": args.review, "deployment_revision": revision,

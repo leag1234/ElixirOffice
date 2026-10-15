@@ -8,6 +8,10 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 [ "$(node -p process.versions.node)" = 22.23.3 ] || { echo "Select the verified portable Node22.23.3 in PATH" >&2; exit 1; }
 mkdir -p "$MAC_BUILD_CACHE"
 MAC_BUILD_CACHE="$(cd "$MAC_BUILD_CACHE" && pwd)"
+mkdir -p "$MAC_BUILD_CACHE/home" "$MAC_BUILD_CACHE/tmp"
+env -i HOME="$MAC_BUILD_CACHE/home" TMPDIR="$MAC_BUILD_CACHE/tmp" PATH="$PATH" \
+  python3 "$ROOT/tools/desktop/build-python.py" "$ROOT" "$MAC_BUILD_CACHE"
+export PATH="$MAC_BUILD_CACHE/python/bin:$PATH"
 python3 "$ROOT/tests/desktop/verify-resources.py" "$ROOT/desktop/assets"
 python3 "$ROOT/tests/desktop/check-samples.py" "$ROOT/desktop/assets"
 mkdir -p "$MAC_BUILD_CACHE/home" "$MAC_BUILD_CACHE/tmp"

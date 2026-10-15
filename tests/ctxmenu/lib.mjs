@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Context-menu sweep engine (shared by the Word, Spreadsheet and Presentation sweeps).
 //
 // For every context a scenario opens the right-click menu with a real mouse event, lists

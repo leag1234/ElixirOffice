@@ -127,18 +127,18 @@ font) and Noto Sans CJK (`.ttc` collection) cover the variable and collection ca
 
 `tools/lan-https/`: a separate Docker Compose project (`eo-lan-https`, `restart: unless-stopped`, only port 8443
 published: Docker-published ports are not filtered by the host's ufw, so the LAN can reach it) serving
-`https://$HOST:8443` (and `$HOST`, `localhost`) in front of the development instance `eo` (host port
+`https://192.0.2.10:8443` (and `dev-host`, `localhost`) in front of the development instance `eo` (host port
 8080), WebSocket included. It touches neither the demo (80/443) nor any other port. A browser sends no SNI for an IP
 address, so the Caddyfile's `default_sni` is the LAN address (use that address, not the wifi one). The
 certificate is issued by Caddy's internal authority ("Caddy Local Authority"); its root certificate can be
 downloaded, without the key:
 
-- `https://$HOST:8443/elixir-ca.crt` (root certificate, valid until 2036);
-- `https://$HOST:8443/elixir-https.html` (one-page how-to for the tester, in French on purpose: it is
+- `https://192.0.2.10:8443/elixir-ca.crt` (root certificate, valid until 2036);
+- `https://192.0.2.10:8443/elixir-https.html` (one-page how-to for the tester, in French on purpose: it is
   end-user content for the French-speaking tester).
 
-Deployment: `cp tools/lan-https/{docker-compose.yml,Caddyfile} $EO_WORK/lan-https/ && cp -r
-tools/lan-https/static $EO_WORK/lan-https/ && cd $EO_WORK/lan-https && docker compose up -d`.
+Deployment: `cp tools/lan-https/{docker-compose.yml,Caddyfile} /srv/elixiroffice/lan-https/ && cp -r
+tools/lan-https/static /srv/elixiroffice/lan-https/ && cd /srv/elixiroffice/lan-https && docker compose up -d`.
 If the host's DHCP address changes, change it in the site address and in `default_sni` of the `Caddyfile` and restart.
 
 ### Trusting the certificate (once per computer)
@@ -160,8 +160,8 @@ is for this test server only; do not install it on a shared computer.
 
 ```
 # test fonts installed (section 5), development instance with the feature on :8082
-EO_BASE=http://localhost:8082 EO_INSECURE_BASE=http://$HOST:8082 \
-EO_HTTPS_BASE=https://$HOST:8443 node tests/localfonts/run.mjs
+EO_BASE=http://localhost:8082 EO_INSECURE_BASE=http://192.0.2.10:8082 \
+EO_HTTPS_BASE=https://192.0.2.10:8443 node tests/localfonts/run.mjs
 ```
 
 `tests/localfonts/run.mjs` (Playwright, Chromium with the `local-fonts` permission, Firefox for the unsupported
@@ -181,4 +181,4 @@ variable `CERTUTIL`), installs `elixir-ca.crt` in it, starts Chromium with that 
 **without a certificate exception**: valid chain issued by "Caddy Local Authority", `isSecureContext === true` and
 `typeof queryLocalFonts === "function"`. The other cases use `ignoreHTTPSErrors` (no effect on whether the context
 is secure). Command-line check of the chain:
-`openssl s_client -connect $HOST:8443 -CAfile elixir-ca.crt -verify_ip $HOST` ("Verify return code: 0").
+`openssl s_client -connect 192.0.2.10:8443 -CAfile elixir-ca.crt -verify_ip 192.0.2.10` ("Verify return code: 0").

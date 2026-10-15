@@ -1,5 +1,4 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-only
 # Same native Playwright browsers as the normal run, in own systemd user scopes.
 set -euo pipefail
 : "${EO_BASE:?own instance required}"

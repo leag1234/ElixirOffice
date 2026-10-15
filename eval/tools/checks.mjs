@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Helpers shared by the success criteria of the eval tasks (eval/tasks/*/check.mjs).
 // before/after are tools/eval/lib.mjs snapshots; `final` is the document once changes are accepted.
 export function criteria() {

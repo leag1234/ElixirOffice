@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Pinned manifest and artifact checks happen before image-context writes."""
 import hashlib
 import json

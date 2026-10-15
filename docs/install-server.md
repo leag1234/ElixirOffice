@@ -396,6 +396,7 @@ Retain package licence files and upstream attributions. Include source/submodule
 pins, runtime manifest, build scripts, checksums and corresponding-source offer
 with third-party binaries. Publication/source-offer location belongs to the owner.
 Do not redistribute a review image while that information is missing.
+Exact review evidence/limitations: the accompanying release acceptance record
 
 Deployment bundling: tools/server/bundle.py takes the image build record, exported
 image licences and a matching image reference, writes deployment/image checksums,

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Client-side PDF bench (docs/client-pdf.md): for each .docx, open it in the editor of a running
 // instance, export the PDF twice through the interface's Download as PDF code path:
 //   <out>/client/<id>.pdf  made in the browser (sdkjs common/clientpdf), nothing sent to the server
@@ -10,7 +9,7 @@
 // anonymous (anon.mjs), uploads are named by id, and no file name or title is printed or stored.
 //
 // Usage: EO_BASE=http://localhost:8084 node tools/client-pdf/bench.mjs [--private] <out dir> <file.docx|corpus dir> [...]
-//        (PW_MODULE: path of playwright's index.mjs, default $EO_WORK/pw/node_modules/playwright/index.mjs)
+//        (PW_MODULE: path of playwright's index.mjs, default /srv/elixiroffice/pw/node_modules/playwright/index.mjs)
 import fs from "fs";
 import path from "path";
 import os from "os";

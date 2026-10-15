@@ -1,6 +1,6 @@
 # DOCX layout fidelity corpus – ElixirOffice
 
-> **PROVISIONAL CORPUS**: a synthetic and open-licence corpus used to bootstrap the measurement chain.
+> **⚠ PROVISIONAL CORPUS** — "provisional corpus, to be replaced by the real documents supplied by the test user".
 > These 30 files only serve to bootstrap the measurement chain (Word for the web rendering → PDF
 > against ElixirOffice server rendering → PDF, page-by-page comparison). They do not replace a corpus
 > of real user documents.
@@ -101,7 +101,7 @@ Code organization:
   by Word — kept on purpose.
 - Opening with python-docx: 30/30.
 - PDF conversion by LibreOffice 24.8 (`soffice --headless --convert-to pdf`, on a macOS machine, LibreOffice
-  not being installed on <build-host>): 30/30 converted; visual check of the renderings of the generated files.
+  not being installed on build-host): 30/30 converted; visual check of the renderings of the generated files.
 - **Not verified: opening in Microsoft Word.** To be done at the first Word for the web pass.
 
 ## Features exercised

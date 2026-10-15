@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Office ScreenTips, focus states, tab switching, no layout jump.
 //   node tests/shortcuts/screentips.mjs [screenshot dir] [--out results.json]
 import fs from "node:fs";

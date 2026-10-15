@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Benchmark x2t.wasm under Node: office -> editor format -> office, per file.
 // usage: node bench_wasm.mjs X2T_JS CORPUS_DIR OUT_DIR [RUNS] [FONTS_DIR]
 // Files live only in the module's in-memory FS (same as in a browser).

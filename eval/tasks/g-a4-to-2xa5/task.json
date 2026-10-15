@@ -1,10 +1,10 @@
 {
   "id": "g-a4-to-2xa5",
-  "title": "A4 document to 2×A5 (user request 2)",
+  "title": "A4 document to 2×A5 (Gaël's request 2)",
   "instruction": "Transforme ce document A4 en 2×A5",
   "select": null,
   "input": "input.docx",
-  "kind": "user",
+  "kind": "gael",
   "lang": "fr",
   "notes": "A4 flyer with a 170 mm wide picture, a 4-column table and large titles. Expected: every section A5 portrait, the picture and the table fit the A5 text column, sensible page count, and the answer says how to print two A5 pages per A4 sheet."
 }

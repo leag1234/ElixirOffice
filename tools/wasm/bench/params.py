@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 """Shared helpers: x2t task XML and format codes (Common/OfficeFileFormats.h)."""
 from xml.sax.saxutils import escape
 

@@ -17,4 +17,4 @@ docker run --rm --user "$(id -u):$(id -g)" \
   --env HOME=/work/home --env ELECTRON_BUILDER_CACHE=/work/builder-cache \
   --env CSC_IDENTITY_AUTO_DISCOVERY=false --env USE_SYSTEM_WINE=true \
   --entrypoint /bin/bash "$WINDOWS_BUILDER_IMAGE" \
-  -c 'set -euo pipefail; npm ci; npm run test; npm run package:windows'
+  -c 'set -euo pipefail; python3 /project/tools/desktop/build-python.py /project /work; export PATH="/work/python/bin:$PATH"; npm ci; npm run test; npm run package:windows'

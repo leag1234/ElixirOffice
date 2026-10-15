@@ -23,7 +23,7 @@ function render(container,info,actions,view='home'){
   }
   for(const template of info.templates){
    const tile=button('',()=>actions('template',template.id),'tile tile-template'),thumb=element('span','thumb thumb-image'),img=element('img');img.src=base+'templates/'+template.thumb;img.alt='';thumb.append(img);
-   tile.append(thumb,element('span','tile-label',t(template.titleKey)));tile.dataset.template=template.id;tiles.append(tile);
+   tile.append(thumb,element('span','tile-label',template.title||t(template.titleKey)));tile.dataset.template=template.id;tiles.append(tile);
   }
   section.append(tiles);main.append(section);
  }
@@ -33,7 +33,7 @@ function render(container,info,actions,view='home'){
  const tbody=element('tbody');
  for(const item of info.recents){
   const row=element('tr'),cell=element('td','c-name'),b=button('',()=>actions('recent',item.id),'file-link');
-  const type=/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(item.name)?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(item.name)?'slide':'word',symbol=icon(type);symbol.classList.add('t-'+type);
+  const type=/\.pdf$/i.test(item.name)?'pdf':/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(item.name)?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(item.name)?'slide':'word',symbol=icon(type);symbol.classList.add('t-'+type);
   const label=element('span');label.append(element('span','file-name',item.name),element('span','file-where',item.folder));b.append(symbol,label);cell.append(b);row.append(cell);
   const date=item.modified?new Intl.DateTimeFormat(info.language,{dateStyle:'medium',timeStyle:'short'}).format(new Date(item.modified)):'—';row.append(element('td','c-date',date));tbody.append(row);
  }

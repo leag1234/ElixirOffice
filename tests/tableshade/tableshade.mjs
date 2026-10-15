@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
-// F10: Table Design > Shading recolours the whole cell, text area included.
+// F10 (docs/backlog.md): Table Design > Shading recolours the whole cell, text area included.
 // The fixture repeats the pale cell colour as direct paragraph and/or run shading of the cell text
 // (as LibreOffice-saved or converted files do). Changing the cell colour from the Table Design tab
 // must remove those duplicates in the same action (one undo step) and keep any other shading.

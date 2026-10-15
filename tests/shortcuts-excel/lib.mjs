@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only
 // Shared helpers of the Excel keyboard-shortcut suite (Playwright against a running
 // spreadsheet editor). Mirrors tests/shortcuts/lib.mjs (Word).
 //
@@ -6,7 +5,7 @@
 //   EO_BASE   editor instance (default http://localhost:8099)
 //   EO_FILE   workbook of the example storage to open instead of a new blank one
 //             (e.g. c04-blank-ish.xlsx; it is then shared with other sessions: avoid)
-//   PW_DIR    directory where the playwright package is installed (default $EO_WORK/pw)
+//   PW_DIR    directory where the playwright package is installed (default /srv/elixiroffice/pw)
 //
 // Every browser opens its own new workbook (/example/editor?fileExt=xlsx), so no
 // other session co-edits it. The test data is written once through the builder

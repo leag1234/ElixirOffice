@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Inline spelling correction (feedback F2): right-click on a misspelled word offers the best
 // suggestions, Ignore All, Add to Dictionary and Language; F7 and Review > Spelling keep working.
 //   node tests/spell/spell.mjs [--out results.json]      (EO_BASE=http://host:port)

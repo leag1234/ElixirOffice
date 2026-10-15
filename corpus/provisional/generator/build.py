@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# SPDX-License-Identifier: AGPL-3.0-only
 """Build the provisional corpus (generated documents) + manifest.csv.
 
 Usage:  python3 build.py [--only t01,s03,...]

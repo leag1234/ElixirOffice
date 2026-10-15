@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Font name and font size drop-downs (feedback F5-F7): the mini toolbar and the ribbon of the three editors.
 // Real mouse clicks, like a tester on macOS (Chrome/Safari-like user agent) in a French school document:
 //   - the mini toolbar floats above the selection together with the right-click menu

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Screenshot sequence of one task, for documentation: selection, command, progress, review with
 // tracked changes, accept, and the single undo.
 //   node tools/eval/demo-sequence.mjs <task> <model> <outdir>

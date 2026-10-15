@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-only
 """Rebrand the upstream Nextcloud app (the first-level fork of ONLYOFFICE's connector) as ElixirOffice.
 
 The upstream name is spelled in pieces in this file (E below): it is the one place

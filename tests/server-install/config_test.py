@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only
 import importlib.util
 from pathlib import Path
 import stat

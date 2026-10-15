@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: AGPL-3.0-only
 // Screenshots of OUR Word editor at the size and zoom of the Word reference (1930x1040, 120%), en and fr.
 //   node tests/ribbon/familiar-shots.mjs --dir docs/screenshots/familiar --tag before
 import path from "node:path";
