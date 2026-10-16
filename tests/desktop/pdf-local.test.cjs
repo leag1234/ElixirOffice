@@ -11,7 +11,7 @@ function setup(offline=true,writable=false){
  const nativeBytes=new Uint8Array(Buffer.from('%PDF-public-copy'));
  const doc={widgets:[{SetEditMode(value){this.design=value}}],BlurActiveObject(){},RecalculateAll(){},History:{Index:3,Reset_SavedIndex(){this.saved=this.Index;}},GetActionsQueue:()=>({SetCurAction:action=>{current=action},Continue:()=>continued++})};
  const viewer={isFullText:true,file:{Selection:{},selectAll(){this.Selection={Glyph1:-2,Glyph2:-1,IsSelection:false}},onUpdateSelection(){},onUpdateOverlay(){},pages:[{originIndex:1},{originIndex:0},{originIndex:undefined}],originalPagesCount:2,nativeFile:{SplitPages:(indexes,changes)=>{written={indexes:Array.from(indexes),changes};return nativeBytes}}},getPDFDoc:()=>doc,Save:()=>new Uint8Array([37,80,68,70,45]),SaveForSplit:()=>new Uint8Array([37,80,68,70])};
- const context={window:null,AscPDF:{CActionRunScript:Action},Asc:{c_oAscFileType:{PDF:513},c_oAscRestrictionType:{View:1}},Uint8Array,setTimeout,clearTimeout,define:(_deps,factory)=>{Pdf=factory({inspect:async()=>({writable,reason:writable?'':'unsupported'}),write:async()=>nativeBytes.slice()},PdfMessages)}};context.window=context;
+ const context={window:null,AscPDF:{CActionRunScript:Action},Asc:{c_oAscFileType:{PDF:513},c_oAscRestrictionType:{View:1}},Uint8Array,setTimeout,clearTimeout,define:(_deps,factory)=>{Pdf=factory({inspect:async()=>({writable,reason:writable?'':'unsupported'}),write:async()=>nativeBytes.slice()},PdfMessages,require(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Operation.js')))}};context.window=context;
  vm.runInNewContext(source,context);
  const api={DocInfo:{get_OfflineApp:()=>offline},DocumentRenderer:viewer,getPDFDoc:()=>doc,openDocument(){opened++},asc_registerCallback:(name,fn)=>{callbacks[name]=fn},asc_unregisterCallback:name=>{delete callbacks[name]},asc_openDocumentFromBytes(){api.openDocument();callbacks.asc_onDocumentContentReady()},asc_addRestriction(value){restriction|=value},asc_removeRestriction(value){restriction&=~value},SetDocumentModified(value){modified=value},canEdit:()=>false,isDocumentModified:()=>modified};
  const options={onError:error=>errors.push(error.message),onExport:async(...args)=>exports.push(args)};
@@ -69,4 +69,57 @@ test('read-only PDF exposes the localized refusal and copy offer end to end',asy
  const e=setup(true,false);e.options.lang='fr';const controller=e.Pdf.install(e.api,e.options);await controller.open(new Uint8Array(Buffer.from('%PDF-public')));
  assert.match(controller.readOnlyMessage(),/Enregistrer sous/);assert.match(controller.readOnlyMessage(),/lecture seule/);
  await assert.rejects(controller.save(),/Enregistrer sous/);
+});
+
+test('PDF lifecycle awaits committed native output and emits one ready after persistence',async()=>{
+ const e=setup(true,true),events=[];let commit;
+ const deferred=new Promise(resolve=>commit=resolve);
+ const controller=e.Pdf.install(e.api,{...e.options,onOperation:event=>events.push(event),operationScope:'public-pdf',saveAcknowledgesOriginal:true,onSave:()=>deferred});
+ await controller.open(new Uint8Array(Buffer.from('%PDF-public')));
+ const first=controller.save(),second=controller.save();await new Promise(setImmediate);
+ assert(!events.some(event=>event.phase==='ready'));assert(controller.isSaving());
+ commit({kind:'saved',committed:true,name:'public.pdf',bytes:22});await Promise.all([first,second]);
+ assert.equal(events.filter(event=>event.kind==='pdf-save'&&event.phase==='preparing').length,1);assert.equal(events.filter(event=>event.phase==='ready').length,1);
+ assert.equal(events.filter(event=>event.kind==='open'&&event.outcome==='opened').length,1);
+ assert.equal(events.at(-1).scope,'public-pdf');assert(!controller.isModified());
+});
+test('PDF cancelled destination and failed persistence never clear dirty or emit ready',async()=>{
+ for(const kind of ['cancel','failure']){
+  const e=setup(true,true),events=[];
+  const controller=e.Pdf.install(e.api,{...e.options,onOperation:event=>events.push(event),saveAcknowledgesOriginal:true,onSave:async()=>{
+   if(kind==='cancel')return {kind:'cancelled'};throw Error('Disk full');
+  }});
+  await controller.open(new Uint8Array(Buffer.from('%PDF-public')));
+  await assert.rejects(controller.save(),kind==='cancel'?/cancelled/:/Disk full/);
+  assert(controller.isModified());assert.equal(e.api.getPDFDoc().History.saved,undefined);
+  assert.equal(events.at(-1).phase,kind==='cancel'?'cancelled':'error');assert(!events.some(event=>event.phase==='ready'));
+ }
+});
+test('PDF browser dispatch/export cancellation preserve original dirty state and truthful outcomes',async()=>{
+ for(const kind of ['download-started','cancelled']){
+  const e=setup(true,true),events=[];
+  const controller=e.Pdf.install(e.api,{...e.options,onOperation:event=>events.push(event),onExport:async()=>({kind,name:'public.pdf'})});
+  await controller.open(new Uint8Array(Buffer.from('%PDF-public')));await controller.exportAs('pdf',{});
+  assert(controller.isModified());assert(!events.some(event=>event.phase==='ready'));
+  assert.equal(events.at(-1).phase,kind==='cancelled'?'cancelled':'complete');
+ }
+});
+test('disposing local PDF suppresses a stale file-ready notification without fabricating failure',async()=>{
+ const e=setup(true,true),events=[];let commit;const deferred=new Promise(resolve=>commit=resolve);
+ const controller=e.Pdf.install(e.api,{...e.options,onOperation:event=>events.push(event),onExport:()=>deferred});
+ await controller.open(new Uint8Array(Buffer.from('%PDF-public')));const pending=controller.exportAs('pdf',{});
+ await new Promise(setImmediate);controller.dispose();commit({kind:'saved',committed:true,name:'public.pdf'});await pending;
+ assert(!events.some(event=>event.phase==='ready'));
+});
+
+test('local PDF rotation capability is fail-closed before policy, during work and after disposal',async()=>{
+ for(const writable of [false,true]){
+  const e=setup(true,writable);let release;
+  const controller=e.Pdf.install(e.api,{...e.options,beforeOperationWork:()=>new Promise(resolve=>{release=resolve})});
+  assert.equal(e.api.eoLocalPdfCanRotate(),false);
+  const opening=controller.open(new Uint8Array(Buffer.from('%PDF-public')));assert.equal(e.api.eoLocalPdfCanRotate(),false);release();await opening;
+  assert.equal(e.api.eoLocalPdfCanRotate(),writable);
+  const job=controller.beginOperation('pdf-export');assert.equal(e.api.eoLocalPdfCanRotate(),false);job.cancel();assert.equal(e.api.eoLocalPdfCanRotate(),writable);
+  controller.dispose();assert.equal(e.api.eoLocalPdfCanRotate(),false);
+ }
 });

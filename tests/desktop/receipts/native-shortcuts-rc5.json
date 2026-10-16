@@ -1,0 +1,250 @@
+{
+  "schema": 2,
+  "review": "MSG121",
+  "frozenProductBase": "dd042fbc48",
+  "frozenWebApps": "c0b82dbd84",
+  "platform": "Linux X11 private Xvfb, Electron44.7.0 native XTest",
+  "sandbox": {
+    "chromiumSandbox": true,
+    "noSandboxArgument": false,
+    "hostSetuidHelper": "Existing system Chrome helper symlinked only inside private test runtime; no system changes",
+    "helperSha256": "24beb85e4149c65db5bf40fa307721143d0883ab8952e60dde1158606f644dee"
+  },
+  "pass": true,
+  "rows": 36,
+  "commands": [
+    {
+      "location": "home",
+      "key": "ctrl+o",
+      "sent": [
+        "open"
+      ]
+    },
+    {
+      "location": "home",
+      "key": "ctrl+s",
+      "sent": [
+        "save"
+      ]
+    },
+    {
+      "location": "home",
+      "key": "F12",
+      "sent": [
+        "save-as"
+      ]
+    },
+    {
+      "location": "home",
+      "key": "ctrl+p",
+      "sent": [
+        "print"
+      ]
+    },
+    {
+      "location": "home",
+      "key": "ctrl+n",
+      "sent": [
+        "new-docx"
+      ]
+    },
+    {
+      "location": "documenteditor",
+      "key": "ctrl+o",
+      "sent": [
+        "open"
+      ]
+    },
+    {
+      "location": "documenteditor",
+      "key": "ctrl+s",
+      "sent": [
+        "save"
+      ]
+    },
+    {
+      "location": "documenteditor",
+      "key": "F12",
+      "sent": [
+        "save-as"
+      ]
+    },
+    {
+      "location": "documenteditor",
+      "key": "ctrl+p",
+      "sent": [
+        "print"
+      ]
+    },
+    {
+      "location": "documenteditor",
+      "key": "ctrl+n",
+      "sent": [
+        "new-docx"
+      ]
+    },
+    {
+      "location": "spreadsheeteditor",
+      "key": "ctrl+o",
+      "sent": [
+        "open"
+      ]
+    },
+    {
+      "location": "spreadsheeteditor",
+      "key": "ctrl+s",
+      "sent": [
+        "save"
+      ]
+    },
+    {
+      "location": "spreadsheeteditor",
+      "key": "F12",
+      "sent": [
+        "save-as"
+      ]
+    },
+    {
+      "location": "spreadsheeteditor",
+      "key": "ctrl+p",
+      "sent": [
+        "print"
+      ]
+    },
+    {
+      "location": "spreadsheeteditor",
+      "key": "ctrl+n",
+      "sent": [
+        "new-xlsx"
+      ]
+    },
+    {
+      "location": "presentationeditor",
+      "key": "ctrl+o",
+      "sent": [
+        "open"
+      ]
+    },
+    {
+      "location": "presentationeditor",
+      "key": "ctrl+s",
+      "sent": [
+        "save"
+      ]
+    },
+    {
+      "location": "presentationeditor",
+      "key": "F12",
+      "sent": [
+        "save-as"
+      ]
+    },
+    {
+      "location": "presentationeditor",
+      "key": "ctrl+p",
+      "sent": [
+        "print"
+      ]
+    },
+    {
+      "location": "presentationeditor",
+      "key": "ctrl+n",
+      "sent": [
+        "new-pptx"
+      ]
+    },
+    {
+      "location": "pdfeditor",
+      "key": "ctrl+o",
+      "sent": [
+        "open"
+      ]
+    },
+    {
+      "location": "pdfeditor",
+      "key": "ctrl+s",
+      "sent": [
+        "save"
+      ]
+    },
+    {
+      "location": "pdfeditor",
+      "key": "F12",
+      "sent": [
+        "save-as"
+      ]
+    },
+    {
+      "location": "pdfeditor",
+      "key": "ctrl+p",
+      "sent": [
+        "print"
+      ]
+    },
+    {
+      "location": "pdfeditor",
+      "key": "ctrl+n",
+      "sent": [
+        "new-docx"
+      ]
+    }
+  ],
+  "officeBehavior": [
+    {
+      "location": "documenteditor",
+      "officeEffects": {
+        "applyStylesOpened": true,
+        "trackChangesToggledAndRestored": true,
+        "paragraphDirectFormattingRemoved": true,
+        "ctrlQDidNotQuit": true
+      }
+    },
+    {
+      "location": "documenteditor",
+      "f12ActualSaveAsChooser": true,
+      "cancelled": true
+    }
+  ],
+  "windowClose": {
+    "location": "pdfeditor-iframe",
+    "action": "window-close",
+    "exitCode": 0
+  },
+  "sourceHashes": {
+    "desktop/shortcuts.cjs": "ba63e7d2f217f03a956bf25d8829ce20164dff020ed05610271d32954a7944f2",
+    "desktop/menu.cjs": "60f936df78c3044bbee143836edf13fc81cce4383b92b99e860ad304223098e3"
+  },
+  "limits": [
+    "Other New/Save/SaveAs/Print IPC is observed and suppressed; actual Word F12 chooser and Open are delivered.",
+    "No PDF keyboard shortcut; platform mapping units cover Mac but native Mac/Windows/Wayland and real non-Latin layout hardware remain unverified.",
+    "Physical printer and rebuilt rc.5 package acceptance are separate."
+  ],
+  "rawReceiptSha256": "e1d90adcd102db9026d79f04f3914a69867ca3134acf30d1f0af402eb815dfb0",
+  "qualificationRuns": [
+    {
+      "sourceParent": "e272eb442fc8",
+      "sourceSet": "frozen rc.5 plus MSG121",
+      "rows": 36,
+      "rawSha256": "e1d90adcd102db9026d79f04f3914a69867ca3134acf30d1f0af402eb815dfb0"
+    },
+    {
+      "sourceParent": "42129fd840ab",
+      "sourceSet": "forward main plus MSG121",
+      "rows": 36,
+      "rawSha256": "e1d90adcd102db9026d79f04f3914a69867ca3134acf30d1f0af402eb815dfb0",
+      "assetScope": "Same controlled frozen c0 four-editor qualification bundle set; full0.2.2 static/package acceptance is separate"
+    }
+  ],
+  "relatedUnitResults": {
+    "frozen": {
+      "pass": 55,
+      "fail": 0,
+      "skip": 0
+    },
+    "forward": {
+      "pass": 56,
+      "fail": 0,
+      "skip": 0
+    }
+  }
+}

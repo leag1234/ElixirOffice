@@ -9,7 +9,7 @@ try{
  const frame=page.frames().find(f=>f.url().includes('/spreadsheeteditor/main/'));
  await frame.evaluate(()=>new Promise(resolve=>Asc.editor.callCommand("Api.GetActiveSheet().GetRange('A1').SetValue('café');Api.GetActiveSheet().GetRange('B1').SetValue('second');",true,resolve)));
  await frame.locator('#toolbar a[data-tab=file]').click();await frame.locator('#fm-btn-download').click();
- await frame.locator('.btn-doc-format[format="260"]').click();
+ await frame.locator('.eo-format-dialog input[value=csv]').check();await frame.locator('.eo-format-dialog button[type=submit]').click();
  // The existing single-sheet warning precedes the real CSV settings dialog.
  if(await frame.locator('.asc-window:visible .dlg-btn[result=ok]').count())await frame.locator('.asc-window:visible .dlg-btn[result=ok]').last().click();
  await frame.locator('#id-delimiters-combo').waitFor();

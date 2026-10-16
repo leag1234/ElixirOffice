@@ -906,3 +906,71 @@ Current development host assembly has18,393 exact hashed resources after removin
 No integration, push, demo change or publication by session A. Task/checks/evidence: /srv/elixiroffice/wt/pdf-local-A-G1b-work.
 
 2026-10-14 narrow desktop PDF correction candidate: no runtime or pin changes. Public Chromium/Skia tagged22page input is refused for MarkInfo/StructTreeRoot catalog entries; copy conversion retains22pages and all normalized text. Modern wheel adaptation and save/recovery error handling are desktop shell changes. See docs/desktop.md for the reviewed scope and native evidence.
+
+
+
+### Desktop release identity (0.2.1)
+
+The [desktop build identity](desktop-build-identity.md) records exact product/DocumentServer revisions alongside existing full/PDF runtime manifest pins. This changes release metadata and About, not converter bytes or runtime selection. Candidate and final packages must be rebuilt and accepted separately.
+
+## Document-security audit follow-up (2026-10-15)
+
+The phase2 JavaScript review candidate leaves x2t and its pins unchanged. A public synthetic DOCX round-trip preserves seven hyperlink targets and tracked hostile font/style values for separate sink tests. ZIP directory traversal and EPUB root-containment source findings remain unresolved; HWPML/HWPX resource inspection is limited. No archive-safety or new runtime acceptance claim is made. See [security phase2](security-phase2.md); native/core fixes, wasm rebuilding and corpus gates require the separately scheduled core work.
+### 2026-10-15 — PDF feedback progress/cancel (review candidate)
+
+The SDK PDF worker now emits opt-in loading, initialization and conversion stages, retaining a single result for callers without a progress observer. Word captures real selected drawing pages; desktop presentations count actual slide preparation. Workbook drawing and synchronous native C++ conversion remain indeterminate. Cancellation checks page/preparation boundaries and terminates the isolated export worker; it cannot interrupt inside C++. Abort never selects the JS fallback. Late progress/results cannot complete a cancelled operation; retry uses a fresh module.
+
+Source-overlay Firefox evidence: public ten-page Word PDF 23,959 bytes, ten pages and 19,434 text characters; cancellation after drawing page two and during real worker conversion, then successful fresh retry. Original-preserving PDF worker cancellation and retry retain the original byte prefix. Dirty/paragraph-mark state stays unchanged, no false Ready, and requests are same-origin GET only. 180 affected units pass; real DOM checks retain Cancel focus across page events and hide it at native-output handoff. Final packaged/native acceptance remains unverified; no0.2.0 artifact changes.
+
+
+### 2026-10-15 — Remaining desktop feedback adapters (review candidate)
+
+Shared opening jobs span desktop startup, real conversion and installation of the native actions. Safe desktop-open IDs are distinct from iframe local-operation IDs. Save As owns its job before password choices; real conversion callbacks carry only a decrypting/encrypting purpose and never passwords. Print preparation reuses PDF counters/stages and cancellation; native callback success is system submission only.
+
+201unitsPASS/0fail/skip; six public encrypted formats wrong-retry/open/edit/save/reopen PASS with real Wasm, and six Save As Keep/Change/Remove/Protect/PDF-copy-refusal UI gates PASS. Public exact100-page opening reports a file name with indeterminate actual stages, same-originGET only, no false fileReady. Production AMD modules compile, generated shell copies the shared Operation source exactly, and45catalogs contain all named-open/crypto labels. Source-overlay evidence only; final package/native-print acceptance separate. A first repeated-body fixture measured85pages; a fresh explicit100-page fixture passes the unchanged exact100assertion.
+### Save As 0.2.1 desktop slice 1 review candidate (2026-10-15)
+
+The desktop now selects a format and native destination before conversion, with single-use destination tickets and selected-format warnings. All-platform styled fallback remains the default until actual native Mac/Windows proof; Linux has explicit snapshot-bound overwrite confirmation. Shared Chromium scenarios 24/24, desktop units 168/168, locale catalogs 45/45 and 18718 resource hashes/licenses pass. Actual owned Electron DOCX/ODT/PDF routes pass; browser-local wiring and full safety/hosted gates remain pending. Runtime pins are unchanged. See scope, failures and limits.
+
+### Save As 0.2.1 browser slice 2 review candidate (2026-10-15)
+
+Browser-local File > Save As uses the shared descriptive dialog, source-format default and a validated copy name. Cancel starts no conversion or rename; the selected extension wins after portable filename validation and NFC normalization. The existing converter, selected-format warnings, password handling and PDF copy consent remain in the export route. Hosted and desktop routing are excluded by the browser capability. The PDF-only menu reuses the selector and translated45-language labels; an existing missing Arabic PDF comment caption now falls back to the translated Comment caption to prevent a startup RTL exception.
+
+Production web builds pass all desktop/mobile/deploy gates. Actual production browser runs pass12/12 Office paths and4/4 PDF paths in en/fr/de/ar, with source/dirty-state checks and zero document requests or sockets. Shared filename dialog8/8 and combined desktop/local policy/protection/locale units186/186 pass. Full output/reopen, native six-format password and hosted gates remain slice3. See scope and retained failures.
+
+### Save As 0.2.1 full matrix (2026-10-15, review candidate)
+
+The shared desktop/browser selector is verified with the existing matched full/PDF runtime pins. Actual browser exports cover24 source/output pairs with real edits and fresh reopen; the D3/D4, pending-picture, Unicode and public38-file corpus checks pass. Sandboxed Linux H1six, native PDF and untitled/converted destinations pass; combined units186/186 and both18,718-file owned resource manifests verify. Hosted candidate/base have identical shortcut and Excel sweep inventories. Their full Word sequences both crash at final footnote, while isolated footnote10/10 passes on both. The current PDF battery is37/38 on both due to the same public title extraction spacing assertion. MSG30 separates those baseline issues from Save As; assertions and absolute result limits are retained. Hosted PowerPoint has an exact paired inventory of149 pass,19 info and18 skip on each; the first baseline target crash remains recorded. See the full scope and runtime provenance. No converter/core rebuild, release artifact replacement or integration is claimed.
+
+### Save As r1 after integrated feedback (2026-10-15, review candidate)
+
+The rebased source preflight passes 228 desktop/local/client-PDF units, 16 localized browser paths and 24 edit/output/reopen pairs, six native password formats and native PDF/destination checks. D3/D4, Unicode, ordered/pending pictures and the public corpus (38/38 normalized outputs) pass with unchanged converter pins. Both 18,732-file resource graphs verify.
+
+Corrected candidate/base smoke runs have zero errors. Shortcut, dedicated context-menu, Excel and PowerPoint status inventories match exactly: 426, 15, 427 and 149 passing cases respectively, with matching other statuses. The initial full Word candidate has 381 pass, 49 info, 84 skip and one menu-reopen failure; the exact baseline has the same passing/information rows and 85 skip. The sole difference is a disabled Cut row. Fresh isolated/prefix repeats match the baseline, but do not replace the strict initial failure. Source review finds no Save As path executed by that hosted Cut context. Both current full Word runs complete without the historical final-footnote crash; this does not establish that the crash is fixed.
+
+Client PDF remains 37/38 on both sides with the same title-spacing assertion. All failed setup/reproduction attempts, the corrected reference theme build, source/resource provenance and review limits are recorded in the Save As handoff. This is an owned source preflight; no release artifact was replaced and no integration or publication is claimed.
+
+### 2026-10-15 Save As r2 review corrections
+
+Restored PDF-copy artifact/name acknowledgement and writing feedback; added the dedicated stale-destination message in45catalogs. Final bases include MSG33 security.236units,16localized production browser paths and the native protected-DOCX/PDF-copy subset pass. Full web27.7s/SDK39.1s production builds and both18,719-file source-preflight resource graphs verify. Current-main documentation union deletes0lines; matched conversion/PDF pins remain unchanged. See the accompanying release acceptance record for exact scope, preserved setup failures and retained r1 hosted/corpus limits. Ready for lead integration review; E does not integrate.
+
+### G2 slice 1: existing annotations/forms and safe page rotation candidate (2026-10-15)
+
+The current pinned PDF runtime (528e920e4f34-98ab90f5d735-st, manifest d9f0109b81130dbadb9f1e8b99e0e024899844a0874784bfc1310bf8fd34d0c6) already preserves real text comments, square annotations, highlights and Tx form-field edits. A new public-fixture browser regression covers their real toolbar and keyboard gestures, Save/download and fresh reopen. The new implementation exposes only left/right quarter-turn rotation in the local thumbnail context menu, gated by verified writable policy and operation/page-lock state. Original PDF text and destructive page actions remain disabled.
+
+English/French public PDF runs pass, including metadata/outline/text/page-count/original-prefix checks and signature/XFA/unsupported-field presence refusals. Independent Poppler/Pillow rotation comparisons have mean absolute channel differences below 0.31/255 (threshold 2/255), with the expected 792x612 raster. These are browser/production-web-apps results on Linux, not native OS file-dialog or new release-package acceptance. No C++/runtime policy or pin was changed. See tests/pdf-local/annotations-browser.cjs, annotations-poppler.py and the accompanying release acceptance record
+### 2026-10-15 named-document quit shell review
+
+Product-only quit wording adds45locale named questions and explicit Don't Save, bidi-isolated names and platform response IDs; deadlines, Save As guards and late-edit/recovery handling remain. Baseline24close tests pass; final242units and32localized DOM projections pass. No converter/SDK/web rebuild or runtime pin change; native OS dialog acceptance remains unverified. See the accompanying release acceptance record
+
+## Desktop open-error resilience — 2026-10-16 (E, MSG54)
+
+FrozenRC4 source receives only recent-metadata isolation, one100ms EBUSY read retry, seven translated OPEN messages in45catalogs and fixed-code local diagnostics; the same fix is forward-ported to main. RC214desktop/34local/26simulatedDarwin and main252/34/27 pass, including8new focused tests each. No runtime/converter changes or native/package/hosted/fullcorpus qualification. Evidence and limits.
+## Desktop output feedback backport (2026-10-16)
+
+Cancellation clears transient feedback; converter/runtime pins are unchanged.
+[Scope](desktop-cancellation-feedback.md).
+
+## Windows opening follow-up — E MSG56, 2026-10-16
+
+No runtime/converter changes. The frozen RC source now recovers preference queue draining, treats recent persistence as optional, tolerates per-entry font discovery failures and brands native identity while preserving the profile. Win32 UNC/extended/mapped aliases and actual Core/SDK font-error polling are exercised; RC222 desktop/34 local/26 Darwin plus Windows7/font1/open8 pass. Native OS/SMB/font fidelity remains unqualified. Full evidence.

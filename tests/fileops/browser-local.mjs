@@ -10,17 +10,18 @@ try{for(const [format,filename,code] of [['docx','offline-review.docx',65],['xls
  await page.goto(base+'/example/local.html');await page.locator('#file').setInputFiles(source);
  await page.waitForFunction(()=>window.EOLocalSession||window.EOLocalFailure,null,{timeout:120000});assert.equal(await page.evaluate(()=>EOLocalFailure),null);
  const frame=page.frames().find(f=>/\/(documenteditor|spreadsheeteditor|presentationeditor)\/main\//.test(f.url()));
- await frame.locator('#toolbar a[data-tab=file]').click();await frame.locator('#fm-btn-download').click();
+ await frame.locator('#file[role=tab]').click();await frame.locator('#fm-btn-download').click();
+ const dialog=frame.locator('.eo-format-dialog');await dialog.waitFor();
  const selectedName=await frame.evaluate(()=>Asc.editor.asc_getDocumentName());
  for(const badName of ['CON','nul.'+format,'Bad\u202e.'+format,'界'.repeat(86)]){
-  page.once('dialog',d=>d.accept(badName));await frame.locator('[data-local-rename]').click();
+  await dialog.getByRole('textbox').fill(badName);await dialog.locator('button[type=submit]').click();
+  assert.equal(await dialog.getByRole('textbox').getAttribute('aria-invalid'),'true');
   assert.equal(await frame.evaluate(()=>Asc.editor.asc_getDocumentName()),selectedName);
  }
- page.once('dialog',d=>d.accept('Cafe\u0301 Downloaded Copy.'+format));
- await frame.locator('[data-local-rename]').click();
- assert.equal(await frame.evaluate(()=>Asc.editor.asc_getDocumentName()),'Café Downloaded Copy.'+format);
- const downloadEvent=page.waitForEvent('download',{timeout:120000});await frame.locator('#panel-saveas .elx-format[format="'+code+'"]').click();
- const download=await downloadEvent;assert.equal(download.suggestedFilename(),'Café Downloaded Copy.'+format);
+ await dialog.getByRole('textbox').fill('Cafe\u0301 Downloaded Copy.'+format);
+ await dialog.locator('input[value="'+format+'"]').check();
+ const downloadEvent=page.waitForEvent('download',{timeout:120000});await dialog.locator('button[type=submit]').click();
+ const download=await downloadEvent;assert.equal(await frame.evaluate(()=>Asc.editor.asc_getDocumentName()),'Café Downloaded Copy.'+format);assert.equal(download.suggestedFilename(),'Café Downloaded Copy.'+format);
  const target=path.join(out,'copy.'+format);await download.saveAs(target);assert(fs.readFileSync(target).subarray(0,2).equals(Buffer.from('PK')));
  assert.deepEqual(fs.readFileSync(source),before);
  assert.deepEqual(bad,[]);assert.deepEqual(errors,[]);

@@ -270,7 +270,7 @@ def main():
     subprocess.run(base + ["--network=bridge", image, *command, "--inside", "prepare"], check=True)
     if a.prepare_only:
         return
-    if not a.work or not a.appimage or not re.fullmatch(r"ElixirOffice-[0-9.]+-x86_64\.AppImage", a.appimage.name):
+    if not a.work or not a.appimage or not re.fullmatch(r"ElixirOffice-[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?-x86_64\.AppImage", a.appimage.name):
         raise ValueError("Provide the final-named AppImage and work directory")
     work = owned(a.work)
     if (work / "input.AppImage").exists():

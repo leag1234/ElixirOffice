@@ -44,12 +44,15 @@ try{for(const kind of ['word','cell','slide']){
  assert(await page.evaluate(()=>EOLocalSession.controller.isModified()),'real edit did not mark modified');
  await frame.locator('#toolbar a[data-tab=file]').click();
  await frame.locator('#fm-btn-download').click();
- const listed=await frame.locator('.btn-doc-format:visible').evaluateAll(nodes=>nodes.map(n=>Number(n.getAttribute('format'))));
+ const listed=await frame.locator('.eo-format-dialog input[type=radio]').evaluateAll((nodes,codes)=>nodes.map(n=>codes[n.value]),codes);
  assert.deepEqual([...listed].sort((a,b)=>a-b),families[kind].map(f=>codes[f]).sort((a,b)=>a-b),'File formats differ from supported list');
  for(const target of families[kind]){
   const pending=page.waitForEvent('download',{timeout:120000});
   // The first item exercises the actual File menu, the rest the same public API.
-  if(target===families[kind][0])await frame.locator('.btn-doc-format[format="'+codes[target]+'"]').click();
+  if(target===families[kind][0]){
+   await frame.locator('.eo-format-dialog input[value="'+target+'"]').check();
+   await frame.locator('.eo-format-dialog button[type=submit]').click();
+  }
   else await frame.evaluate(code=>Asc.editor.asc_DownloadAs(new Asc.asc_CDownloadOptions(code)),codes[target]);
   const download=await pending,dest=path.join(out,kind+'-copy.'+target);await download.saveAs(dest);
   assert.equal(path.extname(download.suggestedFilename()),'.'+target);

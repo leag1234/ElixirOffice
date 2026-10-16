@@ -7,11 +7,16 @@ For the local Mac builder workflow used by session A:
 ```sh
 tools/release/desktop-beta.sh \
   --product-rev <integrated-product-commit> \
+  --build-number <new-monotonic-number> --channel <rc-or-final> \
+  --published-versions <fresh-complete-inventory.json> \
+  --build-ledger <canonical-allocation-ledger.json> \
   --documentserver-rev <integrated-DocumentServer-commit> \
   --node <installed-node-22.23.3-executable> \
   --playwright-core <installed-playwright-core-directory> \
   --mac-export-only --build-only
 ```
+
+For 0.2.1 and later, follow the [build identity and publication guard](desktop-build-identity.md): planning does not allocate N; actual builds reserve it under a lock. Failed builds consume N. About, platform package metadata, BUILD-INFO and MAC-INPUT carry one identity. The historical records below remain historical.
 
 The product revision must be an ancestor of main and DocumentServer an ancestor of elixir/dev. All eleven gitlinks are checked out at exact hashes in fresh detached worktrees under /srv/elixiroffice/wt/. Source repositories are never reset.
 

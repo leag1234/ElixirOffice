@@ -12,6 +12,7 @@ const root=path.resolve(__dirname,'../..');
  const zip=await require(path.join(root,'desktop/node_modules/app-builder-lib/out/toolsets/7zip')).getPath7za();
  fs.mkdirSync(out,{recursive:true});
  const run=(program,args)=>cp.execFileSync(program,args,{stdio:'inherit'});
+ run(process.execPath,[path.join(root,'tools/desktop/check-windows-version.cjs'),installer,'installer']);
  run(zip,['t',installer]);
  run(zip,['x',installer,'-o'+path.join(out,'installer')]);
  const archive=path.join(out,'installer','$PLUGINSDIR','app-64.7z');
@@ -20,6 +21,7 @@ const root=path.resolve(__dirname,'../..');
  run(zip,['x',archive,'-o'+path.join(out,'payload')]);
  for(const base of [path.join(dist,'win-unpacked'),path.join(out,'payload')]){
   run(process.execPath,[path.join(root,'tools/desktop/check-version.cjs'),path.join(base,'resources/app.asar')]);
+  run(process.execPath,[path.join(root,'tools/desktop/check-windows-version.cjs'),path.join(base,'ElixirOffice.exe')]);
   run('python3',[path.join(root,'tests/desktop/verify-resources.py'),path.join(base,'resources/assets')]);
  }
  run(process.execPath,[path.join(root,'tests/desktop/windows-package.cjs'),dist,path.join(out,'payload')]);

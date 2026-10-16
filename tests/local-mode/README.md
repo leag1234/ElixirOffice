@@ -138,3 +138,7 @@ Use Node22, an explicit own EO_BASE (never8080), EO_X2T_RELEASE pointing at the 
 - `EO_DESKTOP_ROOT=OWN_TEST_ROOT EO_PACKAGE_EXECUTABLE=PACKAGED_EXECUTABLE EO_PLAYWRIGHT=PLAYWRIGHT_CORE node tests/desktop/password-native.cjs`: actual packaged six-format flow, Cancel/Home cleanup, native Save As choices, PDF refusal and password profile scan; needs an unlocked display and the existing PID-scoped native-input helper.
 
 Synthetic random passwords stay in process memory and are not written as test fixtures, logs or command-line arguments. Native fixtures are generated encrypted within the own test root; Remove deliberately writes an unprotected copy. Passwords and contents are never included in failure metadata. See docs/local-passwords.md for recovery, integrity and platform limits.
+
+## Local PDF annotations and rotation
+
+The review candidate tests/pdf-local/annotations-browser.cjs uses an explicit own EO_BASE (never8080), EO_PDF_WORK and Playwright via NODE_PATH or EO_PLAYWRIGHT. It generates public valid PDFs, exercises actual Text/Square/Highlight/Tx controls and local thumbnail rotation/undo/redo, downloads preserved outputs and reopens them. EO_LOCALE=fr selects the French gate. Run tests/pdf-local/annotations-poppler.py with that output folder for independent metadata/text/outline and rotation-appearance evidence. Source overlays are not used; build the matched SDK/web-apps and install the accepted runtime pins first. See the accompanying release acceptance record for limits and the unrelated Word shortcut baseline failure.

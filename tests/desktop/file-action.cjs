@@ -11,7 +11,8 @@ module.exports=async function fileAction(page,action,format){
  await frame.locator(selectors[action]).click({timeout:20000});
  if(action==='save-as'){
   const selected=format||await page.evaluate(()=>EOLocalSession.format);
-  await page.locator('.desktop-options button').filter({hasText:new RegExp('^'+selected.toUpperCase()+'$')}).click({timeout:20000});
+  await page.locator('.eo-format-dialog input[value="'+selected+'"]').check({timeout:20000});
+  await page.locator('.eo-format-dialog button[type=submit]').click({timeout:20000});
  }
 
 };

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),flags=require('node:fs').constants;
-const reasons=new Set(['console-error','console-warn','recovery-failure','stdio-failure','uncaught-exception','unhandled-rejection','fatal-dialog-failure','capture-cleanup-failure','startup-failure','file-error','EISDIR','EEXIST','EIO','ENOTDIR','EINVAL','ELOOP','EMFILE','ENFILE','UNKNOWN']);
+const reasons=new Set(['console-error','console-warn','recovery-failure','stdio-failure','uncaught-exception','unhandled-rejection','fatal-dialog-failure','capture-cleanup-failure','startup-failure','file-error','font-error','EPERM','EACCES','EBUSY','ENOENT','ENAMETOOLONG','ENOSPC','EROFS','ENODATA','ENXIO','EAGAIN','ENOTCONN','ETIMEDOUT','EHOSTUNREACH','ENOTSUP','EREMOTEIO','EISDIR','EEXIST','EIO','ENOTDIR','EINVAL','ELOOP','EMFILE','ENFILE','UNKNOWN']);
 const pipeErrors=new Set(['EPIPE','ERR_STREAM_DESTROYED']);
 function create(profile){
  let tail=Promise.resolve(),failed=false;

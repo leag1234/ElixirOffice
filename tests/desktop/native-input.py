@@ -2,7 +2,7 @@
 # Scope every injected event to this app's actual native PID.
 import ctypes,os,sys,time,signal
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(os.environ['EO_DESKTOP_ROOT']).resolve() if os.environ.get('EO_DESKTOP_ROOT') else Path(__file__).resolve().parents[2]
 x=ctypes.CDLL("libX11.so.6");xt=ctypes.CDLL("libXtst.so.6")
 x.XOpenDisplay.restype=ctypes.c_void_p;x.XOpenDisplay.argtypes=[ctypes.c_char_p]
 x.XKeysymToKeycode.argtypes=[ctypes.c_void_p,ctypes.c_ulong];x.XKeysymToKeycode.restype=ctypes.c_uint
@@ -22,8 +22,26 @@ pid_atom=x.XInternAtom(d,b"_NET_WM_PID",False)
 x.XGetTransientForHint.argtypes=[ctypes.c_void_p,ctypes.c_ulong,ctypes.POINTER(ctypes.c_ulong)]
 x.XkbKeycodeToKeysym.argtypes=[ctypes.c_void_p,ctypes.c_uint,ctypes.c_int,ctypes.c_int];x.XkbKeycodeToKeysym.restype=ctypes.c_ulong
 expected=int(os.environ['EO_NATIVE_PID'])
-startup=__import__('subprocess').check_output(['loginctl','show-session','c2','-p','Active','-p','LockedHint'],text=True)
-assert 'Active=yes' in startup and 'LockedHint=no' in startup,'Desktop inactive or locked before focus'
+xvfb_pid=os.environ.get('EO_XVFB_PID')
+xvfb_identity=None
+def desktop_ready():
+ global xvfb_identity
+ if xvfb_pid:
+  import re
+  display=os.environ.get('DISPLAY','')
+  assert re.fullmatch(r':[1-9][0-9]+',display),'Headless input requires a private numbered display'
+  process=Path('/proc')/str(int(xvfb_pid))
+  assert process.stat().st_uid==os.getuid(),'Xvfb must belong to this test user'
+  command=(process/'cmdline').read_bytes()
+  arguments=command.rstrip(bytes([0])).split(bytes([0]))
+  assert Path(os.fsdecode(arguments[0])).name=='Xvfb' and display.encode() in arguments,'Explicit live Xvfb PID/display required'
+  identity=(command,(process/'stat').read_text().rsplit(')',1)[1].split()[19])
+  if xvfb_identity is None:xvfb_identity=identity
+  assert identity==xvfb_identity,'Xvfb process identity changed'
+ else:
+  state=__import__('subprocess').check_output(['loginctl','show-session','c2','-p','Active','-p','LockedHint'],text=True)
+  assert 'Active=yes' in state and 'LockedHint=no' in state,'Desktop inactive or locked'
+desktop_ready()
 def property_pid(w):
  typ=ctypes.c_ulong();fmt=ctypes.c_int();n=ctypes.c_ulong();after=ctypes.c_ulong();ptr=ctypes.c_void_p()
  x.XGetWindowProperty(d,w,pid_atom,0,1,False,0,ctypes.byref(typ),ctypes.byref(fmt),ctypes.byref(n),ctypes.byref(after),ctypes.byref(ptr))
@@ -33,8 +51,7 @@ def property_pid(w):
   x.XFree(ptr)
  return result
 def safe():
- state=__import__('subprocess').check_output(['loginctl','show-session','c2','-p','Active','-p','LockedHint'],text=True)
- assert 'Active=yes' in state and 'LockedHint=no' in state,'Desktop inactive or locked'
+ desktop_ready()
  w=ctypes.c_ulong();r=ctypes.c_int();x.XGetInputFocus(d,ctypes.byref(w),ctypes.byref(r))
  for _ in range(15):
   if w.value<=1:return False

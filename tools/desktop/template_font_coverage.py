@@ -10,11 +10,24 @@ KEY=bytes([160,102,214,32,20,150,71,250,149,105,184,80,176,65,73,72])
 def font_map(assets):
     source=(assets/'sdkjs/common/AllFonts.js').read_text(encoding='utf-8-sig')
     return {name:int(index) for name,index in re.findall(r'\["([^"]+)",\s*(-?\d+),',source) if int(index)>=0}
-def cmap(data):
+def font_variants(assets):
+    source=(assets/'sdkjs/common/AllFonts.js').read_text(encoding='utf-8-sig')
+    result={}
+    for name,raw in re.findall(r'\["([^"]+)"\s*,([-\d,\s]+)\]',source):
+        numbers=[int(n.strip()) for n in raw.split(',') if n.strip()]
+        if len(numbers)==8:
+            result[name]={style:(numbers[i*2],numbers[i*2+1]) for i,style in enumerate(['regular','italic','bold','bold-italic'])}
+    return result
+def cmap(data,face=0):
     """Read Unicode cmap formats 4/12; glyph zero is always missing."""
     u16=lambda p:struct.unpack_from('>H',data,p)[0]
     u32=lambda p:struct.unpack_from('>I',data,p)[0]
-    tables={data[12+i*16:16+i*16]:u32(20+i*16) for i in range(u16(4))}
+    start=0
+    if data[:4]==b'ttcf':
+        assert face<u32(8),'Invalid font collection face'
+        start=u32(12+face*4)
+    else:assert face==0,'Non-collection face must be zero'
+    tables={data[start+12+i*16:start+16+i*16]:u32(start+20+i*16) for i in range(u16(start+4))}
     base=tables[b'cmap'];result=set()
     for i in range(u16(base+2)):
         record=base+4+8*i;platform,encoding=u16(record),u16(record+2)
@@ -34,36 +47,35 @@ def cmap(data):
                     if glyph:result.add(code)
     return result
 class Pack:
-    def __init__(self,assets):self.assets=Path(assets);self.faces=font_map(self.assets)
+    def __init__(self,assets):
+        self.assets=Path(assets);self.faces=font_map(self.assets);self.variants=font_variants(self.assets)
     @lru_cache(maxsize=None)
-    def glyphs(self,family):
-        index=self.faces.get(family)
-        if index is None:return set()
+    def glyphs(self,family,style='regular'):
+        choices={'regular':['regular','italic','bold','bold-italic'],
+                 'italic':['italic','bold-italic','regular','bold'],
+                 'bold':['bold','bold-italic','regular','italic'],
+                 'bold-italic':['bold-italic','bold','italic','regular']}
+        variants=self.variants.get(family,{})
+        selected=next((variants[c] for c in choices[style] if variants.get(c,(-1,0))[0]>=0),None)
+        if selected is None:return set()
+        index,face=selected
         data=bytearray((self.assets/'fonts'/str(index).zfill(3)).read_bytes())
         for i in range(min(32,len(data))):data[i]^=KEY[i%16]
-        return cmap(bytes(data))
+        return cmap(bytes(data),face)
     def missing(self,file):
+        from template_font_styles import styled_text
         missing=set()
         with zipfile.ZipFile(file) as archive:
-            for name in archive.namelist():
-                if not(name.startswith('word/') and name.endswith('.xml')):continue
-                root=ET.fromstring(archive.read(name))
-                for level in root.findall('.//w:lvl',NS):
-                    value=level.find('w:lvlText',NS)
-                    if value is not None:
-                        face=level.find('w:rPr/w:rFonts',NS)
-                        for c in value.get('{'+W+'}val',''):
-                            code=ord(c);slot='cs' if 0x590<=code<=0x8ff else 'eastAsia' if 0x2e80<=code<=0xd7ff else 'ascii' if code<128 else 'hAnsi'
-                            family=face.get('{'+W+'}'+slot,'DejaVu Sans') if face is not None else 'DejaVu Sans'
-                            if not c.isspace() and code not in self.glyphs(family):missing.add(code)
-                for run in root.findall('.//w:r',NS):
-                    fonts=run.find('w:rPr/w:rFonts',NS)
-                    for text in run.findall('w:t',NS):
-                        for c in text.text or '':
-                            code=ord(c)
-                            slot='cs' if 0x590<=code<=0x8ff else 'eastAsia' if 0x2e80<=code<=0xd7ff else 'ascii' if code<128 else 'hAnsi'
-                            face=fonts.get('{'+W+'}'+slot,'DejaVu Sans') if fonts is not None else 'DejaVu Sans'
-                            if not c.isspace() and code not in self.glyphs(face):missing.add(code)
+            for text,properties in styled_text(archive):
+                for c in text:
+                    if c.isspace():continue
+                    code=ord(c);complex_script=properties.get('cs',False) or 0x590<=code<=0x8ff
+                    slot='cs' if complex_script else 'eastAsia' if 0x2e80<=code<=0xd7ff else 'ascii' if code<128 else 'hAnsi'
+                    family=properties.get(slot,'DejaVu Sans')
+                    bold=properties.get('bCs',properties.get('b',False)) if complex_script else properties.get('b',False)
+                    italic=properties.get('iCs',properties.get('i',False)) if complex_script else properties.get('i',False)
+                    style='bold-italic' if bold and italic else 'bold' if bold else 'italic' if italic else 'regular'
+                    if code not in self.glyphs(family,style):missing.add(code)
         return sorted(missing)
 if __name__=='__main__':
     import argparse

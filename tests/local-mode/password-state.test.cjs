@@ -60,7 +60,8 @@ for(const mode of ['throw','cancel'])test('post-conversion '+mode+' clears the p
  api.asc_registerCallback=(name,fn)=>callbacks.set(name,fn);api.asc_unregisterCallback=(name,fn)=>{if(callbacks.get(name)===fn)callbacks.delete(name)};
  api.asc_openDocumentFromBytes=()=>{if(mode==='throw')throw Error('Injected content opening failure');s.abort.abort();};
  const images={assertAvailable(){},install(){return {activate(){},dispose(){},insert(){}}}};
- const define=(_deps,fn)=>{controller=fn(images,{},s.module)};define.amd=true;
+ const FileNames=require(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/FileNames.js'));
+ const define=(_deps,fn)=>{controller=fn(images,{},s.module,require(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Operation.js')),FileNames)};define.amd=true;
  const context={define,Common:s.Common,Uint8Array,URL,Blob,Map,Promise,setTimeout,clearTimeout,AscCommon:{g_oDocumentUrls:{addImageUrl(){},getLocal(){}}},
  EOWasmConvert:{formats:{docx:65},convert:async(_bytes,_from,_to,options)=>{if(!options.openPassword){const e=Error('Password required');e.code='password-required';throw e;}return new Uint8Array([1]);}}};
  vm.runInNewContext(fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Controller.js'),'utf8'),context);

@@ -4,6 +4,9 @@ Living document, kept up to date as features land (requested by the test user, 2
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
+| Security hardening candidate | Download token/trust checks, AI proxy origin/auth checks, escaped WOPI/formula text, plain-text base URL and validated cache hash | Not evaluated | Backported selected fixes plus local output validation | docs/security-phase1.md; tests/security/ |
+| Desktop Save As (0.2.1 candidate) | Descriptive format dialog, native destination, source-format/folder defaults and explicit loss/overwrite consent in 45 UI languages | Native format and destination controls | Previous local format-button chooser | the accompanying release acceptance record |
+| Browser-local Save As (0.2.1 candidate) | Descriptive format and copy-name dialog with keyboard, RTL, theme support and portable filename validation in45 UI languages | Native storage destination | Browser download of a converted copy | the accompanying release acceptance record |
 | Local document encryption (H1 candidate) | Six Office/OpenDocument formats; masked open dialog, encrypted Save, explicit Keep/Change/Remove, session recovery disabled after protection; hosted unchanged | Independent encrypted-file interoperability not checked in this task | Local wasm workers previously lacked password options and offline protection UI was disabled | docs/local-passwords.md |
 | UI model | Word-identical ribbon (tabs, groups, contextual tabs, KeyTips, backstage) | Own UI (menus/toolbars, optional "tabbed" UI) | Ribbon, but own structure and vocabulary | docs/ui.md |
 | Familiar ground for Word users | Title bar with AutoSave switch (the real autosave setting), file name and Saved state, centred command search, Comments, Editing / Reviewing / Viewing and Share; mini toolbar in a table cell in Word's order (font, size, bullets, numbering, styles, bold, italic, underline, highlight, font colour, format painter, borders, shading, tall Insert, Delete, New comment); status bar "2 of 4,378 words" and Display Settings | Own layout, no mini toolbar in tables | Mini toolbar without table commands, no AutoSave switch | docs/ui.md (Familiar ground), tests/ribbon/familiar.mjs |
@@ -173,3 +176,26 @@ bidiVisual table property or obvious hosted setting; an engine investigation is
 queued for the next release.
 
 Narrow desktop PDF correction candidate: PDF AutoRecover disabled, detailed manual errors, desktop-only modern wheel scrolling and clear original-text-editing limits. Tagged browser/Word PDFs still require a copy when in-place preservation is refused. Hosted editing and converter/PDF pins are unchanged; see docs/desktop.md for evidence and remaining native checks.
+
+
+
+Desktop releases from 0.2.1 identify the application version, unique build number and source revision in About on every platform; ordered candidate/final package metadata prevents ambiguous upgrades. See [desktop build identity](desktop-build-identity.md).
+
+Document security review candidate: scheme checks across main/mobile/embed/forms/diagram hyperlink callbacks and escaped tracked font/style display. Scope, actual synthetic-document evidence and unresolved converter path findings: [security phase2](security-phase2.md).
+
+Phase2 r2 hyperlink policy: www. targets become http:// before validation; unsupported scheme-less document paths show the invalid-link warning and are not opened. Existing anchors/internal slide dispatch remain. Forms integrator saveUrl/fullscreenUrl resolve relative to the page origin, then pass the scheme allowlist. Diagram mobile is included. See [security phase2 policy](security-phase2.md).
+
+0.2.1 template review candidate: nine Arabic italic runs use upright bundled fonts; legacy symbols become ordinary Unicode. Styled-face coverage resolves inherited default/paragraph/character/table properties. The frozen0.2.0 package retains its disclosed Arabic italic limitation; no0.2 rebuild or integration is claimed.
+
+G2 local PDF rotation candidate: the annotation-only local thumbnail menu gains quarter-turn rotation under the verified original-append policy, without activating original-text editing or destructive page management. Hosted viewer menus keep their existing Copy-only behavior. Public Linux browser tests exercise actual annotation controls, form typing, rotation/undo/redo, preserved downloads and fresh reopen in English/French. Independent Poppler checks retain title/author/subject/creator, outline, text, page count and original byte prefix, with consistent rotated appearance. No runtime or pin changes; fresh native platform/package acceptance remains separate.
+- Desktop0.2.1 quit review candidate names the active document, uses localized Save / Don't Save / Cancel with explicit platform defaults, and retains conservative busy-close and recovery behavior. See verification scope.
+
+Desktop opening now isolates unreadable recent-file metadata, retries transient EBUSY once, and uses45-language OPEN guidance with path-free local error codes. Issue4 scope and checks.
+## Desktop cancellation feedback review backport
+
+Cancelled output clears stale Cancel feedback; recovery warnings and real
+errors remain visible. [Scope](desktop-cancellation-feedback.md).
+Desktop0.2.1-rc.5 review candidate: native file shortcuts reach their desktop commands from a focused editor iframe, and desktop/browser-local mode suppresses browser-reserved-key advice. Hosted behavior is unchanged. Linux routing evidence and native/platform limitations: [Desktop](desktop.md).
+Desktop0.2.1-rc.5 review candidate: Office-compatible native file shortcuts reach their desktop commands from a focused editor iframe, and desktop/browser-local mode suppresses browser-reserved-key advice. Hosted behavior is unchanged. Linux routing evidence and native/platform limitations: [Desktop](desktop.md).
+
+Windows follow-up isolates failed recent preference writes from document operations, tolerates unreadable computer font entries, and brands native consent without moving user data. UNC aliases retain the existing identity policy. Validation.

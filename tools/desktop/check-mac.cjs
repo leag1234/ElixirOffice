@@ -8,6 +8,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
  assert.equal(process.platform,'darwin');
  const [directory,output]=process.argv.slice(2);assert(directory&&output);
  const dist=path.resolve(directory),out=path.resolve(output);assert(!fs.existsSync(out),'Choose a new acceptance folder');
+ const identity=require(path.join(root,'desktop/build-info.json'));
  const config=require(path.join(root,'desktop/package.json')),dmg=path.join(dist,'ElixirOffice-'+config.version+'-mac-arm64.dmg');
  console.log(run('/usr/bin/hdiutil',['verify',dmg]));
  fs.mkdirSync(out,{recursive:true});const mount=path.join(out,'mount');fs.mkdirSync(mount);
@@ -18,7 +19,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
   for(const bundle of [path.join(dist,'mac-arm64','ElixirOffice.app'),app]) {
    const contents=path.join(bundle,'Contents');
    const plist=JSON.parse(run('/usr/bin/plutil',['-convert','json','-o','-',path.join(contents,'Info.plist')]));
-   assert.equal(plist.CFBundleIdentifier,config.build.appId);assert.equal(plist.CFBundleShortVersionString,config.version);assert.equal(plist.CFBundleDisplayName,'ElixirOffice');
+   assert.equal(plist.CFBundleIdentifier,config.build.appId);assert.equal(plist.CFBundleShortVersionString,identity.mac_short_version);assert.equal(plist.CFBundleVersion,identity.mac_bundle_version);assert.equal(plist.CFBundleDisplayName,'ElixirOffice');
    assert.equal(plist.LSApplicationCategoryType,'public.app-category.productivity');
    const extensions=plist.CFBundleDocumentTypes.flatMap(type=>type.CFBundleTypeExtensions||[]).sort();
    assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf'].sort());
@@ -49,8 +50,12 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    console.log(run('python3',[path.join(root,'tests/desktop/check-samples.py'),path.join(contents,'Resources','assets')]));
    const asar=require('node:module').createRequire(path.join(root,'desktop/node_modules/app-builder-lib/package.json'))('@electron/asar'),archive=path.join(contents,'Resources','app.asar');
    require('./check-version.cjs').verify(JSON.parse(asar.extractFile(archive,'package.json')),config.version);
+   assert.deepEqual(JSON.parse(asar.extractFile(archive,'build-info.json')),identity);require(path.join(root,'desktop/build-identity.cjs')).validate(identity);
    assert(!asar.listPackage(archive).some(name=>/\.(docx|xlsx|pptx|odt|ods|odp|doc|xls|ppt|pdf)$/i.test(name)),'Document fixture unexpectedly shipped in app.asar');
-   for(const name of fs.readdirSync(path.join(root,'desktop')).filter(name=>/\.(cjs|js|html|css)$/.test(name)||name==='icon.png'))
+   const buildOnlyHook='build-identity-before-pack.cjs';
+   assert(config.build.files.includes('!'+buildOnlyHook),'Missing build-only hook exclusion');
+   assert(!asar.listPackage(archive).some(name=>name.replace(/^\//,'')===buildOnlyHook),'Build-only hook leaked into application payload');
+   for(const name of fs.readdirSync(path.join(root,'desktop')).filter(name=>(/\.(cjs|js|html|css)$/.test(name)||name==='icon.png')&&name!==buildOnlyHook))
     assert(fs.readFileSync(path.join(root,'desktop',name)).equals(asar.extractFile(archive,name)),name+' packaged source mismatch');
    const assets=path.join(contents,'Resources','assets'),manifest=JSON.parse(fs.readFileSync(path.join(assets,'desktop-manifest.json')));
    assert.equal(manifest.fontSet,'standard');assert.equal(manifest.pruning.staticHelpAnimations,44);

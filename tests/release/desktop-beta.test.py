@@ -96,18 +96,37 @@ class ReleaseInputs(unittest.TestCase):
         self.assertEqual(len(inventory["files"]), len(set(inventory["files"])))
 
 
+    def test_release_notes_identify_candidate_and_final_without_relabelling(self):
+        template=(source.parent/"desktop-release-notes.md").read_text()
+        identity={"version":"0.2.1-rc.42","build_number":42,"product_revision":"a"*40,"channel":"rc"}
+        candidate=release.render_release_notes(template,identity)
+        self.assertIn("release candidate",candidate);self.assertIn("Build 42",candidate);self.assertNotIn("{{",candidate)
+        final=release.render_release_notes(template,{**identity,"version":"0.2.1","build_number":43,"channel":"final"})
+        self.assertIn("final version rebuilt",final);self.assertIn("Build 43",final);self.assertNotIn("0.2.1-rc.42",final)
+        with self.assertRaises(ValueError):release.render_release_notes("{{UNKNOWN}}",identity)
+
+    def test_candidate_appimage_names_keep_existing_convention(self):
+        self.assertEqual(release.appimage_names("0.2.1-rc.42"),("ElixirOffice-0.2.1-rc.42-x86_64.AppImage","ElixirOffice-0.2.1-rc.42-x86_64.AppImage.zsync"))
+        with self.assertRaises(ValueError):release.appimage_names("0.2.1-rc.0")
+        with self.assertRaises(ValueError):release.appimage_names("../0.2.1")
+
     def test_published_version_cannot_be_repackaged(self):
         package = json.loads((source.parents[2] / "desktop/package.json").read_text())
-        self.assertEqual(release.validate_desktop_version(package), "0.2.0")
-        with self.assertRaisesRegex(ValueError, "already published"):
-            release.validate_desktop_version({**package, "version": "0.1.0"})
+        self.assertEqual(release.validate_desktop_version(package), package["version"])
+        with tempfile.TemporaryDirectory() as folder:
+            inventory = Path(folder) / "published.json"
+            import datetime
+            inventory.write_text(json.dumps({"schema":1,"repository":"leag1234/elixiroffice","complete":True,"fetched_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"versions":["0.1.0","0.2.0"]}))
+            for version in ["0.1.0", "0.2.0"]:
+                with self.assertRaisesRegex(ValueError, "already published"):
+                    release.validate_desktop_version({**package, "version": version}, inventory)
         lock = json.loads((source.parents[2] / "desktop/package-lock.json").read_text())
         self.assertEqual(lock["version"], package["version"])
         self.assertEqual(lock["packages"][""]["version"], package["version"])
         metainfo = ET.parse(source.parents[2] / "tools/flatpak/org.elixiroffice.desktop.metainfo.xml")
         entry = metainfo.find("./releases/release")
-        self.assertEqual(entry.attrib["version"], package["version"])
-        self.assertEqual(entry.attrib["date"], "2026-10-13")
+        self.assertEqual(entry.attrib["version"], "0.2.1")
+        self.assertEqual(entry.attrib["date"], "2026-10-15")
         notes = (source.parent / "desktop-beta3-release-notes.md").read_text()
         self.assertTrue(notes.startswith("# ElixirOffice 0.2.0 beta (desktop)"))
         self.assertIn("`v0.2.0`", notes)
@@ -128,6 +147,8 @@ class ReleaseInputs(unittest.TestCase):
                          build.product / "tools/desktop", build.product / "tests/desktop",
                          build.driver, root / "configured-tools/playwright-core"):
                 path.mkdir(parents=True)
+            build.plan = {"build_identity":{"version":"0.2.1-rc.42","build_number":42}}
+            (build.product / "desktop/build-info.json").write_text(json.dumps(build.plan["build_identity"]))
             dependency = root / "configured-tools/playwright-core/package.json"
             dependency.write_text('{"name":"playwright-core","fixture":"explicit dependency"}')
             for name in ("packaged-smoke.cjs", "remote-build.sh"):
@@ -169,6 +190,7 @@ class ReleaseInputs(unittest.TestCase):
             stale_cache.write_bytes(b"unrelated build cache")
             archive = build.archive()
             with tarfile.open(archive) as exported:
+                self.assertEqual(json.load(exported.extractfile("desktop/build-info.json")),build.plan["build_identity"])
                 self.assertEqual(exported.extractfile("tools/release/desktop-test-inputs.json").read(), selected_inventory.read_bytes())
                 self.assertEqual(exported.extractfile("test-tools/playwright-core/package.json").read(), dependency.read_bytes())
                 name = "cache/home/elixiroffice/DocumentServer/" + str(core.relative_to(build.test_upstream))
@@ -198,6 +220,12 @@ class ReleaseInputs(unittest.TestCase):
             core.parent.mkdir(parents=True)
             locale.mkdir(parents=True)
             inventory = json.loads((source.parent / "desktop-test-inputs.json").read_text())
+            # Preserve the original web-only schema contract alongside schema-2 SDK tests.
+            inventory["schema"] = 1
+            inventory.pop("sdkjs_files", None)
+            inventory_file = root / "legacy-inventory.json"
+            inventory_file.write_text(json.dumps(inventory))
+
             for name in inventory["files"]:
                 file = repo / name
                 file.parent.mkdir(parents=True, exist_ok=True)
@@ -224,7 +252,7 @@ class ReleaseInputs(unittest.TestCase):
             git("add", ".")
             git("commit", "-m", "different ambient inputs")
             destination = root / "export"
-            manifest = release.export_test_upstream(root, recorded, "recorded-DS", destination)
+            manifest = release.export_test_upstream(root, recorded, "recorded-DS", destination, inventory_file)
             exported = destination / "web-apps/apps/common/main/lib/elixir-ai/Core.js"
             self.assertEqual(exported.read_text(), "recorded public connector")
             self.assertEqual(manifest["web_apps_revision"], recorded)
@@ -233,7 +261,7 @@ class ReleaseInputs(unittest.TestCase):
             self.assertEqual(sorted(p.name for p in (destination / "web-apps/apps/documenteditor/main/locale").iterdir()), sorted(["en.json", "fr.json", *extra]))
             self.assertEqual(manifest["locale_count"], 135)
             self.assertEqual(manifest["locale_counts"], {name:45 for name in inventory["locales"]})
-            self.assertEqual(manifest["inventory_sha256"], release.digest(source.parent / "desktop-test-inputs.json"))
+            self.assertEqual(manifest["inventory_sha256"], release.digest(inventory_file))
             self.assertEqual(len(manifest["files"]), len(inventory["files"]) + sum(inventory["locales"].values()) + 1)
             for name in inventory["files"]:
                 self.assertEqual((destination / "web-apps" / name).read_bytes(), subprocess.check_output(["git", "-C", repo, "show", recorded + ":" + name]))
@@ -244,14 +272,14 @@ class ReleaseInputs(unittest.TestCase):
             git("rm", "apps/documenteditor/main/locale/untracked.json")
             git("commit", "-m", "incomplete public inventory")
             with self.assertRaisesRegex(ValueError, "45"):
-                release.export_test_upstream(root, git("rev-parse", "HEAD"), "recorded-DS", root / "incomplete-export")
+                release.export_test_upstream(root, git("rev-parse", "HEAD"), "recorded-DS", root / "incomplete-export", inventory_file)
             git("checkout", recorded, "--", "apps/spreadsheeteditor/main/locale/fr.json")
             git("rm", "apps/common/main/lib/elixir-ai/View.js")
             git("commit", "-m", "incomplete required source inventory")
             with self.assertRaisesRegex(ValueError, "Missing recorded"):
-                release.export_test_upstream(root, git("rev-parse", "HEAD"), "recorded-DS", root / "missing-view-export")
+                release.export_test_upstream(root, git("rev-parse", "HEAD"), "recorded-DS", root / "missing-view-export", inventory_file)
             with self.assertRaises(FileExistsError):
-                release.export_test_upstream(root, recorded, "recorded-DS", destination)
+                release.export_test_upstream(root, recorded, "recorded-DS", destination, inventory_file)
 
     def test_appimage_update_inventory_is_paired_and_excludes_updater_feeds(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -299,18 +327,19 @@ class ReleaseInputs(unittest.TestCase):
 
     def test_build_environment_is_an_allowlist(self):
         env = release.clean_environment("/owned/node/bin/node", "/owned/cache")
-        self.assertEqual(set(env), {"PATH", "HOME", "LANG", "LC_ALL", "npm_config_cache", "PYTHONDONTWRITEBYTECODE"})
+        self.assertEqual(set(env), {"PATH", "HOME", "LANG", "LC_ALL", "npm_config_cache", "PYTHONDONTWRITEBYTECODE", "EO_RELEASE_REQUIRE_BUILDER"})
+        self.assertEqual(env["EO_RELEASE_REQUIRE_BUILDER"], "1")
         self.assertEqual(env["PATH"], "/owned/node/bin:/usr/local/bin:/usr/bin:/bin")
 
     def test_runtime_defaults_are_source_resolved_and_explicit_locations_remain(self):
-        args = release.parser().parse_args(["--product-rev", "main", "--documentserver-rev", "elixir/dev"])
+        args = release.parser().parse_args(["--product-rev", "main", "--documentserver-rev", "elixir/dev", "--build-number", "42", "--channel", "rc", "--published-versions", "/owned/published.json", "--build-ledger", "/owned/ledger.json"])
         self.assertIsNone(args.full_runtime)
         self.assertEqual(args.wasm_artifacts, Path.home() / "elixiroffice/wasm-artifacts")
-        other = release.parser().parse_args(["--product-rev", "main", "--documentserver-rev", "elixir/dev", "--full-runtime", "/tmp/explicit"])
+        other = release.parser().parse_args(["--product-rev", "main", "--documentserver-rev", "elixir/dev", "--full-runtime", "/tmp/explicit", "--build-number", "42", "--channel", "rc", "--published-versions", "/owned/published.json", "--build-ledger", "/owned/ledger.json"])
         self.assertEqual(other.full_runtime, Path("/tmp/explicit"))
 
     def test_host_and_tool_paths_are_explicit_or_environment_configured(self):
-        base = ["--product-rev", "main", "--documentserver-rev", "elixir/dev"]
+        base = ["--product-rev", "main", "--documentserver-rev", "elixir/dev", "--build-number", "42", "--channel", "rc", "--published-versions", "/owned/published.json", "--build-ledger", "/owned/ledger.json"]
         with patch.dict(os.environ, {}, clear=True):
             args = release.parser().parse_args(base)
             self.assertIsNone(args.mac_root)

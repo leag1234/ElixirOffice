@@ -40,14 +40,14 @@ test('web font permission and enumeration behavior is preserved',async()=>{
  const {LF,counts}=fonts(null);assert.equal(await LF.permission(),'granted');assert.equal((await LF.readList())[0].family,'Web');assert.deepEqual(counts(),{queried:1,listed:1});
 });
 
-test('unsaved replacement and close decisions use explicit Discard and safe cancellation',()=>{
+test('unsaved replacement and close decisions use explicit Do not Save and safe cancellation',()=>{
  const {unsaved,discard,buttons}=require('../../desktop/decisions.cjs');
- const words={unsaved:'Unsaved changes',cancel:'Cancel',save:'Save',discard:'Discard'};
+ const words={quitSave:'Save',saveChangesNamed:'Save changes to {name}?',closeWithoutSavingNamed:'Close {name} without saving?',untitled:'Untitled',cancel:'Cancel',save:'Save',dontSave:"Don't Save"};
  for(const closing of [false,true]){
-  const options=unsaved(key=>words[key],closing);
-  assert.deepEqual(options.buttons.map(label=>label.replace('&','')),closing?['Save','Discard','Cancel']:['Cancel','Discard']);
-  assert.equal(options.cancelId,closing?2:0);assert.equal(discard({response:options.cancelId}),false);
-  assert.equal(discard({response:1}),true);assert.equal(discard({response:-1}),false);
+  const options=unsaved(key=>words[key],closing,'Public.docx','win32');
+  assert.deepEqual(options.buttons.map(label=>label.replace('&','')),closing?['Save',"Don't Save",'Cancel']:['Cancel',"Don't Save"]);
+  assert.equal(options.cancelId,closing?2:0);assert.equal(discard({response:options.cancelId},closing,'win32'),false);
+  assert.equal(discard({response:1},closing,'win32'),true);assert.equal(discard({response:-1},closing,'win32'),false);
  }
  assert.deepEqual(buttons(['Annuler','Autoriser']),['&Annuler','A&utoriser']);
 });

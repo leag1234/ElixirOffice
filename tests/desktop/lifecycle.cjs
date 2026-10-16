@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 const {launch,stop,editable,root,sleep,fixture}=require('./harness.cjs');
 const fs=require('node:fs/promises'),path=require('node:path'),cp=require('node:child_process'),assert=require('node:assert/strict');
-const report=[],marker='EODESKTOP';
+const report=[],marker='EODESKTOP',display=process.env.EO_DESKTOP_DISPLAY||':0';
 function keys(env,action,value) {
- const result=cp.spawnSync('python3',[path.join(root,'tests/desktop/native-input.py'),action,...(value?[value]:[])],{cwd:root,env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_NATIVE_PID:String(env.application.pid)},encoding:'utf8'});
+ const result=cp.spawnSync('python3',[path.join(root,'tests/desktop/native-input.py'),action,...(value?[value]:[])],{cwd:root,env:{...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_NATIVE_PID:String(env.application.pid)},encoding:'utf8'});
  assert.equal(result.status,0,result.stderr||result.stdout);
 }
 function text(file) {
@@ -27,9 +27,12 @@ async function edit(env) {
 async function modal(env,expectedTitle) {
  for(let attempt=0;attempt<300;attempt++){
   const failure=await env.page.evaluate(()=>window.EOLocalFailure);if(failure)throw Error(failure);
-  const xenv={...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority')};
-  const list=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:xenv,encoding:'utf8'}).match(/0x[0-9a-f]+/g)||[];
-  for(const id of list){
+  const xenv={...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority')};
+  let list=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:xenv,encoding:'utf8'}).match(/0x[0-9a-f]+/g)||[];
+  // A private Xvfb can have no window manager and therefore no client-list property.
+  // native-input.py verifies the exact Xvfb process before any focus/key injection.
+  if(!list.length&&process.env.EO_XVFB_PID)list=Array.from(cp.execFileSync('xwininfo',['-root','-tree'],{env:xenv,encoding:'utf8'}).matchAll(/^\s+(0x[0-9a-f]+)\s/gm),match=>match[1]);
+  for(const id of [...new Set(list)].filter(id=>parseInt(id,16)>1)){
    try{
    const properties=cp.execFileSync('xprop',['-id',id,'_NET_WM_PID','WM_TRANSIENT_FOR','_NET_WM_WINDOW_TYPE'],{env:xenv,encoding:'utf8'});
    const parent=/WM_TRANSIENT_FOR.*?(0x[0-9a-f]+)/.exec(properties);
@@ -59,7 +62,7 @@ async function roundtrip(format,entry='argument') {
    await require('./file-action.cjs')(env.page,'open');await modal(env);keys(env,'path',target);
   }
   await editable(env);if(process.env.EO_DIRTY_TRACE==='1')await env.page.evaluate(()=>{const api=EOLocalSession.api,original=api.SetDocumentModified;window.EODirtyTrace=[];api.SetDocumentModified=function(value){EODirtyTrace.push({value,time:performance.now(),index:EOLocalSession.win.AscCommon.History.Index,stack:new Error().stack.split('\n').slice(1,5)});return original.apply(this,arguments)}});await edit(env);
-  const dirtyTitle=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority')},encoding:'utf8'});
+  const dirtyTitle=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:{...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority')},encoding:'utf8'});
   await env.page.waitForFunction(()=>document.getElementById('save').disabled===false);
   await require('./file-action.cjs')(env.page,'save');await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);

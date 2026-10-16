@@ -68,6 +68,8 @@ window.EODesktopBackstage=async function(win,main,info,action){
  bs.onClose=()=>action('home');
  // Controller callbacks were bound before this desktop extension was installed.
  // Dispatch native commands before those existing web handlers receive the event.
+ const openBackstage=chrome.openBackstage;chrome.openBackstage=function(){const result=openBackstage.apply(this,arguments);parent.dispatchEvent(new parent.CustomEvent('eo:backstage-visibility',{detail:true}));return result;};
+ const hideFile=fm.hide;fm.hide=function(){const result=hideFile.apply(this,arguments);parent.dispatchEvent(new parent.CustomEvent('eo:backstage-visibility',{detail:false}));return result;};
  const fireEvent=fm.fireEvent;
  fm.fireEvent=function(event,args,...rest){
   const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'home','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
@@ -81,9 +83,22 @@ window.EODesktopBackstage=async function(win,main,info,action){
  const style=win.document.createElement('style');
  style.textContent='.eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
  win.document.head.append(style);
+ let operationFeedback,pendingOperation;
+ const operationRender=bs.onRender;bs.onRender=function(){const result=operationRender.apply(this,arguments);if(pendingOperation)showOperation(pendingOperation);return result;};
+ function showOperation(event){
+  pendingOperation=event;const target=fm.$el?.find('.panel-context')[0];if(!target)return;
+  if(!operationFeedback){
+   operationFeedback=parent.EOOperationFeedback.mount(win.document,target,info.strings,{open:id=>parent.dispatchEvent(new parent.CustomEvent('eo:saved-open',{detail:id})),show:id=>parent.eoDesktop.savedShow(id)});
+   operationFeedback.reset(event.scope);
+   if(event.phase!=='preparing')operationFeedback.update({id:event.id,scope:event.scope,kind:event.kind,phase:'preparing'});
+   operationFeedback.element.classList.add('eo-operation-backstage');
+   const css=win.document.createElement('link');css.rel='stylesheet';css.href='/feedback.css';win.document.head.append(css);
+  }
+  operationFeedback.update(event);
+ }
  chrome.titleBar?.fitName();
  bs.afterApplyMode();bs.enhanceNew();
- return {renameLabel:bs.txtRename,setName:()=>fm.loadDocument({doc:main.document||main.appOptions.spreadsheet}),open:async()=>{
+ return {operation:showOperation,renameLabel:bs.txtRename,setName:()=>fm.loadDocument({doc:main.document||main.appOptions.spreadsheet}),open:async()=>{
   const deadline=Date.now()+30000;
   while(!win.Common.Controllers.LaunchController.isScriptLoaded()){
    if(Date.now()>deadline)throw Error('File menu scripts did not finish loading');

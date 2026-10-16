@@ -13,3 +13,6 @@ fonts-user/
 *.ttf
 *.otf
 *.ttc
+
+# Generated in isolated release build copies.
+/desktop/build-info.json

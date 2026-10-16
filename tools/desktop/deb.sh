@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 APP="$ROOT/desktop/dist/linux-unpacked"
 [ -x "$APP/elixiroffice" ] || { echo "Build the Linux application first" >&2; exit 1; }
 VERSION="$(node -p "require(process.argv[1]).version" "$ROOT/desktop/package.json")"
+DEB_VERSION="$(node "$ROOT/desktop/build-identity.cjs" deb "$ROOT/desktop")"
 STAGE="$(mktemp -d "$ROOT/desktop/dist/deb-stage.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/DEBIAN" "$STAGE/opt/ElixirOffice" "$STAGE/usr/share/applications" "$STAGE/usr/share/icons/hicolor/512x512/apps"
@@ -14,7 +15,7 @@ cp "$ROOT/desktop/icon.png" "$STAGE/usr/share/icons/hicolor/512x512/apps/elixiro
 SIZE="$(du -sk "$STAGE/opt/ElixirOffice" | cut -f1)"
 cat > "$STAGE/DEBIAN/control" <<EOF
 Package: elixiroffice-desktop
-Version: $VERSION
+Version: $DEB_VERSION
 Architecture: amd64
 Maintainer: ElixirOffice contributors
 Installed-Size: $SIZE

@@ -1,16 +1,22 @@
 {
-  "schema": 1,
+  "schema": 2,
   "files": [
     "apps/common/main/lib/elixir-ai/Core.js",
     "apps/common/main/lib/elixir-ai/View.js",
     "apps/common/main/lib/elixir-ai/Strings.js",
+    "apps/common/main/lib/elixir-browserkeys/Controller.js",
+    "apps/common/main/lib/view/ShortcutsDialog.js",
     "apps/documenteditor/main/app/view/FileMenu.js",
     "apps/spreadsheeteditor/main/app/view/FileMenu.js",
     "apps/presentationeditor/main/app/view/FileMenu.js",
     "apps/common/main/lib/elixir-local/Pdf.js",
     "apps/common/main/lib/elixir-local/PdfMessages.js",
     "apps/common/main/lib/elixir-local/PdfWriter.js",
-    "apps/pdfeditor/main/app/controller/Main.js"
+    "apps/pdfeditor/main/app/controller/Main.js",
+    "apps/pdfeditor/main/app/view/DocumentHolderExt.js",
+    "apps/common/main/lib/elixir-local/Controller.js",
+    "apps/common/main/lib/elixir-local/Operation.js",
+    "apps/common/main/lib/elixir-localfonts/Core.js"
   ],
   "locales": {
     "apps/documenteditor/main/locale": 45,
@@ -21,5 +27,9 @@
     "LICENSE",
     "LICENSE.txt",
     "NOTICE"
+  ],
+  "sdkjs_files": [
+    "pdf/src/thumbnails.js",
+    "common/GlobalLoaders.js"
   ]
 }

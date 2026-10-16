@@ -8,6 +8,17 @@ const {modal,keys}=require('./lifecycle.cjs'),fileAction=require('./file-action.
 function scanProfile(directory){
  for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())scanProfile(file);else if(entry.isFile())assert(![password,changed].some(value=>fs.readFileSync(file).includes(Buffer.from(value))),'No document password persisted in the own application profile');}
 }
+function snapshotResults(activeLog){
+ const result=[];
+ function walk(directory,prefix=''){
+  for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+   const relative=prefix+entry.name,file=path.join(directory,entry.name);
+   if(entry.isDirectory()){result.push([relative,'directory']);walk(file,relative+'/');}
+   else{assert(entry.isFile(),'Unexpected non-regular result entry');result.push([relative,relative===activeLog?'active harness log':crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')]);}
+  }
+ }
+ walk(path.join(root,'results'));return result.sort((a,b)=>a[0].localeCompare(b[0]));
+}
 (async()=>{
  let cancelled=false;
  for(const [office,odf,code,odfCode,bin]of [['docx','odt',65,67,8193],['xlsx','ods',257,259,8194],['pptx','odp',129,131,8195]]){
@@ -35,14 +46,15 @@ function scanProfile(directory){
     const frame=env.page.frames().find(f=>/\/(documenteditor|spreadsheeteditor|presentationeditor)\/main\//.test(f.url()));
     for(const choice of ['keep','change','remove']){
      if(choice==='remove'){
-      stage=format+':PDF-refusal';await fileAction(env.page,'pdf');await frame.locator('button[result=no]').click();await env.page.waitForFunction(()=>document.getElementById('message').textContent.includes('AutoRecover'));
+      stage=format+':PDF-refusal';const activeLog=path.basename(env.directory)+'.log',beforeRefusal=snapshotResults(activeLog),sourceBeforeRefusal=fs.readFileSync(file);await fileAction(env.page,'pdf');await frame.locator('button[result=no]').click();await env.page.waitForFunction(()=>document.getElementById('message').textContent.includes('AutoRecover'));assert.deepEqual(snapshotResults(activeLog),beforeRefusal,'Refusing plaintext export creates no file and changes no existing output');assert.deepEqual(fs.readFileSync(file),sourceBeforeRefusal,'Refusing PDF export preserves the original Office file');
       assert.equal(await env.page.evaluate(()=>window.EOLastPdf||null),null);assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
-      stage=format+':PDF-consent';await fileAction(env.page,'pdf');await frame.locator('button[result=yes]').click();const pdf=path.join(root,'results','password-'+format+'-'+Date.now()+'.pdf');await modal(env);keys(env,'save-path',pdf);await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);assert(fs.readFileSync(pdf).subarray(0,5).equals(Buffer.from('%PDF-')));
+      stage=format+':PDF-consent';await fileAction(env.page,'pdf');await frame.locator('button[result=yes]').click();const pdf=path.join(root,'results','password-'+format+'-'+Date.now()+'.pdf');await modal(env);keys(env,'save-path',pdf);await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);assert(fs.readFileSync(pdf).subarray(0,5).equals(Buffer.from('%PDF-')));const pdfAck=await env.page.evaluate(()=>window.EOLastPdf);assert.equal(typeof pdfAck.artifactId,'string','Committed PDF copy exposes scoped Open/Show actions');assert.equal(pdfAck.name,path.basename(pdf));assert.equal(pdfAck.bytes,fs.statSync(pdf).size);
      }
-     stage=format+':SaveAs-'+choice;await fileAction(env.page,'save-as',format);await frame.locator('button[result='+choice+']').click();
+     stage=format+':SaveAs-'+choice;await fileAction(env.page,'save-as',format);
+     const target=path.join(root,'results','password-'+format+'-'+choice+'-'+Date.now()+'.'+format);await modal(env);keys(env,'save-path',target);
+     await frame.locator('button[result='+choice+']').click();
      if(choice==='change'){await frame.locator('#id-password-txt input').fill(changed);await frame.locator('#id-repeat-txt input').fill(changed);await frame.locator('button[result=ok]:visible').click();await frame.locator('#id-repeat-txt input').waitFor({state:'hidden',timeout:10000});}
      if(choice==='remove')await frame.locator('button[result=yes]').click();
-     const target=path.join(root,'results','password-'+format+'-'+choice+'-'+Date.now()+'.'+format);await modal(env);keys(env,'save-path',target);
      await env.page.waitForFunction(name=>window.EOLastSave?.name===name&&!EOLocalSession.controller.isModified()&&Array.from(document.querySelectorAll('#home button')).every(b=>!b.disabled),path.basename(target),{timeout:90000});
      const copy=fs.readFileSync(target);await convert(copy,inputCode,bin,choice==='remove'?{}:{m_sPassword:choice==='keep'?password:changed});
      if(choice!=='remove'){let failed=false;try{await convert(copy,inputCode,bin,{m_sPassword:'intentionally-wrong'});}catch{failed=true;}assert(failed);}

@@ -21,7 +21,7 @@ env -i HOME="$MAC_BUILD_CACHE/home" TMPDIR="$MAC_BUILD_CACHE/tmp" PATH="$PATH" \
   npm ci --cache "$MAC_BUILD_CACHE/npm"
 env -i HOME="$MAC_BUILD_CACHE/home" TMPDIR="$MAC_BUILD_CACHE/tmp" PATH="$PATH" \
   ELECTRON_BUILDER_CACHE="$MAC_BUILD_CACHE/builder" CSC_IDENTITY_AUTO_DISCOVERY=false \
-  npm run test
+  EO_RELEASE_REQUIRE_BUILDER=1 npm run test
 env -i HOME="$MAC_BUILD_CACHE/home" TMPDIR="$MAC_BUILD_CACHE/tmp" PATH="$PATH" \
   ELECTRON_BUILDER_CACHE="$MAC_BUILD_CACHE/builder" CSC_IDENTITY_AUTO_DISCOVERY=false \
   node "$ROOT/tools/desktop/mac-licenses.cjs" "$MAC_BUILD_CACHE/electron"

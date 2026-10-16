@@ -90,7 +90,8 @@ def school_texts(kind, w, t):
     return {'word/document.xml':content,
             'word/footer1.xml':[t['assessment']+' — '+t['plants'], '1', '/', '2']}
 
-RTL = {'ar', 'he', 'ur'}
+ARABIC_SCRIPT = {'ar', 'ur', 'fa'}
+RTL = ARABIC_SCRIPT | {'he'}
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 NS = {'w': W}
 def direction_and_fonts(value, locale):
@@ -111,6 +112,23 @@ def direction_and_fonts(value, locale):
                 if v is None: node.attrib.pop(attr,None)
                 else: node.set(attr,v)
     face = 'DejaVu Sans'
+    # Replace legacy symbol-encoded values with ordinary Unicode text.
+    symbols={0xF04A:0x263A,0xF04B:0x1F610,0xF04C:0x2639,
+             0xF0A8:0x2610,0xF06C:0x25CF,0xF0A1:0x25CB}
+    for run in root.findall('.//w:r',NS):
+        converted=False
+        for symbol in list(run.findall('w:sym',NS)):
+            code=int(symbol.get('{'+W+'}char'),16)
+            if code not in symbols: raise ValueError('Unmapped template symbol')
+            text=XML.Element('{'+W+'}t');text.text=chr(symbols[code])
+            run.replace(symbol,text);converted=True
+        if converted:
+            pr=run.find('w:rPr',NS)
+            if pr is None:pr=XML.Element('{'+W+'}rPr');run.insert(0,pr)
+            fonts=ensure(pr,'rFonts')
+            for slot in ['ascii','hAnsi','eastAsia','cs']:fonts.set('{'+W+'}'+slot,face)
+            # The symbol font used a single regular face; do not inherit italics.
+            for key in ['b','bCs','i','iCs']:ensure(pr,key).set('{'+W+'}val','0')
     for run in root.findall('.//w:r',NS):
         pr=run.find('w:rPr',NS)
         if pr is None: pr=XML.Element('{'+W+'}rPr');run.insert(0,pr)
@@ -142,6 +160,10 @@ def direction_and_fonts(value, locale):
         text=''.join(run.itertext())
         pr=run.find('w:rPr',NS)
         if pr is None: pr=XML.Element('{'+W+'}rPr');run.insert(0,pr)
+        if locale in ARABIC_SCRIPT and re.search('[\u0600-\u08ff]',text):
+            italic=[pr.find('w:'+key,NS) for key in ['i','iCs']]
+            if any(node is not None and node.get('{'+W+'}val','1') not in ['0','false','off'] for node in italic):
+                ensure(pr,'i').set('{'+W+'}val','0');ensure(pr,'iCs').set('{'+W+'}val','0')
         rtl=ensure(pr,'rtl')
         rtl.set('{'+W+'}val','1' if re.search('[\u0590-\u08ff]',text) else '0')
         fonts=ensure(pr,'rFonts')

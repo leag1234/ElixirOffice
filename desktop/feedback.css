@@ -1,0 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+.eo-operation{position:fixed;z-index:2100;bottom:24px;inset-inline-end:24px;max-width:min(440px,calc(100vw - 48px));padding:16px 20px;border:1px solid var(--border,#ccc);border-radius:8px;background:var(--surface,#fff);color:var(--text,#222);box-shadow:var(--shadow-2,0 4px 18px #0002);font:14px/1.5 system-ui}
+.eo-operation-text{margin:0 0 8px;overflow-wrap:anywhere}.eo-operation progress{width:100%;accent-color:var(--accent,#0078d4)}.eo-operation-actions{display:flex;flex-wrap:wrap;gap:8px}.eo-operation button{font:inherit;color:inherit;background:transparent;border:1px solid var(--border,#aaa);border-radius:4px;padding:6px 10px;cursor:pointer}.eo-operation button:focus-visible{outline:2px solid var(--accent,#0078d4);outline-offset:2px}.eo-operation-backstage{position:absolute;bottom:24px;inset-inline-end:24px;margin:0;max-width:440px}
+.eo-operation-live{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+body>.eo-operation{bottom:104px}

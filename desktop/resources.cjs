@@ -11,7 +11,7 @@ function policy(editor){
 function resolve(url,assets,shell){
  let relative;try{relative=decodeURIComponent(url.pathname)}catch{return {status:400}}
  let root;
- if(['/index.html','/renderer.js','/style.css','/pdf.js','/home.js','/backstage.js','/ai.js','/errors.js','/pdf-compat.js'].includes(relative)){root=shell;relative=relative.slice(1)}
+ if(['/index.html','/renderer.js','/style.css','/pdf.js','/home.js','/backstage.js','/ai.js','/errors.js','/pdf-compat.js','/feedback.js','/feedback.css'].includes(relative)){root=shell;relative=relative.slice(1)}
  else if(/^\/example\/local-assets\/sdkjs\/common\/desktop\/(pdf|legacy-worker)\.js$/.test(relative)){root=shell;relative=path.basename(relative)}
  else if(relative.startsWith('/example/local-assets/')){
   root=assets;relative=relative.slice('/example/local-assets/'.length).replace(/^\d+\.\d+\.\d+-[a-f0-9]+\//,'');

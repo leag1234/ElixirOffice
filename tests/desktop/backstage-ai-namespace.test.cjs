@@ -8,10 +8,11 @@ for(const [name,ai,enabled]of [['absent',undefined,false],['empty',{},false],['l
   const fm={$el:element,miHelp:{show(){shown++},setDisabled(value){disabled=value}},hide(){hidden++},fireEvent(){throw Error('Server event must not receive native Help')}};
   const bs={rendered:true,fm,items:{'elx-ai':{show(){aiVisible=true},hide(){aiVisible=false}}},afterApplyMode(){}};
   const win={SSE:{getController:()=>({backstage:bs})},Common:{ElixirAI:ai},$:()=>element,document:{createElement:()=>({}),head:{append(){}}}};
-  const window={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/backstage.js'),'utf8'),{window});
-  await window.EODesktopBackstage(win,{api:{}},{strings:{},language:'en'},value=>{command=value});
+  const visibility=[],window={CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;}},dispatchEvent(event){visibility.push(event);}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/backstage.js'),'utf8'),{window});
+  const adapter=await window.EODesktopBackstage(win,{api:{}},{strings:{},language:'en'},value=>{command=value});
+  assert.doesNotThrow(()=>adapter.operation({id:'local-operation-1',scope:'public',phase:'ready',name:'public.docx'}),'Lifecycle observer must survive an unrendered File menu');
   assert.equal(shown,1);assert.equal(disabled,false);assert.equal(aiVisible,enabled);
   let prevented=false,stopped=false;handler({preventDefault(){prevented=true},stopImmediatePropagation(){stopped=true}});
-  assert(prevented&&stopped);assert.equal(hidden,1);assert.equal(command,'help');
+  assert(prevented&&stopped);assert.equal(hidden,1);assert.equal(command,'help');assert.equal(visibility.at(-1).type,'eo:backstage-visibility');assert.equal(visibility.at(-1).detail,false);
  });
 }

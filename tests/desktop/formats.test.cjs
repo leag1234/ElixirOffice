@@ -6,7 +6,7 @@ test('added desktop formats open as converted copies with scoped export lists',(
  for(const [input,to] of [['rtf','docx'],['txt','docx'],['csv','xlsx'],['dotx','docx'],['docm','docx'],['xltx','xlsx'],['xlsm','xlsx'],['potx','pptx'],['ppsx','pptx']]){
   assert(files.formats.includes(input));assert.equal(documentPath('public.'+input),'public.'+input);assert.equal(formats.canonical[input],to);assert(Number.isInteger(formats.codes[input]));
  }
- assert.deepEqual(formats.exports.word,['docx','odt','rtf','txt','pdf']);assert.deepEqual(formats.exports.cell,['xlsx','ods','csv']);assert.deepEqual(formats.exports.slide,['pptx','odp','pdf']);
+ assert.deepEqual(formats.exports.word,['docx','odt','rtf','txt','pdf']);assert.deepEqual(formats.exports.cell,['xlsx','ods','csv','pdf']);assert.deepEqual(formats.exports.slide,['pptx','odp','pdf']);
 });
 test('export output validation accepts real signatures and refuses wrong or unsafe representations',()=>{
  for(const [data,format] of [['PKtest','docx'],['{\\rtf1 test}','rtf'],['é','txt'],['a,b\n1,2','csv'],['%PDF-1.7','pdf']])assert(formats.output(Buffer.from(data),format));

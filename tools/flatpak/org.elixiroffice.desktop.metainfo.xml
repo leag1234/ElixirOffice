@@ -15,5 +15,5 @@
   <provides><binary>elixiroffice-flatpak</binary></provides>
   <categories><category>Office</category><category>WordProcessor</category><category>Spreadsheet</category><category>Presentation</category></categories>
   <content_rating type="oars-1.1"/>
-  <releases><release version="0.2.0" date="2026-10-13" type="development"><description><p>Desktop beta update. Exact release tag and acceptance are recorded in the accompanying release notes and build information.</p></description></release></releases>
+  <releases><release version="0.2.1" date="2026-10-15" type="development"><description><p>Desktop beta update. Exact release tag and acceptance are recorded in the accompanying release notes and build information.</p></description></release></releases>
 </component>

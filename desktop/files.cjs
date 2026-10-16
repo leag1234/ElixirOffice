@@ -21,8 +21,22 @@ async function realDirectory(directory) {
 async function read(filename) {
   const target = validatePath(path.resolve(filename));
   if (!formats.includes(extension(target))) throw Error('Unsupported document format');
-  const selected=await fs.lstat(target,{bigint:true});
-  if(!selected.isFile() || selected.isSymbolicLink()) throw Error('Choose a regular document, not a symbolic link');
+  let selected;
+  for(let attempt=0;;attempt++){
+    try{
+      // Keep the selected identity across the retry: a replacement is not consent.
+      if(!selected){
+        selected=await fs.lstat(target,{bigint:true});
+        if(!selected.isFile() || selected.isSymbolicLink()) throw Error('Choose a regular document, not a symbolic link');
+      }
+      return await readSelected(target,selected);
+    }catch(error){
+      if(error.code!=='EBUSY'||attempt!==0)throw error;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+  }
+}
+async function readSelected(target,selected){
   const handle = await fs.open(target, constants.O_RDONLY | (process.platform==='win32'?0:(constants.O_NOFOLLOW || 0)));
   try {
     const identity=await handle.stat({bigint:true}), named=await fs.lstat(target,{bigint:true});
@@ -49,7 +63,7 @@ async function atomicWrite(target, bytes, expected) {
     if (!stat.isFile() || stat.isSymbolicLink()) throw Error('Destination must be a regular file');
     original = await fingerprint(target);
   } catch (e) { if (e.code !== 'ENOENT') throw e; }
-  if (expected && (!original || original.hash !== expected.hash || original.inode !== expected.inode)) throw Error('The original changed on disk. Use Save As to preserve both versions.');
+  if (expected && (expected.absent ? !!original : !original || original.hash !== expected.hash || original.inode !== expected.inode || expected.device !== undefined && original.device !== expected.device)) throw Error('The original changed on disk. Use Save As to preserve both versions.');
   const suffix = crypto.randomUUID();
   const temporary = path.join(parent, '.' + path.basename(target) + '.eo-' + suffix + '.tmp');
   const backup = original ? target + '.eo-' + suffix + '.bak' : null;
@@ -67,6 +81,11 @@ async function atomicWrite(target, bytes, expected) {
       if ((await fingerprint(backup)).hash !== original.hash) throw Error('Destination changed while its backup was being saved');
       const final = await fs.lstat(target);
       if (!final.isFile() || final.isSymbolicLink() || final.ino !== original.inode || (await fingerprint(target)).hash !== original.hash) throw Error('Destination changed before replacement');
+    }
+    if(expected?.absent){
+      // Recheck the destination selected before conversion, including new files.
+      try{await fs.lstat(target);throw Error('Destination changed before replacement');}
+      catch(error){if(error.code!=='ENOENT')throw error;}
     }
     await fs.rename(temporary, target); replaced = true;
     if (process.platform !== 'win32') {
@@ -163,4 +182,4 @@ async function rename(expected, name) {
     throw saveFailure(error);
   }
 }
-module.exports = {read, atomic, rename, renameName, hash, formats, extension};
+module.exports = {fingerprint, read, atomic, rename, renameName, hash, formats, extension};

@@ -2,7 +2,7 @@
 'use strict';
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto');
 function roots() {
-  if (process.platform === 'win32') return [path.join(process.env.WINDIR || 'C:\\Windows','Fonts'), path.join(process.env.LOCALAPPDATA || os.homedir(),'Microsoft/Windows/Fonts')];
+  if (process.platform === 'win32') return [path.join(process.env.WINDIR || 'C:\\Windows','Fonts'), path.join(process.env.LOCALAPPDATA || path.join(os.homedir(),'AppData','Local'),'Microsoft/Windows/Fonts')];
   if (process.platform === 'darwin') return ['/System/Library/Fonts','/Library/Fonts',path.join(os.homedir(),'Library/Fonts')];
   return ['/usr/share/fonts','/usr/local/share/fonts',path.join(os.homedir(),'.local/share/fonts'),path.join(os.homedir(),'.fonts')];
 }
@@ -27,26 +27,38 @@ function names(bytes, offset) {
   if(!family)return null;
   return {family,style,fullName:result[4]||family+' '+style,postscriptName:result[6]||family.replace(/\s/g,'')+'-'+style};
 }
+function fontPath(filename){
+  const resolved=path.resolve(filename);
+  return process.platform==='win32'?path.toNamespacedPath(resolved).toLowerCase():resolved;
+}
+function inside(allowed,filename){
+  const real=fontPath(filename);
+  return allowed.some(root=>real.startsWith(fontPath(root)+path.sep));
+}
 class Fonts {
-  constructor() { this.allowed=roots(); this.files=new Map(); }
+  constructor({report=()=>{}}={}) { this.allowed=roots(); this.files=new Map(); this.report=report; }
   async enumerate() {
     const previous=new Map(Array.from(this.files,([id,file])=>[file.real+'|'+(file.offset||0),id])),next=new Map(),found=[];
     const walk=async directory=>{
-      let entries;try{entries=await fs.readdir(directory,{withFileTypes:true})}catch(e){if(['ENOENT','EACCES'].includes(e.code))return;throw e}
+      let entries;try{entries=await fs.readdir(directory,{withFileTypes:true})}catch(e){await this.report(e);if(e.code)return;throw e}
       for(const entry of entries) {
-        if(next.size>=5000)throw Error('Too many system fonts');
+        if(next.size>=5000)return;
         const filename=path.join(directory,entry.name);
         if(entry.isDirectory()) { await walk(filename); continue; }
         if(!/\.(ttf|otf|ttc)$/i.test(entry.name))continue;
         let real,bytes;
         try {
           real=await fs.realpath(filename);
-          if(!this.allowed.some(root=>real.startsWith(path.resolve(root)+path.sep)))continue;
+          if(!inside(this.allowed,real))continue;
           const stat=await fs.stat(real);if(!stat.isFile()||stat.size>20*1024*1024)continue;
           bytes=await fs.readFile(real);if(bytes.length>20*1024*1024)continue;
           const offsets=bytes.toString('ascii',0,4)==='ttcf'?Array.from({length:Math.min(bytes.readUInt32BE(8),64)},(_,i)=>bytes.readUInt32BE(12+i*4)):[0];
-          for(const offset of offsets) { const face=names(bytes,offset); if(face){if(next.size>=5000)throw Error('Too many system fonts');const id=previous.get(real+'|'+offset)||crypto.randomUUID();next.set(id,{real,offset});found.push({...face,id});} }
-        } catch(e) { if(e.message==='Too many system fonts')throw e; if(!['ENOENT','EACCES'].includes(e.code) && e instanceof RangeError)continue; }
+          for(const offset of offsets) {
+            if(next.size>=5000)break;
+            try{const face=names(bytes,offset);if(face){const id=previous.get(real+'|'+offset)||crypto.randomUUID();next.set(id,{real,offset});found.push({...face,id});}}
+            catch(error){await this.report(error)}
+          }
+        } catch(error) { await this.report(error); }
       }
     };
     for(const root of this.allowed)await walk(root);
@@ -55,8 +67,8 @@ class Fonts {
   async read(id) {
     const font=this.files.get(id);if(!font)throw Error('Unknown font handle');
     const real=await fs.realpath(font.real);
-    if(real!==font.real || !this.allowed.some(root=>real.startsWith(path.resolve(root)+path.sep)))throw Error('Font moved outside approved folders');
-    const handle=await fs.open(real,require('node:fs').constants.O_RDONLY|require('node:fs').constants.O_NOFOLLOW);
+    if(fontPath(real)!==fontPath(font.real) || !inside(this.allowed,real))throw Error('Font moved outside approved folders');
+    const handle=await fs.open(real,require('node:fs').constants.O_RDONLY|(process.platform==='win32'?0:(require('node:fs').constants.O_NOFOLLOW||0)));
     try{const stat=await handle.stat();if(!stat.isFile()||stat.size>20*1024*1024)throw Error('Invalid font');const bytes=await handle.readFile();if(bytes.length>20*1024*1024)throw Error('Font grew beyond 20 MiB');return new Uint8Array(bytes);}
     finally{await handle.close()}
   }

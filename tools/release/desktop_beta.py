@@ -21,25 +21,40 @@ DEFAULT_FONT_IMAGE = "sha256:88c561d6fb2bb8529df467fc0543becc6323e58d18734136e23
 DEFAULT_WIN_IMAGE = "electronuserland/builder@sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff"
 ARTIFACTS = {"x2t.js", "x2t.wasm", "x2t.js.gz", "x2t.js.br", "x2t.wasm.gz", "x2t.wasm.br"}
 
+_identity_spec = importlib.util.spec_from_file_location("build_identity", HERE / "build_identity.py")
+build_identity = importlib.util.module_from_spec(_identity_spec)
+_identity_spec.loader.exec_module(build_identity)
+
 _update_spec = importlib.util.spec_from_file_location("appimage_update", HERE / "appimage_update.py")
 appimage_update = importlib.util.module_from_spec(_update_spec)
 _update_spec.loader.exec_module(appimage_update)
 
 
 def appimage_names(version):
-    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}", version):
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?", version):
         raise ValueError("Invalid package version")
     name = "ElixirOffice-" + version + "-x86_64.AppImage"
     return name, name + ".zsync"
 
 
-def validate_desktop_version(package):
+def validate_desktop_version(package, published_path=None):
     version = package.get("version", "")
-    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}", version):
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?", version):
         raise ValueError("Invalid desktop package version")
-    if version in {"0.1.0"}:
-        raise ValueError("Desktop version was already published; bump before packaging")
+    if published_path is not None:
+        build_identity.published(published_path, version)
     return version
+
+
+def render_release_notes(template, identity):
+    fields = {"VERSION":identity["version"], "BUILD_NUMBER":identity["build_number"],
+              "PRODUCT_REVISION":identity["product_revision"],
+              "RELEASE_STATUS":"This is a release candidate." if identity["channel"] == "rc" else "This is the final version rebuilt for acceptance."}
+    for key, value in fields.items():
+        template = template.replace("{{" + key + "}}", str(value))
+    if "{{" in template:
+        raise ValueError("Unresolved release note field")
+    return template
 
 
 def validate_update_packaging(package):
@@ -164,6 +179,19 @@ def export_test_upstream(upstream, web_revision, ds_revision, destination, inven
     entries = {}
     inventory_path = Path(inventory_path or HERE / "desktop-test-inputs.json")
     inventory = json.loads(inventory_path.read_text())
+    schema = inventory.get("schema")
+    if schema not in (1, 2):
+        raise ValueError("Unsupported desktop test inventory schema")
+    sdk_required = inventory.get("sdkjs_files", [])
+    if schema == 2 and (not isinstance(sdk_required, list) or not sdk_required):
+        raise ValueError("Schema 2 requires SDK source inputs")
+    for name in sdk_required:
+        if (not isinstance(name, str) or not name or name.startswith("/") or
+                any(part in ("", ".", "..") for part in name.split("/")) or
+                chr(92) in name or ":" in name or any(ord(char) < 32 for char in name)):
+            raise ValueError("Unsafe SDK test input path")
+    if len(set(sdk_required)) != len(sdk_required):
+        raise ValueError("Duplicate SDK test input path")
     required = set(inventory["files"])
     locale_prefixes = {name + "/": count for name, count in inventory["locales"].items()}
     for row in raw.split(b"\0"):
@@ -183,9 +211,35 @@ def export_test_upstream(upstream, web_revision, ds_revision, destination, inven
     if any(locale_counts[prefix.rstrip("/")] != count for prefix, count in locale_prefixes.items()):
         raise ValueError("Expected all 45 recorded locale source files in each editor")
     locale_count = sum(locale_counts.values())
+    sdk_entries = {}
+    sdk_revision = None
+    if schema == 2:
+        if not re.fullmatch(r"[0-9a-f]{40}", ds_revision):
+            raise ValueError("SDK export requires a recorded DocumentServer revision")
+        link = subprocess.check_output(["git", "-C", str(upstream), "ls-tree", "-z", ds_revision, "--", "sdkjs"]).split(b"\0")
+        if len(link) != 2 or not link[0]:
+            raise ValueError("Missing recorded SDK gitlink")
+        header, link_name = link[0].split(b"\t", 1)
+        mode, kind, sdk_revision = header.decode().split()
+        if mode != "160000" or kind != "commit" or link_name != b"sdkjs":
+            raise ValueError("SDK source must be a recorded gitlink")
+        sdk_source = Path(upstream) / "sdkjs"
+        raw_sdk = subprocess.check_output(["git", "-C", str(sdk_source), "ls-tree", "-r", "-z", sdk_revision])
+        for row in raw_sdk.split(b"\0"):
+            if not row:
+                continue
+            header, name = row.split(b"\t", 1)
+            mode, kind, blob = header.decode().split()
+            name = name.decode()
+            if name in sdk_required:
+                if mode not in {"100644", "100755"} or kind != "blob":
+                    raise ValueError("SDK inputs must be regular tracked files")
+                sdk_entries[name] = blob
+        if not set(sdk_required).issubset(sdk_entries):
+            raise ValueError("Missing recorded SDK inputs for desktop tests")
     destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=False)
-    manifest = {"schema": 1, "documentserver_revision": ds_revision,
+    manifest = {"schema": schema, "documentserver_revision": ds_revision,
                 "web_apps_revision": web_revision, "locale_count": locale_count,
                 "locale_counts": locale_counts, "inventory_sha256": digest(inventory_path), "files": {}}
     for name, blob in sorted(entries.items()):
@@ -194,6 +248,14 @@ def export_test_upstream(upstream, web_revision, ds_revision, destination, inven
         target.write_bytes(subprocess.check_output(["git", "-C", str(source), "cat-file", "blob", blob]))
         manifest["files"]["web-apps/" + name] = {"git_blob": blob, "bytes": target.stat().st_size,
                                               "sha256": digest(target)}
+    if sdk_revision is not None:
+        manifest["sdkjs_revision"] = sdk_revision
+    for name, blob in sorted(sdk_entries.items()):
+        target = destination / "sdkjs" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(subprocess.check_output(["git", "-C", str(sdk_source), "cat-file", "blob", blob]))
+        manifest["files"]["sdkjs/" + name] = {"git_blob": blob, "bytes": target.stat().st_size,
+                                             "sha256": digest(target)}
     (destination / "INPUTS.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return {**manifest, "manifest_sha256": digest(destination / "INPUTS.json")}
 
@@ -219,7 +281,7 @@ def clean_environment(node, cache):
     return {"PATH": str(Path(node).parent) + ":/usr/local/bin:/usr/bin:/bin",
             "HOME": str(Path.home()), "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8",
             "npm_config_cache": str(Path(cache) / "npm"),
-            "PYTHONDONTWRITEBYTECODE": "1"}
+            "PYTHONDONTWRITEBYTECODE": "1", "EO_RELEASE_REQUIRE_BUILDER": "1"}
 
 class Build:
     def __init__(self, args, plan):
@@ -230,7 +292,7 @@ class Build:
         self.product, self.upstream = self.work / "product", self.work / "DocumentServer"
         self.driver = self.work / "release-driver"
         self.test_upstream = self.work / "test-upstream"
-        self.info = {"schema": 1, "state": "running", "started": datetime.datetime.now(ZoneInfo("Europe/Paris")).isoformat(), "inputs": plan, "phases": [], "gates": {}, "artifacts": {}, "published": False}
+        self.info = {"build_identity": plan.get("build_identity"), "schema": 1, "state": "running", "started": datetime.datetime.now(ZoneInfo("Europe/Paris")).isoformat(), "inputs": plan, "phases": [], "gates": {}, "artifacts": {}, "published": False}
         # No inherited credentials, npm configuration or Docker daemon selectors.
         self.env = clean_environment(args.node, args.cache)
 
@@ -266,6 +328,10 @@ class Build:
         self.run("ds-checkout", ["git", "-C", self.args.documentserver_repo, "worktree", "add", "--detach", self.upstream, self.plan["documentserver_revision"]])
         for name, sha in self.plan["submodules"].items():
             self.run("checkout-" + name.replace("/", "-"), ["git", "-C", Path(self.args.documentserver_repo) / name, "worktree", "add", "--detach", self.upstream / name, sha])
+        if digest(self.product / "desktop/build-identity.cjs") != self.plan["identity_module_sha256"]:
+            raise ValueError("Selected source build identity differs from driver")
+        build_identity.stamp(self.product, self.plan["build_identity"])
+
 
     def test_inventory(self):
         selected = self.product / "tools/release/desktop-test-inputs.json"
@@ -309,6 +375,8 @@ class Build:
             shutil.copyfile(self.upstream / ("document-templates/sample/sample." + kind), destination / ("sample." + kind))
 
     def archive(self, include_assets=True):
+        if json.loads((self.product / "desktop/build-info.json").read_text()) != self.plan["build_identity"]:
+            raise ValueError("Archive build identity differs from planned identity")
         file = self.work / ("mac-input.tar" if include_assets else "test-input.tar")
         with tarfile.open(file, "w") as tar:
             folders = ("desktop", "tools/desktop", "tests/desktop",
@@ -396,7 +464,7 @@ job.mkdir()
             self.save()
             self.run("deb-extract", ["dpkg-deb", "-x", self.out / f"ElixirOffice-{version}-linux-amd64.deb", self.work / "deb"])
             deb_version = capture(["dpkg-deb", "-f", self.out / f"ElixirOffice-{version}-linux-amd64.deb", "Version"])
-            if deb_version != version:
+            if deb_version != self.plan["build_identity"]["deb_version"]:
                 raise ValueError("DEB version differs from selected desktop version")
             self.run("deb-packaged-version", [self.args.node, self.product / "tools/desktop/check-version.cjs", self.work / "deb/opt/ElixirOffice/resources/app.asar"])
             self.run("deb-resource-audit", ["python3", self.product / "tests/desktop/verify-resources.py", self.work / "deb/opt/ElixirOffice/resources/assets"])
@@ -412,6 +480,7 @@ job.mkdir()
             shutil.copyfile(archive, self.out / "MAC-INPUT.tar")
             self.info["gates"]["mac-six-format"] = "unverified-manual-export"
             self.info["mac_input"] = {"file": "MAC-INPUT.tar", "sha256": digest(archive),
+                                     "build_identity": self.plan["build_identity"],
                                      "test_upstream_manifest_sha256": self.info["test_upstream"]["manifest_sha256"],
                                      "instructions": "Extract in an owned folder; run /bin/bash tools/release/remote-build.sh mac ROOT yes TEST_UPSTREAM_MANIFEST_SHA256"}
             self.save()
@@ -464,6 +533,9 @@ job.mkdir()
         (self.out / "logs").mkdir()
         self.save()
         try:
+            self.info["build_allocation"] = build_identity.reserve(self.args.build_ledger, self.args.published_versions, self.plan["build_identity"])
+            self.info["publication_inventory"] = build_identity.published(self.args.published_versions, self.plan["build_identity"]["version"])
+            self.save()
             for key, system, machine in (("mac", "Darwin", "arm64"), ("linux", "Linux", "x86_64")):
                 if key in self.plan:
                     remote = self.plan[key]
@@ -476,7 +548,9 @@ job.mkdir()
             self.packages()
             if "linux" in self.args.targets and not self.args.build_only:
                 self.linux_smoke()
-            shutil.copyfile(self.driver / "desktop-beta3-release-notes.md", self.out / "RELEASE-NOTES.md")
+            notes = render_release_notes((self.driver / "desktop-release-notes.md").read_text(), self.plan["build_identity"])
+            (self.out / "RELEASE-NOTES.md").write_text(notes)
+
             names = public_artifact_names(self.out)
             self.info["artifacts"] = checksum_inventory(self.out, names)
             complete = set(self.args.targets) == {"linux", "windows", "mac"} and not self.args.build_only and all(self.info["gates"].get(x) == "pass" for x in ("linux-six-format", "mac-six-format"))
@@ -493,6 +567,11 @@ job.mkdir()
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--product-rev", required=True)
+    p.add_argument("--build-number", required=True, type=int, help="Unique monotonically increasing allocation, 1..65535")
+    p.add_argument("--channel", required=True, choices=["rc", "final"])
+    p.add_argument("--published-versions", required=True, type=Path, help="Complete release inventory fetched within one hour")
+    p.add_argument("--build-ledger", required=True, type=Path, help="Lead-controlled allocation ledger; actual builds reserve a number under lock")
+
     p.add_argument("--documentserver-rev", required=True)
     p.add_argument("--product-repo", type=Path, default=Path.home() / "elixiroffice/elixiroffice")
     p.add_argument("--documentserver-repo", type=Path, default=Path.home() / "elixiroffice/DocumentServer")
@@ -532,10 +611,21 @@ def make_plan(args):
     product = revision(args.product_repo, args.product_rev, "main")
     package = pin(args.product_repo, product, "desktop/package.json")
     validate_desktop_version(package)
+    # Syntax only here; after resolving the RC/final identity below,
+    # build_identity.published applies the fresh published-version guard.
     if "linux" in args.targets:
         validate_update_packaging(package)
     ds = revision(args.documentserver_repo, args.documentserver_rev, "elixir/dev")
     modules = gitlinks(args.documentserver_repo, ds)
+    identity_module = HERE.parents[1] / "desktop/build-identity.cjs"
+    identity_source = git(args.product_repo, "show", product + ":desktop/build-identity.cjs")
+    if identity_source.strip() != identity_module.read_text().strip():
+        raise ValueError("Selected build identity module differs from driver")
+    identity = json.loads(capture([args.node, identity_module, "create",
+                                  json.dumps([package["version"], args.channel, args.build_number, product, ds])]))
+    publication = build_identity.published(args.published_versions, identity["version"])
+    build_identity.allocation(args.build_ledger, identity)
+
     full_pin = pin(args.documentserver_repo / "sdkjs", modules["sdkjs"], "common/wasm-convert/runtime-release.json")
     pdf_pin, pdf_pin_path = pdf_source_pin(args.product_repo, product)
     for recorded in (full_pin, pdf_pin):
@@ -553,7 +643,11 @@ def make_plan(args):
     cache = Path(args.cache).resolve()
     if not cache.is_relative_to("/srv/elixiroffice/cache"):
         raise ValueError("Large caches must stay under /srv/elixiroffice/cache")
-    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta3-release-notes.md", "desktop-test-inputs.json", "appimage_update.py", "appimage-tools.json")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "build_identity.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta3-release-notes.md", "desktop-release-notes.md", "desktop-test-inputs.json", "appimage_update.py", "appimage-tools.json")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    plan["build_identity"] = identity
+    plan["identity_module_sha256"] = digest(identity_module)
+    plan["publication_inventory"] = publication
+    plan["build_ledger_planning_snapshot_sha256"] = digest(args.build_ledger)
     update_pins = appimage_update.pins(HERE / "appimage-tools.json")
     image = args.appimage_builder_image or update_pins["builder_image"]
     if not re.fullmatch(r"(?:[A-Za-z0-9./:_-]+@)?sha256:[0-9a-f]{64}", image) or image.startswith("-"):

@@ -1,0 +1,297 @@
+{
+  "schema": 1,
+  "frozenProduct": "dd042fbc48",
+  "frozenWebApps": "26f3977f5a",
+  "platform": "Linux X11 private Xvfb, Electron44.7.0, native XTest input",
+  "sandbox": {
+    "chromiumSandbox": true,
+    "noSandboxArgument": false,
+    "hostSetuidHelper": "Existing system Chrome helper symlinked only inside private test runtime; no system changes",
+    "helperSha256": "24beb85e4149c65db5bf40fa307721143d0883ab8952e60dde1158606f644dee"
+  },
+  "baseline": {
+    "homeCommands": 6,
+    "homePass": 6,
+    "wordIframeCommands": 6,
+    "wordIframeDispatches": 0
+  },
+  "fixed": {
+    "pass": true,
+    "commands": [
+      {
+        "location": "home",
+        "key": "ctrl+o",
+        "sent": [
+          "open"
+        ]
+      },
+      {
+        "location": "home",
+        "key": "ctrl+s",
+        "sent": [
+          "save"
+        ]
+      },
+      {
+        "location": "home",
+        "key": "ctrl+shift+s",
+        "sent": [
+          "save-as"
+        ]
+      },
+      {
+        "location": "home",
+        "key": "ctrl+shift+e",
+        "sent": [
+          "pdf"
+        ]
+      },
+      {
+        "location": "home",
+        "key": "ctrl+p",
+        "sent": [
+          "print"
+        ]
+      },
+      {
+        "location": "home",
+        "key": "ctrl+n",
+        "sent": [
+          "new-docx"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+o",
+        "sent": [
+          "open"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+s",
+        "sent": [
+          "save"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+shift+s",
+        "sent": [
+          "save-as"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+shift+e",
+        "sent": [
+          "pdf"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+p",
+        "sent": [
+          "print"
+        ]
+      },
+      {
+        "location": "documenteditor",
+        "key": "ctrl+n",
+        "sent": [
+          "new-docx"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+o",
+        "sent": [
+          "open"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+s",
+        "sent": [
+          "save"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+shift+s",
+        "sent": [
+          "save-as"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+shift+e",
+        "sent": [
+          "pdf"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+p",
+        "sent": [
+          "print"
+        ]
+      },
+      {
+        "location": "spreadsheeteditor",
+        "key": "ctrl+n",
+        "sent": [
+          "new-xlsx"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+o",
+        "sent": [
+          "open"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+s",
+        "sent": [
+          "save"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+shift+s",
+        "sent": [
+          "save-as"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+shift+e",
+        "sent": [
+          "pdf"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+p",
+        "sent": [
+          "print"
+        ]
+      },
+      {
+        "location": "presentationeditor",
+        "key": "ctrl+n",
+        "sent": [
+          "new-pptx"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+o",
+        "sent": [
+          "open"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+s",
+        "sent": [
+          "save"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+shift+s",
+        "sent": [
+          "save-as"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+shift+e",
+        "sent": [
+          "pdf"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+p",
+        "sent": [
+          "print"
+        ]
+      },
+      {
+        "location": "pdfeditor",
+        "key": "ctrl+n",
+        "sent": [
+          "new-docx"
+        ]
+      },
+      {
+        "location": "pdfeditor-iframe",
+        "key": "ctrl+q"
+      }
+    ],
+    "editorUndoKeyDelivery": 4,
+    "noticeChecks": [
+      {
+        "location": "documenteditor",
+        "notice": {
+          "available": true,
+          "local": true,
+          "hint": false,
+          "dialog": false
+        }
+      },
+      {
+        "location": "spreadsheeteditor",
+        "notice": {
+          "available": true,
+          "local": true,
+          "hint": false,
+          "dialog": false
+        }
+      },
+      {
+        "location": "presentationeditor",
+        "notice": {
+          "available": true,
+          "local": true,
+          "hint": false,
+          "dialog": false
+        }
+      },
+      {
+        "location": "pdfeditor",
+        "notice": {
+          "available": false
+        }
+      }
+    ],
+    "normalQuitFromPdfIframe": true
+  },
+  "units": {
+    "focused": 6,
+    "closeSave": 44,
+    "baselineNotice": {
+      "pass": 1,
+      "fail": 2
+    },
+    "fixedNotice": {
+      "pass": 4,
+      "fail": 0
+    }
+  },
+  "limits": [
+    "Save/SaveAs/PDF/Print/New IPC is observed and suppressed in native routing test; command effects are not requalified here.",
+    "Open reaches actual main dialog with test cancellation; native Quit uses actual guarded close.",
+    "Undo proves trusted key delivery, not edit/undo content round trip.",
+    "Mac/Windows native shortcuts, Arch/niri Wayland and physical200percent scaling remain unverified.",
+    "Production four-editor bundles tested in an isolated extracted rc4 asset overlay, not a rebuilt rc5 package."
+  ],
+  "rawReceiptSha256": "6bfc8df64ccf8476cbd351472c2131e2cf63467d5aac02b3775d0e4fcdb7712d",
+  "scopeNote": "Final controller retains browser-local alternative editing keys; only notice/status tracking is suppressed.",
+  "qualifiesCurrentOfficeShortcutMapping": false,
+  "supersededBy": "MSG121 Office-compatible mapping"
+}

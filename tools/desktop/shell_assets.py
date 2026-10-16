@@ -3,6 +3,32 @@
 """Reuse the web home assets and editor catalogs for the local desktop shell."""
 import json, shutil, html, re
 from pathlib import Path
+def save_as_strings(translated, extra):
+    """Use existing translated editor descriptions and concise loss disclosures."""
+    clean=lambda value: html.unescape(re.sub('<[^>]*>', ' ', value)).strip()
+    result={'saveFormat':extra['saveFormat']}
+    for suffix,editor,prefix in [
+        ('Docx','documenteditor','DE'),('Odt','documenteditor','DE'),
+        ('Rtf','documenteditor','DE'),('Txt','documenteditor','DE'),
+        ('Xlsx','spreadsheeteditor','SSE'),('Ods','spreadsheeteditor','SSE'),
+        ('Csv','spreadsheeteditor','SSE'),('Pptx','presentationeditor','PE'),
+        ('Odp','presentationeditor','PE'),('Pdf','documenteditor','DE')]:
+        key=prefix+'.Views.ElixirBackstage.txtFmt'+suffix
+        result['saveFormat'+suffix]=clean(translated[editor][key])
+        result['saveFormat'+suffix+'Desc']=clean(translated[editor][key+'Desc'])
+    for suffix,editor,key in [
+        ('Rtf','documenteditor','DE.Controllers.LeftMenu.warnDownloadAsRTF'),
+        ('Txt','documenteditor','DE.Controllers.LeftMenu.warnDownloadAs'),
+        ('Csv','spreadsheeteditor','SSE.Controllers.LeftMenu.warnDownloadCsv')]:
+        value=extra.get('saveLoss'+suffix) or translated[editor].get(key)
+        if not value and suffix=='Csv':value=translated[editor]['SSE.Views.ElixirBackstage.txtFmtCsvDesc']
+        if not value:raise ValueError('Missing translated loss disclosure: '+key)
+        result['saveLoss'+suffix]=clean(re.split(r'<br\s*/?>',value,flags=re.I)[0])
+    result['saveLossPdf']=extra['saveLossPdf']
+    if any(not value for value in result.values()):
+        raise ValueError('Missing Save As locale field')
+    return result
+
 def assemble(upstream, product, out):
     home=upstream/'document-server-integration/web/documentserver-example/nodejs/public/elixir'
     destination=out/'desktop-home';destination.mkdir()
@@ -13,6 +39,8 @@ def assemble(upstream, product, out):
     for name in ['home.css','icons.svg']:shutil.copy2(home/name,destination/name)
     shutil.copytree(home/'fluent',destination/'fluent')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-localfonts/Core.js',destination/'localfonts-Core.js')
+    shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/Operation.js',destination/'operation.js')
+    shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/FormatDialog.js',destination/'format-dialog.js')
     css=(home/'home.css').read_text()
     (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:left;border:0;background:transparent;padding:0}\n')
     brand=product/'branding/example/nodejs/public/elixir/brand/templates'
@@ -36,7 +64,7 @@ def assemble(upstream, product, out):
     english={kind:json.loads((folder/'en.json').read_text()) for kind,folder in editors.items()}
     labels={'info':['Info','Information','Document Info','Document Information'],'home':['Home'],'new':['New'],'open':['Open'],'recent':['Recent','Recent files'],
         'name':['Name'],'modified':['Date modified','Modified'],'browse':['Browse','Browse...','Browse…'],
-        'save':['Save'],'saveAs':['Save As'],'print':['Print'],'export':['Export'],'options':['Options'],
+        'replace':['Replace'],'save':['Save'],'saveAs':['Save As'],'print':['Print'],'export':['Export'],'options':['Options'],
         'help':['Help'],'close':['Close'],'cancel':['Cancel'],'ok':['OK'],'error':['Error'],'warning':['Warning'],
         'file':['File'],'edit':['Edit'],'about':['About'],'settings':['Settings'],'undo':['Undo'],'redo':['Redo'],
         'copy':['Copy'],'cut':['Cut'],'paste':['Paste'],'selectAll':['Select All'],'untitled':['Untitled'],
@@ -74,6 +102,11 @@ def assemble(upstream, product, out):
         if language=='en':strings['fontUse']='Use my fonts'
         if language=='fr':strings['fontUse']='Utiliser mes polices'
         strings['pdf']=strings.get('export','')+' PDF'
+        strings.update(save_as_strings(translated,extra[language]))
+        # The shortcut label can remain English in translated catalogs.
+        strings['quitSave']=clean(translated['documenteditor']['DE.Views.FileMenu.btnSaveCaption'])
+        if not strings['quitSave']:raise ValueError('Missing translated quit Save action: '+language)
+
         (destination/'i18n'/(language+'.json')).write_text(json.dumps(strings,ensure_ascii=False,sort_keys=True,indent=2)+'\n')
     if missing:raise SystemExit('Missing translated labels: '+repr(missing))
     (destination/'locales.json').write_text(json.dumps(supported)+'\n')

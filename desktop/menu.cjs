@@ -6,14 +6,14 @@ function template(platform,action,help,t=key=>({file:'File',blankDoc:'New docume
   {label:t('blankBook'),click:action('new-xlsx')},{label:t('blankSlide'),click:action('new-pptx')},
   {label:t('open'),accelerator:'CommandOrControl+O',click:action('open')},
   {label:t('save'),accelerator:'CommandOrControl+S',click:action('save')},
-  {label:t('saveAs'),accelerator:'CommandOrControl+Shift+S',click:action('save-as')},
-  {label:t('pdf'),accelerator:'CommandOrControl+Shift+E',click:action('pdf')},
+  {label:t('saveAs'),accelerator:platform==='darwin'?'Command+Shift+S':'F12',click:action('save-as')},
+  {label:t('pdf'),click:action('pdf')},
   {label:t('print'),accelerator:'CommandOrControl+P',click:action('print')}
  ]};
  // Empty (not null) overrides Electron's default role accelerators.
  // The editor owns undo/redo keyboard handling on every desktop platform.
  const edit={label:t('edit'),submenu:[{role:'undo',accelerator:''},{role:'redo',accelerator:''},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'}]};
- if(platform!=='darwin'){file.submenu.push({type:'separator'},{role:'quit'});return [file,edit,{role:'help',label:t('help'),submenu:[{label:'ElixirOffice '+t('help'),accelerator:'F1',click:help}]}]}
+ if(platform!=='darwin'){file.submenu.push({type:'separator'},{role:'quit',accelerator:''});return [file,edit,{role:'help',label:t('help'),submenu:[{label:'ElixirOffice '+t('help'),accelerator:'F1',click:help},{label:t('about')+' ElixirOffice',click:action('about')}]}]}
  return [{label:'ElixirOffice',submenu:[
   {role:'about',label:t('about')+' ElixirOffice'},{type:'separator'},
   {label:t('settings')+'…',accelerator:'Command+,',click:action('settings')},

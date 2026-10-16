@@ -46,6 +46,7 @@ export XDG_CONFIG_HOME="$TASK_ROOT/profiles/config"
 export XDG_DATA_HOME="$TASK_ROOT/profiles/data"
 export XDG_CACHE_HOME="$TASK_ROOT/profiles/cache"
 export GSETTINGS_BACKEND=memory
+export EO_RELEASE_REQUIRE_BUILDER=1
 export EO_UPSTREAM="$TASK_ROOT/cache/home/elixiroffice/DocumentServer"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=$TASK_ROOT/profiles/no-session-bus"
 python3 - "$EO_UPSTREAM" "$EXPECTED_TEST_UPSTREAM_SHA" "$TASK_ROOT/tools/release/desktop-test-inputs.json" <<'PY'

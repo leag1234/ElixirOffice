@@ -152,3 +152,21 @@ new manifest language fails when the pack cannot render its characters.
 The 45 language keys match the desktop/editor locale set; Thai and Hindi are not
 supported UI locales in this release. Layout inputs derive only from the public
 synthetic corpus/provisional examples t01, t02, s06 and s08.
+
+### 0.2.1 review candidate: styled glyph coverage
+
+The follow-up candidate keeps Arabic complex-script text upright because bundled
+DejaVu Sans Oblique/Bold Oblique lack Arabic glyphs. Nine previously italic runs
+change; bold remains unchanged. Other languages retain their formatting.
+Legacy symbol-encoded checkbox, circle, bullet and face characters become ordinary
+Unicode with explicit bundled DejaVu Sans regular runs. The neutral face uses
+U+1F610, which is present in the actual pack.
+
+Coverage now selects regular/italic/bold/bold-italic from the real AllFonts indices
+after resolving document defaults, basedOn chains, paragraph and character styles,
+table styles/conditional first-row formatting and direct overrides. Number labels
+and normalized symbols are checked too. Unsupported DrawingML text fails explicitly
+rather than receiving an unverified pass. The 39-language offer list is unchanged.
+This candidate is separate from frozen 0.2.0 and is not integrated.
+
+The upright Arabic-script rule also covers Urdu and future Persian generation. The39offered languages are unchanged. Only the four unshipped Urdu source fixtures were regenerated for reproducibility; their remaining font gaps keep the existing English fallback. No Persian UI locale or new packaged language is introduced.

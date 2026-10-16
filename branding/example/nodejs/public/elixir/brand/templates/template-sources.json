@@ -8,8 +8,8 @@
       "languageTag": "en-US",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34883,
-      "sha256": "e71d67f3e9ae4b23e0e0360ad9b6dc58ffd957f769e6dd6938701e40615779ae",
+      "bytes": 34905,
+      "sha256": "890eb22177425ef328b5f236208e324dc32a2f58e8828ab729ba0577495bf289",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -28,8 +28,8 @@
       "languageTag": "fr-FR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34856,
-      "sha256": "4f8dc4057d3aa052e281d5f13fae19648cd14cd17818328f7a1b9475a289f5ce",
+      "bytes": 34886,
+      "sha256": "e015b598d91c995a3d470133f4436bacf2de6d534fb75f652b2f280c7d8dc984",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -48,8 +48,8 @@
       "languageTag": "de-DE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34934,
-      "sha256": "8b3d29385fbecbc91eeddd7419e62e81858938384c9e6f4ce477575d67af6873",
+      "bytes": 34954,
+      "sha256": "6f3dfdb020ecbc72d635483059e063d7d054060d6c81e57f54da1cb3bf6d11bd",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -68,8 +68,8 @@
       "languageTag": "es-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34926,
-      "sha256": "a3fa99a9b7725a9a83509dd6d5eaffad1a6d93ae5d922ca9f8bae5f8223004bf",
+      "bytes": 34947,
+      "sha256": "b5d3037c42034f13b0ce82958436826c6fe6360f620166c05226cce77d938d85",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -88,8 +88,8 @@
       "languageTag": "it-IT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34914,
-      "sha256": "f710d8256467f8a627410e6de05d64672fcfa10c0fdca67bc47e9d9a3074eaa2",
+      "bytes": 34933,
+      "sha256": "3a125210b295d7a18bd56c40084963da5f806ecfb48403110c58b37dd86af715",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -108,8 +108,8 @@
       "languageTag": "pt-BR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34945,
-      "sha256": "6883bfba4eedf51a39c20714c2a7153fc54726952c7e7b33d406f4948b2d700d",
+      "bytes": 34966,
+      "sha256": "0e1ea149ae28785afb5a44eb8304a3ec948c213465b9045b6f43010e6389bd9e",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -128,8 +128,8 @@
       "languageTag": "pt-PT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34944,
-      "sha256": "f27161eb3624e684453b7eba4ff8af3c6811a24b608d1670e864fc88087671b5",
+      "bytes": 34965,
+      "sha256": "5aff9efa921affca786ae74ab14e0878031547e848bf10ce9e3a5aab077d21e8",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -148,8 +148,8 @@
       "languageTag": "nl-NL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34900,
-      "sha256": "1de3e770506dfe605a4089d555c329e169276fb0ab8f1cdc2be83cdb8d2c7d79",
+      "bytes": 34922,
+      "sha256": "1011438bb3869cd81941a58287e594edecebb5f91a8d4b035cfa56056d2fd825",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -168,8 +168,8 @@
       "languageTag": "pl-PL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34977,
-      "sha256": "71285f5dd22f1df1a3cf92c3333eca36858a40fc1e2442fa8810c709cc355b93",
+      "bytes": 34996,
+      "sha256": "428d800ac1eff68a6bd38a46a019b1a224b5e8a9983c5e342da1e9421257be9f",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -188,8 +188,8 @@
       "languageTag": "ru-RU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35194,
-      "sha256": "c6ae10cee93e242154aa7134d3710b530988c92c782f9654803036af4da08c5a",
+      "bytes": 35210,
+      "sha256": "07abe0280db1406b66e33e7af5e68cd5f2684890b9a43e50dadf8ce0bd64f4cc",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -208,8 +208,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35483,
-      "sha256": "e18e4c1d08a10dd16a1a842a384bfc6fed4ba5b82075473a7a478866df54484b",
+      "bytes": 35500,
+      "sha256": "6524158d95ea155df91aa298cae7503c3ee0c497ffbf5cd44ca8334e1f10f43e",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -228,8 +228,8 @@
       "languageTag": "az-Latn-AZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34999,
-      "sha256": "05683dcbcf2431643c0a0aa339d4cd30f94809b69fb761d3d417ebcd62212011",
+      "bytes": 35017,
+      "sha256": "13bf7a53f8d9bc26ee67dc914cd7bfbcc9675306eb482a277875932d9a544545",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -248,8 +248,8 @@
       "languageTag": "be-BY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35205,
-      "sha256": "a8992879095ee2ec2d0747f0c1429be057cb8fbeb80f23413ec3b2e7085f41a0",
+      "bytes": 35219,
+      "sha256": "ff2625c28c9e8d7eedeaed8e603eb36bc0e477f71a08312e36266bee5ecebb62",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -268,8 +268,8 @@
       "languageTag": "bg-BG",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35199,
-      "sha256": "c08224e17ba36e27ece1a36c2c8555fde22675a406fb3cb658c8c09025a64012",
+      "bytes": 35215,
+      "sha256": "0d3f8754af3e3062bd57ce23c06808245c0a350d438427de65c2467fa7fbc666",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -288,8 +288,8 @@
       "languageTag": "ca-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34927,
-      "sha256": "a04449a665b32eac228d38209c8d656acdb5ce960d4635f015aaf3c303c8dc3f",
+      "bytes": 34948,
+      "sha256": "54649636836fcb8ec340b0840cabc2ba13d9b2e6b0fafc724af619d83b4d969b",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -308,8 +308,8 @@
       "languageTag": "cs-CZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34983,
-      "sha256": "6b1ef7957cbfff1b3d6aa6d450e4d9899e6cf127a3385db1429879e146ac80c3",
+      "bytes": 35002,
+      "sha256": "1e49b4bcdbabf8c2d10566197bc6079b12c251390df9ae98cab232d18cf34d7a",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -328,8 +328,8 @@
       "languageTag": "da-DK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34914,
-      "sha256": "94297621e280ce58d70893e150bf49b4a9df0612a3240e9b6d4b07599ff9773e",
+      "bytes": 34935,
+      "sha256": "5cb13212cd1ef111f8cc35a83458dee538a509f44fe1c5ed0676a78c40d18e30",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -348,8 +348,8 @@
       "languageTag": "el-GR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35288,
-      "sha256": "4d6a4b660a96b1be30887fc60c581f540c23915557b7dad8b20cbb94d95f1c0b",
+      "bytes": 35304,
+      "sha256": "2a832b3b3dfac08ba9e601f5484347dcdc733c3600434913d095f732d162ffbf",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -368,8 +368,8 @@
       "languageTag": "eu-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34921,
-      "sha256": "5287b0aad7c5c6c602a5138e25308776974a9059c3f7d5e683e2dfcf5b89ce86",
+      "bytes": 34942,
+      "sha256": "652e338a435725bb2f92c11bedb9dca764e86ef82b11fdb2f9cc170a31c90191",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -388,8 +388,8 @@
       "languageTag": "fi-FI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34953,
-      "sha256": "f81365a16cdd162e19b7895c10b6547db3baf101716b9b15ee4b521e4de74116",
+      "bytes": 34974,
+      "sha256": "795ca0184d0b08f3672a732b61af97677d2e00342a09fe889dd347fc5846dc05",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -408,8 +408,8 @@
       "languageTag": "gl-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34916,
-      "sha256": "f1c8089c47ac1e1f85e6705a05c135105aee95115279c300eb85cd77d254f666",
+      "bytes": 34937,
+      "sha256": "8e3407f97c97accb95a09ff6f30a541d685a6a1894eae78955f23f0356ae7c97",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -428,8 +428,8 @@
       "languageTag": "he-IL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35424,
-      "sha256": "483a4d73449f8da9ef2fb795382f99c1a45fdbc77d191e87e58c91544ec2edff",
+      "bytes": 35441,
+      "sha256": "e99b741c4a5fa07b969b789a8b7495df6344d13f2e06fd6bd9b751ec1b9fe385",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -448,8 +448,8 @@
       "languageTag": "hu-HU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34983,
-      "sha256": "d72b6f73ba09ff7a8f2b80bb5ba742e2a356a25c4cff16522a7b9bd1242b333c",
+      "bytes": 35002,
+      "sha256": "9c1ffdcba8937312dc8fa381c58f85b2faa78ab209b169944c11fbcf80a1588a",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -468,8 +468,8 @@
       "languageTag": "hy-AM",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35162,
-      "sha256": "3fc61bbf42e296090bae1452c43b721b9683c16ae567e921b8c92b915c952dfc",
+      "bytes": 35180,
+      "sha256": "8ce5d214c9a1aae997cd4ee03da58196f7f47685c6fddf4424cd4e119eca68c6",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -488,8 +488,8 @@
       "languageTag": "id-ID",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34898,
-      "sha256": "1d58bca0e58120d16a91bcafc63c74ef42146acaa5c3753331c24a580c3e6a34",
+      "bytes": 34919,
+      "sha256": "abd1d7e33c234f5d9114817fb4b58ef2b80388ac9c200656e5f8e3a1c927c82d",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -508,8 +508,8 @@
       "languageTag": "lo-LA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35172,
-      "sha256": "bb7b7b7522235c3c412da31e8619f25f33adb01f6bb12f68826e523c2f8d4f92",
+      "bytes": 35188,
+      "sha256": "8932f40217f9ff6877a38bb71130b52f3872d1b185bb62b0a36f3679659d98f1",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -528,8 +528,8 @@
       "languageTag": "lv-LV",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34968,
-      "sha256": "33478fa47b9ce7d3177481ea6187e9585244238b7abbeff6704a6982b4764c93",
+      "bytes": 34988,
+      "sha256": "54c11be9a04c61fd930e94ecfed503ba3f9364e5abb31f300dc47749aeb5e83e",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -548,8 +548,8 @@
       "languageTag": "ms-MY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34890,
-      "sha256": "518b680268980d988d83c3e3900e46b60584180d358ed56afab3d6c11e394017",
+      "bytes": 34912,
+      "sha256": "e533a0b433fb5476be09ecf8ff504cba1d44f667e60ace47302cac96c7cc0833",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -568,8 +568,8 @@
       "languageTag": "nb-NO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34886,
-      "sha256": "55189490cb7874d5d9d14c166909a9511bb954c71e33a84276fdfd5eab947299",
+      "bytes": 34907,
+      "sha256": "7cd40b27ece9025822f46f552e825390c2b7d2bc489bc60c32a9ceec04ac2dd4",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -588,8 +588,8 @@
       "languageTag": "ro-RO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34956,
-      "sha256": "322e768aadd541d0c2503c23bf4f9d486feeccf778f70365f899f984700f63c0",
+      "bytes": 34977,
+      "sha256": "24b61d888c1206745d67f41db38dce04d1d37de49cc8569fc6ba20f000e6ffaa",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -608,8 +608,8 @@
       "languageTag": "sk-SK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34980,
-      "sha256": "db7e23a6e89b18868263e017df5df47f8103c9ff5aba2de95a7e4078731512d6",
+      "bytes": 35000,
+      "sha256": "7facd850683f2c0ad8b5b6916d31f380e7d941a77b5770c53f9582ec0e56527d",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -628,8 +628,8 @@
       "languageTag": "sl-SI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34918,
-      "sha256": "f73fea10ba75448e2dfd0e1c26aa36d3757f11590e5dc6420134ba4aa5fa35e1",
+      "bytes": 34939,
+      "sha256": "b3b388ca338f86f31fb6d4a335c18aafd873613ffc0fcc6844f66620be9c3a29",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -648,8 +648,8 @@
       "languageTag": "sq-AL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34935,
-      "sha256": "06f844d7277b3e73ff4d8fc1ecb3a18c8ca2aedb5034a616d88771d5855185c2",
+      "bytes": 34956,
+      "sha256": "2aa6cec4103f12efaeb0bffbb69ab139adbd7bcecb60d3c5130267a52c2cfa66",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -668,8 +668,8 @@
       "languageTag": "sr-Latn-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34927,
-      "sha256": "4d68254f72d4330a8257609e6412da8aa3e7469f4e8fdf7d3e999c1ddd08e459",
+      "bytes": 34948,
+      "sha256": "c901339a7eb602c1e892f2a158926b221ac7bf2f5ec81c5ec48a5e36d27babad",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -688,8 +688,8 @@
       "languageTag": "sr-Cyrl-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35171,
-      "sha256": "45ea47f1f13c717f0861d61bd632894291ef410c1dfcdedd0096bd155cee38cd",
+      "bytes": 35191,
+      "sha256": "612e83f867c0dc3361a3e8f32a2dccf34792de0ae0e8c1bbc09b2fc318a2a1a1",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -708,8 +708,8 @@
       "languageTag": "sv-SE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34921,
-      "sha256": "e85fd1fbe3fa4de1c8345e51ab0dba27f001697945fa99cf089fa940deda4495",
+      "bytes": 34941,
+      "sha256": "6120e3f703ca56dba3e07496a68381e0e23806da97c537b461cd147f657293e3",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -728,8 +728,8 @@
       "languageTag": "tr-TR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 34944,
-      "sha256": "47be9138710cc9621d2913c8ee70d9121b8c9198c12d9bad0b4bac1d1fd635a6",
+      "bytes": 34964,
+      "sha256": "f84af0e0dd27b7fd007e2bacb0327fc5df41bb91d92943ba384104870178927a",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -748,8 +748,8 @@
       "languageTag": "uk-UA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35209,
-      "sha256": "b9e45e1e2828d9b472b871a8b7ce39890d4831b652bfa2e86ead16e8a08c1337",
+      "bytes": 35224,
+      "sha256": "400cb502fd537c011e4356a6433dcce48230ced280ab8edf5194e6cc8c8709bc",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -768,8 +768,8 @@
       "languageTag": "vi-VN",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 35043,
-      "sha256": "313ec318ddf2b55aab0c024b0f74e7a9916e1e46661876173c56ca126cd9d200",
+      "bytes": 35059,
+      "sha256": "3b594df7f017032d796e9ee51bae9f818889bf89ef5bcba27667f6b41f71ce66",
       "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
     },
     {
@@ -788,8 +788,8 @@
       "languageTag": "en-US",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21437,
-      "sha256": "abea03f061133d81b4d4defa250ba296440fe8898c8e114584cf8f96df1e568b",
+      "bytes": 21452,
+      "sha256": "d8a25a9c3469a673218c0a50784af9d5bd3662305cb99f6b782f015da3f4433a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -798,8 +798,8 @@
       "languageTag": "en-US",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23330,
-      "sha256": "ca1030e8081b4257aac983acb0487565f34f48f78e1c75efa22e0f7648949110",
+      "bytes": 23281,
+      "sha256": "13e21c0d5f3df7768a3654cd157212c7382af846e0c91071bc9fbb4f1dc2b2ad",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -808,8 +808,8 @@
       "languageTag": "fr-FR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21414,
-      "sha256": "0e46fdc46da5e5b6978da1b2f02741765f79fe41f961feb497b276747d3a9c96",
+      "bytes": 21471,
+      "sha256": "aa29befdf6cc0070700d56f5c1b50c44ab08a1dc5650f620d84143dd794f024f",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -818,8 +818,8 @@
       "languageTag": "fr-FR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22842,
-      "sha256": "cd1c9292cc3a2b99504e0801fe6c352becd0435aab36e2031046001cd860dcac",
+      "bytes": 22925,
+      "sha256": "6a03834e39842c75d1c622a2e8b060cc6e6f93fe70e68575171af0a00d3634d2",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -828,8 +828,8 @@
       "languageTag": "de-DE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21556,
-      "sha256": "89bbcac6e06afdd19173ab2d00ce775ba837719a84757d57f1988de6e370257a",
+      "bytes": 21594,
+      "sha256": "2c719468bf87ebe0d8bc4508ef50d5585399f8513b91fb56c90f29c01ae9fd76",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -838,8 +838,8 @@
       "languageTag": "de-DE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22627,
-      "sha256": "83a73762e74b56785a161af7a88d109e4e95f80468e912c916eaf36c265dce26",
+      "bytes": 26660,
+      "sha256": "cc8f7d9297057318d224e4b1a0aa61cf86eb4271567fc39d38ec8219a0d9cb9c",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -848,8 +848,8 @@
       "languageTag": "es-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21544,
-      "sha256": "b8edf68edd3050a4ba766bf543ade1b1991b6d32711cbaf7944f4b99faa3a457",
+      "bytes": 21579,
+      "sha256": "e71e6b5f11edbdfea14b77be141feb5aee6ba08b0a23cba8e17a0943fd4b8dc3",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -858,8 +858,8 @@
       "languageTag": "es-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22042,
-      "sha256": "cf027bc9f461d6d86a69deea32939dd980004060e63285de728262dee0780ce2",
+      "bytes": 25732,
+      "sha256": "76a53e653883487e5ebbeed066944ddba71a18d67e5eec91b623fd6615a375d4",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -868,8 +868,8 @@
       "languageTag": "it-IT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21529,
-      "sha256": "2527cf7f42421f8e88f98f9a02163a6dd70adaec7ea3a9abd397259e83dae7e7",
+      "bytes": 21562,
+      "sha256": "65ffdb4c59f040b10067387a7df6b982b3f60c0a01cb43a654548652d9ead66b",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -878,8 +878,8 @@
       "languageTag": "it-IT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21352,
-      "sha256": "2f5e2b31bfface0bafc7fabd0b80d8eb0829859bbada34c88f0c21c54258eddd",
+      "bytes": 25405,
+      "sha256": "de5abab2afa6e53eb48b259fe35ea836e41f298c4db071218dcb3ccfba2db9ac",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -888,8 +888,8 @@
       "languageTag": "pt-BR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21561,
-      "sha256": "8fed8f8e32ea52b004ac81468befce70c342b323f2cc6cb04b3563280faea5bc",
+      "bytes": 21596,
+      "sha256": "796d482bbc9389c7daa04b302010cbb6b5e30225da3721a0302c499b4130b802",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -898,8 +898,8 @@
       "languageTag": "pt-BR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22225,
-      "sha256": "423c4319845c0d489962296b2f08d79860a238f02417d57cee4b7241e9e638f3",
+      "bytes": 25842,
+      "sha256": "70ec4b222a867e4cba1546bf8a3926dae16a2d34b5bbd9c72243441420a3d48d",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -908,8 +908,8 @@
       "languageTag": "pt-PT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21566,
-      "sha256": "21554817854ce6b09483bc1a03607184a4a786e80f83f0138bb6163e93b8b554",
+      "bytes": 21602,
+      "sha256": "79d4228156d1fe6cb7457aa12d3a775a95e7f310476b227b5e0450f9088db740",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -918,8 +918,8 @@
       "languageTag": "pt-PT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22166,
-      "sha256": "7cf858c808845900fceee5efbc8ea5b08e3dd40ff76f887d4a5e37677c0561df",
+      "bytes": 25564,
+      "sha256": "231dccb40fa3a7a3e189e3900f250038a28e7b218b7340cf9a00901b894989d7",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -928,8 +928,8 @@
       "languageTag": "nl-NL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21509,
-      "sha256": "037f8a9b04cd12b0e88c8b463f24eb3b21f69186116213e6c9e361a74532e9dc",
+      "bytes": 21545,
+      "sha256": "8052bb90918e876ed47aa62d248c998eac3bdd1a12a4cfb9229fb5794ee55df5",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -938,8 +938,8 @@
       "languageTag": "nl-NL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21117,
-      "sha256": "417f4fac8e0fac34cfc5ac3560f548ce39bf90a14eaef279fa355271aaee3378",
+      "bytes": 24705,
+      "sha256": "19247fda2dd902ec884582c5f187ca36cd39299b9d88652a6eb6c228d4b325e4",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -948,8 +948,8 @@
       "languageTag": "pl-PL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21587,
-      "sha256": "7fb1e733870448c8de310a2dcfe33c360916e10d0bb7243207524f8bd981f238",
+      "bytes": 21622,
+      "sha256": "7bb0e478b1c11b48dc3e90220ac4489b72d3f84eb9f54cd34d5d1ecbfee50f7d",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -958,8 +958,8 @@
       "languageTag": "pl-PL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25569,
-      "sha256": "407fe0bae7d562846b2b9745de3cbdce6cd1f1de2782bad9809ce3c31bae4ccb",
+      "bytes": 25395,
+      "sha256": "75f3b6d3931b2d37cc7416d3d14947f2413e5340e45331849a62d1add01a3d23",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -968,8 +968,8 @@
       "languageTag": "ru-RU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21888,
-      "sha256": "2744de13c58bf69d6b9400a1aca9d286f0af2cd036041c426accb3e73db54cd3",
+      "bytes": 21927,
+      "sha256": "4da3f619b0a0f8cc4694db47a9983e17cf6f739786f0236681301f47b9302567",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -978,8 +978,8 @@
       "languageTag": "ru-RU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26004,
-      "sha256": "89d4c4cf14e2c1418f26ca0e71f7491855322a676b941cc29f0a785bff2c220c",
+      "bytes": 25788,
+      "sha256": "c1361c86b9de0e6ad24fa31e66001f3314f953017726fc7e6580ed687db3920a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -988,8 +988,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21855,
-      "sha256": "6dd5cb85ebafecaeb9a84811a7c08478c773574c40aca1c66e6920352f0f34b1",
+      "bytes": 21891,
+      "sha256": "f590308dee0d76be9935f5ebebcd774ddf72e3f8497b73f70a3ac71ccf636600",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -998,8 +998,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 19289,
-      "sha256": "b38b2d12fb42deb72e66cde7345f6a93e6144b97bb5bd5a8903f56b5368f5e5b",
+      "bytes": 19252,
+      "sha256": "a0358a0434be7c095971ace203311c733d192cadd9f4632f993b6e9f41d78748",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1008,8 +1008,8 @@
       "languageTag": "az-Latn-AZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21621,
-      "sha256": "6bd5d6932a3dd2e2bf86ecc829207636cc7d5296f89269551080af806830f55a",
+      "bytes": 21655,
+      "sha256": "abe701a2e16943f20b63df64b5bb43412ae1d71baf4051ad343e1273b8a73870",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1018,8 +1018,8 @@
       "languageTag": "az-Latn-AZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23653,
-      "sha256": "41a79864f0333e056755c9a03e53bc79a07fa781544a31d12d60d72bbf6699d7",
+      "bytes": 23530,
+      "sha256": "e86fd2a1f7fe949bde457ea1de9a5767312dbd18c8ff0f7981dc21691087841b",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1028,8 +1028,8 @@
       "languageTag": "be-BY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21890,
-      "sha256": "abbc81bc31375d2a0d205c9efaecfeb83b3e39bd47a18179ed9a4f4583be39b9",
+      "bytes": 21933,
+      "sha256": "5c4bb65547929152b45f0b771942c8813a59114b1a31097b32a36c58e583e922",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1038,8 +1038,8 @@
       "languageTag": "be-BY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25802,
-      "sha256": "0e6f10b50875fdc1bc44acb4f09a101fc71d774d38cb7f722c608b9a1c258335",
+      "bytes": 25445,
+      "sha256": "1250e039c9c7267ec259260f94e64191b8c158b04cd7128d7235e60c214a3394",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1048,8 +1048,8 @@
       "languageTag": "bg-BG",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21885,
-      "sha256": "58824b021fc9d841c386fc96aaa8e0adabd44c8a2f7f510b53de6f42ad4039bb",
+      "bytes": 21930,
+      "sha256": "238814c8027ad39956820edc20a12afc1d31e2671256de7b3e8c6be31e8850e2",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1058,8 +1058,8 @@
       "languageTag": "bg-BG",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21644,
-      "sha256": "230eb12b0f558f19f114cc8a7daffd9aaa005dee4abb884cb78e4d80e0a4f3e9",
+      "bytes": 25383,
+      "sha256": "3edfc95a409e4d3e9f29564a23169a3bf17001934a3dac764181d198ed8a8af8",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1068,8 +1068,8 @@
       "languageTag": "ca-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21534,
-      "sha256": "bdc7bbf64fdd5bbde33f5704ab5033e52526c445a0ca29edc460206b2ac1d390",
+      "bytes": 21567,
+      "sha256": "a58ca4db50c9a3f0a67b8243444960aef52a6097c5bab6b805b70ad57d5453df",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1078,8 +1078,8 @@
       "languageTag": "ca-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24589,
-      "sha256": "a44d29c1279545890b469891e6a8185e33ff154f8919c29094a75509756effc2",
+      "bytes": 24566,
+      "sha256": "3a0eabfd2d566c0a896286cbf7b4193edeb689a0828dc2fe66b2ac7ddd969479",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1088,8 +1088,8 @@
       "languageTag": "cs-CZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21575,
-      "sha256": "65e07d92121576c7352c94d57092a85096c8a5694a8408b002695080151d6343",
+      "bytes": 21608,
+      "sha256": "6733e12e3e6c9db7dda51ca01955e19def99a359dfa24dcc921c51580138e909",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1098,8 +1098,8 @@
       "languageTag": "cs-CZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24378,
-      "sha256": "760600455a0d40d51e759c79cf1bd6c21343a59c5ef47539850764c9ab3459fc",
+      "bytes": 24331,
+      "sha256": "e2ef6ee26eb62183f3879338defb0033b1a58d0025996575942648881cecd030",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1108,8 +1108,8 @@
       "languageTag": "da-DK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21519,
-      "sha256": "315211a92cc28075be3332121923f45feec6dde5decc3cef2362a3ee8b29819f",
+      "bytes": 21548,
+      "sha256": "d618c1a0fac80c4b1d14a452d10cba7abcfa7c102acf2164a033edb9eebfa147",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1118,8 +1118,8 @@
       "languageTag": "da-DK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 20692,
-      "sha256": "cd1ca4eec0c26432dd97a397e4a63dab68779b93bdd107ea1747f51ceabf4eb3",
+      "bytes": 24260,
+      "sha256": "1967809e97be78cea045f7ed5d3e938dbb3fc90f5467a4165d19d5e32386db2a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1128,8 +1128,8 @@
       "languageTag": "el-GR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21988,
-      "sha256": "e66d867e56f6b9c4f118559faa07dc708cb8500337ade3830e0d270759c7e799",
+      "bytes": 22044,
+      "sha256": "ff61f72c2dbea6d43498ec53e491fd40c9adaf8501862f21d51f6d7e60405606",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1138,8 +1138,8 @@
       "languageTag": "el-GR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24187,
-      "sha256": "9453a9962a18327ef05ed7eccdd262df43df8bc4336ec80a077428076a20ff6c",
+      "bytes": 28444,
+      "sha256": "59464545b516d9f4c8d0df9b11330cc96aa52dd4ad9fb50ec2bf0a4e96d2f709",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1148,8 +1148,8 @@
       "languageTag": "eu-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21515,
-      "sha256": "5677066f0087148dd4cb4b75f8062522e59b5daf55796bcb4867a795dc6f6471",
+      "bytes": 21550,
+      "sha256": "0a6a03f8f8f32fc17a7f7f7c8052cdc6d65de4d75927fc133a38df7bb075a8d2",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1158,8 +1158,8 @@
       "languageTag": "eu-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25173,
-      "sha256": "a9ad04beb26b54dbb5f8a32b15dacd64c2a4de1567b443788e195064c32cba7e",
+      "bytes": 25113,
+      "sha256": "99de0d43c65037a7b5132914606edea53d365e04dda52239e3ec2665400cf190",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1168,8 +1168,8 @@
       "languageTag": "fi-FI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21508,
-      "sha256": "4bf314ebbf51f1484eb10c5ee78df878a3b4c13bf1282b123901703045b5f04a",
+      "bytes": 21542,
+      "sha256": "8127d842624f2c7a04da0ea5f946a3cc181de97e415c397d87ee258957a71914",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1178,8 +1178,8 @@
       "languageTag": "fi-FI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23870,
-      "sha256": "d3d7940d3ecca4e8eada81113f21dd376987b19a1ceaf63b29f619f468afc84e",
+      "bytes": 23799,
+      "sha256": "d637b5b55cd31b019eb1f69823d58525442cccfb56c60ce34737a7f06150cf4c",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1188,8 +1188,8 @@
       "languageTag": "gl-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21526,
-      "sha256": "9d3048c1eb9617c043e16f6bd0cc625e4c5a21dad72fdabd9ba1db02b0ff7348",
+      "bytes": 21558,
+      "sha256": "27f69840e634ebd06fd8e08e38d226ded0807808e4250250787a6996e785d476",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1198,8 +1198,8 @@
       "languageTag": "gl-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21672,
-      "sha256": "b36e395ec5ba30438b09abf6cabb774f0176ed3b13633051e95ff23a9a688ce2",
+      "bytes": 25152,
+      "sha256": "df80b4606560280f6b371d8ba09678c7de2901c0da3885253c3eda30af65fc66",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1208,8 +1208,8 @@
       "languageTag": "he-IL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21792,
-      "sha256": "710a81499ceb5bf9fc379cd2c409b2ad8cafdfde81c259035317f29c2235b6ce",
+      "bytes": 21819,
+      "sha256": "a5306b9150d7a776f82257a502b8c6af0e0c160e4a6355508216fec750586b69",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1218,8 +1218,8 @@
       "languageTag": "he-IL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 18905,
-      "sha256": "05aad9c23e4e90468a92c0b5b49e0fb9419257f590f07e377af33cf0e6180285",
+      "bytes": 18715,
+      "sha256": "08720498f8c0f8f23976e65a1d2f39dfec7cc2ac36b9b6bcf48d404c256e1757",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1228,8 +1228,8 @@
       "languageTag": "hu-HU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21642,
-      "sha256": "e5fc980628df1b003accbc3173490539795431651511c0eb2ef3d24a24a3c1a6",
+      "bytes": 21680,
+      "sha256": "8b0d6ebb3ac1b3d37eeb62fbe5caa57453e976f0b8f4b74a319901fa7cf113f7",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1238,8 +1238,8 @@
       "languageTag": "hu-HU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23262,
-      "sha256": "1555897490764e9a5b098fe5d511156cf84defba9c97300e7bb8b72530db5bb5",
+      "bytes": 27145,
+      "sha256": "303200feec32cb851e66a499d91d393f098ba379a7e02626b22937e640f0927e",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1248,8 +1248,8 @@
       "languageTag": "hy-AM",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21877,
-      "sha256": "b45fd781043c16005ecd71a05902fc90f7a3face8411eaa06ae81eda41256c55",
+      "bytes": 21919,
+      "sha256": "792fbac3a71efe345461702cfccc772885210c7ff2f1e6d830e50034d9396f96",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1258,8 +1258,8 @@
       "languageTag": "hy-AM",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 27060,
-      "sha256": "a1f27ff9cbc3654544125db92c56b672f0664f4391193d557c0e44a09f9528c0",
+      "bytes": 26827,
+      "sha256": "6bf0f65ff16b02350390506df77b5ec7207c50e9f22807946396ef8935d4a610",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1268,8 +1268,8 @@
       "languageTag": "id-ID",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21469,
-      "sha256": "634bde198374c58c964271d25f1812c137b870b0a4c72755586aff52c99fc8f7",
+      "bytes": 21500,
+      "sha256": "4736b6f2bc490a136ffeb99ef1880865d312845edf285f8d81894f5717e0e63f",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1278,8 +1278,8 @@
       "languageTag": "id-ID",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 20531,
-      "sha256": "6e7cd242533994f6d0815253f9fb30fc109817526c0fe6f1dcefc72811a491ec",
+      "bytes": 24080,
+      "sha256": "cdd905a37ce861ffc8738d956b2d05a567616de449a1b84f271d6555b0f1ab58",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1288,8 +1288,8 @@
       "languageTag": "lo-LA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21817,
-      "sha256": "eb82e958a85efda3e8174098a10384f9203b7448ad7db8498d620decddb922a7",
+      "bytes": 21860,
+      "sha256": "562cb0ebff6fad89875fca96df60f205572e5d1b4706b0eb8fa1278812cd0d4b",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1298,8 +1298,8 @@
       "languageTag": "lo-LA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22945,
-      "sha256": "92aea02cddc67c12fc0be82f9790569e06b8635aad5d9d5a82d920fa519a8c75",
+      "bytes": 22842,
+      "sha256": "f2d238992ee4b42d96eda0ed2859c3f8b49412e7b9fd57b93e1cdcfe59b0a881",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1308,8 +1308,8 @@
       "languageTag": "lv-LV",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21554,
-      "sha256": "22dab8ca135f751ce7bf388a18eb319bc17321120d7d2460e64e0e6059b1789d",
+      "bytes": 21587,
+      "sha256": "c38514986dd61961a835aa0df6791ae899ea574b2fcb2bfaf9bedf7b4d7077fe",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1318,8 +1318,8 @@
       "languageTag": "lv-LV",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24177,
-      "sha256": "1d6d89d8ffd852ce8cb5246d6cec98a94b991b9bd682a7aa42a46ffd9e23e0bb",
+      "bytes": 23940,
+      "sha256": "39c53ee4d572923ca19dead27a0338b9b1be70e03a55862af7f8fb215a805fe2",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1328,8 +1328,8 @@
       "languageTag": "ms-MY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21473,
-      "sha256": "d5e3630f0791bf232952f7120a2700baf3cd9f16ca14845e51d77afc948942ff",
+      "bytes": 21500,
+      "sha256": "4b81d50cc21a5e9d0401018a467c011bf72fba8f067bb8f3ba1774b426daa35a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1338,8 +1338,8 @@
       "languageTag": "ms-MY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 20276,
-      "sha256": "1c624b2f0a02f2807f34ea8a930474fd49af49195c146ce96d5c2de70a891de7",
+      "bytes": 23810,
+      "sha256": "a79195e31617149a8e492f1151bf340ede864c6ea09c45b4e1cfafc87ad64a47",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1348,8 +1348,8 @@
       "languageTag": "nb-NO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21499,
-      "sha256": "869d1cbf698b82bd238108780579461848501d40d812f2e7ddbb2d17e9eb7d03",
+      "bytes": 21521,
+      "sha256": "5c3baf1d335d81f7c5288015517d1190b0fbe2596531bd8e19ef71f16ff571e1",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1358,8 +1358,8 @@
       "languageTag": "nb-NO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23678,
-      "sha256": "6058c83beb7ae782415f2f832a2e5d5a9183a714e3a637d1f21457004c9715b9",
+      "bytes": 23583,
+      "sha256": "833f5161a2e241c76a63eade39ee93765b747a5e73b291587373e087f87e1bd6",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1368,8 +1368,8 @@
       "languageTag": "ro-RO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21554,
-      "sha256": "e67e926cce29f7674ee31290e257915bcdc71ca6960572991ed4fc94078b9fc1",
+      "bytes": 21586,
+      "sha256": "be34adef8f7104ae1c8fd7392c590566a1ae352db6b83c6672edb72b5ae9120a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1378,8 +1378,8 @@
       "languageTag": "ro-RO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21129,
-      "sha256": "5fe3f3e425da0d882f48f47376f2e0d5d59fffe1b672976affb4efd2318e0894",
+      "bytes": 24588,
+      "sha256": "587c0a8a1164deee61ef513125851fe9889133a4a43a582093fa41348f490601",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1388,8 +1388,8 @@
       "languageTag": "sk-SK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21566,
-      "sha256": "393c076fe56a1a7d6b5499c8533f061232755ee726cd07ef974481635b4e75c5",
+      "bytes": 21603,
+      "sha256": "79d1f5e77ddd081820ddc935eebf0c15f985c4cfed5b7d9cef797559e3c2ae8e",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1398,8 +1398,8 @@
       "languageTag": "sk-SK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24365,
-      "sha256": "78c931660a6bdfad6692dba8e15bd88b094931ee5ac3fd9376d87fa47bc55b33",
+      "bytes": 24215,
+      "sha256": "f611a371f95dc1daf43dd394cd6da5138605b1c5996b5f6ddb411756c16c4d80",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1408,8 +1408,8 @@
       "languageTag": "sl-SI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21496,
-      "sha256": "3f358c973e533897f61ad129846971a31752a7afaeffbfd43cacdabe8ce5c06a",
+      "bytes": 21520,
+      "sha256": "ed5392679100bdb5e37dc80c9bdb95146faf561811a6b1b82d70862fc1a91767",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1418,8 +1418,8 @@
       "languageTag": "sl-SI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23339,
-      "sha256": "3f50e63e27f56326e91ef8a50e07e07dcbb59e1df8136750ee0a2b83d824a597",
+      "bytes": 23226,
+      "sha256": "cdfc599dcd02575fef17e840553cd35a428a927021f9c9ed9345a713bb799fd4",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1428,8 +1428,8 @@
       "languageTag": "sq-AL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21550,
-      "sha256": "12f80fcb5e02aebe6224f0445a719cc67c562be071f96745621599d16c077a0d",
+      "bytes": 21584,
+      "sha256": "ca86d07b8e939096bef653399654b73d9c2820493039065a1e6b4be04c8186c7",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1438,8 +1438,8 @@
       "languageTag": "sq-AL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23832,
-      "sha256": "71713c5878cd9b4744e7e2857dd60cfe71295a2cbcfe778416a01f2b01e387dc",
+      "bytes": 23800,
+      "sha256": "483ce8ca986f5e7261637c4e9abd83ab9bac6a222eafd5a137ea4a48cbb2b79a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1448,8 +1448,8 @@
       "languageTag": "sr-Latn-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21503,
-      "sha256": "f2c1bc4ac6a08e0ce494735084b21111d8ea5e574f8694dbcfface10c08b28dc",
+      "bytes": 21517,
+      "sha256": "0443b64d6a2c4ed0269608684b22cc6e9cb746cb42565bce2fbe7c44b1f8ab61",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1458,8 +1458,8 @@
       "languageTag": "sr-Latn-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22966,
-      "sha256": "6e8c0b5d93e4304d234c8bce9894a66e5aa15895b2607dca5fe46d9c8cb949ad",
+      "bytes": 22864,
+      "sha256": "4ce1715ba21de35023366656b12e184671cd7f101f3cf576c3e25a1944ab99dc",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1468,8 +1468,8 @@
       "languageTag": "sr-Cyrl-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21822,
-      "sha256": "f3789d1249f0f8bda1c16595be3bbba359aff9aae957af9973a94cc7db80dbd4",
+      "bytes": 21866,
+      "sha256": "1075eb5fa0d6ca2168e2e654b781f3395e8bfb0f0493aeaa14016dc2371b9e85",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1478,8 +1478,8 @@
       "languageTag": "sr-Cyrl-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23988,
-      "sha256": "8d782f3f04389631be2f63a507da3ee71e3900976847f39c49bd1887ba006085",
+      "bytes": 23772,
+      "sha256": "316b05dd7629dad0d9e3215cc595d71035cae4c8d4c805930949e567e49a6d37",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1488,8 +1488,8 @@
       "languageTag": "sv-SE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21523,
-      "sha256": "491629b7d931ab1911e1bbc20df56f4e81a6469f7bb67f9774d3024493ab93de",
+      "bytes": 21558,
+      "sha256": "8b436b8fc9af3414c490f3d5393f3397427620e52e73af99a84fa02e8fcf8f77",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1498,8 +1498,8 @@
       "languageTag": "sv-SE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24470,
-      "sha256": "c3d30c6d10bed3bf80315066f109e0fa5845163834125a67e63718df90449baf",
+      "bytes": 24223,
+      "sha256": "23e2bd9adbefc952e8c58ba62215c26fc23d5befaabf2a6cf733cc8d656560ab",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1508,8 +1508,8 @@
       "languageTag": "tr-TR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21558,
-      "sha256": "b4e004a397f6ba93ba6e846bf46f2c0b6bac2335088eb1fc57e71b45eeb99be1",
+      "bytes": 21590,
+      "sha256": "c5ddbb4f6e8f7713868aab9c9ff9dcdcb10910c7f978e3fe4d44c4090a1a3528",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1518,8 +1518,8 @@
       "languageTag": "tr-TR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 19994,
-      "sha256": "4daf2ac04523e43ed1bbe27fe4d3706b9e60d4937aecba4e8e4bfd2d044a6153",
+      "bytes": 23530,
+      "sha256": "2b60f1d2e899bc8017f1b30f542e4afc1b6deb7fdb97544e3a9baa9452c733da",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1528,8 +1528,8 @@
       "languageTag": "uk-UA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21894,
-      "sha256": "75e36a2af4070bb530632a6ac415e797301efb12cca8dd37dfd71e884cc18f90",
+      "bytes": 21935,
+      "sha256": "360baa1e94a9c11906ed3525eff089d53294c8803ba83bbdcd8ae9dba7b2ba00",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1538,8 +1538,8 @@
       "languageTag": "uk-UA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24374,
-      "sha256": "f110a63aeae2a3224f8a17ba7a40b0018f7f0c2e389e5cbff9e06f83a1143e10",
+      "bytes": 24092,
+      "sha256": "0173dd508bad423d651b324e8625845d033cebc7bee7bd59969e1b67ddbe1b22",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1548,8 +1548,8 @@
       "languageTag": "vi-VN",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 21685,
-      "sha256": "30045be6957137e935d6bc2a680348cf680a9cba4f1f5fc1631e084949baec11",
+      "bytes": 21724,
+      "sha256": "52cc56c57e1e3c6dd8a610246322b6128b8bf7114c955ae1741361240f81de1a",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1558,8 +1558,8 @@
       "languageTag": "vi-VN",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24145,
-      "sha256": "d3eb18df2c422d527564f414deea65ecd25873c16714239b652578cc56853759",
+      "bytes": 24031,
+      "sha256": "d2cfe564c6729ee9d1bcc3adeaf1f6d37c5bd934b522b06e5729c113ebaf03c5",
       "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
     },
     {
@@ -1768,8 +1768,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 19356,
-      "sha256": "f7c3951014dae946009ba98ffd3d77ab0317ce864d630db9fd74bbc49ccb2e93",
+      "bytes": 19362,
+      "sha256": "46afb989b0b874b301776ce127970fc8a9394dc66a32208b594e0701c57c9e27",
       "layoutSource": "tools/example/template-layouts/letterhead.docx"
     },
     {
@@ -1778,8 +1778,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 15554,
-      "sha256": "edc30b6acb9dd8b1e66bbde7e6da352f4b66babfa9473f80956f5524ebd7d0cd",
+      "bytes": 15191,
+      "sha256": "12b42ee965848710e1d158c28547cb10decb7e60b66307c63bb6acaddd385fe4",
       "layoutSource": "tools/example/template-layouts/letterhead.docx"
     },
     {
@@ -2348,8 +2348,8 @@
       "languageTag": "en-US",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16698,
-      "sha256": "9045da7cd0f4dd1b82b359c189335ab8973699cd671adf6a54cdc485491e74f6",
+      "bytes": 16727,
+      "sha256": "7b7c7b8508db76fc07d63ed66bb66d364c7982fc1726001e936c65f2dc299731",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2358,8 +2358,8 @@
       "languageTag": "en-US",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23313,
-      "sha256": "2e5602726abe0850e1a66de123c9dd1c7a498fd8a9e7eaf6bf7e07e673cb98fa",
+      "bytes": 23418,
+      "sha256": "bee438dde2f23a541a2de9946b4c3c91f9da1a0ee1d02e780dd79d36e7a2f2d4",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2368,8 +2368,8 @@
       "languageTag": "fr-FR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16766,
-      "sha256": "dccd92eb3916bea0e82d73c61773cc0556b74d604c0496b598546a27b559dc09",
+      "bytes": 16784,
+      "sha256": "f4e5625ba121651e271b337135fc8753506661cd26c8517c0be3ca9c1f8161f2",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2378,8 +2378,8 @@
       "languageTag": "fr-FR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 18687,
-      "sha256": "2fb1b9c8dcdbdc45ac62205e2dd0b4a54aacf3380250cdb8a8a876fdc54556c6",
+      "bytes": 18722,
+      "sha256": "5832bb3a0d9cd51e8db10bf06f8cd39ad50c6447a66e27dd962d955950599482",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2388,8 +2388,8 @@
       "languageTag": "de-DE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16729,
-      "sha256": "237ec037176ca71c2906e93d21500f64a2b48ab56911a08ef7d128b583535928",
+      "bytes": 16750,
+      "sha256": "030624738a05a6a39e5b14ac4b317b93b6116d23b51cddb85d31a4de065087cb",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2398,8 +2398,8 @@
       "languageTag": "de-DE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24083,
-      "sha256": "b22cfafe41b506ad422676dc9d88e05c72f39d030eef30a85381e4a96f696778",
+      "bytes": 23933,
+      "sha256": "a20a853a25d9c48228e72086baac0aeb3918f6d13bff5c1c2ddb4a6c81d451e3",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2408,8 +2408,8 @@
       "languageTag": "es-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16760,
-      "sha256": "a89f57460109dbf4d812bc9c661213324f3a0aa199faee74d98b4d51969e24cd",
+      "bytes": 16788,
+      "sha256": "af5eeb018b225c34b54c002c2517c759b057de40578129a92a6ab5a432c0da0f",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2418,8 +2418,8 @@
       "languageTag": "es-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 27168,
-      "sha256": "dd63dda1dff6a2e83c7fc1104c80ac4991fdfa2cafee87f8be6a05f97e94d45c",
+      "bytes": 28129,
+      "sha256": "9cac132d40ab0af4d359714cdf8505eaf555576a645cc00fe7ffe80832ea4554",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2428,8 +2428,8 @@
       "languageTag": "it-IT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16748,
-      "sha256": "85f11d443a02f270ab5e958ec363eca99ce8bc2dc8d885a2cab285a97d1f92d4",
+      "bytes": 16777,
+      "sha256": "6dc47a15076c6c64323f5f94c38ae315bea27f5d0660afcae2981316b0a2a5b0",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2438,8 +2438,8 @@
       "languageTag": "it-IT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25518,
-      "sha256": "df3f1a6b5c3bcbda50791aad39b404a2cb1428649862af19b48a2fa1efcbcdcd",
+      "bytes": 25924,
+      "sha256": "41c2351ffd0ce57efbbe59c09fc19408e4e918e858e7deb278c0affd791b5695",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2448,8 +2448,8 @@
       "languageTag": "pt-BR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16781,
-      "sha256": "e8170a032e0fa7b53afc30f99d5ee10927228fb2009d41decb8ce72e4e6f75c8",
+      "bytes": 16808,
+      "sha256": "e44ddbe1f78ac7b303c4eb7c3ec1dbb1d8746043bff61db8e6533cf133eed8e4",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2458,8 +2458,8 @@
       "languageTag": "pt-BR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26562,
-      "sha256": "7fc169d434c4b25e14aa7a54c96c17a7f95ae743c9f5ddb63b312e19cc448dce",
+      "bytes": 27188,
+      "sha256": "393cfa1b9ea922ef533ead73809da92a8c00934342cab618c1de3b438ee4e0f1",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2468,8 +2468,8 @@
       "languageTag": "pt-PT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16784,
-      "sha256": "10cc726d6d5a216df4735d81c0fead8d025bb567191d082f96b313267527608d",
+      "bytes": 16812,
+      "sha256": "3363e0910a18ff670e71e76ee72612e6b7415d505344adca7fadd9d132159e85",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2478,8 +2478,8 @@
       "languageTag": "pt-PT",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26495,
-      "sha256": "d504acf3da9d4e29f352643c46d9dbe88c7631c64ba338c908cf161fcb97e28c",
+      "bytes": 27129,
+      "sha256": "d1ff0b9807c86e03e63f439c06b33c7a4231fa78f9bfb42f7d8f2fd049f8a6f1",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2488,8 +2488,8 @@
       "languageTag": "nl-NL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16707,
-      "sha256": "cc6931d3cd88403fbe5e807b9e19553d669046ac4b30f8ef9badc160b720a435",
+      "bytes": 16735,
+      "sha256": "30683949807760c51a03917366f21a013c5252c958d8ca2afbbe4bb00a777e2d",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2498,8 +2498,8 @@
       "languageTag": "nl-NL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24599,
-      "sha256": "a752154701fe382ffdfc860d2328ed10778c8c941b6c19c13d5dd63af1052111",
+      "bytes": 24594,
+      "sha256": "a99dcd507c8868e4b03477f71249913231bfaaa90b6c95546ef934b890b29945",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2508,8 +2508,8 @@
       "languageTag": "pl-PL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16800,
-      "sha256": "694aef33270c4254040b36edac5d3d348f754c27df72abd8310de51a12d7c773",
+      "bytes": 16828,
+      "sha256": "4f34683a06ff9773b18984309c9839b4f1156728b69fb44ce19732eee33f9955",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2518,8 +2518,8 @@
       "languageTag": "pl-PL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26933,
-      "sha256": "43ace3a58e73ab0efa63d95dd6ea83ce3d265ab96be6c5c5fb08359a39c551ce",
+      "bytes": 27197,
+      "sha256": "d44cd030ce55b7e92f8a101ea2ae1e452725e348d2d0bc46d3463e6181dcfbc8",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2528,8 +2528,8 @@
       "languageTag": "ru-RU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16971,
-      "sha256": "510f2c4f1907fbead4c0cd698a771c9d643905418c016574e316c02853e380b8",
+      "bytes": 16994,
+      "sha256": "e7477c1b59f93f0daa44981625fc2af5dbd3d340f882cea07bc13b0dad34afee",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2538,8 +2538,8 @@
       "languageTag": "ru-RU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25857,
-      "sha256": "bf729c90cac8f5900bc454fbcf0b4a138a935fe364b1bb9c6adbf57b7f540ef9",
+      "bytes": 26006,
+      "sha256": "3d410fae8e83bc537548b71b6ae6ab05da9a2df6d76a36494e1ebc6922604598",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2548,8 +2548,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16966,
-      "sha256": "23fccf39b27e7cc3a40208382b1ba1f0c1c0e34d70f3340eef0f8a9a21e26a52",
+      "bytes": 16988,
+      "sha256": "5849c2d7d6936c8552fcd92a0c2572403ccf9455a1fe6d282357ec20c4437409",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2558,8 +2558,8 @@
       "languageTag": "ar-SA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 17831,
-      "sha256": "2446bc312448496de26731dd19e478ef8d3e5d8492fb594e338197d402116132",
+      "bytes": 18149,
+      "sha256": "d2e59f578c7d7ab0c4ece2e4eea460625a03e9374b2cb95aef6f52896c5a46c7",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2568,8 +2568,8 @@
       "languageTag": "az-Latn-AZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16799,
-      "sha256": "08417019ac07d015521365325416fcd8e20a7f093462f08be3d22e8279372d9b",
+      "bytes": 16824,
+      "sha256": "0f581686d3b068b9b6b6ffd30c850af6616743ac095d6e1f5cd13406ed59cf27",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2578,8 +2578,8 @@
       "languageTag": "az-Latn-AZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22527,
-      "sha256": "8ccbbb08b430b17ad607b0a30118ab11ad30f0e2471c5284478675c7543c459c",
+      "bytes": 22588,
+      "sha256": "6ada41a3a94a626aa929bc66380cb64bfb73e0d295eb3e10ad75af89b0bb8545",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2588,8 +2588,8 @@
       "languageTag": "be-BY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16990,
-      "sha256": "2817db16f3b18f9339cae7ea7bd1d81853e713557a2c2718b312056ff179d5b4",
+      "bytes": 17017,
+      "sha256": "091beaaa4c50213e9c80fb55aa51992490d1408400bfdbff5727618a90181afe",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2598,8 +2598,8 @@
       "languageTag": "be-BY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25944,
-      "sha256": "811e20a6be34d0fbf23de4c13401f6e74cc5bb1720f4aed7b3b5edb55ac95f54",
+      "bytes": 26205,
+      "sha256": "cc8ab0b86763f624adfdb4f8c8034bf3233298358b827804c745ccbb55125442",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2608,8 +2608,8 @@
       "languageTag": "bg-BG",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16944,
-      "sha256": "2835e0dc440ea285f2282e5c84bed972e1604f0d53406ef2375532a2a26c421a",
+      "bytes": 16967,
+      "sha256": "82c495119a859b4ac48befd3465dfe5f00486b8c688d6c65f9e1430eb1ebb655",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2618,8 +2618,8 @@
       "languageTag": "bg-BG",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24510,
-      "sha256": "a789d85ad6358db02f28a8a439f499f60c91c3feee06688b5dc4747367f12eb7",
+      "bytes": 24666,
+      "sha256": "902ff03123dd9754219e4d510e65b61b9851376c49b6a81ad5e52644475cb689",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2628,8 +2628,8 @@
       "languageTag": "ca-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16775,
-      "sha256": "5a1cf54be830baf253fce9c8a828f508bf6d7ea00872b7f2261e49f379f6ba23",
+      "bytes": 16802,
+      "sha256": "1ae8ddd29d41c92c856078a53c0ec3188df0ba3741201df737ad91d863c2cd2b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2638,8 +2638,8 @@
       "languageTag": "ca-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26105,
-      "sha256": "b926a041ddf8b017d7b512bd0881fa55841c52f812b79191b598f851b5412c9a",
+      "bytes": 26607,
+      "sha256": "dbecd44be9698581f917f1a6d06acbac3f6c2228d25abfd8ed44ffa6ace9c525",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2648,8 +2648,8 @@
       "languageTag": "cs-CZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16826,
-      "sha256": "40695363b4b11cad754af939f3e370300a80eb31e3b0f9bb597763867a1fa58d",
+      "bytes": 16850,
+      "sha256": "b75215c5535341ed0ef6317354f05bf2a6d15369b3122edb998123d164fc9594",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2658,8 +2658,8 @@
       "languageTag": "cs-CZ",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24930,
-      "sha256": "133da7fee0051270cab8e276a408a37be2e7d1bb5cc8168bba5bf88db0328f0f",
+      "bytes": 25183,
+      "sha256": "c58def2c80a7aa59b36457d29bf574613799fc3de9ab5b440f5af24f61e0eca3",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2668,8 +2668,8 @@
       "languageTag": "da-DK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16715,
-      "sha256": "9a2aafce3190fdd8dfc770156f6ba748e2add03bfe6a53adde43d4f8b9642b8e",
+      "bytes": 16738,
+      "sha256": "062a7402696ae3416c4dd692e44bddcd3fc0d9602cf3f7d7e0f46fe351a4cedc",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2678,8 +2678,8 @@
       "languageTag": "da-DK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23847,
-      "sha256": "93b6e35cdf8b8492362ed3efd0795c7de522b88031bbca0169d15d700b0b76bf",
+      "bytes": 23986,
+      "sha256": "d4e29db0da48296b02d10437b3f9ec9df0d639250694b7fd2d6a07b85638d8ee",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2688,8 +2688,8 @@
       "languageTag": "el-GR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 17012,
-      "sha256": "6f13be915b0acae635128ce79c051c263709895036cc7ec9ff48941dfa48539f",
+      "bytes": 17037,
+      "sha256": "28675976942a2fdfea668b9f6ff357bfc3c6ea3fec5947d443d9bad9a54e80b2",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2698,8 +2698,8 @@
       "languageTag": "el-GR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 27412,
-      "sha256": "df781a51304df0164fbaf4c9eedb8ffaf4c158deb8c978768bfd10a1163d0679",
+      "bytes": 28182,
+      "sha256": "ebeca738f57ee718f6210dcd36d5dd29ad59abccecf104c0bb09837c472a9e61",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2708,8 +2708,8 @@
       "languageTag": "eu-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16746,
-      "sha256": "5716bf129f371d36378dee8e1eb87496a5a7043a120195298b2d17ba889f4390",
+      "bytes": 16773,
+      "sha256": "46d75aa94f08c34504e66ba6b3c9417bc7d7be67ddaa6db514393560d38130f9",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2718,8 +2718,8 @@
       "languageTag": "eu-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 25126,
-      "sha256": "c125941f4a4b3424855275c16ce8d3a2b6643d46303be54ff0ba29faf7bc0ef2",
+      "bytes": 25288,
+      "sha256": "f14181261c3a722c6516c1fbeafa7290e07eb5442e1dedc178296e3377fe625b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2728,8 +2728,8 @@
       "languageTag": "fi-FI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16740,
-      "sha256": "7e2e1aff22cae853adce99a80426b82b2e1d515a7254dc6f6cdc067a0bea8208",
+      "bytes": 16766,
+      "sha256": "b580721a5e0175ff0c5488a2e0baae08b4476b314081d0e47d0f3fae4a64ddc4",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2738,8 +2738,8 @@
       "languageTag": "fi-FI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23474,
-      "sha256": "2b65258c17a7ca20cff96125839d17f47852092b7356e4cd4b8179285c805ee5",
+      "bytes": 23741,
+      "sha256": "cd934beb3b141a63e98eead715f40178ee0df22815bfe4b9272f24b012b8c89e",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2748,8 +2748,8 @@
       "languageTag": "gl-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16759,
-      "sha256": "cf00753acfe5440f5258b4e01258b6511094b669fb704393ebcbdc355c2d30a2",
+      "bytes": 16787,
+      "sha256": "8fabba3a1bf96e6b07fbb653ee892b0a51eee9122248ed0b78fb7e494e2159ca",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2758,8 +2758,8 @@
       "languageTag": "gl-ES",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 26689,
-      "sha256": "9057fe3c91d1726fb4ebd7452032e50786e1dd2376be508b9a70ff25eea48e46",
+      "bytes": 27230,
+      "sha256": "03d9ffea617ec2e5f3419f1b41f76dcbee431be45a82cae1fb1bf633d01513c8",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2768,8 +2768,8 @@
       "languageTag": "he-IL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16898,
-      "sha256": "0a462bc5021a58c5119eb8f03fe237d03fa55284e9a91173473b98b7c80a222b",
+      "bytes": 16922,
+      "sha256": "4e8b7a25858b23460a4f0417eee71c626f077d443856a0c0e3e4547f01eeaf71",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2778,8 +2778,8 @@
       "languageTag": "he-IL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16247,
-      "sha256": "e21352611c2db5f8b76eb861ee998fb6849401ab4d12310cebbc117f4c116c6b",
+      "bytes": 16386,
+      "sha256": "fe2917d297debe0b3a9c052634797487a0dc647e12475aba0b345b8b93c80888",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2788,8 +2788,8 @@
       "languageTag": "hu-HU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16786,
-      "sha256": "b014ed955e98421f2d6044014bc384b4b201344b0ca326638b026e0e9055fc61",
+      "bytes": 16811,
+      "sha256": "abb0ac419ae3b09cb462e65e2cf9b9b7c90144ae57a90e92a3461b4811726f59",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2798,8 +2798,8 @@
       "languageTag": "hu-HU",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24607,
-      "sha256": "ea274e97ae5be4c6b2c8c08770b8ce2521efe78b31f19e32eda50a5d2ee83cbe",
+      "bytes": 24829,
+      "sha256": "0cc6758ac9d77a4e146b162dfebfe60232e761c489b144bb9b9548ea81a19f2a",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2808,8 +2808,8 @@
       "languageTag": "hy-AM",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16927,
-      "sha256": "9e9ed5eaf95376828ab0354dff121775a91c41fef733530c5dcf3e2f86f1c217",
+      "bytes": 16952,
+      "sha256": "b8377765a40ae91df117f4295fba419ba411411b1bc4ee0bf501d21ea70d198b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2818,8 +2818,8 @@
       "languageTag": "hy-AM",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 27970,
-      "sha256": "1b3800c2a86dc7d10b97cd7b5a3558907224091f8c70392f4698ae06feaf6264",
+      "bytes": 28313,
+      "sha256": "1ccc9f2fe5ea731fbab79bfa5c19ebf5ff331b8e2519b14ceb25f63c19a23292",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2828,8 +2828,8 @@
       "languageTag": "id-ID",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16708,
-      "sha256": "228d8ce19593f2e2fb32389cff6fd883b81f125d0a300fe8b87885cf570d1062",
+      "bytes": 16736,
+      "sha256": "d90e5ecd177df4327cd974d929059bb7effa25dbb96412055f94ad9e2461b705",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2838,8 +2838,8 @@
       "languageTag": "id-ID",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22180,
-      "sha256": "3785afae0f3f4df095aacf66f63f9cbd3434fa69ff8deec8f1551a12b4d8ff6c",
+      "bytes": 22457,
+      "sha256": "09cdab5121d84701fdf01af7ca9a24cd1a6f72213abc768df8b35044e2aef5a0",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2848,8 +2848,8 @@
       "languageTag": "lo-LA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16940,
-      "sha256": "207bec724fdbe977dfc20b5ce7b3fe1c3aa88c0890839ebac2a08a2f487044a0",
+      "bytes": 16962,
+      "sha256": "3313b109542710616dcba8dc8634aa0335ddaa21e3f180c26dd4c63f0d2c60c1",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2858,8 +2858,8 @@
       "languageTag": "lo-LA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22179,
-      "sha256": "4e962ea6d05ec1f0f15ba550dc35ecebe55ffd15d9843f3eca82da0b67bda8f1",
+      "bytes": 22454,
+      "sha256": "e61ac98c97235e7a3bc1f5147d7b5833ce03e8cff9c5245b57ac2691a6b12c4d",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2868,8 +2868,8 @@
       "languageTag": "lv-LV",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16769,
-      "sha256": "01310acd4b1185548a43b9686fbb0701b7785d1f8c0df1d8c2fc8ad641fbde59",
+      "bytes": 16795,
+      "sha256": "233dabb796cf8fd3f9502b6a24b1a77e6bfba8c5533dc69e69d1e3c924a7fec5",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2878,8 +2878,8 @@
       "languageTag": "lv-LV",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24506,
-      "sha256": "99868443568a9ce396d657f16c2ea73cb4623786103559b253ba10cefadba807",
+      "bytes": 24794,
+      "sha256": "97d56a4e3d1678c85718ca82883a6037d67fca472727d504d65641a6ca7b1df2",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2888,8 +2888,8 @@
       "languageTag": "ms-MY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16710,
-      "sha256": "a8745c170e39589e8adb49ca3ae84df0fe624048882cffb7d0824cbb91e33071",
+      "bytes": 16738,
+      "sha256": "8dd4bb3b57be881f8a5be9cbb5b1dd7c750a2e651ac58786f282aa1a7a856363",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2898,8 +2898,8 @@
       "languageTag": "ms-MY",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22462,
-      "sha256": "a3f03df9626a802c2485f814d322109f819636991fdd2c9ad70e51c9a1240053",
+      "bytes": 22663,
+      "sha256": "3ea46296610c49d93044965b0435ffce6c2619260e5cd87d219bd4247c96160b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2908,8 +2908,8 @@
       "languageTag": "nb-NO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16708,
-      "sha256": "55b62bc0701c317c9c28b905163b21c0316da5fb7d565c0f1b6a676460ef8377",
+      "bytes": 16731,
+      "sha256": "f6a83adc75892f8be90ac8a6282c020714edf2e6d6a78035cd57ebfc61c211f1",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2918,8 +2918,8 @@
       "languageTag": "nb-NO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22913,
-      "sha256": "bbbb0e0804ea64b30e51285548ffc30991b04158d2502003a52db5a2b26e929e",
+      "bytes": 22973,
+      "sha256": "40a090aa979f2648d893bace9d4bb01ae715fcb48f47380ee7bfefa9ac8bf07e",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2928,8 +2928,8 @@
       "languageTag": "ro-RO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16773,
-      "sha256": "0eb6a97698815ca7c67014fb444d36a0cb5763c4fe878816c1a9d6cad123bc45",
+      "bytes": 16800,
+      "sha256": "7326b5edc4e6a2b4c4c4d9e3b1fb31bdff13b5548274477db2a029456c45565f",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2938,8 +2938,8 @@
       "languageTag": "ro-RO",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24835,
-      "sha256": "b47a9876d809997a4c5acc6a9b4ab9e6704051274b721df84df22b03cf32f082",
+      "bytes": 25317,
+      "sha256": "67416586493e9b65cdb80145356a525d963bfba19c888132f92a752e747612c5",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2948,8 +2948,8 @@
       "languageTag": "sk-SK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16824,
-      "sha256": "97944827756a36b0376a56f3d184e7864f1e06c94fa9e801ae45f8bcacaff8c0",
+      "bytes": 16848,
+      "sha256": "fe5d8d48bf6fe02ede773c3d47bfd5353e2a3131f23158d377b1b0cae4beee35",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2958,8 +2958,8 @@
       "languageTag": "sk-SK",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24576,
-      "sha256": "9a0077b2afdb10e0d3452c26169d303d05681a416f01e74ec5de066d101411a6",
+      "bytes": 24792,
+      "sha256": "ea94122d9f1d24e8863ad1706dae171562a3f0427b1d1b0830918106474abf56",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2968,8 +2968,8 @@
       "languageTag": "sl-SI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16760,
-      "sha256": "a41906bae7b5e45470b2b19fe01a92f628d82c6b0dcc54e4e56057202dc4e7e9",
+      "bytes": 16785,
+      "sha256": "adfd7c8e4a46fe4cfcf5889f2badf9218af9a109b6f4d57865f1f3dabd64176c",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2978,8 +2978,8 @@
       "languageTag": "sl-SI",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24457,
-      "sha256": "ddb284c05ccf22dea95a857edf6ce61f078ffa1c0703dbafebdf10041d0b02d5",
+      "bytes": 24524,
+      "sha256": "e4a06cfbe1247a1cf4bc4a169d9e1c8d2d82ff23158acfb75babe32bbf7fd5aa",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2988,8 +2988,8 @@
       "languageTag": "sq-AL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16772,
-      "sha256": "cb81a9911c701de869d1c1a5926e36c3cfa68db34b05c2d241816c3b17c429d5",
+      "bytes": 16796,
+      "sha256": "f165d1164b5fe9a2feb28ed97276e6b8ae18574871c3ba79d5e9b1a9e05bb0dd",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -2998,8 +2998,8 @@
       "languageTag": "sq-AL",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24039,
-      "sha256": "5dd130d461d695d0b50131480d48abcfff1b258fce8f56135adc6b7760334f76",
+      "bytes": 24251,
+      "sha256": "3e4102293eaef73c96d13bae931865025c05d8120a2483125ebc9cd4fc75ec15",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3008,8 +3008,8 @@
       "languageTag": "sr-Latn-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16747,
-      "sha256": "829a9d5351c45ae2c26a168a64736f74bdb8984764fae8aea6a443060690aef3",
+      "bytes": 16772,
+      "sha256": "97e5af3f27f06f0009c1948bf5fad4e3cb867e86d1783aadec55eecbbd89b156",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3018,8 +3018,8 @@
       "languageTag": "sr-Latn-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22882,
-      "sha256": "7c83a3e7db1dc8ae2b5a6c2c83121e20a29a2efb936fa3e134511d5525107c6c",
+      "bytes": 23203,
+      "sha256": "5afbe3c6c00fb6e3127e3dfba60faf2331b9baa46b1eb872bf0ff778c84dc03b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3028,8 +3028,8 @@
       "languageTag": "sr-Cyrl-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16960,
-      "sha256": "29c4d1c4d2a278d5e372c42fa88be5e42b92e312bdb6dcc3798ef1a3fa47e831",
+      "bytes": 16986,
+      "sha256": "79026c022ce57975afa28c625705666563368d472e12262437b03883a87e1ffe",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3038,8 +3038,8 @@
       "languageTag": "sr-Cyrl-RS",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23792,
-      "sha256": "6a7f980c7b82abb137435cdfa1c89a5c09a96eb9bdd91cea902445bea61a93b9",
+      "bytes": 24392,
+      "sha256": "6a6df5653fd3fa9a4a7a313f5f4ecb536dba4f25de938bf648d0dfda13a3e9a4",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3048,8 +3048,8 @@
       "languageTag": "sv-SE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16719,
-      "sha256": "694d7e0078ae9681aea417ab136269eb016003605ab6ba1d3bd753047972f961",
+      "bytes": 16740,
+      "sha256": "89f76d9db879e38c63dd94cbed22bd6bd207e23f8f21afb5823b1c6345084ab0",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3058,8 +3058,8 @@
       "languageTag": "sv-SE",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 22393,
-      "sha256": "53c1c0a81fa4e8b43b86ce9cbb714cd079d91a95a9e2b605cbf33be7f2217bb6",
+      "bytes": 22592,
+      "sha256": "8f6ff9eb67e45c6c163f68f9c6f7aa9add2364d95ff41bdcfbd1f4da11d902e3",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3068,8 +3068,8 @@
       "languageTag": "tr-TR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16749,
-      "sha256": "fc1dea2a33799cd471276103175d30e35cf3425a0e1f6b6042687fc9f324092b",
+      "bytes": 16777,
+      "sha256": "cfc17b1241bd05c4c67163d2a4f1c6f3677397e3126c20166a4a62fae726c364",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3078,8 +3078,8 @@
       "languageTag": "tr-TR",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 20567,
-      "sha256": "e75dd2185465b747f452f267e702ff28a78f54434af6b191376fadc0563dd736",
+      "bytes": 20785,
+      "sha256": "0bc27c002d1319a2d883b26a402174763713c022dba1cf2a7defb5fc03b991f0",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3088,8 +3088,8 @@
       "languageTag": "uk-UA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16977,
-      "sha256": "12c6fc2d8dc1f61616605d6d0b3e734aae99619df21ddbd3dcd2d39cb865a85d",
+      "bytes": 17000,
+      "sha256": "d413b10cccd5b0a442e70ed4fd4aa46b1c1f7549a6261f95d2753b4bbd231438",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3098,8 +3098,8 @@
       "languageTag": "uk-UA",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 24620,
-      "sha256": "db1e040efedd001dea7f7c3c2603aa31e857e7fd1d2f265792a8896a979bf6ee",
+      "bytes": 24750,
+      "sha256": "df722aff51098f2bc66b1bc27fc19704b560718fea553587d8e5c49091f7d89b",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3108,8 +3108,8 @@
       "languageTag": "vi-VN",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 16881,
-      "sha256": "89b2b26f0af0a7a387405e2a51f2a1357d7ca700c2d4fa2d989b4ce3ae79da4b",
+      "bytes": 16906,
+      "sha256": "78e00c514aab62f79b64ad23db5285e6160075bfd2d89bb322ea0d7462e10401",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     },
     {
@@ -3118,8 +3118,8 @@
       "languageTag": "vi-VN",
       "license": "CC0-1.0",
       "fictional": true,
-      "bytes": 23076,
-      "sha256": "125376c2bb596cfad954a4a73ac8b8912c617b29c3014c3cdb571f2f73e7fd11",
+      "bytes": 23340,
+      "sha256": "8211b9c1daaec6a1f2c88028fa9c4bdbe30e28124e9f16fbfd3e618407c4e584",
       "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
     }
   ]

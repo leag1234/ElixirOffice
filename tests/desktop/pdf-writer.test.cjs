@@ -10,7 +10,7 @@ function setup(reply){
  class FakeWorker{
   constructor(){worker=this}
   terminate(){this.closed=true}
-  postMessage(job){posted++;this.job=job;setImmediate(()=>this.onmessage({data:reply}))}
+  postMessage(job){posted++;this.job=job;setImmediate(()=>{for(const data of (Array.isArray(reply)?reply:[reply]))this.onmessage({data});})}
  }
  const url={createObjectURL:()=> 'blob:public-proof',revokeObjectURL(){revoked++}};
  class URLClass extends URL{}Object.assign(URLClass,url);
@@ -44,4 +44,15 @@ test('writer returns validated PDF bytes; oversized jobs fail before a worker',a
  assert.deepEqual(await e.api.write(original,null),bytes);
  const large=setup({});await assert.rejects(large.api.write({length:128*1024*1024+1},null),/128 MiB/);
  assert.equal(large.stats().posted,0);assert.equal(large.worker,undefined);
+});
+
+test('preservation progress does not become output and cancellation remains classified and scoped',async()=>{
+ const bytes=new Uint8Array(Buffer.from('%PDF-public-progress')),events=[];
+ const e=setup([{type:'progress',stage:'loading-runtime'},{type:'progress',stage:'initializing'},{type:'progress',stage:'converting'},{bytes}]);
+ assert.deepEqual(await e.api.write(original,null,{onProgress:value=>events.push(value)}),bytes);
+ assert.deepEqual(events.map(value=>value.stage),['loading-runtime','initializing','converting']);assert.equal(e.worker.job.progress,true);assert.equal(e.stats().revoked,1);
+ const abort=new AbortController(),cancelled=setup([{type:'progress',stage:'converting'},{bytes}]);
+ await assert.rejects(cancelled.api.write(original,null,{lang:'fr',signal:abort.signal,onProgress:()=>abort.abort()}),error=>error.name==='AbortError'&&error.code==='cancelled'&&error.reason==='cancelled');
+ assert.equal(cancelled.worker.closed,true);assert.equal(cancelled.stats().revoked,1);
+ assert.deepEqual(await cancelled.api.write(original,null),bytes);assert.equal(cancelled.worker.job.progress,false);
 });

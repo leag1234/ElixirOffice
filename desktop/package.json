@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -27,7 +27,9 @@
       "*.html",
       "*.css",
       "package.json",
-      "icon.png"
+      "icon.png",
+      "build-info.json",
+      "!build-identity-before-pack.cjs"
     ],
     "extraResources": [
       {
@@ -113,7 +115,8 @@
     "publish": null,
     "appImage": {
       "artifactName": "ElixirOffice-${version}-x86_64.${ext}"
-    }
+    },
+    "beforePack": "./build-identity-before-pack.cjs"
   },
   "desktopName": "org.elixiroffice.desktop.desktop"
 }
