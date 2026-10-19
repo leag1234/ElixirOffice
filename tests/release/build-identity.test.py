@@ -73,6 +73,7 @@ class Identity(unittest.TestCase):
             root=Path(root);desktop=root/"desktop";scripts=root/"tools/desktop";scripts.mkdir(parents=True);desktop.mkdir()
             app=desktop/"dist/linux-unpacked";app.mkdir(parents=True)
             (app/"elixiroffice").write_text("#!/bin/sh\\nexit 0\\n");(app/"elixiroffice").chmod(0o755)
+            (app/"chrome-sandbox").write_text("sandbox");(app/"chrome-sandbox").chmod(0o755)
             shutil.copyfile(ROOT/"tools/desktop/deb.sh",scripts/"deb.sh")
             shutil.copyfile(ROOT/"desktop/build-identity.cjs",desktop/"build-identity.cjs")
             shutil.copyfile(ROOT/"desktop/icon.png",desktop/"icon.png")
@@ -84,6 +85,14 @@ class Identity(unittest.TestCase):
             subprocess.run(["bash",scripts/"deb.sh"],check=True,stdout=subprocess.DEVNULL)
             artifact=desktop/("dist/ElixirOffice-"+package["version"]+"-rc.42-linux-amd64.deb")
             self.assertEqual(subprocess.check_output(["dpkg-deb","-f",artifact,"Version"],text=True).strip(),package["version"]+"~rc42")
+            # Electron's SUID sandbox is required on systems that restrict unprivileged user namespaces (Ubuntu 24.04+, issue #19).
+            listing=subprocess.check_output(["dpkg-deb","-c",artifact],text=True)
+            sandbox=[l for l in listing.splitlines() if l.rstrip().endswith("/opt/ElixirOffice/chrome-sandbox")]
+            self.assertEqual(len(sandbox),1);self.assertTrue(sandbox[0].startswith("-rwsr-xr-x root/root"),sandbox[0])
+            postinst=subprocess.check_output(["dpkg-deb","--ctrl-tarfile",artifact],stderr=subprocess.DEVNULL)
+            import tarfile,io
+            with tarfile.open(fileobj=io.BytesIO(postinst)) as ctrl:
+                self.assertIn("chmod 4755 /opt/ElixirOffice/chrome-sandbox",ctrl.extractfile("./postinst").read().decode())
     def test_publication_preparation_rechecks_completed_build_without_allocating(self):
         with tempfile.TemporaryDirectory() as root:
             root=Path(root);inventory=self.fixture(root)

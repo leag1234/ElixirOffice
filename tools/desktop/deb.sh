@@ -11,6 +11,8 @@ STAGE="$(mktemp -d "$ROOT/desktop/dist/deb-stage.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/DEBIAN" "$STAGE/opt/ElixirOffice" "$STAGE/usr/share/applications" "$STAGE/usr/share/icons/hicolor/512x512/apps"
 cp -a "$APP/." "$STAGE/opt/ElixirOffice/"
+# Electron falls back to the SUID sandbox where unprivileged user namespaces are restricted (Ubuntu 24.04+).
+[ ! -f "$STAGE/opt/ElixirOffice/chrome-sandbox" ] || chmod 4755 "$STAGE/opt/ElixirOffice/chrome-sandbox"
 cp "$ROOT/desktop/icon.png" "$STAGE/usr/share/icons/hicolor/512x512/apps/elixiroffice.png"
 SIZE="$(du -sk "$STAGE/opt/ElixirOffice" | cut -f1)"
 cat > "$STAGE/DEBIAN/control" <<EOF
@@ -41,6 +43,7 @@ for SCRIPT in postinst postrm; do
  cat > "$STAGE/DEBIAN/$SCRIPT" <<'EOF'
 #!/bin/sh
 set -e
+if [ -f /opt/ElixirOffice/chrome-sandbox ]; then chown root:root /opt/ElixirOffice/chrome-sandbox || true; chmod 4755 /opt/ElixirOffice/chrome-sandbox || true; fi
 if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-database -q || true; fi
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true; fi
 exit 0
