@@ -52,7 +52,24 @@ const root=require('node:path').resolve(__dirname,'../..');
    await page.evaluate(()=>{view.update({id:'print',scope:'public',kind:'print',phase:'preparing'});view.update({id:'print',scope:'public',kind:'print',phase:'converting',completed:1,total:3});});
    assert.equal(await page.locator('.eo-operation-actions button').count(),1);
    await page.evaluate(()=>view.update({id:'print',scope:'public',kind:'print',phase:'awaiting-output'}));assert.equal(await page.locator('.eo-operation-actions button').count(),0);
-   await page.evaluate(()=>view.update({id:'print',scope:'public',kind:'print',phase:'complete',outcome:'print-started'}));assert.equal(await page.locator('.eo-operation-actions button').count(),1);
+   await page.evaluate(()=>view.update({id:'print',scope:'public',kind:'print',phase:'awaiting-user'}));
+   assert(await page.locator('.eo-operation').isHidden(),'System print choice must not have a competing floating panel');
+   assert.equal(await page.locator('.eo-operation-live').textContent(),catalogs[lang].opAwaiting);
+   assert.equal(await page.locator('.eo-operation-live').evaluate(el=>el.closest('[hidden]')===null),true);
+   await page.evaluate(()=>{view.obscure(true);view.obscure(false);});
+   assert(await page.locator('.eo-operation').isHidden(),'Closing another overlay must not reveal the native print choice panel');
+   await page.evaluate(()=>view.update({id:'print',scope:'public',kind:'print',phase:'complete',outcome:'print-started'}));
+   assert(await page.locator('.eo-operation').isVisible(),'Submission feedback returns after system choice');
+   for(const kind of ['save','pdf-export','open']){
+    await page.evaluate(kind=>{view.update({id:kind,scope:'public',kind,phase:'preparing'});view.update({id:kind,scope:'public',kind,phase:'awaiting-user'});},kind);
+    assert(await page.locator('.eo-operation').isVisible(),kind+' choices keep their existing feedback');
+   }
+   for(const phase of ['error','cancelled']){
+    await page.evaluate(phase=>{view.update({id:'native-print',scope:'public',kind:'print',phase:'preparing'});view.update({id:'native-print',scope:'public',kind:'print',phase:'awaiting-user'});view.update({id:'native-print',scope:'public',kind:'print',phase,reason:'Printer unavailable'});},phase);
+    assert(await page.locator('.eo-operation').isVisible(),phase+' must restore visible feedback');
+   }
+   await page.evaluate(()=>{view.update({id:'print-finished',scope:'public',kind:'print',phase:'preparing'});view.update({id:'print-finished',scope:'public',kind:'print',phase:'complete',outcome:'print-started'});});
+assert.equal(await page.locator('.eo-operation-actions button').count(),1);
    assert.equal(await page.locator('.eo-operation-text').textContent(),catalogs[lang].opPrint);
   }
   for(const phase of ['preparing','loading-runtime','initializing','converting']){

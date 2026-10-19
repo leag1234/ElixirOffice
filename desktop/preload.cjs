@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   create: format => ipcRenderer.invoke('eo:new', format),
   drop: file => ipcRenderer.invoke('eo:drop', webUtils.getPathForFile(file)),
   rename: (token, name) => ipcRenderer.invoke('eo:rename', token, name),
+  copySaveDiagnostics: () => ipcRenderer.invoke('eo:copy-save-diagnostics'),
   cancelWrite: (token, operationId) => ipcRenderer.invoke('eo:write-cancel', token, operationId),
   save: (token, bytes, as, protection, operationId, ticket) => ipcRenderer.invoke('eo:save', token, bytes, !!as, protection, operationId, ticket),
   savedOpen: id => ipcRenderer.invoke('eo:saved-open', id),

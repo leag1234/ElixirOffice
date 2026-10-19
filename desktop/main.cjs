@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
-const {app, BrowserWindow, ipcMain, dialog, Menu, session, protocol, net, shell} = require('electron');
+const {app, BrowserWindow, ipcMain, dialog, Menu, session, protocol, net, shell, clipboard} = require('electron');
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
 const packageGuard=require('./package-guard.cjs'),password=require('./password.cjs');
 const saveAs=require('./save-as.cjs'),destinations=new saveAs.Destinations();
@@ -18,6 +18,7 @@ let win, settings={recents:[],fontConsent:false}, current, dirty=false, busy=fal
 const fonts = new Fonts({report:error=>{void safety.log('font-error');void safety.log(error?.code)}});
 const captureConsoleError=console.error.bind(console);
 const safety=require('./safety-log.cjs').create(()=>app.getPath('userData'));
+let saveDiagnostics;
 safety.install(process,console,async()=>{
  closing=true;
  try{
@@ -80,6 +81,7 @@ function finishClose() {
     await dialog.showMessageBox(win,{type:'warning',title:'ElixirOffice',message:require('./errors.js').message(error,languageInfo?.strings),buttons:[t('close')],normalizeAccessKeys:true,defaultId:0,cancelId:0});
     files.acknowledgeWriteWarning(warning.key);
   }
+  await files.cleanupBackups();await saveDiagnostics.flush();
   closing=true;win.destroy();
  })().finally(()=>{finishClosePending=null});
  return finishClosePending;
@@ -196,6 +198,8 @@ async function takeDestination(ticket,format,route){
 }
 function handle(name,run) { ipcMain.handle('eo:'+name,(event,...args)=>{authorize(event);return (async()=>{try{return await run(...args)}catch(error){if(/^(?:E[A-Z0-9_]+|UNKNOWN)$/.test(error?.code||'')){await safety.log('file-error');await safety.log(error.code)}throw error}})()}); }
 async function start() {
+  saveDiagnostics=require('./save-diagnostics.cjs').create(()=>app.getPath('userData'),{version:app.getVersion(),electron:process.versions?.electron,node:process.versions?.node,platform:process.platform,windowsBuild:require('node:os').release()});
+  files.setDiagnostics(event=>saveDiagnostics.record(event));
   await printer.cleanup().catch(()=>safety.log('print-cleanup-failure'));
   preferences=require('./settings-store.cjs')(app.getPath('userData'));
   recovery=new (require('./recovery.cjs').Recovery)(app.getPath('userData'));
@@ -263,6 +267,8 @@ async function start() {
   handle('help',()=>help());
   handle('about',()=>showAbout());
   handle('quit',()=>win.close());
+  // Authorized top-frame action, with no renderer-supplied clipboard text.
+  handle('copy-save-diagnostics',async()=>{await saveDiagnostics.flush();clipboard.writeText(saveDiagnostics.text());return true;});
   handle('locale',async()=>({...languageInfo,capture:!!captureOptions}));
   handle('capture-locale',async language=>{
     if(!captureOptions||!captureOptions.locales.includes(language))throw Error('Capture locale unavailable');

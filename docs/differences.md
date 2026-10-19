@@ -433,3 +433,17 @@ Guided feature tips defer while editor modal dialogs or AI panels are open, pres
 The desktop print path uses a hidden, file-backed PDF viewer with an explicit document-ready check before the operating system's print dialog. This preserves vector text and shapes without a full-page raster conversion. Cancellation, timeouts and helper failures remove temporary document files and leave the editor open. Linux native Print to File output is checked for complete selectable text, page geometry and matching rendered pixels on Office output, a 300-page report and rotated pages. Native macOS, Windows and physical-printer checks remain pending; this correction is not a release acceptance claim.
 
 Converter hardening candidate: product XML readers and canonicalization disable external entity and network loading; SVG images accept embedded PNG/JPEG and references stay within the same SVG. Archive decompression has count, size and ratio budgets with fatal CRC errors, while optional remote EPUB manifest entries are skipped. Native synthetic controls pass, including local text-path objects, empty-spine rejection and cleanup of CRC-failed output. Extended local drive roots normalize while UNC/device namespaces fail closed; native Windows long-path I/O remains unqualified. Final full/PDF WebAssembly and corpus gates are pending. See [converter validation](wasm.md#converter-hardening-validation).
+
+### Quick Access icon contrast
+
+Header buttons give monochrome Fluent icon paths the theme header color, including Classic Light and dark themes. Ribbon and colored icons keep their own color roles. Disabled controls remain disabled and visually distinct. [Behavior and checks](quick-access-contrast.md).
+
+### Stable document-page shadows
+
+Word page shadows retain their translucent CSS color through theme changes and draw against a fresh canvas background. Repeated document repaints no longer accumulate a darker margin. Themes without a shadow keep their existing appearance; document layout and exported output are unchanged. [Behavior and regression](page-shadows.md).
+
+### Native print choice feedback
+
+The desktop hides its floating status panel while the system print dialog owns the choice, preserving the accessible announcement and restoring submission, cancellation or error feedback. Other file-choice feedback is unchanged. [Behavior](desktop.md#native-print-choice-feedback).
+
+Desktop Windows saves retry scanner-held original/backup operations within one budget; verified replacement succeeds even if backup cleanup must wait. Local allowlisted diagnostics can be copied explicitly, and 45 locales explain how to preserve edits with Save As under a new name. See [Windows file access](windows-file-access.md).

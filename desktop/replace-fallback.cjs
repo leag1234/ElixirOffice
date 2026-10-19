@@ -4,7 +4,7 @@ const fs=require('node:fs/promises'),crypto=require('node:crypto'),path=require(
 const chunkBytes=1024*1024,limit=512*1024*1024;
 const failed=message=>Object.assign(Error(message),{code:'EIO'});
 const same=(stat,selected)=>stat.isFile()&&!stat.isSymbolicLink()&&stat.ino===selected.inode&&stat.dev===selected.device;
-async function named(filename,selected,single=false){
+async function checkedName(filename,selected,single=false){
  const stat=await fs.lstat(filename);
  if(!same(stat,selected)||single&&stat.nlink!==1)throw Error('Destination changed before or during fallback');
  return stat;
@@ -37,8 +37,19 @@ async function verify(handle,size,hash){
 }
 // Last resort for a refused Windows rename. The durable backup is the recovery
 // guarantee; this path cannot provide atomicity across a crash or failed rollback.
-module.exports=async function replaceInPlace({target,temporary,bytes,original,backup,retained,outputHash,options={}}){
- let handle,source,modified=false;let originalSize;
+module.exports=async function replaceInPlace({target,temporary,bytes,original,backup,retained,outputHash,options={},run=(_step,work)=>work()}){
+ let handle,source,modified=false,restoring=false;let originalSize;
+ const attempt=(step,work)=>run('fallback-'+step,work,restoring);
+ const named=(...args)=>attempt('stat',()=>checkedName(...args));
+ const open=async(...args)=>{
+  const h=await attempt('open',()=>fs.open(...args));
+  // Reads/writes below always use explicit positions; retrying them, truncate,
+  // stat and sync is idempotent. Never use this adapter for offset-based writeFile.
+  return new Proxy(h,{get(target,key){
+   const value=Reflect.get(target,key,target);
+   return typeof value==='function'?(...values)=>attempt(String(key),()=>value.apply(target,values)):value;
+  }});
+ };
  const targetState=async()=>{
   await named(target,original,true);
   const stat=await handle.stat();
@@ -55,11 +66,11 @@ module.exports=async function replaceInPlace({target,temporary,bytes,original,ba
  try{
   retryWindow.check(options);
   await named(target,original,true);await named(backup,retained);
-  source=await fs.open(backup,constants.O_RDONLY|(process.platform==='win32'?0:(constants.O_NOFOLLOW||0)));
+  source=await open(backup,constants.O_RDONLY|(process.platform==='win32'?0:(constants.O_NOFOLLOW||0)));
   originalSize=await backupState();
-  const staging=await fs.open(temporary,constants.O_RDONLY|(process.platform==='win32'?0:(constants.O_NOFOLLOW||0)));
+  const staging=await open(temporary,constants.O_RDONLY|(process.platform==='win32'?0:(constants.O_NOFOLLOW||0)));
   try{await verify(staging,bytes.length,outputHash)}finally{await staging.close()}
-  handle=await fs.open(target,'r+');
+  handle=await open(target,'r+');
   const selected=await handle.stat();
   if(!same(selected,original)||selected.nlink!==1)throw Error('Destination changed before fallback');
   await named(target,original,true);await verify(handle,originalSize,original.hash);await writeState();
@@ -70,6 +81,7 @@ module.exports=async function replaceInPlace({target,temporary,bytes,original,ba
    await named(target,original,true);await verify(handle,bytes.length,outputHash);await named(target,original,true);
    await backupState();
   }catch(error){
+   restoring=true;
    error.rollbackVerified=false;error.rollbackUncertain=false;error.originalBackup=backup;
    try{
     const size=await backupState(),buffer=Buffer.alloc(Math.min(chunkBytes,Math.max(1,size)));let position=0;

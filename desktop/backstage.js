@@ -96,7 +96,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
  function showOperation(event){
   pendingOperation=event;const target=fm.$el?.find('.panel-context')[0];if(!target)return;
   if(!operationFeedback){
-   operationFeedback=parent.EOOperationFeedback.mount(win.document,target,info.strings,{open:id=>parent.dispatchEvent(new parent.CustomEvent('eo:saved-open',{detail:id})),show:id=>parent.eoDesktop.savedShow(id)});
+   operationFeedback=parent.EOOperationFeedback.mount(win.document,target,info.strings,{diagnostics:()=>parent.eoDesktop.copySaveDiagnostics(),open:id=>parent.dispatchEvent(new parent.CustomEvent('eo:saved-open',{detail:id})),show:id=>parent.eoDesktop.savedShow(id)});
    operationFeedback.reset(event.scope);
    if(event.phase!=='preparing')operationFeedback.update({id:event.id,scope:event.scope,kind:event.kind,phase:'preparing'});
    operationFeedback.element.classList.add('eo-operation-backstage');

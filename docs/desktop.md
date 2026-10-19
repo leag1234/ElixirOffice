@@ -567,3 +567,11 @@ On Linux and macOS, private print directories and PDFs use modes 0700 and 0600. 
 The normal helper remains hidden. For supervised diagnosis only, setting EO_PRINT_OFFSCREEN_RETRY=1 before launch enables one retry with an off-screen, minimized helper after a definite failure. It is disabled by default. Cancellation, an uncertain native callback timeout, cleanup failure or a renderer crash after submission never retries, avoiding duplicate or unwanted jobs. This contingency still requires native qualification on the affected platform.
 
 CI must run npm run test:print-viewer from desktop with an explicit private EO_PRINT_CONTRACT_OUT and an owned display. It launches the pinned Electron and reads the actual PDF viewer; it never uses mocked readiness or accepts the compatibility fallback. A changed field contract fails with a specific error and last-state evidence.
+
+### Native print choice feedback
+
+While the system print dialog owns a print choice, the desktop floating operation panel stays hidden. Its separate polite live region remains available to assistive technology. Preparation progress remains visible before this phase; submission, cancellation and errors restore their normal feedback afterward. Other Save As, PDF export and Open choices retain their existing feedback. This does not change print submission or claim that a physical page has printed.
+
+### PDF export progress
+
+Large document exports display conversion stages and real page counts, then keep Open file and Show in folder actions after the native save completes. A generated public 300-page DOCX regression checks intermediate visible counts, all saved page labels and the unchanged source file using the packaged Linux application. [Regression](../tests/pdf-export/README.md).

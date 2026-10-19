@@ -4,7 +4,7 @@
  else window.EOOperationFeedback=factory();
 })(function(){
  'use strict';
- const fallback={opOpening:'Opening {name}…',opOpened:'Opened: {name}',opDecrypting:'Decrypting {name}…',opEncrypting:'Encrypting {name}…',opPreparing:'Preparing…',opRuntime:'Loading conversion engine…',opInitializing:'Initializing…',opConverting:'Converting…',opAwaiting:'Waiting for your choice…',opWriting:'Saving…',opReady:'File ready: {name}',opCancelled:'Cancelled',opFailed:'Could not finish: {reason}',opWarning:'Saved, but disk durability could not be confirmed. Keep the backup and save again before closing.',opDownload:'Download started: {name}',opPrint:'Sent to the print system',opUnconfirmed:'Operation finished; file completion is unconfirmed.',opPages:'Preparing pages: {completed} of {total}',opShow:'Show in folder',opOpen:'Open file',opDismiss:'Dismiss'};
+ const fallback={opOpening:'Opening {name}…',opOpened:'Opened: {name}',opDecrypting:'Decrypting {name}…',opEncrypting:'Encrypting {name}…',opPreparing:'Preparing…',opRuntime:'Loading conversion engine…',opInitializing:'Initializing…',opConverting:'Converting…',opAwaiting:'Waiting for your choice…',opWriting:'Saving…',opReady:'File ready: {name}',opCancelled:'Cancelled',opFailed:'Could not finish: {reason}',opWarning:'Saved, but disk durability could not be confirmed. Keep the backup and save again before closing.',opDownload:'Download started: {name}',opPrint:'Sent to the print system',opUnconfirmed:'Operation finished; file completion is unconfirmed.',opPages:'Preparing pages: {completed} of {total}',opShow:'Show in folder',opOpen:'Open file',opCopyDiagnostics:'Copy diagnostics',opDismiss:'Dismiss'};
  const terminal=new Set(['ready','warning','complete','error','cancelled']);
  function isolate(value){return '\u2068'+String(value??'').replace(/[\u202a-\u202e\u2066-\u2069]/g,'')+'\u2069';}
  function label(event,strings={}){
@@ -27,6 +27,8 @@
    view.requestAnimationFrame(()=>view.requestAnimationFrame(finish));
   });
  }
+ // The system print dialog owns the visible choice; keep its live announcement.
+ function nativePrintChoice(event){return event?.kind==='print'&&event.phase==='awaiting-user';}
  function canCancel(event){return event.cancellable!==false&&['pdf-export','pdf-save','print'].includes(event.kind)&&['preparing','loading-runtime','initializing','converting'].includes(event.phase);}
  function mount(document,container,strings={},actions={}){
   const text=document.createElement('p'),bar=document.createElement('progress'),links=document.createElement('div'),announcement=document.createElement('span'),notice=document.createElement('div');
@@ -62,7 +64,7 @@
   function update(event){
    if(closed||event.scope!==scope)return false;
    if(event.phase==='preparing'){dismissed=false;id=event.id;if(!notice.contains(document.activeElement))previousFocus=document.activeElement;}else if(event.id!==id)return false;
-   latest=event;notice.hidden=obscured||dismissed;const ended=terminal.has(event.phase),message=label(event,strings);
+   latest=event;notice.hidden=obscured||dismissed||nativePrintChoice(event);const ended=terminal.has(event.phase),message=label(event,strings);
    notice.setAttribute('aria-busy',String(!ended));announcement.setAttribute('role',event.phase==='error'?'alert':'status');text.textContent=message;
    // Keep visual progress current; throttle page-count announcements for assistive technology.
    if(ended||event.phase!=='converting'||Date.now()-lastAnnouncement>=1000){announcement.textContent=message;lastAnnouncement=Date.now();}
@@ -77,6 +79,7 @@
     const restore=links.contains(document.activeElement);links.replaceChildren();actionKey=nextKey;
     if(!ended&&actions.cancel&&canCancel(event))button('cancel',()=>actions.cancel(event.id));
     if(ended){
+     if(event.phase==='error'&&['save','save-as','export','pdf-save','pdf-export'].includes(event.kind)&&actions.diagnostics)button('opCopyDiagnostics',()=>actions.diagnostics());
      if(event.phase==='ready'&&event.artifactId){
       if(actions.open)button('opOpen',()=>actions.open(event.artifactId));
       if(actions.show)button('opShow',()=>actions.show(event.artifactId));
@@ -88,7 +91,7 @@
    if(timer===null)schedule();
    return true;
   }
-  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured;if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
+  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured||nativePrintChoice(latest);if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
  }
  return {mount,label,fallback,paint,canCancel,isolate};
 });

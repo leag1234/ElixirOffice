@@ -15,19 +15,20 @@ function pause(milliseconds,options){
 // One shared monotonic budget; check cancellation/deadline before each syscall.
 module.exports=function retryWindow(platform=process.platform,milliseconds=3000,options={}){
  let deadline;
- return async function retry(run){
+ return async function retry(run,cleanup=false){
+  const active=cleanup?{}:options;
   let delay=25,lastError;
   for(;;){
-   check(options);
+   check(active);
    if(lastError&&performance.now()>=deadline){lastError.retryExpired=true;throw lastError;}
    try{return await run()}
    catch(error){
     if(platform!=='win32'||error.replacementCompleted||!transient.has(error.code))throw error;
-    check(options);const now=performance.now();deadline??=now+milliseconds;lastError=error;
-    const remaining=Number.isFinite(options.deadline)?options.deadline-Date.now():Infinity;
+    check(active);const now=performance.now();deadline??=now+milliseconds;lastError=error;
+    const remaining=Number.isFinite(active.deadline)?active.deadline-Date.now():Infinity;
     const wait=Math.min(delay,deadline-now,remaining);
-    if(wait<=0){check(options);error.retryExpired=true;throw error;}
-    await pause(wait,options);delay=Math.min(delay*2,400);
+    if(wait<=0){check(active);error.retryExpired=true;throw error;}
+    await pause(wait,active);delay=Math.min(delay*2,400);
    }
   }
  };

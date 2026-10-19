@@ -23,7 +23,8 @@ async function returnHome(){
 }
 function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
 
-const fail=error=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);};
+const fail=(error,saveError=false)=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);if(!saveError)return;
+ const copy=document.createElement('button');copy.type='button';copy.textContent=info?.strings.opCopyDiagnostics||'Copy diagnostics';copy.addEventListener('click',()=>eoDesktop.copySaveDiagnostics().catch(()=>{}));$('message').append(' ',copy);};
 function buttons(busy) {
   operationBusy=busy;
   for(const button of $('home').querySelectorAll('button'))button.disabled=busy;
@@ -68,7 +69,7 @@ async function open(selected) {
   const cancelPreparation=()=>{preparedWorker?.terminate();preparedWorker=null};
   abort.signal.addEventListener('abort',cancelPreparation,{once:true});
   try {
-    pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();file=selected;feedback?.dispose();lastOperation=null;feedback=EOOperationFeedback.mount(document,document.body,info.strings,{open:id=>run(()=>eoDesktop.savedOpen(id)),show:id=>eoDesktop.savedShow(id),error:operationEvent,cancel:id=>{if(lastOperation?.id===id&&EOOperationFeedback.canCancel(lastOperation))abort?.abort();}});feedback.reset(file.token);
+    pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();file=selected;feedback?.dispose();lastOperation=null;feedback=EOOperationFeedback.mount(document,document.body,info.strings,{diagnostics:()=>eoDesktop.copySaveDiagnostics(),open:id=>run(()=>eoDesktop.savedOpen(id)),show:id=>eoDesktop.savedShow(id),error:operationEvent,cancel:id=>{if(lastOperation?.id===id&&EOOperationFeedback.canCancel(lastOperation))abort?.abort();}});feedback.reset(file.token);
     const openingTracker=Common.ElixirLocalOperation.create(operationEvent,file.token,'desktop-open');openingOperation=openingTracker.begin('open',{name:file.name});
     await EOOperationFeedback.paint(window);
     const timings={selected:performance.now()};
@@ -162,7 +163,7 @@ async function updateDirty(){if(controller)await eoDesktop.state(file.token,cont
 async function run(select){if(opening||operationBusy)return;window.EOLocalFailure=null;buttons(true);try{await open(await select())}catch(error){fail(error)}finally{buttons(false)}}
 async function save(as=false){
   if(!controller||choosingSaveAs)return false;if(operationBusy){status(lastOperation?EOOperationFeedback.label(lastOperation,info?.strings):t('opPreparing'));return false;}if(as)return chooseExport();window.EOLocalFailure=null;savingAs=as;
-  try{await controller.save();await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error);return false}finally{savingAs=false}
+  try{await controller.save();await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error,true);return false}finally{savingAs=false}
 }
 function setDocumentName(name){
  main.api.documentTitle=name;main.api.DocInfo?.put_Title(name);const doc=main.document||main.appOptions.spreadsheet;if(doc)doc.title=name;main.onDocumentName(name);backstage?.setName();
@@ -197,7 +198,7 @@ async function chooseExport(){
   if(!selected||file!==selectedFile||controller!==selectedController)return false;
   saveAsTicket=selected.ticket;
   return await exportAs(selected.format);
- }catch(error){fail(error);return false}
+ }catch(error){fail(error,true);return false}
  finally{
   saveAsTicket=null;choosingSaveAs=false;
   await eoDesktop.saveAsCancel(selectedFile.token).catch(()=>{});
@@ -208,12 +209,12 @@ async function exportAs(format){
  if(!controller||operationBusy)return false;
  if(format==='pdf'&&(file.format!=='pdf'||!controller.canSave()))return pdf(false,saveAsTicket);
  if(format===file.format){
-  savingAs=true;try{await (controller.saveAs?controller.saveAs():controller.save());await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error);return false}finally{savingAs=false}
+  savingAs=true;try{await (controller.saveAs?controller.saveAs():controller.save());await updateDirty();if(!controller.isModified())await eoDesktop.recoveryClear(file.token);return !controller.isModified()}catch(error){fail(error,true);return false}finally{savingAs=false}
  }
  buttons(true);abort=new AbortController();
  try{
   let saved;await controller.exportCopy(format,async (bytes,protection)=>{saved=await nativeWrite(()=>eoDesktop.export(file.token,bytes,format,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);return outputOutcome(saved)});window.EOLastExport=saved;return true;
- }catch(error){fail(error);return false}finally{buttons(false)}
+ }catch(error){fail(error,true);return false}finally{buttons(false)}
 }
 async function pdf(print=false,ticket){
   if(!controller||operationBusy)return;window.EOLocalFailure=null;buttons(true);abort=new AbortController();
@@ -235,7 +236,7 @@ async function pdf(print=false,ticket){
     operation.phase('awaiting-output');
     const saved=await nativeWrite(()=>eoDesktop.pdf(file.token,result.bytes,print,plainCopy,operation.id,ticket),file.token,operation.id);operation.finish(outputOutcome(saved,print));window.EOLastPdf={...saved,stats:result.stats};return !!saved;
 
-  }catch(error){operation?.fail(error);fail(error)}finally{buttons(false)}
+  }catch(error){operation?.fail(error);fail(error,!print)}finally{buttons(false)}
 }
 async function recoveryCopy(){
  if(!controller||file?.format==='pdf'||opening||operationBusy||choosingSaveAs||recoveryBusy||closeCheck||info.capture||controller.isRecoveryLocked?.()||!controller.isModified())return;

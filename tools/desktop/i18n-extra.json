@@ -53,8 +53,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Your edits remain open. Use Save As with a new name.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Your edits remain open. Use Save As with a new name.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -100,7 +100,9 @@
     "saveRestoreUncertain": "The save failed and restoring the original file could not be confirmed. Keep the backup in the same folder and use Save As for your edits.",
     "printFailed": "Printing failed. Try again or export PDF.",
     "printTimedOut": "Printing timed out. Try again or export PDF.",
-    "printHelperError": "The print helper failed. Try again or export PDF."
+    "printHelperError": "The print helper failed. Try again or export PDF.",
+    "opCopyDiagnostics": "Copy diagnostics",
+    "saveEditsOpen": "Your edits remain open. Use Save As with a new name."
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -156,8 +158,8 @@
     "recoveryFailed": "La récupération automatique n’a pas pu conserver de copie. Enregistrez votre document manuellement.",
     "fatalMessage": "ElixirOffice a rencontré un problème inattendu et doit fermer.",
     "fatalDetail": "Les modifications non enregistrées peuvent être perdues. Rouvrez l’application pour continuer.",
-    "savePermission": "Accès refusé. Choisissez un autre dossier ou utilisez Enregistrer sous.",
-    "saveBusy": "Le fichier est ouvert ailleurs ou ne peut pas être remplacé. Fermez l’autre application ou utilisez Enregistrer sous.",
+    "savePermission": "Accès refusé. Choisissez un autre dossier ou utilisez Enregistrer sous. Vos modifications restent ouvertes. Utilisez Enregistrer sous avec un nouveau nom.",
+    "saveBusy": "Le fichier est ouvert ailleurs ou ne peut pas être remplacé. Fermez l’autre application ou utilisez Enregistrer sous. Vos modifications restent ouvertes. Utilisez Enregistrer sous avec un nouveau nom.",
     "saveSpace": "Le disque est plein. Libérez de l’espace ou choisissez un autre disque.",
     "savePath": "La destination est indisponible ou son chemin est trop long. Choisissez un autre dossier ou nom de fichier.",
     "saveDifferent": "Choisissez une autre destination pour la copie PDF. L’original n’a pas été modifié.",
@@ -203,7 +205,9 @@
     "saveRestoreUncertain": "L’enregistrement a échoué et la restauration du fichier d’origine n’a pas pu être confirmée. Conservez la copie de sauvegarde dans le même dossier et utilisez Enregistrer sous pour vos modifications.",
     "printFailed": "L’impression a échoué. Réessayez ou exportez en PDF.",
     "printTimedOut": "Le délai d’impression est dépassé. Réessayez ou exportez en PDF.",
-    "printHelperError": "Le module d’impression a échoué. Réessayez ou exportez en PDF."
+    "printHelperError": "Le module d’impression a échoué. Réessayez ou exportez en PDF.",
+    "opCopyDiagnostics": "Copier les diagnostics",
+    "saveEditsOpen": "Vos modifications restent ouvertes. Utilisez Enregistrer sous avec un nouveau nom."
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -259,8 +263,8 @@
     "recoveryFailed": "AutoWiederherstellen konnte keine Kopie behalten. Speichern Sie Ihr Dokument manuell.",
     "fatalMessage": "ElixirOffice hat ein unerwartetes Problem festgestellt und muss geschlossen werden.",
     "fatalDetail": "Nicht gespeicherte Änderungen können verloren gehen. Öffnen Sie die App erneut.",
-    "savePermission": "Zugriff verweigert. Wählen Sie einen anderen Ordner oder Speichern unter.",
-    "saveBusy": "Die Datei ist anderweitig geöffnet oder kann nicht ersetzt werden. Schließen Sie die andere App oder verwenden Sie Speichern unter.",
+    "savePermission": "Zugriff verweigert. Wählen Sie einen anderen Ordner oder Speichern unter. Ihre Änderungen bleiben geöffnet. Verwenden Sie Speichern unter mit einem neuen Namen.",
+    "saveBusy": "Die Datei ist anderweitig geöffnet oder kann nicht ersetzt werden. Schließen Sie die andere App oder verwenden Sie Speichern unter. Ihre Änderungen bleiben geöffnet. Verwenden Sie Speichern unter mit einem neuen Namen.",
     "saveSpace": "Der Datenträger ist voll. Geben Sie Speicher frei oder wählen Sie einen anderen Datenträger.",
     "savePath": "Das Ziel ist nicht verfügbar oder der Pfad zu lang. Wählen Sie einen anderen Ordner oder Dateinamen.",
     "saveDifferent": "Wählen Sie ein anderes Ziel für die PDF-Kopie. Das Original wurde nicht geändert.",
@@ -306,7 +310,9 @@
     "saveRestoreUncertain": "Das Speichern ist fehlgeschlagen. Die Wiederherstellung der Originaldatei konnte nicht bestätigt werden. Behalten Sie die Sicherung im selben Ordner und verwenden Sie Speichern unter für Ihre Änderungen.",
     "printFailed": "Drucken fehlgeschlagen. Versuchen Sie es erneut oder exportieren Sie als PDF.",
     "printTimedOut": "Zeitüberschreitung beim Drucken. Versuchen Sie es erneut oder exportieren Sie als PDF.",
-    "printHelperError": "Das Druckmodul ist fehlgeschlagen. Versuchen Sie es erneut oder exportieren Sie als PDF."
+    "printHelperError": "Das Druckmodul ist fehlgeschlagen. Versuchen Sie es erneut oder exportieren Sie als PDF.",
+    "opCopyDiagnostics": "Diagnose kopieren",
+    "saveEditsOpen": "Ihre Änderungen bleiben geöffnet. Verwenden Sie Speichern unter mit einem neuen Namen."
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -362,8 +368,8 @@
     "recoveryFailed": "La recuperación automática no pudo conservar una copia. Guarde el documento manualmente.",
     "fatalMessage": "ElixirOffice encontró un problema inesperado y debe cerrarse.",
     "fatalDetail": "Se pueden perder los cambios sin guardar. Abra la aplicación de nuevo para continuar.",
-    "savePermission": "Acceso denegado. Elija otra carpeta o use Guardar como.",
-    "saveBusy": "El archivo está abierto en otra aplicación o no se puede reemplazar. Cierre esa aplicación o use Guardar como.",
+    "savePermission": "Acceso denegado. Elija otra carpeta o use Guardar como. Sus cambios siguen abiertos. Use Guardar como con un nombre nuevo.",
+    "saveBusy": "El archivo está abierto en otra aplicación o no se puede reemplazar. Cierre esa aplicación o use Guardar como. Sus cambios siguen abiertos. Use Guardar como con un nombre nuevo.",
     "saveSpace": "El disco está lleno. Libere espacio o elija otro disco.",
     "savePath": "El destino no está disponible o la ruta es demasiado larga. Elija otra carpeta o nombre.",
     "saveDifferent": "Elija otro destino para la copia PDF. El original no se modificó.",
@@ -409,7 +415,9 @@
     "saveRestoreUncertain": "No se pudo guardar ni confirmar la restauración del archivo original. Conserve la copia de seguridad en la misma carpeta y use Guardar como para sus cambios.",
     "printFailed": "Error de impresión. Inténtelo de nuevo o exporte a PDF.",
     "printTimedOut": "Se agotó el tiempo de impresión. Inténtelo de nuevo o exporte a PDF.",
-    "printHelperError": "El módulo de impresión falló. Inténtelo de nuevo o exporte a PDF."
+    "printHelperError": "El módulo de impresión falló. Inténtelo de nuevo o exporte a PDF.",
+    "opCopyDiagnostics": "Copiar diagnóstico",
+    "saveEditsOpen": "Sus cambios siguen abiertos. Use Guardar como con un nombre nuevo."
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -465,8 +473,8 @@
     "recoveryFailed": "Il ripristino automatico non ha potuto conservare una copia. Salva il documento manualmente.",
     "fatalMessage": "ElixirOffice ha riscontrato un problema imprevisto e deve chiudersi.",
     "fatalDetail": "Le modifiche non salvate potrebbero andare perse. Riapri l’app per continuare.",
-    "savePermission": "Accesso negato. Scegli un’altra cartella o usa Salva con nome.",
-    "saveBusy": "Il file è aperto altrove o non può essere sostituito. Chiudi l’altra app o usa Salva con nome.",
+    "savePermission": "Accesso negato. Scegli un’altra cartella o usa Salva con nome. Le modifiche restano aperte. Usa Salva con nome con un nuovo nome.",
+    "saveBusy": "Il file è aperto altrove o non può essere sostituito. Chiudi l’altra app o usa Salva con nome. Le modifiche restano aperte. Usa Salva con nome con un nuovo nome.",
     "saveSpace": "Il disco è pieno. Libera spazio o scegli un altro disco.",
     "savePath": "La destinazione non è disponibile o il percorso è troppo lungo. Scegli un’altra cartella o nome.",
     "saveDifferent": "Scegli un’altra destinazione per la copia PDF. L’originale non è stato modificato.",
@@ -512,7 +520,9 @@
     "saveRestoreUncertain": "Il salvataggio non è riuscito e non è stato possibile confermare il ripristino del file originale. Conservare la copia di backup nella stessa cartella e usare Salva con nome per le modifiche.",
     "printFailed": "Stampa non riuscita. Riprova o esporta in PDF.",
     "printTimedOut": "Tempo di stampa scaduto. Riprova o esporta in PDF.",
-    "printHelperError": "Il modulo di stampa non ha funzionato. Riprova o esporta in PDF."
+    "printHelperError": "Il modulo di stampa non ha funzionato. Riprova o esporta in PDF.",
+    "opCopyDiagnostics": "Copia diagnostica",
+    "saveEditsOpen": "Le modifiche restano aperte. Usa Salva con nome con un nuovo nome."
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -568,8 +578,8 @@
     "recoveryFailed": "A recuperação automática não conseguiu manter uma cópia. Salve o documento manualmente.",
     "fatalMessage": "O ElixirOffice encontrou um problema inesperado e precisa fechar.",
     "fatalDetail": "Alterações não salvas podem ser perdidas. Abra o aplicativo novamente para continuar.",
-    "savePermission": "Acesso negado. Escolha outra pasta ou use Salvar como.",
-    "saveBusy": "O arquivo está aberto em outro aplicativo ou não pode ser substituído. Feche esse aplicativo ou use Salvar como.",
+    "savePermission": "Acesso negado. Escolha outra pasta ou use Salvar como. Suas alterações continuam abertas. Use Salvar como com um novo nome.",
+    "saveBusy": "O arquivo está aberto em outro aplicativo ou não pode ser substituído. Feche esse aplicativo ou use Salvar como. Suas alterações continuam abertas. Use Salvar como com um novo nome.",
     "saveSpace": "O disco está cheio. Libere espaço ou escolha outro disco.",
     "savePath": "O destino está indisponível ou o caminho é longo demais. Escolha outra pasta ou nome.",
     "saveDifferent": "Escolha outro destino para a cópia PDF. O original não foi alterado.",
@@ -615,7 +625,9 @@
     "saveRestoreUncertain": "Não foi possível salvar nem confirmar a restauração do arquivo original. Mantenha a cópia de segurança na mesma pasta e use Salvar como para suas alterações.",
     "printFailed": "Falha na impressão. Tente novamente ou exporte para PDF.",
     "printTimedOut": "O tempo de impressão esgotou. Tente novamente ou exporte para PDF.",
-    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF."
+    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF.",
+    "opCopyDiagnostics": "Copiar diagnóstico",
+    "saveEditsOpen": "Suas alterações continuam abertas. Use Salvar como com um novo nome."
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -671,8 +683,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. As suas alterações continuam abertas. Use Guardar como com um novo nome.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. As suas alterações continuam abertas. Use Guardar como com um novo nome.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -718,7 +730,9 @@
     "saveRestoreUncertain": "Não foi possível guardar nem confirmar o restauro do ficheiro original. Mantenha a cópia de segurança na mesma pasta e utilize Guardar como para as suas alterações.",
     "printFailed": "A impressão falhou. Tente novamente ou exporte para PDF.",
     "printTimedOut": "O tempo de impressão esgotou. Tente novamente ou exporte para PDF.",
-    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF."
+    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF.",
+    "opCopyDiagnostics": "Copiar diagnóstico",
+    "saveEditsOpen": "As suas alterações continuam abertas. Use Guardar como com um novo nome."
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -774,8 +788,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Uw wijzigingen blijven geopend. Gebruik Opslaan als met een nieuwe naam.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Uw wijzigingen blijven geopend. Gebruik Opslaan als met een nieuwe naam.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -821,7 +835,9 @@
     "saveRestoreUncertain": "Opslaan is mislukt en het herstel van het oorspronkelijke bestand kon niet worden bevestigd. Bewaar de reservekopie in dezelfde map en gebruik Opslaan als voor uw wijzigingen.",
     "printFailed": "Afdrukken mislukt. Probeer het opnieuw of exporteer naar PDF.",
     "printTimedOut": "Time-out bij afdrukken. Probeer het opnieuw of exporteer naar PDF.",
-    "printHelperError": "De afdrukmodule is mislukt. Probeer het opnieuw of exporteer naar PDF."
+    "printHelperError": "De afdrukmodule is mislukt. Probeer het opnieuw of exporteer naar PDF.",
+    "opCopyDiagnostics": "Diagnostiek kopiëren",
+    "saveEditsOpen": "Uw wijzigingen blijven geopend. Gebruik Opslaan als met een nieuwe naam."
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -877,8 +893,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Zmiany pozostają otwarte. Użyj Zapisz jako z nową nazwą.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Zmiany pozostają otwarte. Użyj Zapisz jako z nową nazwą.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -924,7 +940,9 @@
     "saveRestoreUncertain": "Zapis nie powiódł się i nie udało się potwierdzić przywrócenia oryginalnego pliku. Zachowaj kopię zapasową w tym samym folderze i użyj Zapisz jako, aby zachować zmiany.",
     "printFailed": "Drukowanie nie powiodło się. Spróbuj ponownie lub wyeksportuj do PDF.",
     "printTimedOut": "Przekroczono czas drukowania. Spróbuj ponownie lub wyeksportuj do PDF.",
-    "printHelperError": "Moduł drukowania zawiódł. Spróbuj ponownie lub wyeksportuj do PDF."
+    "printHelperError": "Moduł drukowania zawiódł. Spróbuj ponownie lub wyeksportuj do PDF.",
+    "opCopyDiagnostics": "Kopiuj diagnostykę",
+    "saveEditsOpen": "Zmiany pozostają otwarte. Użyj Zapisz jako z nową nazwą."
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -980,8 +998,8 @@
     "recoveryFailed": "Автовосстановление не смогло сохранить копию. Сохраните документ вручную.",
     "fatalMessage": "ElixirOffice столкнулся с неожиданной проблемой и должен закрыться.",
     "fatalDetail": "Несохранённые изменения могут быть потеряны. Откройте приложение снова.",
-    "savePermission": "Доступ запрещён. Выберите другую папку или используйте «Сохранить как».",
-    "saveBusy": "Файл открыт в другом приложении или не может быть заменён. Закройте другое приложение или используйте «Сохранить как».",
+    "savePermission": "Доступ запрещён. Выберите другую папку или используйте «Сохранить как». Ваши изменения остаются открытыми. Используйте «Сохранить как» с новым именем.",
+    "saveBusy": "Файл открыт в другом приложении или не может быть заменён. Закройте другое приложение или используйте «Сохранить как». Ваши изменения остаются открытыми. Используйте «Сохранить как» с новым именем.",
     "saveSpace": "Диск заполнен. Освободите место или выберите другой диск.",
     "savePath": "Папка недоступна или путь слишком длинный. Выберите другую папку или имя.",
     "saveDifferent": "Выберите другое место для копии PDF. Оригинал не изменён.",
@@ -1027,7 +1045,9 @@
     "saveRestoreUncertain": "Не удалось сохранить файл и подтвердить восстановление оригинала. Оставьте резервную копию в той же папке и используйте «Сохранить как» для своих изменений.",
     "printFailed": "Не удалось выполнить печать. Повторите попытку или экспортируйте в PDF.",
     "printTimedOut": "Время ожидания печати истекло. Повторите попытку или экспортируйте в PDF.",
-    "printHelperError": "Сбой модуля печати. Повторите попытку или экспортируйте в PDF."
+    "printHelperError": "Сбой модуля печати. Повторите попытку или экспортируйте в PDF.",
+    "opCopyDiagnostics": "Копировать диагностику",
+    "saveEditsOpen": "Ваши изменения остаются открытыми. Используйте «Сохранить как» с новым именем."
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1083,8 +1103,8 @@
     "recoveryFailed": "自動回復のコピーを保持できませんでした。文書を手動で保存してください。",
     "fatalMessage": "ElixirOfficeで予期しない問題が発生したため終了する必要があります。",
     "fatalDetail": "未保存の変更は失われる可能性があります。アプリを再度開いて続行してください。",
-    "savePermission": "アクセスが拒否されました。別のフォルダーを選ぶか、名前を付けて保存してください。",
-    "saveBusy": "ファイルが他のアプリで開かれているか置換できません。そのアプリを閉じるか、名前を付けて保存してください。",
+    "savePermission": "アクセスが拒否されました。別のフォルダーを選ぶか、名前を付けて保存してください。 編集内容は開いたままです。「名前を付けて保存」で新しい名前を指定してください。",
+    "saveBusy": "ファイルが他のアプリで開かれているか置換できません。そのアプリを閉じるか、名前を付けて保存してください。 編集内容は開いたままです。「名前を付けて保存」で新しい名前を指定してください。",
     "saveSpace": "ディスクがいっぱいです。空き容量を増やすか別のディスクを選んでください。",
     "savePath": "保存先が利用できないかパスが長すぎます。別のフォルダーや名前を選んでください。",
     "saveDifferent": "PDFコピーには別の保存先を選んでください。元のファイルは変更されていません。",
@@ -1130,7 +1150,9 @@
     "saveRestoreUncertain": "保存に失敗し、元のファイルの復元を確認できませんでした。バックアップを同じフォルダーに残し、編集内容は「名前を付けて保存」で保存してください。",
     "printFailed": "印刷に失敗しました。再試行するかPDFにエクスポートしてください。",
     "printTimedOut": "印刷がタイムアウトしました。再試行するかPDFにエクスポートしてください。",
-    "printHelperError": "印刷モジュールに問題が発生しました。再試行するかPDFにエクスポートしてください。"
+    "printHelperError": "印刷モジュールに問題が発生しました。再試行するかPDFにエクスポートしてください。",
+    "opCopyDiagnostics": "診断情報をコピー",
+    "saveEditsOpen": "編集内容は開いたままです。「名前を付けて保存」で新しい名前を指定してください。"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -1186,8 +1208,8 @@
     "recoveryFailed": "自动恢复无法保留副本。请手动保存文档。",
     "fatalMessage": "ElixirOffice 遇到意外问题，需要关闭。",
     "fatalDetail": "未保存的更改可能丢失。请重新打开应用以继续。",
-    "savePermission": "访问被拒绝。请选择其他文件夹或使用另存为。",
-    "saveBusy": "文件已在其他应用中打开或无法替换。请关闭该应用或使用另存为。",
+    "savePermission": "访问被拒绝。请选择其他文件夹或使用另存为。 您的编辑内容仍保持打开状态。请使用“另存为”并指定新名称。",
+    "saveBusy": "文件已在其他应用中打开或无法替换。请关闭该应用或使用另存为。 您的编辑内容仍保持打开状态。请使用“另存为”并指定新名称。",
     "saveSpace": "磁盘已满。请释放空间或选择其他磁盘。",
     "savePath": "目标不可用或路径过长。请选择其他文件夹或文件名。",
     "saveDifferent": "请为 PDF 副本选择其他保存位置。原文件未被更改。",
@@ -1233,7 +1255,9 @@
     "saveRestoreUncertain": "保存失败，无法确认原始文件是否已恢复。请将备份保留在同一文件夹中，并使用“另存为”保存您的修改。",
     "printFailed": "打印失败。请重试或导出为PDF。",
     "printTimedOut": "打印超时。请重试或导出为PDF。",
-    "printHelperError": "打印模块出错。请重试或导出为PDF。"
+    "printHelperError": "打印模块出错。请重试或导出为PDF。",
+    "opCopyDiagnostics": "复制诊断信息",
+    "saveEditsOpen": "您的编辑内容仍保持打开状态。请使用“另存为”并指定新名称。"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -1292,8 +1316,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. 您的編輯內容仍保持開啟。請使用「另存新檔」並指定新名稱。",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. 您的編輯內容仍保持開啟。請使用「另存新檔」並指定新名稱。",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1339,7 +1363,9 @@
     "saveRestoreUncertain": "儲存失敗，無法確認原始檔案是否已還原。請將備份保留在同一資料夾中，並使用「另存新檔」儲存您的修改。",
     "printFailed": "列印失敗。請重試或匯出為PDF。",
     "printTimedOut": "列印逾時。請重試或匯出為PDF。",
-    "printHelperError": "列印模組發生錯誤。請重試或匯出為PDF。"
+    "printHelperError": "列印模組發生錯誤。請重試或匯出為PDF。",
+    "opCopyDiagnostics": "複製診斷資訊",
+    "saveEditsOpen": "您的編輯內容仍保持開啟。請使用「另存新檔」並指定新名稱。"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -1398,8 +1424,8 @@
     "recoveryFailed": "تعذر الاحتفاظ بنسخة للاسترداد التلقائي. احفظ المستند يدويًا.",
     "fatalMessage": "واجه ElixirOffice مشكلة غير متوقعة ويجب إغلاقه.",
     "fatalDetail": "قد تُفقد التغييرات غير المحفوظة. افتح التطبيق مجددًا للمتابعة.",
-    "savePermission": "رُفض الوصول. اختر مجلدًا آخر أو استخدم حفظ باسم.",
-    "saveBusy": "الملف مفتوح في تطبيق آخر أو لا يمكن استبداله. أغلق التطبيق الآخر أو استخدم حفظ باسم.",
+    "savePermission": "رُفض الوصول. اختر مجلدًا آخر أو استخدم حفظ باسم. تظل تعديلاتك مفتوحة. استخدم «حفظ باسم» مع اسم جديد.",
+    "saveBusy": "الملف مفتوح في تطبيق آخر أو لا يمكن استبداله. أغلق التطبيق الآخر أو استخدم حفظ باسم. تظل تعديلاتك مفتوحة. استخدم «حفظ باسم» مع اسم جديد.",
     "saveSpace": "القرص ممتلئ. أفرغ مساحة أو اختر قرصًا آخر.",
     "savePath": "الوجهة غير متاحة أو المسار طويل جدًا. اختر مجلدًا أو اسمًا آخر.",
     "saveDifferent": "اختر وجهة أخرى لنسخة PDF. لم يتغير الملف الأصلي.",
@@ -1445,7 +1471,9 @@
     "saveRestoreUncertain": "فشل الحفظ وتعذّر تأكيد استعادة الملف الأصلي. احتفظ بالنسخة الاحتياطية في المجلد نفسه واستخدم «حفظ باسم» لحفظ تعديلاتك.",
     "printFailed": "فشلت الطباعة. أعد المحاولة أو صدّر إلى PDF.",
     "printTimedOut": "انتهت مهلة الطباعة. أعد المحاولة أو صدّر إلى PDF.",
-    "printHelperError": "تعطلت وحدة الطباعة. أعد المحاولة أو صدّر إلى PDF."
+    "printHelperError": "تعطلت وحدة الطباعة. أعد المحاولة أو صدّر إلى PDF.",
+    "opCopyDiagnostics": "نسخ معلومات التشخيص",
+    "saveEditsOpen": "تظل تعديلاتك مفتوحة. استخدم «حفظ باسم» مع اسم جديد."
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -1504,8 +1532,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Dəyişiklikləriniz açıq qalır. Yeni adla «Fərqli saxla» əmrindən istifadə edin.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Dəyişiklikləriniz açıq qalır. Yeni adla «Fərqli saxla» əmrindən istifadə edin.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1551,7 +1579,9 @@
     "saveRestoreUncertain": "Saxlama alınmadı və ilkin faylın bərpası təsdiqlənmədi. Ehtiyat nüsxəni eyni qovluqda saxlayın və dəyişiklikləriniz üçün Fərqli saxla əmrindən istifadə edin.",
     "printFailed": "Çap alınmadı. Yenidən cəhd edin və ya PDF olaraq ixrac edin.",
     "printTimedOut": "Çap üçün gözləmə vaxtı bitdi. Yenidən cəhd edin və ya PDF olaraq ixrac edin.",
-    "printHelperError": "Çap modulu işləmədi. Yenidən cəhd edin və ya PDF olaraq ixrac edin."
+    "printHelperError": "Çap modulu işləmədi. Yenidən cəhd edin və ya PDF olaraq ixrac edin.",
+    "opCopyDiagnostics": "Diaqnostikanı kopyala",
+    "saveEditsOpen": "Dəyişiklikləriniz açıq qalır. Yeni adla «Fərqli saxla» əmrindən istifadə edin."
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -1610,8 +1640,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Вашы змены застаюцца адкрытымі. Скарыстайцеся «Захаваць як» з новай назвай.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Вашы змены застаюцца адкрытымі. Скарыстайцеся «Захаваць як» з новай назвай.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1657,7 +1687,9 @@
     "saveRestoreUncertain": "Не ўдалося захаваць файл і пацвердзіць аднаўленне арыгінала. Пакіньце рэзервовую копію ў той жа папцы і скарыстайцеся камандай «Захаваць як» для сваіх змен.",
     "printFailed": "Не ўдалося надрукаваць. Паўтарыце спробу або экспартуйце ў PDF.",
     "printTimedOut": "Час чакання друку скончыўся. Паўтарыце спробу або экспартуйце ў PDF.",
-    "printHelperError": "Збой модуля друку. Паўтарыце спробу або экспартуйце ў PDF."
+    "printHelperError": "Збой модуля друку. Паўтарыце спробу або экспартуйце ў PDF.",
+    "opCopyDiagnostics": "Капіяваць дыягностыку",
+    "saveEditsOpen": "Вашы змены застаюцца адкрытымі. Скарыстайцеся «Захаваць як» з новай назвай."
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -1719,8 +1751,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Промените ви остават отворени. Използвайте „Запиши като“ с ново име.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Промените ви остават отворени. Използвайте „Запиши като“ с ново име.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1766,7 +1798,9 @@
     "saveRestoreUncertain": "Записването е неуспешно и възстановяването на оригиналния файл не можа да бъде потвърдено. Запазете резервното копие в същата папка и използвайте „Запиши като“ за промените си.",
     "printFailed": "Печатът е неуспешен. Опитайте отново или експортирайте в PDF.",
     "printTimedOut": "Времето за печат изтече. Опитайте отново или експортирайте в PDF.",
-    "printHelperError": "Модулът за печат се повреди. Опитайте отново или експортирайте в PDF."
+    "printHelperError": "Модулът за печат се повреди. Опитайте отново или експортирайте в PDF.",
+    "opCopyDiagnostics": "Копиране на диагностиката",
+    "saveEditsOpen": "Промените ви остават отворени. Използвайте „Запиши като“ с ново име."
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -1825,8 +1859,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Els canvis continuen oberts. Feu servir Anomena i desa amb un nom nou.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Els canvis continuen oberts. Feu servir Anomena i desa amb un nom nou.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1872,7 +1906,9 @@
     "saveRestoreUncertain": "No s’ha pogut desar ni confirmar la restauració del fitxer original. Conserveu la còpia de seguretat a la mateixa carpeta i utilitzeu Anomena i desa per als canvis.",
     "printFailed": "La impressió ha fallat. Torneu-ho a provar o exporteu a PDF.",
     "printTimedOut": "S’ha esgotat el temps d’impressió. Torneu-ho a provar o exporteu a PDF.",
-    "printHelperError": "El mòdul d’impressió ha fallat. Torneu-ho a provar o exporteu a PDF."
+    "printHelperError": "El mòdul d’impressió ha fallat. Torneu-ho a provar o exporteu a PDF.",
+    "opCopyDiagnostics": "Copia el diagnòstic",
+    "saveEditsOpen": "Els canvis continuen oberts. Feu servir Anomena i desa amb un nom nou."
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -1931,8 +1967,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Vaše změny zůstávají otevřené. Použijte Uložit jako s novým názvem.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Vaše změny zůstávají otevřené. Použijte Uložit jako s novým názvem.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -1978,7 +2014,9 @@
     "saveRestoreUncertain": "Uložení se nezdařilo a obnovení původního souboru se nepodařilo potvrdit. Ponechte zálohu ve stejné složce a změny uložte pomocí Uložit jako.",
     "printFailed": "Tisk se nezdařil. Zkuste to znovu nebo exportujte do PDF.",
     "printTimedOut": "Vypršel časový limit tisku. Zkuste to znovu nebo exportujte do PDF.",
-    "printHelperError": "Modul tisku selhal. Zkuste to znovu nebo exportujte do PDF."
+    "printHelperError": "Modul tisku selhal. Zkuste to znovu nebo exportujte do PDF.",
+    "opCopyDiagnostics": "Kopírovat diagnostiku",
+    "saveEditsOpen": "Vaše změny zůstávají otevřené. Použijte Uložit jako s novým názvem."
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -2037,8 +2075,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Dine ændringer forbliver åbne. Brug Gem som med et nyt navn.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Dine ændringer forbliver åbne. Brug Gem som med et nyt navn.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2084,7 +2122,9 @@
     "saveRestoreUncertain": "Det lykkedes ikke at gemme, og gendannelse af den oprindelige fil kunne ikke bekræftes. Behold sikkerhedskopien i samme mappe, og brug Gem som til dine ændringer.",
     "printFailed": "Udskrivning mislykkedes. Prøv igen, eller eksportér til PDF.",
     "printTimedOut": "Udskrivning fik timeout. Prøv igen, eller eksportér til PDF.",
-    "printHelperError": "Udskrivningsmodulet fejlede. Prøv igen, eller eksportér til PDF."
+    "printHelperError": "Udskrivningsmodulet fejlede. Prøv igen, eller eksportér til PDF.",
+    "opCopyDiagnostics": "Kopiér diagnosticering",
+    "saveEditsOpen": "Dine ændringer forbliver åbne. Brug Gem som med et nyt navn."
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -2143,8 +2183,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Οι αλλαγές σας παραμένουν ανοιχτές. Χρησιμοποιήστε Αποθήκευση ως με νέο όνομα.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Οι αλλαγές σας παραμένουν ανοιχτές. Χρησιμοποιήστε Αποθήκευση ως με νέο όνομα.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2190,7 +2230,9 @@
     "saveRestoreUncertain": "Η αποθήκευση απέτυχε και δεν ήταν δυνατή η επιβεβαίωση της επαναφοράς του αρχικού αρχείου. Κρατήστε το αντίγραφο ασφαλείας στον ίδιο φάκελο και χρησιμοποιήστε Αποθήκευση ως για τις αλλαγές σας.",
     "printFailed": "Η εκτύπωση απέτυχε. Δοκιμάστε ξανά ή εξαγάγετε σε PDF.",
     "printTimedOut": "Έληξε το χρονικό όριο εκτύπωσης. Δοκιμάστε ξανά ή εξαγάγετε σε PDF.",
-    "printHelperError": "Η μονάδα εκτύπωσης απέτυχε. Δοκιμάστε ξανά ή εξαγάγετε σε PDF."
+    "printHelperError": "Η μονάδα εκτύπωσης απέτυχε. Δοκιμάστε ξανά ή εξαγάγετε σε PDF.",
+    "opCopyDiagnostics": "Αντιγραφή διαγνωστικών",
+    "saveEditsOpen": "Οι αλλαγές σας παραμένουν ανοιχτές. Χρησιμοποιήστε Αποθήκευση ως με νέο όνομα."
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -2249,8 +2291,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Aldaketak irekita jarraitzen dute. Erabili Gorde honela izen berri batekin.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Aldaketak irekita jarraitzen dute. Erabili Gorde honela izen berri batekin.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2296,7 +2338,9 @@
     "saveRestoreUncertain": "Ezin izan da gorde, ezta jatorrizko fitxategia leheneratu dela egiaztatu ere. Mantendu babeskopia karpeta berean eta erabili Gorde honela zure aldaketetarako.",
     "printFailed": "Inprimatzeak huts egin du. Saiatu berriro edo esportatu PDFra.",
     "printTimedOut": "Inprimatzeko denbora agortu da. Saiatu berriro edo esportatu PDFra.",
-    "printHelperError": "Inprimatze-moduluak huts egin du. Saiatu berriro edo esportatu PDFra."
+    "printHelperError": "Inprimatze-moduluak huts egin du. Saiatu berriro edo esportatu PDFra.",
+    "opCopyDiagnostics": "Kopiatu diagnostikoa",
+    "saveEditsOpen": "Aldaketak irekita jarraitzen dute. Erabili Gorde honela izen berri batekin."
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -2357,8 +2401,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Muutoksesi pysyvät avoinna. Käytä Tallenna nimellä ja anna uusi nimi.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Muutoksesi pysyvät avoinna. Käytä Tallenna nimellä ja anna uusi nimi.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2404,7 +2448,9 @@
     "saveRestoreUncertain": "Tallennus epäonnistui, eikä alkuperäisen tiedoston palautusta voitu vahvistaa. Säilytä varmuuskopio samassa kansiossa ja tallenna muutoksesi valinnalla Tallenna nimellä.",
     "printFailed": "Tulostus epäonnistui. Yritä uudelleen tai vie PDF-muotoon.",
     "printTimedOut": "Tulostuksen aikakatkaisu. Yritä uudelleen tai vie PDF-muotoon.",
-    "printHelperError": "Tulostusmoduuli epäonnistui. Yritä uudelleen tai vie PDF-muotoon."
+    "printHelperError": "Tulostusmoduuli epäonnistui. Yritä uudelleen tai vie PDF-muotoon.",
+    "opCopyDiagnostics": "Kopioi diagnostiikka",
+    "saveEditsOpen": "Muutoksesi pysyvät avoinna. Käytä Tallenna nimellä ja anna uusi nimi."
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -2463,8 +2509,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Os cambios seguen abertos. Use Gardar como cun nome novo.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Os cambios seguen abertos. Use Gardar como cun nome novo.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2510,7 +2556,9 @@
     "saveRestoreUncertain": "Non se puido gardar nin confirmar a restauración do ficheiro orixinal. Conserve a copia de seguranza no mesmo cartafol e use Gardar como para os cambios.",
     "printFailed": "Fallou a impresión. Ténteo de novo ou exporte a PDF.",
     "printTimedOut": "Esgotouse o tempo de impresión. Ténteo de novo ou exporte a PDF.",
-    "printHelperError": "Fallou o módulo de impresión. Ténteo de novo ou exporte a PDF."
+    "printHelperError": "Fallou o módulo de impresión. Ténteo de novo ou exporte a PDF.",
+    "opCopyDiagnostics": "Copiar diagnóstico",
+    "saveEditsOpen": "Os cambios seguen abertos. Use Gardar como cun nome novo."
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -2569,8 +2617,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. השינויים שלך נשארים פתוחים. יש להשתמש בשמירה בשם עם שם חדש.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. השינויים שלך נשארים פתוחים. יש להשתמש בשמירה בשם עם שם חדש.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2616,7 +2664,9 @@
     "saveRestoreUncertain": "השמירה נכשלה ולא ניתן היה לאשר שקובץ המקור שוחזר. יש לשמור את עותק הגיבוי באותה תיקייה ולהשתמש בשמירה בשם עבור השינויים.",
     "printFailed": "ההדפסה נכשלה. נסו שוב או ייצאו ל-PDF.",
     "printTimedOut": "תם הזמן הקצוב להדפסה. נסו שוב או ייצאו ל-PDF.",
-    "printHelperError": "מודול ההדפסה נכשל. נסו שוב או ייצאו ל-PDF."
+    "printHelperError": "מודול ההדפסה נכשל. נסו שוב או ייצאו ל-PDF.",
+    "opCopyDiagnostics": "העתקת פרטי אבחון",
+    "saveEditsOpen": "השינויים שלך נשארים פתוחים. יש להשתמש בשמירה בשם עם שם חדש."
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -2675,8 +2725,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. A módosítások nyitva maradnak. Használja a Mentés másként parancsot új névvel.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. A módosítások nyitva maradnak. Használja a Mentés másként parancsot új névvel.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2722,7 +2772,9 @@
     "saveRestoreUncertain": "A mentés sikertelen, és az eredeti fájl visszaállítása nem volt megerősíthető. Tartsa meg a biztonsági másolatot ugyanabban a mappában, és a módosításokhoz használja a Mentés másként parancsot.",
     "printFailed": "A nyomtatás sikertelen. Próbálja újra, vagy exportálja PDF-be.",
     "printTimedOut": "A nyomtatás túllépte az időkorlátot. Próbálja újra, vagy exportálja PDF-be.",
-    "printHelperError": "A nyomtatási modul meghibásodott. Próbálja újra, vagy exportálja PDF-be."
+    "printHelperError": "A nyomtatási modul meghibásodott. Próbálja újra, vagy exportálja PDF-be.",
+    "opCopyDiagnostics": "Diagnosztika másolása",
+    "saveEditsOpen": "A módosítások nyitva maradnak. Használja a Mentés másként parancsot új névvel."
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -2781,8 +2833,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Ձեր փոփոխությունները մնում են բաց։ Օգտագործեք «Պահպանել որպես» հրամանը նոր անունով։",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Ձեր փոփոխությունները մնում են բաց։ Օգտագործեք «Պահպանել որպես» հրամանը նոր անունով։",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2828,7 +2880,9 @@
     "saveRestoreUncertain": "Պահպանումը չհաջողվեց, և սկզբնական ֆայլի վերականգնումը չհաստատվեց։ Պահեք պահուստային պատճենը նույն թղթապանակում և փոփոխությունների համար օգտագործեք «Պահպանել որպես» հրամանը։",
     "printFailed": "Տպումը ձախողվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։",
     "printTimedOut": "Տպման սպասման ժամանակը սպառվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։",
-    "printHelperError": "Տպման մոդուլը խափանվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։"
+    "printHelperError": "Տպման մոդուլը խափանվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։",
+    "opCopyDiagnostics": "Պատճենել ախտորոշումը",
+    "saveEditsOpen": "Ձեր փոփոխությունները մնում են բաց։ Օգտագործեք «Պահպանել որպես» հրամանը նոր անունով։"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -2887,8 +2941,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Perubahan Anda tetap terbuka. Gunakan Simpan sebagai dengan nama baru.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Perubahan Anda tetap terbuka. Gunakan Simpan sebagai dengan nama baru.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -2934,7 +2988,9 @@
     "saveRestoreUncertain": "Penyimpanan gagal dan pemulihan berkas asli tidak dapat dipastikan. Simpan cadangan di folder yang sama dan gunakan Simpan Sebagai untuk perubahan Anda.",
     "printFailed": "Pencetakan gagal. Coba lagi atau ekspor ke PDF.",
     "printTimedOut": "Waktu pencetakan habis. Coba lagi atau ekspor ke PDF.",
-    "printHelperError": "Modul pencetakan gagal. Coba lagi atau ekspor ke PDF."
+    "printHelperError": "Modul pencetakan gagal. Coba lagi atau ekspor ke PDF.",
+    "opCopyDiagnostics": "Salin diagnostik",
+    "saveEditsOpen": "Perubahan Anda tetap terbuka. Gunakan Simpan sebagai dengan nama baru."
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -2993,8 +3049,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. 편집 내용은 열린 상태로 유지됩니다. 다른 이름으로 저장을 사용하여 새 이름으로 저장하세요.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. 편집 내용은 열린 상태로 유지됩니다. 다른 이름으로 저장을 사용하여 새 이름으로 저장하세요.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3040,7 +3096,9 @@
     "saveRestoreUncertain": "저장에 실패했으며 원본 파일의 복원을 확인할 수 없습니다. 백업을 같은 폴더에 보관하고 편집 내용은 다른 이름으로 저장을 사용하세요.",
     "printFailed": "인쇄에 실패했습니다. 다시 시도하거나 PDF로 내보내세요.",
     "printTimedOut": "인쇄 시간이 초과되었습니다. 다시 시도하거나 PDF로 내보내세요.",
-    "printHelperError": "인쇄 모듈에 오류가 발생했습니다. 다시 시도하거나 PDF로 내보내세요."
+    "printHelperError": "인쇄 모듈에 오류가 발생했습니다. 다시 시도하거나 PDF로 내보내세요.",
+    "opCopyDiagnostics": "진단 정보 복사",
+    "saveEditsOpen": "편집 내용은 열린 상태로 유지됩니다. 다른 이름으로 저장을 사용하여 새 이름으로 저장하세요."
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -3099,8 +3157,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. ການແກ້ໄຂຂອງທ່ານຍັງເປີດຢູ່. ໃຊ້ «ບັນທຶກເປັນ» ດ້ວຍຊື່ໃໝ່.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. ການແກ້ໄຂຂອງທ່ານຍັງເປີດຢູ່. ໃຊ້ «ບັນທຶກເປັນ» ດ້ວຍຊື່ໃໝ່.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3146,7 +3204,9 @@
     "saveRestoreUncertain": "ບັນທຶກບໍ່ສຳເລັດ ແລະບໍ່ສາມາດຢືນຢັນການກູ້ຄືນໄຟລ໌ຕົ້ນສະບັບໄດ້. ເກັບສຳເນົາສຳຮອງໄວ້ໃນໂຟນເດີເດີມ ແລະໃຊ້ ບັນທຶກເປັນ ສຳລັບການແກ້ໄຂຂອງທ່ານ.",
     "printFailed": "ພິມບໍ່ສຳເລັດ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF.",
     "printTimedOut": "ໝົດເວລາລໍຖ້າການພິມ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF.",
-    "printHelperError": "ໂມດູນການພິມຂັດຂ້ອງ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF."
+    "printHelperError": "ໂມດູນການພິມຂັດຂ້ອງ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF.",
+    "opCopyDiagnostics": "ຄັດລອກຂໍ້ມູນວິນິດໄສ",
+    "saveEditsOpen": "ການແກ້ໄຂຂອງທ່ານຍັງເປີດຢູ່. ໃຊ້ «ບັນທຶກເປັນ» ດ້ວຍຊື່ໃໝ່."
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -3205,8 +3265,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Jūsu izmaiņas paliek atvērtas. Izmantojiet Saglabāt kā ar jaunu nosaukumu.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Jūsu izmaiņas paliek atvērtas. Izmantojiet Saglabāt kā ar jaunu nosaukumu.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3252,7 +3312,9 @@
     "saveRestoreUncertain": "Saglabāšana neizdevās, un sākotnējā faila atjaunošanu nevarēja apstiprināt. Paturiet rezerves kopiju tajā pašā mapē un izmaiņām izmantojiet Saglabāt kā.",
     "printFailed": "Drukāšana neizdevās. Mēģiniet vēlreiz vai eksportējiet PDF formātā.",
     "printTimedOut": "Drukāšanas gaidīšanas laiks beidzās. Mēģiniet vēlreiz vai eksportējiet PDF formātā.",
-    "printHelperError": "Drukāšanas modulis nedarbojas. Mēģiniet vēlreiz vai eksportējiet PDF formātā."
+    "printHelperError": "Drukāšanas modulis nedarbojas. Mēģiniet vēlreiz vai eksportējiet PDF formātā.",
+    "opCopyDiagnostics": "Kopēt diagnostiku",
+    "saveEditsOpen": "Jūsu izmaiņas paliek atvērtas. Izmantojiet Saglabāt kā ar jaunu nosaukumu."
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -3311,8 +3373,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Perubahan anda kekal terbuka. Gunakan Simpan sebagai dengan nama baharu.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Perubahan anda kekal terbuka. Gunakan Simpan sebagai dengan nama baharu.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3358,7 +3420,9 @@
     "saveRestoreUncertain": "Penyimpanan gagal dan pemulihan fail asal tidak dapat disahkan. Simpan salinan sandaran dalam folder yang sama dan gunakan Simpan Sebagai untuk perubahan anda.",
     "printFailed": "Pencetakan gagal. Cuba lagi atau eksport ke PDF.",
     "printTimedOut": "Masa pencetakan tamat. Cuba lagi atau eksport ke PDF.",
-    "printHelperError": "Modul pencetakan gagal. Cuba lagi atau eksport ke PDF."
+    "printHelperError": "Modul pencetakan gagal. Cuba lagi atau eksport ke PDF.",
+    "opCopyDiagnostics": "Salin diagnostik",
+    "saveEditsOpen": "Perubahan anda kekal terbuka. Gunakan Simpan sebagai dengan nama baharu."
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -3426,8 +3490,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Endringene dine forblir åpne. Bruk Lagre som med et nytt navn.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Endringene dine forblir åpne. Bruk Lagre som med et nytt navn.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3475,7 +3539,9 @@
     "saveRestoreUncertain": "Lagringen mislyktes, og gjenoppretting av originalfilen kunne ikke bekreftes. Behold sikkerhetskopien i samme mappe, og bruk Lagre som for endringene dine.",
     "printFailed": "Utskrift mislyktes. Prøv igjen eller eksporter til PDF.",
     "printTimedOut": "Tidsavbrudd under utskrift. Prøv igjen eller eksporter til PDF.",
-    "printHelperError": "Utskriftsmodulen feilet. Prøv igjen eller eksporter til PDF."
+    "printHelperError": "Utskriftsmodulen feilet. Prøv igjen eller eksporter til PDF.",
+    "opCopyDiagnostics": "Kopier diagnostikk",
+    "saveEditsOpen": "Endringene dine forblir åpne. Bruk Lagre som med et nytt navn."
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -3534,8 +3600,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Modificările rămân deschise. Folosiți Salvare ca cu un nume nou.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Modificările rămân deschise. Folosiți Salvare ca cu un nume nou.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3581,7 +3647,9 @@
     "saveRestoreUncertain": "Salvarea a eșuat și restaurarea fișierului original nu a putut fi confirmată. Păstrați copia de rezervă în același folder și folosiți Salvare ca pentru modificări.",
     "printFailed": "Imprimarea a eșuat. Încercați din nou sau exportați în PDF.",
     "printTimedOut": "Timpul de imprimare a expirat. Încercați din nou sau exportați în PDF.",
-    "printHelperError": "Modulul de imprimare a eșuat. Încercați din nou sau exportați în PDF."
+    "printHelperError": "Modulul de imprimare a eșuat. Încercați din nou sau exportați în PDF.",
+    "opCopyDiagnostics": "Copiază diagnosticul",
+    "saveEditsOpen": "Modificările rămân deschise. Folosiți Salvare ca cu un nume nou."
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -3640,8 +3708,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. ඔබේ වෙනස්කම් විවෘතව පවතී. නව නමක් සමඟ වෙනත් නමකින් සුරකින්න භාවිත කරන්න.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. ඔබේ වෙනස්කම් විවෘතව පවතී. නව නමක් සමඟ වෙනත් නමකින් සුරකින්න භාවිත කරන්න.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3687,7 +3755,9 @@
     "saveRestoreUncertain": "සුරැකීම අසාර්ථක වූ අතර මුල් ගොනුව ප්‍රතිසාධනය කළ බව තහවුරු කළ නොහැකි විය. උපස්ථය එම ෆෝල්ඩරයේම තබා ඔබගේ වෙනස්කම් වෙනත් නමකින් සුරකින්න.",
     "printFailed": "මුද්‍රණය අසාර්ථක විය. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න.",
     "printTimedOut": "මුද්‍රණය සඳහා කාලය ඉක්මවා ඇත. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න.",
-    "printHelperError": "මුද්‍රණ මොඩියුලය අසාර්ථක විය. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න."
+    "printHelperError": "මුද්‍රණ මොඩියුලය අසාර්ථක විය. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න.",
+    "opCopyDiagnostics": "දෝෂ නිර්ණය පිටපත් කරන්න",
+    "saveEditsOpen": "ඔබේ වෙනස්කම් විවෘතව පවතී. නව නමක් සමඟ වෙනත් නමකින් සුරකින්න භාවිත කරන්න."
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -3746,8 +3816,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Vaše zmeny zostávajú otvorené. Použite Uložiť ako s novým názvom.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Vaše zmeny zostávajú otvorené. Použite Uložiť ako s novým názvom.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3793,7 +3863,9 @@
     "saveRestoreUncertain": "Uloženie zlyhalo a obnovenie pôvodného súboru sa nepodarilo potvrdiť. Ponechajte zálohu v rovnakom priečinku a zmeny uložte pomocou Uložiť ako.",
     "printFailed": "Tlač zlyhala. Skúste to znova alebo exportujte do PDF.",
     "printTimedOut": "Časový limit tlače vypršal. Skúste to znova alebo exportujte do PDF.",
-    "printHelperError": "Modul tlače zlyhal. Skúste to znova alebo exportujte do PDF."
+    "printHelperError": "Modul tlače zlyhal. Skúste to znova alebo exportujte do PDF.",
+    "opCopyDiagnostics": "Kopírovať diagnostiku",
+    "saveEditsOpen": "Vaše zmeny zostávajú otvorené. Použite Uložiť ako s novým názvom."
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -3855,8 +3927,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Vaše spremembe ostanejo odprte. Uporabite Shrani kot z novim imenom.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Vaše spremembe ostanejo odprte. Uporabite Shrani kot z novim imenom.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -3903,7 +3975,9 @@
     "saveRestoreUncertain": "Shranjevanje ni uspelo in obnovitve izvirne datoteke ni bilo mogoče potrditi. Varnostno kopijo obdržite v isti mapi in za spremembe uporabite Shrani kot.",
     "printFailed": "Tiskanje ni uspelo. Poskusite znova ali izvozite v PDF.",
     "printTimedOut": "Čas za tiskanje je potekel. Poskusite znova ali izvozite v PDF.",
-    "printHelperError": "Tiskalni modul ni uspel. Poskusite znova ali izvozite v PDF."
+    "printHelperError": "Tiskalni modul ni uspel. Poskusite znova ali izvozite v PDF.",
+    "opCopyDiagnostics": "Kopiraj diagnostiko",
+    "saveEditsOpen": "Vaše spremembe ostanejo odprte. Uporabite Shrani kot z novim imenom."
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -3962,8 +4036,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Ndryshimet tuaja mbeten të hapura. Përdorni Ruaj si me një emër të ri.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Ndryshimet tuaja mbeten të hapura. Përdorni Ruaj si me një emër të ri.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4009,7 +4083,9 @@
     "saveRestoreUncertain": "Ruajtja dështoi dhe rikthimi i skedarit origjinal nuk mund të konfirmohej. Mbajeni kopjen rezervë në të njëjtën dosje dhe përdorni Ruaj si për ndryshimet tuaja.",
     "printFailed": "Printimi dështoi. Provoni përsëri ose eksportoni në PDF.",
     "printTimedOut": "Koha e printimit mbaroi. Provoni përsëri ose eksportoni në PDF.",
-    "printHelperError": "Moduli i printimit dështoi. Provoni përsëri ose eksportoni në PDF."
+    "printHelperError": "Moduli i printimit dështoi. Provoni përsëri ose eksportoni në PDF.",
+    "opCopyDiagnostics": "Kopjo diagnostikimin",
+    "saveEditsOpen": "Ndryshimet tuaja mbeten të hapura. Përdorni Ruaj si me një emër të ri."
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -4068,8 +4144,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Vaše izmene ostaju otvorene. Koristite Sačuvaj kao sa novim imenom.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Vaše izmene ostaju otvorene. Koristite Sačuvaj kao sa novim imenom.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4115,7 +4191,9 @@
     "saveRestoreUncertain": "Čuvanje nije uspelo i vraćanje originalne datoteke nije moglo da se potvrdi. Zadržite rezervnu kopiju u istoj fascikli i koristite Sačuvaj kao za izmene.",
     "printFailed": "Štampanje nije uspelo. Pokušajte ponovo ili izvezite u PDF.",
     "printTimedOut": "Vreme za štampanje je isteklo. Pokušajte ponovo ili izvezite u PDF.",
-    "printHelperError": "Modul za štampanje nije uspeo. Pokušajte ponovo ili izvezite u PDF."
+    "printHelperError": "Modul za štampanje nije uspeo. Pokušajte ponovo ili izvezite u PDF.",
+    "opCopyDiagnostics": "Kopiraj dijagnostiku",
+    "saveEditsOpen": "Vaše izmene ostaju otvorene. Koristite Sačuvaj kao sa novim imenom."
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -4174,8 +4252,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Ваше измене остају отворене. Користите Сачувај као са новим именом.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Ваше измене остају отворене. Користите Сачувај као са новим именом.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4221,7 +4299,9 @@
     "saveRestoreUncertain": "Чување није успело и враћање оригиналне датотеке није могло да се потврди. Задржите резервну копију у истој фасцикли и користите Сачувај као за измене.",
     "printFailed": "Штампање није успело. Покушајте поново или извезите у PDF.",
     "printTimedOut": "Време за штампање је истекло. Покушајте поново или извезите у PDF.",
-    "printHelperError": "Модул за штампање није успео. Покушајте поново или извезите у PDF."
+    "printHelperError": "Модул за штампање није успео. Покушајте поново или извезите у PDF.",
+    "opCopyDiagnostics": "Копирај дијагностику",
+    "saveEditsOpen": "Ваше измене остају отворене. Користите Сачувај као са новим именом."
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -4280,8 +4360,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Dina ändringar förblir öppna. Använd Spara som med ett nytt namn.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Dina ändringar förblir öppna. Använd Spara som med ett nytt namn.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4327,7 +4407,9 @@
     "saveRestoreUncertain": "Det gick inte att spara och återställningen av originalfilen kunde inte bekräftas. Behåll säkerhetskopian i samma mapp och använd Spara som för dina ändringar.",
     "printFailed": "Utskriften misslyckades. Försök igen eller exportera till PDF.",
     "printTimedOut": "Tidsgränsen för utskrift överskreds. Försök igen eller exportera till PDF.",
-    "printHelperError": "Utskriftsmodulen misslyckades. Försök igen eller exportera till PDF."
+    "printHelperError": "Utskriftsmodulen misslyckades. Försök igen eller exportera till PDF.",
+    "opCopyDiagnostics": "Kopiera diagnostik",
+    "saveEditsOpen": "Dina ändringar förblir öppna. Använd Spara som med ett nytt namn."
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -4386,8 +4468,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Değişiklikleriniz açık kalır. Yeni bir adla Farklı Kaydet'i kullanın.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Değişiklikleriniz açık kalır. Yeni bir adla Farklı Kaydet'i kullanın.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4433,7 +4515,9 @@
     "saveRestoreUncertain": "Kaydetme başarısız oldu ve özgün dosyanın geri yüklendiği doğrulanamadı. Yedeği aynı klasörde tutun ve değişiklikleriniz için Farklı Kaydet'i kullanın.",
     "printFailed": "Yazdırma başarısız oldu. Yeniden deneyin veya PDF olarak dışa aktarın.",
     "printTimedOut": "Yazdırma zaman aşımına uğradı. Yeniden deneyin veya PDF olarak dışa aktarın.",
-    "printHelperError": "Yazdırma modülü başarısız oldu. Yeniden deneyin veya PDF olarak dışa aktarın."
+    "printHelperError": "Yazdırma modülü başarısız oldu. Yeniden deneyin veya PDF olarak dışa aktarın.",
+    "opCopyDiagnostics": "Tanılamayı kopyala",
+    "saveEditsOpen": "Değişiklikleriniz açık kalır. Yeni bir adla Farklı Kaydet'i kullanın."
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -4492,8 +4576,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Ваші зміни залишаються відкритими. Скористайтеся «Зберегти як» з новим ім’ям.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Ваші зміни залишаються відкритими. Скористайтеся «Зберегти як» з новим ім’ям.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4539,7 +4623,9 @@
     "saveRestoreUncertain": "Не вдалося зберегти файл і підтвердити відновлення оригіналу. Залиште резервну копію в тій самій папці та скористайтеся командою «Зберегти як» для своїх змін.",
     "printFailed": "Не вдалося надрукувати. Спробуйте ще раз або експортуйте в PDF.",
     "printTimedOut": "Час очікування друку минув. Спробуйте ще раз або експортуйте в PDF.",
-    "printHelperError": "Збій модуля друку. Спробуйте ще раз або експортуйте в PDF."
+    "printHelperError": "Збій модуля друку. Спробуйте ще раз або експортуйте в PDF.",
+    "opCopyDiagnostics": "Копіювати діагностику",
+    "saveEditsOpen": "Ваші зміни залишаються відкритими. Скористайтеся «Зберегти як» з новим ім’ям."
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -4598,8 +4684,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. آپ کی تبدیلیاں کھلی رہتی ہیں۔ نئے نام کے ساتھ «بنام محفوظ کریں» استعمال کریں۔",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. آپ کی تبدیلیاں کھلی رہتی ہیں۔ نئے نام کے ساتھ «بنام محفوظ کریں» استعمال کریں۔",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4645,7 +4731,9 @@
     "saveRestoreUncertain": "محفوظ کرنا ناکام رہا اور اصل فائل کی بحالی کی تصدیق نہیں ہو سکی۔ بیک اپ اسی فولڈر میں رکھیں اور اپنی تبدیلیوں کے لیے «بطور محفوظ کریں» استعمال کریں۔",
     "printFailed": "پرنٹنگ ناکام ہوگئی۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔",
     "printTimedOut": "پرنٹنگ کا وقت ختم ہوگیا۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔",
-    "printHelperError": "پرنٹ ماڈیول ناکام ہوگیا۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔"
+    "printHelperError": "پرنٹ ماڈیول ناکام ہوگیا۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔",
+    "opCopyDiagnostics": "تشخیصی معلومات کاپی کریں",
+    "saveEditsOpen": "آپ کی تبدیلیاں کھلی رہتی ہیں۔ نئے نام کے ساتھ «بنام محفوظ کریں» استعمال کریں۔"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -4708,8 +4796,8 @@
     "recoveryFailed": "AutoRecover could not keep a recovery copy. Save your document manually.",
     "fatalMessage": "ElixirOffice encountered an unexpected problem and needs to close.",
     "fatalDetail": "Changes not yet saved may be lost. Open the app again to continue.",
-    "savePermission": "Permission denied. Choose another folder or use Save As.",
-    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As.",
+    "savePermission": "Permission denied. Choose another folder or use Save As. Các chỉnh sửa của bạn vẫn đang mở. Dùng Lưu thành với tên mới.",
+    "saveBusy": "The file is open elsewhere or cannot be replaced. Close the other application or use Save As. Các chỉnh sửa của bạn vẫn đang mở. Dùng Lưu thành với tên mới.",
     "saveSpace": "The disk is full. Free space or choose another disk.",
     "savePath": "The destination is unavailable or its path is too long. Choose another folder or filename.",
     "saveDifferent": "Choose a different destination for the PDF copy. The original was not changed.",
@@ -4756,6 +4844,8 @@
     "saveRestoreUncertain": "Không thể lưu và không thể xác nhận việc khôi phục tệp gốc. Giữ bản sao lưu trong cùng thư mục và dùng Lưu dưới dạng cho các thay đổi của bạn.",
     "printFailed": "In không thành công. Hãy thử lại hoặc xuất PDF.",
     "printTimedOut": "Đã hết thời gian chờ in. Hãy thử lại hoặc xuất PDF.",
-    "printHelperError": "Mô-đun in bị lỗi. Hãy thử lại hoặc xuất PDF."
+    "printHelperError": "Mô-đun in bị lỗi. Hãy thử lại hoặc xuất PDF.",
+    "opCopyDiagnostics": "Sao chép chẩn đoán",
+    "saveEditsOpen": "Các chỉnh sửa của bạn vẫn đang mở. Dùng Lưu thành với tên mới."
   }
 }
