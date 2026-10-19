@@ -1,5 +1,37 @@
 # Changelog
 
+## Desktop 0.2.2 beta (2026-10-19)
+
+### New
+
+- Improve Arabic, Hebrew and Urdu right-to-left Home layouts and add light/dark Home appearance.
+- Improve local use of installed fonts and PDF font selection; add small Arabic/Urdu and Sinhala fallbacks.
+- Add six localized desktop-template variants, with installed-font requirements and English fallback for East Asian variants.
+
+### Fixed
+
+- Address Windows repeated-save and AutoRecover failures, with bounded retries and a verified-backup fallback. [#8](https://github.com/leag1234/elixiroffice/issues/8)
+- Improve Windows per-user/registered font discovery and tolerance of unreadable fonts. [#9](https://github.com/leag1234/elixiroffice/issues/9)
+- Keep the Word zoom track clear of its plus button. [#2](https://github.com/leag1234/elixiroffice/issues/2)
+- Wait for the prepared PDF before native printing and preserve vector text and shapes.
+- Complete Save As for untitled documents from File > Close; wait for saving to finish and keep the document open if saving fails or is cancelled.
+- Make the full Browse area clickable and keyboard accessible.
+- Improve Options, picture-layout and formula-wizard focus; label dialogs for accessibility, pause feature tips around dialogs and translate existing password-choice labels and warnings.
+- Reduce duplicate desktop menus and expire informational notices without hiding errors or warnings.
+
+### Security
+
+- Harden the document converter: archive limits and integrity checks, no external XML entities or network access, SVG images limited to embedded and same-document content, stricter EPUB checks, and failed embedded archives no longer produce partial output. Archives with path-escaping members are cleaned rather than rejected; strict rejection is planned for 0.2.3.
+
+### Known limitations
+
+- Multiple document windows are not implemented. [#7](https://github.com/leag1234/elixiroffice/issues/7)
+- Physical-printer output, older-Linux print compatibility, and native Windows save/font fixes still need confirmation.
+- Local PDF editing, AutoRecover and page reordering remain limited; some right-to-left table conversions and Arabic/Urdu/Sinhala PDF text extraction remain imperfect.
+- Arabic picture-menu and other translation gaps, font-dependent templates, ODS embedded-object loss, and unsigned installers remain as described in the release notes.
+- A small “Waiting for your choice” status panel stays visible while the system print dialog is open; improving it is planned for 0.2.3.
+
+
 ## Desktop 0.2.1 beta (2026-10-16)
 
 ### Fixed
