@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Independent structure oracle for the page-order review gate.
+pypdf==5.9.0

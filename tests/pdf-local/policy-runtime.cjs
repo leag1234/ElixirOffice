@@ -14,6 +14,9 @@ async function run(input,changes,inspect){
 }
 (async()=>{
  const cases=[
+ ['public-page-order-inherited.pdf',''],['public-page-order-inherited-compressed.pdf',''],
+ ['public-page-order-nested.pdf',''],['public-page-order-nested-compressed.pdf',''],
+ ...['named-bad-page','named-numeric-page','named-bad-mode','named-cycle','named-extra-tree','tagged-marker'].map(name=>['public-'+name+'.pdf','unsupported-catalog']),
  ['public-forms.pdf',''],['public-compressed.pdf',''],['public-annotations-link.pdf',''],['public-compressed-annotations-link.pdf',''],
  ['public-signature-marker.pdf','signature'],['public-compressed-signature-marker.pdf','signature'],['public-xfa-marker.pdf','xfa'],
  ['public-unsupported-field.pdf','form'],['public-unsupported-catalog.pdf','unsupported-catalog'],['public-unsupported-annotation.pdf','annotation'],
@@ -25,7 +28,7 @@ async function run(input,changes,inspect){
  ];
  for(const [name,reason] of cases){
   const input=fs.readFileSync(path.join(root,name)),inspection=await run(input,null,true);
-  assert.equal(inspection.exit,0,name);assert.equal(inspection.policy.reason,reason,name);assert.equal(inspection.policy.writable,!reason,name);
+  assert.equal(inspection.exit,0,name);assert.equal(inspection.policy.reason,reason,name);assert.equal(inspection.policy.writable,!reason,name);assert.equal(inspection.policy.reorderSafe,!reason,name);
   const edited=await run(input,null,false);
   assert.equal(edited.exit,reason?2:0,name);assert.equal(edited.policy.writable,!reason,name);
   if(reason)assert(!edited.output,name+' unsafe writer ran');else assert.deepEqual(edited.output.subarray(0,input.length),new Uint8Array(input));

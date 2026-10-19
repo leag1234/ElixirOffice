@@ -23,7 +23,7 @@ HWP/HML lookup resolves to HwpFile/HwpDoc/HWPMLFile.cpp and HWPXFile.cpp. The in
 A core follow-up needs one consistent extraction-root containment policy before any directory/file creation, explicit archive-name length validation, unconditional EPUB OPF/resource containment, hostile traversal fixtures and allowed nested-resource controls against native conversion, followed by the scheduled wasm rebuild and corpus gates. No archive, EPUB or HWP safety claim is made here. Lead review must decide/schedule this core follow-up with phase3 before phase2 is described as complete.
 
 
-## MSG95 policy and compatibility correction (r2)
+## release review policy and compatibility correction (r2)
 
 Bare targets beginning with www. (case-insensitive) receive http:// before scheme validation. Other scheme-less document paths are not sent to an external opener: the existing invalid-link warning is displayed without an approval-to-open action. Anchors and existing internal slide/bookmark handling retain their prior dispatch; the slide-action allowlist stays anchored. The diagram mobile callback now has the same guard and escaped warning text.
 

@@ -56,7 +56,9 @@ async function printCancel(){
  try{
   await editable(env);await require('./file-action.cjs')(env.page,'print');await modal(env,'Print');
   const pages=env.browser.contexts()[0].pages();
-  assert(pages.some(page=>page.url().startsWith('data:application/pdf;base64,')),'Native print must load the resulting PDF');
+  const helpers=pages.filter(page=>page.url().startsWith('file:')&&page.url().includes('/print-jobs/job-')&&page.url().endsWith('/document.pdf'));
+  assert.equal(helpers.length,1,'Native print must load the prepared PDF from its private job file');
+  assert(!pages.some(page=>page.url().startsWith('data:application/pdf')),'Large PDFs must not use a data URL');
   keys(env,'escape');await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   const result=await env.page.evaluate(()=>window.EOLastPdf);assert.equal(result.printed,false);assert.equal(result.stats.backend,'wasm');

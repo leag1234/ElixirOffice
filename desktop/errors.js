@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 (function(factory){if(typeof module==='object'&&module.exports)module.exports=factory();else window.EODesktopErrors=factory();})(function(){
  'use strict';
- const fallback={opFileMissing:'This file is no longer available. It may have been moved or deleted.',savePermission:'Permission denied. Choose another folder or use Save As.',saveBusy:'The file is open elsewhere or cannot be replaced. Close the other application or use Save As.',saveSpace:'The disk is full. Free space or choose another disk.',savePath:'The destination is unavailable or its path is too long. Choose another folder or filename.',saveDifferent:'Choose a different destination for the PDF copy. The original was not changed.',saveInvalid:'The conversion did not produce a valid file. The original was not changed.'};
+ const fallback={printFailed:"Printing failed. Try again or export PDF.",printTimedOut:"Printing timed out. Try again or export PDF.",printHelperError:"The print helper failed. Try again or export PDF.",saveRestoreUncertain:'The save failed and restoring the original file could not be confirmed. Keep the backup in the same folder and use Save As for your edits.',opFileMissing:'This file is no longer available. It may have been moved or deleted.',savePermission:'Permission denied. Choose another folder or use Save As.',saveBusy:'The file is open elsewhere or cannot be replaced. Close the other application or use Save As.',saveSpace:'The disk is full. Free space or choose another disk.',savePath:'The destination is unavailable or its path is too long. Choose another folder or filename.',saveDifferent:'Choose a different destination for the PDF copy. The original was not changed.',saveInvalid:'The conversion did not produce a valid file. The original was not changed.'};
  const openFallback={
   openPermission:'ElixirOffice cannot read this file. Check its permissions or open it with File → Open.',
   openPermissionMac:'ElixirOffice is not allowed to read this file. Allow access in System Settings → Privacy & Security → Files and Folders, or open it with File → Open.',
@@ -22,7 +22,7 @@
   return strings[key]||openFallback[key];
  }
  function raw(error){return String(error?.message||error||'').replace(/^Error invoking remote method '[^']+': (?:Error: )?/,'');}
- function cancelled(error){return error?.code==='cancelled'||error?.reason==='cancelled'||error?.name==='AbortError'||/^(?:Save cancelled|Conversion cancelled|PDF saving cancelled)(?::|$)/.test(raw(error));}
+ function cancelled(error){if(error?.rollbackUncertain||/^SAVE_RESTORE_UNCERTAIN:/.test(raw(error)))return false;return error?.code==='cancelled'||error?.reason==='cancelled'||error?.name==='AbortError'||/^(?:Save cancelled|Conversion cancelled|PDF saving cancelled)(?::|$)/.test(raw(error));}
  function approved(reason,strings){
   if(Object.values(fallback).includes(reason)||Object.values(openFallback).includes(reason)||Object.values(strings).includes(reason))return true;
   // PDF policies are composed only from trusted bundled catalog strings.
@@ -32,18 +32,29 @@
    return reason===policy||strings.pdfReadOnlyState&&reason===strings.pdfReadOnlyState+' '+policy;
   });
  }
+ function backupLabel(error,reason){
+  let name;
+  try{name=JSON.parse(reason.slice('SAVE_RESTORE_UNCERTAIN:'.length));}catch{}
+  if(typeof name==='string')name=name.replace(/[\x00-\x1f\x7f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'');
+  if(typeof name!=='string'||!name||name.length>255||/[\\/\x00-\x1f\x7f\u202a-\u202e\u2066-\u2069]/.test(name))return '';
+  return ' ('+'\u2068'+name+'\u2069'+')';
+ }
  function message(error,strings={}){
   const reason=raw(error);let key;
   if(error?.code==='operation-busy'||/^A local (?:operation|conversion|save|export) is already running$/.test(reason))return strings.opPreparing||'An operation is in progress. Please wait.';
-  const code=error?.code||(/^(E[A-Z0-9_]+|UNKNOWN):/.exec(reason)||[])[1];
-  if(/^Saved file unavailable$/.test(reason))key='opFileMissing';
+  const code=error?.code||(/^(E[A-Z0-9_]+|UNKNOWN)(?::|$)/.exec(reason)||[])[1];
+  if(/^EOPRINT_/.test(code||'')){
+   key=/_(?:READY|CALLBACK)_TIMEOUT$/.test(code)?'printTimedOut':['EOPRINT_RENDERER','EOPRINT_VIEWER','EOPRINT_CACHE','EOPRINT_CLEANUP'].includes(code)?'printHelperError':'printFailed';
+  }
+  else if(error?.rollbackUncertain||/^SAVE_RESTORE_UNCERTAIN:/.test(reason))key='saveRestoreUncertain';
+  else if(/^Saved file unavailable$/.test(reason))key='opFileMissing';
   else if(['EACCES','EROFS'].includes(code))key='savePermission';
   else if(['EPERM','EBUSY'].includes(code)||/^Could not save: the file may be open in another application/.test(reason))key='saveBusy';
   else if(code==='ENOSPC')key='saveSpace';
   else if(['ENOENT','ENAMETOOLONG'].includes(code)||/^This Windows path is too long/.test(reason))key='savePath';
   else if(/^Choose a different destination for the PDF copy/.test(reason))key='saveDifferent';
   else if(/^Invalid (?:document|PDF) output/.test(reason))key='saveInvalid';
-  return key?(strings[key]||fallback[key]):!code&&approved(reason,strings)?reason:(strings.error||'Unknown local file error');
+  return key?(strings[key]||fallback[key])+(key==='saveRestoreUncertain'?backupLabel(error,reason):''):!code&&approved(reason,strings)?reason:(strings.error||'Unknown local file error');
  }
  return {message,openMessage,cancelled,raw,fallback,openFallback};
 });

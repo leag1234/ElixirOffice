@@ -1,0 +1,4 @@
+Noto Sans Sinhala — copyright and OFL terms in OFL.txt.
+Desktop derivative: static wdth=100, wght=400/700 instances; family renamed to Elixir Fallback Sinhala. No glyph subsetting, metric adjustment or pre-slanted outlines. Italic is synthesized by the editor.
+Source: https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notosanssinhala/NotoSansSinhala%5Bwdth%2Cwght%5D.ttf
+Source SHA256: 9bd93e407a278075be403324063bc94a7e306c44de4df81214e932330c22eecf

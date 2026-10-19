@@ -32,9 +32,23 @@
   const text=document.createElement('p'),bar=document.createElement('progress'),links=document.createElement('div'),announcement=document.createElement('span'),notice=document.createElement('div');
   notice.className='eo-operation';text.className='eo-operation-text';text.setAttribute('aria-hidden','true');announcement.className='eo-operation-live';announcement.setAttribute('aria-live','polite');announcement.setAttribute('aria-atomic','true');announcement.setAttribute('role','status');
   bar.setAttribute('aria-label',strings.opPreparing||fallback.opPreparing);
-  links.className='eo-operation-actions';notice.append(text,bar,links,announcement);container.append(notice);notice.hidden=true;
+  links.className='eo-operation-actions';notice.append(text,bar,links);container.append(notice,announcement);notice.hidden=true;
   let latest=null,scope=null,id=null,closed=false,lastAnnouncement=0,previousFocus,obscured=false,dismissed=false,actionKey=null;
-  function reset(nextScope){actionKey=null;scope=nextScope;id=null;latest=null;notice.hidden=true;links.replaceChildren();bar.hidden=true;}
+  const view=document.defaultView||globalThis;
+  let timer=null,due=0,remaining=8000,hovered=false;
+  function hasFileActions(event){return event.phase==="ready"&&!!event.artifactId&&!!(actions.open||actions.show);}
+  function clearTimer(){if(timer!==null)view.clearTimeout(timer);timer=null;}
+  function pauseTimer(){if(timer!==null)remaining=Math.max(0,due-view.Date.now());clearTimer();}
+  function schedule(){
+   if(closed||dismissed||obscured||hovered||notice.contains(document.activeElement)||!latest||hasFileActions(latest)||!["ready","complete","cancelled"].includes(latest.phase)||notice.classList.contains("eo-operation-backstage"))return;
+   clearTimer();due=view.Date.now()+remaining;
+   timer=view.setTimeout(()=>{timer=null;dismissed=true;notice.hidden=true;},remaining);
+  }
+  notice.addEventListener("mouseenter",()=>{hovered=true;pauseTimer();});
+  notice.addEventListener("mouseleave",()=>{hovered=false;schedule();});
+  notice.addEventListener("focusin",pauseTimer);
+  notice.addEventListener("focusout",()=>view.setTimeout(()=>{if(!notice.contains(document.activeElement))schedule();},0));
+  function reset(nextScope){clearTimer();remaining=8000;actionKey=null;scope=nextScope;id=null;latest=null;notice.hidden=true;announcement.textContent="";links.replaceChildren();bar.hidden=true;}
   function button(key,run){
    const node=document.createElement('button');node.type='button';node.textContent=key==='cancel'?(strings.cancel||'Cancel'):(strings[key]||fallback[key]);
    node.addEventListener('click',()=>{const actionEvent=latest;return Promise.resolve().then(run).catch(error=>{
@@ -55,9 +69,11 @@
    bar.hidden=ended;bar.setAttribute('aria-label',message);
    if(!ended&&Number.isInteger(event.completed)&&Number.isInteger(event.total)&&event.total>0){bar.max=event.total;bar.value=event.completed;}
    else bar.removeAttribute('value');
+   if(!ended)clearTimer();
    const nextKey=ended?[event.id,event.phase,event.artifactId||''].join('/'):(actions.cancel&&canCancel(event)?'cancel/'+event.id:'');
    // Keep keyboard focus on Cancel while real page/stage events update the bar.
    if(nextKey!==actionKey){
+    clearTimer();remaining=8000;
     const restore=links.contains(document.activeElement);links.replaceChildren();actionKey=nextKey;
     if(!ended&&actions.cancel&&canCancel(event))button('cancel',()=>actions.cancel(event.id));
     if(ended){
@@ -65,13 +81,14 @@
       if(actions.open)button('opOpen',()=>actions.open(event.artifactId));
       if(actions.show)button('opShow',()=>actions.show(event.artifactId));
      }
-     button('opDismiss',()=>{dismissed=true;notice.hidden=true;if(previousFocus?.isConnected)previousFocus.focus();});
+     button('opDismiss',()=>{clearTimer();dismissed=true;notice.hidden=true;if(previousFocus?.isConnected)previousFocus.focus();});
     }
     if(restore&&previousFocus?.isConnected)previousFocus.focus();
    }
+   if(timer===null)schedule();
    return true;
   }
-  return {update,reset,obscure(value){obscured=!!value;notice.hidden=!latest||dismissed||obscured;},dispose(){closed=true;notice.remove();},element:notice};
+  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured;if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
  }
  return {mount,label,fallback,paint,canCancel,isolate};
 });

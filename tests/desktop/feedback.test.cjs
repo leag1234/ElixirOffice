@@ -49,13 +49,14 @@ test('feedback paints two visible frames, while hidden windows and stalled frame
 test('actual desktop format download routes Office copies and PDF to the correct native bridge',async()=>{
  const vm=require('node:vm'),source=fs.readFileSync(path.join(__dirname,'../../desktop/renderer.js'),'utf8'),calls=[];
  const start=source.indexOf('function outputOutcome('),end=source.indexOf('async function updateDirty()',start);assert(start>=0&&end>start);
- const context={file:{token:'public'},lastOperation:{id:'job'},saveAsTicket:'selection-capability',window:{},eoDesktop:{export:async(...args)=>{calls.push(['office',...args]);return {name:'copy.odt',artifactId:'opaque'};},pdf:async(...args)=>{calls.push(['pdf',...args]);return null;}}};
+ const context={abort:new AbortController(),file:{token:'public'},lastOperation:{id:'job'},saveAsTicket:'selection-capability',window:{},eoDesktop:{export:async(...args)=>{calls.push(['office',...args]);return {name:'copy.odt',artifactId:'opaque'};},pdf:async(...args)=>{calls.push(['pdf',...args]);return null;}}};
  vm.createContext(context);vm.runInContext(source.slice(start,end),context);
  const protection={protected:true,remove:false},bytes=new Uint8Array([1]);
  const result=await context.exportOutput(bytes,'odt',{},undefined,protection);
  assert.equal(result.kind,'saved');assert.equal(result.committed,true);assert.equal(calls[0][0],'office');assert.equal(calls[0][3],'odt');assert.deepEqual(calls[0][4],protection);assert.equal(calls[0][5],'job');assert.equal(calls[0][6],'selection-capability');
  assert.equal(context.window.EOLastExport.name,'copy.odt');assert.equal(context.window.EOLastPdf,undefined);
  assert.equal((await context.exportOutput(bytes,'pdf',{})).kind,'cancelled');assert.equal(calls[1][0],'pdf');
+ context.abort.abort();await assert.rejects(context.exportOutput(bytes,'odt',{},undefined,protection),error=>error.name==='AbortError');assert.equal(calls.length,2);
 });
 
 test('feedback isolates untrusted RTL names and reasons without allowing embedded controls to escape',()=>{

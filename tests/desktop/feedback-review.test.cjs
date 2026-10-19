@@ -63,3 +63,20 @@ test('actual print handler waits for native callback and reports submission/canc
   }finally{await e.cleanup();}
  }
 });
+
+test('native helper failure retains the actual main window and sanitizes the error',async()=>{
+ const e=await boot({document:true,onPrint(){throw Error('private printer/path detail')}});
+ try{
+  await assert.rejects(e.invoke('pdf',e.selected.token,new Uint8Array(Buffer.from('%PDF-public-print')),true,false,'local-operation-1'),error=>error.code==='EOPRINT_JOB'&&!error.message.includes('private'));
+  assert.equal(e.window.closed,undefined);assert.equal(e.app.exitCode,undefined);assert.equal(e.windows[1].destroyed,true);assert.deepEqual(await fsp.readdir(path.join(e.directory,'print-jobs')),[]);
+ }finally{await e.cleanup();}
+});
+test('actual write cancellation reaches a pending native print without closing the editor',async()=>{
+ let respond;const e=await boot({document:true,onPrint:(_options,callback)=>{respond=callback}});
+ try{
+  const id='local-operation-2',pending=e.invoke('pdf',e.selected.token,new Uint8Array(Buffer.from('%PDF-public-print')),true,false,id);
+  for(let n=0;n<100&&!respond;n++)await new Promise(resolve=>setTimeout(resolve,5));assert(respond);
+  assert.equal(await e.invoke('write-cancel',e.selected.token,id),true);assert.deepEqual(await pending,{printed:false,reason:'cancelled'});
+  assert.equal(e.window.closed,undefined);assert.equal(e.app.exitCode,undefined);assert.deepEqual(await fsp.readdir(path.join(e.directory,'print-jobs')),[]);respond(true,'');
+ }finally{await e.cleanup();}
+});

@@ -46,3 +46,5 @@ test('Office Save As and editor chords match native menu declarations on every p
   assert.equal(command({type:'keyDown',key:'Process',code:'KeyS',control:!mac,meta:mac},platform,'docx'),null);
  }
 });
+
+test("F1 reaches native Help without consuming modified or composing keys",()=>{for(const platform of ["linux","win32","darwin"]){assert.equal(command({type:"keyDown",key:"F1"},platform,"docx"),"help");for(const extra of [{control:true},{meta:true},{shift:true},{alt:true},{isComposing:true},{type:"keyUp"}])assert.equal(command({type:"keyDown",key:"F1",...extra},platform,"docx"),null);}});

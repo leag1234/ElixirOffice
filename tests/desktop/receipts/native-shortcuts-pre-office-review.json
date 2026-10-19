@@ -293,5 +293,5 @@
   "rawReceiptSha256": "6bfc8df64ccf8476cbd351472c2131e2cf63467d5aac02b3775d0e4fcdb7712d",
   "scopeNote": "Final controller retains browser-local alternative editing keys; only notice/status tracking is suppressed.",
   "qualifiesCurrentOfficeShortcutMapping": false,
-  "supersededBy": "MSG121 Office-compatible mapping"
+  "supersededBy": "release review Office-compatible mapping"
 }

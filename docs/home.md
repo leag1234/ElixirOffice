@@ -170,3 +170,53 @@ rather than receiving an unverified pass. The 39-language offer list is unchange
 This candidate is separate from frozen 0.2.0 and is not integrated.
 
 The upright Arabic-script rule also covers Urdu and future Persian generation. The39offered languages are unchanged. Only the four unshipped Urdu source fixtures were regenerated for reproducibility; their remaining font gaps keep the existing English fallback. No Persian UI locale or new packaged language is introduced.
+
+## 2026-10-16 — System fonts S1–S4: isolated review addendum
+
+This dated addendum records the isolated fonts review candidate. Earlier text remains the integrated baseline. Historical source/runtime evidence keeps its original profile; r1 validation and remaining gates are recorded separately. No integration, runtime pin, package or release is implied.
+
+#### 0.2.2 desktop review candidate: six additional locales
+
+The server retains its 39-language offer. Desktop assembly adds branding/desktop-templates separately: ja, zh, zh-tw, ko, si and ur for each of the four examples, with matching 264-by-374 native-rendered previews and 48 CC0 source/preview hashes. All existing shared files remain unchanged. The resulting desktop resource catalog contains four templates in45languages.
+
+Sinhala and Urdu use the small offline fallback pack even with Computer fonts disabled. CJK templates require eligible covering system fonts and consent; otherwise both Home previews and opening retain English fallback. Regional Noto requests can select appropriate existing OS alternatives. Actual physical-style coverage and classifier parity replace script-only guesses. Real native previews were checked across all36pages; blank end pages, signature spill, Urdu header overlap and recipient-frame clipping found during review were corrected only in the new variants.
+
+Native editor screens, runtime thumbnails and cross-platform layout remain unverified, as does general contextual run-language fallback. Script text-extraction failures from S2/S3 remain separate from visual coverage. See [desktop font evidence](desktop-system-fonts.md#desktop-home-localization--s4), tests/fonts/README.md and branding/desktop-templates/template-sources.json.
+
+## release review r1 scope — 2026-10-16
+This dated candidate addition preserves integrated main41e4fa6f96 in full.
+See docs/desktop-system-fonts.md for the independent r1 family, fresh test profiles,
+historical evidence limits and open runtime gates. No integration or release.
+
+## Home UI languages and direction (0.2.2 review candidate)
+
+Home adds complete171-key Arabic (`ar`), Hebrew (`he`) and Urdu (`ur`) catalogs alongside the existing12 catalogs. The page direction follows the resolved Home UI language. Navigation, account panels, search affordances, table alignment, menus, dialogs and breadcrumbs use logical placement; server-address inputs remain LTR. Mixed filenames/folder segments and numeric sizes are isolated for display, as are interpolated dynamic text and fixed Latin brand/protocol names. Original file/path/server/profile values remain on the existing request and URL paths. The shared desktop stylesheet/assembled labels and standalone/embedded Home retain the same direction behavior.
+
+UI and editor language policies remain separate. The existing server policy resolves plain `he` to editor English but accepts `he-IL` as an editor tag; Home uses Hebrew for both. `en-GB` remains an editor regional tag. Arabic/Urdu variants resolve to their existing editor languages. Persian (`fa`) is not a supported desktop/editor catalog in the45-language source set and continues to fall back to English. No editor-language policy, login flow, cloud authorization, CSRF, storage operation or save/quit contract changes here.
+
+The maintained [Home tests](../tests/home-ui/README.md) exercise real EJS/helper/JS/CSS handlers with public fixture locals and intercepted HTTP results. Current browser coverage includes five languages under light/dark preference, actual account/profile/cloud forms, error/toast text, mixed-script markup-shaped names, menu keyboard/RTL placement and narrow800px layout. The desktop component check uses actual assembled45-locale assets and public templates in20 standalone/embedded browser profiles. During item6 qualification, requested dark still rendered light; the separate appearance candidate below adds dark behavior. No live cloud authentication/backend, native Electron lifecycle, native OS panels, mobile or package acceptance is implied. Exact evidence, reviewed source trees and final local heads are recorded in Z's per-item handoff report.
+
+
+### Home appearance review candidate (0.2.2)
+
+The start page reuses its existing custom properties for a night palette drawn from the editor theme, with separate foreground and filled-button tokens. Shared desktop assets include the same preference resolver. Home follows live owner-window UI state first, then saved `ui-theme-id` and a matching custom `ui-theme` type. Known light/dark app IDs override the OS; no selection or `theme-system` follows `prefers-color-scheme`. Storage denial, malformed cache and unknown IDs safely fall back to the available preference or OS. Document `content-theme` is independent. Actual storage/media events and host class changes refresh the bound surface; the resolver never writes preferences.
+
+The shared script loads before Home CSS. A CSS media fallback covers system appearance if the script is unavailable. Embedded Home binds its own container using the container's owner document, without changing the editor root or body. The existing backstage panel is reused across renders; qualification covers stable panel reuse and the explicit bind disposer, not arbitrary application mount/unmount lifecycle.
+
+Normal and secondary text, hovered file details, placeholders, filled buttons, danger actions, fields and keyboard menu/account focus have computed-color checks. The inspector composes color alpha and placeholder opacity against actual ancestor backgrounds. Named text surfaces require4.5:1, field boundaries and visible focus outlines3:1. This is targeted component coverage, not whole-page accessibility certification. Document preview bytes, file/account/server identities and API values are unchanged.
+
+Maintained tests cover five languages and both preferences,140 web captures,40 standalone/embedded desktop profiles including explicit app choices opposite the OS,15 browser preference cases including real storage denial, and foreign-owner component state transitions. Public synthetic HTTP results exercise production Home handlers; these checks do not certify live cloud/backend, editor Options UI, Electron/native startup/close, OS dialogs, mobile or packages. See [appearance tests](../tests/home-theme/README.md).
+
+
+release review light-appearance clarification: this candidate also improves contrast on the hosted start page and the shared desktop light Home. The light `--border-strong` changes from `#c9c9cf` to `#85858d`, and `--text-3` from `#85858d` to `#6b6b73`. Primary buttons and selected location options now use `--accent-fill` (and its border/hover tokens) rather than the previous direct accent fill. These are visible accessibility contrast improvements to the light appearance as well as support for dark surfaces.
+
+## 2026-10-16 — Server Arabic qualification for the next release
+
+The earlier Arabic upright correction changed the shared server/desktop files,
+not only the desktop overlay. On Product5094ee2a the four Arabic DOCX already have
+zero effective Arabic italic runs and strict server-font misses. Fresh native
+regeneration preserves all DOCX/PNG bytes and312 provenance records; all316 shared
+brand files are unchanged. The filename-aware coverage gate confirms156 offered
+server templates with zero missing characters. Existing blank resume end page,
+letterhead header overlap and worksheet formula crowding remain outside this
+glyph slice. [Exact profile, reproduction and limits](server-template-coverage.md).

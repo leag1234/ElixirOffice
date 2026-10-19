@@ -1,11 +1,30 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-import hashlib,json,sys,zipfile,xml.etree.ElementTree as ET
+import hashlib,json,re,sys,zipfile,xml.etree.ElementTree as ET
 from pathlib import Path
 root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'tools/desktop'))
 from blank_templates import LANGUAGES
 from home_templates import localized, direction_and_fonts, RTL
 from template_font_coverage import Pack
-pack=Pack(root/'desktop/assets')
+assets=root/'desktop/assets'
+delivery=Pack(assets)
+# The shared web catalog deliberately excludes six locales. Desktop fallbacks
+# may cover more; reconstruct its exact shared110 oracle by physical identity,
+# so the build's114-font assets also exercise every original negative control.
+profile=json.loads((root/'tests/desktop/fixtures/shared-font-profile.json').read_text())
+font_source=(assets/'sdkjs/common/AllFonts.js').read_text(encoding='utf-8-sig')
+font_files=json.loads(re.search(r'window\["__fonts_files"\]\s*=\s*(\[[\s\S]*?\]);',font_source)[1])
+assert all(Path(name).name==name for name in font_files)
+actual={hashlib.sha256((assets/'fonts'/name).read_bytes()).hexdigest():index
+        for index,name in enumerate(font_files)}
+assert len(profile['files'])==110 and len(profile['faces'])==49
+assert set(profile['files'].values())<=set(actual),'Shared font payload changed or missing'
+indices={int(index):actual[digest] for index,digest in profile['files'].items()}
+pack=Pack(assets)
+pack.faces={name:indices[index] for name,index in profile['faces'].items()}
+pack.variants={name:{style:(indices[index] if index>=0 else index,face)
+                     for style,(index,face) in styles.items()}
+               for name,styles in profile['variants'].items()}
+pack.ranges=[tuple(value) for value in profile['ranges']]
 brand=root/'branding/example/nodejs/public/elixir/brand/templates'
 catalog=json.loads((brand/'templates.json').read_text());words=json.loads((brand/'localized-content.json').read_text())
 sources=json.loads((brand/'template-sources.json').read_text())
@@ -21,8 +40,10 @@ for item in catalog['templates']:
   shipped=locale in item['languages']
   folder=brand/locale if shipped else root/'tools/example/template-layouts/localized'/locale
   file=folder/item['file'];assert file.stat().st_size<40000
-  missing=pack.missing(file)
-  assert bool(missing)!=shipped,(locale,item['id'],'font coverage disagrees with manifest')
+  missing=pack.missing(file,character_fallback=True)
+  assert bool(missing)!=shipped,(locale,item['id'],'shared110 font coverage disagrees with manifest')
+  if shipped:
+   assert not delivery.missing(file,character_fallback=True),(locale,item['id'],'delivery lost shared coverage')
   if not shipped: assert not (brand/locale/item['file']).exists()
   for key in ['file','thumb']:
    if not shipped: continue
@@ -83,4 +104,4 @@ for item in catalog['templates']:
     assert 'example.org' in visible and words[locale]['phone'] in visible
    assert 'Century Gothic' not in ' '.join(xml)
   assert localized(layout,item['id'],locale)==file.read_bytes(),'Generation not reproducible'
-print('PASS 180 source DOCX; shipped glyph coverage, RTL/layout, reproducibility and CC0 hashes')
+print('PASS 180 source DOCX; exact shared110 positive/negative coverage and actual delivery shared coverage, RTL/layout, reproducibility and CC0 hashes')

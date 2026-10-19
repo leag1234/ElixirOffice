@@ -7,10 +7,12 @@
 #include "PdfFile/OnlineOfficeBinToPdf.h"
 #include "PdfFile/PdfReader.h"
 #include "PdfFile/lib/xpdf/PDFDoc.h"
+#include "PdfFile/lib/xpdf/Catalog.h"
 #include "PdfFile/lib/xpdf/XRef.h"
 #include "PdfFile/lib/xpdf/Dict.h"
 #include "DesktopEditor/common/File.h"
 #include <cstring>
+#include <cmath>
 #include <vector>
 namespace {
 const unsigned int maxBytes=128*1024*1024;
@@ -49,6 +51,60 @@ const char* inspectObject(Object& obj,int depth,int& budget) {
  }
  return nullptr;
 }
+bool destination(Object& value,Catalog* catalog) {
+ Object array;
+ if(value.isDict()){
+  if(value.dictGetLength()!=1 || std::strcmp(value.dictGetKey(0),"D")!=0)return false;
+  value.dictLookup("D",&array);
+ }else value.copy(&array);
+ if(!array.isArray() || array.arrayGetLength()<2 || array.arrayGetLength()>6){array.free();return false;}
+ Object page,mode;array.arrayGetNF(0,&page);array.arrayGet(1,&mode);
+ bool ok=page.isRef() && catalog->findPage(page.getRef().num,page.getRef().gen)>0;
+ int length=0;
+ if(mode.isName("Fit")||mode.isName("FitB"))length=2;
+ else if(mode.isName("FitH")||mode.isName("FitBH")||mode.isName("FitV")||mode.isName("FitBV"))length=3;
+ else if(mode.isName("XYZ"))length=5;
+ else if(mode.isName("FitR"))length=6;
+ ok=ok && length && array.arrayGetLength()==length;
+ for(int i=2;ok && i<length;++i){
+  Object coordinate;array.arrayGet(i,&coordinate);
+  ok=(coordinate.isNum() && std::isfinite(coordinate.getNum())) || (coordinate.isNull() && !mode.isName("FitR"));coordinate.free();
+ }
+ page.free();mode.free();array.free();return ok;
+}
+bool destinationTree(Object& node,Catalog* catalog,int depth,int& budget) {
+ if(depth>16 || --budget<0 || !node.isDict())return false;
+ for(int i=0;i<node.dictGetLength();++i){
+  const char* key=node.dictGetKey(i);
+  if(std::strcmp(key,"Kids") && std::strcmp(key,"Names") && std::strcmp(key,"Limits"))return false;
+ }
+ Object kids,names,limits;node.dictLookup("Kids",&kids);node.dictLookup("Names",&names);node.dictLookup("Limits",&limits);
+ bool ok=limits.isNull() || (limits.isArray() && limits.arrayGetLength()==2);
+ if(ok && limits.isArray()){
+  for(int i=0;i<2;++i){Object bound;limits.arrayGet(i,&bound);ok=ok&&bound.isString();bound.free();}
+ }
+ if(ok && kids.isArray() && names.isNull()){
+  ok=kids.arrayGetLength()>0 && kids.arrayGetLength()<=20000;
+  for(int i=0;ok && i<kids.arrayGetLength();++i){Object child;kids.arrayGet(i,&child);ok=destinationTree(child,catalog,depth+1,budget);child.free();}
+ }else if(ok && names.isArray() && kids.isNull()){
+  ok=names.arrayGetLength()>0 && names.arrayGetLength()%2==0 && names.arrayGetLength()<=40000;
+  for(int i=0;ok && i<names.arrayGetLength();i+=2){
+   Object name,target;names.arrayGet(i,&name);names.arrayGet(i+1,&target);
+   ok=--budget>=0 && name.isString() && destination(target,catalog);name.free();target.free();
+  }
+ }else ok=false;
+ kids.free();names.free();limits.free();return ok;
+}
+bool namedDestinations(Object& catalog,PDFDoc* doc) {
+ Object names;catalog.dictLookup("Names",&names);
+ if(names.isNull()){names.free();return true;}
+ bool ok=names.isDict() && names.dictGetLength()==1 && std::strcmp(names.dictGetKey(0),"Dests")==0;
+ if(ok){
+  Object tree;names.dictLookup("Dests",&tree);int budget=20000;
+  ok=destinationTree(tree,doc->getCatalog(),0,budget);tree.free();
+ }
+ names.free();return ok;
+}
 const char* inspect(CPdfReader& reader,NSFonts::IApplicationFonts* fonts,const std::wstring& file=L"/p/in.pdf") {
  if(!reader.LoadFromFile(fonts,file))return "protected-or-invalid";
  PDFDoc* doc=reader.GetPDFDocument(0);
@@ -58,12 +114,13 @@ const char* inspect(CPdfReader& reader,NSFonts::IApplicationFonts* fonts,const s
  XRef* xref=doc->getXRef();if(!xref || xref->getNumObjects()>200000)return "complexity";
  Object catalog;xref->getCatalog(&catalog);
  if(!catalog.isDict()){catalog.free();return "catalog";}
- const char* allowed[]={"Type","Pages","Outlines","AcroForm","Metadata","Lang","Version","PageLayout","PageMode","ViewerPreferences"};
+ const char* allowed[]={"Type","Pages","Outlines","AcroForm","Metadata","Lang","Version","PageLayout","PageMode","ViewerPreferences","Names"};
  for(int i=0;i<catalog.dictGetLength();++i) {
   bool known=false;
   for(const char* key:allowed)if(std::strcmp(catalog.dictGetKey(i),key)==0)known=true;
   if(!known){catalog.free();return "unsupported-catalog";}
  }
+ if(!namedDestinations(catalog,doc)){catalog.free();return "unsupported-catalog";}
  Object acroForm,sigFlags;sigFlags.initNull();catalog.dictLookup("AcroForm",&acroForm);
  if(acroForm.isDict())acroForm.dictLookup("SigFlags",&sigFlags);
  bool signedFlag=!sigFlags.isNull() && !(sigFlags.isInt() && sigFlags.getInt()==0);
@@ -83,7 +140,7 @@ bool read(const wchar_t* file,std::vector<BYTE>& bytes,unsigned int limit) {
  bytes.resize(size);return input.ReadFile(bytes.data(),size);
 }
 void policy(const char* reason) {
- std::string value=std::string("{\"writable\":")+(reason?"false":"true")+",\"reason\":\""+(reason?reason:"")+"\",\"writer\":\"original-append\"}";
+ std::string value=std::string("{\"writable\":")+(reason?"false":"true")+",\"reason\":\""+(reason?reason:"")+"\",\"writer\":\"original-append\",\"reorderSafe\":"+(reason?"false":"true")+"}";
  NSFile::CFileBinary file;if(file.CreateFileW(L"/p/policy.json"))file.WriteFile(reinterpret_cast<BYTE*>(&value[0]),value.size());
 }
 }

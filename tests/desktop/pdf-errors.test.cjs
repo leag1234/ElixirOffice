@@ -39,3 +39,16 @@ test('uncoded errors cannot expose future Unix/Windows paths and PDF catalog com
   assert.equal(Errors.message(Error(readOnly),strings),readOnly);
  }
 });
+
+test('every print fault has a specific translated safe message across all 45 catalogs and IPC forms',()=>{
+ const mapping={EOPRINT_READY_TIMEOUT:'printTimedOut',EOPRINT_CALLBACK_TIMEOUT:'printTimedOut',EOPRINT_RENDERER:'printHelperError',EOPRINT_VIEWER:'printHelperError',EOPRINT_CACHE:'printHelperError',EOPRINT_CLEANUP:'printHelperError',EOPRINT_INPUT:'printFailed',EOPRINT_JOB:'printFailed',EOPRINT_FAILED:'printFailed',EOPRINT_FUTURE:'printFailed'};
+ for(const [language,strings]of Object.entries(catalogs)){
+  for(const key of ['printFailed','printTimedOut','printHelperError'])assert(strings[key]?.trim(),language+'/'+key);
+  if(language!=='en')for(const key of ['printFailed','printTimedOut','printHelperError'])assert.notEqual(strings[key],catalogs.en[key],language+'/'+key);
+  for(const [code,key]of Object.entries(mapping))for(const error of [{code,message:'private path /not-for-UI'},Error(code),Error(code+': private path'),Error("Error invoking remote method 'eo:pdf': Error: "+code)]){
+   assert.equal(Errors.message(error,strings),strings[key],language+'/'+code);
+   assert(!Errors.message(error,strings).includes('private'));
+  }
+ }
+ for(const [code,key]of Object.entries(mapping))assert.equal(Errors.message({code},{}),Errors.fallback[key]);
+});

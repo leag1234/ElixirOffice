@@ -25,6 +25,13 @@ window.EODesktopBackstage=async function(win,main,info,action){
   for(const id of ['elx-share'])this.items[id]?.hide();
   for(const item of [fm.miRecent,fm.miRename,fm.miProtect,fm.miHistory,fm.miAccess,fm.miSaveCopyAs])item?.hide();
   this.items['elx-ai']?.[win.Common.ElixirAI?.Settings?.isConfigured?.()?'show':'hide']();
+  this.items['elx-about']?.show();this.items['elx-about']?.setDisabled(false);
+  if(!this.items['eo-quit']){
+   const el=$('<li id="fm-btn-eo-quit" class="fm-btn"/>').insertAfter(fm.$el.find('#fm-btn-elx-about'));
+   const item=new win.Common.UI.MenuItem({el,action:'eo-quit',caption:t('quit'),canFocused:false,iconCls:'menu__icon'});
+   fm.items.push(item);this.items['eo-quit']=item;
+   item.on('click',()=>{fm.hide();return action('quit')});
+  }
   fm.miHelp?.show();fm.miHelp?.setDisabled(false);
   // Handle native Help before the server-only delegated panel callback.
   fm.$el.find('#fm-btn-help').off('click.eoDesktopHelp').on('click.eoDesktopHelp',event=>{
@@ -65,6 +72,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
  };
  bs.enhanceSaveAs=function(){const panel=ensurePanel('saveas');if(!panel)return;panel.$el.empty().append($('<button class="btn btn-primary" type="button"/>').text(t('saveAs')).on('click',()=>action('save-as')),$('<button data-action="rename" type="button"/>').text(bs.txtRename).on('click',()=>{fm.hide();action('rename')}))};
  bs.enhancePrint=function(){};
+ bs.onAbout=()=>{fm.hide();return action('about')};
  bs.onClose=()=>action('home');
  // Controller callbacks were bound before this desktop extension was installed.
  // Dispatch native commands before those existing web handlers receive the event.
@@ -81,7 +89,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
  main.api.downloadAs=(_action,options)=>options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
  const link=win.document.createElement('link');link.rel='stylesheet';link.href='/example/local-assets/desktop-home/backstage-home.css';win.document.head.append(link);
  const style=win.document.createElement('style');
- style.textContent='.eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
+ style.textContent='.eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
  win.document.head.append(style);
  let operationFeedback,pendingOperation;
  const operationRender=bs.onRender;bs.onRender=function(){const result=operationRender.apply(this,arguments);if(pendingOperation)showOperation(pendingOperation);return result;};

@@ -42,3 +42,23 @@ test('actual font Core and SDK polling settle after one lazy font read fails, wh
  assert.deepEqual(Array.from(context.AscFonts.g_font_files,loader=>loader.Status),[1,0]);
  assert.equal(context.AscCommon.g_font_loader.loadFontsCounter,0);assert.equal(streams.length,1);assert.equal(streams[0].data.length,bytes.length);
 });
+
+test('actual font Core plus desktop installer reports no readable fonts but keeps a readable partial list silent',async()=>{
+ const product=path.resolve(__dirname,'../..'),upstream=process.env.EO_UPSTREAM||path.join(require('node:os').homedir(),'elixiroffice/DocumentServer');
+ const renderer=fs.readFileSync(path.join(product,'desktop/renderer.js'),'utf8'),start=renderer.indexOf('async function installFonts('),end=renderer.indexOf('\nasync function ',start+1);
+ assert(start>=0&&end>start);
+ for(const readable of [false,true]){
+  const storage=new Map(),messages=[],context={Buffer,Uint8Array,Blob,setTimeout,clearTimeout,setInterval:()=>0,clearInterval(){},document:{},navigator:{},AscCommon:{},AscFonts:{},
+   localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},
+   eoDesktop:{fontPermission:async()=>true,fontConsent:async()=>true,fontIndex:async()=>({system:[],bundled:[]}),fonts:async()=>readable?[{id:'public',family:'Public Readable',fullName:'Public Readable',style:'Regular',postscriptName:'PublicReadable'}]:[]},
+   script:async()=>{},t:key=>key==='fontFailed'?'Localized computer-font failure':key,status:value=>messages.push(value)};
+  context.window=context;context.define=(_deps,factory)=>factory();vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-localfonts/Core.js'),'utf8'),context);
+  context.EOComputerFonts={install(){}};
+  vm.runInContext(renderer.slice(start,end)+'\nthis.installFonts=installFonts;',context);
+  const result=await context.installFonts(context,true),local=context.Common.ElixirLocalFonts;
+  assert.equal(result,readable);
+  if(readable){assert.equal(context.EOComputerFontWarning,null);assert.notEqual(local.status,'error');assert.equal(messages.length,0)}
+  else{assert.equal(local.status,'error');assert.equal(local.hasConsent(),false);assert.equal(context.EOComputerFontWarning,'Localized computer-font failure');assert.equal(messages.length,1)}
+ }
+});

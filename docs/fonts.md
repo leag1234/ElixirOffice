@@ -322,3 +322,16 @@ Marelle is the free cursive of the French Ministry of National Education (Forge 
   carry no licence, the author's site is gone and dafont says "free for personal use": not verifiable from an
   official source. The name patterns "Écolier…" keep mapping to Playwrite FR Moderne Metric (§ 9).
 - Test: `branding/fonts/test_build.py` (`SourcesPinning`: every file pinned, Marelle unmodified, OFL, default group).
+
+## 2026-10-16 — System fonts S1–S4: isolated review addendum
+
+This dated addendum records the isolated fonts review candidate. Earlier text remains the integrated baseline. Historical source/runtime evidence keeps its original profile; r1 validation and remaining gates are recorded separately. No integration, runtime pin, package or release is implied.
+
+### Desktop system fonts (0.2.2 S1 candidate)
+
+All existing bundles remain. The desktop-only private index and named-family/style resolver prefer bundled document/metric fonts, then local system fonts, then a small bundled fallback. Default-on applies to unset settings and preserves explicit declines. See [desktop system fonts](desktop-system-fonts.md) for privacy, cache, tests and pending character/PDF/collection gates. No full CJK bundle or new fallback files are added in S1; server font generation is unchanged.
+
+## release review r1 scope — 2026-10-16
+This dated candidate addition preserves integrated main41e4fa6f96 in full.
+See docs/desktop-system-fonts.md for the independent r1 family, fresh test profiles,
+historical evidence limits and open runtime gates. No integration or release.

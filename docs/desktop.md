@@ -15,6 +15,8 @@ An asterisk in the window title means there are unsaved changes. Closing offers 
 
 Export PDF uses the native WebAssembly PDF writer with document fonts and images. Print submits the resulting PDF through the operating system's print dialog. Cancelling a dialog does not submit a print job.
 
+The next desktop printing correction keeps text and shapes as vectors. It loads a private temporary PDF in a hidden helper and waits for Chromium's PDF viewer to finish loading before opening the native print dialog. Temporary files are removed after completion, cancellation or failure, and interrupted jobs are removed at startup. Readiness is limited to one minute and an unanswered print dialog to ten minutes. A helper failure leaves the editor open. Linux native Print to File checks cover Office output, a 300-page report and mixed portrait/rotated pages; native macOS, Windows and physical-printer acceptance remain pending.
+
 Save prepares and flushes a sibling temporary file, verifies the selected original, keeps a sibling backup while replacing it, and flushes the directory on Linux/macOS. Failed replacement retains the backup and reports its path. A changed original requires Save As. This is not an interprocess file lock; avoid editing the same file simultaneously in another program. Symlink destinations/folders are refused. Files must be regular Office documents under 512 MiB; the save preserves ordinary permission bits, but does not promise preservation of extended ACLs or filesystem ownership.
 
 ## Privacy and fonts
@@ -298,9 +300,9 @@ Local web Open accepts RTF/TXT/CSV, DOTX/XLTX/POTX/DOCM/XLSM/PPSX and legacy DOC
 
 Spreadsheet Review > Protect Range now works in both local launchers. The normal manager/dialog associates the range with the current local identity; XLSX local save/reopen retains those permissions. Insert text from file and Edit Links entry points are hidden in local editors because their server operations are unavailable. External reference update prompts/actions are suppressed in these explicit Elixir-local API instances. Hosted instances retain their ordinary behavior.
 
-Reproduce web checks with an explicit own EO_BASE, public fixtures and an owned output directory: exports-browser.mjs, imports-browser.mjs, unicode-browser.mjs, csv-ui-browser.mjs, export-media-browser.mjs and protect-range-browser.mjs in tests/local-mode. The desktop Protect Range test is tests/desktop/protect-range.cjs; set EO_DESKTOP_RANGE_FILE, optional EO_DESKTOP_WORD_FILE, EO_PACKAGE_EXECUTABLE and an owned EO_DESKTOP_ROOT. EO_DESKTOP_DISPLAY selects a private test display; the default stays :0. Session E ran the packaged Linux shell with generated production candidate assets under its own Xvfb display, keeping Chromium's sandbox enabled. This does not certify OS printer dialogs, Windows/macOS packaging, downloaded-signature handling or physical printer output.
+Reproduce web checks with an explicit own EO_BASE, public fixtures and an owned output directory: exports-browser.mjs, imports-browser.mjs, unicode-browser.mjs, csv-ui-browser.mjs, export-media-browser.mjs and protect-range-browser.mjs in tests/local-mode. The desktop Protect Range test is tests/desktop/protect-range.cjs; set EO_DESKTOP_RANGE_FILE, optional EO_DESKTOP_WORD_FILE, EO_PACKAGE_EXECUTABLE and an owned EO_DESKTOP_ROOT. EO_DESKTOP_DISPLAY selects a private test display; the default stays :0. release maintainer ran the packaged Linux shell with generated production candidate assets under its own Xvfb display, keeping Chromium's sandbox enabled. This does not certify OS printer dialogs, Windows/macOS packaging, downloaded-signature handling or physical printer output.
 
-The packaged A1–A3 baseline ran for 302,353 ms and reported real spelling errors after typing a misspelling; the old no-spelling audit is superseded by A1. Review remained disabled and the imported comment model remained present. Session D owns comments/review/pictures. Final results, runtime pins, known hosted baseline failures and review limits are recorded in the accompanying release acceptance record
+The packaged A1–A3 baseline ran for 302,353 ms and reported real spelling errors after typing a misspelling; the old no-spelling audit is superseded by A1. Review remained disabled and the imported comment model remained present. release maintainer owns comments/review/pictures. Final results, runtime pins, known hosted baseline failures and review limits are recorded in the accompanying release acceptance record
 
 ### D3–D4 review follow-up on integrated A4–A6 (2026-10-13)
 
@@ -421,9 +423,102 @@ Local PDF parity G2 first-slice review candidate: right-click a selected page th
 
 Quit names the document with bidi isolation and localized Save / Don't Save / Cancel; defaultSave and EscapeCancel use explicit platform IDs. Busy close retains a safe Cancel default and explicit Don't Save, with the document name and existing recovery/deadline guards. The File-menu Save caption supplies the translated quit action in45catalogs.242units and32localized DOM projections pass; native OS rendering/key delivery remains unverified. See scope and evidence.
 
+## 2026-10-16 — System fonts S1–S4: isolated review addendum
+
+This dated addendum records the isolated fonts review candidate. Earlier text remains the integrated baseline. Historical source/runtime evidence keeps its original profile; r1 validation and remaining gates are recorded separately. No integration, runtime pin, package or release is implied.
+
+The standard free font set and its licenses are bundled: metric-compatible office fonts, school fonts including Marelle, and UI and symbol fonts. The full set remains available as a separate build option; an optional download is not implemented yet. In the 0.2.2 S1/S2 candidate, Computer fonts is enabled for unset desktop settings; explicit prior declines remain disabled and re-enabling uses the native dialog. The switch stays in File > Options. A private worker index gives bundled/metric fonts priority; [scope and limits](desktop-system-fonts.md). Earlier 0.2.0/0.2.1 packages remain opt-in. The renderer receives opaque font handles, not filesystem paths, and reads only recognized font files under those folders, capped at128MiB each with192MiB selected-byte budgets. Static TTC PDF faces are tested; variable system fonts are eligible only at their default instance, with static or synthetic alternatives for other requests. Native screen/export parity remains unverified. Recent document names and native paths are stored locally, limited to fifteen entries.
+
+The start renderer has a strict self-only script policy, context isolation, a sandbox, and no Node integration. The existing editor bundles require inline scripts and eval/Wasm compilation; their separate resource policy permits these while retaining self-only resource connections and no object embedding. The editor iframe shares the start window's origin and can call window.parent.eoDesktop. Its bundled code is therefore inside the bridge's trust boundary: the main-frame IPC check does not isolate the editor from the parent's API. A compromised bundled editor could use the active document handle, request native dialogs, or select a previously authorized recent file. The bridge exposes no arbitrary filesystem read/write API; document saves and PDF exports require the active opaque handle, and computer fonts require the enabled local setting (with explicit prior declines preserved). CSP permits unsafe-inline, unsafe-eval and wasm-unsafe-eval for the editor; the shell has neither inline nor eval permission. Frames are self-only, media is disabled, and blob/data remain only where required for image/font loading and local workers/conversion. Files are authorized through native selection, recent-file selection, command-line opening or an OS-backed drop.
+
+1. Open the arm64 DMG; verify the displayed unsigned-publisher/Gatekeeper behavior without disabling security protections. Copy/run the preview as the owner chooses; confirm About name/version and icon.
+2. Use Open, an installed association/double-click, a file URI and OS-backed drop. Check all nine Office associations are alternatives, unsupported extensions are ignored, and a second file reaches the existing instance.
+3. Edit/save/fresh-reopen DOCX, XLSX, PPTX, ODT, ODS and ODP; check original/backup safety and disclose the known embedded-ODS object/PDF limitation.
+4. Export PDF and inspect saved text/images/fonts; invoke Print, cancel its native sheet, and confirm no job is submitted. A real print job is an owner action.
+5. With unsaved changes, test Cmd+W and Quit: Cancel keeps the document, Save writes and closes, Discard closes. Opening another file also requires a discard decision.
+6. Exercise App/Settings/Services/Hide/Show All, Edit/Cut/Copy/Paste/Select All, Window/Minimize/Zoom/Close and offline Help. Confirm Cmd+Z and Cmd+Y reach editor undo/redo and closing every window quits.
+7. Refuse then allow Computer fonts, check layout/PDF, reopen the profile and confirm persistence. For 0.2.2, confirm a fresh profile enables computer fonts without a prompt, explicit declines survive restart and capture mode remains disabled; earlier releases start without consent.
+8. Run offline: open/edit/save/export remain local, renderer Node access is unavailable and external requests are blocked. Record startup separately; no macOS performance target is claimed.
+
+Before building, create an isolated Python environment with `python3 -m venv "$OUTPUT/python"`, activate it with `source "$OUTPUT/python/bin/activate"`, and run `python3 -m pip install -r tools/desktop/requirements.txt fonttools==4.58.0`.
+
+1. Set `UPSTREAM` to that checkout, `FULL_RUNTIME` and `PDF_RELEASE` to the full and PDF manifest-verified release folders, and `OUTPUT` to a fresh output folder outside the source trees. Run `bash tools/desktop/compile.sh`. It installs verified runtimes, runs the SDK and themed web-app production pipelines, restores generated locale/icon changes, and prints `SDK_OUTPUT` and `WEBAPPS_OUTPUT`.
+2. Build the four small desktop fallbacks with `python3 tools/desktop/fallback-fonts.py --out "$OUTPUT/desktop-fallbacks" --cache "$OUTPUT/font-downloads"`; use `--offline` once the verified sources are cached. Set `DESKTOP_FALLBACKS=$OUTPUT/desktop-fallbacks` and retain it through fonts, themes and resource assembly. This helper uses the existing release-driver FontTools 4.58.0 pin; exact source/derivative/OFL/NOTICE hashes are verified before generation. Then set `FONT_TOOL_IMAGE` to an immutable Docker image SHA, `FONT_TOOL_ROOT` to its documentserver directory, `CORE_FONTS` and `FONT_PACK` to licensed free-font inputs, and `FONT_OUTPUT` to a fresh output folder. Run `bash tools/desktop/fonts.sh` (`FONT_SET=standard` by default; `FONT_SET=full` for a separate full-font build). The generator runs without network access and explicitly excludes system fonts.
+3. Generate the presentation theme catalog with `bash tools/desktop/themes.sh`, using the same pinned font-tool image, production SDK/web-app outputs, `DESKTOP_FALLBACKS` mount and free-font inputs. Set `THEMES` to its generated output directory.
+4. Set the printed production output paths, `FONT_FILES=$FONT_OUTPUT/fonts`, `ALL_FONTS=$FONT_OUTPUT/AllFonts.js`, `FONT_IMAGES=$FONT_OUTPUT/Images`, the font-source paths (for standard builds, `CORE_FONTS=$FONT_OUTPUT/inputs/core` and `FONT_PACK=$FONT_OUTPUT/inputs/pack`, including the matching bundled notices; for a full build, retain its licensed original input paths), `PDF_RUNTIME` to the folder containing `current.json` and its versioned release, `TEMPLATES` to the directory containing the three `new.*` Office templates, `DESKTOP_FALLBACKS` for the matching small fallback files/notices, and `UPSTREAM`. Run `bash tools/desktop/build.sh` with a fresh `desktop/assets` directory. Preserve or move any previous assets first.
+5. The script verifies production editor/SDK bundles and all six files in each Wasm release, hashes the complete resource set into `desktop-manifest.json`, installs the pinned lockfile, runs units, and produces both Linux packages. Generated resources, dependencies and packages are ignored by Git.
+
+Existing packages use the shared 39-language Home manifest. The desktop0.2.2 S4 candidate merges a separate24DOCX/24PNG overlay for ja, zh, zh-tw, ko, si and ur. Sinhala/Urdu use the small offline pack; CJK requires consent and eligible covering system fonts, otherwise Home/opening retain English fallback. The server catalog remains unchanged. See docs/home.md and docs/desktop-system-fonts.md for real preview/coverage evidence and native acceptance limits.
+
+S3 adds four small renamed static Arabic/Sinhala fallback faces (882,628 font bytes), including explicit synthetic italic behavior with Computer fonts off. The generated font resources and notices grow by 1,022,525 raw bytes in the controlled comparison; full installer deltas remain unverified. See [source pins, priority, real converter evidence and extraction limits](desktop-system-fonts.md#small-bundled-desktop-fallbacks--s3).
+
+## release review r1 scope — 2026-10-16
+This dated candidate addition preserves integrated main41e4fa6f96 in full.
+See docs/desktop-system-fonts.md for the independent r1 family, fresh test profiles,
+historical evidence limits and open runtime gates. No integration or release.
+
+
+### Local PDF page-order review candidate
+Existing pages can be moved using thumbnail drag, including multiple selected pages and the end boundary, in one undoable action. This is enabled only for a verified writable local PDF while no open/save operation is active. It retains page count and source bytes through incremental saving; page insertion/deletion and original-text editing remain unavailable. Hosted thumbnail behavior is unchanged.
+The synthetic public five-page classic/compressed regression covers distinct page identities, MediaBox/CropBox, nested outlines, internal destinations, raster images, text-field values, annotations, XMP and document information, actual English/French gestures, grouped Undo/Redo, repeated save and fresh reopen. Independent Poppler rendering compares every reordered page to its source identity. This does not qualify arbitrary PDF structure or native platform packaging.
+
+
+### 2026-10-16: page-order baseline blocked by inherited attributes
+The expanded baseline fixtures exposed a writer limitation: a grouped move
+through a nested Pages tree can retain the original byte prefix and page order
+while losing the moved page's inherited MediaBox and Rotate. In the synthetic
+case, logical page 4 becomes output page 3 with 652-by-872 instead of 642-by-852
+and zero instead of 270-degree rotation. Poppler and pypdf independently confirm
+the mismatch. The moved text widget's page reference remains correct, but that
+does not make the output safe. That baseline candidate was blocked pending a writer repair or safe structural
+refusal.
+At that baseline, named-destination PDFs were refused by the
+unsupported-catalog policy. The required positive test could not pass; the guard
+was retained during diagnosis. Flat classic/compressed tests and Undo/Redo
+after actual Save pass. Nested single-move inheritance and widget binding pass;
+the full nested/group/repeated baseline qualification did not pass.
+The independent structure check uses pypdf==5.9.0, pinned in
+tests/pdf-local/requirements.txt; install it in the test environment used by
+EO_PDF_STRUCTURE_PYTHON (default python3). Production browser tests retain the
+positive assertions for all required structures. Native packages and a runtime
+change are outside this review correction.
+
+
+### 2026-10-16: inherited page-order source repair qualified separately
+Core branch elixir/pdf-page-order-core-A (39ca5772b4) resolves the original page
+by its stable object reference before copying inherited attributes. With the
+separate c81d qualification module, all six classic/compressed/Pages-inherited/
+named-destination inputs pass actual single, group and end moves, Undo/Redo after
+Save, repeated incremental saves and fresh SDK reopen in English at DPR2 and
+French. Independent pypdf verifies every page's Resources, MediaBox, CropBox,
+Rotate and unchanged object identity, plus named targets and widget /P binding.
+The 90 Poppler page comparisons per language have zero mean pixel difference.
+All 278 units and 33 native inspect/edit policy fixtures plus three malformed
+jobs pass. Signed/encrypted/XFA/scripted/tagged and malformed Names trees remain
+refused. Hosted smoke has no errors; the one previously paired Windows
+navigation failure remains, with other Windows and Mac shortcuts passing.
+The published runtime pins remain unchanged. Old runtimes lack reorderSafe and
+the new local gate denies reordering; the actual six-input old-runtime browser
+gate preserves order/history. D must build and qualify one combined 0.2.2
+runtime pair with security and RTL changes. This isolated binary is never a
+release pin. The neutral source patch and regression recipe are in
+tools/wasm/review-patches/; integration remains with the lead.
+
+Dialog accessibility 0.2.2 slice 1: Recovery and Options reference their existing visible headings with distinct IDs on repeated openings. The shared editor naming/field-label changes and browser-versus-native acceptance limits are recorded in the slice handoff.
+
+### Home RTL component review (0.2.2)
+
+Shared Home assets include Arabic/Hebrew/Urdu start labels and direction-aware layout. The desktop renderer aligns tile/file labels to logical start and isolates displayed recent filenames/folders with BDI. Embedded Home uses the same logical alignment. Actual assembled45-locale assets/public previews and standalone/embedded renderers are checked in a browser; native Electron startup/close, OS dialogs, actual file opens and packaging are outside this component gate. Existing template font fallback and save/quit behavior are unchanged. See [Home UI tests](../tests/home-ui/README.md).
+
+
+### Shared Home appearance review (0.2.2)
+
+Home assets include the same UI theme resolver as the web start page. The standalone head loads it before CSS; embedded rendering binds the Home container to its owner document's current app preference. The scoped backstage stylesheet carries the same light/dark tokens and retains the production inline backstage rules. The browser component gate checks40 localized standalone/embedded combinations with system and explicit opposite-system choices; a parent-renderer/foreign-owner fixture checks live host state, OS changes, stable panel reuse, the bind disposer and recent-file callback. It leaves the host root/body untouched. Native Electron lifecycle, Options UI interaction, final packages and OS dialogs remain unverified. [Appearance tests](../tests/home-theme/README.md).
+
 ## Open-error resilience (0.2.1 follow-up)
 
 Unreadable recent metadata is isolated per entry. User-document reads retry EBUSY once after100ms while retaining file identity; failures use45-language OPEN guidance and code-only local diagnostics. Existing SAVE/cancel/recovery policies remain unchanged. Validation and limits.
+
 ## Desktop keyboard routing,0.2.1-rc.5 review candidate
 
 Desktop file shortcuts follow Office while an editor iframe has focus. Windows/Linux use Ctrl+N/O/S/P and F12 for Save As. Ctrl+Shift+S (Word Apply Styles), Ctrl+Shift+E (Track Changes) and Ctrl+Q (remove paragraph formatting; Excel Quick Analysis) remain editor commands. Quit is available through the menu/window close, including the OS Alt+F4 convention. PDF export has no assigned shortcut and stays in File.
@@ -436,4 +531,39 @@ The corrected Linux private-Xvfb/XTest gate has36passing rows:25exactly-once fil
 
 Native testing requires EO_PLAYWRIGHT, EO_NATIVE_WORK, EO_ELECTRON, EO_XVFB and EO_XDOTOOL and uses a fresh private Linux display with mandatory sandboxing. The development host extracted test runtime uses the existing root-owned system Chrome sandbox helper through an isolated symlink; system files are unchanged. Windows/macOS native delivery, Arch/niri Wayland, physical200percent scaling and real non-Latin OS-layout input remain unverified; platform/menu/layout/AltGr/IME mappings have unit coverage. Source evidence is not rebuilt rc.5 package acceptance. See tests/desktop/native-shortcuts.cjs and tests/desktop/receipts/native-shortcuts-rc5.json.
 
-MSG56 Windows follow-up: preference queue draining recovers after failed writes; optional recent persistence cannot invalidate a successful open/save. Font discovery skips unreadable entries and native app identity is ElixirOffice without relocating the profile. RC222/34/26 and focused Windows7/font1/open8 pass. Evidence and native limitations.
+release review Windows follow-up: preference queue draining recovers after failed writes; optional recent persistence cannot invalidate a successful open/save. Font discovery skips unreadable entries and native app identity is ElixirOffice without relocating the profile. RC222/34/26 and focused Windows7/font1/open8 pass. Evidence and native limitations.
+
+## Desktop menu and notification behavior
+
+On Windows/Linux the native menu bar stays hidden; its menu and accelerators remain installed, alongside the desktop before-input handler. The macOS application menu is unchanged. Successful and cancelled informational toasts expire after eight seconds of unpaused display. Hovering or focusing the notice pauses the remaining time; errors and warnings remain until dismissed. File-backstage operation details remain available. The accessible live announcement survives visual expiration. No browser/server behavior or runtime pin changes. Tests: `tests/desktop/menu-visibility.test.cjs`, `tests/desktop/feedback-autodismiss.cjs` and existing shortcut/feedback regressions.
+
+F1 routes through the native before-input handler even when the editor iframe has focus. File backstage provides native Help, About and a guarded Quit action, translated in all 45 shell locales. Help and print child windows also hide their native menu bars on Windows/Linux. Toasts with Open file or Show in folder actions stay until dismissed; only plain informational notices expire after eight unpaused seconds. The reported intermittent print exit on elementary OS 6.1 (Ubuntu 20.04 base) remains an unresolved limitation: public DOCX/XLSX/PDF tests on the same installed binary did not reproduce the owner report. No root cause or printing fix is claimed.
+
+
+Desktop Close/Open review for 0.2.2: File > Close shares the named quit choices and platform defaults. Save on an untitled document uses the shared Save As format/destination-ticket path; Home waits for committed output and a fresh dirty/pending-picture check. The full Open drop zone uses desktop CSS for its width and visible focus in Home and the editor. Current-main baseline 286/286; candidate 305/305 desktop, 37/37 local and 46/46 simulated Darwin pass. Actual sandboxed Linux Electron covers five Close outcomes, fifteen Open checks and a native Save/real-ticket/precommit-ordering test. Evidence
+
+
+## Windows file access
+
+Windows saves retry temporary access refusals within a shared five-second window, configurable up to fifteen seconds, while retaining the saving state. After a refused replacement, an existing single-link file can use a verified-backup in-place fallback; failed or unsafe restoration keeps the backup and shows translated recovery guidance. AutoRecover uses the same strategy. Computer font discovery retains readable system, per-user and exact local registry fonts despite individual failures, without scanning registry parent folders. Persistent failures keep fixed-code local diagnostics. See [Windows document and font access](windows-file-access.md).
+
+Windows backup flushing uses a write-capable handle for repeated document, AutoRecover and preference saves. Directory flushing remains disabled on Windows; Linux/macOS retain equivalent save behavior. [Windows file access](windows-file-access.md).
+
+Cancel reaches an active native save retry. Forced close stops queued writes and waits for active write cleanup or restoration; abandoning close permits new writes again. An uncertain restoration keeps its backup, names that backup without a folder path and waits for acknowledgement before closing. Computer font indexing falls back to bounded registry queries if PowerShell cannot run, preserving readable records despite an individual query or encoding failure. [Windows file access](windows-file-access.md).
+
+
+## Local password choices
+
+Local password choices and the warnings before exporting an unprotected copy or removing protection follow the editor language, with English fallback. No or Cancel preserves protection and stops the operation. Existing conversion, recovery and save safeguards remain in place. [Behavior](local-passwords.md).
+
+Guided feature tips stay clear of editor dialog actions and the AI bar/settings. They can resume after the last surface closes while their associated control remains available. Connection, session and license warnings retain their existing behavior. [Guided tips](guided-tips.md).
+
+### Printing compatibility and private temporary files
+
+The printing correction has a six-second compatibility grace period when the loaded PDF viewer's internal readiness fields are unrecognised. Known loading, incomplete and failed states do not use that fallback. A real-Electron contract check detects field changes independently of the fallback. Printing failures, timeouts and helper failures have distinct messages in all 45 desktop languages.
+
+On Linux and macOS, private print directories and PDFs use modes 0700 and 0600. On Windows, these POSIX mode bits do not create a DACL: temporary jobs inherit the current user's application-profile ACL. The application does not override Windows profile ACLs; profiles must remain private to their user.
+
+The normal helper remains hidden. For supervised diagnosis only, setting EO_PRINT_OFFSCREEN_RETRY=1 before launch enables one retry with an off-screen, minimized helper after a definite failure. It is disabled by default. Cancellation, an uncertain native callback timeout, cleanup failure or a renderer crash after submission never retries, avoiding duplicate or unwanted jobs. This contingency still requires native qualification on the affected platform.
+
+CI must run npm run test:print-viewer from desktop with an explicit private EO_PRINT_CONTRACT_OUT and an owned display. It launches the pinned Electron and reads the actual PDF viewer; it never uses mocked readiness or accepts the compatibility fallback. A changed field contract fails with a specific error and last-state evidence.

@@ -13,6 +13,20 @@ set(EO_WASM_BOOST "" CACHE PATH "Boost prefix built for Emscripten (include/, li
 set(EO_WASM_INITIAL_MEMORY "64MB" CACHE STRING "Initial wasm memory")
 option(EO_WASM_THREADS "Build with pthreads (needs SharedArrayBuffer, COOP/COEP)" OFF)
 
+# pdf-edit.cpp attests reorderSafe after inspection. Require the reviewed
+# original-page lookup before either full or PDF-only runtime can be built.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    "${EO_CORE_DIR}/PdfFile/PdfEditor.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../check-pdf-reorder-core.py")
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/../check-pdf-reorder-core.py" "${EO_CORE_DIR}"
+    RESULT_VARIABLE EO_REORDER_GUARD_RESULT
+    ERROR_VARIABLE EO_REORDER_GUARD_ERROR)
+if(NOT EO_REORDER_GUARD_RESULT STREQUAL "0")
+    message(FATAL_ERROR "${EO_REORDER_GUARD_ERROR}")
+endif()
+
 set(CORE_ROOT_DIR "${EO_CORE_DIR}")
 include("${EO_CORE_DIR}/common.cmake")
 

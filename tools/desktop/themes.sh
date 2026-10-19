@@ -5,6 +5,8 @@ set -euo pipefail
 : "${FONT_TOOL_ROOT:?documentserver directory in that image}"
 : "${CORE_FONTS:?licensed free-font checkout}"
 : "${FONT_PACK:?licensed free-font pack}"
+: "${DESKTOP_FALLBACKS:?matching generated small desktop fallback inputs}"
+python3 "$(dirname "$0")/fallback-fonts.py" --verify "$DESKTOP_FALLBACKS"
 : "${FONT_OUTPUT:?completed free-only font generation directory}"
 : "${SDK_OUTPUT:?production output containing sdkjs/}"
 : "${WEBAPPS_OUTPUT:?production output containing web-apps/}"
@@ -14,7 +16,7 @@ case "$FONT_TOOL_IMAGE" in sha256:*) ;; *) echo "Pin a sha256 image ID" >&2; exi
 [ ! -e "$THEME_OUTPUT" ] || { echo "Choose a fresh theme output directory" >&2; exit 1; }
 mkdir -p "$THEME_OUTPUT"
 docker run --rm --name "eo-desktop-A-themes-$$" --network none --user "$(id -u):$(id -g)" --entrypoint /bin/sh \
- -e FONT_TOOL_ROOT="$FONT_TOOL_ROOT" -v "$CORE_FONTS:/input:ro" -v "$FONT_PACK:/pack:ro" \
+ -e FONT_TOOL_ROOT="$FONT_TOOL_ROOT" -v "$CORE_FONTS:/input:ro" -v "$FONT_PACK:/pack:ro" -v "$DESKTOP_FALLBACKS:/fallback:ro" \
  -v "$SDK_OUTPUT/sdkjs:/sdkjs:ro" -v "$WEBAPPS_OUTPUT/web-apps:/web-apps:ro" -v "$FONT_OUTPUT:/font-output:ro" -v "$THEME_SOURCE:/theme-input:ro" -v "$THEME_OUTPUT:/out" "$FONT_TOOL_IMAGE" -c '
  set -e
  cp /theme-input/*.pptx /out/

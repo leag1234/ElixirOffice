@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-import pathlib,sys,zipfile,xml.etree.ElementTree as E,json
+import pathlib,sys,zipfile,xml.etree.ElementTree as E,json,hashlib,re
 root=pathlib.Path(sys.argv[1])
 docs=[p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in {'.docx','.xlsx','.pptx','.odt','.ods','.odp','.pdf','.doc','.xls','.ppt'}]
 manifest=json.loads((root/'desktop-manifest.json').read_text())
@@ -25,6 +25,22 @@ for entry in catalog:
   assert (root/relative).read_bytes()==(brand/language/entry['file']).read_bytes(), 'Home template differs from approved source'
   home_templates.add(relative)
 assert len(home_templates)==156, 'Expected four Home templates in 39 supported languages'
+# The desktop-only six-locale extension is separately approved and pinned.
+# Keep a closed set: no glob or catalog entry can silently admit more documents.
+overlay=pathlib.Path(__file__).resolve().parents[2]/'branding/desktop-templates'
+pins=json.loads(pathlib.Path(__file__).with_name('approved-overlay-templates.json').read_text())
+overlay_names={language+'/'+name+'.docx' for language in ['ja','zh','zh-tw','ko','si','ur']
+               for name in ['letterhead','resume-two-columns','worksheet-fractions','assessment-grid']}
+assert set(pins)==overlay_names and len(pins)==24, 'Unexpected desktop overlay pin set'
+for relative,digest in pins.items():
+ assert re.fullmatch('[0-9a-f]{64}',digest), 'Invalid desktop overlay source hash'
+ source=overlay/relative
+ assert not source.is_symlink() and hashlib.sha256(source.read_bytes()).hexdigest()==digest, 'Desktop overlay source hash mismatch'
+ packaged=root/'desktop-home/templates'/relative
+ assert not packaged.is_symlink() and hashlib.sha256(packaged.read_bytes()).hexdigest()==digest, 'Desktop overlay template hash mismatch'
+ home_templates.add('desktop-home/templates/'+relative)
+assert len(home_templates)==180, 'Expected 156 web templates and exactly 24 desktop overlay templates'
+
 expected={'templates/new.docx','templates/new.xlsx','templates/new.pptx'} | themes | localized_blanks | home_templates
 assert {p.relative_to(root).as_posix() for p in docs}==expected, 'Samples/test artifacts must not be packaged'
 for p in docs:
@@ -35,4 +51,4 @@ for p in docs:
    assert b'EODESKTOP' not in xml and b'CLOSERACE' not in xml, 'Test marker in packaged document'
    text=' '.join(E.fromstring(xml).itertext()).lower()
    assert 'welcome to onlyoffice' not in text and 'onlyoffice online editors' not in text, 'Old upstream welcome sample'
-print('PASS no old sample or test-modified Office payload; three clean blank templates,45 exact language-only blank variants, 156 exact approved localized home templates and22 approved theme files')
+print('PASS no old sample or test-modified Office payload; three clean blank templates,45 exact language-only blank variants, 180 exact approved localized home templates (including24pinned desktop overlay templates) and22 approved theme files')

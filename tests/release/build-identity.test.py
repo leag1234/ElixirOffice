@@ -46,13 +46,13 @@ class Identity(unittest.TestCase):
             desktop=Path(root)/"desktop";desktop.mkdir()
             package=json.loads((ROOT/"desktop/package.json").read_text())
             (desktop/"package.json").write_text(json.dumps(package))
-            (desktop/"package-lock.json").write_text('{"version":"0.2.1","packages":{"":{"version":"0.2.1"}}}')
+            (desktop/"package-lock.json").write_text(json.dumps({"version":package["version"],"packages":{"":{"version":package["version"]}}}))
             node=os.environ.get("EO_RELEASE_NODE","node")
-            args=["0.2.1","rc",42,"a"*40,"b"*40]
+            args=[package["version"],"rc",42,"a"*40,"b"*40]
             v=json.loads(subprocess.check_output([node,ROOT/"desktop/build-identity.cjs","create",json.dumps(args)],text=True))
             identity.stamp(root,v)
             actual=json.loads((desktop/"package.json").read_text());lock=json.loads((desktop/"package-lock.json").read_text())
-            self.assertEqual(actual["version"],lock["packages"][""]["version"]);self.assertEqual(actual["version"],"0.2.1-rc.42")
+            self.assertEqual(actual["version"],lock["packages"][""]["version"]);self.assertEqual(actual["version"],package["version"]+"-rc.42")
             subprocess.run([node,ROOT/"desktop/build-identity.cjs","verify",desktop],check=True)
     def test_public_release_fetcher_paginates_and_does_not_mark_errors_complete(self):
         spec=importlib.util.spec_from_file_location("fetch_published",ROOT/"tools/release/fetch-published-versions.py")
@@ -77,13 +77,13 @@ class Identity(unittest.TestCase):
             shutil.copyfile(ROOT/"desktop/build-identity.cjs",desktop/"build-identity.cjs")
             shutil.copyfile(ROOT/"desktop/icon.png",desktop/"icon.png")
             package=json.loads((ROOT/"desktop/package.json").read_text());(desktop/"package.json").write_text(json.dumps(package))
-            (desktop/"package-lock.json").write_text('{"version":"0.2.1","packages":{"":{"version":"0.2.1"}}}')
+            (desktop/"package-lock.json").write_text(json.dumps({"version":package["version"],"packages":{"":{"version":package["version"]}}}))
             node=os.environ.get("EO_RELEASE_NODE","node")
-            v=json.loads(subprocess.check_output([node,ROOT/"desktop/build-identity.cjs","create",json.dumps(["0.2.1","rc",42,"a"*40,"b"*40])],text=True))
+            v=json.loads(subprocess.check_output([node,ROOT/"desktop/build-identity.cjs","create",json.dumps([package["version"],"rc",42,"a"*40,"b"*40])],text=True))
             identity.stamp(root,v)
             subprocess.run(["bash",scripts/"deb.sh"],check=True,stdout=subprocess.DEVNULL)
-            artifact=desktop/"dist/ElixirOffice-0.2.1-rc.42-linux-amd64.deb"
-            self.assertEqual(subprocess.check_output(["dpkg-deb","-f",artifact,"Version"],text=True).strip(),"0.2.1~rc42")
+            artifact=desktop/("dist/ElixirOffice-"+package["version"]+"-rc.42-linux-amd64.deb")
+            self.assertEqual(subprocess.check_output(["dpkg-deb","-f",artifact,"Version"],text=True).strip(),package["version"]+"~rc42")
     def test_publication_preparation_rechecks_completed_build_without_allocating(self):
         with tempfile.TemporaryDirectory() as root:
             root=Path(root);inventory=self.fixture(root)

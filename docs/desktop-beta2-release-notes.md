@@ -24,7 +24,7 @@ The first public beta ships the server version only. This is a development/revie
 - Web local Open also accepts RTF/TXT/CSV, DOTX/XLTX/POTX/DOCM/XLSM/PPSX, and legacy DOC/XLS/PPT as converted DOCX/XLSX/PPTX copies. Downloads identify these copies; the selected source is never overwritten. Macro-enabled documents open as static copies; macros do not run. HTML/XLSB and PDF open/edit remain unavailable.
 - Protect Range is available offline in the spreadsheet Review tab in both web local mode and desktop. XLSX save/reopen preserves range and local-user permissions.
 - Insert text from file and Edit Links are hidden in local modes; their server-dependent actions remain unavailable. Existing external link refresh stays outside beta 2.
-- A wasm-only ICU wide-string fix preserves Unicode in newly enabled TXT/CSV conversions, including supplementary characters. The shared wasm RTF surrogate correction also preserves emoji through export/reopen. Runtime identities and acceptance are recorded in the Session E handoff.
+- A wasm-only ICU wide-string fix preserves Unicode in newly enabled TXT/CSV conversions, including supplementary characters. The shared wasm RTF surrogate correction also preserves emoji through export/reopen. Runtime identities and acceptance are recorded in the release maintainer handoff.
 
 ## Server upgrade note
 

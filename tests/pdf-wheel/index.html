@@ -1,0 +1,5 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Public hosted PDF wheel</title><style>html,body,#placeholder{margin:0;width:100%;height:100%;overflow:hidden}</style><script src="/web-apps/apps/api/documents/api.js"></script></head><body><div id="placeholder"></div><script>
+const q=new URLSearchParams(location.search),mode=q.get('mode')==='edit'?'edit':'view',key=('Z5-'+(q.get('key')||'public')).replace(/[^a-zA-Z0-9-]/g,'').slice(0,100);
+window.Z5Config={documentType:'pdf',type:'desktop',width:'100%',height:'100%',document:{fileType:'pdf',key,title:'Public wheel fixture.pdf',url:'http://127.0.0.1/z5-public/wheel.pdf',permissions:{edit:mode==='edit',comment:mode==='edit',fillForms:mode==='edit',download:false,print:false}},editorConfig:{mode,lang:q.get('lang')||'en',user:{id:'public-wheel',name:'Public wheel test'},customization:{autosave:false}}};
+window.Z5Editor=new DocsAPI.DocEditor('placeholder',Z5Config);
+</script></body></html>

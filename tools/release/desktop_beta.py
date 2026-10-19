@@ -345,12 +345,13 @@ class Build:
         env = {**self.env, "UPSTREAM": str(self.upstream), "OUTPUT": str(self.work / "production"), "FULL_RUNTIME": self.plan["full_runtime"]["path"], "PDF_RELEASE": self.plan["pdf_runtime"]["path"]}
         self.run("production", ["bash", self.product / "tools/desktop/compile.sh"], env)
         self.run("font-pack", [python, self.product / "branding/fonts/build.py", "--out", self.work / "font-pack", "--cache", Path(self.args.cache) / "font-downloads"])
-        env.update(FONT_TOOL_IMAGE=self.args.font_tool_image, FONT_TOOL_ROOT=self.args.font_tool_root, CORE_FONTS=str(self.upstream / "core-fonts"), FONT_PACK=str(self.work / "font-pack"), FONT_OUTPUT=str(self.work / "fonts"), FONT_SET="standard")
+        self.run("desktop-fallbacks", [python, self.product / "tools/desktop/fallback-fonts.py", "--out", self.work / "desktop-fallbacks", "--cache", Path(self.args.cache) / "font-downloads"])
+        env.update(FONT_TOOL_IMAGE=self.args.font_tool_image, FONT_TOOL_ROOT=self.args.font_tool_root, CORE_FONTS=str(self.upstream / "core-fonts"), FONT_PACK=str(self.work / "font-pack"), FONT_OUTPUT=str(self.work / "fonts"), FONT_SET="standard", DESKTOP_FALLBACKS=str(self.work / "desktop-fallbacks"))
         self.run("fonts", ["bash", self.product / "tools/desktop/fonts.sh"], env)
         env.update(CORE_FONTS=str(self.work / "fonts/inputs/core"), FONT_PACK=str(self.work / "fonts/inputs/pack"), SDK_OUTPUT=str(self.work / "production/sdk"), WEBAPPS_OUTPUT=str(self.work / "production/apps"), THEME_SOURCE=str(self.upstream / "sdkjs/slide/themes/src"), THEME_OUTPUT=str(self.work / "themes"))
         self.run("themes", ["bash", self.product / "tools/desktop/themes.sh"], env)
         env.update(THEMES=str(self.work / "themes"), FONT_FILES=str(self.work / "fonts/fonts"), ALL_FONTS=str(self.work / "fonts/AllFonts.js"), FONT_IMAGES=str(self.work / "fonts/Images"), PDF_RUNTIME=str(self.upstream / "sdkjs/common/clientpdf/runtime"), TEMPLATES=str(self.upstream / "document-templates/new/en-US"))
-        self.run("resources", [python, self.product / "tools/desktop/resources.py", "--font-set", "standard", "--themes", env["THEMES"], "--sdk", env["SDK_OUTPUT"], "--apps", env["WEBAPPS_OUTPUT"], "--fonts", env["FONT_FILES"], "--allfonts", env["ALL_FONTS"], "--pdf-runtime", env["PDF_RUNTIME"], "--templates", env["TEMPLATES"], "--upstream", self.upstream, "--font-images", env["FONT_IMAGES"], "--font-source", env["CORE_FONTS"], "--font-source", env["FONT_PACK"], "--out", self.product / "desktop/assets"], env)
+        self.run("resources", [python, self.product / "tools/desktop/resources.py", "--font-set", "standard", "--themes", env["THEMES"], "--sdk", env["SDK_OUTPUT"], "--apps", env["WEBAPPS_OUTPUT"], "--fonts", env["FONT_FILES"], "--allfonts", env["ALL_FONTS"], "--pdf-runtime", env["PDF_RUNTIME"], "--templates", env["TEMPLATES"], "--upstream", self.upstream, "--font-images", env["FONT_IMAGES"], "--font-source", env["CORE_FONTS"], "--font-source", env["FONT_PACK"], "--font-source", env["DESKTOP_FALLBACKS"], "--out", self.product / "desktop/assets"], env)
         self.run("resource-audit", [python, self.product / "tests/desktop/verify-resources.py", self.product / "desktop/assets"])
         self.run("sample-audit", [python, self.product / "tests/desktop/check-samples.py", self.product / "desktop/assets"])
         self.env.update(ELECTRON_CACHE=str(Path(self.args.cache) / "electron"), ELECTRON_BUILDER_CACHE=str(Path(self.args.cache) / "builder"), CSC_IDENTITY_AUTO_DISCOVERY="false")
@@ -381,6 +382,7 @@ class Build:
         with tarfile.open(file, "w") as tar:
             folders = ("desktop", "tools/desktop", "tests/desktop",
                        "branding/example/nodejs/public/elixir/brand/templates",
+                       "branding/desktop-templates",
                        "tools/example/template-layouts")
             for folder in folders:
                 source = self.product / folder

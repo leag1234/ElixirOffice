@@ -19,6 +19,37 @@ release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 
 class ReleaseInputs(unittest.TestCase):
+    def test_assembly_builds_pinned_desktop_fallbacks_and_preserves_their_notices(self):
+        driver = object.__new__(release.Build)
+        driver.product = source.parents[2]
+        driver.work = Path("/owned S3 build")
+        driver.upstream = Path("/owned upstream")
+        driver.args = SimpleNamespace(cache="/owned cache", font_tool_image="sha256:public-test",
+                                      font_tool_root="/font-tool")
+        driver.env = {"PATH": "/portable/node:/usr/bin:/bin"}
+        driver.plan = {"full_runtime": {"path": "/full-runtime"}, "pdf_runtime": {"path": "/pdf-runtime"}}
+        phases = []
+        class ReachedResources(Exception):
+            pass
+        def run(name, command, env=None, cwd=None):
+            phases.append((name, [str(arg) for arg in command], dict(env or driver.env)))
+            if name == "resources":
+                raise ReachedResources()
+        driver.run = run
+        with self.assertRaises(ReachedResources):
+            driver.assemble()
+        names = [phase[0] for phase in phases]
+        self.assertLess(names.index("desktop-fallbacks"), names.index("fonts"))
+        build = next(phase for phase in phases if phase[0] == "desktop-fallbacks")
+        self.assertIn(str(driver.product / "tools/desktop/fallback-fonts.py"), build[1])
+        self.assertIn("fonttools==4.58.0", phases[1][1])
+        for name in ("fonts", "themes", "resources"):
+            phase = next(p for p in phases if p[0] == name)
+            self.assertEqual(phase[2]["DESKTOP_FALLBACKS"], str(driver.work / "desktop-fallbacks"))
+        resources = next(p for p in phases if p[0] == "resources")[1]
+        sources = [resources[i + 1] for i, item in enumerate(resources) if item == "--font-source"]
+        self.assertIn(str(driver.work / "desktop-fallbacks"), sources)
+
     def build_python(self):
         helper = source.parents[2] / "tools/desktop/build-python.py"
         spec = importlib.util.spec_from_file_location("build_python", helper)
@@ -178,6 +209,10 @@ class ReleaseInputs(unittest.TestCase):
                 "branding/example/nodejs/public/elixir/brand/templates/templates.json": b'{"templates":[]}',
                 "branding/example/nodejs/public/elixir/brand/templates/ar/letterhead.docx": b"public localized source",
                 "branding/example/nodejs/public/elixir/brand/templates/ar/letterhead.png": b"public source preview",
+                "branding/desktop-templates/templates.json": b'{"templates":[]}',
+                "branding/desktop-templates/template-sources.json": b'{"license":"CC0-1.0","files":[]}',
+                "branding/desktop-templates/ur/letterhead.docx": b"public desktop localized source",
+                "branding/desktop-templates/ur/letterhead.png": b"public desktop source preview",
                 "tools/example/template-layouts/letterhead.docx": b"public source layout",
                 "tools/example/template-layouts/localized/ur/letterhead.docx": b"public unshipped unit variant",
             }
@@ -204,6 +239,14 @@ class ReleaseInputs(unittest.TestCase):
                     self.assertEqual(exported.extractfile(name).read(), data)
                 self.assertNotIn(str(stale_cache.relative_to(build.product)), exported.getnames())
             self.assertEqual(release.verify_archive_resources(archive, assets), len(manifest["files"]))
+            build.args.node = root / "configured-node/bin/node"
+            build.args.node.parent.mkdir(parents=True)
+            build.args.node.write_bytes(b"public node fixture")
+            (build.args.node.parent.parent / "LICENSE").write_text("public node license fixture")
+            with tarfile.open(build.archive(include_assets=False)) as exported:
+                for name, data in template_sources.items():
+                    self.assertEqual(exported.extractfile(name).read(), data)
+                self.assertNotIn("desktop/assets/desktop-manifest.json", exported.getnames())
 
     def test_upstream_export_uses_recorded_blobs_not_ambient_head(self):
         with tempfile.TemporaryDirectory() as folder:

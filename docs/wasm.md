@@ -1,6 +1,6 @@
 # x2t in WebAssembly: feasibility study
 
-Study of 2026-10-08 (request from the test user). **Question: can the C++ converter x2t (DocumentServer `core`) run in the browser, so that documents open, save and export without a server, and the desktop app becomes a web view plus static files?** Build: `tools/wasm/`. Measurements: build-host (16 cores, Node 22.16 / V8 12.4), provisional corpus (31 .docx, 2 .xlsx, 2 .pptx, 1 .odt, 1 .ods, 1 .odp; no private document).
+Study of 2026-10-08. **Question: can the C++ converter x2t (DocumentServer `core`) run in the browser, so that documents open, save and export without a server, and the desktop app becomes a web view plus static files?** Build: `tools/wasm/`. Measurements: build-host (16 cores, Node 22.16 / V8 12.4), provisional corpus (31 .docx, 2 .xlsx, 2 .pptx, 1 .odt, 1 .ods, 1 .odp; no private document).
 
 ## 1. Summary
 
@@ -273,10 +273,9 @@ nested embedded Office packages are compared recursively.
 python3 repo/tools/wasm/bench/compare_builds.py reference38 candidate38-early
 ```
 
-Results: `w0/candidate-comparison.json`, `w0/reference38/wasm.csv`,
-`w0/candidate38-early/wasm.csv` on build-host. Unit tests verify manifest hashes,
+Unit tests verify manifest hashes,
 missing artifacts and that normalization rejects content/reference changes.
-Integration checks on isolated development host instance `eo-w0`, port 32780: smoke zero
+Isolated integration checks: smoke zero
 failures/errors; Windows shortcuts 228 editor + 14 browser, macOS 171 + 13,
 zero failures; four unit tests pass; rebrand check zero findings.
 
@@ -338,19 +337,18 @@ selected development SDK checkout:
 
 ```sh
 python3 tools/wasm/install-runtime.py <release-dir> <sdkjs-dir>
-make sdkjs-full CONTAINER=eo-w1 UPSTREAM="$HOME/elixiroffice/wt/w1"
+make sdkjs-full CONTAINER=eo-wasm-check UPSTREAM=/path/to/DocumentServer
 ```
 
 The installer requires a PDF-only manifest and checks all six sizes/hashes before writing any runtime files. Unit coverage rejects a full-module manifest and tampered artifacts. Asset deployment preserves
 the generated glue bytes and manifest; `common/clientpdf/runtime/` is ignored.
-A checkout without the installed version uses the JS fallback. Production image
-installation, content encoding and cache headers are explicitly deferred to W5;
-this step's review instance is `eo-w1`, development host port 32781.
+A checkout without the installed version uses the JS fallback. Production-image
+installation, content encoding and cache headers are covered by the
+image-packaging checks below.
 
 ### Validation
 
-Original JS suite on isolated `eo-w0`: zero failed checks (baseline rerun when
-the task-protocol rule arrived mid-step). PDF-only suite on `eo-w1`:
+The original JS suite had zero failed checks. The PDF-only suite had:
 **29 checks, zero failures**, including lazy backend/worker, local Fira Sans
 font bytes and embedded subsets, text, links, Print, no upload/WebSocket leak,
 forced worker failure to JS, blocked image through JS to server with reason,
@@ -378,11 +376,10 @@ All six served files also match their manifest hashes over HTTP.
 One page remains below SSIM .97: `a08` p.4, **.9449**, the image-containing
 page already identified in the earlier JS study. No text/page-count difference;
 the mean acceptance passes. Its remaining raster difference is retained as
-review evidence at `/tmp/eo-w1-pdf-only-gate/cmp/full/a08/p004-diff.png`;
+historical validation evidence;
 the cause has not been established for this native wasm result.
 
-The private corpus gate remains for the lead on build-host; Firefox/WebKit and low
-memory coverage remain W4. No public demo or production deployment was performed.
+Firefox/WebKit, low-memory coverage and the separate private-corpus gate were not part of this browser PDF measurement.
 
 ### W1 review corrections (2026-10-09)
 
@@ -397,11 +394,6 @@ and the unused image argument were removed. Tests cover two exports without a
 runtime, session caching, invalid versions, wrong module kinds and network failure.
 
 ## 15. W5 image part: runtime packaging and compressed delivery
-
-The owner requested this part immediately after W1, before W2. W1 lead fixes
-are integrated: sdkjs bfb7d50024, DocumentServer 607e7135de, product main a767d98.
-All 51 elixir branch tips (18 SDK,22 web-apps,4 core,7 integration) remain ancestors
-of their integration branches.
 
 The image pipeline now builds base -> fonts -> runtime. The fonts intermediate
 tag is <TAG>-fonts; the final public-facing tag remains <TAG>. Before the costly
@@ -426,50 +418,44 @@ version paths are immutable for one year, while current.json is no-store.
 Unversioned and image-version-prefixed SDK URLs both work. SDK deploy-assets
 copies the whole runtime directory without minifying generated glue.
 
-development host validation uses an own dev-derived image, with its runtime removed before
+Historical validation uses a development-derived image, with its runtime removed before
 running the production runtime phase; this validates the final layer, not a cold
-standalone bake. Own instance eo-w5-image listens at localhost:32782. Public
+standalone build. Public
 runtime sizes: raw 8,887,507 bytes, gzip 3,839,219, Brotli 3,133,741. Artifact wire
 hashes and decoded bytes match the pinned release. HTTP tests cover both URL
 forms, all encodings/MIME/cache headers, q=0, fractional qualities and 64
 deterministic quality-ordering HEAD cases. No prod directory or demo container
 was accessed. The fresh build-host acceptance result is recorded below.
 
-Developer commands (own container only):
+Developer commands (use an isolated container):
 ~~~sh
 tools/image/install-runtime-dev.sh eo-w5-image "$X2T_RELEASE"
 python3 tools/image/check-runtime-http.py http://localhost:32782 "$X2T_RELEASE"
 EO_BASE=http://localhost:32782 EO_EXPECT_WASM_ENCODING=br node tests/client-pdf/run.mjs
 ~~~
 
-Lead build after reviewing/integrating W5 and preparing complete checkouts on
-build-host, outside prod:
+Historical image-build recipe, using complete checkouts and an isolated image:
 ~~~sh
-cd /srv/elixiroffice/w5-review/elixiroffice
-DS=/srv/elixiroffice/w5-review/DocumentServer \
-LOGS=/srv/elixiroffice/w5-review/logs \
-X2T_RELEASE=/srv/elixiroffice/wasm/w0/fresh/out/releases/9ee6831853aa-36c327f971c4-st \
-TAG=w5-image-review tools/image/build.sh all
+cd /path/to/product
+DS=/path/to/DocumentServer \
+LOGS=/path/to/logs \
+X2T_RELEASE=/path/to/releases/9ee6831853aa-36c327f971c4-st \
+TAG=wasm-image tools/image/build.sh all
 ~~~
 Run check-runtime-http.py and the client-PDF suite with EO_EXPECT_WASM_ENCODING=br
-against an isolated instance of that fresh image. The fresh build-host bake and browser checks completed on 2026-10-10;
-no demo switch is authorized for the agent.
-The remaining W5 corpus-command work, W2, W4 browsers and private gate remain
-outside this image-only task.
+against an isolated instance of that image. The historical build and browser
+checks completed on 2026-10-10; corpus-command and other-browser checks were
+separate validations.
 
-Final development host result: corrected image25520334ce41 recreated before final HTTP/PDF tests;35 browser checks green including actual Brotli MIME/encoding,30 artifact responses plus64 q-value HEAD checks green. Smoke0; shortcuts Windows228+14/macOS171+13,zero failures and zero editor untested. This initial development host result preceded the approved integration recorded below. W5 implementation196c411,SDK971bd03b24,DS06bd63fa31. Runtime layer1s; full base/fonts build not measured in this W5 task.
+Historical development-image result: corrected image25520334ce41 recreated before final HTTP/PDF tests;35 browser checks green including actual Brotli MIME/encoding,30 artifact responses plus64 q-value HEAD checks green. Smoke0; shortcuts Windows228+14/macOS171+13,zero failures and zero editor untested. This was a historical image check before the later build below. Runtime layer1s; full base/fonts build not measured in that image check.
 
-Fresh build-host acceptance (2026-10-10, authorized by lead review-w5.md): approved W5
-fast-forwarded to product main 9247367ef, DocumentServer dev 06bd63fa31 and SDK
-dev 971bd03b24. All 52 component branch tips remain ancestors (19 SDK, 22 web-apps,
-4 core, 7 integration). The separate w5-review build used 33 exact committed
-root/recursive-gitlink snapshots, the pinned PDF release and TAG=w5-image-review.
-Full build exit 0: base 2825 s, fonts 134 s, runtime 3 s (2962 s total, 49m22s).
-Final image 6a37b3847a17 is 5,112,801,996 bytes. The image JSON reports
-runtime_version 9ee6831853aa-36c327f971c4-st and pinned manifest SHA256
+Historical image acceptance (2026-10-10) used33 committed root/recursive-gitlink
+snapshots and the pinned PDF release. Full build exit0: base2825s, fonts134s,
+runtime3s (2962s total,49m22s). Image6a37b3847a17 is5,112,801,996 bytes.
+Its JSON reports runtime_version9ee6831853aa-36c327f971c4-st and manifest SHA256
 96e31045069ac3b0fbd854ac2c7385f724baaeba5cbf512df997fa831b08e8bb.
 
-Own build-host container eo-w5-review at localhost:32784 passed HTTP 30 decoded
+The isolated historical image passed HTTP 30 decoded
 responses plus 64 quality cases, PDF 35 with EO_EXPECT_WASM_ENCODING=br, smoke
 with 0 failures or console/page errors, and both unchanged shortcut suites:
 Windows 228 editor + 14 browser variants, macOS 171 + 13, zero failures and zero
@@ -480,19 +466,13 @@ A supplemental assertion mistakenly required all scopes to have zero untested
 rows; its exit 1 and logs are retained, with a scoped JSON postcheck exit 0 and
 full counts. No suite was altered or weakened.
 
-The acceptance container and its volumes were removed, absence verified, and
-both SSH test tunnels closed. build host source/build/image evidence remains under
-/srv/elixiroffice/w5-review/logs; browser evidence and task protocol
-are on development host at /srv/elixiroffice/wt/w5-review-work (outside Git). Minor lead comments
-on portable doc paths, runtime security-header inheritance and proxy identity
-tolerance remain deferred. Full regression gate and deployment are lead-owned;
-no prod/demo/private-corpus access or push was performed.
+Portable documentation paths, inherited runtime security headers and proxy-identity tolerance remained unverified in that historical image check.
 
-## 16. W2 fonts on demand: session A, review pending
+## 16. W2 fonts on demand
 
 The new EOWasmFonts service supplies ensureFonts, prepareFS and fontsOfDocument. The PDF backend writes only the drawing stream's requested font files and matching native version-2 selection metadata. Metrics use native 1000-unit normalization. Server font bytes use the editor URLs and CacheStorage eo-wasm-fonts-v1. Local fonts require application consent and granted browser permission; the service never enumerates fonts, prompts or persistently caches local bytes. Missing fonts give a named fallback reason.
 
-Family strings request four styles; objects with name/style request exact styles. For session B: fontsOfDocument(PDF stream) returns {name, style} entries, with style 0 regular, 1 bold, 2 italic and 3 bold italic; pass these entries unchanged to ensureFonts or prepareFS to avoid requesting unused faces. Arrays of PDF page streams are deduplicated by name/style. DOCY font tables return family strings because that table does not identify used styles. prepareFS writes /fonts/* and /font_selection.bin. Document extraction supports PDF command streams and DOCY font tables; absent tables and other formats fail explicitly. tools/wasm/subset-fonts.py filters existing native selection metadata and opens only requested files.
+Family strings request four styles; objects with name/style request exact styles. fontsOfDocument(PDF stream) returns {name, style} entries, with style 0 regular, 1 bold, 2 italic and 3 bold italic; pass these entries unchanged to ensureFonts or prepareFS to avoid requesting unused faces. Arrays of PDF page streams are deduplicated by name/style. DOCY font tables return family strings because that table does not identify used styles. prepareFS writes /fonts/* and /font_selection.bin. Document extraction supports PDF command streams and DOCY font tables; absent tables and other formats fail explicitly. tools/wasm/subset-fonts.py filters existing native selection metadata and opens only requested files.
 
 The synthetic ten-page document used one unique font, 410820 bytes, and zero font GETs during normal export. Forced cold loading downloaded only that selected file. Cache-backed native PDF rendering matched the warm PDF. One cache entry served 133 available editor entries. Existing editor startup UI font preloads remain; observed startup response bodies include duplicate service-worker events and are not wire-byte totals.
 
@@ -505,13 +485,12 @@ Smoke passed without console/page errors. Shortcuts: Windows 228 editor + 14 bro
 Reproduce from the product worktree on the isolated instance:
 
     UPSTREAM=../w2-A node tests/client-pdf/fonts-unit.mjs
-    EO_BASE=http://localhost:32785 EO_FONT_OUT=../w2-A-work/ten-page node tests/client-pdf/fonts-browser.mjs
+    EO_BASE=http://localhost:32785 EO_FONT_OUT=/path/to/output node tests/client-pdf/fonts-browser.mjs
     EO_BASE=http://localhost:32785 EO_EXPECT_WASM_ENCODING=br node tests/client-pdf/run.mjs
 
-Evidence and protocol: development host /srv/elixiroffice/wt/w2-A-work/, logs/fonts-accepted.exit and logs/gate-w2-accepted.exit both 0, and ten-page/. The owner authorized the one-line deployment-list hook on 2026-10-10. The real deploy script emits the new service; generated raw/gzip assets are tested on own eo-w2-A. No integration before lead instruction.
+The deployment script emits the font service; generated raw/gzip assets were tested on an isolated instance. Font extraction and the associated corpus gate completed successfully in the historical font-on-demand validation.
 
-
-## 16. W3 local open and save (session A)
+## 16. W3 local open and save
 
 The example app has a local conversion checkbox (off by default) and a separate
 local document page. File selection and drag/drop use the local path when opted
@@ -571,8 +550,7 @@ paragraphs while preserving original XML bytes/content (SHA256
 Use tests/local-mode/prepare-benchmark.py and EO_LOCAL_MIN_PAGES=100, which waits
 for full pagination and asserts the exact count. An initial ElementTree rewrite
 changed namespace prefixes/layout to28pages and failed the strict check; it is
-retained in task notes and was corrected without changing acceptance.
-The independent reviewer accepted the derived-fixture method with these disclosures.
+retained as a failed setup attempt; the exact100-page assertion was not changed.
 
 The full release is 9ee6831853aa-fd40349d310d-st, manifest SHA256
 cd641de09b05381802ddbe92a05076919cedeac02d280c82040d8f5fb85fa247.
@@ -585,37 +563,25 @@ local conversion needs this additional full release before the SDK asset build.
 Current runtime/editor/privacy/launch/installer checks, PDF35, shared-font units,
 smoke0 and both shortcut platforms pass (228+14 Windows,171+13 macOS, no failures
 or editor untested). Existing browser-owned coverage gaps and runner skips remain
-disclosed. The owner authorized the minimal SDK asset glob and three editor
-bundle imports; production packaging is verified as described below. W2 is
-integrated; W3 remains a review branch. No demo/image deployment was performed.
-Evidence, commands and failed attempts are in wt/w3-A-work/{checks,progress}.md.
+disclosed. The minimal SDK asset glob and three editor bundle imports are
+covered by the production-packaging checks below.
 
-### 17. W3 production packaging acceptance (2026-10-10, session A)
+### 17. W3 production packaging acceptance (2026-10-10)
 
-The owner confirmed gate6 green and authorized serial W2 integration. SDK
-elixir/dev is 6b2b217b0b, DocumentServer elixir/dev 2ee7a1ef08, and product main
-0775687 includes the integration log. All 53 prior branch-tip ancestor checks
-pass; the three active W3 tips are explicitly held. Six integration gitlinks
-match the checked-out tips. The latest W6 documentation and lead-generated
-results were preserved. W3 was rebased on integrated W2; one handoff append
-conflict was resolved by retaining both complete entries.
-
-The authorized SDK change adds only wasm-convert/**/* to deploy-assets.cjs
+The SDK deployment change adds only wasm-convert/**/* to deploy-assets.cjs
 (commit82970e556b); each of the three editor app.js files adds only the local
 Controller dependency (e629205eb2). Real SDK deployment yields 407 files. The
 full production web-apps pipeline completes in 21.6 s, including its bundle,
 deployment and browser-target gates. The isolated container's server announces
 9.3.4, so these builds use PRODUCT_VERSION=9.3.4; an initial 9.3.5 build correctly
 failed the existing hosted version guard. The guard was not bypassed.
-The first theme setup also needed the own worktree's missing Git admin info
-directory. Generated locales/icons were restored before committing.
+The first theme setup failed because Git administrative information was missing. That setup failure does not change the successful production-output checks.
 
 The packaging checker verifies the deployed manifest/pin, every one of the six
 artifact hashes, API/worker and all three Controller-containing bundles.
 Only generated outputs were copied to eo-w3-A, gzip refreshed and cache flushed.
-The manually deployed raw Controller was removed. The separate reviewer checked
-that the live app.js hashes match their production outputs and raw Controller
-URLs return 404. EO_LOCAL_PACKAGED=1 rejects any raw-module fallback request.
+The deployed app.js hashes match their production outputs; raw Controller
+URLs return404. EO_LOCAL_PACKAGED=1 rejects any raw-module fallback request.
 
 Fresh packaged runs pass all 35 local and35 hosted actual content edits/downloads,
 six image picker/replacement/repeated saves, 68 hash-identical media payloads,
@@ -628,22 +594,15 @@ comparison against the previous 35-doc baseline passes with no change.
 The existing eo-cpdf-tools image runs this comparator without network access;
 initial host interpreter attempts lacked OpenCV and are retained as failures.
 
-The table above now publishes the final generated-output synthetic measurements;
-earlier successful 100-page prototype runs 3107/764 ms and 3247/804 ms remain in logs.
-Measurements were run after the corpus/render/regression work completed.
-Evidence is wt/w3-A-work/logs/packaged-final-*.log, packaging-final-check.log,
-fidelity-packaged/cmp/results.json and packaged-final-media-retention.json.
-W3 stays unintegrated for lead review. No fresh image build or public deployment was
-performed; a later image build must install the pinned full release before its
-SDK asset build, in addition to the separate PDF runtime.
+The table above reports final generated-output synthetic measurements.
+Earlier successful100-page prototype runs measured3107/764ms and3247/804ms.
+Measurements followed corpus/render/regression work; they do not qualify
+a later image build. An image build must install the selected full runtime
+before its SDK asset build, in addition to the separate PDF runtime.
 
-### 18. Browsers (W4 session A, 2026-10-10)
+### 18. Browsers (W4, 2026-10-10)
 
-W3 was integrated after the lead review: explicit confirmation on unreachable
-servers, unsaved replacement warning, and concurrent save/image safety.
-W4 uses its own eo-w4-A instance on 32786, based on that integrated source;
-the unchanged W1 baseline also ran on A's integrated W2 instance32785.
-No test uses the lead instance, public demo or private corpus.
+The browser checks use local open/save with explicit confirmation when servers are unreachable, unsaved-replacement warnings and concurrent save/image protection. They ran on isolated instances; the PDF baseline used the same font-on-demand implementation.
 
 The unchanged client-PDF suite passes35 checks in Chromium. Firefox and
 WebKit reject its Chromium-only local-fonts permission before running.
@@ -701,13 +660,10 @@ as a passing profile. Browser wasm32 tests accept a65536-page (4 GiB)
 maximum declaration, reject65537 and enforce a256 MiB growth limit. They
 do not allocate4 GiB or establish a4 GiB converter workload.
 
-Evidence: /srv/elixiroffice/wt/w4-A-work/{pdf,portable-pdf4,provisional35,
-fidelity,memory100,pdf-memory100,lifecycle,capabilities,native-budget-1g,
-native-budget-2g,launch-bytes,handoff}; task/checks/progress remain outside
-Git. tests/browsers/README.md documents reproducible commands. Native Mac
-Chrome/Safari/Firefox scripts are prepared and syntax-checked on development host only.
-Real Mac runs, native font consent and Mac memory remain unverified and
-owner-run. W4 is held for lead review; no W4 integration or image deployment.
+Reproducible commands are documented in tests/browsers/README.md. Native Mac
+Chrome/Safari/Firefox scripts were prepared and syntax-checked only.
+Actual Mac execution, native font consent and Mac memory remain unverified
+in that historical browser matrix.
 
 The original unsaved test passes Chromium but crosses a serializer timestamp
 second in Firefox/WebKit: Core.toStream writes the current ISO timestamp
@@ -718,7 +674,7 @@ checks exact bytes except the single current-second Core.modified field, plus
 actual dirty state, same session, native consent, completed save and new-edit
 discard. The timestamp must match the browser instant captured beside
 serialization within two seconds, with the same field offset. Its per-engine
-verdict is recorded in checks.md.
+verdict is preserved in the historical validation record.
 
 Supplemental Firefox/WebKit PPTX snapshots differed by four bytes beyond
 the timestamp. Public Firefox diagnostic files show the dynamic slide-number text
@@ -737,19 +693,18 @@ A later isolated WebKit PPTX probe produces identical203638-byte snapshots, conf
 
 Final original local-mode coverage also passes native image picker/replacement/two saves in six formats per engine, concurrent edit/pending-image disposal and serialized image queue in all3. Exact inserted/replaced media bytes and image-reference counts are checked. HTTP-runtime7, installer1 and production packaging pin/six artifact hashes/three bundles pass. Evidence: image-pickers, concurrent, queued-images, http-runtime.log, installer.log and packaging-final.log. Initial packaging command used duplicated directory suffixes and is retained separately; corrected output-root arguments pass.
 
-## Release1 server deployment review (2026-10-11)
+## Release1 server deployment (2026-10-11)
 
-Single-host production deployment is documented in [install-server.md](install-server.md). It consumes the existing branded base/font/validated-runtime image pipeline without the demo gateway. Server task evidence distinguishes the earlier standalone review image from a fresh current-source release build; no new wasm code or D5 scheduling experiment is integrated. Runtime source pins and manifest are retained with the deployment bundle.
-Linux second-review preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md and the accompanying release acceptance record
+Single-host production deployment is documented in [install-server.md](install-server.md). It consumes the existing branded base/font/validated-runtime image pipeline without the demo gateway. Historical standalone-image checks do not qualify a different release build. Runtime source pins and manifest are retained with the deployment bundle.
+Linux preview: build-time asset pruning preserves all active editor locales, offline help languages and licences, while static first frames replace 44 large help animations. AppImage 347841399 bytes; DEB 372535118 bytes. Shared ODS object/PDF failure, warm empty start 2.452 s vs 2.2 s target, unsigned packages and unverified installed associations remain disclosed in docs/desktop.md and the accompanying release acceptance record
 
 Windows desktop cross-build uses the same manifest-verified full/PDF Wasm releases, standard fonts and reduced multilingual resources as the integrated Linux preview. The final NSIS artifact verifies17896hashes in unpacked and extracted payload copies and17970byte-identical payload files; cross-build checks do not establish native Windows converter/PDF/GUI/privacy acceptance. Windows native behavior and timings remain unverified.
 
-Windows review robustness retains exact opening file IDs, rejects overlong destination/temp/backup paths before mutation and reports locked/access-denied saves with recovery guidance. Native Windows checks remain unverified; local conversion behavior/resources are unchanged.
-
+Windows path robustness retains exact opening file IDs, rejects overlong destination/temp/backup paths before mutation and reports locked/access-denied saves with recovery guidance. Native Windows checks remain unverified; local conversion behavior/resources are unchanged.
 
 macOSarm64 DMG uses the integrated full/PDF Wasm releases and standard resource set. Actual read-only mounted image acceptance verifies both17896resource manifests and18169bundle entries, including explicit Electron/Chromium notices. Native fileURI/edit/atomic save and WasmPDF with saved text pass. Native font refusal/allow, opaque handles and separatefreshreopen/consentpersistence also pass; Print/dirtyCancel remain unverified due lockedMac. No macOS performance claim, Intel or Gatekeeper acceptance is implied.
 
-Mac review rebuild: unsigned arm64 DMG 381,116,748 bytes, SHA256 `0bad218dc1fe57665ff06120b7eaeb8afc64e0a02f35be0258f521ae26ac5e83`. Actual image acceptance verifies both 17,896 resource manifests and all 18,169 bundle entries. Fresh branded web-apps f1b87e0a04 includes a one-line missing-tooltip startup fix; SDK, fonts and full/PDF runtime bytes are preserved. The final app passes six-format edits/saves, immutable public fixtures, the Word Wasm PDF marker/fresh reopen and controlled network denial/no Node. Native modal sheets, Gatekeeper, associations, Intel and notarization remain unverified. No new timing is claimed; the known ODS/startup limitations remain.
+Mac arm64 package: unsigned arm64 DMG 381,116,748 bytes, SHA256 `0bad218dc1fe57665ff06120b7eaeb8afc64e0a02f35be0258f521ae26ac5e83`. Actual image acceptance verifies both 17,896 resource manifests and all 18,169 bundle entries. Fresh branded web-apps f1b87e0a04 includes a one-line missing-tooltip startup fix; SDK, fonts and full/PDF runtime bytes are preserved. The final app passes six-format edits/saves, immutable public fixtures, the Word Wasm PDF marker/fresh reopen and controlled network denial/no Node. Native modal sheets, Gatekeeper, associations, Intel and notarization remain unverified. No new timing is claimed; the known ODS/startup limitations remain.
 
 ## Shared ODS chart and default-color correction (2026-10-11)
 
@@ -757,122 +712,160 @@ The converter locally escapes chart titles, ignores images with neither href
 nor bytes, and emits literal-series cache tables independently of worksheet
 formula remapping, with inclusive endpoints. Separate one-line commits
 initialize default-color RGB bytes and the discriminator before SetRGB reads it.
-The lead identified the earlier intermittent DOCX colors as pre-existing
-uninitialized state; RGB initialization alone still failed a retained run.
+Earlier intermittent DOCX colors came from uninitialized state; RGB initialization alone still failed a retained run.
 
 Final full native-EH release528e920e4f34-98317b47cc65-st, SDK95e9aa2b91,
-was built through the original W0 script using D's caches (15m12s).
+was built through the original W0 script with cached dependencies (15m12s).
 All six hashes/decompression/timestamps/size checks pass. Three unchanged
-strict corpus runs pass38/38 against the approved ODS reference; each historical
+strict corpus runs pass38/38 against the ODS reference; each historical
 comparison differs only on that ODS. Browser edit/save/fresh reopen retains
 both charts and95source values. Six-format media/conversion/privacy, mixed
 series and distinct inline-image byte references pass. No published package
 or demo changed.
 
-Approved ODS-only native test desktop edit/save/PDF/fresh reopen remains the native
-proof. Final528 native PDF is unverified because the graphical session is
-locked; independent review accepts source integration under the owner's updated
-conditions without claiming final native or package acceptance.
+The earlier ODS-only native edit/save/PDF/fresh reopen remains historical
+native evidence. Final528 native PDF and replacement-package acceptance
+remain unverified because the graphical desktop was locked.
 See the full evidence and limits.
 
 ## Beta desktop runtime refresh (2026-10-12)
 
-Fresh Linux AppImage/DEB, Windows NSIS and macOS arm64 DMG include full converter528e920e4f34-98317b47cc65-st, manifest8572f319a6becf1e11126b2b6e6be99e791d99c79af7201f9f99ab0c1731e003. Each extracted package passes17896 resource/licence hashes and branded-sample guards. Actual Linux AppImage/DEB and Mac ODS checks retain both charts, all95values, edited save/PDF and fresh reopen. Linux native chooser and Mac Print/dialog acceptance remain unverified while their desktops are locked. Windows hardware acceptance is unverified. Mac packaging adds explicit ad-hoc resource sealing after strict verification exposed an incomplete linker-only signature;19units and18178 matching bundle entries pass. Server release staging remains pending session D current-source build.
+Fresh Linux AppImage/DEB, Windows NSIS and macOS arm64 DMG include full converter528e920e4f34-98317b47cc65-st, manifest8572f319a6becf1e11126b2b6e6be99e791d99c79af7201f9f99ab0c1731e003. Each extracted package passes17896 resource/licence hashes and branded-sample guards. Actual Linux AppImage/DEB and Mac ODS checks retain both charts, all95values, edited save/PDF and fresh reopen. Linux native chooser and Mac Print/dialog acceptance remain unverified while their desktops are locked. Windows hardware acceptance is unverified. Mac packaging adds explicit ad-hoc resource sealing after strict verification exposed an incomplete linker-only signature;19units and18178 matching bundle entries pass. The server source build was not part of these package checks.
 
-## Desktop font bridge and Home review revision
+## Desktop font bridge and Home
 
-Actual packaged Linux and macOS baselines reproduce the browser padlock denial. The rebuilt Linux invitation opens the real desktop consent dialog, invokes neither browser font API and reads no metadata before consent. Source tests cover native permission/revocation, PDF consent without prompting, web permission behavior and cross-origin embedding.27desktop units pass. Linux own-window capture mode generated sixEnglish/FrenchPNG files and exited; visual corrections and final Mac/Windows package runs remain pending. The converter stays checksum-pinned to full528e920e4f34-98317b47cc65-st. Owner requires review before integration and supplies Windows captures.
+Actual packaged Linux and macOS baselines reproduce the browser padlock denial. The rebuilt Linux invitation opens the real desktop consent dialog, invokes neither browser font API and reads no metadata before consent. Source tests cover native permission/revocation, PDF consent without prompting, web permission behavior and cross-origin embedding.27desktop units pass. Linux own-window capture mode generated sixEnglish/FrenchPNG files and exited; visual corrections and final Mac/Windows package runs remain pending. The converter stays checksum-pinned to full528e920e4f34-98317b47cc65-st. Native Windows behavior remains unverified.
 
-Desktop UI review fixes (2026-10-12): File Info is restored between Open and Save; empty Recent text is translated in all45shell catalogs. Desktop feature announcements are suppressed; the web French multipage tip is translated. Font invitation buttons wrap without being covered by a tip, and accepted/declined choices are remembered in desktop settings. New Word documents use a pristine template with the UI language as their proofing default; existing documents and nonblank templates retain their language. Each of45blank variants is checked byte-for-byte against the source ZIP, allowing only the default-language element to change. Capture receipts now validate these UI requirements at1360x900. Mailings remains a documented local beta limitation.
+Desktop UI behavior (2026-10-12): File Info is restored between Open and Save; empty Recent text is translated in all45shell catalogs. Desktop feature announcements are suppressed; the web French multipage tip is translated. Font invitation buttons wrap without being covered by a tip, and accepted/declined choices are remembered in desktop settings. New Word documents use a pristine template with the UI language as their proofing default; existing documents and nonblank templates retain their language. Each of45blank variants is checked byte-for-byte against the source ZIP, allowing only the default-language element to change. Capture checks validate these UI requirements at1360x900. Mailings remains a documented local beta limitation.
 
-Desktop beta2 missionF A1–A3 review candidate: dictionary payload366files/342347581bytes; protocol206 ranges for thesaurus slices; media-preserving serialized recovery snapshots converted through the unchanged pinned full x2t.wasm, keeping dirty state and originals; safe native http/https/mailto dispatch. Public beta1 is server-only. Final runtime proof and review records are in the accompanying release acceptance record and the external task checks. No converter/core change.
+Desktop beta2 dictionary/recovery/link support: dictionary payload366files/342347581bytes; protocol206 ranges for thesaurus slices; media-preserving serialized recovery snapshots converted through the unchanged pinned full x2t.wasm, keeping dirty state and originals; safe native http/https/mailto dispatch. Public beta1 is server-only. Historical validation is in the technical handoff. No converter/core change.
 
+Local review and image handling are shared across the editors, with no converter/core/SDK binary change or runtime-pin change. Queued clipboard/drop/file/allowed-local-URL images populate the existing media resource list before x2t serialization; PNG/JPEG remain exact and additional supported raster/vector inputs become PNG. Real three-editor browser save/reopen and Linux native same-file save/reopen prove persistence. Existing full528 converter and separate PDF-only pins are retained; hosted regression results and validation limits are recorded in the technical handoff.
 
-Mission F D1–D2 is a shared local editor candidate, with no converter/core/SDK binary change or runtime-pin change. Queued clipboard/drop/file/allowed-local-URL images populate the existing media resource list before x2t serialization; PNG/JPEG remain exact and additional supported raster/vector inputs become PNG. Real three-editor browser save/reopen and Linux native same-file save/reopen prove persistence. Existing full528 converter and separate PDF-only pins are retained; hosted regression results and review disposition belong to the accompanying release acceptance record
-## Desktop beta 2 A4–A6 review candidate (2026-10-12)
+## Desktop beta 2 A4–A6 (2026-10-12)
 
 Isolated branches start from product 28c6a4a / DocumentServer 9f5878d606 / web-apps 46538e06af. Additional-format imports become converted copies; foreign-format exports preserve the active original, dirty state and recovery checkpoint. The real converter supports the requested eleven output combinations and nine added import formats. CSV exports the active worksheet, using UTF-8 and commas; TXT supports empty content.
 
-The full converter needs three Wasm-only overlays: a UTF-8 fast path avoiding the ICU byte-truncating fallback, signed UTF-16 surrogate escapes for RTF export, and a reader fix that combines those signed units into Unicode scalars. The core source pin remains 528e920e4f3489069474d91346e406ddfb78f054; native/server builds and the separate PDF-only pin remain unchanged. Builds and artifacts stay in the private A456 trees, outside production. Actual final packaged TXT/RTF/CSV Unicode roundtrips pass, including supplementary characters. Initial reviewed full pin: 528e920e4f34-cd1d25d5a3e1-st, manifest SHA256 25e744a592bc325c10f6df09edfe653414a316db45ba437d938401bcc2225c8e; raw 53,066,846 bytes, Brotli 8,777,933 bytes. Native packaged ODS retains both editable charts and all 95 values after Save, PDF and fresh reopen.
+The full converter needs three Wasm-only overlays: a UTF-8 fast path avoiding the ICU byte-truncating fallback, signed UTF-16 surrogate escapes for RTF export, and a reader fix that combines those signed units into Unicode scalars. The core source pin remains 528e920e4f3489069474d91346e406ddfb78f054; native/server builds and the separate PDF-only pin remain unchanged. Actual final packaged TXT/RTF/CSV Unicode roundtrips pass, including supplementary characters. Historical full runtime: 528e920e4f34-cd1d25d5a3e1-st, manifest SHA256 25e744a592bc325c10f6df09edfe653414a316db45ba437d938401bcc2225c8e; raw 53,066,846 bytes, Brotli 8,777,933 bytes. Native packaged ODS retains both editable charts and all 95 values after Save, PDF and fresh reopen.
 
-Desktop AI uses an explicit native consent dialog and bounded native transport to the approved model/endpoint. Unconfigured AI sends no traffic; renderer HTTP/WebSocket access stays denied. Synthetic loopback SSE tests verify Cancel/Allow/Remove and key isolation. Word is the current AI toolset; other editors feature-detect its absence.
+Desktop AI uses an explicit native consent dialog and bounded native transport to the user-selected model/endpoint. Unconfigured AI sends no traffic; renderer HTTP/WebSocket access stays denied. Synthetic loopback SSE tests verify Cancel/Allow/Remove and key isolation. Word is the current AI toolset; other editors feature-detect its absence.
 
-Offline Help indexes are bundled with language fallback. Options updates the SDK author and comment-name parser. Real Word/PowerPoint chart Edit Data persists values 77/88; embedded slide video/audio both decode and survive export. A throwaway combination with D's exact d837634fbd source snapshot proves six picture types and the configured comment/revision author; That earlier combination has been superseded by the authorized rebase onto integrated D1–D2; no A4–A6 integration is performed. Resource, native acceptance, hosted regression and remaining OS checks are recorded in the accompanying release acceptance record and the external task checks. Public beta 1 remains server-only.
+Offline Help indexes are bundled with language fallback. Options updates the SDK author and comment-name parser. Real Word/PowerPoint chart Edit Data persists values 77/88; embedded slide video/audio both decode and survive export. A historical combined-source check covers six picture types and configured comment/revision authors. Resource, native, hosted and remaining OS qualifications are recorded in the technical handoff. Public beta 1 remains server-only.
 
-A4–A6 authorized rebase: product f486cf3, DS a214726a00, web-apps d837634fbd, SDK base139269f887. Wasm build-input hashes remain identical, so the previously verified cd1d25 runtime and PDF-only pin are retained. Fresh48units, Linux package smoke/author/images, normal launcher viewport and own32788 hosted smoke/shortcuts pass.
+Combined-feature validation retains identical Wasm build-input hashes, so the previously verified cd1d25 runtime and PDF-only pin are retained. Fresh48units, Linux package smoke/author/images, normal launcher viewport and own32788 hosted smoke/shortcuts pass.
 
+### A4–A6 guarded UTF-8 runtime (2026-10-12)
 
-### A4–A6 review fixes: guarded UTF-8 runtime (2026-10-12)
+The numeric UTF-8 shortcut in overlay 0006 now returns an empty string for a null input or zero length before calling the decoder, in both ICU and empty implementations. Actual Emscripten tests cover null lengths 0 and 1 and a non-null zero-length input, with both exact modes; normal Unicode and Latin-1 checks still pass. Overlays0006–0008 are EO_WASM-only.
 
-The numeric UTF-8 shortcut in overlay 0006 now returns an empty string for a null input or zero length before calling the decoder, in both ICU and empty implementations. Actual Emscripten tests cover null lengths 0 and 1 and a non-null zero-length input, with both exact modes; normal Unicode and Latin-1 checks still pass. Overlays 0006–0008 remain owned by session A and are EO_WASM-only.
+Historical UTF-8 runtime (superseded): **528e920e4f34-9aa540d2fd30-st**,
+manifest SHA256 **46fd3fde29aa03b0ec19be07f05e258ebd4b600e1dd3d5200f97649f3b275104**.
+Raw module:53,066,877 bytes; Brotli:8,776,905 bytes. The PDF-only runtime
+is separate. Linux AppImage and Debian resource checks and packaged
+TXT/RTF/CSV Unicode roundtrips passed for that historical build.
 
-Historical A4–A6 review pin (superseded): **528e920e4f34-9aa540d2fd30-st**, manifest SHA256 **46fd3fde29aa03b0ec19be07f05e258ebd4b600e1dd3d5200f97649f3b275104**. Raw module: 53,066,877 bytes; Brotli: 8,776,905 bytes. Build inputs are recorded at product source e7e52f2. The already promoted cd1d25d5a3e1 release is unchanged; the guarded replacement is staged at /srv/elixiroffice/cache/local-gaps-A456-review-fixes-runtime. The separate PDF-only pin remains unchanged. Rebuilt Linux AppImage and Debian resource checks pass; actual packaged TXT/RTF/CSV Unicode roundtrips pass. No integration or public runtime replacement was performed.
+Historical desktop beta2 pipeline validation: parameterized full converter used528e920e4f34-cd1d25d5a3e1-st (manifest25e744a592bc325c10f6df09edfe653414a316db45ba437d938401bcc2225c8e); independent PDF pin retained. Isolated metadata/generated dependency overlay records hashes without shared SDK edits. Real Linux AppImage/DEB and Windows installer/resource audits pass; full Mac and direct remote packaged gates remain unverified pending SSH access. See docs/desktop-release.md.
 
-Historical desktop beta2 pipeline D review: parameterized full converter used528e920e4f34-cd1d25d5a3e1-st (manifest25e744a592bc325c10f6df09edfe653414a316db45ba437d938401bcc2225c8e); independent PDF pin retained. Isolated metadata/generated dependency overlay records hashes without shared SDK edits. Real Linux AppImage/DEB and Windows installer/resource audits pass; full Mac and direct remote packaged gates remain unverified pending SSH access. See docs/desktop-release.md. No integration or publication.
+Historical packaged validation:18383resource hashes/samplechecksPASS, packaged sixformat matrix5/6 (ODT saved-clean timeout, exit1), first nativeWord CDPstartupFAIL. DirectFire/Mac remain unverified. No full release pass claimed.
 
-D beta2 actual test desktop relay:18383resource hashes/samplechecksPASS, packaged sixformat matrix5/6 (ODT saved-clean timeout, exit1), first nativeWord CDPstartupFAIL. DirectFire/Mac remain unverified. Review65c25b49aafe667622accda90a3e055557569ce32940ccc0e0f5373ed72fbc78 clears environment/path findings in final driver; real final-driver build in progress. No full release pass claimed.
+The historical packaging validation completed every build/audit phase, verified four artifact checksums and deliberately returned partial-unverified status. The warmed native Word check opened, edited and saved, then failed to find the native PDF dialog. Native PDF remained failed; Mac artifact and direct-transport checks were not inferred.
 
-Final-driver validation: /srv/elixiroffice/release/beta2-2026-10-12-D-final-driver/ records all build/audit phases0, exact current five driver hashes, SHA256SUMS4/4PASS and deliberate partial-unverified exit2. The warmed native Word test opens/edits/saves, then fails to find the native PDF dialog; native PDF remains failed. No Mac artifact or direct-transport gate was inferred.
+Release-pipeline validation (2026-10-13) resolves full/PDF runtimes from selected
+source commits without a hardcoded runtime or overlay. AI,45 locale and
+license blobs are recorded in an isolated HOME; the external input manifest
+is pinned, arm64 system Bash is explicit and archive exclusions are anchored.
+An empty-HOME baseline passed50/52; source-archive and explicit-upstream
+runs passed52/52, with10 pipeline units. Linux/Windows packaging and Mac
+local export completed with5/5 checksums and a deliberate partial-unverified
+outcome. Native Word passed; ODT still failed. See [release procedures](desktop-release.md).
 
-2026-10-13 [D] Lead bus MSG2-5 release pipeline fixes: full/PDF pins resolved from selectedsourcecommits (nohardcodedruntime/overlay), recorded AI/45locale/license blobs in isolatedHOME, externally pinned inputmanifestSHA, explicitarm64systembash andanchoredarchive exclusions. EmptyHOME baseline50/52, actualarchive52/52andexplicitupstream52/52;10pipelineunitsPASS. Finaldriver allphase0/Linux+Windows packages+Maclocalexport, checksums5/5, deliberatepartial-unverified; actualMacgate belongsA. Source docs/desktop-release.md; task /srv/elixiroffice/wt/release-triage-D-work. NativeWord current624/DS1c/9aaPASS viaalreadyintegrated14add05; ODTstillfails, triageongoing. No integration/publication.
+Packaged Word save-state validation (2026-10-13): historical full9aa540d2fd30 reproduces the ODT saved-clean failure. Word repeats modified notifications during layout with unchanged history. The offline-only controller now distinguishes history changes and document/undo actions; concurrent undo keeps the overwritten snapshot dirty through ForceSave and the normal CheckChangedDocument path refreshes Save availability. The candidate AppImage passes52desktop units, sixformat open/edit/save/reopen/Wasm-PDF6/6, nativeWord PDF/offline/no-Node/fresh reopen, and five real-Wasm controlled save-state cases. The fifth case caught a disabled-Save flaw in the first candidate; its failure and trace are retained. No converter output is mocked or acceptance weakened. Windows/Mac native and new hosted runtime gates remain unverified.
 
-2026-10-13 [D] Packaged Word save-state triage: the then-integrated product6241519 / DocumentServer1c743e72be / historical source-pinned full9aa540d2fd30 reproduces the ODT saved-clean failure. Word repeats modified notifications during layout with unchanged history. The offline-only controller now distinguishes history changes and document/undo actions; concurrent undo keeps the overwritten snapshot dirty through ForceSave and the normal CheckChangedDocument path refreshes Save availability. The candidate AppImage passes52desktop units, sixformat open/edit/save/reopen/Wasm-PDF6/6, nativeWord PDF/offline/no-Node/fresh reopen, and five real-Wasm controlled save-state cases. The fifth case caught a disabled-Save flaw in the first candidate; its failure and trace are retained. No converter output is mocked or acceptance weakened. Exact candidate sources and hashes: /srv/elixiroffice/wt/release-triage-D-work/candidate-v2-source-proof.json; evidence linux-v2-results.tar. Windows/Mac native and new hosted runtime gates remain unverified; no integration/publication.
+Packaged Word save-state regressions include paste, idle undo-to-saved and
+exact callback disposal; all eight cases passed on the same controller.
+Pipeline host/tool paths are explicit arguments or environment values.
+Eleven pipeline tests and a source-pin plan passed; these checks did not
+rebuild the SDK, core or runtime.
 
-2026-10-13 [D] MSG7 follow-up adds three actual packaged Word save-state regressions (paste, idle undo-to-saved, exact callback disposal); eight cases PASS on the identical integrated Controller from926119ca8b. Pipeline host/tool paths are explicit arguments/environment values rather than private defaults; eleven pipeline tests and a real source-pin plan PASS. No SDK/core/runtime rebuild or final beta2 build; review and exact-head build authorization pending.
-### Mission F E D3–D4: Unicode conversion and local exports (review candidate)
+### Unicode conversion and local exports
 
 The browser local launcher accepts the A4 input/canonical conversion list and exposes supported format copies, client PDF and Print. Detached snapshots retain media and the saved/undo state; the original selected file and editor format are not changed by copies. Local-only capability flags expose spreadsheet Protect Range and hide server-dependent text/link actions.
 
-Actual TXT/CSV testing exposed an older full-runtime defect: café exported as UTF-8 BOM plus a raw 0xE9 byte, and TXT imported empty. A direct emsdk5.0.4/ICU probe showed wchar_t4 with u_strFromWCS U_ILLEGAL_ARGUMENT_ERROR and u_strToWCS17 output units for9 scalars. tools/wasm/patches/0009-icu-wide-utf32.patch uses explicit UTF-32 bridges under EO_WASM, reserves two UTF-16 units per scalar, and maps Windows numeric codepages to ICU names (notably1200). Native hosted builds retain their original branches. tools/wasm/bench/unicode.test.cpp verifies actual converter UTF-8/UTF-16 by name/number, multilingual strings and supplementary scalars; the initial numeric-UTF16 failure and correction are preserved in E's external task logs.
+Actual TXT/CSV testing exposed an older full-runtime defect: café exported as UTF-8 BOM plus a raw 0xE9 byte, and TXT imported empty. A direct emsdk5.0.4/ICU probe showed wchar_t4 with u_strFromWCS U_ILLEGAL_ARGUMENT_ERROR and u_strToWCS17 output units for9 scalars. tools/wasm/patches/0009-icu-wide-utf32.patch uses explicit UTF-32 bridges under EO_WASM, reserves two UTF-16 units per scalar, and maps Windows numeric codepages to ICU names (notably1200). Native hosted builds retain their original branches. tools/wasm/bench/unicode.test.cpp verifies actual converter UTF-8/UTF-16 by name/number, multilingual strings and supplementary scalars; the initial numeric-UTF16 failure remains part of the historical validation.
 
-Both full and PDF-only rebuilds use isolated /srv/elixiroffice/wasm-local-gaps-E directories, core528e920e4f34. The earlier candidate adopted Session A's RTF writer/reader patches0007/0008; those duplicate E commits were dropped on the integrated A4–A6 rebase. Both current targets use all nine common overlays, including A0006–0008 and E0009. The PDF-only pin stays separate from the office-conversion pin. Final artifact identities, corpus/browser/native evidence and review status: Session E handoff. No integration, push, production or demo deployment is authorized.
+Both full and PDF-only runtime builds use core528e920e4f34 and the same nine
+overlays, including the RTF writer/reader corrections0007/0008. The PDF-only
+runtime remains separate from Office conversion. Historical artifact,
+corpus, browser and native qualifications are in the
+conversion handoff.
 
-## D3–D4 reviewed runtime convergence (2026-10-13)
+## D3–D4 matched runtime convergence (2026-10-13)
 
-Integrated A4–A6 was the rebase base (product6241519/DS1c743e72be/WAe152418fe0/SDK60f1c86377/integrationa2de2cef). E's duplicate RTF commits are removed; A overlays0006–0008 stay unchanged and E's ICU bridge is0009. One full and one PDF-only build use the same patched core528 and the same product build-input sourcef83cbb7. Both manifests have identical9patches, source/tool hashes and product/core identities; patched-core diff SHA256 f1b3fc39a84834127c200f661791d7792b1c5ade26d65aee809b2b8bd4fe4218. Actual A ICU/empty UTF8 guard units and E UTF8/UTF16 numeric/name/supplementary units pass together.
+The combined converter uses unchanged overlays0006–0008 and ICU bridge0009; duplicate RTF changes are excluded. One full and one PDF-only build use the same patched core528 and the same product build-input sourcef83cbb7. Both manifests have identical9patches, source/tool hashes and product/core identities; patched-core diff SHA256 f1b3fc39a84834127c200f661791d7792b1c5ade26d65aee809b2b8bd4fe4218. Actual ICU/empty UTF8 guard units and UTF8/UTF16 numeric/name/supplementary units pass together.
 
 | Historical purpose | Release | Manifest SHA256 | Raw/Brotli module bytes |
 | --- | --- | --- | --- |
 | full | `528e920e4f34-769ba807df31-st` | `a139b3756743e6d59f2e02f427cd10686229822c6d8b84eba237e7e38e4dfcef` | 53065738 / 8778290 |
 | pdf | `528e920e4f34-a6337ac5034f-st` | `83aa9dbebaf5d57515e70d6d41856ae1c8edb88586378770d592337f10c29009` | 8887503 / 3124673 |
 
-These historical validated directories are in <HOME>/elixiroffice/wasm-artifacts. The full769ba807df31 release is superseded by H1 full2618710bdd8d (manifest ae62a0a65577bb6385b38ce79a9b93f948195bd0ac5fe58fdb470d6f4bb57832). Session A will rebuild and re-pin both the full and PDF-only modules from the combined0001–0011 overlays after H1 integration; do not release between those integrations. Product tools/wasm/runtime-release.json, SDK common/wasm-convert/runtime-release.json and api.js choose full. Product tools/wasm/pdf-runtime-release.json chooses PDF-only for tools/image/prepare-runtime.py/build.sh and packaging; its installer generates SDK common/clientpdf/runtime/current.json. Only these two generated version dirs remain in E's source/deploy/served SDK; older receipts are retained outside source trees.
+The historical full runtime769ba807df31 was superseded by password-capable
+full2618710bdd8d (manifest ae62a0a65577bb6385b38ce79a9b93f948195bd0ac5fe58fdb470d6f4bb57832).
+Both full and PDF-only modules require the combined0001–0011 overlays.
+Product tools/wasm/runtime-release.json, SDK common/wasm-convert/runtime-release.json
+and api.js select the full runtime. Product tools/wasm/pdf-runtime-release.json
+selects the PDF-only runtime for image building and packaging; its installer
+generates SDK common/clientpdf/runtime/current.json. Only the two selected
+generated version directories are retained in the assembled SDK.
 
-Production packaging verifies both six-artifact checksum sets and the common inputs. D3/D4 browser suites pass, including12converted-copy imports and strict multilingual/emoji TXT/CSV/RTF roundtrip. PDF and Print are each started while real pictures are pending in a fresh document; all3editor Office/PDF/Print pixel assertions pass. The unchanged public comparator gives canonical38/38 and oldcontrol38/38. Hosted PDF35/35 and smoke0 pass. New normal-sandbox Linux AppImage/deb contain18391verified resources;52units,3editor smoke, native D4 and Unicode pass. A additional-format conversion/roundtrip/open tests pass in the explicit EO_CONVERT_ONLY mode; native Save As/Print dialogs and new Windows/macOS execution are unverified. Complete hosted paired inventories and review heads are recorded in Session E handoff and external checks. No integration, push, production or demo change.
+Production packaging verifies both six-artifact checksum sets and the common inputs. D3/D4 browser suites pass, including12converted-copy imports and strict multilingual/emoji TXT/CSV/RTF roundtrip. PDF and Print are each started while real pictures are pending in a fresh document; all3editor Office/PDF/Print pixel assertions pass. The unchanged public comparator gives canonical38/38 and oldcontrol38/38. Hosted PDF35/35 and smoke0 pass. New normal-sandbox Linux AppImage/deb contain18391verified resources;52units,3editor smoke, native D4 and Unicode pass. Additional-format conversion/roundtrip/open tests pass in the explicit EO_CONVERT_ONLY mode; native Save As/Print dialogs and new Windows/macOS execution are unverified. Complete hosted comparisons and limitations are recorded in the conversion handoff.
 
-Historical E review pins after the D save-state rebase were **528e920e4f34-769ba807df31-st** full (manifest **a139b3756743e6d59f2e02f427cd10686229822c6d8b84eba237e7e38e4dfcef**) and **528e920e4f34-a6337ac5034f-st** PDF-only (manifest **83aa9dbebaf5d57515e70d6d41856ae1c8edb88586378770d592337f10c29009**). Older A and D build identities above are historical receipts. The action-event save-state change is in web-apps, so the validated common-core runtime pair is retained.
+Historical full/PDF runtime selections after the save-state correction were **528e920e4f34-769ba807df31-st** full (manifest **a139b3756743e6d59f2e02f427cd10686229822c6d8b84eba237e7e38e4dfcef**) and **528e920e4f34-a6337ac5034f-st** PDF-only (manifest **83aa9dbebaf5d57515e70d6d41856ae1c8edb88586378770d592337f10c29009**). Older runtime identifiers above are historical. The action-event save-state change is in web-apps, so the validated common-core runtime pair is retained.
 
-2026-10-13 [D] Release pipeline now reads the selected product revision's dedicated tools/wasm/pdf-runtime-release.json. Older source revisions fall back only when the dedicated file is absent and the matched runtime manifest is PDF-only. Present bad/new pins and legacy full modules fail closed. Thirteen pipeline tests and actual new/legacy source plans PASS; no runtime build or final desktop release build.
+Release-pipeline source selection (2026-10-13): the pipeline now reads the selected product revision's dedicated tools/wasm/pdf-runtime-release.json. Older source revisions fall back only when the dedicated file is absent and the matched runtime manifest is PDF-only. Present bad/new pins and legacy full modules fail closed. Thirteen pipeline tests and actual new/legacy source plans PASS; no runtime build or final desktop release build.
 
-2026-10-13 [D] MSG13 packaging test-input inventory now covers AI Core/View/Strings, all three FileMenu sources and45locales per editor. The exporter and desktop inventory unit share one JSON list; selected-source blobs and the inventory SHA are bound in INPUTS.json and checked remotely. Fourteen pipeline tests PASS; exact A test sources with old47inputs fail7/64, while142inputs plus the new inventory unit pass65/65 in both isolated environment layouts. Unit asset prerequisites are real manifest-hashed bundle bytes; no final package or runtime rebuild and no A source edits.
+Packaging test-input inventory covers AI Core/View/Strings, the three
+FileMenu sources and45 locales per editor. The exporter and desktop inventory
+unit share one JSON list; selected-source blobs and the inventory SHA are
+bound in INPUTS.json and verified. Fourteen pipeline tests passed. The old
+47-input archive failed7/64 cases;142 inputs plus the inventory unit passed
+65/65 in both isolated layouts. Unit asset prerequisites use real,
+manifest-hashed bundles; this did not rebuild the runtime.
 
-### 2026-10-13 — Session A native desktop Help and startup review
+### 2026-10-13 — native desktop Help and startup
 
-The Help/AI disclosure candidate uses the integrated full 528e920e4f34-769ba807df31-st and PDF 528e920e4f34-a6337ac5034f-st, with 18,391 manifest-verified resources. SDK/web bundles were compiled fresh; unchanged standard free-font data and slide themes were reused from the audited frozen cache, with unchanged theme source checked. The current shared D test inventory exports142 exact Git blobs and 135 editor locale files, with manifest SHA ced67a8744e601daa1b77852db054d3f887171dd648dcc549f07d97fc96345ef. No runtime was rebuilt by this follow-up.
+The Help/AI disclosure implementation uses the integrated full 528e920e4f34-769ba807df31-st and PDF 528e920e4f34-a6337ac5034f-st, with 18,391 manifest-verified resources. SDK/web bundles were compiled fresh; unchanged standard free-font data and slide themes were reused from the audited frozen cache, with unchanged theme source checked. The shared test inventory exports142 exact Git blobs and 135 editor locale files. No runtime was rebuilt by this follow-up.
 
-The rebuilt Linux and installed arm64 DMG pass all six formats for opening, editing, saving, a clean state and fresh reopening and Wasm PDF, native File > Help in all three editors and desktop AI disclosure (English/Linux and French/Mac). Source and isolated Mac units pass 78/78; strict own-hosted smoke with no errors and Windows 228+14 and Mac 171+13 shortcut cases pass with existing exclusions. Actual periodic recovery, SIGKILL and restoration for spreadsheet/presentation passed on both preceding same-runtime shell candidates; the frozen Mac native Save As, PDF save sheet, Print then Cancel, keyless AI, Ctrl+click and recovery baseline is retained separately.
+The rebuilt Linux and installed arm64 DMG pass all six formats for opening, editing, saving, a clean state and fresh reopening and Wasm PDF, native File > Help in all three editors and desktop AI disclosure (English/Linux and French/Mac). Source and isolated Mac units pass 78/78; strict isolated hosted smoke with no errors and Windows 228+14 and Mac 171+13 shortcut cases pass with existing exclusions. Actual periodic recovery, SIGKILL and restoration for spreadsheet/presentation passed on both preceding same-runtime shell candidates; the frozen Mac native Save As, PDF save sheet, Print then Cancel, keyless AI, Ctrl+click and recovery baseline is retained separately.
 
-Invalid-capture bootstrap regression: all seven cases failed before the fix. Actual installed Mac malformed requests now exit 1 without a blocking error box and log the exact main stack (three cases); valid English/French capture produces six PNGs. Historical popup screenshots were not captured: native early-startup targeting failed, and a display-name fallback mistakenly opened a stale owner-installed copy; no subsequent clicks, keys, file actions or screenshots were taken in that window. This is a test-targeting incident, not a current old-shell fallback. The lead confirmed the stale executable. Further native starts use only owned absolute paths and isolated profiles; no further CUA name/bundle lookup. Actual-main English UI/French system Help routing passes; the combined native debugger/capture probe is unverified because capture intentionally rejects debugger flags. Windows, downloaded Gatekeeper and installed associations and physical printing remain outside this follow-up’s new acceptance. Review only; no integration or publication.
+All seven invalid-capture bootstrap cases failed before correction. Malformed
+Mac capture requests now exit1 without a blocking error box and log the main
+stack; valid English/French capture produces six PNGs. Earlier popup attempts
+targeted the wrong installed copy and do not qualify current behavior.
+Native checks use absolute executable paths and isolated profiles.
+English application/French system Help routing passed; the combined native
+debugger/capture check remained unverified because capture rejects debugger
+flags. Windows, downloaded Gatekeeper, installed associations and physical
+printing were not qualified by this validation.
 
-## 2026-10-13: Session E file operations review candidate
+## 2026-10-13: file operations
 
-MSG2 adds stored Rename, current-storage Save a Copy destination pickers, native Rename and explicit browser downloaded-copy naming. No core/runtime rebuild or pin change: full 528e920e4f34-769ba807df31-st and PDF-only 528e920e4f34-a6337ac5034f-st remain the accepted releases. The separate Download copy cards preserve hosted PDF behavior.
+File operations add stored Rename, current-storage Save a Copy destination pickers, native Rename and explicit browser downloaded-copy naming. No core/runtime rebuild or pin change: full 528e920e4f34-769ba807df31-st and PDF-only 528e920e4f34-a6337ac5034f-st remain the accepted releases. The separate Download copy cards preserve hosted PDF behavior.
 
-Public acceptance: hosted Word/Excel/PowerPoint3/3, browser local3/3, packaged Linux native3/3, package loads6/6, Word save-state8/8, desktop units87/87, storage paths2/2, actual macOS filesystem rename3/3, real Nextcloud permissions/conflicts and two-account mount aliases, callback retry and real delayed conversion lock all pass. Hosted PDF35/35 and smoke0 errors pass; shortcut results match the control (one existing Windows screen-top failure). Full context-menu results and platform/persistence qualifications are recorded in the file operations handoff. Independent read-only review found no concrete blocker; lead review remains required. No integration/push/deployment.
+Public acceptance: hosted Word/Excel/PowerPoint3/3, browser local3/3, packaged Linux native3/3, package loads6/6, Word save-state8/8, desktop units87/87, storage paths2/2, actual macOS filesystem rename3/3, real Nextcloud permissions/conflicts and two-account mount aliases, callback retry and real delayed conversion lock all pass. Hosted PDF35/35 and smoke0 errors pass; shortcut results match the control (one existing Windows screen-top failure). Full context-menu results and platform/persistence qualifications are recorded in the file operations handoff.
 
-MSG11 file-operation followup retains both accepted runtimes. New names reject Windows devices/bidi controls/excess bytes and normalize NFC; file verification hashes stream. Actual final tests pass: desktop88, storage6, Mac filesystem4, browser3, Linux native3/package6/ODT8, hosted3, real cloud/aliases, stored PDF/RTF2, translated French/German-fallback2, callback3, smoke0 errors and hosted PDF35/35. Existing full shortcut/context control comparisons and platform/race qualifications remain in the handoff. New baseline vectors failed before implementation; separate read-only review found no ordinary blocker. No integration/push/runtime rebuild.
+File-operation validation retains both accepted runtimes. New names reject Windows devices/bidi controls/excess bytes and normalize NFC; file verification hashes stream. Actual final tests pass: desktop88, storage6, Mac filesystem4, browser3, Linux native3/package6/ODT8, hosted3, real cloud/aliases, stored PDF/RTF2, translated French/German-fallback2, callback3, smoke0 errors and hosted PDF35/35. Existing full shortcut/context control comparisons and platform/race qualifications remain in the handoff. New baseline vectors failed before implementation. The runtime was not rebuilt.
 
-## Local PDF preview (G1a, awaiting review)
+## Local PDF preview (G1a, historical validation)
 
 Desktop and browser convert-locally mode can open PDF bytes directly in the bundled PDF editor. View, text search/select/copy, page navigation, ordinary AcroForm filling and comments/annotations operate locally. Original text editing, OCR and PDF-to-DOCX are not enabled. PDF document JavaScript and form URI actions are disabled locally; scripted calculations and validation therefore are not supported. Hosted PDF behavior remains unchanged.
 
-This stage exports PDF copies and supports local printing, while Save to the original stays disabled pending G1b. The existing drawingfile SplitPages writer retains tested pages, basic form values and annotations, but drops document Title/Author/Subject and bookmarks; signatures are invalidated. Copy export asks for acknowledgement of these losses, defaults to a copy name on desktop and rejects the original path or hard-link identity. It never acknowledges the original as saved. The engine still emits upstream Creator/Producer metadata: this is an open G1b/release issue, not a branded writer acceptance. No newly built package is approved by this source-stage report.
+This stage exports PDF copies and supports local printing, while Save to the original stays disabled pending G1b. The existing drawingfile SplitPages writer retains tested pages, basic form values and annotations, but drops document Title/Author/Subject and bookmarks; signatures are invalidated. Copy export asks for acknowledgement of these losses, defaults to a copy name on desktop and rejects the original path or hard-link identity. It never acknowledges the original as saved. The engine still emits upstream Creator/Producer metadata: this is an open G1b/release issue, not a branded writer acceptance. These source checks do not qualify a newly built package.
 
 Acceptance on public synthetic fixtures: 94 desktop units; real sandboxed Linux Electron source/dev runs with two pages, a text field filled through keyboard input, old/new annotations and author names retained after export/reopen, unchanged original bytes, visible native copy-loss warning cancelled, real native print dialog cancelled (no print); Firefox browser raw open, search two matches, copy both pages, page navigation, form UI input, comment, actual PDF download and fresh reopen, no Node, 170 static GETs and no upload/server fallback/external request. A 250-page 74,391-byte synthetic PDF reached SDK-ready in about 1.2 seconds on development host; this is not a large-image-PDF memory or first-paint benchmark. New native macOS/Windows PDF acceptance and encrypted/signed/XFA cases remain unverified and belong to subsequent gates.
 
-## H1 local passwords (review candidate, 2026-10-13)
+## H1 local passwords (2026-10-13)
 
-The full runtime `528e920e4f34-2618710bdd8d-st` adds the EO_WASM-only Office integrity rejection overlay and keeps the separate PDF-only release unchanged. Actual six-format encrypt/decrypt/change/remove gates pass in both workers; three Office HMAC mutations now fail instead of producing editable output. The public corpus retains 38/38 normalized outputs. Production browser six-format edits and encrypted saves pass. Combined desktop units104 and lifecycle state8 pass. Linux packaged six-format native Save As Keep/Change/Remove, protected PDF refusal/consent/output, Cancel/Home and password-profile scans pass (product116dd8f); the later isolated backup-name warning is covered by the104 units. One earlier XLSX dialog timeout is retained and unclassified; focused/full retries pass. No integration or package publication is approved. See [local password policy, build provenance and limitations](local-passwords.md).
+The full runtime `528e920e4f34-2618710bdd8d-st` adds the EO_WASM-only Office integrity rejection overlay and keeps the separate PDF-only release unchanged. Actual six-format encrypt/decrypt/change/remove gates pass in both workers; three Office HMAC mutations now fail instead of producing editable output. The public corpus retains 38/38 normalized outputs. Production browser six-format edits and encrypted saves pass. Combined desktop units104 and lifecycle state8 pass. Linux packaged six-format native Save As Keep/Change/Remove, protected PDF refusal/consent/output, Cancel/Home and password-profile scans pass (product116dd8f); the later isolated backup-name warning is covered by the104 units. One earlier XLSX dialog timeout is retained and unclassified; focused/full retries pass. These checks do not qualify a replacement release package. See [local password policy, build provenance and limitations](local-passwords.md).
 
 2026-10-13 A G1b runtime preparation (not Save acceptance): native EditPdf/AddToPdfFromBinary prototype preserves original bytes, page content/geometry, Title/Author/Subject, outline, form value and old/new annotations on public synthetic fixtures; fresh SDK reopen and independent Poppler pass. Eight parsed-policy fixtures prove signature/XFA/encryption/unsupported field/catalog/page-limit/invalid rejection with no output and unchanged input. Added bounded original-append entry, Creator preservation patch0010 and branded generated provenance; a fresh matched runtime pair and wider repeat-save/native gates remain pending. Original Save stays disabled.
 
@@ -882,9 +875,9 @@ Local desktop PDFs now use a bounded incremental writer for original Save and Sa
 
 The parsed policy refuses encryption, signature markers (including compressed objects), XFA, non-text form fields, scripted actions, unsupported catalog/annotation structures and linearization markers. Bounds are 128 MiB input, 64 MiB changes, 256 MiB output, 2,000 pages, 200,000 objects, bounded traversal and a 60-second worker deadline. Producer and modification date change intentionally; original Creator, Title, Author, Subject and outline are retained in the public proof. This is a conservative supported subset, not unrestricted PDF editing.
 
-Evidence: 15 actual browser policy cases; eight independent Poppler preservation outputs; classic/compressed object and xref streams; text/highlight/ink annotations and URI links; first/repeated/second-edit/Undo fresh reopen; 250-page public sample; 116 desktop units after the bd2b998 rebase; sandboxed Linux two atomic saves and fresh reopen. Both runtimes were rebuilt from recipe 8b15cde and core 528e920e4f34 with patches 0001–0011: full 528e920e4f34-b84bad726b86-st and PDF-only 528e920e4f34-7e3dabf57ea2-st. D's password integrity (3) and actual workers (12 groups) pass. Hosted smoke and Windows/Mac shortcut scopes pass with zero errors/failures.
+Evidence: 15 actual browser policy cases; eight independent Poppler preservation outputs; classic/compressed object and xref streams; text/highlight/ink annotations and URI links; first/repeated/second-edit/Undo fresh reopen; 250-page public sample; 116 desktop units after the same controller source profile; sandboxed Linux two atomic saves and fresh reopen. Both runtimes were rebuilt from recipe 8b15cde and core 528e920e4f34 with patches 0001–0011: full 528e920e4f34-b84bad726b86-st and PDF-only 528e920e4f34-7e3dabf57ea2-st. Password integrity (3) and actual workers (12 groups) pass. Hosted smoke and Windows/Mac shortcut scopes pass with zero errors/failures.
 
-Signature/XFA/linearization fixtures test presence refusal, not cryptographic signature validity or conformance. Image-heavy peak memory, original PDF saving on macOS/Windows, physical printing and new release packages are unverified. Native Linux Save As/print acceptance is recorded separately in the task checks. No integration or publication by session A.
+Signature/XFA/linearization fixtures test marker-presence refusal, not cryptographic signature validity or conformance. Image-heavy peak memory, original PDF saving on macOS/Windows, physical printing and new release packages remain unverified.
 
 ## G1b safety review follow-up (2026-10-13)
 
@@ -897,17 +890,13 @@ All12 artifact hashes and common source/patch/tool provenance match. The shared 
 
 Refusal reasons come from the existing45locale catalogs with English fallback and French translations. Desktop and browser-local modes show the reason, original safety and copy offer; cancellation does not falsely label a writable document read-only. Unsupported named destinations, portfolios and automatic catalog actions are explicitly disclosed. The existing copy loss confirmation and original-path/hard-link refusal remain mandatory.
 
-Acceptance:120desktop units;9password-state units;2legal-attribution units;1manifest test; fault-injected C++ guard;23actual native policy cases plus3failed-write false-policy cases; four first/repeated/second/Undo outputs and four classic/compressed annotation/link cases;8independent Poppler appearance/property/outline/order proofs; actual visible browser Save download keeps dirty state,200staticGET/0errors/250pages;3actual French read-only UI cases. D integrity3 and actual six-format web/desktop worker12groups pass on the final full runtime. Hosted own:32793 smoke0errors/fails and win228+14/mac171+13shortcut scopes pass.
+Acceptance:120desktop units;9password-state units;2legal-attribution units;1manifest test; fault-injected C++ guard;23actual native policy cases plus3failed-write false-policy cases; four first/repeated/second/Undo outputs and four classic/compressed annotation/link cases;8independent Poppler appearance/property/outline/order proofs; actual visible browser Save download keeps dirty state,200staticGET/0errors/250pages;3actual French read-only UI cases. Integrity3 and actual six-format web/desktop worker12groups pass on the final full runtime. Isolated hosted smoke0errors/fails and win228+14/mac171+13shortcut scopes pass.
 
-Final matched pair in sandboxed Linux source/dev overlay: two atomic original saves/fresh reopen (7091/8681bytes, old/new annotations retained) and3actual native refusal/copy-offer cases pass without focused input. Fresh native SaveAs/print-dialog reruns are UNVERIFIED: test desktop relocked (LockedHint=yes), owner unlock requested; no focused native event sent. Their earlier G1b native results remain recorded as historical evidence, not a fresh-module pass. Existing Help3/fonts native consent/rename/protected-DOCX menu checks passed before this hardening; those hooks are unchanged.
+Final matched pair in sandboxed Linux source/dev overlay: two atomic original saves/fresh reopen (7091/8681bytes, old/new annotations retained) and3actual native refusal/copy-offer cases pass without focused input. Fresh native SaveAs/print-dialog reruns are UNVERIFIED: the graphical desktop was locked, no focused native event sent. Their earlier G1b native results remain recorded as historical evidence, not a fresh-module pass. Existing Help3/fonts native consent/rename/protected-DOCX menu checks passed before this hardening; those hooks are unchanged.
 
-Current development host assembly has18,393 exact hashed resources after removing only own inactive generated runtime versions; all four production editor bundles and45desktop catalogs are present. Linux evidence is a source/dev overlay, not a release package. macOS/Windows original PDF Save, physical printing, image-heavy peak memory and fresh release packages remain unverified. Signature/XFA/linearization samples are marker-presence fixtures, not cryptographic/conformance proofs. Startup deletion of stale .bak/.tmp is deferred: a backup may be the only recoverable original, and safe automatic cleanup requires a durable ownership/recovery ledger.
-
-No integration, push, demo change or publication by session A. Task/checks/evidence: /srv/elixiroffice/wt/pdf-local-A-G1b-work.
+The historical source assembly has18,393 exact hashed resources after removing inactive generated runtime versions; all four production editor bundles and45desktop catalogs are present. Linux evidence is a source/dev overlay, not a release package. macOS/Windows original PDF Save, physical printing, image-heavy peak memory and fresh release packages remain unverified. Signature/XFA/linearization samples are marker-presence fixtures, not cryptographic/conformance proofs. Startup deletion of stale .bak/.tmp is deferred: a backup may be the only recoverable original, and safe automatic cleanup requires a durable ownership/recovery ledger.
 
 2026-10-14 narrow desktop PDF correction candidate: no runtime or pin changes. Public Chromium/Skia tagged22page input is refused for MarkInfo/StructTreeRoot catalog entries; copy conversion retains22pages and all normalized text. Modern wheel adaptation and save/recovery error handling are desktop shell changes. See docs/desktop.md for the reviewed scope and native evidence.
-
-
 
 ### Desktop release identity (0.2.1)
 
@@ -915,62 +904,345 @@ The [desktop build identity](desktop-build-identity.md) records exact product/Do
 
 ## Document-security audit follow-up (2026-10-15)
 
-The phase2 JavaScript review candidate leaves x2t and its pins unchanged. A public synthetic DOCX round-trip preserves seven hyperlink targets and tracked hostile font/style values for separate sink tests. ZIP directory traversal and EPUB root-containment source findings remain unresolved; HWPML/HWPX resource inspection is limited. No archive-safety or new runtime acceptance claim is made. See [security phase2](security-phase2.md); native/core fixes, wasm rebuilding and corpus gates require the separately scheduled core work.
-### 2026-10-15 — PDF feedback progress/cancel (review candidate)
+The phase2 JavaScript security changes leave x2t and its pins unchanged. A public synthetic DOCX round-trip preserves seven hyperlink targets and tracked hostile font/style values for separate sink tests. ZIP directory traversal and EPUB root-containment source findings remain unresolved; HWPML/HWPX resource inspection is limited. No archive-safety or new runtime acceptance claim is made. See [security phase2](security-phase2.md); native/core fixes, wasm rebuilding and corpus gates require the separately scheduled core work.
+
+### 2026-10-15 — PDF feedback progress/cancel
 
 The SDK PDF worker now emits opt-in loading, initialization and conversion stages, retaining a single result for callers without a progress observer. Word captures real selected drawing pages; desktop presentations count actual slide preparation. Workbook drawing and synchronous native C++ conversion remain indeterminate. Cancellation checks page/preparation boundaries and terminates the isolated export worker; it cannot interrupt inside C++. Abort never selects the JS fallback. Late progress/results cannot complete a cancelled operation; retry uses a fresh module.
 
 Source-overlay Firefox evidence: public ten-page Word PDF 23,959 bytes, ten pages and 19,434 text characters; cancellation after drawing page two and during real worker conversion, then successful fresh retry. Original-preserving PDF worker cancellation and retry retain the original byte prefix. Dirty/paragraph-mark state stays unchanged, no false Ready, and requests are same-origin GET only. 180 affected units pass; real DOM checks retain Cancel focus across page events and hide it at native-output handoff. Final packaged/native acceptance remains unverified; no0.2.0 artifact changes.
 
-
-### 2026-10-15 — Remaining desktop feedback adapters (review candidate)
+### 2026-10-15 — Remaining desktop feedback adapters
 
 Shared opening jobs span desktop startup, real conversion and installation of the native actions. Safe desktop-open IDs are distinct from iframe local-operation IDs. Save As owns its job before password choices; real conversion callbacks carry only a decrypting/encrypting purpose and never passwords. Print preparation reuses PDF counters/stages and cancellation; native callback success is system submission only.
 
 201unitsPASS/0fail/skip; six public encrypted formats wrong-retry/open/edit/save/reopen PASS with real Wasm, and six Save As Keep/Change/Remove/Protect/PDF-copy-refusal UI gates PASS. Public exact100-page opening reports a file name with indeterminate actual stages, same-originGET only, no false fileReady. Production AMD modules compile, generated shell copies the shared Operation source exactly, and45catalogs contain all named-open/crypto labels. Source-overlay evidence only; final package/native-print acceptance separate. A first repeated-body fixture measured85pages; a fresh explicit100-page fixture passes the unchanged exact100assertion.
-### Save As 0.2.1 desktop slice 1 review candidate (2026-10-15)
+
+### Save As 0.2.1 desktop slice 1 (2026-10-15)
 
 The desktop now selects a format and native destination before conversion, with single-use destination tickets and selected-format warnings. All-platform styled fallback remains the default until actual native Mac/Windows proof; Linux has explicit snapshot-bound overwrite confirmation. Shared Chromium scenarios 24/24, desktop units 168/168, locale catalogs 45/45 and 18718 resource hashes/licenses pass. Actual owned Electron DOCX/ODT/PDF routes pass; browser-local wiring and full safety/hosted gates remain pending. Runtime pins are unchanged. See scope, failures and limits.
 
-### Save As 0.2.1 browser slice 2 review candidate (2026-10-15)
+### Save As 0.2.1 browser slice 2 (2026-10-15)
 
 Browser-local File > Save As uses the shared descriptive dialog, source-format default and a validated copy name. Cancel starts no conversion or rename; the selected extension wins after portable filename validation and NFC normalization. The existing converter, selected-format warnings, password handling and PDF copy consent remain in the export route. Hosted and desktop routing are excluded by the browser capability. The PDF-only menu reuses the selector and translated45-language labels; an existing missing Arabic PDF comment caption now falls back to the translated Comment caption to prevent a startup RTL exception.
 
 Production web builds pass all desktop/mobile/deploy gates. Actual production browser runs pass12/12 Office paths and4/4 PDF paths in en/fr/de/ar, with source/dirty-state checks and zero document requests or sockets. Shared filename dialog8/8 and combined desktop/local policy/protection/locale units186/186 pass. Full output/reopen, native six-format password and hosted gates remain slice3. See scope and retained failures.
 
-### Save As 0.2.1 full matrix (2026-10-15, review candidate)
+### Save As 0.2.1 full matrix (2026-10-15)
 
-The shared desktop/browser selector is verified with the existing matched full/PDF runtime pins. Actual browser exports cover24 source/output pairs with real edits and fresh reopen; the D3/D4, pending-picture, Unicode and public38-file corpus checks pass. Sandboxed Linux H1six, native PDF and untitled/converted destinations pass; combined units186/186 and both18,718-file owned resource manifests verify. Hosted candidate/base have identical shortcut and Excel sweep inventories. Their full Word sequences both crash at final footnote, while isolated footnote10/10 passes on both. The current PDF battery is37/38 on both due to the same public title extraction spacing assertion. MSG30 separates those baseline issues from Save As; assertions and absolute result limits are retained. Hosted PowerPoint has an exact paired inventory of149 pass,19 info and18 skip on each; the first baseline target crash remains recorded. See the full scope and runtime provenance. No converter/core rebuild, release artifact replacement or integration is claimed.
+The shared desktop/browser selector is verified with the existing matched full/PDF runtime pins. Actual browser exports cover24 source/output pairs with real edits and fresh reopen; the D3/D4, pending-picture, Unicode and public38-file corpus checks pass. Sandboxed Linux H1six, native PDF and untitled/converted destinations pass; combined units186/186 and both18,718-file owned resource manifests verify. Hosted candidate/base have identical shortcut and Excel sweep inventories. Their full Word sequences both crash at final footnote, while isolated footnote10/10 passes on both. The current PDF battery is37/38 on both due to the same public title extraction spacing assertion. Those paired baseline failures remain distinct from Save As; the original assertions and limits are retained. Hosted PowerPoint has an exact paired inventory of149 pass,19 info and18 skip on each; the first baseline target crash remains recorded. See the full scope and runtime provenance. These checks do not qualify a converter/core rebuild or replacement release artifact.
 
-### Save As r1 after integrated feedback (2026-10-15, review candidate)
+### Save As r1 after integrated feedback (2026-10-15)
 
-The rebased source preflight passes 228 desktop/local/client-PDF units, 16 localized browser paths and 24 edit/output/reopen pairs, six native password formats and native PDF/destination checks. D3/D4, Unicode, ordered/pending pictures and the public corpus (38/38 normalized outputs) pass with unchanged converter pins. Both 18,732-file resource graphs verify.
+The later source preflight passes 228 desktop/local/client-PDF units, 16 localized browser paths and 24 edit/output/reopen pairs, six native password formats and native PDF/destination checks. D3/D4, Unicode, ordered/pending pictures and the public corpus (38/38 normalized outputs) pass with unchanged converter pins. Both 18,732-file resource graphs verify.
 
 Corrected candidate/base smoke runs have zero errors. Shortcut, dedicated context-menu, Excel and PowerPoint status inventories match exactly: 426, 15, 427 and 149 passing cases respectively, with matching other statuses. The initial full Word candidate has 381 pass, 49 info, 84 skip and one menu-reopen failure; the exact baseline has the same passing/information rows and 85 skip. The sole difference is a disabled Cut row. Fresh isolated/prefix repeats match the baseline, but do not replace the strict initial failure. Source review finds no Save As path executed by that hosted Cut context. Both current full Word runs complete without the historical final-footnote crash; this does not establish that the crash is fixed.
 
-Client PDF remains 37/38 on both sides with the same title-spacing assertion. All failed setup/reproduction attempts, the corrected reference theme build, source/resource provenance and review limits are recorded in the Save As handoff. This is an owned source preflight; no release artifact was replaced and no integration or publication is claimed.
+Client PDF remains 37/38 on both sides with the same title-spacing assertion. All failed setup/reproduction attempts, the corrected reference theme build, source/resource provenance and review limits are recorded in the Save As handoff. These source checks do not qualify a replacement release artifact.
 
-### 2026-10-15 Save As r2 review corrections
+### 2026-10-15 Save As r2 corrections
 
-Restored PDF-copy artifact/name acknowledgement and writing feedback; added the dedicated stale-destination message in45catalogs. Final bases include MSG33 security.236units,16localized production browser paths and the native protected-DOCX/PDF-copy subset pass. Full web27.7s/SDK39.1s production builds and both18,719-file source-preflight resource graphs verify. Current-main documentation union deletes0lines; matched conversion/PDF pins remain unchanged. See the accompanying release acceptance record for exact scope, preserved setup failures and retained r1 hosted/corpus limits. Ready for lead integration review; E does not integrate.
+PDF-copy output/name acknowledgement and writing feedback are retained;45
+catalogs contain the stale-destination message. Validation passed236 units,
+16 localized production browser paths and the native protected-DOCX/PDF-copy
+subset. Web/SDK production builds and both18,719-file source-preflight
+resource graphs verified. Conversion/PDF runtimes were unchanged.
+Full scope, setup failures and hosted/corpus limits.
 
 ### G2 slice 1: existing annotations/forms and safe page rotation candidate (2026-10-15)
 
 The current pinned PDF runtime (528e920e4f34-98ab90f5d735-st, manifest d9f0109b81130dbadb9f1e8b99e0e024899844a0874784bfc1310bf8fd34d0c6) already preserves real text comments, square annotations, highlights and Tx form-field edits. A new public-fixture browser regression covers their real toolbar and keyboard gestures, Save/download and fresh reopen. The new implementation exposes only left/right quarter-turn rotation in the local thumbnail context menu, gated by verified writable policy and operation/page-lock state. Original PDF text and destructive page actions remain disabled.
 
 English/French public PDF runs pass, including metadata/outline/text/page-count/original-prefix checks and signature/XFA/unsupported-field presence refusals. Independent Poppler/Pillow rotation comparisons have mean absolute channel differences below 0.31/255 (threshold 2/255), with the expected 792x612 raster. These are browser/production-web-apps results on Linux, not native OS file-dialog or new release-package acceptance. No C++/runtime policy or pin was changed. See tests/pdf-local/annotations-browser.cjs, annotations-poppler.py and the accompanying release acceptance record
-### 2026-10-15 named-document quit shell review
+
+### 2026-10-15 named-document quit wording
 
 Product-only quit wording adds45locale named questions and explicit Don't Save, bidi-isolated names and platform response IDs; deadlines, Save As guards and late-edit/recovery handling remain. Baseline24close tests pass; final242units and32localized DOM projections pass. No converter/SDK/web rebuild or runtime pin change; native OS dialog acceptance remains unverified. See the accompanying release acceptance record
 
-## Desktop open-error resilience — 2026-10-16 (E, MSG54)
+## 2026-10-16 — System fonts S1–S4: implementation and validation
 
-FrozenRC4 source receives only recent-metadata isolation, one100ms EBUSY read retry, seven translated OPEN messages in45catalogs and fixed-code local diagnostics; the same fix is forward-ported to main. RC214desktop/34local/26simulatedDarwin and main252/34/27 pass, including8new focused tests each. No runtime/converter changes or native/package/hosted/fullcorpus qualification. Evidence and limits.
-## Desktop output feedback backport (2026-10-16)
+Historical font validations below apply to their recorded source/runtime profiles; they do not qualify later runtime or packaged builds.
 
-Cancellation clears transient feedback; converter/runtime pins are unchanged.
-[Scope](desktop-cancellation-feedback.md).
+### Desktop 0.2.2 S1 system-font preparation
 
-## Windows opening follow-up — E MSG56, 2026-10-16
+The desktop adds a private local index and named-family/style policy before the existing font loader. Packaged/metric families retain priority and no fonts are uploaded. This slice does not change the x2t runtime or selective font-selection format: shared character ranges, physical face/export agreement and TTC/variable fixes belong to S2. See [scope, actual measurements and remaining gates](desktop-system-fonts.md).
+
+### Desktop 0.2.2 S2 selected system fonts
+
+The desktop-only SDK policy preserves logical style and physical/full-name identity through manager/shaper lookup; shared local streams and selected FS entries deduplicate TTC bytes. Private indexv3 and selected caches enforce128MiB/file,192MiB selected,2GiB cumulative scan and32MiB metadata-file read/write bounds. Actual style-slot coverage, conservative regional preloading and selected native ranges replace a name-only fallback assumption. Adapter capability1 prevents pairing new shell policy with old compiled SDK. Actual renderer setup registers eligible families/ranges before document symbol scanning.
+
+Variable system fonts are eligible only at their default instance, in BOTH resolver and real registration. Eligible static same-family slots win; known eligible physical styles precede synthetic fallback. Default named aliases normalize to low16 collection ordinal. Ubuntu Sans Regular/Medium select default400/face0; Bold uses the same eligible face with needBold=true. Nondefault named instances are excluded rather than advertised as supported. Defensive rejection remains in both PDF backends if an ineligible instance reaches export.
+
+Actual pinned PDF528e920e4f34-98ab90f5d735-st with production-selected FS only:26,286,892-byte system TTC JP0/TC3 gives correct embedded regional faces and exact extraction. Six fresh jobs all convert; non-Arabic text extracts exactly. Independent FontTools/default-policy contour oracle passes Regular/Medium/Bold: exact eligible default outlines, identical Medium/Regular pixels and explicit synthetic-Bold ink. Arabic italic renders joined/slanted with zero HarfBuzz missing glyphs but extraction remains FAIL.
+
+Historical raw named Medium/Bold tests fail in BOTH native and fontkit subsetters, which embed default contours despite correct metadata/getVariation paths. That defect justifies default-only eligibility and the deferred core backlog item in docs/wasm.md. No core/runtime rewrite or new font dependency belongs to this slice.
+
+Final217/217 desktop units,12 focused cases, actual-source renderer/cold-loader/manager/glyph-picker/shaper/asynchronous preloader/service gates, metadata write/recovery and selected-budget/revocation/oversize boundaries pass. The minified font-service regression passes. Four SDK bundles build; original style checker passes clean baseline/current tracked snapshots, while its built-tree generated-output failure is retained separately.
+
+Native Electron/ASAR, Windows/macOS/Flatpak, run-language regional fallback and rendered thumbnails remain unverified. See [scope and evidence](desktop-system-fonts.md) and tests/fonts/README.md. Font payload and server font inventory are unchanged.
+
+### Desktop 0.2.2 S3 small offline fallbacks
+
+Four renamed OFL static Arabic/Sinhala R/B faces add882,628font bytes; generated inventory51families/114files retains all110existing encoded file hashes unchanged. The actual generated ranges and SDK preloader/selected-FS gate work with system fonts off and after revocation; normal system Noto alternatives retain priority and reserved fallback-name system collisions are rejected. Release driver builds/verifies the inputs and carries their notices into resources; font/theme generation remains offline. No server inventory change.
+
+Baseline217/217, current218/218 desktop and13focused tests pass; release driver25tests pass. Seven actual selected-Wasm PDFs convert with0HarfBuzz.notdef. Every emitted embedded glyph contour equals its selected static source; actual italic matrices shear0.26 and rasters differ visibly. Arabic/Urdu extraction remainsFAIL; Sinhala extraction alsoFAILS due inserted spaces in clusters. These are sample converter proofs; native editor/ASAR/OS/thumbnail gates remainunverified.
+
+Measured controlled font-resource growth: raw1,022,525B; tar-gzip9 402,284B; tar-xz6 224,888B; ZIP-deflate9 406,576B; gzip-SquashFS376,832B. No complete installer was built and no installer delta is asserted. Final source/derivative hashes use the existing releaseFontTools4.58.0 pin; repeated offline builds are identical. Details: [S3 evidence](desktop-system-fonts.md#small-bundled-desktop-fallbacks--s3), tests/fonts/README.md.
+
+Generator validation: actual updated themes.sh completed all11presentation themes using the same verified fallback mount and owned SDK outputs. Release-driver assembly orchestration regression passes25tests; full desktop218/218 and focused13/13 pass. Complete installer/native acceptance remains unverified.
+
+### 2026-10-15: S4 desktop Home templates
+
+A desktop-only overlay adds 24 localized DOCX and 24 native-rendered previews for ja, zh, zh-tw, ko, si and ur. The server's 39-language catalog and all 316 shared files remain byte-identical. Actual Home assembly produces four templates in 45 languages, with 360 matching source/preview hashes. Both release source archive modes retain the overlay.
+
+The pinned SDK font classifier and CS-style oracle pass 3.34 million table values, 3,144 property vectors and 144 actual GetFontInfo vectors. Strict primary-face misses remain visible; explicit rendered coverage follows the generated glyph picker and actual selected style. A real inventory of 114 bundled files and 20 indexed static CJK faces covers all 24 variants. With system fonts off, eight Sinhala/Urdu variants remain covered and 16 CJK choices select English. Existing S2 engine and S3 packaged-loader/selected-FS compatibility gates pass; desktop tests pass 222/222 and release-driver tests 25/25.
+
+Pinned native previews cover 36 visually reviewed pages and embed the expected regional CJK or small fallback families. Layout corrections affect only the new variants. No x2t/Wasm runtime, SDK/core, font-selection format or server inventory changes. Native Electron/ASAR, OS and runtime-thumbnail acceptance remain unverified; prior Arabic/Urdu/Sinhala exact extraction failures remain open. Overlay resource sizes are not installer deltas. See docs/desktop-system-fonts.md.
+
+See [desktop system fonts](desktop-system-fonts.md) for implementation details, tested profiles, historical evidence limits and remaining runtime checks.
+
+## 2026-10-16 — System fonts resilience r2
+
+The resilience change affects desktop discovery/cache/ready-only opening only. All tested bundled
+faces pass the unchanged stricter SDK inspectFace, including freshly generated
+full server253 and desktop257 faces; no SDK relaxation or converter pin change.
+See docs/desktop-system-fonts.md. Earlier r1 selective-PDF evidence and eight exact
+extraction failures remain historical; no new full-Wasm/native acceptance.
+
+### Local PDF page-order
+Existing pages can be moved using thumbnail drag, including multiple selected pages and the end boundary, in one undoable action. This is enabled only for a verified writable local PDF while no open/save operation is active. It retains page count and source bytes through incremental saving; page insertion/deletion and original-text editing remain unavailable. Hosted thumbnail behavior is unchanged.
+The synthetic public five-page classic/compressed regression covers distinct page identities, MediaBox/CropBox, nested outlines, internal destinations, raster images, text-field values, annotations, XMP and document information, actual English/French gestures, grouped Undo/Redo, repeated save and fresh reopen. Independent Poppler rendering compares every reordered page to its source identity. This does not qualify arbitrary PDF structure or native platform packaging.
+
+### 2026-10-16: page-order baseline blocked by inherited attributes
+The expanded baseline fixtures exposed a writer limitation: a grouped move
+through a nested Pages tree can retain the original byte prefix and page order
+while losing the moved page's inherited MediaBox and Rotate. In the synthetic
+case, logical page 4 becomes output page 3 with 652-by-872 instead of 642-by-852
+and zero instead of 270-degree rotation. Poppler and pypdf independently confirm
+the mismatch. The moved text widget's page reference remains correct, but that
+does not make the output safe. That baseline candidate was blocked pending a writer repair or safe structural
+refusal.
+At that baseline, named-destination PDFs were refused by the
+unsupported-catalog policy. The required positive test could not pass; the guard
+was retained during diagnosis. Flat classic/compressed tests and Undo/Redo
+after actual Save pass. Nested single-move inheritance and widget binding pass;
+the full nested/group/repeated baseline qualification did not pass.
+The independent structure check uses pypdf==5.9.0, pinned in
+tests/pdf-local/requirements.txt; install it in the test environment used by
+EO_PDF_STRUCTURE_PYTHON (default python3). Production browser tests retain the
+positive assertions for all required structures. Native packages and a runtime
+change are outside this validation.
+
+### 2026-10-16: inherited page-order source repair qualified separately
+Core branch elixir/pdf-page-order-core-A (39ca5772b4) resolves the original page
+by its stable object reference before copying inherited attributes. With the
+separate c81d qualification module, all six classic/compressed/Pages-inherited/
+named-destination inputs pass actual single, group and end moves, Undo/Redo after
+Save, repeated incremental saves and fresh SDK reopen in English at DPR2 and
+French. Independent pypdf verifies every page's Resources, MediaBox, CropBox,
+Rotate and unchanged object identity, plus named targets and widget /P binding.
+The 90 Poppler page comparisons per language have zero mean pixel difference.
+All 278 units and 33 native inspect/edit policy fixtures plus three malformed
+jobs pass. Signed/encrypted/XFA/scripted/tagged and malformed Names trees remain
+refused. Hosted smoke has no errors; the one previously paired Windows
+navigation failure remains, with other Windows and Mac shortcuts passing.
+The published runtime pins remain unchanged. Old runtimes lack reorderSafe and
+the new local gate denies reordering; the actual six-input old-runtime browser
+gate preserves order/history. A combined0.2.2 runtime pair must be built and qualified with security and RTL changes. This isolated binary is never a
+release pin. The neutral source patch and regression recipe are in
+tools/wasm/review-patches/.
+
+## 2026-10-16 — RTL tables slices 1–2: implementation and validation
+
+The historical RTL checks below retain their original source/runtime profiles; they do not qualify a different converter or packaged build.
+
+### 2026-10-15: RTL table initial implementation
+
+The isolated SDK/core candidate preserves three-state table direction, wire field 22, history and API, with mirrored inline metrics/border strokes and logical XML order retained. Native core preserves explicit false/left overrides, default/inherited anchors and horizontal ODF mode/physical alignment with exact absolute-indent rounding. The native matrix passes 41 inputs / 287 steps; the maintained regression passes 11 inputs / 55 steps. Forty cases have direction/property oracles; original ODF page mode remains unqualified. Native PDF reflection passes four pairs over six pages, five anchors, the colored-border oracle and eight resolved-section style anchors.
+
+Historical ODF table/page dimension normalization remains. Actual Word, full schema and pixel-exact cross-format fidelity are unverified. The browser still uses the old full-Wasm runtime: observed false-style-override/ODT failures remain until a rebuilt full converter is tested.  The frozen first slice guarded RTL mutation paths; the isolated interaction extension below qualifies a controlled editing scope. See [scope and evidence](rtl-tables.md).
+
+### 2026-10-16: RTL table interaction extension
+
+The isolated SDK extension maps physical RTL column/ruler gestures, southwest
+outline resizing and leading row/cell selection zones onto logical table data.
+Keyboard routing separates physical keys from paragraph direction and retains
+document-order range collapse. Text-selection initialization preserves the caret,
+local fragments map selection bounds/anchors to each physical page and origin,
+and floating movements record
+temporary positions before recalculation. Stale RTL gestures cancel after
+resolved geometry/direction changes.
+
+Controlled browser gestures and exact Undo/Redo, nested direction/selection
+probes, all four production editor builds and XLSX/PPTX smoke are recorded in
+the [RTL scope and evidence](rtl-tables.md). Pencil/eraser remains gated.
+Clipped overflowing nested text, general transformed hierarchies, pagination
+changes, live collaboration and actual Word remain outside the qualified scope.
+This changes SDK source only: the full-Wasm runtime and its observed
+false-style-override/ODT failures are unchanged.
+
+See [RTL tables](rtl-tables.md) for implementation details, tested profiles, historical evidence limits and remaining runtime checks.
+
+## 2026-10-16 — RTL r2 and unchanged converter boundary
+
+The SDK and desktop implementation were rebuilt with the integrated font policy.
+Real-editor checks cover LTR compatibility, empty/default direction history and
+bounded pointer validation. Core0011 stays separate from DS core528 and requires
+a combined0.2.2 runtime rebuild. Its explicit LTR jc=left and ODT alignment/tblInd output
+changes are documented in docs/rtl-tables.md with the future corpus gate.
+No new full converter, native Electron, package or release qualification.
+
+## 2026-10-16 — RTL r3 style output qualification
+
+The SDK resets implicit table direction to absence, avoiding false pollution in
+compiled clipboard styles. The r3 public checks compare complete LTR style
+records/XML against SDK50f1 and run the named product browser gates on isolated
+full DocumentServer images with SHA-verified production bundles. Their
+local.html route still uses the local editor; backend editing is not claimed.
+Native clipboard-to-DOCX LTR styles are compared using the existing base225f57
+converter. Exploratory RTL false controls fail on that converter, matching the
+queued core0011 false-output fix. These failures, the separate explicit-jc-left/
+ODT tblInd effects, the combined rebuilt runtime and future corpus gate remain explicit.
+See docs/rtl-tables.md; no new Wasm/core runtime, native desktop or release claim.
+
+The later RTL style validation used newly built SDK/editor bundles and server profiles while retaining the selected converter. Earlier checkpoints remain historical. The separate explicit-LTR/ODT conversion correction still requires a combined runtime build and full corpus validation.
+
+### 2026-10-15 dialog accessibility, slice 1
+
+Shared window/message names and visible sheet/image/formula labels are associated programmatically. Fresh SDK50 editor64, styled shell24, SaveAs12, desktop236per side, local34 and Darwin-substitution close27 pass. Hosted smoke5, shortcuts426 and context15 match exactly; full Word381/Excel427/PowerPoint149 match exactly (with documented information/skips). The SDK production build passes in40.8s;20 pinned runtime files remain byte-identical. The110-font reference profile does not qualify native/AT/new font policy/packages or a full-Wasm rebuild. See current inputs, historical evidence and retained setup failures.
+
+### 2026-10-16 dialog accessibility current validation
+
+The font-policy source profile remains unchanged. Fresh SDK production build
+36.6s, paired desktop244each, strict editor64, styled shell24, actual SaveAs12,
+local34 and Darwin-policy simulation27 pass. The **strict full hosted gate fails**:
+Word baseline380pass/49info/85skip/1fail (exit1), candidate381pass/49info/85skip
+(exit0), solely New Comment failing to reopen on the baseline. No previously
+nonfailing case is lost or regressed and no new candidate failure appears.
+The exact-inventory requirement is not waived. Remaining full and separately
+invoked diagnostic outcomes are preserved in the linked handoff; isolated
+outcomes do not certify the full sequence and no cause/flake claim is made.
+Old-runtime PDF6+3 per side fails closed with unchanged order/history and no
+errors. All13JS hashes match on four surfaces;121source/build and222reference-font
+hashes are rechecked. The15runtime-directory files remain unchanged. No
+full-Wasm/native/AT/system-font policy/package qualification is claimed.
+Earlier SDK profiles remain historical. See failed strict gate and scope.
+
+## 2026-10-16 — hosted PDF input qualification
+
+The hosted PDF wheel candidate changes SDK event binding without changing the
+conversion/Wasm runtime. Current production Word bundles on an owned DocService
+instance pass Chrome/Firefox104/104 across four hosted profiles, with keyboard
+controls and six resource hashes each. Desktop244/244 and focused15/15 pass.
+No native/touch/physical-trackpad/runtime fidelity claim: [details](pdf-wheel.md).
+
+## 2026-10-16 — shared server Arabic data verification
+
+No Wasm or conversion pin changes. The already-integrated upright Arabic shared
+templates reproduce exactly with a native server profile; all233 native/client
+font payloads agree,156 templates have zero missing characters, and desktop244/244
+passes. This is native font/data qualification with explicit existing layout
+limits, not a general Wasm/backend fidelity result.
+[Scope and limits](server-template-coverage.md).
+
+## Desktop open-error resilience (2026-10-16)
+
+Desktop opening adds recent-metadata isolation, one100ms EBUSY read retry, seven translated OPEN messages in45catalogs and fixed-code local diagnostics; the same fix is forward-ported to main. RC214desktop/34local/26simulatedDarwin and main252/34/27 pass, including8new focused tests each. No runtime/converter changes or native/package/hosted/fullcorpus qualification. Evidence and limits.
+
+## desktop output feedback (2026-10-16)
+
+Cancellation clears stale feedback; Word reserves zoom track width. Conversion,
+serialization and runtime pins are unchanged. See [tests](desktop-status-feedback.md).
+
+The output-feedback UI qualification uses the coherent branded Word build: Chrome 155 and
+Firefox 155, four profiles each, 80/80 checks; exact executed-driver/served-input
+guards pass. Earlier unbranded candidates remain partial setup evidence only.
+Compiled Word output differs solely by the intended CSS width rule. See
+[details](desktop-status-feedback.md).
+
+A later source profile passed desktop baseline256/256 and candidate262/262;
+Chrome/Firefox checks using the same driver passed80/80. These results do
+not qualify a packaged application or change the conversion runtime.
+
+## Windows opening follow-up (2026-10-16)
 
 No runtime/converter changes. The frozen RC source now recovers preference queue draining, treats recent persistence as optional, tolerates per-entry font discovery failures and brands native identity while preserving the profile. Win32 UNC/extended/mapped aliases and actual Core/SDK font-error polling are exercised; RC222 desktop/34 local/26 Darwin plus Windows7/font1/open8 pass. Native OS/SMB/font fidelity remains unqualified. Full evidence.
+
+### Desktop shell follow-up (2026-10-16)
+
+The menu/notification behavior follow-up changes only the desktop shell: hidden Windows/Linux native menu bar, timed informational notices with reading/focus pause and persistent error/warning feedback. The conversion runtime, resource hashes and engine gitlinks are unchanged. Linux printing remains a separate investigation; these UI changes do not claim to fix the reported print exit.
+
+Desktop menu and notice behavior (2026-10-16): direct native F1 routing, File Help/About/guarded Quit, localized Quit in45catalogs, hidden Help/print child menus on Windows/Linux, and8second plain notices with persistent file actions. No runtime or engine pin changes. Linux built-editor gate44rows and286strict desktop units pass; Firefox timing/action/live-region gate passes. Native Windows/Mac menu changes and hardware printing remain unverified. The old elementary6.1 print exit remains an unresolved limitation, not a claimed fix.
+
+## Desktop Close/Open behavior (2026-10-16)
+
+Product-shell change for 0.2.2; converter and PDF runtimes are unchanged. The historical baseline 286/286 and candidate 305/305 desktop, 37/37 local, 46/46 simulated Darwin pass with zero skips. Canonical assembly uses SDK9a06b24c33 and Web e6be113c67 production outputs; 18,771 resource hashes pass, with only the two Home CSS resources changed by this patch. Actual Electron verifies untitled Close Save uses one destination ticket and waits for committed DOCX output before returning Home; Close5/Open15 checks also pass. Evidence
+
+## formula wizard keyboard focus (2026-10-16)
+
+A five-line Spreadsheet view hook supplies the existing primary button only when a formula has no arguments. SDK/conversion/runtime pins and calculation/history code are unchanged. Current-main strict 305/305, actual AMD 4/4 and Firefox/actual Mac Chrome 16 profiles / 288 checks pass, with 18 checks in a separate Firefox observer follow-up. Per-run driver bindings and native/AT/hosted/full-shortcut/package limits are explicit in [scope and evidence](formula-wizard-focus.md). These browser checks do not qualify a new package.
+
+## 2026-10-16 image Layout Options focus
+
+The shared Word flyout adds an optional F6 region and scoped SDK-compatible
+focus ownership. Ordinary public image insertion reproduces the baseline;
+wrapping and positioning keep their existing handlers and history. Converter
+sources and runtime pins are unchanged. Actual Firefox/Chrome16profiles pass272checks, desktop278/278 and
+completion-focus15/15 (baseline9RED). Native/AT/hosted/full shortcut gates
+remain unqualified; [scope and test commands](image-layout-keyboard.md).
+
+## Picture Layout Options and conversion compatibility
+
+Picture Layout Options changes shared Word UI and leaves conversion sources
+and runtime selection unchanged. Focused source contracts and ordinary
+Firefox/macOS Chrome keyboard checks cover the picture flyout; native panels,
+assistive technology, hosted transport, locked/read-only combinations and
+the full shortcut inventory remain unqualified.
+[Keyboard behavior and focused checks](image-layout-keyboard.md).
+
+
+## Windows desktop file access
+
+Desktop output and AutoRecover writes retry temporary Windows access refusals before replacing a document. A guarded backup/in-place fallback verifies output and attempts restoration on failure; uncertain restoration retains the original backup. Font discovery continues past unreadable entries, including per-user and exact local registry font files. See [Windows document and font access](windows-file-access.md).
+
+Windows existing-file saving flushes its backup using a write-capable handle, as required by [FlushFileBuffers](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers). Directory flushing is skipped on Windows. Recovery and settings share this file writer; Linux/macOS retain their existing synchronization behavior.
+
+### Desktop save cancellation and font discovery
+
+Windows replacement retries compare file identity, size and modification timestamps without re-hashing full files on every refusal. Original, backup and output verification still guard replacement, fallback and cleanup. Cancellation and the close deadline reach native writes; rollback completes before settlement. Verified rollback removes the backup, while uncertain restoration retains it and names it in an acknowledged close warning. Registry font discovery has bounded PowerShell and fixed-argument reg.exe queries, once per index, with partial-record tolerance. Linux/macOS retain equivalent save and font behavior. Native Windows lock, registry and package acceptance remains separate. [Behavior and limits](windows-file-access.md).
+
+The desktop and font regression suites pass 383 checks on Linux and actual macOS with Node 22.23.3, including the fourteen Options focus tests. The two runs use identical desktop and test sources and include final cancellation, warning and registry handling. Native Windows lock, registry and packaged-app checks remain unverified.
+
+
+## Local password confirmation language
+
+Local password choices and the warnings before exporting an unprotected copy or removing protection follow the editor language, with English fallback. No or Cancel preserves protection and stops the operation. Existing conversion, recovery and save safeguards remain in place. [Behavior](local-passwords.md).
+
+Guided-tip and dialog checks pass 397/397 across English, French, German and Arabic in white/night Word themes, compared with 132 findings on the reference. Paired Linux desktop unit suites pass 383/383 each; local-mode unit checks pass 48/48, simulated Darwin 46/46, formula focus 4/4 and PDF wheel 9/9, with zero skips. Both canonical trees verify 18,772 resource and license hashes. The matched editor assets differ only in five JavaScript app bundles for Word, forms, Sheets, Slides and PDF; their CSS, catalogs, SDK, runtime and font bytes match. [Behavior](guided-tips.md) and paired hosted results with retained coverage gaps.
+
+### Desktop vector print preparation
+
+Office print preparation still uses the local WebAssembly PDF writer. Existing PDF documents retain the original-preserving append path. A hidden file-backed Chromium PDF helper now waits for the viewer's successful load state, full progress, initial-load completion and positive page count before opening the native print dialog. This fixes the observed race where a successful native callback could accompany a blank page or the viewer's controls. File URLs also avoid the observed data-URL size failure for an ordinary 1.6 MB, 300-page report.
+
+Linux native Print to File checks retain all text and vector objects, with zero image objects for the vector fixtures. Every page of the 300-page report and Office sample matches the prepared PDF at 24 DPI with mean absolute pixel error zero; a two-page portrait/rotated fixture also matches. The main editor survives successful printing and native cancellation, and private print-job files are removed. Native macOS, Windows and physical-printer acceptance remain pending.
+
+release review replays the original reviewed Word focus payload above integrated
+Product4a5/DS303/Web28404 without changing SDK9a, Integration00962 or Core528.
+Independent source/dependency and output checks permit explicit reuse of
+the old Word baseline/candidate build outputs; no new heavy build, runtime
+selection or package is implied. Fresh current-shell strict305/305 and
+Firefox/actualMacChrome272/272 pass. Historical3374 scoped-file wording is
+qualified by the full16,712-file comparison in the
+[replay evidence](image-layout-keyboard.md#msg46-current-base-replay-qualification-2026-10-16).
+
+## Converter hardening validation
+
+The next converter revision upgrades bundled libxml2 to 2.9.14 while retaining the project's parser limits, build features and error handling. The default NOXXE loader rejects external entities even when an entity parser has no active input. Explicit root-file loading remains supported; application-installed loaders own their external-resource policy.
+
+Product XML reader and canonicalization entry points pass NOXXE and NONET explicitly. NONET no longer bypasses network checks for an initial input; WebAssembly feature guards exclude HTTP and FTP even if build inputs request them. Native sanitizer fixtures pass 12 parser cases, and the actual product wrappers pass 16 reader, DOM, canonicalization and external-resource controls. An earlier native-EH WebAssembly parser fixture run passed 12 cases for the libxml2 upgrade; the final combined modules still require rebuilding and validation.
+
+The global SVG renderer accepts embedded PNG/JPEG images and same-document references; file paths and external use/paint/style URLs are omitted. Native package controls pass 49 cases, package SVG rendering passes eight, and a separate renderer/archive/EPUB matrix checks the global source. Archive budgets are 50,000 members, 256 MiB per member and 1 GiB total uncompressed bytes, with a maximum compression ratio of 1,000 for members larger than 1 MiB. Metadata is checked before extraction or allocation, and CRC failures abort even for directory or skipped members. Optional remote EPUB manifest items are skipped; invalid spine resources and empty fragment-only paths are rejected. UNC and device namespaces fail closed, extended local drive-root spelling is normalized, and POSIX temporary roots may contain colons. Empty EPUB spines are rejected explicitly, and a failed archive CRC removes the file produced by that extraction. Native text-path object controls retain local fragment references and reject external references; complete parent text layout remains outside this gate.
+
+These are bounded native and compile-time results. Final full/PDF WebAssembly modules, document-corpus validation, native Windows behavior and concurrent filesystem mutation remain unqualified.
+
+Runtime builds also require the original-page identity lookup before the PDF wrapper can advertise safe page reordering. The guard runs at configuration and reruns when the checked source changes. Source refactors require a fresh guard update. These changes are not in the currently pinned runtime.

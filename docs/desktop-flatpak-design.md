@@ -1,10 +1,10 @@
 # Current release version
 
-MSG38 supersedes the original version/tag proposal below: desktop version 0.2.0, public title ElixirOffice 0.2.0 beta (desktop), pre-release tag v0.2.0. Original 0.1.0 preview receipts remain historical; the final bundle must be rebuilt from the integrated version-bump commit.
+release review supersedes the original version/tag proposal below: desktop version 0.2.0, public title ElixirOffice 0.2.0 beta (desktop), pre-release tag v0.2.0. Original 0.1.0 preview receipts remain historical; the final bundle must be rebuilt from the integrated version-bump commit.
 
 # Flatpak F0: desktop update study
 
-Study only (MSG30, 2026-10-13); no build, installation or Flathub submission. Base productf45f0a2 / DS6d581e, Electron44.7.0 / electron-builder26.15.3. Await the integrated A G1b source and final combined full/PDF runtime pair.
+Study only (release review, 2026-10-13); no build, installation or Flathub submission. Base productf45f0a2 / DS6d581e, Electron44.7.0 / electron-builder26.15.3. Await the integrated A G1b source and final combined full/PDF runtime pair.
 
 ## Recommendation and build inputs
 

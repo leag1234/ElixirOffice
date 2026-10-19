@@ -8,10 +8,20 @@ function blockDuringClose(event){if(closeCheck||info?.capture){event.preventDefa
 for(const name of ['keydown','beforeinput','click','drop'])document.addEventListener(name,blockDuringClose,true);
 let info,operationBusy=false,backstage,recoveryBusy=false,pdfCompatibility,recoveryNotified=false,feedback,lastOperation,statusOperation;
 const t=key=>info?.strings[key]||({recoveryFailed:'AutoRecover could not keep a recovery copy. Save your document manually.',pdfRecoveryOff:'AutoRecover is not available for PDF files. Save manually; these settings apply to Office files.'})[key]||key;
-const status=(text,operationId)=>{statusOperation=operationId||null;const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[text,recovery].filter(Boolean).join(' — ');$('message').textContent=message;$('message').hidden=!message;};
+const status=(text,operationId)=>{statusOperation=operationId||null;const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[...new Set([text,recovery,frame?.EOComputerFontWarning].filter(Boolean))].join(' — ');$('message').textContent=message;$('message').hidden=!message;};
 async function refreshHome(view='home'){const data=await eoDesktop.home();EODesktopHome.render($('home'),{...data,...info},desktopAction,view);}
-async function returnHome(){if(!await eoDesktop.returnHome())return;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();}
-function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
+async function returnHome(){
+ try{
+  let decision=await eoDesktop.returnHome();
+  while(decision==='save'||decision==='save-as'){
+   if(!await save(decision==='save-as'))return;
+   decision=await eoDesktop.returnHome();
+  }
+  if(decision!==true)return;
+  pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
+ }catch(error){fail(error)}
+}
+function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
 
 const fail=error=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);};
 function buttons(busy) {
@@ -23,10 +33,26 @@ function buttons(busy) {
 function script(win,url){return new Promise((resolve,reject)=>{const element=win.document.createElement('script');element.src=url;element.onload=resolve;element.onerror=()=>reject(Error('Cannot load bundled editor asset'));win.document.head.appendChild(element)})}
 async function recent(){if(!$('home').hidden)await refreshHome();}
 
-async function installFonts(win) {
+async function installFonts(win,waitForIndex=false) {
   const LF=win.Common?.ElixirLocalFonts;
   if(!LF)throw Error('Bundled local font interface missing');
-  if(await eoDesktop.fontPermission())LF.setConsent(true);
+  const allowed=await eoDesktop.fontPermission();LF.setConsent(allowed);win.EOComputerFontWarning=null;
+  if(!allowed){LF.setStatus('off');return false;}
+  try{
+    if(!LF.desktopPolicy){
+      await script(win,'/font-resolver.js');await script(win,'/computer-fonts.js');
+      const index=await eoDesktop.fontIndex(!waitForIndex);
+      if(!index){LF.setConsent(false);LF.setStatus('loading');return false;}
+      win.EOComputerFonts.install(index);
+      // Install eligible families and ranges before document symbol scanning.
+      await LF.readList();LF.register();
+    }
+    return true;
+  }catch(error){
+    // Optional discovery must not prevent opening a document with the packaged fonts.
+    LF.setConsent(false);LF.setStatus('error');win.EOComputerFontWarning=t('fontFailed');status('');
+    return false;
+  }
 }
 
 async function drainPending(){
@@ -82,7 +108,7 @@ async function open(selected) {
             frame.Common.ElixirLocal.prepare(main.api,main);
             main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:kind!=='pdf',comment:true,fillForms:true,download:true,print:false,chat:false}}});
             controller=frame.Common.ElixirLocal.install(main.api,{format,name:file.name,lang:info.language,pdfStrings:info.strings,saveAcknowledgesOriginal:kind==='pdf',operationScope:file.token,onOperation:operationEvent,beforeOperationWork:()=>EOOperationFeedback.paint(window),onExport:exportOutput,getSignal:()=>abort.signal,
-              onSave:async (bytes,protection)=>{const saved=await eoDesktop.save(file.token,bytes,savingAs,protection,lastOperation?.id,saveAsTicket);file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved)},
+              onSave:async (bytes,protection)=>{const saved=await nativeWrite(()=>eoDesktop.save(file.token,bytes,savingAs,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved)},
               onProtectionLock:async()=>{const locked=await eoDesktop.passwordLock(file.token);file.recoveryVersion=locked.recoveryVersion;status('AutoRecover is disabled for this session because password protection was used');},
               onBeforeSave:()=>{abort=new AbortController();buttons(true)},onAfterSave:()=>{buttons(false);updateDirty()},
               onError:fail});
@@ -116,11 +142,18 @@ function outputOutcome(saved,print=false){
  if(print){if(saved.printed)return {kind:'print-started'};if(saved.reason&&!['cancelled','canceled','Print job cancelled','Print job canceled'].includes(saved.reason))throw Error(saved.reason);return {kind:'cancelled'};}
  return {...saved,kind:'saved',committed:true};
 }
+async function nativeWrite(run,scope,id) {
+ const signal=abort?.signal;
+ const cancel=()=>{if(typeof id==='string')void eoDesktop.cancelWrite(scope,id).catch(()=>{});};
+ if(signal?.aborted)throw Object.assign(Error('Save cancelled'),{name:'AbortError',code:'cancelled'});
+ signal?.addEventListener('abort',cancel,{once:true});
+ try{return await run()}finally{signal?.removeEventListener('abort',cancel);}
+}
 async function exportOutput(bytes,target,options={},stats,protection){
  const print=target==='pdf'&&!!options.isPdfPrint;
  const saved=target==='pdf'
-  ?await eoDesktop.pdf(file.token,bytes,print,!!options.allowPlainCopy,lastOperation?.id,saveAsTicket)
-  :await eoDesktop.export(file.token,bytes,target,protection,lastOperation?.id,saveAsTicket);
+  ?await nativeWrite(()=>eoDesktop.pdf(file.token,bytes,print,!!options.allowPlainCopy,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id)
+  :await nativeWrite(()=>eoDesktop.export(file.token,bytes,target,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);
  if(target==='pdf')window.EOLastPdf={...saved,stats:stats||{backend:'drawingfile'}};
  else window.EOLastExport=saved;
  return outputOutcome(saved,print);
@@ -179,7 +212,7 @@ async function exportAs(format){
  }
  buttons(true);abort=new AbortController();
  try{
-  let saved;await controller.exportCopy(format,async (bytes,protection)=>{saved=await eoDesktop.export(file.token,bytes,format,protection,lastOperation?.id,saveAsTicket);return outputOutcome(saved)});window.EOLastExport=saved;return true;
+  let saved;await controller.exportCopy(format,async (bytes,protection)=>{saved=await nativeWrite(()=>eoDesktop.export(file.token,bytes,format,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);return outputOutcome(saved)});window.EOLastExport=saved;return true;
  }catch(error){fail(error);return false}finally{buttons(false)}
 }
 async function pdf(print=false,ticket){
@@ -200,7 +233,7 @@ async function pdf(print=false,ticket){
     if(!['wasm','drawingfile','original-append'].includes(result.stats.backend))throw Error('Native local PDF export unavailable');
     if(abort.signal.aborted)throw Object.assign(Error('PDF export cancelled'),{name:'AbortError',code:'aborted'});
     operation.phase('awaiting-output');
-    const saved=await eoDesktop.pdf(file.token,result.bytes,print,plainCopy,operation.id,ticket);operation.finish(outputOutcome(saved,print));window.EOLastPdf={...saved,stats:result.stats};return !!saved;
+    const saved=await nativeWrite(()=>eoDesktop.pdf(file.token,result.bytes,print,plainCopy,operation.id,ticket),file.token,operation.id);operation.finish(outputOutcome(saved,print));window.EOLastPdf={...saved,stats:result.stats};return !!saved;
 
   }catch(error){operation?.fail(error);fail(error)}finally{buttons(false)}
 }
@@ -222,17 +255,32 @@ function scheduleRecovery(){
  schedule().catch(fail);
  window.addEventListener('unload',()=>clearTimeout(timer),{once:true});
 }
+let dialogSerial=0;
 function modal(title){
  const box=document.createElement('dialog');box.className='desktop-options';
- const heading=document.createElement('h2');heading.textContent=title;box.append(heading);
+ const heading=document.createElement('h2');heading.id='desktop-dialog-title-'+(++dialogSerial);heading.textContent=title;box.setAttribute('aria-labelledby',heading.id);box.append(heading);
  document.body.append(box);box.addEventListener('close',()=>box.remove(),{once:true});box.showModal();return box;
 }
 function modalButton(box,label,action){
  const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',()=>Promise.resolve(action()).catch(fail));box.append(button);return button;
 }
 async function showOptions(){
- const options=await eoDesktop.recoveryOptions(),box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
- enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));box.append(label);
+ const options=await eoDesktop.recoveryOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
+ const returnTarget=returnFrame&&(invoker===document.body||invoker?.closest('dialog.desktop-options:not([open])'))?returnFrame.frameElement:invoker;
+ const returnDocument=returnTarget?.tagName==='IFRAME'?returnTarget.contentDocument:null,returnChild=returnDocument?.activeElement;
+ const box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
+ box.addEventListener('close',()=>{
+  const active=document.activeElement;
+  // A close event may run after another dialog, control or document took ownership.
+  if(returnFrame!==frame||returnFile!==file||returnController!==controller||document.querySelector('dialog[open]')||
+    (active!==document.body&&active!==box&&!box.contains(active))||!returnTarget?.isConnected)return;
+  if(returnChild){
+   const doc=returnTarget.contentDocument;
+   if(doc!==returnDocument||!returnChild.isConnected||(doc.activeElement!==returnChild&&doc.activeElement!==doc.body))return;
+  }
+  returnTarget.focus();returnChild?.focus();
+ },{once:true});
+ enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));box.append(label);enabled.focus();
  const interval=document.createElement('select');interval.id='recovery-interval';interval.setAttribute('aria-label',t('autoRecover'));
  if(file?.format==='pdf'){const pdfNote=document.createElement('p');pdfNote.textContent=t('pdfRecoveryOff');box.append(pdfNote);}
  for(const seconds of [15,30,60,120,300]){const option=document.createElement('option');option.value=seconds;option.textContent=String(seconds)+' s';option.selected=seconds===options.seconds;interval.append(option)}box.append(interval);
@@ -254,7 +302,7 @@ async function offerRecovery(){
  }
  modalButton(box,t('cancel'),()=>box.close());
 }
-async function fontConsent(){try{if(!await eoDesktop.fontConsent())return false;if(frame){await installFonts(frame);await frame.Common.ElixirLocalFonts.readList();await frame.Common.ElixirLocalFonts.enable(main.api)}status(t('fontUse'));return true}catch(error){fail(error);return false}}
+async function fontConsent(){try{if(!await eoDesktop.fontConsent())return false;if(frame){if(await installFonts(frame,true)===false)return false;await frame.Common.ElixirLocalFonts.readList();await frame.Common.ElixirLocalFonts.enable(main.api)}status(t('fontUse'));return true}catch(error){fail(error);return false}}
 async function addFontOptions(box){
  const label=document.createElement('label'),enabled=document.createElement('input'),state=document.createElement('p'),hint=document.createElement('p');
  enabled.type='checkbox';enabled.id='computer-fonts-enabled';state.id='computer-fonts-status';hint.id='computer-fonts-hint';
@@ -289,6 +337,7 @@ eoDesktop.onAction(async action=>{
   if(action==='pending'){pendingRequested=true;return drainPending()}
   if(closeCheck && action!=='save-close')return;
   if(choosingSaveAs)return;
+  if(action==='font-index-ready'){const home=$('home');if(!home.hidden)await refreshHome(home.querySelector('[aria-current="page"]')?.dataset.view||'home');return;}
   if(action==='save-close'){try{if(await save())await eoDesktop.closeSaved();}catch(error){fail(error)}finally{closeCheck=false;if(pendingRequested)setTimeout(drainPending,0)}return}
   ({'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
 });

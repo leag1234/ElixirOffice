@@ -106,8 +106,8 @@ function validate(input,format,protection,current){
  if(!actual&&(bytes[0]!==80||bytes[1]!==75))throw Error('Invalid document output');
  return bytes;
 }
-async function write(files,target,bytes,expected){
- try{return await files.atomic(target,bytes,expected)}catch(error){
+async function write(files,target,bytes,expected,options){
+ try{return await files.atomic(target,bytes,expected,options)}catch(error){
   if(!error.replacementCompleted)throw error;
   // A filesystem failure after replacement must not leave the renderer using
   // the old password. Acknowledge only bytes verified at the saved destination.

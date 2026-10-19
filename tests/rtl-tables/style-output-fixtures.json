@@ -1,0 +1,99 @@
+{
+  "cases": [
+    {
+      "file": "ltr-latin-empty.docx",
+      "sha256": "b52cfa22c559a4ccc4a88a2f2cb1985078abdca3316b76cbd241ead3a492cba4",
+      "nested": false,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-latin-text.docx",
+      "sha256": "49dd860a4b9e1c3ba68dddb2188b3f7715eeb6b36edb0dd6c816314d7af7e323",
+      "nested": false,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-indent.docx",
+      "sha256": "2a866629397d3299d2089129683b4547b3f9043c0cd3ca7471a8dc3cc10378e3",
+      "nested": false,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-floating.docx",
+      "sha256": "deaf15521c5eaf42ae4e84c6430d89ea8288f43e7ae7f0e97972bb299857df73",
+      "nested": false,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-nested-ltr-tall.docx",
+      "sha256": "8fe3b06ccc2ce44f6b4946d7b4aca3ee93f9e86f75f6ac2b0ef7e1c1d4320e0c",
+      "nested": true,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-nested-ltr-empty.docx",
+      "sha256": "60cdfd787cb6062f2d00d5ded1f15f769310d41d8dc79b7f5c96f8165a00808f",
+      "nested": true,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-paginated.docx",
+      "sha256": "50d355c8c58829a6fc4b2fc1224739c520fd4d479f10da6fb9353e77cb65fe05",
+      "nested": false,
+      "laterPage": true,
+      "columns": false
+    },
+    {
+      "file": "ltr-two-columns.docx",
+      "sha256": "350703955f1e77b8c3d91a2527b72296b804834c6b1b7b0ca7a3bd2b7f13cf80",
+      "nested": false,
+      "laterPage": false,
+      "columns": true
+    },
+    {
+      "file": "ltr-rtl-paragraph-text.docx",
+      "sha256": "435f881bca74baa8551aad92596a603a71d3a646c892495ad951ed39afbcedcd",
+      "nested": false,
+      "laterPage": false,
+      "columns": false
+    },
+    {
+      "file": "ltr-no-direct.docx",
+      "sha256": "d81589a86eaf80c9901f387792bbeacab97311ed2e0e35d81efb4aa95dd056ce",
+      "nested": false,
+      "laterPage": false,
+      "columns": false,
+      "derivation": "Remove only the direct bidiVisual=0 XML node from ltr-latin-empty.docx; other ZIP members unchanged."
+    },
+    {
+      "file": "ltr-style-custom.docx",
+      "sha256": "c9a6247459718c20ddccea43c23a36f8a65efc34ad2bb09cef10f2c97a285488",
+      "purpose": "Controlled LTR custom table style; no direction property; actual clipboard compilation",
+      "source": "CC0 ltr-no-direct.docx derivative; only document table style link and styles XML changed",
+      "sourceSHA256": "d81589a86eaf80c9901f387792bbeacab97311ed2e0e35d81efb4aa95dd056ce",
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "ltr-style-inherited.docx",
+      "sha256": "103f4da04ce52641842b1141df27f846d8cc09eee46f1ad8c8dd9624856b6fa7",
+      "purpose": "Controlled LTR inherited table style; no direction property; actual clipboard compilation",
+      "source": "CC0 ltr-no-direct.docx derivative; only document table style link and styles XML changed",
+      "sourceSHA256": "d81589a86eaf80c9901f387792bbeacab97311ed2e0e35d81efb4aa95dd056ce",
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "ltr-style-whole-table.docx",
+      "sha256": "f65328e7f243277b150bf78570c9ac4abdadd8b5dbb5539c5d8f076718e6cb6a",
+      "purpose": "Controlled LTR whole-table table style; no direction property; actual clipboard compilation",
+      "source": "CC0 ltr-no-direct.docx derivative; only document table style link and styles XML changed",
+      "sourceSHA256": "d81589a86eaf80c9901f387792bbeacab97311ed2e0e35d81efb4aa95dd056ce",
+      "license": "CC0-1.0"
+    }
+  ]
+}

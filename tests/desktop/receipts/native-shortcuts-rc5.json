@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "review": "MSG121",
+  "review": "release review",
   "frozenProductBase": "dd042fbc48",
   "frozenWebApps": "c0b82dbd84",
   "platform": "Linux X11 private Xvfb, Electron44.7.0 native XTest",
@@ -223,13 +223,13 @@
   "qualificationRuns": [
     {
       "sourceParent": "e272eb442fc8",
-      "sourceSet": "frozen rc.5 plus MSG121",
+      "sourceSet": "frozen rc.5 plus release review",
       "rows": 36,
       "rawSha256": "e1d90adcd102db9026d79f04f3914a69867ca3134acf30d1f0af402eb815dfb0"
     },
     {
       "sourceParent": "42129fd840ab",
-      "sourceSet": "forward main plus MSG121",
+      "sourceSet": "forward main plus release review",
       "rows": 36,
       "rawSha256": "e1d90adcd102db9026d79f04f3914a69867ca3134acf30d1f0af402eb815dfb0",
       "assetScope": "Same controlled frozen c0 four-editor qualification bundle set; full0.2.2 static/package acceptance is separate"

@@ -1,0 +1,4 @@
+Noto Sans Arabic — copyright and OFL terms in OFL.txt.
+Desktop derivative: static wdth=100, wght=400/700 instances; family renamed to Elixir Fallback Arabic. No glyph subsetting, metric adjustment or pre-slanted outlines. Italic is synthesized by the editor.
+Source: https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf
+Source SHA256: 63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e

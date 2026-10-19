@@ -8,6 +8,7 @@ function validatePath(filename,platform=process.platform) {
   return filename;
 }
 function saveFailure(error) {
+  if(error.rollbackUncertain)return error;
   if(['EPERM','EBUSY'].includes(error.code))
     error.message='Could not save: the file may be open in another application or you may not have permission. Close the other application or use Save As. '+error.message;
   return error;

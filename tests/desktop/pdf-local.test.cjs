@@ -5,13 +5,13 @@ const upstream=process.env.EO_UPSTREAM||path.join(require('node:os').homedir(),'
 const source=fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Pdf.js'),'utf8');
 let PdfMessages;vm.runInNewContext(fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/PdfMessages.js'),'utf8'),{define:(_deps,factory)=>{PdfMessages=factory()}});
 
-function setup(offline=true,writable=false){
+function setup(offline=true,writable=false,reorderSafe){
  let Pdf,written,opened=0,continued=0,current,scriptRuns=0,modified=true,restriction=0;const callbacks={},errors=[],exports=[];
  function Action(){}Action.prototype.RunScript=()=>scriptRuns++;Action.prototype.Do=()=>scriptRuns++;
  const nativeBytes=new Uint8Array(Buffer.from('%PDF-public-copy'));
  const doc={widgets:[{SetEditMode(value){this.design=value}}],BlurActiveObject(){},RecalculateAll(){},History:{Index:3,Reset_SavedIndex(){this.saved=this.Index;}},GetActionsQueue:()=>({SetCurAction:action=>{current=action},Continue:()=>continued++})};
  const viewer={isFullText:true,file:{Selection:{},selectAll(){this.Selection={Glyph1:-2,Glyph2:-1,IsSelection:false}},onUpdateSelection(){},onUpdateOverlay(){},pages:[{originIndex:1},{originIndex:0},{originIndex:undefined}],originalPagesCount:2,nativeFile:{SplitPages:(indexes,changes)=>{written={indexes:Array.from(indexes),changes};return nativeBytes}}},getPDFDoc:()=>doc,Save:()=>new Uint8Array([37,80,68,70,45]),SaveForSplit:()=>new Uint8Array([37,80,68,70])};
- const context={window:null,AscPDF:{CActionRunScript:Action},Asc:{c_oAscFileType:{PDF:513},c_oAscRestrictionType:{View:1}},Uint8Array,setTimeout,clearTimeout,define:(_deps,factory)=>{Pdf=factory({inspect:async()=>({writable,reason:writable?'':'unsupported'}),write:async()=>nativeBytes.slice()},PdfMessages,require(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Operation.js')))}};context.window=context;
+ const context={window:null,AscPDF:{CActionRunScript:Action},Asc:{c_oAscFileType:{PDF:513},c_oAscRestrictionType:{View:1}},Uint8Array,setTimeout,clearTimeout,define:(_deps,factory)=>{Pdf=factory({inspect:async()=>({writable,reorderSafe,reason:writable?'':'unsupported'}),write:async()=>nativeBytes.slice()},PdfMessages,require(path.join(upstream,'web-apps/apps/common/main/lib/elixir-local/Operation.js')))}};context.window=context;
  vm.runInNewContext(source,context);
  const api={DocInfo:{get_OfflineApp:()=>offline},DocumentRenderer:viewer,getPDFDoc:()=>doc,openDocument(){opened++},asc_registerCallback:(name,fn)=>{callbacks[name]=fn},asc_unregisterCallback:name=>{delete callbacks[name]},asc_openDocumentFromBytes(){api.openDocument();callbacks.asc_onDocumentContentReady()},asc_addRestriction(value){restriction|=value},asc_removeRestriction(value){restriction&=~value},SetDocumentModified(value){modified=value},canEdit:()=>false,isDocumentModified:()=>modified};
  const options={onError:error=>errors.push(error.message),onExport:async(...args)=>exports.push(args)};
@@ -112,14 +112,24 @@ test('disposing local PDF suppresses a stale file-ready notification without fab
  assert(!events.some(event=>event.phase==='ready'));
 });
 
-test('local PDF rotation capability is fail-closed before policy, during work and after disposal',async()=>{
+test('local PDF rotation/reorder capabilities are fail-closed before policy, during work and after disposal',async()=>{
  for(const writable of [false,true]){
-  const e=setup(true,writable);let release;
+  const e=setup(true,writable,true);let release;
   const controller=e.Pdf.install(e.api,{...e.options,beforeOperationWork:()=>new Promise(resolve=>{release=resolve})});
-  assert.equal(e.api.eoLocalPdfCanRotate(),false);
-  const opening=controller.open(new Uint8Array(Buffer.from('%PDF-public')));assert.equal(e.api.eoLocalPdfCanRotate(),false);release();await opening;
-  assert.equal(e.api.eoLocalPdfCanRotate(),writable);
-  const job=controller.beginOperation('pdf-export');assert.equal(e.api.eoLocalPdfCanRotate(),false);job.cancel();assert.equal(e.api.eoLocalPdfCanRotate(),writable);
-  controller.dispose();assert.equal(e.api.eoLocalPdfCanRotate(),false);
+  for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),false);
+  const opening=controller.open(new Uint8Array(Buffer.from('%PDF-public')));for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),false);release();await opening;
+  for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),writable);
+  const job=controller.beginOperation('pdf-export');for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),false);job.cancel();for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),writable);
+  controller.dispose();for(const method of ['eoLocalPdfCanRotate','eoLocalPdfCanReorder'])assert.equal(e.api[method](),false);
+ }
+});
+
+test('page reorder needs an explicit verified-runtime capability; old and malformed policies stay closed',async()=>{
+ for(const capability of [undefined,false,null,0,1,'true',{},[],true]){
+  const e=setup(true,true,capability),controller=e.Pdf.install(e.api,e.options);
+  await controller.open(new Uint8Array(Buffer.from('%PDF-public')));
+  assert.equal(e.api.eoLocalPdfCanRotate(),true);
+  assert.equal(e.api.eoLocalPdfCanReorder(),capability===true);
+  controller.dispose();assert.equal(e.api.eoLocalPdfCanReorder(),false);
  }
 });

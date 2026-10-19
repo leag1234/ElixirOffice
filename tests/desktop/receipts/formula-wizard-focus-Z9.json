@@ -1,0 +1,272 @@
+{
+  "scope": "Local renderer/current production Spreadsheet/SDKcell/Wasm with public native-IPC fixture; no native OS/AT/hosted/full-shortcut/new-package claim",
+  "productBase": "33ad375fef2c5403f8f08ca4759aa4bc837b61f8",
+  "webParent": "e6be113c6747ab8df5d5977e0e77a6e88e936ff9",
+  "webCandidate": "28404fdeaa88a02f92199198f6bae4106033cd1a",
+  "dsCandidate": "303f5d7b44dc15b52fd3594cfed5d07565c5ff52",
+  "sdk": "9a06b24c33b43027b567462086100ef18e11bd57",
+  "integration": "00962d45ee7794e65b5ed55ab0996a8893d99db1",
+  "sourceSha256": "3faec21c98b08633f1d0efb45e54a054c54dd6307d353f4b416f2639d2cc3ccd",
+  "maintainedDriverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+  "fixtureSha256": "759bbc99d6b7a0949fa66c7a8be0c24c61470ad1b717b6b554b85edf68b805a5",
+  "coreMatrixProfiles": 16,
+  "coreMatrixChecksPass": 288,
+  "directObserverFirefoxFollowupChecksPass": 18,
+  "desktopStrict": {
+    "pass": 305,
+    "skip": 0,
+    "concurrency": 1,
+    "builderRequired": true,
+    "logSha256": "01295f994defafb37aaa2332ed146ef311399721d3de0b18172d05a0509bce4c"
+  },
+  "actualAMDContract": {
+    "candidatePass": 4,
+    "baselinePass": 3,
+    "baselineExpectedFail": 1
+  },
+  "assetsReceiptSha256": "5272766fbd11051d5fc0132f39726495b5332da2de588d9f56f2b62c532c3bee",
+  "frozenEvidenceSha256": "6aa238bc409c79d0a0eddbe62dab056f467db1d6e0cee31068ccbf0dc5c1b93e",
+  "evidenceDirectory": "/srv/elixiroffice/wt/formula-focus-Z9-work",
+  "runs": [
+    {
+      "directory": "final3-candidate-firefox",
+      "runtime": {
+        "browser": "firefox",
+        "version": "155.0",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 1
+        },
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 2
+        },
+        {
+          "language": "fr",
+          "theme": "theme-white",
+          "dpr": 1
+        },
+        {
+          "language": "fr",
+          "theme": "theme-white",
+          "dpr": 2
+        },
+        {
+          "language": "de",
+          "theme": "theme-night",
+          "dpr": 1
+        },
+        {
+          "language": "de",
+          "theme": "theme-night",
+          "dpr": 2
+        },
+        {
+          "language": "ar",
+          "theme": "theme-night",
+          "dpr": 1
+        },
+        {
+          "language": "ar",
+          "theme": "theme-night",
+          "dpr": 2
+        }
+      ],
+      "driverSha256": "457529b021b7e8e9ab1b38a4aca5419b935a37f28a589f0cc821874695866c64",
+      "resultsSha256": "e5c5267afb3b1b614727c2f79c8abc2b761bad244ab1797d70340ef50d7bc272",
+      "inputGuardsSha256": "b6d6964740d2fc9eeca62568c5a956266070913f19176b1808165b8822fd62cd",
+      "servedFileCount": 93,
+      "expectedRows": 8,
+      "candidateChecksPass": 144,
+      "baselineExpectedFocusFailures": null,
+      "clickCidObserver": "latest shown wizard (inferred)"
+    },
+    {
+      "directory": "final4-candidate-firefox",
+      "runtime": {
+        "browser": "firefox",
+        "version": "155.0",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 1
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "b709a9d1371a6a785be2cef34aeb86bdbd12f0d6f4813152494b16c1955f2034",
+      "inputGuardsSha256": "6a0da48294176a8cbfd345f990428130c0fb819d42bb3e1e675676744bc4047d",
+      "servedFileCount": 69,
+      "expectedRows": 1,
+      "candidateChecksPass": 18,
+      "baselineExpectedFocusFailures": null,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    },
+    {
+      "directory": "final4-candidate-chrome-en1",
+      "runtime": {
+        "browser": "chromium",
+        "version": "155.0.8059.82",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 1
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "801af4ab0e16d50053a871d2baf4f056ecc4216eab65c744e9de4d15c1b0813a",
+      "inputGuardsSha256": "6a0da48294176a8cbfd345f990428130c0fb819d42bb3e1e675676744bc4047d",
+      "servedFileCount": 69,
+      "expectedRows": 1,
+      "candidateChecksPass": 18,
+      "baselineExpectedFocusFailures": null,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    },
+    {
+      "directory": "final4-candidate-chrome-en2",
+      "runtime": {
+        "browser": "chromium",
+        "version": "155.0.8059.82",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 2
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "17cd2a49f4a6de158e9e5d2d68a929fc43ed3e134e9bb9ed223c57faed9c309a",
+      "inputGuardsSha256": "97376e6c1a1123ef7b74ced70de07af1bf2fb3508706806d36acdd34a1558dd1",
+      "servedFileCount": 68,
+      "expectedRows": 1,
+      "candidateChecksPass": 18,
+      "baselineExpectedFocusFailures": null,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    },
+    {
+      "directory": "final4-candidate-chrome-rest",
+      "runtime": {
+        "browser": "chromium",
+        "version": "155.0.8059.82",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "fr",
+          "theme": "theme-white",
+          "dpr": 1
+        },
+        {
+          "language": "fr",
+          "theme": "theme-white",
+          "dpr": 2
+        },
+        {
+          "language": "de",
+          "theme": "theme-night",
+          "dpr": 1
+        },
+        {
+          "language": "de",
+          "theme": "theme-night",
+          "dpr": 2
+        },
+        {
+          "language": "ar",
+          "theme": "theme-night",
+          "dpr": 1
+        },
+        {
+          "language": "ar",
+          "theme": "theme-night",
+          "dpr": 2
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "79935e0821a93a2ea620cdfc34f04de838dde7ad9ad1f9934f914d1a6e0602f4",
+      "inputGuardsSha256": "415f63a00e5c95182240753ef28bb961d5d8f8d1ae3fe355c332233451b33c06",
+      "servedFileCount": 92,
+      "expectedRows": 6,
+      "candidateChecksPass": 108,
+      "baselineExpectedFocusFailures": null,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    },
+    {
+      "directory": "final4-baseline-firefox",
+      "runtime": {
+        "browser": "firefox",
+        "version": "155.0",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 1
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "68c8162306cc382bd2b949c90d6fae04c541356f76c690db50161f8775648fc5",
+      "inputGuardsSha256": "6a0da48294176a8cbfd345f990428130c0fb819d42bb3e1e675676744bc4047d",
+      "servedFileCount": 69,
+      "expectedRows": 1,
+      "candidateChecksPass": null,
+      "baselineExpectedFocusFailures": 3,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    },
+    {
+      "directory": "final4-baseline-chrome",
+      "runtime": {
+        "browser": "chromium",
+        "version": "155.0.8059.82",
+        "transport": "launchServer/connect"
+      },
+      "profiles": [
+        {
+          "language": "en",
+          "theme": "theme-white",
+          "dpr": 1
+        }
+      ],
+      "driverSha256": "c5ee005d939590e94f20fba186def2db33e0079aedc8b45f2cd71bb2038dbb79",
+      "resultsSha256": "ccdeb2fa8b75584715c7063ff968951673be8cab71c3c4cef6576aaa023734a0",
+      "inputGuardsSha256": "6a0da48294176a8cbfd345f990428130c0fb819d42bb3e1e675676744bc4047d",
+      "servedFileCount": 69,
+      "expectedRows": 1,
+      "candidateChecksPass": null,
+      "baselineExpectedFocusFailures": 3,
+      "clickCidObserver": "actual clicked DOM window WeakMap, timestamp bounded"
+    }
+  ],
+  "retainedCorrections": [
+    "injected English SUM invalid localized stimulus is not ordinary mixed-focus proof",
+    "wrong one-Undo NOW oracle retained; observed two-Undo/two-Redo trace approved release review",
+    "initial prepared asset guard used app.js; actual sole changed bundle is code.js",
+    "post-state observation and delayed pointer confirmation missed rapid timing precondition; threshold remains100ms",
+    "settled Cancel coordinates invalid during animation; current animated bounds restored; stale guards rejected missed click",
+    "click CID metadata strengthened from latest shown wizard to actual clicked node; split-run hashes preserved",
+    "Frozen candidate scope label names app.js although only code.js differs; unchanged appBundle field and actual payload distinguished in separately bound addendum."
+  ],
+  "fixtureMetadataCaveat": {
+    "description": "Frozen QA candidate scope incorrectly names app.js; build-profile appBundle tracks unchanged app.js. Exact full output comparison and served hashes bind the sole changed code.js payload. Frozen files are preserved.",
+    "candidateManifestSha256": "30fcd0184d86565b8a5644ab39fd4468fbe28a405847af12319256db31d08f87",
+    "actualChangedBundle": "apps/spreadsheeteditor/main/code.js",
+    "baselineCodeSha256": "3b15b5d17e1d039483e3934a13d47a26763e7e7f860e627618ceb3b1bb7643ca",
+    "candidateCodeSha256": "213f4bb950c6283793c3dfb5bcb2da62071b5839de2e5216b44cf086cb81363d",
+    "unchangedAppJsSha256": "a58465f7767052ede1d59bf12b33daf2fba287d8636a94abcb51f9e2c47ff6b7",
+    "externalAddendum": "asset-manifest-scope-addendum.md",
+    "externalAddendumSha256": "7e26b4064641f3cffc30e95b3bd305772a0254938603068971fda2f4e409ab39"
+  }
+}

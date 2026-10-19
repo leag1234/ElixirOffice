@@ -8,7 +8,7 @@ class SDKInputs(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.root=Path(self.temp.name)
   self.inventory=json.loads((source.parent/"desktop-test-inputs.json").read_text())
-  self.inventory.update(schema=2)
+  self.inventory.update(schema=2,sdkjs_files=["pdf/src/thumbnails.js"])
   self.path=self.root/"inventory.json";self.path.write_text(json.dumps(self.inventory))
   for name in ["web-apps","sdkjs",""]:
    repo=self.root/name;repo.mkdir(exist_ok=True)
@@ -20,8 +20,10 @@ class SDKInputs(unittest.TestCase):
    for i in range(count):(p/("unit%02d.json"%i)).write_text("{}")
   self.git(self.root/"web-apps","add",".");self.git(self.root/"web-apps","commit","-m","Public recorded web inputs")
   self.web=self.git(self.root/"web-apps","rev-parse","HEAD")
-  for name in self.inventory["sdkjs_files"]:
-   p=self.root/"sdkjs"/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text("PUBLIC_RECORDED_SDK" if name=="pdf/src/thumbnails.js" else "PUBLIC_RECORDED_SDK_"+name)
+  p=self.root/"sdkjs/pdf/src/thumbnails.js";p.parent.mkdir(parents=True);p.write_text("PUBLIC_RECORDED_SDK")
+  for name in json.loads((source.parent/"desktop-test-inputs.json").read_text())["sdkjs_files"]:
+   p=self.root/"sdkjs"/name
+   if not p.exists():p.parent.mkdir(parents=True,exist_ok=True);p.write_text("PUBLIC_RECORDED_"+name)
   self.git(self.root/"sdkjs","add",".");self.git(self.root/"sdkjs","commit","-m","Public recorded SDK input")
   self.sdk=self.git(self.root/"sdkjs","rev-parse","HEAD")
   self.record()
@@ -40,14 +42,14 @@ class SDKInputs(unittest.TestCase):
   result=release.export_test_upstream(self.root,self.web,self.ds,self.root/"export")
   self.assertEqual(result["inventory_sha256"],release.digest(source.parent/"desktop-test-inputs.json"))
   self.assertEqual(result["sdkjs_revision"],self.sdk)
-  for name in self.inventory["sdkjs_files"]:
-   expected="PUBLIC_RECORDED_SDK" if name=="pdf/src/thumbnails.js" else "PUBLIC_RECORDED_SDK_"+name
-   self.assertEqual((self.root/"export/sdkjs"/name).read_text(),expected)
-   self.assertEqual(result["files"]["sdkjs/"+name]["git_blob"],self.git(self.root/"sdkjs","rev-parse",self.sdk+":"+name))
   self.assertEqual((self.root/"export/sdkjs/pdf/src/thumbnails.js").read_text(),"PUBLIC_RECORDED_SDK")
   self.assertEqual(result["files"]["sdkjs/pdf/src/thumbnails.js"]["git_blob"],self.git(self.root/"sdkjs","rev-parse",self.sdk+":pdf/src/thumbnails.js"))
   for name in self.inventory["files"]:
    self.assertEqual((self.root/"export/web-apps"/name).read_text(),"PUBLIC_RECORDED_"+name)
+  for name in json.loads((source.parent/"desktop-test-inputs.json").read_text())["sdkjs_files"]:
+   recorded=subprocess.check_output(["git","-C",str(self.root/"sdkjs"),"show",self.sdk+":"+name])
+   self.assertEqual((self.root/"export/sdkjs"/name).read_bytes(),recorded)
+   self.assertEqual(result["files"]["sdkjs/"+name]["git_blob"],self.git(self.root/"sdkjs","rev-parse",self.sdk+":"+name))
   self.assertEqual(result["locale_count"],sum(self.inventory["locales"].values()))
   for name,record in result["files"].items():self.assertEqual(release.digest(self.root/"export"/name),record["sha256"])
  def test_missing_sdk_blob_is_rejected(self):

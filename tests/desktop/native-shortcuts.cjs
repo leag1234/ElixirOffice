@@ -13,7 +13,7 @@ function pdf(){
 }
 const wrapper=`
 const {app,dialog}=require('electron');
-global.shortcutProbe={sent:[],inputs:[],dialogs:[],nextOpen:null,deliverSaveAs:false};
+global.shortcutProbe={sent:[],inputs:[],dialogs:[],about:[],nextOpen:null,deliverSaveAs:false};
 app.on('web-contents-created',(_event,wc)=>{
  const send=wc.send.bind(wc);
  wc.send=(channel,...args)=>{
@@ -27,7 +27,7 @@ app.on('web-contents-created',(_event,wc)=>{
  };
  wc.on('before-input-event',(_event,input)=>{if(input.type==='keyDown')global.shortcutProbe.inputs.push(input);});
 });
-dialog.showMessageBox=async(_win,options)=>{const index=(options.buttons||[]).findIndex(s=>/^(Don't Save|Do not Save)$/.test(s.replaceAll('&','')));if(index<0)throw Error('Unexpected test message box: '+options.message);return {response:index};};
+dialog.showMessageBox=async(_win,options)=>{if(options.message==='ElixirOffice'){global.shortcutProbe.about.push(options);return {response:0};}const index=(options.buttons||[]).findIndex(s=>/^(Don't Save|Do not Save)$/.test(s.replaceAll('&','')));if(index<0)throw Error('Unexpected test message box: '+options.message);return {response:index};};
 dialog.showOpenDialog=async()=>{global.shortcutProbe.dialogs.push('open');const file=global.shortcutProbe.nextOpen;global.shortcutProbe.nextOpen=null;return file?{canceled:false,filePaths:[file]}:{canceled:true,filePaths:[]}};
 require(process.env.EO_NATIVE_PRODUCT+'/desktop/main.cjs');
 `;
@@ -48,6 +48,7 @@ async function exited(child,ms=3000){
  const keypress=key=>execFileSync(process.env.EO_XDOTOOL,['key','--clearmodifiers',key],{env});
  app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(run,'main.cjs')],env,timeout:30000});
  assert(!app.process().spawnargs.includes('--no-sandbox')); const page=await app.firstWindow();await page.waitForFunction(()=>window.EODesktopReady,null,{timeout:60000});
+ assert.equal(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].isMenuBarVisible()),false,"Native menu hidden while shortcuts stay installed");
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].focus());
  async function keys(location,newAction,frame){
   for(const [key,expected] of [['ctrl+o','open'],['ctrl+s','save'],['F12','save-as'],['ctrl+p','print'],['ctrl+n',newAction]]){
@@ -107,12 +108,23 @@ async function exited(child,ms=3000){
   const frame=page.frames().find(f=>f.url().includes('/'+editor+'/'));assert(frame,editor+' iframe');
   await frame.locator('body').click({position:{x:700,y:400}});
   await keys(editor,newAction,frame);
+  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].focus());keypress('F1');
+  await page.waitForFunction(()=>true);
+  await new Promise(async(resolve,reject)=>{const deadline=Date.now()+10000;while(Date.now()<deadline){if(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(w=>w.getParentWindow()&&!w.webContents.isLoadingMainFrame()&&w.webContents.getURL().includes('/resources/help/')))){resolve();return;}await new Promise(r=>setTimeout(r,50));}reject(Error('F1 did not open Help'));});
+  console.log(editor,'F1 Help loaded');
+  const help=await app.evaluate(({BrowserWindow})=>{const child=BrowserWindow.getAllWindows().find(w=>w.getParentWindow());const result={url:child.webContents.getURL(),menuVisible:child.isMenuBarVisible()};child.close();BrowserWindow.getAllWindows()[0].focus();return result;});
+  assert.equal(help.menuVisible,false);assert.match(help.url,/resources\/help/);rows.push({location:editor,f1NativeHelp:true,helpMenuHidden:true});
+  console.log(editor,'Help closed');await frame.waitForFunction(()=>Common.Controllers.LaunchController.isScriptLoaded(),null,{timeout:30000});
+  await frame.evaluate(()=>{const app=window.DE||window.SSE||window.PE||window.PDFE;app.getController('ElixirChrome').openBackstage('elx-home');});
+  for(const id of ['fm-btn-help','fm-btn-elx-about','fm-btn-eo-quit'])assert(await frame.locator('#'+id).isVisible(),editor+' backstage '+id);
+  console.log(editor,'Backstage entries visible');const aboutBefore=await app.evaluate(()=>global.shortcutProbe.about.length);await frame.locator('#fm-btn-elx-about').click();await page.waitForTimeout(100);assert.equal(await app.evaluate(()=>global.shortcutProbe.about.length),aboutBefore+1);rows.push({location:editor,backstageHelpAboutQuit:true,actualNativeAboutBridge:true});
+
   if(format==='pdf')break;
   await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.send('eo:action','home'));
   await page.locator('#home').waitFor({state:'visible'});
  }
  // Quit uses the real guarded close path; distinguish its exit from cleanup.
- await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].close());await exited(app.process(),5000);
+ const finalFrame=page.frames().find(f=>f.url().includes('/pdfeditor/'));await finalFrame.evaluate(()=>PDFE.getController('ElixirChrome').openBackstage('elx-home'));await finalFrame.locator('#fm-btn-eo-quit').click();await exited(app.process(),5000);
  assert.equal(app.process().exitCode,0,'Guarded window close exits normally');
  rows.push({location:'pdfeditor-iframe',action:'window-close',exitCode:app.process().exitCode});
  completed=true;

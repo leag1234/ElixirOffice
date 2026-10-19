@@ -5,12 +5,16 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const source=path.resolve(__dirname,'../../desktop/main.cjs'),load=createRequire(source),{ORIGIN}=load('./resources.cjs');
 const tick=()=>new Promise(setImmediate);
 const closeCancel=process.platform==='darwin'?1:2,closeDontSave=process.platform==='darwin'?2:1;
-async function boot({platform=process.platform,document=false,failRemove=false,safeStorage,systemLanguages=["en"],systemLocale="en",captureLocales,getRendererState,onSend,onShow,onPrint}={}){
+async function boot({platform=process.platform,document=false,failRemove=false,safeStorage,systemLanguages=["en"],systemLocale="en",captureLocales,getRendererState,onSend,onShow,onPrint,fontSettings}={}){
+ // Each VM models a fresh app process; createRequire otherwise shares its write barrier and warnings.
+ const sessionFiles=load('./files.cjs');sessionFiles.resumeWrites();for(const warning of sessionFiles.writeWarnings())sessionFiles.acknowledgeWriteWarning(warning.key);
  const directory=await fs.mkdtemp(path.join(os.tmpdir(),'eo-close-recovery-')),handlers=new Map(),dialogs=[],responses=[],saveResponses=[],state={dirty:false},sent=[],windows=[],app=new EventEmitter();
+ if(fontSettings)await fs.writeFile(path.join(directory,'desktop-settings.json'),JSON.stringify({recents:[],...fontSettings}));
  let window,started=false,removeCalls=0;
  Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},getPath:()=>directory,requestSingleInstanceLock:()=>true,whenReady:()=>Promise.resolve(),getPreferredSystemLanguages:()=>systemLanguages,getLocale:()=>systemLocale,quit(){},isReady:()=>true,exit(code){this.exitCode=code;},getVersion:()=> '0.1.0',setAboutPanelOptions(options){this.aboutOptions=options},showAboutPanel(){this.aboutShown=true}});
  class Window extends EventEmitter{
-  constructor(){super();window=this;windows.push(this);this.webContents=new EventEmitter();Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/index.html'},setWindowOpenHandler(){},send(...args){sent.push(args);onSend?.(...args)},executeJavaScript:async expression=>getRendererState?getRendererState(expression):({...state,opening:state.opening===true})});this.webContents.print=(options,callback)=>onPrint?onPrint(options,callback):callback(false,'cancelled');this.webContents.session={};}
+  constructor(options={}){super();this.options=options;window=this;windows.push(this);this.webContents=new EventEmitter();Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/index.html'},setWindowOpenHandler(){},send(...args){sent.push(args);onSend?.(...args)},executeJavaScript:async expression=>getRendererState?getRendererState(expression):({...state,opening:state.opening===true})});this.webContents.print=(options,callback)=>onPrint?onPrint(options,callback):callback(false,'cancelled');this.webContents.loadURL=async url=>this.loadURL(url);this.webContents.session={};if(options.show===false)this.webContents.mainFrame.framesInSubtree=[{url:'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/index.html',executeJavaScript:async()=>({recognized:true,state:'success',progress:100,initial:true,pages:1})}];}
+  setMenuBarVisibility(value){this.menuBarVisible=value}
   setTitle(){} setContentSize(){} show(){} focus(){} isDestroyed(){return this.closed===true}
   async loadURL(url){this.url=url;started=true}
   destroy(){this.closed=true;this.destroyed=true}
@@ -137,9 +141,9 @@ test('native Help follows selected UI language when system preferences differ, i
 
 
 test('desktop font choice consent and revocation persist (native dialog unit injection)',async()=>{
- const env=await boot();
+ const env=await boot({fontSettings:{fontConsent:false,fontChoice:'declined'}});
  try{
-  assert.equal(await env.invoke('font-choice'),'unset');
+  assert.equal(await env.invoke('font-choice'),'declined');
   assert.equal(await env.invoke('font-permission'),false);
   assert.deepEqual(Array.from(await env.invoke('fonts')),[]);
   env.responses.push(0);assert.equal(await env.invoke('font-consent'),false);
@@ -376,4 +380,15 @@ test('localized busy close names the document without offering an unsafe Save',a
   env.responses.push(1);env.window.close();for(let n=0;n<100&&!env.window.destroyed;n++)await new Promise(resolve=>setTimeout(resolve,10));
   assert.equal(env.window.destroyed,true);assert.equal(env.removeCalls,0,'Busy-close must preserve recovery');
  }finally{await env.cleanup();}
+});
+
+test('fresh desktop enables system fonts while explicit decline and capture remain disabled',async()=>{
+ for(const options of [{},{fontSettings:{fontConsent:false,fontChoice:'declined'}},{captureLocales:'en'}]){
+  const env=await boot(options);try{
+   const allowed=!options.fontSettings&&!options.captureLocales;
+   assert.equal(await env.invoke('font-permission'),allowed);
+   if(!allowed){assert.deepEqual(Array.from(await env.invoke('fonts')),[]);await assert.rejects(env.invoke('font','unknown'),/permission/);await assert.rejects(env.invoke('font-index'),/disabled/);}
+   if(allowed){const settings=JSON.parse(await fs.readFile(path.join(env.directory,'desktop-settings.json'),'utf8'));assert.equal(settings.fontChoice,'default');assert.equal(env.dialogs.length,0);}
+  }finally{await env.cleanup();}
+ }
 });

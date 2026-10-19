@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -10,7 +10,8 @@
     "test": "node --test ../tests/desktop/*.test.cjs",
     "package": "electron-builder --linux AppImage --publish never && bash ../tools/desktop/deb.sh",
     "package:windows": "electron-builder --win nsis --x64",
-    "package:mac": "electron-builder --config ../tools/desktop/mac-config.cjs --mac dmg --arm64"
+    "package:mac": "electron-builder --config ../tools/desktop/mac-config.cjs --mac dmg --arm64",
+    "test:print-viewer": "electron ../tests/desktop/print-viewer-contract.cjs"
   },
   "devDependencies": {
     "electron": "44.7.0",

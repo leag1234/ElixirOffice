@@ -36,27 +36,37 @@ def assemble(upstream, product, out):
     (destination/'blanks').mkdir()
     for language in LANGUAGES:
         (destination/'blanks'/(language+'.docx')).write_bytes(localized(out/'templates/new.docx',language))
-    for name in ['home.css','icons.svg']:shutil.copy2(home/name,destination/name)
+    css=(home/'home.css').read_text()+'\n'+(product/'desktop/home.css').read_text()
+    (destination/'home.css').write_text(css)
+    for name in ['home-theme.js','icons.svg']:shutil.copy2(home/name,destination/name)
     shutil.copytree(home/'fluent',destination/'fluent')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-localfonts/Core.js',destination/'localfonts-Core.js')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/Operation.js',destination/'operation.js')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/FormatDialog.js',destination/'format-dialog.js')
-    css=(home/'home.css').read_text()
-    (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:left;border:0;background:transparent;padding:0}\n')
+    (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:start;border:0;background:transparent;padding:0}\n')
     brand=product/'branding/example/nodejs/public/elixir/brand/templates'
     catalog=json.loads((brand/'templates.json').read_text())
     templates=[]
+    overlay=product/'branding/desktop-templates'
+    additions=json.loads((overlay/'templates.json').read_text())
+    extras={entry['id']:entry for entry in additions['templates']}
     (destination/'templates').mkdir()
     for entry in catalog['templates']:
+        extra=extras[entry['id']]
+        combined={**entry,'languages':list(dict.fromkeys(entry['languages']+extra['languages'])),
+                  'fontRequirements':extra['fontRequirements'],'systemLocales':extra['systemLocales']}
         for language in LANGUAGES:
-            chosen=language if language in entry['languages'] else 'en'
+            chosen=language if language in combined['languages'] else 'en'
+            source=overlay if chosen in extra['languages'] else brand
             for field in ['file','thumb']:
                 relative=chosen+'/'+entry[field]
                 target=destination/'templates'/relative;target.parent.mkdir(parents=True,exist_ok=True)
-                shutil.copy2(brand/relative,target)
-        templates.append(dict(entry,format='docx'))
+                shutil.copy2(source/relative,target)
+        templates.append(dict(combined,format='docx'))
     (out/'licenses/home').mkdir(parents=True,exist_ok=True)
-    shutil.copy2(brand/'template-sources.json',out/'licenses/home/template-sources.json')
+    provenance=json.loads((brand/'template-sources.json').read_text())
+    provenance['files']+=json.loads((overlay/'template-sources.json').read_text())['files']
+    (out/'licenses/home/template-sources.json').write_text(json.dumps(provenance,ensure_ascii=False,indent=2)+'\n')
     (out/'licenses/home/README.txt').write_text('The four localized Home templates and previews come from the ElixirOffice public start-page template set under CC0-1.0. The included template-sources.json records its public provisional-corpus provenance. Fluent UI System Icons are copyright Microsoft Corporation, MIT; see desktop-home/fluent/LICENSE.\n')
     (destination/'templates.json').write_text(json.dumps(templates,indent=2)+'\n')
     extra=json.loads((product/'tools/desktop/i18n-extra.json').read_text())

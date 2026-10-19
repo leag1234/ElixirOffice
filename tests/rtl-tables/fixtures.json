@@ -1,0 +1,117 @@
+{
+  "license": "CC0-1.0",
+  "provenance": "Original synthetic table direction/anchor regression inputs; no private documents or actual Word-produced golden files",
+  "actualWordGolden": false,
+  "cases": [
+    {
+      "file": "rtl-empty-ar.docx",
+      "sha256": "8f579bd9e50d0b1329f02cde4ad2404b063e210947f06dce9f03c61c3857909a",
+      "expected": {
+        "rtl": true,
+        "jc": "left",
+        "indent": 0
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "rtl-false-he.docx",
+      "sha256": "fd71b5102dae7f06ab722adc3f393a5ac1328834d4f9bde72651476e16b5c11f",
+      "expected": {
+        "rtl": false,
+        "jc": "left",
+        "indent": 0
+      },
+      "requireDirectFalse": true
+    },
+    {
+      "file": "style-rtl-override-false.docx",
+      "sha256": "659ce69878ab1dcc620493278880f3f66f7880a6c3c09efcfda72f906bca7679",
+      "expected": {
+        "rtl": false,
+        "jc": "left",
+        "indent": 0
+      },
+      "requireDirectFalse": true
+    },
+    {
+      "file": "rtl-default-anchor.docx",
+      "sha256": "e98303e7becce278d92498a06f8dd81f5b2f9216c335e48891d3dcd9af55d44f",
+      "expected": {
+        "rtl": true,
+        "jc": "left",
+        "indent": 0
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "rtl-inherited-center.docx",
+      "sha256": "f323a554980231fb65260219e8d73605bc0964383b199630bdf4d26fd8779d31",
+      "expected": {
+        "rtl": true,
+        "jc": "center",
+        "indent": 0
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "style-chain-center-rtl.docx",
+      "sha256": "e6208f5b45e208cd7cf2f54dca991898ab747fb428f611cad8cf1abdbd4da0dd",
+      "expected": {
+        "rtl": true,
+        "jc": "center",
+        "indent": 0
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "style-chain-indent-explicit-false.docx",
+      "sha256": "b5c429c929bbec16d590cc7cf160b041ed92534e3ab4d524cba4f34dd246495f",
+      "expected": {
+        "rtl": false,
+        "jc": "left",
+        "indent": 720
+      },
+      "requireDirectFalse": true
+    },
+    {
+      "file": "style-chain-indent-reactivated-child.docx",
+      "sha256": "3017fcc1736dabc8f182bb78525f8d1b21bd21beb7e13127e276fe1c66d2c997",
+      "expected": {
+        "rtl": true,
+        "jc": "left",
+        "indent": 720
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "style-chain-indent-reactivated-table.docx",
+      "sha256": "832c13066f5b3650b46aeadd9bcbdacc0e7191226b49490fa53a9158ab2a45f2",
+      "expected": {
+        "rtl": true,
+        "jc": "left",
+        "indent": 720
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "odt-rtl-left-zero-margins.odt",
+      "sha256": "612c4cb11053cd98905b1425e1954e0fcf13758d8e723b09693e6690461f6039",
+      "expected": {
+        "rtl": true,
+        "jc": "right",
+        "indent": 0
+      },
+      "requireDirectFalse": false
+    },
+    {
+      "file": "odt-rtl-right-leading-indent.odt",
+      "sha256": "14f9534784da0c1ea0c631add64b0781876b20dae4e0a469f031a77914faef83",
+      "expected": {
+        "rtl": true,
+        "jc": "left",
+        "indent": 720
+      },
+      "requireDirectFalse": false
+    }
+  ]
+}

@@ -5,6 +5,9 @@ const constants = require('node:fs').constants;
 const path = require('node:path');
 const crypto = require('node:crypto');
 const packageGuard=require('./package-guard.cjs');
+const retryWindow=require('./windows-io.cjs');
+const replaceInPlace=require('./replace-fallback.cjs');
+const writes=require('./write-scope.cjs')();
 const {validatePath,saveFailure}=require('./file-policy.cjs');
 const formats = Object.keys(require('./formats.cjs').codes);
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -50,10 +53,13 @@ async function readSelected(target,selected){
     return {target, bytes, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, embeddedObjects:['odt','ods','odp'].includes(extension(target))?packageGuard.embeddedObjects(bytes):0};
   } finally { await handle.close(); }
 }
-async function atomic(target,bytes,expected) {
-  try {return await atomicWrite(target,bytes,expected)} catch(error) {throw saveFailure(error)}
+async function atomic(target,bytes,expected,options={}) {
+  const entry=writes.start(options);
+  let failure;
+  try {return await atomicWrite(target,bytes,expected,entry.context)} catch(error) {failure=saveFailure(error);throw failure} finally {entry.finish(failure)}
 }
-async function atomicWrite(target, bytes, expected) {
+async function atomicWrite(target, bytes, expected,options) {
+  retryWindow.check(options);
   target = validatePath(path.resolve(target));
   if (!(bytes instanceof Uint8Array) || bytes.length > 512 * 1024 * 1024) throw Error('Invalid output size');
   const parent = await realDirectory(path.dirname(target));
@@ -64,43 +70,84 @@ async function atomicWrite(target, bytes, expected) {
     original = await fingerprint(target);
   } catch (e) { if (e.code !== 'ENOENT') throw e; }
   if (expected && (expected.absent ? !!original : !original || original.hash !== expected.hash || original.inode !== expected.inode || expected.device !== undefined && original.device !== expected.device)) throw Error('The original changed on disk. Use Save As to preserve both versions.');
-  const suffix = crypto.randomUUID();
-  const temporary = path.join(parent, '.' + path.basename(target) + '.eo-' + suffix + '.tmp');
-  const backup = original ? target + '.eo-' + suffix + '.bak' : null;
-  validatePath(temporary);if(backup)validatePath(backup);
-  let handle, backed = false, replaced = false;
+  const backup = original ? target + '.eo-' + crypto.randomUUID() + '.bak' : null;
+  if(backup)validatePath(backup);
+  const retry=retryWindow(process.platform,retryWindow.saveBudget(process.env),options),temporaries=[],outputHash=hash(bytes);
+  let temporary,handle,backed=false,replaced=false,retained,staged;
+  const unchanged=(actual,selected)=>actual.hash===selected.hash&&actual.inode===selected.inode&&actual.device===selected.device;
   try {
-    handle = await fs.open(temporary, 'wx', (original?.mode || 0o600) & 0o777);
-    await handle.writeFile(bytes); await handle.chmod((original?.mode || 0o600) & 0o777);
-    await handle.sync(); await handle.close(); handle = null;
+    handle = await retry(async()=>{
+      // A refused exclusive open may leave a quarantined file: use a fresh name.
+      temporary=validatePath(path.join(parent,'.'+path.basename(target)+'.eo-'+crypto.randomUUID()+'.tmp'));
+      temporaries.push(temporary);
+      return fs.open(temporary,'wx',(original?.mode||0o600)&0o777);
+    });
+    retryWindow.check(options);await handle.writeFile(bytes); await handle.chmod((original?.mode || 0o600) & 0o777);
+    await handle.sync();staged=await handle.stat();await handle.close();handle=null;
+    retryWindow.check(options);
     if (original) {
       const latest = await fs.lstat(target);
       if (!latest.isFile() || latest.isSymbolicLink() || latest.ino !== original.inode || (await fingerprint(target)).hash !== original.hash) throw Error('Destination changed during save');
       await fs.copyFile(target, backup, constants.COPYFILE_EXCL); backed = true;
-      const copy = await fs.open(backup, 'r'); try { await copy.sync(); } finally { await copy.close(); }
-      if ((await fingerprint(backup)).hash !== original.hash) throw Error('Destination changed while its backup was being saved');
-      const final = await fs.lstat(target);
-      if (!final.isFile() || final.isSymbolicLink() || final.ino !== original.inode || (await fingerprint(target)).hash !== original.hash) throw Error('Destination changed before replacement');
+      // Windows FlushFileBuffers requires a write-capable handle.
+      const copy = await fs.open(backup, process.platform==='win32'?'r+':'r'); try { await copy.sync(); } finally { await copy.close(); }
+      retained=await fingerprint(backup);
+      if(retained.hash!==original.hash)throw Error('Destination changed while its backup was being saved');
     }
-    if(expected?.absent){
-      // Recheck the destination selected before conversion, including new files.
-      try{await fs.lstat(target);throw Error('Destination changed before replacement');}
-      catch(error){if(error.code!=='ENOENT')throw error;}
+    retryWindow.check(options);
+    if(original&&!unchanged(await fingerprint(target),original))throw Error('Destination changed before replacement');
+    const stamp=(stat,selected)=>stat.isFile()&&!stat.isSymbolicLink()&&stat.dev===selected.device&&stat.ino===selected.inode&&stat.size===selected.size&&stat.mtimeMs===selected.mtimeMs&&stat.ctimeMs===selected.ctimeMs;
+    try{
+    await retry(async()=>{
+      // A wait is not consent to overwrite an external edit, replacement or new file.
+      if(original){
+        if(!stamp(await fs.lstat(target),original))throw Error('Destination changed before replacement');
+        if(!stamp(await fs.lstat(backup),retained))throw Error('Original backup changed before replacement');
+      }else{
+        try{await fs.lstat(target);throw Error('Destination changed before replacement');}
+        catch(error){if(error.code!=='ENOENT')throw error;}
+      }
+      try{await fs.rename(temporary,target)}
+      catch(error){
+        // Some filesystems can report an error after committing. Never retry it.
+        try{
+          const named=await fs.lstat(target);
+          if(named.isFile()&&!named.isSymbolicLink()&&named.ino===staged.ino&&named.dev===staged.dev&&(await fingerprint(target)).hash===hash(bytes)){
+            replaced=true;error.replacementCompleted=true;
+          }
+        }catch{}
+        throw error;
+      }
+    });
+    }catch(error){
+      if(process.platform!=='win32'||replaced||!original||!backed||!error.retryExpired||!['EPERM','EACCES','EBUSY'].includes(error.code))throw error;
+      await replaceInPlace({target,temporary,bytes,original,backup,retained,outputHash,options});
     }
-    await fs.rename(temporary, target); replaced = true;
+    replaced = true;
     if (process.platform !== 'win32') {
       const directory = await fs.open(parent, 'r'); try { await directory.sync(); } finally { await directory.close(); }
+    }
+    const verified=await fingerprint(target);
+    if(verified.hash!==outputHash||verified.size!==bytes.length){
+      const error=Object.assign(Error(backup?'SAVE_RESTORE_UNCERTAIN:'+JSON.stringify(path.basename(backup)):'Invalid document output'),{code:'EIO',rollbackUncertain:!!backup,outputVerificationFailed:true});throw error;
     }
     const stat = await fs.stat(target);
     if (backed) await fs.unlink(backup);
     return {target, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, bytes: bytes.length};
   } catch (e) {
-    if (backed) e.message += ' Original backup: ' + backup;
-    if (replaced) {e.replacementCompleted=true;e.originalBackup=backed?backup:null;e.message += ' Replacement completed, but durability could not be confirmed.';}
+    // Remove only our still-verified backup when the original is confirmed intact.
+    if(process.platform==='win32'&&backed&&!replaced&&!e.rollbackUncertain){
+      try{
+        const targetState=await fingerprint(target),copyState=await fingerprint(backup);
+        if(unchanged(targetState,original)&&(!retained||unchanged(copyState,retained))&&copyState.hash===original.hash){await fs.unlink(backup);backed=false;e.originalBackup=null;}
+      }catch{e.backupCleanupFailed=true;}
+    }
+    if (backed&&!e.rollbackUncertain) e.message += ' Original backup: ' + backup;
+    if (replaced) {e.replacementCompleted=true;e.originalBackup=backed?backup:null;if(!e.rollbackUncertain)e.message += ' Replacement completed, but durability could not be confirmed.';}
     throw e;
   } finally {
     if (handle) await handle.close().catch(() => {});
-    if (!replaced) await fs.unlink(temporary).catch(() => {});
+    for(const filename of temporaries)await fs.unlink(filename).catch(()=>{});
   }
 }
 // Rename the selected file without replacing another file or changing its bytes.
@@ -129,10 +176,10 @@ async function fingerprint(filename) {
       size+=chunk.length;if(size>512*1024*1024)throw Error('Document grew beyond 512 MiB during read');digest.update(chunk);
     }
     const latest=await handle.stat({bigint:true}), final=await fs.lstat(target,{bigint:true});
-    if(final.isSymbolicLink()||final.ino!==initial.ino||final.dev!==initial.dev||latest.size!==initial.size||latest.mtimeNs!==initial.mtimeNs)
+    if(final.isSymbolicLink()||final.ino!==initial.ino||final.dev!==initial.dev||latest.size!==initial.size||latest.mtimeNs!==initial.mtimeNs||latest.ctimeNs!==initial.ctimeNs)
       throw Error('Document changed during read');
     const stat=await handle.stat();
-    return {target,hash:digest.digest('hex'),mode:stat.mode,inode:stat.ino,device:stat.dev};
+    return {target,hash:digest.digest('hex'),mode:stat.mode,inode:stat.ino,device:stat.dev,size:stat.size,mtimeMs:stat.mtimeMs,ctimeMs:stat.ctimeMs};
   }finally{await handle.close()}
 }
 
@@ -182,4 +229,9 @@ async function rename(expected, name) {
     throw saveFailure(error);
   }
 }
-module.exports = {fingerprint, read, atomic, rename, renameName, hash, formats, extension};
+async function scoped(options,run){
+ const entry=writes.start(options);
+ let failure;
+ try{retryWindow.check(entry.context);return await run(entry.context)}catch(error){failure=error;throw error}finally{entry.finish(failure)}
+}
+module.exports = {resumeWrites:()=>writes.resume(),writeWarnings:()=>writes.warnings(),acknowledgeWriteWarning:key=>writes.acknowledge(key),scoped,cancelPending:options=>writes.cancel(options),fingerprint, read, atomic, rename, renameName, hash, formats, extension};

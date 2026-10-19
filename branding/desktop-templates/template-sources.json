@@ -1,0 +1,492 @@
+{
+  "license": "CC0-1.0",
+  "description": "Desktop-only fictional examples derived from public provisional corpus t01,t02,s06,s08; translations and source layouts are shared with the existing public Home examples.",
+  "preview": {
+    "generator": "Pinned native x2t PDF conversion, first page rasterized by Poppler and resized with Pillow",
+    "converterImage": "sha256:bb2dfabd7bdd5174eab4385070cc52ee6f2cfa17aef0572d8c837a3bb2e794e3",
+    "fontProfile": "Existing desktop bundle plus Elixir Fallback Arabic/Sinhala Regular/Bold and test-only Noto Sans CJK Regular/Bold regional TTC faces. CJK font binaries are not distributed in this overlay.",
+    "scope": "Prebuilt preview evidence only. Native Electron editor, runtime thumbnails and platform rendering remain unverified; exact Unicode extraction failures remain recorded in the project handoff."
+  },
+  "files": [
+    {
+      "file": "ja/assessment-grid.docx",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 21789,
+      "sha256": "8f4dd3d452dfece5b92ab6933dee1977839c0f78d6b7fd5c77c07c8f4410e27a",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ja/assessment-grid.png",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 32409,
+      "sha256": "a803a4611cb3f53766c586839174491dd755105d9704269450cae3b20ddf348f",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ja/letterhead.docx",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19398,
+      "sha256": "858f38cca6aad2ba74b732c5dc2c5c1c225eb8fdbe573447a318badf9e216e38",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ja/letterhead.png",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29091,
+      "sha256": "0aee3e1ef3d0023e31da99eb9e0e83e02ed53e5b91a68583c87da3f245d4a5e0",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ja/resume-two-columns.docx",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 16959,
+      "sha256": "7a21204d6635d2dab8e8ee9306e034475e551fdb086d68123c78149c77067e7a",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ja/resume-two-columns.png",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 34108,
+      "sha256": "40ece83d8d2fcfe7c1a0d6f95397b5e65b5d168d4c8ca186b1f66424d0a97386",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ja/worksheet-fractions.docx",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35237,
+      "sha256": "5764c71241fd375f62db727704bc7f60edd8afc4c182db7577fbaddabf9548dc",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "ja/worksheet-fractions.png",
+      "language": "ja",
+      "languageTag": "ja-JP",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 27475,
+      "sha256": "28a7ba4b6fd9fa03e56e6f2800d74c2619f9ef52efbfd820a5c90c0d352f334e",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "zh/assessment-grid.docx",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 21720,
+      "sha256": "0f5988fed5ed48778c6cdf01bedb313c9572cf567ebea13f1c268ea67ef4ae4a",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "zh/assessment-grid.png",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29283,
+      "sha256": "bad161817f97d7309af98fa34b303205ec723205d48a813290f4850adf45d91e",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "zh/letterhead.docx",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19269,
+      "sha256": "d9b607bcf60f5dc0998e3609e98d61ac1bc84568b2ba2486a1bf143b926774e4",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "zh/letterhead.png",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 24380,
+      "sha256": "b90cd3f82f8ab197dadbf507274c6c6cb9c827dac921ecc4982f1bf68669e9ad",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "zh/resume-two-columns.docx",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 16917,
+      "sha256": "bcf57e331323b529a517b630c43b08d42cd3938ca3942f4bd89959737c7ea0ba",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "zh/resume-two-columns.png",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 30154,
+      "sha256": "fc9ecf31bad6e8dee5f1c19194a82c5fc6288545fc172b4e99e8f0bcb8526a33",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "zh/worksheet-fractions.docx",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35144,
+      "sha256": "a7b431e504f82e78359a714be07988ecc81ec7a0e857f6f71516c122c09499e7",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "zh/worksheet-fractions.png",
+      "language": "zh",
+      "languageTag": "zh-CN",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 26078,
+      "sha256": "5114b6dcf83b51544fa34ed02c2b62f54395a18fb28e9935382f2bccdc40cc01",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "zh-tw/assessment-grid.docx",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 21725,
+      "sha256": "14695eddcc0c5a8f1bde51118fc74ea4b5071e7871078bbddb50c79b8df4e2c4",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "zh-tw/assessment-grid.png",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29864,
+      "sha256": "25bf641a907e798c1507107d51e72e1229dc764d22926e909a10f98decbbdaa7",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "zh-tw/letterhead.docx",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19272,
+      "sha256": "9b297b443d4be487cd1eb99ac067bf4a498c7a7b16fd50ac196bb0b2a3d28a5a",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "zh-tw/letterhead.png",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 24392,
+      "sha256": "31d7893ec80e2e3640b784bd53688083e55990c966f4eda92b598066c574d3a6",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "zh-tw/resume-two-columns.docx",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 16910,
+      "sha256": "3ba7f8841334e69dfc49ed4ce0ecb41bad8ca6459993be25708111946869fd87",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "zh-tw/resume-two-columns.png",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29940,
+      "sha256": "52ebc0ecf356991bf9f76555e94ff8fbd1e1eff3c0b67496ad50d485b35c5923",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "zh-tw/worksheet-fractions.docx",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35137,
+      "sha256": "7468170fa2fbb1c9820ef3ee6f07c349cafa15d62a15f93e735988c250fe2408",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "zh-tw/worksheet-fractions.png",
+      "language": "zh-tw",
+      "languageTag": "zh-TW",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 26260,
+      "sha256": "f1147a0bdfa4373c9c5db12d4b4f9f1a96a784128e1a14e1e727f6d624794654",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "ko/assessment-grid.docx",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 21789,
+      "sha256": "a7a53ed486c38483b42c03ee8ef08ecd0a15a1657f370ba74aa64c658104d59d",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ko/assessment-grid.png",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 31041,
+      "sha256": "02a0d597f8abf2b00b1adc5d460b9f6a96ab4d0ee67f22a849076a09413a0acb",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ko/letterhead.docx",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19272,
+      "sha256": "f0548d187b109eddc527c14b1c6c7c041682e773d1658edfaa250ad4a1381be8",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ko/letterhead.png",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 24507,
+      "sha256": "c6b8b5403404fb677270a1f82dcab6af35b4088de1ff146f9906372c9e8c06b5",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ko/resume-two-columns.docx",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 16907,
+      "sha256": "7a1616d817224d9fbb04bee5643790e65d5a06daea7e9b8e7129316755a468c2",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ko/resume-two-columns.png",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29536,
+      "sha256": "7cc05b4f43b2c4242655a7087dd43d27e5e222198d328bb9097a480b09317bee",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ko/worksheet-fractions.docx",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35239,
+      "sha256": "accb3407e7c460cd2e1f6b31c95de99d93d1fd95fcbcefa26745e332e9da4284",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "ko/worksheet-fractions.png",
+      "language": "ko",
+      "languageTag": "ko-KR",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 27369,
+      "sha256": "27498b0b3b7fc28b5750db632fdb487cf79b821d67586b7d88cfd8247f9e9331",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "si/assessment-grid.docx",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 21962,
+      "sha256": "4e9b3e4151f9acb2b6182e247e8c2b852341996fa47c4e6b48078ea65161b6ab",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "si/assessment-grid.png",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 42892,
+      "sha256": "3a81b6c4231b697447126f08197972281034ce14f16178080262d4ab165a96b7",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "si/letterhead.docx",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19497,
+      "sha256": "8ebfb2a2b9ad9733f8068d4e464ba4b17f5efa9359262616a7f6973603034d09",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "si/letterhead.png",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 37444,
+      "sha256": "7e1fcbc49a2f6b1f9177c2530e1f7957490eb5f865ebc12975e99bbc86930abb",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "si/resume-two-columns.docx",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 17106,
+      "sha256": "36735e3f842d2d36a3e8082f237a570695424a6aede13881a76c147ce7baf2ca",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "si/resume-two-columns.png",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 43588,
+      "sha256": "c0e802c1fa773403c399c95281d686723c690eed1fb3ef324a3b059682c030b4",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "si/worksheet-fractions.docx",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35417,
+      "sha256": "95204ea7dd88340115ed3c2be0eae88eab6116b850c34eda1b6e58abf56c83f6",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "si/worksheet-fractions.png",
+      "language": "si",
+      "languageTag": "si-LK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 30434,
+      "sha256": "7354fabc3958146322e9cc15c309e208ea3f941c3cfaeedd18b4b9de4310ee89",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "ur/assessment-grid.docx",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 22034,
+      "sha256": "49850c697aa4f51991a07b9b7679bdd1f5e02e97128d3c20bdf4f189b958896d",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ur/assessment-grid.png",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 29079,
+      "sha256": "192aaeee44b6280be7dd8ae4b0887f51321a6888cca17a102e0105fd8a016e42",
+      "layoutSource": "tools/example/template-layouts/assessment-grid.docx"
+    },
+    {
+      "file": "ur/letterhead.docx",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 19512,
+      "sha256": "5356de1d89eecc360f77df30f652c1fcef069a5669057d5d5d6add58ac7e464f",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ur/letterhead.png",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 27740,
+      "sha256": "7b8494cfdb1f223ed335bdf438fa6eca67aba0c69ba19b33f25c9cb3c5eb0eb0",
+      "layoutSource": "tools/example/template-layouts/letterhead.docx"
+    },
+    {
+      "file": "ur/resume-two-columns.docx",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 17075,
+      "sha256": "2ef193b3865c993be34e4e3fa125cb1c488f352e857efc022a4d2100209a64f8",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ur/resume-two-columns.png",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 32827,
+      "sha256": "d274d1654be2301587f286091533def1bc3d7ff025c69fdfd0807f30029e32d2",
+      "layoutSource": "tools/example/template-layouts/resume-two-columns.docx"
+    },
+    {
+      "file": "ur/worksheet-fractions.docx",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 35611,
+      "sha256": "2c9a5c0e2d458723fd8028689936b5fc974453eb2e6f171ae7ea772d18fb1e1b",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    },
+    {
+      "file": "ur/worksheet-fractions.png",
+      "language": "ur",
+      "languageTag": "ur-PK",
+      "license": "CC0-1.0",
+      "fictional": true,
+      "bytes": 25415,
+      "sha256": "849c9e2dc17a2f5c02ae88a55466d2af094a8c23dd1234feba28842a5cb2a024",
+      "layoutSource": "tools/example/template-layouts/worksheet-fractions.docx"
+    }
+  ]
+}

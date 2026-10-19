@@ -3,6 +3,7 @@
 // Handle native file commands before a focused editor iframe consumes them.
 function command(input,platform,format) {
  if(input.type!=='keyDown'||input.isComposing||input.alt||(input.modifiers||[]).some(value=>/^altgr(?:aph)?$/i.test(value)))return null;
+ if((input.key==="F1"||input.code==="F1")&&!input.control&&!input.meta&&!input.shift)return "help";
  if(platform!=='darwin'&&(input.key==='F12'||input.code==='F12')&&!input.control&&!input.meta&&!input.shift)return 'save-as';
  if(platform==='darwin'?(!input.meta||input.control):(!input.control||input.meta))return null;
  let key=String(input.key||'').toLowerCase();

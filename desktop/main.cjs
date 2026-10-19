@@ -28,6 +28,7 @@ safety.install(process,console,async()=>{
  finally{await safety.flush();app.exit(1);}
 });
 const artifacts=new (require('./artifacts.cjs').Artifacts)();
+const printer=require('./printing.cjs').create({BrowserWindow,session,root:path.join(app.getPath('userData'),'print-jobs'),log:code=>safety.log(code),allowOffscreenRetry:process.env.EO_PRINT_OFFSCREEN_RETRY==='1'});
 let preferences,recovery;
 const locale=require('./locale.cjs'),capture=require('./capture.cjs'),decisions=require('./decisions.cjs');
 let captureOptions,captureStartupError;
@@ -68,10 +69,20 @@ function authorize(event) {
 function persist(){return preferences.save(settings)}
 
 function title() { win.setTitle((dirty?'* ':'')+(current?.name?current.name+' — ':'')+'ElixirOffice'); }
+let finishClosePending;
 function finishClose() {
+ if(finishClosePending)return finishClosePending;
+ finishClosePending=(async()=>{
   // Called only after saved/clean state or an explicit native Discard decision.
   // Destroy also finishes when a frozen iframe cannot acknowledge unload.
+  for(const warning of files.writeWarnings()){
+    const error={rollbackUncertain:true,message:'SAVE_RESTORE_UNCERTAIN:'+JSON.stringify(warning.backupName)};
+    await dialog.showMessageBox(win,{type:'warning',title:'ElixirOffice',message:require('./errors.js').message(error,languageInfo?.strings),buttons:[t('close')],normalizeAccessKeys:true,defaultId:0,cancelId:0});
+    files.acknowledgeWriteWarning(warning.key);
+  }
   closing=true;win.destroy();
+ })().finally(()=>{finishClosePending=null});
+ return finishClosePending;
 }
 let closeLogWrite=Promise.resolve();
 function closeReason(reason) {
@@ -85,17 +96,20 @@ function closeReason(reason) {
       if((await handle.stat()).size+line.length>64*1024)await handle.truncate(0);
       await handle.write(line);
     }finally{await handle.close()}
-  }).catch(()=>{});
+  }).catch(async error=>{await safety.log('font-list-error');await safety.log(error?.code);});
   return closeLogWrite;
 }
-async function closeDeadline(work) {
+async function closeDeadline(work,deadline=Date.now()+3000) {
   let timer;
-  try{return await Promise.race([work,new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(Error('Close state unavailable')),3000)})])}
+  try{return await Promise.race([work,new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(Error('Close state unavailable')),Math.max(0,deadline-Date.now()))})])}
   finally{clearTimeout(timer)}
 }
 async function cancelRendererOperation(){
-  try{await closeDeadline(win.webContents.executeJavaScript('globalThis.EODesktopCancelOperation?.()'));}
+  const deadline=Date.now()+3000,settled=files.cancelPending({deadline});
+  try{await closeDeadline(win.webContents.executeJavaScript('globalThis.EODesktopCancelOperation?.()'),deadline);}
   catch{closeReason('operation-cancel-unavailable');}
+  // A timeout keeps the window alive; rollback/backup cleanup must settle first.
+  await closeDeadline(settled,deadline);
 }
 async function savedTarget(id){
   try{return await artifacts.resolve(id,current?.token);}
@@ -105,17 +119,21 @@ async function rendererState(lock=true) {
   const state=await closeDeadline(win.webContents.executeJavaScript('globalThis.EODesktopState ? globalThis.EODesktopState(false) : {dirty:true,opening:true}'));
   if(lock)win.webContents.send('eo:action','prepare-close');return state;
 }
-async function discard() {
+async function discard(allowSave=false) {
   if(!current)return true;
   try{
   const state=await rendererState();
   if(state.opening)throw Error('Wait for the document to finish opening');
   dirty=state.dirty===true;
         await preferences.flush();
+  if(allowSave){const confirmed=await rendererState(false);if(confirmed.opening)throw Error('Wait for the document to finish opening');dirty=confirmed.dirty===true;}
   if(!dirty){if(current)await recovery.remove(current.recoveryId||current.token);return true;}
-  const result=await dialog.showMessageBox(win,decisions.unsaved(t,false,current?.name,process.platform));
-  if(decisions.discard(result)&&current){current.recoveryVersion=(current.recoveryVersion||0)+1;await recovery.remove(current.recoveryId||current.token);}
-  return decisions.discard(result);
+  const result=await dialog.showMessageBox(win,decisions.unsaved(t,allowSave,current?.name,process.platform));
+  // Choose the shared destination-ticket path before saving a document without a target.
+  if(allowSave&&result.response===0)return current.target?'save':'save-as';
+  const discarded=decisions.discard(result,allowSave,process.platform);
+  if(discarded&&current){current.recoveryVersion=(current.recoveryVersion||0)+1;await recovery.remove(current.recoveryId||current.token);}
+  return discarded;
   }finally{win.webContents.send('eo:action','resume-close')}
 }
 async function remember(target) {
@@ -140,6 +158,24 @@ async function select(filename) {
   dirty=false;title();await remember(opened.target);
   return {token:current.token,name:current.name,bytes:new Uint8Array(bytes),format:current.format,sourceFormat,runtime:conversionRuntime};
 }
+let homeFontDiscovery,homeFontGeneration;
+function discoverFontsInBackground(){
+ const generation=fonts.generation||0;
+ if(homeFontDiscovery&&homeFontGeneration===generation)return;
+ homeFontGeneration=generation;
+ homeFontDiscovery=fonts.index();
+ homeFontDiscovery.then(()=>{
+  if(!captureOptions&&settings.fontConsent===true&&generation===(fonts.generation||0)&&win&&!win.isDestroyed())
+   win.webContents.send('eo:action','font-index-ready');
+ }).catch(()=>{});
+}
+function templateFonts(templates,language){
+ if(!templates.some(template=>template.systemLocales?.includes(language))||captureOptions||settings.fontConsent!==true)return {};
+ const index=fonts.peek();
+ if(index)return {index};
+ discoverFontsInBackground();
+ return {};
+}
 function active(token) { if(!current||typeof token!=='string'||current.token!==token)throw Error('No active document handle'); }
 function output(input,pdf=false) {
   if(!(input instanceof Uint8Array)||input.byteLength>512*1024*1024)throw Error('Invalid document output');
@@ -160,6 +196,7 @@ async function takeDestination(ticket,format,route){
 }
 function handle(name,run) { ipcMain.handle('eo:'+name,(event,...args)=>{authorize(event);return (async()=>{try{return await run(...args)}catch(error){if(/^(?:E[A-Z0-9_]+|UNKNOWN)$/.test(error?.code||'')){await safety.log('file-error');await safety.log(error.code)}throw error}})()}); }
 async function start() {
+  await printer.cleanup().catch(()=>safety.log('print-cleanup-failure'));
   preferences=require('./settings-store.cjs')(app.getPath('userData'));
   recovery=new (require('./recovery.cjs').Recovery)(app.getPath('userData'));
   const preferred=captureOptions?captureOptions.locales:[...(app.getPreferredSystemLanguages?.()||[]),app.getLocale()];
@@ -175,11 +212,14 @@ async function start() {
 
   try{settings=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'desktop-settings.json'),'utf8'));settings.recents=require('./recent-files.cjs').normalize(settings.recents);settings.fontConsent=settings.fontConsent===true;}
   catch(error){if(error.code!=='ENOENT')throw error}
+  settings=require('./font-preferences.cjs').migrate(settings,{capture:!!captureOptions});
+  if(!captureOptions)await persist();
   const manifestBytes=await fs.readFile(path.join(assets,'desktop-manifest.json'));
   const manifest=JSON.parse(manifestBytes);
   if(!/^[a-zA-Z0-9-]+$/.test(manifest.conversion.artifact_version))throw Error('Invalid bundled conversion runtime');
   conversionRuntime=resources.ORIGIN+'/example/local-assets/sdkjs/common/wasm-convert/runtime/'+manifest.conversion.artifact_version+'/';
   const assetIdentity=crypto.createHash('sha256').update(manifestBytes).digest('hex').slice(0,16);
+  fonts.configure({cacheDir:path.join(app.getPath('userData'),'font-index'),bundled:assets,bundleIdentity:assetIdentity});
   const ses=session.fromPartition((captureOptions?'elixiroffice-capture-':'persist:elixiroffice-desktop-')+assetIdentity);
   ses.protocol.handle(resources.SCHEME,await resources.createHandler(assets,__dirname,url=>net.fetch(url)));
   ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*','ws://*/*','wss://*/*','ftp://*/*','file://*/*']},(_details,callback)=>callback({cancel:true}));
@@ -200,17 +240,17 @@ async function start() {
         const confirmed=await rendererState(false);
         if(busy||confirmed.opening)throw Error('close-busy');
         dirty=confirmed.dirty===true;
-        if(!dirty){if(current)await closeDeadline(recovery.remove(current.recoveryId||current.token));finishClose();return}
+        if(!dirty){if(current)await closeDeadline(recovery.remove(current.recoveryId||current.token));await finishClose();return}
         const result=await dialog.showMessageBox(win,decisions.unsaved(t,true,current?.name,process.platform));
         if(result.response===0)win.webContents.send('eo:action','save-close');
-        else if(decisions.discard(result,true,process.platform)){if(current){current.recoveryVersion=(current.recoveryVersion||0)+1;await closeDeadline(recovery.remove(current.recoveryId||current.token));}finishClose()}
+        else if(decisions.discard(result,true,process.platform)){if(current){current.recoveryVersion=(current.recoveryVersion||0)+1;await closeDeadline(recovery.remove(current.recoveryId||current.token));}await finishClose()}
         else win.webContents.send('eo:action','resume-close');
       } catch(error) {
         closeReason(error.message==='close-busy'?'busy-choice':'state-or-cleanup-failure');
         win.show();
         const result=await dialog.showMessageBox(win,decisions.busy(t,current?.name));
-        if(result.response===1){if(error.message==='close-busy')await cancelRendererOperation();finishClose()}else {closing=false;win.webContents.send('eo:action','resume-close');}
-      } finally {closePending=false;if(!closing&&!win.isDestroyed())win.webContents.send('eo:action','resume-close')}
+        if(result.response===1){await cancelRendererOperation();await finishClose()}else {closing=false;win.webContents.send('eo:action','resume-close');}
+      } finally {closePending=false;if(!closing)files.resumeWrites();if(!closing&&!win.isDestroyed())win.webContents.send('eo:action','resume-close')}
     })().catch(()=>{closing=false;closePending=false;if(!win.isDestroyed())win.webContents.send('eo:action','resume-close');closeReason('dialog-failure')});
   });
   handle('initial',()=>operation(async()=>{
@@ -221,6 +261,8 @@ async function start() {
   handle('author',()=>typeof settings.author==='string'&&settings.author.trim()?settings.author:'ElixirOffice');
   handle('author-save',async value=>{if(typeof value!=='string'||!value.trim()||value.length>200||/[\u0000-\u001f\u007f]/.test(value))throw Error('Invalid author name');settings.author=value.trim();await persist();return settings.author;});
   handle('help',()=>help());
+  handle('about',()=>showAbout());
+  handle('quit',()=>win.close());
   handle('locale',async()=>({...languageInfo,capture:!!captureOptions}));
   handle('capture-locale',async language=>{
     if(!captureOptions||!captureOptions.locales.includes(language))throw Error('Capture locale unavailable');
@@ -231,16 +273,19 @@ async function start() {
       await safety.log('file-error');await safety.log(error?.code);
     });
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
-    return {templates:templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language)),recents};
+    const fontOptions=await templateFonts(templates,languageInfo.language);
+    return {templates:templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language,fontOptions)),recents};
   });
   handle('return-home',()=>operation(async()=>{
-    if(!await discard())return false;destinations.clear();current=null;dirty=false;title();return true;
+    const decision=await discard(true);if(decision!==true)return decision;
+    destinations.clear();current=null;dirty=false;title();return true;
   }));
   handle('template',id=>operation(async()=>{
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
     const selected=templates.find(item=>item.id===id);if(!selected)throw Error('Unknown template');
-    const template=require('./templates.cjs').resolve(selected,languageInfo.language);
     if(!await discard())return null;
+    const fontOptions=await templateFonts([selected],languageInfo.language);
+    const template=require('./templates.cjs').resolve(selected,languageInfo.language,fontOptions);
     const bytes=await fs.readFile(path.join(assets,'desktop-home/templates',template.file));
     destinations.clear();current={token:crypto.randomUUID(),name:(template.title||t(template.titleKey))+'.'+template.format,format:template.format,target:null};dirty=false;title();
     return {token:current.token,name:current.name,format:current.format,bytes:new Uint8Array(bytes),runtime:conversionRuntime};
@@ -287,7 +332,7 @@ async function start() {
     active(token);const collided=busy,version=await password.lock(current,recovery);active(token);
     if(collided)throw Error('Another file operation is running');return {recoveryVersion:version};
   });
-  handle('save',(token,input,as,protection,operationId,ticket)=>operation(async()=>{
+  handle('save',(token,input,as,protection,operationId,ticket)=>operation(()=>files.scoped({scope:token,id:operationId},async writeOptions=>{
     active(token);if(current.format==='pdf'&&protection?.protected)throw Error('PDF password protection is unavailable');const bytes=current.format==='pdf'?output(input,current.format):password.validate(input,current.format,protection||{protected:current.protected===true,remove:false},current);let target=current.target,copy=false;
     const selected=ticket?await takeDestination(ticket,current.format,'save'):null;
     try{packageGuard.protect(bytes,current.format,current.embeddedObjects)}
@@ -316,11 +361,16 @@ async function start() {
       }catch(error){if(error.code!=='ENOENT')throw error}
     }
     operationStage(token,operationId,'writing');
-    const saved=await password.write(files,target,bytes,selected&&!copy?selected.state||{absent:true}:!as&&!copy&&current.target?current:undefined);
+    const saved=await password.write(files,target,bytes,selected&&!copy?selected.state||{absent:true}:!as&&!copy&&current.target?current:undefined,writeOptions);
     current={...current,...saved,sourceTarget:target,sourceFormat:current.format,protected:password.encrypted(bytes,current.format),name:path.basename(target),embeddedObjects:['odt','ods','odp'].includes(current.format)?packageGuard.embeddedObjects(bytes):0};const preferencesSaved=await remember(target);title();
     current.recoveryVersion=(current.recoveryVersion||0)+1;
     return {artifactId:artifacts.register(saved,current.token),name:current.name,bytes:saved.bytes,recoveryVersion:current.recoveryVersion,preferencesSaved,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
-  }));
+  })));
+  handle('write-cancel',async(token,id)=>{
+    active(token);
+    if(typeof id!=='string'||!/^local-operation-[0-9]+$/.test(id))throw Error('Invalid save operation');
+    return (await files.cancelPending({scope:token,id,deadline:Date.now()+3000}))>0;
+  });
   handle('save-as-info',token=>{
     active(token);
     return {formats:saveAs.choices(current).map(value=>({value,name:t(saveAs.labels[value]),description:t(saveAs.labels[value]+'Desc')})),
@@ -369,7 +419,7 @@ async function start() {
     }
   }));
   handle('export-formats',token=>{active(token);return require('./formats.cjs').exports[require('./formats.cjs').kind(current.format)]});
-  handle('export',(token,input,format,protection,operationId,ticket)=>operation(async()=>{
+  handle('export',(token,input,format,protection,operationId,ticket)=>operation(()=>files.scoped({scope:token,id:operationId},async writeOptions=>{
     active(token);const formats=require('./formats.cjs');
     if(!formats.exports[formats.kind(current.format)]?.includes(format)||format==='pdf')throw Error('Unsupported export format');
     if(current.protected&&protection?.protected!==true&&protection?.remove!==true)throw Error('Confirm an unprotected export copy');
@@ -385,9 +435,9 @@ async function start() {
       try{const stat=await fs.stat(result.filePath);if(stat.dev===current.device&&stat.ino===current.inode)throw Error('Export to a different file');}catch(error){if(error.code!=='ENOENT')throw error;}
     }
     operationStage(token,operationId,'writing');
-    const saved=await files.atomic(result.filePath,bytes,selected?(selected.state||{absent:true}):undefined);
+    const saved=await files.atomic(result.filePath,bytes,selected?(selected.state||{absent:true}):undefined,writeOptions);
     return {artifactId:artifacts.register(saved,current.token),name:path.basename(saved.target),bytes:saved.bytes,format,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
-  }));
+  })));
   handle('recovery-failure',()=>safety.log('recovery-failure').then(()=>true));
   handle('recovery-options',()=>({enabled:settings.recoveryEnabled!==false,seconds:[15,30,60,120,300].includes(settings.recoverySeconds)?settings.recoverySeconds:60}));
   handle('recovery-settings',async(value)=>{
@@ -446,20 +496,33 @@ async function start() {
   handle('ai-cancel',id=>{aiJobs.get(id)?.abort();return true});
   handle('font-choice',async()=>{await preferences.flush();return settings.fontConsent===true?'granted':settings.fontChoice==='declined'?'declined':'unset'});
   handle('font-dismiss',async()=>{settings.fontChoice='declined';await persist();return true});
-  handle('font-disable',async()=>{settings.fontChoice='declined';settings.fontConsent=false;await persist();return true});
-  handle('font-permission',async()=>settings.fontConsent===true);
+  handle('font-disable',async()=>{settings.fontChoice='declined';settings.fontConsent=false;fonts.clear();homeFontDiscovery=null;await persist();return true});
+  handle('font-permission',async()=>!captureOptions&&settings.fontConsent===true);
   handle('font-consent',()=>operation(async()=>{
     if(captureOptions)throw Error('Capture mode does not read computer fonts');
     if(settings.fontConsent===true)return true;
     const result=await dialog.showMessageBox(win,{type:'question',title:'ElixirOffice',message:t('fontAsk'),detail:t('fontDetail'),buttons:decisions.buttons([t('cancel'),t('allow')]),normalizeAccessKeys:true,defaultId:0,cancelId:0});
     if(result.response!==1){settings.fontChoice='declined';await persist();return false;}
     settings.fontChoice='granted';settings.fontConsent=true;await persist();return true;
-  }));
-  handle('fonts',async()=>settings.fontConsent===true?fonts.enumerate():[]);
-  handle('font',async id=>{if(settings.fontConsent!==true)throw Error('Font permission required');return fonts.read(id)});
-  handle('pdf',(token,input,print,plainCopy,operationId,ticket)=>operation(async()=>{
+  }).catch(async error=>{await safety.log('font-consent-error');throw error}));
+  handle('fonts',async()=>{
+    try{return !captureOptions&&settings.fontConsent===true?await fonts.enumerate():[]}
+    catch(error){await safety.log('font-list-error');throw error}
+  });
+  handle('font-index',async readyOnly=>{
+    if(captureOptions||settings.fontConsent!==true)throw Error('Computer fonts are disabled');
+    if(readyOnly!==undefined&&typeof readyOnly!=='boolean')throw Error('Invalid font index request');
+    const index=fonts.peek();
+    if(readyOnly===true&&!index){discoverFontsInBackground();return null;}
+    try{return index||await fonts.index()}catch(error){await safety.log('font-list-error');throw error}
+  });
+  handle('font',async id=>{
+    if(captureOptions||settings.fontConsent!==true)throw Error('Font permission required');
+    try{return await fonts.read(id)}catch(error){await safety.log('font-read-error');throw error}
+  });
+  handle('pdf',(token,input,print,plainCopy,operationId,ticket)=>operation(()=>files.scoped({scope:token,id:operationId},async writeOptions=>{
     active(token);if(current.protected&&plainCopy!==true)throw Error('Confirm an unprotected PDF copy');const bytes=output(input,true);
-    if(print){operationStage(token,operationId,'awaiting-user');return printPdf(bytes);}
+    if(print){operationStage(token,operationId,'awaiting-user');return printer.print(bytes,{parent:win,signal:writeOptions.signal,title:t('print')+' PDF'});}
     const policy=require('./pdf-policy.cjs');
     if(!ticket)operationStage(token,operationId,'awaiting-user');
     const selected=ticket?await takeDestination(ticket,'pdf','pdf'):null;
@@ -469,13 +532,13 @@ async function start() {
     if(files.extension(result.filePath)!=='pdf')throw Error('Choose a PDF destination');
     await policy.assertCopyDestination(current,result.filePath);
     operationStage(token,operationId,'writing');
-    const saved=await files.atomic(result.filePath,bytes,selected?(selected.state||{absent:true}):undefined);
+    const saved=await files.atomic(result.filePath,bytes,selected?(selected.state||{absent:true}):undefined,writeOptions);
     return {artifactId:artifacts.register(saved,current.token),name:path.basename(saved.target),bytes:saved.bytes,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
-  }));
+  })));
   handle('closed-saved',async()=>{
     // Recheck edits made after the save snapshot before authorizing destruction.
     const state=await rendererState(false);dirty=state.dirty===true;
-    if(!dirty&&!busy&&!state.opening)finishClose();else win.webContents.send('eo:action','resume-close');
+    if(!dirty&&!busy&&!state.opening)await finishClose();else win.webContents.send('eo:action','resume-close');
   });
   const action=name=>()=> {
     if(name!=='settings'){win.webContents.send('eo:action',name);return}
@@ -488,12 +551,14 @@ async function start() {
     try{await fs.access(path.join(base,language,'index.htm'))}catch{language='en'}
     const prefix=resources.ORIGIN+'/example/local-assets/web-apps/apps/'+editor+'/main/resources/help/'+language+'/';
     const helpWindow=new BrowserWindow({parent:win,width:1000,height:800,title:'ElixirOffice '+t('help'),webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false}});
+    if(process.platform!=="darwin")helpWindow.setMenuBarVisibility(false);
     helpWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
     helpWindow.webContents.on('will-navigate',(event,url)=>{if(!url.startsWith(prefix))event.preventDefault()});
     await helpWindow.loadURL(prefix+'index.htm');
   };
   Menu.setApplicationMenu(Menu.buildFromTemplate(require('./menu.cjs').template(process.platform,name=>name==='about'?showAbout:action(name),()=>help().catch(error=>dialog.showErrorBox(t('help'),t('error'))),t)));
-  require('./shortcuts.cjs').install(win.webContents,process.platform,()=>current?.format,name=>name==='quit'?win.close():action(name)(),()=>!captureOptions);
+  if(process.platform!=="darwin")win.setMenuBarVisibility(false);
+  require('./shortcuts.cjs').install(win.webContents,process.platform,()=>current?.format,name=>name==='quit'?win.close():name==='help'?help().catch(()=>dialog.showErrorBox(t('help'),t('error'))):action(name)(),()=>!captureOptions);
   await win.loadURL(resources.ORIGIN+'/index.html');
   if(captureOptions){
     (async()=>{
@@ -506,14 +571,5 @@ async function start() {
     }).catch(()=>{void safety.log('capture-cleanup-failure');app.exit(1)});
   }
 
-}
-async function printPdf(bytes) {
-  const printWindow=new BrowserWindow({width:900,height:800,parent:win,title:t('print')+' PDF',webPreferences:{session:win.webContents.session,sandbox:true,contextIsolation:true,nodeIntegration:false}});
-  printWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
-  const pdf=bytes.toString('base64');
-  await printWindow.loadURL('data:application/pdf;base64,'+pdf);
-  const result=await new Promise(resolve=>printWindow.webContents.print({silent:false},(success,reason)=>resolve({printed:success,reason:reason||null})));
-  if(!printWindow.isDestroyed())printWindow.close();
-  return result;
 }
 app.on('window-all-closed',()=>{if(!captureOptions)app.quit()});

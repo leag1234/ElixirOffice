@@ -18,6 +18,8 @@ function choose(preferred,supported){
 async function load(assets,preferred){
  const home=path.join(assets,'desktop-home'),supported=JSON.parse(await fs.readFile(path.join(home,'locales.json'),'utf8'));
  const language=choose(preferred,supported),strings=JSON.parse(await fs.readFile(path.join(home,'i18n',language+'.json'),'utf8'));
+ const safety=require('./save-messages.cjs');
+ strings.saveRestoreUncertain||=safety[language]||safety.en;
  return {language,strings,supported};
 }
 module.exports={choose,load};

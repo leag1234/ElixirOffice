@@ -49,33 +49,47 @@ def cmap(data,face=0):
 class Pack:
     def __init__(self,assets):
         self.assets=Path(assets);self.faces=font_map(self.assets);self.variants=font_variants(self.assets)
+        text=(self.assets/'sdkjs/common/AllFonts.js').read_text(encoding='utf-8-sig')
+        def array(name):
+            match=re.search(r'window\["'+name+r'"\]\s*=\s*(\[[\s\S]*?\]);',text)
+            return json.loads(match[1]) if match else []
+        self.files=array('__fonts_files')
+        if not self.files or any(not isinstance(name,str) or not re.fullmatch(r'[A-Za-z0-9_.-]+',name) or name in ['.','..'] for name in self.files):
+            raise ValueError('Expected local encoded font filenames in __fonts_files')
+        infos=array('__fonts_infos');ranges=array('__fonts_ranges')
+        self.ranges=[(ranges[i],ranges[i+1],infos[ranges[i+2]][0]) for i in range(0,len(ranges),3)]
+
     @lru_cache(maxsize=None)
     def glyphs(self,family,style='regular'):
         choices={'regular':['regular','italic','bold','bold-italic'],
-                 'italic':['italic','bold-italic','regular','bold'],
-                 'bold':['bold','bold-italic','regular','italic'],
+                 'italic':['italic','regular','bold-italic','bold'],
+                 'bold':['bold','regular','bold-italic','italic'],
                  'bold-italic':['bold-italic','bold','italic','regular']}
         variants=self.variants.get(family,{})
         selected=next((variants[c] for c in choices[style] if variants.get(c,(-1,0))[0]>=0),None)
         if selected is None:return set()
         index,face=selected
-        data=bytearray((self.assets/'fonts'/str(index).zfill(3)).read_bytes())
+        # Server font-file order can differ from its encoded filename order.
+        data=bytearray((self.assets/'fonts'/self.files[index]).read_bytes())
         for i in range(min(32,len(data))):data[i]^=KEY[i%16]
         return cmap(bytes(data),face)
-    def missing(self,file):
-        from template_font_styles import styled_text
+    def missing(self,file,character_fallback=False):
+        from template_font_styles import styled_text, font_request
         missing=set()
         with zipfile.ZipFile(file) as archive:
             for text,properties in styled_text(archive):
                 for c in text:
                     if c.isspace():continue
-                    code=ord(c);complex_script=properties.get('cs',False) or 0x590<=code<=0x8ff
-                    slot='cs' if complex_script else 'eastAsia' if 0x2e80<=code<=0xd7ff else 'ascii' if code<128 else 'hAnsi'
-                    family=properties.get(slot,'DejaVu Sans')
-                    bold=properties.get('bCs',properties.get('b',False)) if complex_script else properties.get('b',False)
-                    italic=properties.get('iCs',properties.get('i',False)) if complex_script else properties.get('i',False)
-                    style='bold-italic' if bold and italic else 'bold' if bold else 'italic' if italic else 'regular'
-                    if code not in self.glyphs(family,style):missing.add(code)
+                    code=ord(c)
+                    family,bits=font_request(properties,code)
+                    style=['regular','bold','italic','bold-italic'][bits]
+                    if code in self.glyphs(family,style):continue
+                    # Optional rendered-coverage check uses the real generated picker family
+                    # and its actual style slot; it never substitutes an arbitrary covering R face.
+                    if character_fallback and not(0xe000<=code<=0xf8ff or code>=0xf0000):
+                        fallback=next((name for start,end,name in self.ranges if start<=code<=end),None)
+                        if fallback and code in self.glyphs(fallback,style):continue
+                    missing.add(code)
         return sorted(missing)
 if __name__=='__main__':
     import argparse

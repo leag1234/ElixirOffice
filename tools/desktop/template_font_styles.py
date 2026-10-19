@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 """Resolve DOCX run font/style inheritance for public-template coverage checks."""
 import xml.etree.ElementTree as ET
+import bisect,json
+from pathlib import Path
 W='http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 A='http://schemas.openxmlformats.org/drawingml/2006/main'
 NS={'w':W,'a':A}
@@ -36,11 +38,18 @@ class Styles:
                 if theme:
                     role='major' if theme.startswith('major') else 'minor'
                     result[slot]=self.theme.get((role,slot),'Unresolved theme '+theme)
+        if fonts is not None and fonts.get('{'+W+'}hint') is not None:
+            result['hint']={'eastAsia':2,'cs':1}.get(fonts.get('{'+W+'}hint'),0)
+        language=node.find('w:lang',NS)
+        if language is not None and language.get('{'+W+'}eastAsia') is not None:
+            # Only the neutral Chinese LCID uses the classifier's special lookup table.
+            result['langEastAsia']=0x7804 if language.get('{'+W+'}eastAsia').lower()=='zh' else 0
         for key in ['b','i','bCs','iCs','cs','rtl']:
             child=node.find('w:'+key,NS)
             if child is not None:
                 enabled=on(val(child,default='1'))
-                result[key]=not result.get(key,False) if toggle and enabled else enabled
+                field="complexScript" if key=="cs" else key
+                result[field]=not result.get(field,False) if toggle and enabled else enabled
         return result
     def chain(self,identifier,seen=()):
         if not identifier:return []
@@ -118,3 +127,29 @@ def styled_text(archive):
                       'lowerLetter':'abcdefghijklmnopqrstuvwxyz','upperLetter':'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                       'arabicIndic':'٠١٢٣٤٥٦٧٨٩'}
             if fmt in counters:yield counters[fmt],properties
+
+
+_SLOT_DATA=json.loads((Path(__file__).with_name('font-slots.json')).read_text())['modes']
+_SLOT_STARTS={mode:[row[0] for row in ranges] for mode,ranges in _SLOT_DATA.items()}
+
+def font_slot(codepoint,hint=0,language=0,complex_script=False,rtl=False):
+    """Match the pinned SDK GetFontSlot, including its hint and PUA early returns."""
+    if not 0<=codepoint<=0x10ffff:
+        raise ValueError('Invalid Unicode value')
+    if 0xe000<=codepoint<=0xf8ff:
+        return 2 if hint==2 else 1
+    mode='chinese' if hint==2 and language==0x7804 else 'eastAsia' if hint==2 else 'default'
+    index=bisect.bisect_right(_SLOT_STARTS[mode],codepoint)-1
+    slot=_SLOT_DATA[mode][index][2]
+    if hint==2 and codepoint<=0xffff and slot==2:
+        return 2
+    return 4 if complex_script or rtl else slot
+
+def font_request(properties,codepoint):
+    slot=font_slot(codepoint,properties.get('hint',0),properties.get('langEastAsia',0),
+                   properties.get('complexScript',False),properties.get('rtl',False))
+    complex_script=slot==4
+    family=properties.get({1:'ascii',2:'eastAsia',4:'cs',8:'hAnsi'}[slot],'DejaVu Sans')
+    bold=properties.get('bCs',False) if complex_script else properties.get('b',False)
+    italic=properties.get('iCs',False) if complex_script else properties.get('i',False)
+    return family,int(bool(bold)) | (2 if italic else 0)

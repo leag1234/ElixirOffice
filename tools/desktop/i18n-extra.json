@@ -2,7 +2,7 @@
   "en": {
     "privacy": "Documents stay on this computer",
     "fontAsk": "Use fonts installed on this computer?",
-    "fontDetail": "Read fonts only from standard system and user font folders. Nothing is uploaded.",
+    "fontDetail": "Read fonts from system and user font folders and exact local font files registered with Windows. Nothing is uploaded.",
     "fontFailed": "Could not read computer fonts.",
     "fontMissing": "Fonts not available: {0}.",
     "letterhead": "Letterhead",
@@ -95,12 +95,17 @@
     "openMissing": "This file may have been moved or deleted. Choose it again with File → Open.",
     "openUnavailable": "The file could not be read. If it is stored in the cloud, make it available offline and check the connection. Check that security software allows ElixirOffice to read it.",
     "openInvalid": "Choose a supported, regular document under 512 MiB, not a symbolic link. Text and CSV files must use UTF-8.",
-    "openPath": "The file path is too long. Move the document to a shorter folder path and open it again."
+    "openPath": "The file path is too long. Move the document to a shorter folder path and open it again.",
+    "quit": "Quit",
+    "saveRestoreUncertain": "The save failed and restoring the original file could not be confirmed. Keep the backup in the same folder and use Save As for your edits.",
+    "printFailed": "Printing failed. Try again or export PDF.",
+    "printTimedOut": "Printing timed out. Try again or export PDF.",
+    "printHelperError": "The print helper failed. Try again or export PDF."
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
     "fontAsk": "Utiliser les polices installées sur cet ordinateur ?",
-    "fontDetail": "Lire les polices uniquement dans les dossiers de polices système et utilisateur. Aucun fichier n’est envoyé.",
+    "fontDetail": "Lire les polices dans les dossiers système et utilisateur et les fichiers de polices locaux enregistrés dans Windows. Aucun fichier n’est envoyé.",
     "fontFailed": "Impossible de lire les polices de cet ordinateur.",
     "fontMissing": "Polices indisponibles : {0}.",
     "letterhead": "Papier à en-tête",
@@ -193,12 +198,17 @@
     "openMissing": "Ce fichier a peut-être été déplacé ou supprimé. Sélectionnez-le à nouveau avec Fichier → Ouvrir.",
     "openUnavailable": "Impossible de lire le fichier. S’il est stocké dans le cloud, rendez-le disponible hors connexion et vérifiez la connexion. Vérifiez que votre logiciel de sécurité autorise ElixirOffice à le lire.",
     "openInvalid": "Choisissez un document pris en charge de moins de 512 Mio, et non un lien symbolique. Les fichiers texte et CSV doivent utiliser UTF-8.",
-    "openPath": "Le chemin du fichier est trop long. Déplacez le document dans un dossier au chemin plus court, puis ouvrez-le à nouveau."
+    "openPath": "Le chemin du fichier est trop long. Déplacez le document dans un dossier au chemin plus court, puis ouvrez-le à nouveau.",
+    "quit": "Quitter",
+    "saveRestoreUncertain": "L’enregistrement a échoué et la restauration du fichier d’origine n’a pas pu être confirmée. Conservez la copie de sauvegarde dans le même dossier et utilisez Enregistrer sous pour vos modifications.",
+    "printFailed": "L’impression a échoué. Réessayez ou exportez en PDF.",
+    "printTimedOut": "Le délai d’impression est dépassé. Réessayez ou exportez en PDF.",
+    "printHelperError": "Le module d’impression a échoué. Réessayez ou exportez en PDF."
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
     "fontAsk": "Auf diesem Computer installierte Schriftarten verwenden?",
-    "fontDetail": "Schriftarten nur aus den System- und Benutzerschriftordnern lesen. Nichts wird hochgeladen.",
+    "fontDetail": "Schriftarten aus System- und Benutzerordnern sowie einzelne lokal in Windows registrierte Schriftdateien lesen. Nichts wird hochgeladen.",
     "fontFailed": "Die Schriftarten dieses Computers konnten nicht gelesen werden.",
     "fontMissing": "Nicht verfügbare Schriftarten: {0}.",
     "letterhead": "Briefpapier",
@@ -291,12 +301,17 @@
     "openMissing": "Diese Datei wurde möglicherweise verschoben oder gelöscht. Wählen Sie sie erneut über Datei → Öffnen aus.",
     "openUnavailable": "Die Datei konnte nicht gelesen werden. Falls sie in der Cloud gespeichert ist, machen Sie sie offline verfügbar und prüfen Sie die Verbindung. Prüfen Sie, ob Sicherheitssoftware ElixirOffice den Lesezugriff erlaubt.",
     "openInvalid": "Wählen Sie ein unterstütztes reguläres Dokument unter 512 MiB, keinen symbolischen Link. Text- und CSV-Dateien müssen UTF-8 verwenden.",
-    "openPath": "Der Dateipfad ist zu lang. Verschieben Sie das Dokument in einen Ordner mit kürzerem Pfad und öffnen Sie es erneut."
+    "openPath": "Der Dateipfad ist zu lang. Verschieben Sie das Dokument in einen Ordner mit kürzerem Pfad und öffnen Sie es erneut.",
+    "quit": "Beenden",
+    "saveRestoreUncertain": "Das Speichern ist fehlgeschlagen. Die Wiederherstellung der Originaldatei konnte nicht bestätigt werden. Behalten Sie die Sicherung im selben Ordner und verwenden Sie Speichern unter für Ihre Änderungen.",
+    "printFailed": "Drucken fehlgeschlagen. Versuchen Sie es erneut oder exportieren Sie als PDF.",
+    "printTimedOut": "Zeitüberschreitung beim Drucken. Versuchen Sie es erneut oder exportieren Sie als PDF.",
+    "printHelperError": "Das Druckmodul ist fehlgeschlagen. Versuchen Sie es erneut oder exportieren Sie als PDF."
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
     "fontAsk": "¿Usar las fuentes instaladas en este equipo?",
-    "fontDetail": "Leer fuentes solo de las carpetas de fuentes del sistema y del usuario. No se sube nada.",
+    "fontDetail": "Leer fuentes de las carpetas del sistema y del usuario y archivos de fuentes locales registrados en Windows. No se sube nada.",
     "fontFailed": "No se pudieron leer las fuentes del equipo.",
     "fontMissing": "Fuentes no disponibles: {0}.",
     "letterhead": "Membrete",
@@ -389,12 +404,17 @@
     "openMissing": "Es posible que este archivo se haya movido o eliminado. Selecciónelo de nuevo mediante Archivo → Abrir.",
     "openUnavailable": "No se pudo leer el archivo. Si está en la nube, hágalo disponible sin conexión y compruebe la conexión. Compruebe que el software de seguridad permite que ElixirOffice lo lea.",
     "openInvalid": "Elija un documento normal compatible de menos de 512 MiB, no un enlace simbólico. Los archivos de texto y CSV deben usar UTF-8.",
-    "openPath": "La ruta del archivo es demasiado larga. Mueva el documento a una carpeta con una ruta más corta y ábralo de nuevo."
+    "openPath": "La ruta del archivo es demasiado larga. Mueva el documento a una carpeta con una ruta más corta y ábralo de nuevo.",
+    "quit": "Salir",
+    "saveRestoreUncertain": "No se pudo guardar ni confirmar la restauración del archivo original. Conserve la copia de seguridad en la misma carpeta y use Guardar como para sus cambios.",
+    "printFailed": "Error de impresión. Inténtelo de nuevo o exporte a PDF.",
+    "printTimedOut": "Se agotó el tiempo de impresión. Inténtelo de nuevo o exporte a PDF.",
+    "printHelperError": "El módulo de impresión falló. Inténtelo de nuevo o exporte a PDF."
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
     "fontAsk": "Usare i caratteri installati su questo computer?",
-    "fontDetail": "Leggere i caratteri solo dalle cartelle di sistema e dell’utente. Nessun file viene caricato.",
+    "fontDetail": "Leggere i caratteri dalle cartelle di sistema e dell’utente e dai singoli file di caratteri locali registrati in Windows. Nessun file viene caricato.",
     "fontFailed": "Impossibile leggere i caratteri del computer.",
     "fontMissing": "Caratteri non disponibili: {0}.",
     "letterhead": "Carta intestata",
@@ -487,12 +507,17 @@
     "openMissing": "Questo file potrebbe essere stato spostato o eliminato. Selezionalo di nuovo con File → Apri.",
     "openUnavailable": "Impossibile leggere il file. Se è nel cloud, rendilo disponibile offline e verifica la connessione. Verifica che il software di sicurezza consenta a ElixirOffice di leggerlo.",
     "openInvalid": "Scegli un documento normale supportato inferiore a 512 MiB, non un collegamento simbolico. I file di testo e CSV devono usare UTF-8.",
-    "openPath": "Il percorso del file è troppo lungo. Sposta il documento in una cartella con un percorso più breve e aprilo di nuovo."
+    "openPath": "Il percorso del file è troppo lungo. Sposta il documento in una cartella con un percorso più breve e aprilo di nuovo.",
+    "quit": "Esci",
+    "saveRestoreUncertain": "Il salvataggio non è riuscito e non è stato possibile confermare il ripristino del file originale. Conservare la copia di backup nella stessa cartella e usare Salva con nome per le modifiche.",
+    "printFailed": "Stampa non riuscita. Riprova o esporta in PDF.",
+    "printTimedOut": "Tempo di stampa scaduto. Riprova o esporta in PDF.",
+    "printHelperError": "Il modulo di stampa non ha funzionato. Riprova o esporta in PDF."
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
     "fontAsk": "Usar as fontes instaladas neste computador?",
-    "fontDetail": "Ler fontes apenas nas pastas de fontes do sistema e do usuário. Nada é enviado.",
+    "fontDetail": "Ler fontes das pastas do sistema e do usuário e dos arquivos de fontes locais registrados no Windows. Nada é enviado.",
     "fontFailed": "Não foi possível ler as fontes do computador.",
     "fontMissing": "Fontes indisponíveis: {0}.",
     "letterhead": "Papel timbrado",
@@ -585,12 +610,17 @@
     "openMissing": "Este arquivo pode ter sido movido ou excluído. Selecione-o novamente em Arquivo → Abrir.",
     "openUnavailable": "Não foi possível ler o arquivo. Se estiver na nuvem, disponibilize-o offline e verifique a conexão. Verifique se o software de segurança permite que o ElixirOffice o leia.",
     "openInvalid": "Escolha um documento comum compatível com menos de 512 MiB, não um link simbólico. Arquivos de texto e CSV devem usar UTF-8.",
-    "openPath": "O caminho do arquivo é muito longo. Mova o documento para uma pasta com caminho mais curto e abra-o novamente."
+    "openPath": "O caminho do arquivo é muito longo. Mova o documento para uma pasta com caminho mais curto e abra-o novamente.",
+    "quit": "Sair",
+    "saveRestoreUncertain": "Não foi possível salvar nem confirmar a restauração do arquivo original. Mantenha a cópia de segurança na mesma pasta e use Salvar como para suas alterações.",
+    "printFailed": "Falha na impressão. Tente novamente ou exporte para PDF.",
+    "printTimedOut": "O tempo de impressão esgotou. Tente novamente ou exporte para PDF.",
+    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF."
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
     "fontAsk": "Utilizar os tipos de letra instalados neste computador?",
-    "fontDetail": "Ler tipos de letra apenas nas pastas do sistema e do utilizador. Nada é enviado.",
+    "fontDetail": "Ler tipos de letra das pastas do sistema e do utilizador e dos ficheiros de tipos de letra locais registados no Windows. Nada é enviado.",
     "fontFailed": "Não foi possível ler os tipos de letra do computador.",
     "fontMissing": "Tipos de letra indisponíveis: {0}.",
     "letterhead": "Papel timbrado",
@@ -683,12 +713,17 @@
     "openMissing": "Este ficheiro pode ter sido movido ou eliminado. Selecione-o novamente em Ficheiro → Abrir.",
     "openUnavailable": "Não foi possível ler o ficheiro. Se estiver na nuvem, disponibilize-o offline e verifique a ligação. Verifique se o software de segurança permite que o ElixirOffice o leia.",
     "openInvalid": "Escolha um documento normal suportado com menos de 512 MiB, não uma ligação simbólica. Os ficheiros de texto e CSV devem usar UTF-8.",
-    "openPath": "O caminho do ficheiro é demasiado longo. Mova o documento para uma pasta com um caminho mais curto e abra-o novamente."
+    "openPath": "O caminho do ficheiro é demasiado longo. Mova o documento para uma pasta com um caminho mais curto e abra-o novamente.",
+    "quit": "Sair",
+    "saveRestoreUncertain": "Não foi possível guardar nem confirmar o restauro do ficheiro original. Mantenha a cópia de segurança na mesma pasta e utilize Guardar como para as suas alterações.",
+    "printFailed": "A impressão falhou. Tente novamente ou exporte para PDF.",
+    "printTimedOut": "O tempo de impressão esgotou. Tente novamente ou exporte para PDF.",
+    "printHelperError": "O módulo de impressão falhou. Tente novamente ou exporte para PDF."
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
     "fontAsk": "Op deze computer geïnstalleerde lettertypen gebruiken?",
-    "fontDetail": "Lees lettertypen alleen uit de systeem- en gebruikersmappen voor lettertypen. Er wordt niets geüpload.",
+    "fontDetail": "Lees lettertypen uit systeem- en gebruikersmappen en afzonderlijke lokale lettertypebestanden die in Windows zijn geregistreerd. Er wordt niets geüpload.",
     "fontFailed": "De lettertypen van deze computer konden niet worden gelezen.",
     "fontMissing": "Niet beschikbare lettertypen: {0}.",
     "letterhead": "Briefpapier",
@@ -781,12 +816,17 @@
     "openMissing": "Dit bestand is mogelijk verplaatst of verwijderd. Selecteer het opnieuw via Bestand → Openen.",
     "openUnavailable": "Het bestand kon niet worden gelezen. Maak het offline beschikbaar als het in de cloud staat en controleer de verbinding. Controleer of beveiligingssoftware ElixirOffice toestaat het te lezen.",
     "openInvalid": "Kies een ondersteund normaal document kleiner dan 512 MiB, geen symbolische koppeling. Tekst- en CSV-bestanden moeten UTF-8 gebruiken.",
-    "openPath": "Het bestandspad is te lang. Verplaats het document naar een map met een korter pad en open het opnieuw."
+    "openPath": "Het bestandspad is te lang. Verplaats het document naar een map met een korter pad en open het opnieuw.",
+    "quit": "Afsluiten",
+    "saveRestoreUncertain": "Opslaan is mislukt en het herstel van het oorspronkelijke bestand kon niet worden bevestigd. Bewaar de reservekopie in dezelfde map en gebruik Opslaan als voor uw wijzigingen.",
+    "printFailed": "Afdrukken mislukt. Probeer het opnieuw of exporteer naar PDF.",
+    "printTimedOut": "Time-out bij afdrukken. Probeer het opnieuw of exporteer naar PDF.",
+    "printHelperError": "De afdrukmodule is mislukt. Probeer het opnieuw of exporteer naar PDF."
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
     "fontAsk": "Użyć czcionek zainstalowanych na tym komputerze?",
-    "fontDetail": "Odczytuj czcionki tylko z systemowych i użytkowych folderów czcionek. Nic nie jest wysyłane.",
+    "fontDetail": "Odczytuj czcionki z folderów systemowych i użytkownika oraz lokalnych plików czcionek zarejestrowanych w Windows. Nic nie jest wysyłane.",
     "fontFailed": "Nie można odczytać czcionek tego komputera.",
     "fontMissing": "Niedostępne czcionki: {0}.",
     "letterhead": "Papier firmowy",
@@ -879,12 +919,17 @@
     "openMissing": "Ten plik mógł zostać przeniesiony lub usunięty. Wybierz go ponownie przez Plik → Otwórz.",
     "openUnavailable": "Nie można odczytać pliku. Jeśli jest w chmurze, udostępnij go offline i sprawdź połączenie. Sprawdź, czy oprogramowanie zabezpieczające pozwala ElixirOffice go odczytać.",
     "openInvalid": "Wybierz obsługiwany zwykły dokument mniejszy niż 512 MiB, a nie dowiązanie symboliczne. Pliki tekstowe i CSV muszą używać UTF-8.",
-    "openPath": "Ścieżka pliku jest za długa. Przenieś dokument do folderu o krótszej ścieżce i otwórz go ponownie."
+    "openPath": "Ścieżka pliku jest za długa. Przenieś dokument do folderu o krótszej ścieżce i otwórz go ponownie.",
+    "quit": "Zakończ",
+    "saveRestoreUncertain": "Zapis nie powiódł się i nie udało się potwierdzić przywrócenia oryginalnego pliku. Zachowaj kopię zapasową w tym samym folderze i użyj Zapisz jako, aby zachować zmiany.",
+    "printFailed": "Drukowanie nie powiodło się. Spróbuj ponownie lub wyeksportuj do PDF.",
+    "printTimedOut": "Przekroczono czas drukowania. Spróbuj ponownie lub wyeksportuj do PDF.",
+    "printHelperError": "Moduł drukowania zawiódł. Spróbuj ponownie lub wyeksportuj do PDF."
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
     "fontAsk": "Использовать шрифты, установленные на этом компьютере?",
-    "fontDetail": "Читать шрифты только из системных и пользовательских папок шрифтов. Ничего не отправляется.",
+    "fontDetail": "Читать шрифты из системных и пользовательских папок и отдельных локальных файлов шрифтов, зарегистрированных в Windows. Ничего не отправляется.",
     "fontFailed": "Не удалось прочитать шрифты компьютера.",
     "fontMissing": "Недоступные шрифты: {0}.",
     "letterhead": "Фирменный бланк",
@@ -977,12 +1022,17 @@
     "openMissing": "Возможно, этот файл перемещён или удалён. Выберите его снова через Файл → Открыть.",
     "openUnavailable": "Не удалось прочитать файл. Если он хранится в облаке, сделайте его доступным автономно и проверьте подключение. Убедитесь, что защитное ПО разрешает ElixirOffice читать его.",
     "openInvalid": "Выберите поддерживаемый обычный документ размером менее 512 МиБ, а не символическую ссылку. Текстовые файлы и CSV должны использовать UTF-8.",
-    "openPath": "Путь к файлу слишком длинный. Переместите документ в папку с более коротким путём и откройте его снова."
+    "openPath": "Путь к файлу слишком длинный. Переместите документ в папку с более коротким путём и откройте его снова.",
+    "quit": "Выйти",
+    "saveRestoreUncertain": "Не удалось сохранить файл и подтвердить восстановление оригинала. Оставьте резервную копию в той же папке и используйте «Сохранить как» для своих изменений.",
+    "printFailed": "Не удалось выполнить печать. Повторите попытку или экспортируйте в PDF.",
+    "printTimedOut": "Время ожидания печати истекло. Повторите попытку или экспортируйте в PDF.",
+    "printHelperError": "Сбой модуля печати. Повторите попытку или экспортируйте в PDF."
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
     "fontAsk": "このコンピューターのフォントを使用しますか？",
-    "fontDetail": "システムとユーザーの標準フォントフォルダーからのみ読み取ります。アップロードは行いません。",
+    "fontDetail": "システムとユーザーのフォントフォルダー、およびWindowsに登録された個別のローカルフォントファイルを読み取ります。アップロードは行いません。",
     "fontFailed": "コンピューターのフォントを読み取れませんでした。",
     "fontMissing": "利用できないフォント：{0}。",
     "letterhead": "レターヘッド",
@@ -1075,12 +1125,17 @@
     "openMissing": "このファイルは移動または削除された可能性があります。［ファイル → 開く］から選び直してください。",
     "openUnavailable": "ファイルを読み取れませんでした。クラウドに保存されている場合はオフラインで利用可能にして、接続を確認してください。セキュリティソフトが ElixirOffice の読み取りを許可しているか確認してください。",
     "openInvalid": "512 MiB 未満の対応する通常の文書を選んでください。シンボリックリンクは使用できません。テキストと CSV ファイルは UTF-8 が必要です。",
-    "openPath": "ファイルのパスが長すぎます。文書をパスの短いフォルダに移動して、もう一度開いてください。"
+    "openPath": "ファイルのパスが長すぎます。文書をパスの短いフォルダに移動して、もう一度開いてください。",
+    "quit": "終了",
+    "saveRestoreUncertain": "保存に失敗し、元のファイルの復元を確認できませんでした。バックアップを同じフォルダーに残し、編集内容は「名前を付けて保存」で保存してください。",
+    "printFailed": "印刷に失敗しました。再試行するかPDFにエクスポートしてください。",
+    "printTimedOut": "印刷がタイムアウトしました。再試行するかPDFにエクスポートしてください。",
+    "printHelperError": "印刷モジュールに問題が発生しました。再試行するかPDFにエクスポートしてください。"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
     "fontAsk": "使用此计算机上安装的字体吗？",
-    "fontDetail": "仅从标准系统和用户字体文件夹读取字体。不上传任何内容。",
+    "fontDetail": "从系统和用户字体文件夹以及在 Windows 中注册的本地字体文件读取字体。不上传任何内容。",
     "fontFailed": "无法读取此计算机的字体。",
     "fontMissing": "不可用的字体：{0}。",
     "letterhead": "信头",
@@ -1173,12 +1228,17 @@
     "openMissing": "此文件可能已移动或删除。请通过“文件 → 打开”重新选择。",
     "openUnavailable": "无法读取文件。如果文件存储在云端，请使其可离线使用并检查连接。请确认安全软件允许 ElixirOffice 读取它。",
     "openInvalid": "请选择小于 512 MiB 的受支持常规文档，而非符号链接。文本和 CSV 文件必须使用 UTF-8。",
-    "openPath": "文件路径过长。请将文档移到路径较短的文件夹，然后重新打开。"
+    "openPath": "文件路径过长。请将文档移到路径较短的文件夹，然后重新打开。",
+    "quit": "退出",
+    "saveRestoreUncertain": "保存失败，无法确认原始文件是否已恢复。请将备份保留在同一文件夹中，并使用“另存为”保存您的修改。",
+    "printFailed": "打印失败。请重试或导出为PDF。",
+    "printTimedOut": "打印超时。请重试或导出为PDF。",
+    "printHelperError": "打印模块出错。请重试或导出为PDF。"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
     "fontAsk": "使用此電腦上安裝的字型嗎？",
-    "fontDetail": "僅從標準系統與使用者字型資料夾讀取字型。不會上傳任何內容。",
+    "fontDetail": "從系統與使用者字型資料夾及在 Windows 中註冊的本機字型檔案讀取字型。不會上傳任何內容。",
     "fontFailed": "無法讀取此電腦的字型。",
     "fontMissing": "無法使用的字型：{0}。",
     "letterhead": "信頭",
@@ -1274,12 +1334,17 @@
     "openMissing": "此檔案可能已移動或刪除。請透過「檔案 → 開啟」重新選取。",
     "openUnavailable": "無法讀取檔案。若儲存在雲端，請設為可離線使用並檢查連線。請確認安全軟體允許 ElixirOffice 讀取。",
     "openInvalid": "請選擇小於 512 MiB 的支援一般文件，而非符號連結。文字和 CSV 檔案必須使用 UTF-8。",
-    "openPath": "檔案路徑太長。請將文件移到路徑較短的檔案夾，再重新開啟。"
+    "openPath": "檔案路徑太長。請將文件移到路徑較短的檔案夾，再重新開啟。",
+    "quit": "結束",
+    "saveRestoreUncertain": "儲存失敗，無法確認原始檔案是否已還原。請將備份保留在同一資料夾中，並使用「另存新檔」儲存您的修改。",
+    "printFailed": "列印失敗。請重試或匯出為PDF。",
+    "printTimedOut": "列印逾時。請重試或匯出為PDF。",
+    "printHelperError": "列印模組發生錯誤。請重試或匯出為PDF。"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
     "fontAsk": "هل تريد استخدام الخطوط المثبتة على هذا الكمبيوتر؟",
-    "fontDetail": "تُقرأ الخطوط من مجلدات خطوط النظام والمستخدم القياسية فقط. لا يُرفع أي محتوى.",
+    "fontDetail": "تُقرأ الخطوط من مجلدات النظام والمستخدم وملفات الخطوط المحلية المسجلة في Windows فقط. لا يُرفع أي محتوى.",
     "fontFailed": "تعذرت قراءة خطوط هذا الكمبيوتر.",
     "fontMissing": "خطوط غير متاحة: {0}.",
     "letterhead": "ورق رسمي",
@@ -1375,12 +1440,17 @@
     "openMissing": "ربما نُقل هذا الملف أو حُذف. حدده مجددًا من ملف ← فتح.",
     "openUnavailable": "تعذرت قراءة الملف. إذا كان مخزنًا في السحابة، فاجعله متاحًا دون اتصال وتحقق من الاتصال. تأكد من أن برنامج الأمان يسمح لـ ElixirOffice بقراءته.",
     "openInvalid": "اختر مستندًا عاديًا مدعومًا أصغر من 512 MiB، وليس رابطًا رمزيًا. يجب أن تستخدم ملفات النص وCSV ترميز UTF-8.",
-    "openPath": "مسار الملف طويل جدًا. انقل المستند إلى مجلد ذي مسار أقصر وافتحه مجددًا."
+    "openPath": "مسار الملف طويل جدًا. انقل المستند إلى مجلد ذي مسار أقصر وافتحه مجددًا.",
+    "quit": "إنهاء",
+    "saveRestoreUncertain": "فشل الحفظ وتعذّر تأكيد استعادة الملف الأصلي. احتفظ بالنسخة الاحتياطية في المجلد نفسه واستخدم «حفظ باسم» لحفظ تعديلاتك.",
+    "printFailed": "فشلت الطباعة. أعد المحاولة أو صدّر إلى PDF.",
+    "printTimedOut": "انتهت مهلة الطباعة. أعد المحاولة أو صدّر إلى PDF.",
+    "printHelperError": "تعطلت وحدة الطباعة. أعد المحاولة أو صدّر إلى PDF."
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
     "fontAsk": "Bu kompüterdə quraşdırılmış şriftlərdən istifadə edilsin?",
-    "fontDetail": "Şriftlər yalnız standart sistem və istifadəçi şrift qovluqlarından oxunur. Heç nə yüklənmir.",
+    "fontDetail": "Şriftlər sistem və istifadəçi qovluqlarından və Windows-da qeydiyyata alınmış yerli şrift fayllarından oxunur. Heç nə yüklənmir.",
     "fontFailed": "Kompüterin şriftlərini oxumaq mümkün olmadı.",
     "fontMissing": "Əlçatan olmayan şriftlər: {0}.",
     "letterhead": "Firma blankı",
@@ -1476,12 +1546,17 @@
     "openMissing": "Bu fayl köçürülmüş və ya silinmiş ola bilər. Fayl → Aç vasitəsilə yenidən seçin.",
     "openUnavailable": "Faylı oxumaq mümkün olmadı. Buludda saxlanırsa, onu oflayn əlçatan edin və bağlantını yoxlayın. Təhlükəsizlik proqramının ElixirOffice-a oxumağa icazə verdiyini yoxlayın.",
     "openInvalid": "512 MiB-dan kiçik dəstəklənən adi sənəd seçin, simvolik keçid yox. Mətn və CSV faylları UTF-8 istifadə etməlidir.",
-    "openPath": "Fayl yolu çox uzundur. Sənədi daha qısa yollu qovluğa köçürüb yenidən açın."
+    "openPath": "Fayl yolu çox uzundur. Sənədi daha qısa yollu qovluğa köçürüb yenidən açın.",
+    "quit": "Çıxış",
+    "saveRestoreUncertain": "Saxlama alınmadı və ilkin faylın bərpası təsdiqlənmədi. Ehtiyat nüsxəni eyni qovluqda saxlayın və dəyişiklikləriniz üçün Fərqli saxla əmrindən istifadə edin.",
+    "printFailed": "Çap alınmadı. Yenidən cəhd edin və ya PDF olaraq ixrac edin.",
+    "printTimedOut": "Çap üçün gözləmə vaxtı bitdi. Yenidən cəhd edin və ya PDF olaraq ixrac edin.",
+    "printHelperError": "Çap modulu işləmədi. Yenidən cəhd edin və ya PDF olaraq ixrac edin."
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
     "fontAsk": "Выкарыстоўваць шрыфты, усталяваныя на гэтым камп’ютары?",
-    "fontDetail": "Чытаць шрыфты толькі са стандартных сістэмных і карыстальніцкіх папак шрыфтоў. Нічога не адпраўляецца.",
+    "fontDetail": "Чытаць шрыфты з сістэмных і карыстальніцкіх папак і асобных лакальных файлаў шрыфтоў, зарэгістраваных у Windows. Нічога не адпраўляецца.",
     "fontFailed": "Не ўдалося прачытаць шрыфты камп’ютара.",
     "fontMissing": "Недаступныя шрыфты: {0}.",
     "letterhead": "Фірмовы бланк",
@@ -1577,12 +1652,17 @@
     "openMissing": "Магчыма, гэты файл перамешчаны або выдалены. Выберыце яго зноў праз Файл → Адкрыць.",
     "openUnavailable": "Не ўдалося прачытаць файл. Калі ён у воблаку, зрабіце яго даступным пазасеткава і праверце злучэнне. Праверце, ці дазваляе ахоўная праграма ElixirOffice чытаць яго.",
     "openInvalid": "Выберыце звычайны дакумент падтрыманага фармату памерам менш за 512 МіБ, а не сімвалічную спасылку. Тэкставыя файлы і CSV павінны выкарыстоўваць UTF-8.",
-    "openPath": "Шлях да файла занадта доўгі. Перамясціце дакумент у папку з карацейшым шляхам і адкрыйце зноў."
+    "openPath": "Шлях да файла занадта доўгі. Перамясціце дакумент у папку з карацейшым шляхам і адкрыйце зноў.",
+    "quit": "Выйсці",
+    "saveRestoreUncertain": "Не ўдалося захаваць файл і пацвердзіць аднаўленне арыгінала. Пакіньце рэзервовую копію ў той жа папцы і скарыстайцеся камандай «Захаваць як» для сваіх змен.",
+    "printFailed": "Не ўдалося надрукаваць. Паўтарыце спробу або экспартуйце ў PDF.",
+    "printTimedOut": "Час чакання друку скончыўся. Паўтарыце спробу або экспартуйце ў PDF.",
+    "printHelperError": "Збой модуля друку. Паўтарыце спробу або экспартуйце ў PDF."
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
     "fontAsk": "Да се използват ли шрифтовете на този компютър?",
-    "fontDetail": "Шрифтовете се четат само от стандартните системни и потребителски папки. Нищо не се качва.",
+    "fontDetail": "Шрифтовете се четат от системните и потребителските папки и от отделни локални файлове, регистрирани в Windows. Нищо не се качва.",
     "fontFailed": "Шрифтовете на компютъра не могат да бъдат прочетени.",
     "fontMissing": "Недостъпни шрифтове: {0}.",
     "letterhead": "Бланка",
@@ -1681,12 +1761,17 @@
     "openMissing": "Този файл може да е преместен или изтрит. Изберете го отново чрез Файл → Отваряне.",
     "openUnavailable": "Файлът не може да бъде прочетен. Ако е в облака, направете го достъпен офлайн и проверете връзката. Проверете дали защитният софтуер позволява на ElixirOffice да го чете.",
     "openInvalid": "Изберете поддържан обикновен документ под 512 MiB, а не символна връзка. Текстовите и CSV файловете трябва да използват UTF-8.",
-    "openPath": "Пътят до файла е твърде дълъг. Преместете документа в папка с по-кратък път и го отворете отново."
+    "openPath": "Пътят до файла е твърде дълъг. Преместете документа в папка с по-кратък път и го отворете отново.",
+    "quit": "Изход",
+    "saveRestoreUncertain": "Записването е неуспешно и възстановяването на оригиналния файл не можа да бъде потвърдено. Запазете резервното копие в същата папка и използвайте „Запиши като“ за промените си.",
+    "printFailed": "Печатът е неуспешен. Опитайте отново или експортирайте в PDF.",
+    "printTimedOut": "Времето за печат изтече. Опитайте отново или експортирайте в PDF.",
+    "printHelperError": "Модулът за печат се повреди. Опитайте отново или експортирайте в PDF."
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
     "fontAsk": "Voleu utilitzar els tipus de lletra d’aquest ordinador?",
-    "fontDetail": "Llegiu els tipus de lletra només de les carpetes estàndard del sistema i de l’usuari. No es puja res.",
+    "fontDetail": "Llegiu els tipus de lletra de les carpetes del sistema i de l’usuari i dels fitxers locals registrats al Windows. No es puja res.",
     "fontFailed": "No s’han pogut llegir els tipus de lletra de l’ordinador.",
     "fontMissing": "Tipus de lletra no disponibles: {0}.",
     "letterhead": "Paper amb capçalera",
@@ -1782,12 +1867,17 @@
     "openMissing": "Pot ser que aquest fitxer s’hagi mogut o suprimit. Torneu-lo a seleccionar amb Fitxer → Obre.",
     "openUnavailable": "No s’ha pogut llegir el fitxer. Si és al núvol, feu-lo disponible fora de línia i comproveu la connexió. Comproveu que el programari de seguretat permeti que ElixirOffice el llegeixi.",
     "openInvalid": "Trieu un document normal admès de menys de 512 MiB, no un enllaç simbòlic. Els fitxers de text i CSV han d’utilitzar UTF-8.",
-    "openPath": "El camí del fitxer és massa llarg. Moveu el document a una carpeta amb un camí més curt i torneu-lo a obrir."
+    "openPath": "El camí del fitxer és massa llarg. Moveu el document a una carpeta amb un camí més curt i torneu-lo a obrir.",
+    "quit": "Surt",
+    "saveRestoreUncertain": "No s’ha pogut desar ni confirmar la restauració del fitxer original. Conserveu la còpia de seguretat a la mateixa carpeta i utilitzeu Anomena i desa per als canvis.",
+    "printFailed": "La impressió ha fallat. Torneu-ho a provar o exporteu a PDF.",
+    "printTimedOut": "S’ha esgotat el temps d’impressió. Torneu-ho a provar o exporteu a PDF.",
+    "printHelperError": "El mòdul d’impressió ha fallat. Torneu-ho a provar o exporteu a PDF."
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
     "fontAsk": "Použít písma nainstalovaná v tomto počítači?",
-    "fontDetail": "Písma se čtou pouze ze standardních systémových a uživatelských složek písem. Nic se neodesílá.",
+    "fontDetail": "Písma se čtou ze systémových a uživatelských složek a jednotlivých místních souborů písem registrovaných ve Windows. Nic se neodesílá.",
     "fontFailed": "Písma tohoto počítače se nepodařilo přečíst.",
     "fontMissing": "Nedostupná písma: {0}.",
     "letterhead": "Hlavičkový papír",
@@ -1883,12 +1973,17 @@
     "openMissing": "Tento soubor mohl být přesunut nebo odstraněn. Vyberte jej znovu přes Soubor → Otevřít.",
     "openUnavailable": "Soubor nelze přečíst. Pokud je v cloudu, zpřístupněte jej offline a zkontrolujte připojení. Ověřte, že bezpečnostní software umožňuje ElixirOffice soubor číst.",
     "openInvalid": "Vyberte podporovaný běžný dokument menší než 512 MiB, nikoli symbolický odkaz. Textové a CSV soubory musí používat UTF-8.",
-    "openPath": "Cesta k souboru je příliš dlouhá. Přesuňte dokument do složky s kratší cestou a otevřete jej znovu."
+    "openPath": "Cesta k souboru je příliš dlouhá. Přesuňte dokument do složky s kratší cestou a otevřete jej znovu.",
+    "quit": "Ukončit",
+    "saveRestoreUncertain": "Uložení se nezdařilo a obnovení původního souboru se nepodařilo potvrdit. Ponechte zálohu ve stejné složce a změny uložte pomocí Uložit jako.",
+    "printFailed": "Tisk se nezdařil. Zkuste to znovu nebo exportujte do PDF.",
+    "printTimedOut": "Vypršel časový limit tisku. Zkuste to znovu nebo exportujte do PDF.",
+    "printHelperError": "Modul tisku selhal. Zkuste to znovu nebo exportujte do PDF."
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
     "fontAsk": "Brug skrifttyper installeret på denne computer?",
-    "fontDetail": "Læs kun skrifttyper fra standardmapperne for systemets og brugerens skrifttyper. Intet uploades.",
+    "fontDetail": "Læs skrifttyper fra systemets og brugerens mapper og enkelte lokale skrifttypefiler registreret i Windows. Intet uploades.",
     "fontFailed": "Computerens skrifttyper kunne ikke læses.",
     "fontMissing": "Utilgængelige skrifttyper: {0}.",
     "letterhead": "Brevpapir",
@@ -1984,12 +2079,17 @@
     "openMissing": "Filen kan være blevet flyttet eller slettet. Vælg den igen via Filer → Åbn.",
     "openUnavailable": "Filen kunne ikke læses. Hvis den er i skyen, skal du gøre den tilgængelig offline og kontrollere forbindelsen. Kontroller, at sikkerhedssoftware tillader ElixirOffice at læse den.",
     "openInvalid": "Vælg et understøttet almindeligt dokument under 512 MiB, ikke et symbolsk link. Tekst- og CSV-filer skal bruge UTF-8.",
-    "openPath": "Filstien er for lang. Flyt dokumentet til en mappe med en kortere sti, og åbn det igen."
+    "openPath": "Filstien er for lang. Flyt dokumentet til en mappe med en kortere sti, og åbn det igen.",
+    "quit": "Afslut",
+    "saveRestoreUncertain": "Det lykkedes ikke at gemme, og gendannelse af den oprindelige fil kunne ikke bekræftes. Behold sikkerhedskopien i samme mappe, og brug Gem som til dine ændringer.",
+    "printFailed": "Udskrivning mislykkedes. Prøv igen, eller eksportér til PDF.",
+    "printTimedOut": "Udskrivning fik timeout. Prøv igen, eller eksportér til PDF.",
+    "printHelperError": "Udskrivningsmodulet fejlede. Prøv igen, eller eksportér til PDF."
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
     "fontAsk": "Να χρησιμοποιηθούν οι γραμματοσειρές αυτού του υπολογιστή;",
-    "fontDetail": "Οι γραμματοσειρές διαβάζονται μόνο από τους τυπικούς φακέλους συστήματος και χρήστη. Δεν μεταφορτώνεται τίποτα.",
+    "fontDetail": "Οι γραμματοσειρές διαβάζονται από φακέλους συστήματος και χρήστη και από συγκεκριμένα τοπικά αρχεία γραμματοσειρών καταχωρισμένα στα Windows. Δεν μεταφορτώνεται τίποτα.",
     "fontFailed": "Δεν ήταν δυνατή η ανάγνωση των γραμματοσειρών.",
     "fontMissing": "Μη διαθέσιμες γραμματοσειρές: {0}.",
     "letterhead": "Επιστολόχαρτο",
@@ -2085,12 +2185,17 @@
     "openMissing": "Το αρχείο μπορεί να μετακινήθηκε ή να διαγράφηκε. Επιλέξτε το ξανά από Αρχείο → Άνοιγμα.",
     "openUnavailable": "Δεν ήταν δυνατή η ανάγνωση του αρχείου. Αν είναι στο cloud, καταστήστε το διαθέσιμο εκτός σύνδεσης και ελέγξτε τη σύνδεση. Ελέγξτε ότι το λογισμικό ασφαλείας επιτρέπει στο ElixirOffice να το διαβάσει.",
     "openInvalid": "Επιλέξτε υποστηριζόμενο κανονικό έγγραφο κάτω από 512 MiB, όχι συμβολικό σύνδεσμο. Τα αρχεία κειμένου και CSV πρέπει να χρησιμοποιούν UTF-8.",
-    "openPath": "Η διαδρομή του αρχείου είναι πολύ μεγάλη. Μετακινήστε το έγγραφο σε φάκελο με συντομότερη διαδρομή και ανοίξτε το ξανά."
+    "openPath": "Η διαδρομή του αρχείου είναι πολύ μεγάλη. Μετακινήστε το έγγραφο σε φάκελο με συντομότερη διαδρομή και ανοίξτε το ξανά.",
+    "quit": "Έξοδος",
+    "saveRestoreUncertain": "Η αποθήκευση απέτυχε και δεν ήταν δυνατή η επιβεβαίωση της επαναφοράς του αρχικού αρχείου. Κρατήστε το αντίγραφο ασφαλείας στον ίδιο φάκελο και χρησιμοποιήστε Αποθήκευση ως για τις αλλαγές σας.",
+    "printFailed": "Η εκτύπωση απέτυχε. Δοκιμάστε ξανά ή εξαγάγετε σε PDF.",
+    "printTimedOut": "Έληξε το χρονικό όριο εκτύπωσης. Δοκιμάστε ξανά ή εξαγάγετε σε PDF.",
+    "printHelperError": "Η μονάδα εκτύπωσης απέτυχε. Δοκιμάστε ξανά ή εξαγάγετε σε PDF."
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
     "fontAsk": "Ordenagailu honetan instalatutako letra-tipoak erabili?",
-    "fontDetail": "Letra-tipoak sistemaren eta erabiltzailearen karpeta estandarretatik soilik irakurtzen dira. Ez da ezer kargatzen.",
+    "fontDetail": "Letra-tipoak sistemaren eta erabiltzailearen karpetetatik eta Windows-en erregistratutako tokiko letra-tipo fitxategietatik irakurtzen dira. Ez da ezer kargatzen.",
     "fontFailed": "Ezin izan dira ordenagailuko letra-tipoak irakurri.",
     "fontMissing": "Erabilgarri ez dauden letra-tipoak: {0}.",
     "letterhead": "Gutun-burua",
@@ -2186,12 +2291,17 @@
     "openMissing": "Baliteke fitxategia mugitu edo ezabatu izana. Hautatu berriro Fitxategia → Ireki aukerarekin.",
     "openUnavailable": "Ezin izan da fitxategia irakurri. Hodeian badago, jarri lineaz kanpo erabilgarri eta egiaztatu konexioa. Egiaztatu segurtasun-softwareak ElixirOffice-ri irakurtzen uzten diola.",
     "openInvalid": "Hautatu onartutako dokumentu arrunt bat, 512 MiB baino txikiagoa, ez esteka sinboliko bat. Testu- eta CSV-fitxategiek UTF-8 erabili behar dute.",
-    "openPath": "Fitxategiaren bidea luzeegia da. Mugitu dokumentua bide laburragoko karpeta batera eta ireki berriro."
+    "openPath": "Fitxategiaren bidea luzeegia da. Mugitu dokumentua bide laburragoko karpeta batera eta ireki berriro.",
+    "quit": "Irten",
+    "saveRestoreUncertain": "Ezin izan da gorde, ezta jatorrizko fitxategia leheneratu dela egiaztatu ere. Mantendu babeskopia karpeta berean eta erabili Gorde honela zure aldaketetarako.",
+    "printFailed": "Inprimatzeak huts egin du. Saiatu berriro edo esportatu PDFra.",
+    "printTimedOut": "Inprimatzeko denbora agortu da. Saiatu berriro edo esportatu PDFra.",
+    "printHelperError": "Inprimatze-moduluak huts egin du. Saiatu berriro edo esportatu PDFra."
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
     "fontAsk": "Käytetäänkö tämän tietokoneen fontteja?",
-    "fontDetail": "Fontit luetaan vain järjestelmän ja käyttäjän tavallisista fonttikansioista. Mitään ei lähetetä.",
+    "fontDetail": "Fontit luetaan järjestelmän ja käyttäjän fonttikansioista sekä Windowsiin rekisteröidyistä yksittäisistä paikallisista fonttitiedostoista. Mitään ei lähetetä.",
     "fontFailed": "Tietokoneen fontteja ei voitu lukea.",
     "fontMissing": "Fontit eivät ole käytettävissä: {0}.",
     "letterhead": "Kirjelomake",
@@ -2289,12 +2399,17 @@
     "openMissing": "Tämä tiedosto on ehkä siirretty tai poistettu. Valitse se uudelleen kohdasta Tiedosto → Avaa.",
     "openUnavailable": "Tiedostoa ei voitu lukea. Jos se on pilvessä, määritä se käytettäväksi offline-tilassa ja tarkista yhteys. Tarkista, että suojausohjelmisto sallii ElixirOfficen lukea sen.",
     "openInvalid": "Valitse tuettu tavallinen asiakirja, joka on alle 512 MiB, ei symbolista linkkiä. Teksti- ja CSV-tiedostojen on käytettävä UTF-8-koodausta.",
-    "openPath": "Tiedostopolku on liian pitkä. Siirrä asiakirja kansioon, jonka polku on lyhyempi, ja avaa se uudelleen."
+    "openPath": "Tiedostopolku on liian pitkä. Siirrä asiakirja kansioon, jonka polku on lyhyempi, ja avaa se uudelleen.",
+    "quit": "Lopeta",
+    "saveRestoreUncertain": "Tallennus epäonnistui, eikä alkuperäisen tiedoston palautusta voitu vahvistaa. Säilytä varmuuskopio samassa kansiossa ja tallenna muutoksesi valinnalla Tallenna nimellä.",
+    "printFailed": "Tulostus epäonnistui. Yritä uudelleen tai vie PDF-muotoon.",
+    "printTimedOut": "Tulostuksen aikakatkaisu. Yritä uudelleen tai vie PDF-muotoon.",
+    "printHelperError": "Tulostusmoduuli epäonnistui. Yritä uudelleen tai vie PDF-muotoon."
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
     "fontAsk": "Usar os tipos de letra instalados neste ordenador?",
-    "fontDetail": "Ler os tipos de letra só dos cartafoles estándar do sistema e do usuario. Non se envía nada.",
+    "fontDetail": "Ler os tipos de letra dos cartafoles do sistema e do usuario e dos ficheiros locais rexistrados en Windows. Non se envía nada.",
     "fontFailed": "Non se puideron ler os tipos de letra do ordenador.",
     "fontMissing": "Tipos de letra non dispoñibles: {0}.",
     "letterhead": "Papel con cabeceira",
@@ -2390,12 +2505,17 @@
     "openMissing": "Este ficheiro puido moverse ou eliminarse. Seleccióneo de novo con Ficheiro → Abrir.",
     "openUnavailable": "Non se puido ler o ficheiro. Se está na nube, fágao dispoñible sen conexión e comprobe a conexión. Comprobe que o software de seguridade permite a ElixirOffice lelo.",
     "openInvalid": "Escolla un documento normal compatible de menos de 512 MiB, non unha ligazón simbólica. Os ficheiros de texto e CSV deben usar UTF-8.",
-    "openPath": "A ruta do ficheiro é demasiado longa. Mova o documento a un cartafol cunha ruta máis curta e ábrao de novo."
+    "openPath": "A ruta do ficheiro é demasiado longa. Mova o documento a un cartafol cunha ruta máis curta e ábrao de novo.",
+    "quit": "Saír",
+    "saveRestoreUncertain": "Non se puido gardar nin confirmar a restauración do ficheiro orixinal. Conserve a copia de seguranza no mesmo cartafol e use Gardar como para os cambios.",
+    "printFailed": "Fallou a impresión. Ténteo de novo ou exporte a PDF.",
+    "printTimedOut": "Esgotouse o tempo de impresión. Ténteo de novo ou exporte a PDF.",
+    "printHelperError": "Fallou o módulo de impresión. Ténteo de novo ou exporte a PDF."
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
     "fontAsk": "להשתמש בגופנים המותקנים במחשב זה?",
-    "fontDetail": "הגופנים נקראים רק מתיקיות הגופנים הרגילות של המערכת והמשתמש. דבר אינו מועלה.",
+    "fontDetail": "הגופנים נקראים מתיקיות המערכת והמשתמש ומקובצי גופנים מקומיים מסוימים הרשומים ב-Windows. דבר אינו מועלה.",
     "fontFailed": "לא ניתן לקרוא את גופני המחשב.",
     "fontMissing": "גופנים לא זמינים: {0}.",
     "letterhead": "נייר מכתבים",
@@ -2491,12 +2611,17 @@
     "openMissing": "ייתכן שהקובץ הועבר או נמחק. בחר אותו שוב דרך קובץ ← פתיחה.",
     "openUnavailable": "לא ניתן לקרוא את הקובץ. אם הוא מאוחסן בענן, הפוך אותו לזמין במצב לא מקוון ובדוק את החיבור. ודא שתוכנת האבטחה מאפשרת ל-ElixirOffice לקרוא אותו.",
     "openInvalid": "בחר מסמך רגיל נתמך שגודלו פחות מ-512 MiB, ולא קישור סמלי. קובצי טקסט ו-CSV חייבים להשתמש ב-UTF-8.",
-    "openPath": "נתיב הקובץ ארוך מדי. העבר את המסמך לתיקייה עם נתיב קצר יותר ופתח אותו שוב."
+    "openPath": "נתיב הקובץ ארוך מדי. העבר את המסמך לתיקייה עם נתיב קצר יותר ופתח אותו שוב.",
+    "quit": "יציאה",
+    "saveRestoreUncertain": "השמירה נכשלה ולא ניתן היה לאשר שקובץ המקור שוחזר. יש לשמור את עותק הגיבוי באותה תיקייה ולהשתמש בשמירה בשם עבור השינויים.",
+    "printFailed": "ההדפסה נכשלה. נסו שוב או ייצאו ל-PDF.",
+    "printTimedOut": "תם הזמן הקצוב להדפסה. נסו שוב או ייצאו ל-PDF.",
+    "printHelperError": "מודול ההדפסה נכשל. נסו שוב או ייצאו ל-PDF."
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
     "fontAsk": "Használja a számítógépre telepített betűtípusokat?",
-    "fontDetail": "A betűtípusokat csak a rendszer és a felhasználó szabványos betűtípusmappáiból olvassa. Semmit sem tölt fel.",
+    "fontDetail": "A betűtípusokat a rendszer és a felhasználó mappáiból, valamint a Windowsban regisztrált egyedi helyi betűtípusfájlokból olvassa. Semmit sem tölt fel.",
     "fontFailed": "A számítógép betűtípusai nem olvashatók.",
     "fontMissing": "Nem elérhető betűtípusok: {0}.",
     "letterhead": "Fejléces levélpapír",
@@ -2592,12 +2717,17 @@
     "openMissing": "Lehet, hogy ezt a fájlt áthelyezték vagy törölték. Válassza ki újra a Fájl → Megnyitás paranccsal.",
     "openUnavailable": "A fájl nem olvasható. Ha felhőben van, tegye elérhetővé offline, és ellenőrizze a kapcsolatot. Ellenőrizze, hogy a biztonsági szoftver engedélyezi az ElixirOffice számára az olvasását.",
     "openInvalid": "Válasszon támogatott, 512 MiB-nál kisebb normál dokumentumot, ne szimbolikus hivatkozást. A szöveges és CSV-fájloknak UTF-8 kódolást kell használniuk.",
-    "openPath": "A fájl elérési útja túl hosszú. Helyezze a dokumentumot rövidebb elérési útjú mappába, és nyissa meg újra."
+    "openPath": "A fájl elérési útja túl hosszú. Helyezze a dokumentumot rövidebb elérési útjú mappába, és nyissa meg újra.",
+    "quit": "Kilépés",
+    "saveRestoreUncertain": "A mentés sikertelen, és az eredeti fájl visszaállítása nem volt megerősíthető. Tartsa meg a biztonsági másolatot ugyanabban a mappában, és a módosításokhoz használja a Mentés másként parancsot.",
+    "printFailed": "A nyomtatás sikertelen. Próbálja újra, vagy exportálja PDF-be.",
+    "printTimedOut": "A nyomtatás túllépte az időkorlátot. Próbálja újra, vagy exportálja PDF-be.",
+    "printHelperError": "A nyomtatási modul meghibásodott. Próbálja újra, vagy exportálja PDF-be."
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
     "fontAsk": "Օգտագործե՞լ այս համակարգչում տեղադրված տառատեսակները։",
-    "fontDetail": "Տառատեսակները կարդացվում են միայն համակարգի և օգտատիրոջ ստանդարտ պանակներից։ Ոչինչ չի վերբեռնվում։",
+    "fontDetail": "Տառատեսակները կարդացվում են համակարգի և օգտատիրոջ պանակներից և Windows-ում գրանցված տեղական տառատեսակների առանձին ֆայլերից։ Ոչինչ չի վերբեռնվում։",
     "fontFailed": "Չհաջողվեց կարդալ համակարգչի տառատեսակները։",
     "fontMissing": "Անհասանելի տառատեսակներ՝ {0}։",
     "letterhead": "Ձևաթուղթ",
@@ -2693,12 +2823,17 @@
     "openMissing": "Այս ֆայլը կարող է տեղափոխված կամ ջնջված լինել։ Կրկին ընտրեք այն Ֆայլ → Բացել միջոցով։",
     "openUnavailable": "Չհաջողվեց կարդալ ֆայլը։ Եթե այն ամպում է, դարձրեք հասանելի անցանց և ստուգեք կապը։ Ստուգեք, որ անվտանգության ծրագիրը թույլ է տալիս ElixirOffice-ին կարդալ այն։",
     "openInvalid": "Ընտրեք աջակցվող սովորական փաստաթուղթ՝ 512 MiB-ից փոքր, ոչ թե խորհրդանշական հղում։ Տեքստային և CSV ֆայլերը պետք է օգտագործեն UTF-8։",
-    "openPath": "Ֆայլի ուղին չափազանց երկար է։ Փաստաթուղթը տեղափոխեք ավելի կարճ ուղի ունեցող պանակ և կրկին բացեք։"
+    "openPath": "Ֆայլի ուղին չափազանց երկար է։ Փաստաթուղթը տեղափոխեք ավելի կարճ ուղի ունեցող պանակ և կրկին բացեք։",
+    "quit": "Ելք",
+    "saveRestoreUncertain": "Պահպանումը չհաջողվեց, և սկզբնական ֆայլի վերականգնումը չհաստատվեց։ Պահեք պահուստային պատճենը նույն թղթապանակում և փոփոխությունների համար օգտագործեք «Պահպանել որպես» հրամանը։",
+    "printFailed": "Տպումը ձախողվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։",
+    "printTimedOut": "Տպման սպասման ժամանակը սպառվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։",
+    "printHelperError": "Տպման մոդուլը խափանվեց։ Փորձեք կրկին կամ արտահանեք PDF ձևաչափով։"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
     "fontAsk": "Gunakan font yang terpasang di komputer ini?",
-    "fontDetail": "Baca font hanya dari folder font standar sistem dan pengguna. Tidak ada yang diunggah.",
+    "fontDetail": "Baca font dari folder sistem dan pengguna serta file font lokal yang terdaftar di Windows. Tidak ada yang diunggah.",
     "fontFailed": "Font komputer tidak dapat dibaca.",
     "fontMissing": "Font tidak tersedia: {0}.",
     "letterhead": "Kop surat",
@@ -2794,12 +2929,17 @@
     "openMissing": "Berkas ini mungkin telah dipindahkan atau dihapus. Pilih kembali melalui Berkas → Buka.",
     "openUnavailable": "Berkas tidak dapat dibaca. Jika disimpan di cloud, sediakan secara offline dan periksa koneksi. Pastikan perangkat lunak keamanan mengizinkan ElixirOffice membacanya.",
     "openInvalid": "Pilih dokumen biasa yang didukung di bawah 512 MiB, bukan tautan simbolik. Berkas teks dan CSV harus menggunakan UTF-8.",
-    "openPath": "Jalur berkas terlalu panjang. Pindahkan dokumen ke folder dengan jalur lebih pendek dan buka kembali."
+    "openPath": "Jalur berkas terlalu panjang. Pindahkan dokumen ke folder dengan jalur lebih pendek dan buka kembali.",
+    "quit": "Keluar",
+    "saveRestoreUncertain": "Penyimpanan gagal dan pemulihan berkas asli tidak dapat dipastikan. Simpan cadangan di folder yang sama dan gunakan Simpan Sebagai untuk perubahan Anda.",
+    "printFailed": "Pencetakan gagal. Coba lagi atau ekspor ke PDF.",
+    "printTimedOut": "Waktu pencetakan habis. Coba lagi atau ekspor ke PDF.",
+    "printHelperError": "Modul pencetakan gagal. Coba lagi atau ekspor ke PDF."
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
     "fontAsk": "이 컴퓨터에 설치된 글꼴을 사용하시겠습니까?",
-    "fontDetail": "표준 시스템 및 사용자 글꼴 폴더에서만 글꼴을 읽습니다. 어떤 내용도 업로드하지 않습니다.",
+    "fontDetail": "시스템 및 사용자 글꼴 폴더와 Windows에 등록된 개별 로컬 글꼴 파일에서 글꼴을 읽습니다. 어떤 내용도 업로드하지 않습니다.",
     "fontFailed": "컴퓨터의 글꼴을 읽을 수 없습니다.",
     "fontMissing": "사용할 수 없는 글꼴: {0}.",
     "letterhead": "레터헤드",
@@ -2895,12 +3035,17 @@
     "openMissing": "이 파일이 이동되거나 삭제되었을 수 있습니다. 파일 → 열기에서 다시 선택하세요.",
     "openUnavailable": "파일을 읽을 수 없습니다. 클라우드에 저장되어 있다면 오프라인에서 사용할 수 있게 하고 연결을 확인하세요. 보안 소프트웨어가 ElixirOffice의 읽기를 허용하는지 확인하세요.",
     "openInvalid": "512 MiB 미만의 지원되는 일반 문서를 선택하세요. 심볼릭 링크는 사용할 수 없습니다. 텍스트 및 CSV 파일은 UTF-8을 사용해야 합니다.",
-    "openPath": "파일 경로가 너무 깁니다. 문서를 경로가 더 짧은 폴더로 이동하고 다시 여세요."
+    "openPath": "파일 경로가 너무 깁니다. 문서를 경로가 더 짧은 폴더로 이동하고 다시 여세요.",
+    "quit": "종료",
+    "saveRestoreUncertain": "저장에 실패했으며 원본 파일의 복원을 확인할 수 없습니다. 백업을 같은 폴더에 보관하고 편집 내용은 다른 이름으로 저장을 사용하세요.",
+    "printFailed": "인쇄에 실패했습니다. 다시 시도하거나 PDF로 내보내세요.",
+    "printTimedOut": "인쇄 시간이 초과되었습니다. 다시 시도하거나 PDF로 내보내세요.",
+    "printHelperError": "인쇄 모듈에 오류가 발생했습니다. 다시 시도하거나 PDF로 내보내세요."
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
     "fontAsk": "ໃຊ້ຟອນທີ່ຕິດຕັ້ງໃນຄອມພິວເຕຕີນີ້ບໍ?",
-    "fontDetail": "ອ່ານຟອນຈາກໂຟນເດີມາດຕະຖານຂອງລະບົບແລະຜູ້ໃຊ້ເທົ່ານັ້ນ. ບໍ່ມີການອັບໂຫຼດ.",
+    "fontDetail": "ອ່ານຟອນຈາກໂຟນເດີຂອງລະບົບແລະຜູ້ໃຊ້ ແລະໄຟລ໌ຟອນພາຍໃນເຄື່ອງທີ່ລົງທະບຽນໃນ Windows. ບໍ່ມີການອັບໂຫຼດ.",
     "fontFailed": "ບໍ່ສາມາດອ່ານຟອນຂອງຄອມພິວເຕີໄດ້.",
     "fontMissing": "ຟອນທີ່ບໍ່ມີ: {0}.",
     "letterhead": "ຫົວຈົດໝາຍ",
@@ -2996,12 +3141,17 @@
     "openMissing": "ໄຟລ໌ນີ້ອາດຖືກຍ້າຍ ຫຼືລຶບແລ້ວ. ເລືອກອີກຄັ້ງຜ່ານ ໄຟລ໌ → ເປີດ.",
     "openUnavailable": "ບໍ່ສາມາດອ່ານໄຟລ໌ໄດ້. ຖ້າຢູ່ໃນຄລາວ ໃຫ້ຕັ້ງໃຫ້ໃຊ້ອອບລາຍໄດ້ ແລະກວດສອບການເຊື່ອມຕໍ່. ກວດວ່າໂປຣແກຣມຄວາມປອດໄພອະນຸຍາດໃຫ້ ElixirOffice ອ່ານໄດ້.",
     "openInvalid": "ເລືອກເອກະສານປົກກະຕິທີ່ຮອງຮັບ ຂະໜາດຕ່ຳກວ່າ 512 MiB ບໍ່ແມ່ນລິ້ງສັນຍາລັກ. ໄຟລ໌ຂໍ້ຄວາມ ແລະ CSV ຕ້ອງໃຊ້ UTF-8.",
-    "openPath": "ເສັ້ນທາງໄຟລ໌ຍາວເກີນໄປ. ຍ້າຍເອກະສານໄປໂຟນເດີທີ່ມີເສັ້ນທາງສັ້ນກວ່າ ແລ້ວເປີດອີກຄັ້ງ."
+    "openPath": "ເສັ້ນທາງໄຟລ໌ຍາວເກີນໄປ. ຍ້າຍເອກະສານໄປໂຟນເດີທີ່ມີເສັ້ນທາງສັ້ນກວ່າ ແລ້ວເປີດອີກຄັ້ງ.",
+    "quit": "ອອກ",
+    "saveRestoreUncertain": "ບັນທຶກບໍ່ສຳເລັດ ແລະບໍ່ສາມາດຢືນຢັນການກູ້ຄືນໄຟລ໌ຕົ້ນສະບັບໄດ້. ເກັບສຳເນົາສຳຮອງໄວ້ໃນໂຟນເດີເດີມ ແລະໃຊ້ ບັນທຶກເປັນ ສຳລັບການແກ້ໄຂຂອງທ່ານ.",
+    "printFailed": "ພິມບໍ່ສຳເລັດ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF.",
+    "printTimedOut": "ໝົດເວລາລໍຖ້າການພິມ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF.",
+    "printHelperError": "ໂມດູນການພິມຂັດຂ້ອງ. ລອງໃໝ່ ຫຼື ສົ່ງອອກເປັນ PDF."
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
     "fontAsk": "Izmantot šajā datorā instalētos fontus?",
-    "fontDetail": "Fonti tiek lasīti tikai no standarta sistēmas un lietotāja fontu mapēm. Nekas netiek augšupielādēts.",
+    "fontDetail": "Fonti tiek lasīti no sistēmas un lietotāja mapēm un atsevišķiem vietējiem fontu failiem, kas reģistrēti sistēmā Windows. Nekas netiek augšupielādēts.",
     "fontFailed": "Neizdevās nolasīt datora fontus.",
     "fontMissing": "Nepieejami fonti: {0}.",
     "letterhead": "Veidlapa",
@@ -3097,12 +3247,17 @@
     "openMissing": "Iespējams, šis fails ir pārvietots vai izdzēsts. Izvēlieties to vēlreiz, izmantojot Fails → Atvērt.",
     "openUnavailable": "Failu nevarēja nolasīt. Ja tas glabājas mākonī, padariet to pieejamu bezsaistē un pārbaudiet savienojumu. Pārbaudiet, vai drošības programmatūra ļauj ElixirOffice to lasīt.",
     "openInvalid": "Izvēlieties atbalstītu parastu dokumentu, kas mazāks par 512 MiB, nevis simbolisku saiti. Teksta un CSV failiem jāizmanto UTF-8.",
-    "openPath": "Faila ceļš ir pārāk garš. Pārvietojiet dokumentu uz mapi ar īsāku ceļu un atveriet to vēlreiz."
+    "openPath": "Faila ceļš ir pārāk garš. Pārvietojiet dokumentu uz mapi ar īsāku ceļu un atveriet to vēlreiz.",
+    "quit": "Iziet",
+    "saveRestoreUncertain": "Saglabāšana neizdevās, un sākotnējā faila atjaunošanu nevarēja apstiprināt. Paturiet rezerves kopiju tajā pašā mapē un izmaiņām izmantojiet Saglabāt kā.",
+    "printFailed": "Drukāšana neizdevās. Mēģiniet vēlreiz vai eksportējiet PDF formātā.",
+    "printTimedOut": "Drukāšanas gaidīšanas laiks beidzās. Mēģiniet vēlreiz vai eksportējiet PDF formātā.",
+    "printHelperError": "Drukāšanas modulis nedarbojas. Mēģiniet vēlreiz vai eksportējiet PDF formātā."
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
     "fontAsk": "Gunakan fon yang dipasang pada komputer ini?",
-    "fontDetail": "Baca fon hanya daripada folder fon standard sistem dan pengguna. Tiada apa-apa dimuat naik.",
+    "fontDetail": "Baca fon daripada folder sistem dan pengguna serta fail fon setempat yang didaftarkan dalam Windows. Tiada apa-apa dimuat naik.",
     "fontFailed": "Fon komputer tidak dapat dibaca.",
     "fontMissing": "Fon tidak tersedia: {0}.",
     "letterhead": "Kepala surat",
@@ -3198,12 +3353,17 @@
     "openMissing": "Fail ini mungkin telah dipindahkan atau dipadam. Pilih semula melalui Fail → Buka.",
     "openUnavailable": "Fail tidak dapat dibaca. Jika disimpan dalam awan, jadikannya tersedia di luar talian dan semak sambungan. Pastikan perisian keselamatan membenarkan ElixirOffice membacanya.",
     "openInvalid": "Pilih dokumen biasa yang disokong di bawah 512 MiB, bukan pautan simbolik. Fail teks dan CSV mesti menggunakan UTF-8.",
-    "openPath": "Laluan fail terlalu panjang. Pindahkan dokumen ke folder dengan laluan lebih pendek dan buka semula."
+    "openPath": "Laluan fail terlalu panjang. Pindahkan dokumen ke folder dengan laluan lebih pendek dan buka semula.",
+    "quit": "Keluar",
+    "saveRestoreUncertain": "Penyimpanan gagal dan pemulihan fail asal tidak dapat disahkan. Simpan salinan sandaran dalam folder yang sama dan gunakan Simpan Sebagai untuk perubahan anda.",
+    "printFailed": "Pencetakan gagal. Cuba lagi atau eksport ke PDF.",
+    "printTimedOut": "Masa pencetakan tamat. Cuba lagi atau eksport ke PDF.",
+    "printHelperError": "Modul pencetakan gagal. Cuba lagi atau eksport ke PDF."
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
     "fontAsk": "Bruke skrifter installert på denne datamaskinen?",
-    "fontDetail": "Les skrifter bare fra standard system- og brukermapper for skrifter. Ingenting lastes opp.",
+    "fontDetail": "Les skrifter fra system- og brukermapper og enkelte lokale skriftfiler registrert i Windows. Ingenting lastes opp.",
     "fontFailed": "Skriftene på datamaskinen kunne ikke leses.",
     "fontMissing": "Utilgjengelige skrifter: {0}.",
     "letterhead": "Brevpapir",
@@ -3310,12 +3470,17 @@
     "openMissing": "Denne filen kan ha blitt flyttet eller slettet. Velg den på nytt via Fil → Åpne.",
     "openUnavailable": "Filen kunne ikke leses. Hvis den er lagret i skyen, gjør den tilgjengelig frakoblet og kontroller tilkoblingen. Kontroller at sikkerhetsprogramvaren lar ElixirOffice lese den.",
     "openInvalid": "Velg et støttet vanlig dokument under 512 MiB, ikke en symbolsk lenke. Tekst- og CSV-filer må bruke UTF-8.",
-    "openPath": "Filbanen er for lang. Flytt dokumentet til en mappe med kortere bane, og åpne det på nytt."
+    "openPath": "Filbanen er for lang. Flytt dokumentet til en mappe med kortere bane, og åpne det på nytt.",
+    "quit": "Avslutt",
+    "saveRestoreUncertain": "Lagringen mislyktes, og gjenoppretting av originalfilen kunne ikke bekreftes. Behold sikkerhetskopien i samme mappe, og bruk Lagre som for endringene dine.",
+    "printFailed": "Utskrift mislyktes. Prøv igjen eller eksporter til PDF.",
+    "printTimedOut": "Tidsavbrudd under utskrift. Prøv igjen eller eksporter til PDF.",
+    "printHelperError": "Utskriftsmodulen feilet. Prøv igjen eller eksporter til PDF."
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
     "fontAsk": "Folosiți fonturile instalate pe acest computer?",
-    "fontDetail": "Citiți fonturile numai din folderele standard ale sistemului și utilizatorului. Nu se încarcă nimic.",
+    "fontDetail": "Citiți fonturile din folderele sistemului și utilizatorului și din fișierele locale de fonturi înregistrate în Windows. Nu se încarcă nimic.",
     "fontFailed": "Fonturile computerului nu au putut fi citite.",
     "fontMissing": "Fonturi indisponibile: {0}.",
     "letterhead": "Antet",
@@ -3411,12 +3576,17 @@
     "openMissing": "Este posibil ca acest fișier să fi fost mutat sau șters. Selectați-l din nou din Fișier → Deschidere.",
     "openUnavailable": "Fișierul nu a putut fi citit. Dacă este în cloud, faceți-l disponibil offline și verificați conexiunea. Verificați dacă software-ul de securitate permite ElixirOffice să-l citească.",
     "openInvalid": "Alegeți un document obișnuit acceptat sub 512 MiB, nu o legătură simbolică. Fișierele text și CSV trebuie să folosească UTF-8.",
-    "openPath": "Calea fișierului este prea lungă. Mutați documentul într-un dosar cu o cale mai scurtă și deschideți-l din nou."
+    "openPath": "Calea fișierului este prea lungă. Mutați documentul într-un dosar cu o cale mai scurtă și deschideți-l din nou.",
+    "quit": "Ieșire",
+    "saveRestoreUncertain": "Salvarea a eșuat și restaurarea fișierului original nu a putut fi confirmată. Păstrați copia de rezervă în același folder și folosiți Salvare ca pentru modificări.",
+    "printFailed": "Imprimarea a eșuat. Încercați din nou sau exportați în PDF.",
+    "printTimedOut": "Timpul de imprimare a expirat. Încercați din nou sau exportați în PDF.",
+    "printHelperError": "Modulul de imprimare a eșuat. Încercați din nou sau exportați în PDF."
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
     "fontAsk": "මෙම පරිගණකයේ ස්ථාපිත අකුරු භාවිත කරන්නද?",
-    "fontDetail": "පද්ධතියේ සහ පරිශීලකයාගේ සම්මත අකුරු ෆෝල්ඩරවලින් පමණක් අකුරු කියවයි. කිසිවක් උඩුගත නොකරයි.",
+    "fontDetail": "පද්ධතියේ සහ පරිශීලකයාගේ ෆෝල්ඩරවලින් සහ Windows හි ලියාපදිංචි දේශීය අකුරු ගොනුවලින් අකුරු කියවයි. කිසිවක් උඩුගත නොකරයි.",
     "fontFailed": "පරිගණකයේ අකුරු කියවීමට නොහැකි විය.",
     "fontMissing": "නොමැති අකුරු: {0}.",
     "letterhead": "ලිපි ශීර්ෂය",
@@ -3512,12 +3682,17 @@
     "openMissing": "මෙම ගොනුව ගෙන ගොස් හෝ මකා දමා තිබිය හැක. ගොනුව → විවෘත කරන්න හරහා නැවත තෝරන්න.",
     "openUnavailable": "ගොනුව කියවීමට නොහැකි විය. එය වලාකුළෙහි තිබේ නම්, නොබැඳිව ලබාගත හැකි කර සම්බන්ධතාව පරීක්ෂා කරන්න. ආරක්ෂක මෘදුකාංගය ElixirOffice හට එය කියවීමට ඉඩ දෙන බව පරීක්ෂා කරන්න.",
     "openInvalid": "සංකේතාත්මක සබැඳියක් නොවන, 512 MiB ට අඩු සහය දක්වන සාමාන්‍ය ලේඛනයක් තෝරන්න. පෙළ සහ CSV ගොනු UTF-8 භාවිත කළ යුතුය.",
-    "openPath": "ගොනුවේ මාර්ගය දිග වැඩිය. ලේඛනය කෙටි මාර්ගයක් ඇති ෆෝල්ඩරයකට ගෙන ගොස් නැවත විවෘත කරන්න."
+    "openPath": "ගොනුවේ මාර්ගය දිග වැඩිය. ලේඛනය කෙටි මාර්ගයක් ඇති ෆෝල්ඩරයකට ගෙන ගොස් නැවත විවෘත කරන්න.",
+    "quit": "පිටවන්න",
+    "saveRestoreUncertain": "සුරැකීම අසාර්ථක වූ අතර මුල් ගොනුව ප්‍රතිසාධනය කළ බව තහවුරු කළ නොහැකි විය. උපස්ථය එම ෆෝල්ඩරයේම තබා ඔබගේ වෙනස්කම් වෙනත් නමකින් සුරකින්න.",
+    "printFailed": "මුද්‍රණය අසාර්ථක විය. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න.",
+    "printTimedOut": "මුද්‍රණය සඳහා කාලය ඉක්මවා ඇත. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න.",
+    "printHelperError": "මුද්‍රණ මොඩියුලය අසාර්ථක විය. නැවත උත්සාහ කරන්න හෝ PDF ලෙස නිර්යාත කරන්න."
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
     "fontAsk": "Použiť písma nainštalované v tomto počítači?",
-    "fontDetail": "Písma sa čítajú iba zo štandardných systémových a používateľských priečinkov písiem. Nič sa neodosiela.",
+    "fontDetail": "Písma sa čítajú zo systémových a používateľských priečinkov a jednotlivých lokálnych súborov písiem zaregistrovaných vo Windowse. Nič sa neodosiela.",
     "fontFailed": "Písma počítača sa nepodarilo prečítať.",
     "fontMissing": "Nedostupné písma: {0}.",
     "letterhead": "Hlavičkový papier",
@@ -3613,12 +3788,17 @@
     "openMissing": "Tento súbor mohol byť presunutý alebo odstránený. Vyberte ho znova cez Súbor → Otvoriť.",
     "openUnavailable": "Súbor sa nepodarilo prečítať. Ak je v cloude, sprístupnite ho offline a skontrolujte pripojenie. Overte, či bezpečnostný softvér umožňuje ElixirOffice súbor čítať.",
     "openInvalid": "Vyberte podporovaný bežný dokument menší ako 512 MiB, nie symbolický odkaz. Textové a CSV súbory musia používať UTF-8.",
-    "openPath": "Cesta k súboru je príliš dlhá. Presuňte dokument do priečinka s kratšou cestou a otvorte ho znova."
+    "openPath": "Cesta k súboru je príliš dlhá. Presuňte dokument do priečinka s kratšou cestou a otvorte ho znova.",
+    "quit": "Ukončiť",
+    "saveRestoreUncertain": "Uloženie zlyhalo a obnovenie pôvodného súboru sa nepodarilo potvrdiť. Ponechajte zálohu v rovnakom priečinku a zmeny uložte pomocou Uložiť ako.",
+    "printFailed": "Tlač zlyhala. Skúste to znova alebo exportujte do PDF.",
+    "printTimedOut": "Časový limit tlače vypršal. Skúste to znova alebo exportujte do PDF.",
+    "printHelperError": "Modul tlače zlyhal. Skúste to znova alebo exportujte do PDF."
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
     "fontAsk": "Uporabite pisave, nameščene v tem računalniku?",
-    "fontDetail": "Pisave se berejo samo iz standardnih sistemskih in uporabniških map za pisave. Nič se ne naloži.",
+    "fontDetail": "Pisave se berejo iz sistemskih in uporabniških map ter posameznih lokalnih datotek pisav, registriranih v sistemu Windows. Nič se ne naloži.",
     "fontFailed": "Pisav računalnika ni bilo mogoče prebrati.",
     "fontMissing": "Nerazpoložljive pisave: {0}.",
     "letterhead": "Glava pisma",
@@ -3718,12 +3898,17 @@
     "openMissing": "Ta datoteka je bila morda premaknjena ali izbrisana. Znova jo izberite prek Datoteka → Odpri.",
     "openUnavailable": "Datoteke ni bilo mogoče prebrati. Če je v oblaku, omogočite dostop brez povezave in preverite povezavo. Preverite, ali varnostna programska oprema dovoljuje ElixirOffice branje.",
     "openInvalid": "Izberite podprt običajen dokument, manjši od 512 MiB, ne simbolne povezave. Besedilne datoteke in CSV morajo uporabljati UTF-8.",
-    "openPath": "Pot datoteke je predolga. Premaknite dokument v mapo s krajšo potjo in ga znova odprite."
+    "openPath": "Pot datoteke je predolga. Premaknite dokument v mapo s krajšo potjo in ga znova odprite.",
+    "quit": "Izhod",
+    "saveRestoreUncertain": "Shranjevanje ni uspelo in obnovitve izvirne datoteke ni bilo mogoče potrditi. Varnostno kopijo obdržite v isti mapi in za spremembe uporabite Shrani kot.",
+    "printFailed": "Tiskanje ni uspelo. Poskusite znova ali izvozite v PDF.",
+    "printTimedOut": "Čas za tiskanje je potekel. Poskusite znova ali izvozite v PDF.",
+    "printHelperError": "Tiskalni modul ni uspel. Poskusite znova ali izvozite v PDF."
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
     "fontAsk": "Të përdoren fontet e instaluara në këtë kompjuter?",
-    "fontDetail": "Lexohen vetëm fontet nga dosjet standarde të sistemit dhe përdoruesit. Asgjë nuk ngarkohet.",
+    "fontDetail": "Fontet lexohen nga dosjet e sistemit dhe përdoruesit dhe skedarët lokalë të fonteve të regjistruar në Windows. Asgjë nuk ngarkohet.",
     "fontFailed": "Fontet e kompjuterit nuk mund të lexoheshin.",
     "fontMissing": "Fonte të padisponueshme: {0}.",
     "letterhead": "Letër me kokë",
@@ -3819,12 +4004,17 @@
     "openMissing": "Ky skedar mund të jetë zhvendosur ose fshirë. Zgjidheni sërish nga Skedar → Hap.",
     "openUnavailable": "Skedari nuk mund të lexohej. Nëse ruhet në re, bëjeni të disponueshëm jashtë linje dhe kontrolloni lidhjen. Kontrolloni që programi i sigurisë lejon ElixirOffice ta lexojë.",
     "openInvalid": "Zgjidhni një dokument të zakonshëm të mbështetur nën 512 MiB, jo një lidhje simbolike. Skedarët tekst dhe CSV duhet të përdorin UTF-8.",
-    "openPath": "Shtegu i skedarit është tepër i gjatë. Zhvendoseni dokumentin në një dosje me shteg më të shkurtër dhe hapeni sërish."
+    "openPath": "Shtegu i skedarit është tepër i gjatë. Zhvendoseni dokumentin në një dosje me shteg më të shkurtër dhe hapeni sërish.",
+    "quit": "Dil",
+    "saveRestoreUncertain": "Ruajtja dështoi dhe rikthimi i skedarit origjinal nuk mund të konfirmohej. Mbajeni kopjen rezervë në të njëjtën dosje dhe përdorni Ruaj si për ndryshimet tuaja.",
+    "printFailed": "Printimi dështoi. Provoni përsëri ose eksportoni në PDF.",
+    "printTimedOut": "Koha e printimit mbaroi. Provoni përsëri ose eksportoni në PDF.",
+    "printHelperError": "Moduli i printimit dështoi. Provoni përsëri ose eksportoni në PDF."
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
     "fontAsk": "Koristiti fontove instalirane na ovom računaru?",
-    "fontDetail": "Fontovi se čitaju samo iz standardnih sistemskih i korisničkih fascikli. Ništa se ne otprema.",
+    "fontDetail": "Fontovi se čitaju iz sistemskih i korisničkih fascikli i pojedinačnih lokalnih datoteka fontova registrovanih u Windowsu. Ništa se ne otprema.",
     "fontFailed": "Nije moguće pročitati fontove računara.",
     "fontMissing": "Nedostupni fontovi: {0}.",
     "letterhead": "Memorandum",
@@ -3920,12 +4110,17 @@
     "openMissing": "Ova datoteka je možda premeštena ili obrisana. Izaberite je ponovo preko Datoteka → Otvori.",
     "openUnavailable": "Datoteka nije mogla da se pročita. Ako je u oblaku, učinite je dostupnom van mreže i proverite vezu. Proverite da li bezbednosni softver dozvoljava da je ElixirOffice čita.",
     "openInvalid": "Izaberite podržan običan dokument manji od 512 MiB, a ne simboličku vezu. Tekstualne i CSV datoteke moraju da koriste UTF-8.",
-    "openPath": "Putanja datoteke je predugačka. Premestite dokument u fasciklu sa kraćom putanjom i otvorite ga ponovo."
+    "openPath": "Putanja datoteke je predugačka. Premestite dokument u fasciklu sa kraćom putanjom i otvorite ga ponovo.",
+    "quit": "Izađi",
+    "saveRestoreUncertain": "Čuvanje nije uspelo i vraćanje originalne datoteke nije moglo da se potvrdi. Zadržite rezervnu kopiju u istoj fascikli i koristite Sačuvaj kao za izmene.",
+    "printFailed": "Štampanje nije uspelo. Pokušajte ponovo ili izvezite u PDF.",
+    "printTimedOut": "Vreme za štampanje je isteklo. Pokušajte ponovo ili izvezite u PDF.",
+    "printHelperError": "Modul za štampanje nije uspeo. Pokušajte ponovo ili izvezite u PDF."
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
     "fontAsk": "Користити фонтове инсталиране на овом рачунару?",
-    "fontDetail": "Фонтови се читају само из стандардних системских и корисничких фасцикли. Ништа се не отпрема.",
+    "fontDetail": "Фонтови се читају из системских и корисничких фасцикли и појединачних локалних датотека фонтова регистрованих у Windows-у. Ништа се не отпрема.",
     "fontFailed": "Није могуће прочитати фонтове рачунара.",
     "fontMissing": "Недоступни фонтови: {0}.",
     "letterhead": "Меморандум",
@@ -4021,12 +4216,17 @@
     "openMissing": "Ова датотека је можда премештена или обрисана. Изаберите је поново преко Датотека → Отвори.",
     "openUnavailable": "Датотека није могла да се прочита. Ако је у облаку, учините је доступном ван мреже и проверите везу. Проверите да ли безбедносни софтвер дозвољава да је ElixirOffice чита.",
     "openInvalid": "Изаберите подржан обичан документ мањи од 512 MiB, а не симболичку везу. Текстуалне и CSV датотеке морају да користе UTF-8.",
-    "openPath": "Путања датотеке је предугачка. Преместите документ у фасциклу са краћом путањом и отворите га поново."
+    "openPath": "Путања датотеке је предугачка. Преместите документ у фасциклу са краћом путањом и отворите га поново.",
+    "quit": "Изађи",
+    "saveRestoreUncertain": "Чување није успело и враћање оригиналне датотеке није могло да се потврди. Задржите резервну копију у истој фасцикли и користите Сачувај као за измене.",
+    "printFailed": "Штампање није успело. Покушајте поново или извезите у PDF.",
+    "printTimedOut": "Време за штампање је истекло. Покушајте поново или извезите у PDF.",
+    "printHelperError": "Модул за штампање није успео. Покушајте поново или извезите у PDF."
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
     "fontAsk": "Använd teckensnitt installerade på den här datorn?",
-    "fontDetail": "Läs endast teckensnitt från systemets och användarens standardmappar. Ingenting laddas upp.",
+    "fontDetail": "Läs teckensnitt från systemets och användarens mappar samt enskilda lokala teckensnittsfiler registrerade i Windows. Ingenting laddas upp.",
     "fontFailed": "Datorns teckensnitt kunde inte läsas.",
     "fontMissing": "Otillgängliga teckensnitt: {0}.",
     "letterhead": "Brevpapper",
@@ -4122,12 +4322,17 @@
     "openMissing": "Den här filen kan ha flyttats eller tagits bort. Välj den igen via Arkiv → Öppna.",
     "openUnavailable": "Filen kunde inte läsas. Om den finns i molnet, gör den tillgänglig offline och kontrollera anslutningen. Kontrollera att säkerhetsprogrammet tillåter ElixirOffice att läsa den.",
     "openInvalid": "Välj ett vanligt dokument som stöds och är mindre än 512 MiB, inte en symbolisk länk. Text- och CSV-filer måste använda UTF-8.",
-    "openPath": "Filsökvägen är för lång. Flytta dokumentet till en mapp med kortare sökväg och öppna det igen."
+    "openPath": "Filsökvägen är för lång. Flytta dokumentet till en mapp med kortare sökväg och öppna det igen.",
+    "quit": "Avsluta",
+    "saveRestoreUncertain": "Det gick inte att spara och återställningen av originalfilen kunde inte bekräftas. Behåll säkerhetskopian i samma mapp och använd Spara som för dina ändringar.",
+    "printFailed": "Utskriften misslyckades. Försök igen eller exportera till PDF.",
+    "printTimedOut": "Tidsgränsen för utskrift överskreds. Försök igen eller exportera till PDF.",
+    "printHelperError": "Utskriftsmodulen misslyckades. Försök igen eller exportera till PDF."
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
     "fontAsk": "Bu bilgisayarda yüklü yazı tipleri kullanılsın mı?",
-    "fontDetail": "Yazı tipleri yalnızca standart sistem ve kullanıcı yazı tipi klasörlerinden okunur. Hiçbir şey yüklenmez.",
+    "fontDetail": "Yazı tipleri sistem ve kullanıcı klasörlerinden ve Windows'a kayıtlı yerel yazı tipi dosyalarından okunur. Hiçbir şey yüklenmez.",
     "fontFailed": "Bilgisayarın yazı tipleri okunamadı.",
     "fontMissing": "Kullanılamayan yazı tipleri: {0}.",
     "letterhead": "Antetli kâğıt",
@@ -4223,12 +4428,17 @@
     "openMissing": "Bu dosya taşınmış veya silinmiş olabilir. Dosya → Aç ile yeniden seçin.",
     "openUnavailable": "Dosya okunamadı. Bulutta saklanıyorsa çevrimdışı kullanılabilir yapıp bağlantıyı kontrol edin. Güvenlik yazılımının ElixirOffice'in dosyayı okumasına izin verdiğini doğrulayın.",
     "openInvalid": "Sembolik bağlantı değil, 512 MiB'dan küçük, desteklenen normal bir belge seçin. Metin ve CSV dosyaları UTF-8 kullanmalıdır.",
-    "openPath": "Dosya yolu çok uzun. Belgeyi yolu daha kısa olan bir klasöre taşıyıp yeniden açın."
+    "openPath": "Dosya yolu çok uzun. Belgeyi yolu daha kısa olan bir klasöre taşıyıp yeniden açın.",
+    "quit": "Çıkış",
+    "saveRestoreUncertain": "Kaydetme başarısız oldu ve özgün dosyanın geri yüklendiği doğrulanamadı. Yedeği aynı klasörde tutun ve değişiklikleriniz için Farklı Kaydet'i kullanın.",
+    "printFailed": "Yazdırma başarısız oldu. Yeniden deneyin veya PDF olarak dışa aktarın.",
+    "printTimedOut": "Yazdırma zaman aşımına uğradı. Yeniden deneyin veya PDF olarak dışa aktarın.",
+    "printHelperError": "Yazdırma modülü başarısız oldu. Yeniden deneyin veya PDF olarak dışa aktarın."
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
     "fontAsk": "Використовувати шрифти, встановлені на цьому комп’ютері?",
-    "fontDetail": "Читати шрифти лише зі стандартних системних і користувацьких папок шрифтів. Нічого не надсилається.",
+    "fontDetail": "Читати шрифти із системних і користувацьких папок та окремих локальних файлів шрифтів, зареєстрованих у Windows. Нічого не надсилається.",
     "fontFailed": "Не вдалося прочитати шрифти комп’ютера.",
     "fontMissing": "Недоступні шрифти: {0}.",
     "letterhead": "Фірмовий бланк",
@@ -4324,12 +4534,17 @@
     "openMissing": "Можливо, цей файл переміщено або видалено. Виберіть його знову через Файл → Відкрити.",
     "openUnavailable": "Не вдалося прочитати файл. Якщо він у хмарі, зробіть його доступним офлайн і перевірте з’єднання. Перевірте, чи захисне ПЗ дозволяє ElixirOffice читати його.",
     "openInvalid": "Виберіть підтримуваний звичайний документ розміром менше 512 МіБ, а не символічне посилання. Текстові та CSV-файли мають використовувати UTF-8.",
-    "openPath": "Шлях до файлу задовгий. Перемістіть документ до папки з коротшим шляхом і відкрийте знову."
+    "openPath": "Шлях до файлу задовгий. Перемістіть документ до папки з коротшим шляхом і відкрийте знову.",
+    "quit": "Вийти",
+    "saveRestoreUncertain": "Не вдалося зберегти файл і підтвердити відновлення оригіналу. Залиште резервну копію в тій самій папці та скористайтеся командою «Зберегти як» для своїх змін.",
+    "printFailed": "Не вдалося надрукувати. Спробуйте ще раз або експортуйте в PDF.",
+    "printTimedOut": "Час очікування друку минув. Спробуйте ще раз або експортуйте в PDF.",
+    "printHelperError": "Збій модуля друку. Спробуйте ще раз або експортуйте в PDF."
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
     "fontAsk": "کیا اس کمپیوٹر پر نصب فونٹ استعمال کیے جائیں؟",
-    "fontDetail": "فونٹ صرف نظام اور صارف کے معیاری فونٹ فولڈروں سے پڑھے جاتے ہیں۔ کچھ بھی اپ لوڈ نہیں ہوتا۔",
+    "fontDetail": "فونٹ نظام اور صارف کے فولڈروں اور Windows میں رجسٹرڈ مقامی فونٹ فائلوں سے پڑھے جاتے ہیں۔ کچھ بھی اپ لوڈ نہیں ہوتا۔",
     "fontFailed": "کمپیوٹر کے فونٹ پڑھے نہیں جا سکے۔",
     "fontMissing": "غیر دستیاب فونٹ: {0}۔",
     "letterhead": "لیٹرہیڈ",
@@ -4425,12 +4640,17 @@
     "openMissing": "ممکن ہے یہ فائل منتقل یا حذف ہو گئی ہو۔ فائل ← کھولیں سے دوبارہ منتخب کریں۔",
     "openUnavailable": "فائل پڑھی نہیں جا سکی۔ اگر کلاؤڈ میں محفوظ ہے تو اسے آف لائن دستیاب کریں اور کنکشن چیک کریں۔ تصدیق کریں کہ سیکیورٹی سافٹ ویئر ElixirOffice کو اسے پڑھنے دیتا ہے۔",
     "openInvalid": "512 MiB سے چھوٹی، معاون عام دستاویز منتخب کریں، علامتی لنک نہیں۔ متن اور CSV فائلوں کے لیے UTF-8 ضروری ہے۔",
-    "openPath": "فائل کا راستہ بہت لمبا ہے۔ دستاویز کو مختصر راستے والے فولڈر میں منتقل کر کے دوبارہ کھولیں۔"
+    "openPath": "فائل کا راستہ بہت لمبا ہے۔ دستاویز کو مختصر راستے والے فولڈر میں منتقل کر کے دوبارہ کھولیں۔",
+    "quit": "باہر نکلیں",
+    "saveRestoreUncertain": "محفوظ کرنا ناکام رہا اور اصل فائل کی بحالی کی تصدیق نہیں ہو سکی۔ بیک اپ اسی فولڈر میں رکھیں اور اپنی تبدیلیوں کے لیے «بطور محفوظ کریں» استعمال کریں۔",
+    "printFailed": "پرنٹنگ ناکام ہوگئی۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔",
+    "printTimedOut": "پرنٹنگ کا وقت ختم ہوگیا۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔",
+    "printHelperError": "پرنٹ ماڈیول ناکام ہوگیا۔ دوبارہ کوشش کریں یا PDF میں برآمد کریں۔"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
     "fontAsk": "Dùng phông chữ đã cài trên máy tính này?",
-    "fontDetail": "Chỉ đọc phông chữ từ thư mục phông chuẩn của hệ thống và người dùng. Không tải lên bất cứ thứ gì.",
+    "fontDetail": "Đọc phông chữ từ thư mục hệ thống và người dùng cùng các tệp phông cục bộ được đăng ký trong Windows. Không tải lên bất cứ thứ gì.",
     "fontFailed": "Không thể đọc phông chữ của máy tính.",
     "fontMissing": "Phông chữ không có: {0}.",
     "letterhead": "Tiêu đề thư",
@@ -4531,6 +4751,11 @@
     "openMissing": "Tệp này có thể đã bị di chuyển hoặc xóa. Chọn lại bằng Tệp → Mở.",
     "openUnavailable": "Không thể đọc tệp. Nếu lưu trên đám mây, hãy cho phép dùng ngoại tuyến và kiểm tra kết nối. Kiểm tra xem phần mềm bảo mật có cho phép ElixirOffice đọc tệp hay không.",
     "openInvalid": "Chọn tài liệu thông thường được hỗ trợ dưới 512 MiB, không phải liên kết tượng trưng. Tệp văn bản và CSV phải dùng UTF-8.",
-    "openPath": "Đường dẫn tệp quá dài. Chuyển tài liệu vào thư mục có đường dẫn ngắn hơn rồi mở lại."
+    "openPath": "Đường dẫn tệp quá dài. Chuyển tài liệu vào thư mục có đường dẫn ngắn hơn rồi mở lại.",
+    "quit": "Thoát",
+    "saveRestoreUncertain": "Không thể lưu và không thể xác nhận việc khôi phục tệp gốc. Giữ bản sao lưu trong cùng thư mục và dùng Lưu dưới dạng cho các thay đổi của bạn.",
+    "printFailed": "In không thành công. Hãy thử lại hoặc xuất PDF.",
+    "printTimedOut": "Đã hết thời gian chờ in. Hãy thử lại hoặc xuất PDF.",
+    "printHelperError": "Mô-đun in bị lỗi. Hãy thử lại hoặc xuất PDF."
   }
 }

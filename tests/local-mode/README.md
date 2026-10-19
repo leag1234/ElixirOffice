@@ -109,7 +109,7 @@ establish native Windows/macOS acceptance.
 The packaged Word save-state regression is tests/desktop/odt-save-state.cjs. Run with EO_DESKTOP_ROOT, EO_PLAYWRIGHT and EO_PACKAGE_EXECUTABLE pointing at an owned packaged test export after its real six-format matrix has derived the public ODT fixture. It controls only the timing of actual conversion results and uses real SDK edit/undo/redo operations and saved XML checks; it does not substitute converter output.
 
 The packaged odt-save-state suite now has eight cases: its real-Wasm paste case preserves a newer edit while saving an older snapshot; undo-to-saved performs no conversion or file rewrite; disposal checks the three exact callbacks against actual SDK dispatch with a positive control. Run against an explicit EO_PACKAGE_EXECUTABLE and isolated EO_DESKTOP_ROOT.
-Mission F Session E acceptance (own EO_BASE is mandatory):
+Mission F release maintainer acceptance (own EO_BASE is mandatory):
 
 - exports-browser.mjs: real edits, File cards, every supported copy format/PDF, Print iframe bytes, retained dirty state, hidden local commands and request boundary.
 - imports-browser.mjs: RTF/TXT/CSV/templates/macro-enabled/PPSX/legacy converted copies, original checksums and fresh reopen. EO_EXPORT_OUT points to the exports test's seed outputs.

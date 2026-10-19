@@ -7,5 +7,3 @@ Schema 2 adds a required sdkjs_files list. The SDK revision comes from the sdkjs
 The two actual-builder identity tests need electron-builder's installed app-builder-lib dependency. Developer source-only runs report an explicit skip if that package is absent. An installed but broken package still fails. Release environments set EO_RELEASE_REQUIRE_BUILDER=1, making a missing toolchain an error; Linux orchestration, the Windows container and the isolated Mac test command carry that flag. No packaging acceptance is inferred from a developer skip.
 
 Validation for this candidate includes the real builder's Linux/Windows beforePack contexts, using the locked installed builder package and synthetic projects, without creating installer binaries. It is separate from running an actual release build.
-
-The 0.2.1 Windows font resilience regression also requires the recorded SDK common/GlobalLoaders.js and Web Apps apps/common/main/lib/elixir-localfonts/Core.js. These inputs come from the selected DocumentServer gitlinks and travel with the platform test export.

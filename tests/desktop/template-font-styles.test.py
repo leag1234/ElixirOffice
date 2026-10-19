@@ -20,12 +20,15 @@ def fixture(body,styles='',defaults='',theme=None):
   if theme:z.writestr('word/theme/theme1.xml',theme)
  return output.getvalue()
 def paragraph(pr='',ppr='',text='م'):
+ if any(0x590<=ord(c)<=0x8ff for c in text):pr+='<w:rtl/>'
  return '<w:p><w:pPr>'+ppr+'</w:pPr><w:r><w:rPr>'+pr+'</w:rPr><w:t>'+text+'</w:t></w:r></w:p>'
 def missing(data):
  with tempfile.TemporaryDirectory(prefix='eo-font-style-') as directory:
   file=Path(directory)/'public.docx';file.write_bytes(data);return pack.missing(file)
 cases=[
  ('regular',fixture(paragraph()),False),
+ ('Latin italic does not imply complex italic',fixture(paragraph('<w:i/>')),False),
+ ('Latin bold-italic does not imply complex style',fixture(paragraph('<w:b/><w:i/>')),False),
  ('doc-default italic',fixture(paragraph(),defaults='<w:iCs/>'),True),
  ('direct upright overrides default',fixture(paragraph('<w:iCs w:val="0"/>'),defaults='<w:iCs/>'),False),
  ('direct bold-italic',fixture(paragraph('<w:bCs/><w:iCs/>')),True),
@@ -71,3 +74,19 @@ for locale,text in [('he','א'),('ur','Latin')]:
  tree=ET.fromstring(direction_and_fonts(source,locale));pr=tree.find('.//{'+W+'}r/{'+W+'}rPr')
  for key in ['i','iCs']:assert pr.find('{'+W+'}'+key).get('{'+W+'}val','1')=='1',(locale,key)
 print('PASS Arabic/Urdu/future Persian upright preserves bold; Hebrew/Latin italics unchanged')
+
+# A cs font-family declaration is not the w:cs boolean and must not override ASCII.
+assert not missing(fixture(paragraph('<w:rFonts w:cs="Absent complex font"/>',text='A')))
+assert missing(fixture(paragraph('<w:rFonts w:ascii="Absent ASCII font"/>',text='A'))) == [65]
+assert missing(fixture(paragraph('<w:rFonts w:cs="Absent complex font"/><w:cs/>',text='A'))) == [65]
+assert missing(fixture(paragraph('<w:rFonts w:hAnsi="Absent Sinhala font"/>',text='සි'))) == sorted(map(ord,'සි'))
+print('PASS distinct complex-script font name/boolean, ASCII slot and Sinhala slot checks')
+
+# Preserve known primary-face misses separately from actual generated-picker coverage.
+for locale,kind,expected in [('fr','worksheet-fractions',ord('F')),
+                             ('hy','worksheet-fractions',ord('Վ')),
+                             ('fr','assessment-grid',0x2082)]:
+ file=root/'branding/example/nodejs/public/elixir/brand/templates'/locale/(kind+'.docx')
+ assert expected in pack.missing(file),(locale,kind,'primary miss was hidden')
+ assert not pack.missing(file,character_fallback=True),(locale,kind,'actual picker fallback missing')
+print('PASS known French/Armenian primary misses retained; actual generated-picker/style fallback covers them')

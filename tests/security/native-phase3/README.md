@@ -1,0 +1,21 @@
+# Native package resource gates
+
+Configure CMakeLists.txt with explicit CORE, CACHED_NATIVE and CACHED_THIRDPARTY paths and build the security-native executable with at most two jobs. The harness compiles the actual ZIP/EPUB/HTML sources and uses the declared unchanged native dependencies.
+
+Run run.py with the executable and a fresh output directory. Its 49 cases cover archive traversal, flat destinations, Windows path-component predicates, linked and hardlinked destinations, clear-output descendants, valid nested resources, package-root URI references and base URLs, plus CSS import/URL omission controls. The deterministic PNG fixture includes valid chunk CRCs and images must contain the actual expected bytes. Abnormal converter exits cannot satisfy rejection checks.
+
+Run svg.py with the same executable and a fresh directory. It requires Pillow and checks 8 actual rendering cases: embedded PNG/JPEG and same-document fragments retain sentinel pixels, while nested/encoded traversal and external URLs produce no image. Outside sentinel bytes must remain unchanged.
+
+No Windows execution is implied by testing component predicates on Linux. Extraction roots and their ancestors must be private and trusted, and remain stable for the operation; concurrent filesystem mutation is outside this contract. The CSS fixtures verify the current converter leaves unsupported imported styles/background images unused; they do not add those features. The separate global-renderer gate below establishes file and string rendering using the actual SVG source.
+
+
+Run review144.py with the executable and a fresh directory for 67 checks of the global SVG renderer, disk and memory archive APIs, EPUB compatibility, and path normalization. File and string SVG inputs retain embedded PNG/JPEG images and local fragments; external image, use and paint/style references cannot render the synthetic sentinel. Archive checks cover member/count/aggregate/ratio limits, CRC failures including directory and skipped names, valid directory orderings, and colon-containing POSIX temporary roots. UNC checks exercise the shared lexical predicate on Linux, not native Windows filesystem behavior.
+
+Run wrapper.py with xml-wrapper-security and a fresh directory for 16 product reader/DOM/canonicalization cases. The reader variants include file, wide string, byte buffer, restart and external DTD inputs. Registered synthetic input callbacks count attempted external I/O; ordinary content remains available and XInclude is not executed. Compile xml-network-features.c with forced WITH_HTTP=1 and WITH_FTP=1: native control definitions remain enabled, while BUILDING_WASM_MODULE, EO_WASM, and __EMSCRIPTEN__ each exclude them. This compile control does not replace the final Wasm runtime build.
+
+Archive budgets are 50,000 entries, 256 MiB per member and 1 GiB total uncompressed bytes. Members larger than 1 MiB must have a compression ratio no greater than 1,000. Metadata is checked before output clearing or header-sized allocations; read and CRC errors are fatal. Unsupported harmless names are skipped after full CRC validation; path escapes remain fatal.
+
+
+Run review156.py with the native executable and a fresh output directory for 17 compatibility and cleanup cases. Set EO_TEST_FONT_DIR to a directory containing the explicitly selected public DejaVuSans.ttf fixture; the recorded runner mounts this single font read-only and records its checksum. A plain-text control verifies the font setup, then the actual CTextPath object is created from a valid SVG fragment: local references render pixels and external references render none. This object-level gate does not qualify parent text-child dispatch or complete text layout.
+
+The additional cases cover empty/missing EPUB spines, removal of CRC-failed disk and flat outputs, and lexical normalization of extended local drive roots while rejecting UNC, extended UNC, device namespaces, drive-relative and GLOBALROOT forms. One earlier case incorrectly classified an extended local drive root as UNC; its expected result is corrected to acceptance, with real UNC/device rejection assertions retained. Lexical acceptance on Linux does not establish native Windows I/O beyond MAX_PATH.

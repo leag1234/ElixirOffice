@@ -21,7 +21,7 @@ test('four Home templates resolve every UI language and matching existing thumbn
 });
 test('native Home and opening use the current UI language and localized title',()=>{
  const main=fs.readFileSync(path.join(__dirname,'../../desktop/main.cjs'),'utf8'),home=fs.readFileSync(path.join(__dirname,'../../desktop/home.js'),'utf8');
- assert(main.includes("templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language))"));
- assert(main.includes("require('./templates.cjs').resolve(selected,languageInfo.language)"));
+ assert(main.includes("templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language,fontOptions))"));
+ assert(main.includes("require('./templates.cjs').resolve(selected,languageInfo.language,fontOptions)"));
  assert(home.includes('template.title||t(template.titleKey)'));
 });

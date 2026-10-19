@@ -1,0 +1,3 @@
+# Preserve exact pinned upstream OFL bytes, including the original trailing space.
+OFL.txt -text whitespace=-blank-at-eol
+NOTICE.txt -text

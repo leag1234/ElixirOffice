@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "file": "rtl-style-inherited-true.docx",
+      "sha256": "dbd931c3ce709bb77653a0cdbf701c728435f0fee0b5c7f0c5323ac2acf73789",
+      "expectedRTL": true,
+      "purpose": "inherited-true must survive actual compiled clipboard serialization",
+      "source": "CC0 ltr-style-custom.docx derivative; only document/style XML changed",
+      "sourceSHA256": "c9a6247459718c20ddccea43c23a36f8a65efc34ad2bb09cef10f2c97a285488",
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "rtl-style-direct-false.docx",
+      "sha256": "df5dc868c06d5978e61e5c5b65bf00824b248780ee21b1f9caadafb8e2cf4bf3",
+      "expectedRTL": false,
+      "purpose": "direct-false must survive actual compiled clipboard serialization",
+      "source": "CC0 ltr-style-custom.docx derivative; only document/style XML changed",
+      "sourceSHA256": "c9a6247459718c20ddccea43c23a36f8a65efc34ad2bb09cef10f2c97a285488",
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "rtl-style-inherited-false.docx",
+      "sha256": "c1e5dadb11232493f27042dbae409116bcb8f4897758c34ac9b6bbfdf90ee6dd",
+      "expectedRTL": false,
+      "purpose": "inherited-false must survive actual compiled clipboard serialization",
+      "source": "CC0 ltr-style-custom.docx derivative; only document/style XML changed",
+      "sourceSHA256": "c9a6247459718c20ddccea43c23a36f8a65efc34ad2bb09cef10f2c97a285488",
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "rtl-style-whole-table-false.docx",
+      "sha256": "3959d976e04def11689733102d8fed07937bce6216f94ee81c2e394edf8ec4e4",
+      "expectedRTL": false,
+      "purpose": "whole-table-false must survive actual compiled clipboard serialization",
+      "source": "CC0 ltr-style-custom.docx derivative; only document/style XML changed",
+      "sourceSHA256": "c9a6247459718c20ddccea43c23a36f8a65efc34ad2bb09cef10f2c97a285488",
+      "license": "CC0-1.0"
+    }
+  ]
+}

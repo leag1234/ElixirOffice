@@ -168,7 +168,7 @@ test('Windows font containment treats case and extended prefixes as aliases with
 test('native app/consent identity is ElixirOffice while the existing default profile is retained',async()=>{
  const virtual=await virtualWindows();let env;
  try{
-  env=await bootWin(virtual);assert.equal(env.app.getName(),'ElixirOffice');assert.equal(env.app.getPath('userData'),env.directory);
+  env=await bootWin(virtual,{fontSettings:{fontChoice:'declined',fontConsent:false}});assert.equal(env.app.getName(),'ElixirOffice');assert.equal(env.app.getPath('userData'),env.directory);
   env.responses.push(0);assert.equal(await env.invoke('font-consent'),false);assert.equal(env.dialogs.at(-1).title,'ElixirOffice');
  }finally{if(env)await env.cleanup();await virtual.cleanup()}
 });

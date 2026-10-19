@@ -261,7 +261,7 @@ Fixed along the way: document server save URL rewritten to the internal address;
 (locked file); editing sessions indexed by document key (a late callback from a
 session ended in conflict overwrote the next session of the same file).
 
-## 8. Rename and Save As folders (Session E review candidate)
+## 8. Rename and Save As folders (release maintainer review candidate)
 
 This server remains example-app storage scoped by client address (including X-Forwarded-For), not an authenticated per-user boundary. Existing download/history addressing can target another address folder; the new file-operation session grants do not change that pre-existing limitation. Use the connected cloud account for account-based storage access.
 
