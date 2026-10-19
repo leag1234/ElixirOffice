@@ -1,5 +1,14 @@
 # Changelog
 
+## Desktop 0.2.4 beta (2026-10-20)
+
+### Fixed
+
+- Windows saving: retry every file step within a short limit; a locked leftover backup copy no longer turns a completed save into an error; clear guidance (edits stay open, use Save As) when a file cannot be replaced. [#8](https://github.com/leag1234/elixiroffice/issues/8), [#12](https://github.com/leag1234/elixiroffice/issues/12)
+- Add local diagnostics for save problems with an explicit "Copy diagnostics" action (no paths or content).
+- Make the Quick Access toolbar buttons clearly visible in the Classic Light theme and stop the page shadow from darkening while typing. [#13](https://github.com/leag1234/elixiroffice/issues/13)
+- Hide the print status panel while the system print dialog is open.
+
 ## Desktop 0.2.3 beta (2026-10-19)
 
 ### Fixed
