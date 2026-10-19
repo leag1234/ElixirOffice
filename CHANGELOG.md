@@ -1,5 +1,16 @@
 # Changelog
 
+## Desktop 0.2.3 beta (2026-10-19)
+
+### Fixed
+
+- Debian/Ubuntu package: install the Electron sandbox helper with the permissions needed on systems that restrict unprivileged user namespaces (Ubuntu 24.04 and later), so the application starts. [#19](https://github.com/leag1234/elixiroffice/issues/19)
+- README: Windows and macOS download links on separate lines. [#20](https://github.com/leag1234/elixiroffice/issues/20)
+
+### Changed
+
+- All other installers are rebuilt from the 0.2.2 application source with the new version number.
+
 ## Desktop 0.2.2 beta (2026-10-19)
 
 ### New
