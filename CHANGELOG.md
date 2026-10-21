@@ -1,5 +1,29 @@
 # Changelog
 
+## Desktop 0.3.0
+
+### Added
+
+- Multiple document tabs and live detach/move between windows, including keyboard-accessible move commands.
+- Document the independently maintained Arch Linux AUR package.
+
+### Fixed
+
+- Declare audited ALSA, GBM and GL dispatch runtime dependencies in the Linux DEB.
+
+- Clarify Options, Rename and recovery dialogs; preserve document-scoped save and close decisions.
+- Wait for document-engine readiness before installing discovered computer fonts.
+- Refine macOS app and DMG artwork, including small icon representations.
+- Preserve ODS embedded chart caches and worksheet identities; correct CBC padding for protected ODF exports.
+
+### Qualification
+
+- Record the final DEB installation/dependency evidence separately from native startup; container namespace restrictions and diagnostic host-helper differences remain disclosed.
+- Record exact recovered AppImageUpdate tool pins; a moving URL remains an unproven explanation for the earlier mismatch.
+
+- Record matched full/PDF runtime qualification, Linux X11 tab scope and outstanding physical Windows tab checks.
+- Modern LibreOffice 26.8 encrypted ODS remains unsupported. Strict ODF 1.3 checks fail identically on old/new exports declaring 1.2; no regression shown, normative ODF 1.2 validity unmeasured.
+
 ## Desktop 0.2.4 beta (2026-10-20)
 
 ### Fixed
