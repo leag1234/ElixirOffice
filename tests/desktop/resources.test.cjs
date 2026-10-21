@@ -47,3 +47,22 @@ test('thesaurus byte ranges stream exact slices, clamp ends, support suffix and 
   assert.equal((await response(new Request(url.replace('test.dat','link.dat'),{headers:{Range:'bytes=0-3'}}),dir,dir)).status,403);
  }finally{await fs.rm(dir,{recursive:true,force:true})}
 });
+
+test('ordinary resource transport retains its native network session',async()=>{
+ const {createFileFetch}=require('../../desktop/resources.cjs');
+ let calls=0;
+ const net={fetch:async function(url){assert.equal(this,net);calls++;return new Response(url)}};
+ const fetch=createFileFetch({net,session:{fromPartition(){throw Error('Ordinary transport must remain unchanged')}},capture:false,identity:'public'});
+ assert.equal(await (await fetch('file:///public.wasm')).text(),'file:///public.wasm');assert.equal(calls,1);
+});
+test('capture resource transport uses an uncached memory session and never falls back to the persistent default',async()=>{
+ const {createFileFetch}=require('../../desktop/resources.cjs');
+ const partitions=[],calls=[];let reject=false;
+ const isolated={fetch:async function(url){assert.equal(this,isolated);calls.push(url);if(reject)throw Error('Injected capture fetch failure');return new Response('public')}};
+ const fetch=createFileFetch({net:{fetch(){throw Error('Persistent default transport forbidden')}},session:{fromPartition(name,options){partitions.push({name,options});return isolated}},capture:true,identity:'public'});
+ assert.equal(partitions.length,1);assert(!partitions[0].name.startsWith('persist:'));assert.equal(partitions[0].options.cache,false);
+ assert.equal(await (await fetch('file:///public.wasm')).text(),'public');
+ assert.throws(()=>fetch('https://example.invalid/blocked'),/file transport/);assert.equal(calls.length,1);
+ reject=true;await assert.rejects(fetch('file:///unavailable.wasm'),/Injected capture fetch failure/);
+ assert.equal(calls.length,2);
+});

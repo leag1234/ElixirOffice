@@ -176,6 +176,13 @@ PRODUCT_PROTECT = [
 ]
 
 
+# Comparison requested in issue #24, truthful lineage; exact README lines only.
+README_COMPARISON = tuple(re.compile(r"^" + re.escape(line) + r"$") for line in (
+    "## Compared with " + "Only" + "Office and " + "Euro" + "Office",
+    "ElixirOffice uses the same open source editing engine as " + "Only" + "Office (" + "Euro" + "Office is another " + "Only" + "Office-based project). The difference is what we do with it:",
+))
+
+
 # ---------------------------------------------------------------- visible scan
 # Second net, independent of the rewrite rules: every mention of an upstream name
 # (any case, "onlyoffice" or the fork name) in the places users can see or install
@@ -194,6 +201,9 @@ VISIBLE = [
 _V = re.compile(r"onlyoffice|" + _E + r"[-_ ]?office", re.I)
 # (path globs, regex of the allowed span, reason). Spans are removed before matching.
 VISIBLE_ALLOW = [
+    (["README.md"], rx, "comparison requested in issue #24, truthful lineage")
+    for rx in README_COMPARISON
+] + [
     (["*"], re.compile(r"asc_\w*OnlyOffice\w*|\w*OnlyOfficeTime\w*"), "SDK API names (code)"),
     (["*"], re.compile(r"ONLYOFFICEFORM"), "signature of form files (file format)"),
     (["*"], re.compile(r"Referer\s*==\s*[\"']onlyoffice[\"']"), "postMessage protocol marker (code)"),
@@ -347,7 +357,7 @@ def candidate(repo_name, path, text):
 
 def protects_for(repo_name, path):
     if repo_name == PRODUCT:
-        return list(PRODUCT_PROTECT)
+        return list(PRODUCT_PROTECT) + (list(README_COMPARISON) if path == "README.md" else [])
     return [rx for g, rx, _ in PROTECT if repo_name == "" and fnmatch.fnmatch(path, g)]
 
 

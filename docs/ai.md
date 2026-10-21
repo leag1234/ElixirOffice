@@ -411,7 +411,7 @@ Three variables, in the container environment (image: `docker run -e ...`, compo
 
 | Variable | Meaning |
 |---|---|
-| `ELIXIR_AI_BASE_URL` | base URL of an OpenAI-compatible API: `https://api.openai.com/v1`, `https://api.mistral.ai/v1`, `http://ollama-host:11434/v1`, a vLLM server, an internal gateway. `http://` or `https://`, letters, digits and `. _ : - / %` only |
+| `ELIXIR_AI_BASE_URL` | OpenAI-compatible base URL, for example `https://api.openai.com/v1` or `http://localhost:11434/v1`. Remote services require HTTPS; HTTP is only permitted for literal `localhost`, `127.0.0.1` or `[::1]`. No URL credentials, query or fragment. |
 | `ELIXIR_AI_MODEL` | model name sent with each request (default `gpt-4.1-mini` for `api.openai.com` only; required otherwise) |
 | `ELIXIR_AI_API_KEY` | key for that endpoint; empty is fine for Ollama and keyless gateways |
 | `OPENAI_API_KEY` | legacy: alone, means OpenAI with `gpt-4.1-mini` |
@@ -424,7 +424,7 @@ Admin check: `make ai-check [SERVER=http://host:port]` (`tools/ai-proxy/check.sh
 
 When the server has no configuration (or the user prefers their own service): **File > AI** (listed with Options; "Set up AI…" in the search box, on Alt+I's bar and in the Elixir tab's settings leads to the same page). Provider presets (OpenAI-compatible service, OpenAI, Mistral, **Ollama on this computer** `http://localhost:11434/v1`), service URL, model, API key, advanced (extra parameters, maximum rounds), **Test connection**, Remove settings. The key and settings are stored **only in this browser** (`localStorage`, `elixir-ai-settings`, labelled as such, in clear text on the user's computer); the key is sent only to the endpoint typed there. A live notice says where the text goes: "Your text is sent to <host>." (server mode: "…to this server, which forwards it to <host>."; off: "AI is off. No text leaves your computer.").
 
-CORS: the browser calls the endpoint directly, so the endpoint must allow this site's origin. OpenAI and Mistral do. For **Ollama**, start it with `OLLAMA_ORIGINS` set to the address of the ElixirOffice site (for example `OLLAMA_ORIGINS=https://office.example.org ollama serve`); the page shows the reminder, and Test connection says so when the browser blocks the call. Mixed content: an `https://` ElixirOffice site cannot call an `http://` endpoint other than `localhost`; use a server configuration (the server then makes the call) or an `https://` endpoint.
+CORS: the browser calls the endpoint directly, so the endpoint must allow this site's origin. OpenAI and Mistral do. For **Ollama**, start it with `OLLAMA_ORIGINS` set to the address of the ElixirOffice site (for example `OLLAMA_ORIGINS=https://office.example.org ollama serve`); the page shows the reminder, and Test connection says so when the browser blocks the call. Mixed content: an `https://` ElixirOffice site cannot call an `http://` endpoint other than `localhost`; use an HTTPS endpoint for a remote provider. Server-managed configuration enforces the same remote-HTTPS rule.
 
 Strings: `Strings.js`, 12 languages (en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh).
 
@@ -435,3 +435,57 @@ Unchanged: `tools/demo/container-setup.sh` writes its own `ds-elixir-ai.conf` (c
 ### 7.5 Tests
 
 `tests/ai-config/config.mjs` (42 checks, instance container with docker access, local mock OpenAI-compatible server, no real key): generator (invalid values keep AI off, key only in the proxy block, keyless Ollama, legacy variable); **A** no configuration (no AI entry point, "Set up AI…" opens the page, only same-origin `config.json`, no console error); **B** server configuration (entry points on, key and model added by the proxy, nothing secret in the browser); **C** user configuration (presets, notice, CORS hint, Test connection direct to the endpoint, Save without reload, Remove); **D** the demo's include (no `enabled` field) still means AI on. `tools/eval/entry-check.mjs` and `ui-check.mjs` now store a placeholder endpoint in the browser (they need AI on); `EO_MANAGED=1` makes entry-check use the server's configuration instead.
+
+
+## Remote endpoint transport policy
+
+The browser's stored settings, File > AI Save/Test actions, shared connector,
+generated server proxy and administrator connectivity probe reject remote HTTP.
+HTTP is permitted only for literal localhost, 127.0.0.1 and [::1], optionally with
+a valid port. Alternate numeric spellings, encoded hostnames, lookalike domains,
+URL credentials, query strings, fragments and scheme-relative URLs are rejected.
+Browser requests refuse redirects, so an approved endpoint cannot redirect a
+document request to a plaintext service. The same-origin managed proxy remains
+/elixir-ai/v1; the generator validates its upstream endpoint before enabling it.
+
+There is no plaintext exception for an administrator's private LAN or VPN.
+Publish a remote Ollama, vLLM or gateway through an HTTPS endpoint instead. In
+server configuration, loopback means the server/container, not the user's
+computer. Existing insecure browser settings stay stored until edited or
+removed, but AI stays off and makes no provider request. An invalid generated
+server configuration emits enabled:false and a clear stderr reason; it does not
+echo the endpoint or key.
+
+The endpoint error has translations for all 45 interface locales without changing
+the older AI chrome's language fallback. Unit coverage is in
+tests/ai-config/endpoint-policy.test.cjs; tests/ai-config/endpoint-form.cjs exercises
+the actual production AMD form handlers in an isolated browser, with rejected
+Save/Test, a synthetic local provider and a refused redirect.
+The desktop native bridge also checks the raw authority before URL parsing can
+canonicalize numeric IPv4 or encoded-host aliases. Direct preload callers and
+the shared form both require the explicit loopback spellings.
+
+
+### Authenticating a self-hosted AI service
+
+Generated HTTPS proxies enable certificate verification with the system CA
+bundle, SNI and a verification depth of three. The generator detects the standard
+Debian/Ubuntu, Red Hat, SUSE or OpenSSL CA-bundle paths. If no readable valid
+certificate bundle is available, AI remains off rather than accepting an
+unauthenticated TLS connection.
+
+For a private certificate authority, set EO_AI_CA_FILE to the absolute PEM
+certificate-bundle path inside the server container, for example
+/etc/elixiroffice/ai-ca.pem. Mount the public CA certificates read-only; do not
+provide a TLS private key. The path must use ASCII letters, digits, dots, hyphens,
+underscores and slashes, without spaces or parent traversal. It must be a readable
+regular file containing a certificate. OpenSSL parses a certificate from it before the proxy is
+enabled. This selected bundle replaces the default trust bundle for this AI
+upstream.
+
+The host-side install helper forwards the container path. The connectivity check
+uses the same setting with curl certificate verification; when container and host
+paths differ, override EO_AI_CA_FILE for the check with the checking host's path.
+The desktop native connector explicitly retains HTTPS certificate verification,
+as does the browser; a private CA must be trusted by the corresponding client.
+Neither client offers an insecure-certificate switch.

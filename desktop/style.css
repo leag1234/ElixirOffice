@@ -6,3 +6,44 @@ html,body{margin:0;height:100%}#home{min-height:100%;display:flex;flex-direction
 #home .rail{height:calc(100vh - var(--topbar-h) - 52px)}button.tile{border:0;background:transparent;padding:0}
 
 .desktop-options{font:14px system-ui;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);max-width:560px;padding:24px}.desktop-options::backdrop{background:#0004}.desktop-options button,.desktop-options select{margin:8px;padding:8px}.desktop-options label{display:block}.desktop-options section{border-bottom:1px solid var(--border);padding:8px}
+
+
+/* Single-page preferences use the shared Fluent tokens and button components. */
+.desktop-preferences{width:min(640px,calc(100vw - 48px));max-width:none;max-height:calc(100dvh - 48px);overflow:auto;padding:24px;line-height:1.45}
+.desktop-preferences h2{font-size:20px;font-weight:600;line-height:1.3;margin:0 0 24px}
+.desktop-preferences .desktop-setting-section{padding:0 0 20px;margin:0 0 20px;border:0;border-block-end:1px solid var(--border)}
+.desktop-preferences .desktop-setting-section:last-of-type{padding-block-end:0;margin-block-end:0;border:0}
+.desktop-preferences .desktop-recovery-row{display:grid;grid-template-columns:minmax(0,1fr) 88px;align-items:center;gap:16px}
+.desktop-preferences label:has(input[type=checkbox]){display:flex;align-items:flex-start;gap:8px}
+.desktop-preferences input[type=checkbox]{flex:none;width:16px;height:16px;margin:2px 0 0;accent-color:var(--accent-fill)}
+.desktop-preferences input[type=text],.desktop-preferences select{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;min-height:34px;padding:5px 8px}
+.desktop-preferences input[type=text]{display:block;width:100%;margin-block-start:6px}
+.desktop-preferences select{margin:0;width:100%}
+.desktop-preferences .desktop-ai-settings{margin:12px 0 0;padding:0 14px}
+.desktop-preferences p{margin:8px 0 0;color:var(--text-2);font-size:13px;line-height:1.5}
+.desktop-preferences .desktop-privacy{font-size:12px;margin-block-start:20px}
+.desktop-preferences .desktop-dialog-actions{display:flex;justify-content:flex-end;gap:8px;position:sticky;inset-block-end:0;background:var(--surface);padding-block-start:16px;margin-block-start:16px;border-block-start:1px solid var(--border)}
+.desktop-preferences .desktop-dialog-actions .btn{min-width:88px;margin:0;padding:0 16px}
+.desktop-preferences :is(input,select,button):focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}
+@media(max-width:520px){.desktop-preferences{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:20px}.desktop-preferences .desktop-recovery-row{grid-template-columns:1fr;gap:8px}.desktop-preferences .desktop-recovery-row select{width:88px;margin-inline-start:24px}}
+
+/* Rename keeps one named field and a deliberate primary form action. */
+.desktop-rename{width:min(440px,calc(100vw - 48px));max-width:none;max-height:calc(100dvh - 48px);overflow:auto;line-height:1.45}
+.desktop-rename h2{font-size:20px;font-weight:600;margin:0 0 20px}
+.desktop-rename label{margin-block-end:6px}
+.desktop-rename input{display:block;box-sizing:border-box;width:100%;min-height:34px;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 8px}
+.desktop-rename [role=status]{margin:8px 0;overflow-wrap:anywhere}
+.desktop-rename .desktop-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-block-start:20px;padding-block-start:16px;border-block-start:1px solid var(--border)}
+.desktop-rename .desktop-dialog-actions .btn{min-width:88px;margin:0;padding:0 16px}
+.desktop-rename :is(input,button):focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}
+
+/* Recovery separates document identity, unavailable copies and deliberate actions. */
+.desktop-recovery{width:min(560px,calc(100vw - 48px));max-width:none;max-height:calc(100dvh - 48px);overflow:auto;line-height:1.45}
+.desktop-recovery h2{font-size:20px;font-weight:600;margin:0 0 20px}
+.desktop-recovery .desktop-recovery-entry{padding:0 0 16px;margin-block-end:16px;border:0;border-block-end:1px solid var(--border)}
+.desktop-recovery h3{font-size:15px;font-weight:600;margin:0;overflow-wrap:anywhere}
+.desktop-recovery time,.desktop-recovery p{display:block;margin:6px 0;color:var(--text-2);font-size:13px}
+.desktop-recovery .desktop-dialog-actions,.desktop-recovery-footer{display:flex;justify-content:flex-end;gap:8px;margin-block-start:12px}
+.desktop-recovery .btn{min-width:88px;margin:0;padding:0 16px}
+.desktop-recovery-footer{position:sticky;inset-block-end:0;padding-block-start:12px;background:var(--surface)}
+.desktop-recovery button:focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}

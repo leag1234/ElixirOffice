@@ -85,6 +85,18 @@ class Identity(unittest.TestCase):
             subprocess.run(["bash",scripts/"deb.sh"],check=True,stdout=subprocess.DEVNULL)
             artifact=desktop/("dist/ElixirOffice-"+package["version"]+"-rc.42-linux-amd64.deb")
             self.assertEqual(subprocess.check_output(["dpkg-deb","-f",artifact,"Version"],text=True).strip(),package["version"]+"~rc42")
+            # All missing SONAMEs from the installed-package ELF audit must be declared.
+            # Ubuntu 26.04 / Debian 13 use t64; Debian 12 uses the older name.
+            audited_dependencies = {
+                "libasound2t64 | libasound2",
+                "libgbm1", "libgl1", "libegl1", "libgles2", "libopengl0",
+            }
+            depends = subprocess.check_output(["dpkg-deb", "-f", artifact, "Depends"], text=True).strip()
+            declared = {item.strip() for item in depends.split(",")}
+            self.assertTrue(audited_dependencies <= declared, depends)
+            info = subprocess.check_output(["dpkg-deb", "-I", artifact], text=True)
+            info_depends = next(line.strip()[len("Depends: "):] for line in info.splitlines() if line.strip().startswith("Depends: "))
+            self.assertEqual(info_depends, depends)
             # Electron's SUID sandbox is required on systems that restrict unprivileged user namespaces (Ubuntu 24.04+, issue #19).
             listing=subprocess.check_output(["dpkg-deb","-c",artifact],text=True)
             sandbox=[l for l in listing.splitlines() if l.rstrip().endswith("/opt/ElixirOffice/chrome-sandbox")]

@@ -44,8 +44,8 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    const signature=cp.spawnSync('/usr/bin/codesign',['-dv','--verbose=2',bundle],{encoding:'utf8'});
    assert.equal(signature.status,0);assert.match(signature.stderr,/Signature=adhoc/);assert.match(signature.stderr,/TeamIdentifier=not set/);
    const icon=path.join(contents,'Resources',plist.CFBundleIconFile.endsWith('.icns')?plist.CFBundleIconFile:plist.CFBundleIconFile+'.icns');
-   assert.equal(fs.readFileSync(icon).subarray(0,4).toString(),'icns');
-   const generated=path.join(dist,'.icon-icns','icon.icns');assert.equal(hash(icon),hash(generated));
+   require('./check-icns.cjs').validate(fs.readFileSync(icon));
+   assert.equal(hash(icon),hash(build.mac.icon),'Bundled icon differs from pinned Apple ICNS');
    console.log(run('python3',[path.join(root,'tests/desktop/verify-resources.py'),path.join(contents,'Resources','assets')]));
    console.log(run('python3',[path.join(root,'tests/desktop/check-samples.py'),path.join(contents,'Resources','assets')]));
    const asar=require('node:module').createRequire(path.join(root,'desktop/node_modules/app-builder-lib/package.json'))('@electron/asar'),archive=path.join(contents,'Resources','app.asar');

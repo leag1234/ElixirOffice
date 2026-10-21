@@ -53,7 +53,7 @@ async function guardedBoot(document=false,injected=''){
    require:name=>name==='node:test'?()=>{}:name==='node:vm'?wrappedVM:load(name),module:moduleScope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate
   });
   const env=await moduleScope.exports.boot({document});
-  try{assert.equal(env.window.url,load('../../desktop/resources.cjs').ORIGIN+'/index.html');if(document)assert(env.selected.token);assert.deepEqual(calls,[]);}
+  try{assert.equal(env.shell.url,load('../../desktop/resources.cjs').ORIGIN+'/tabs.html');assert.equal(env.documents[0].getURL(),load('../../desktop/resources.cjs').ORIGIN+'/index.html');if(document)assert(env.selected.token);assert.deepEqual(calls,[]);}
   finally{await env.cleanup()}
  }finally{
   Module._load=originalLoad;global.fetch=originalFetch;

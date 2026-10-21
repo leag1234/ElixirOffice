@@ -5,33 +5,49 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const source=path.resolve(__dirname,'../../desktop/main.cjs'),load=createRequire(source),{ORIGIN}=load('./resources.cjs');
 const tick=()=>new Promise(setImmediate);
 const closeCancel=process.platform==='darwin'?1:2,closeDontSave=process.platform==='darwin'?2:1;
-async function boot({platform=process.platform,document=false,failRemove=false,safeStorage,systemLanguages=["en"],systemLocale="en",captureLocales,getRendererState,onSend,onShow,onPrint,fontSettings}={}){
+async function boot({platform=process.platform,document=false,failRemove=false,safeStorage,systemLanguages=["en"],systemLocale="en",captureLocales,printSentinel=false,fontService,getRendererState,onSend,onShow,onPrint,fontSettings,timerDelay=ms=>ms,queuedPaths=[]}={}){
  // Each VM models a fresh app process; createRequire otherwise shares its write barrier and warnings.
  const sessionFiles=load('./files.cjs');sessionFiles.resumeWrites();for(const warning of sessionFiles.writeWarnings())sessionFiles.acknowledgeWriteWarning(warning.key);
- const directory=await fs.mkdtemp(path.join(os.tmpdir(),'eo-close-recovery-')),handlers=new Map(),dialogs=[],responses=[],saveResponses=[],state={dirty:false},sent=[],windows=[],app=new EventEmitter();
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'eo-close-recovery-')),handlers=new Map(),dialogs=[],dialogParents=[],saveDialogs=[],responses=[],saveResponses=[],state={dirty:false},sent=[],windows=[],documentContents=[],app=new EventEmitter();
  if(fontSettings)await fs.writeFile(path.join(directory,'desktop-settings.json'),JSON.stringify({recents:[],...fontSettings}));
- let window,started=false,removeCalls=0;
- Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(){},getPath:()=>directory,requestSingleInstanceLock:()=>true,whenReady:()=>Promise.resolve(),getPreferredSystemLanguages:()=>systemLanguages,getLocale:()=>systemLocale,quit(){},isReady:()=>true,exit(code){this.exitCode=code;},getVersion:()=> '0.1.0',setAboutPanelOptions(options){this.aboutOptions=options},showAboutPanel(){this.aboutShown=true}});
+ const printSentinelPath=path.join(directory,'print-jobs','job-PUBLIC','document.pdf');
+ if(printSentinel){await fs.mkdir(path.dirname(printSentinelPath),{recursive:true});await fs.writeFile(printSentinelPath,'%PDF-public-sentinel');}
+ const appPaths={userData:directory};
+ let window,focusedWindow,started=false,removeCalls=0;
+ Object.assign(app,{isPackaged:false,commandLine:{appendSwitch(){}},setPath(name,value){appPaths[name]=value},getPath:name=>appPaths[name]||directory,requestSingleInstanceLock:()=>true,whenReady:()=>Promise.resolve(),getPreferredSystemLanguages:()=>systemLanguages,getLocale:()=>systemLocale,quit(){app.quitCalls=(app.quitCalls||0)+1;},isReady:()=>true,exit(code){this.exitCode=code;},getVersion:()=> '0.1.0',setAboutPanelOptions(options){this.aboutOptions=options},showAboutPanel(){this.aboutShown=true}});
+ function contents(url){
+  const wc=new EventEmitter(),rendererState=documentContents.length?{dirty:false}:state;
+  Object.assign(wc,{mainFrame:{url},state:rendererState,dead:false,isDestroyed(){return this.dead;},getURL(){return this.mainFrame.url;},focus(){},setWindowOpenHandler(){},send(...args){sent.push(args);onSend?.(...args)},executeJavaScript:async expression=>getRendererState?getRendererState(expression,wc):({...wc.state,opening:wc.state.opening===true}),loadURL:async function(url){this.mainFrame.url=url;started=true;},close(){this.dead=true;this.emit('destroyed');}});
+  return wc;
+ }
+ class View{
+  constructor(){this.webContents=contents(ORIGIN+'/index.html');documentContents.push(this.webContents);}
+  setVisible(value){this.visible=value;}setBounds(value){this.bounds=value;}
+ }
  class Window extends EventEmitter{
-  constructor(options={}){super();this.options=options;window=this;windows.push(this);this.webContents=new EventEmitter();Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/index.html'},setWindowOpenHandler(){},send(...args){sent.push(args);onSend?.(...args)},executeJavaScript:async expression=>getRendererState?getRendererState(expression):({...state,opening:state.opening===true})});this.webContents.print=(options,callback)=>onPrint?onPrint(options,callback):callback(false,'cancelled');this.webContents.loadURL=async url=>this.loadURL(url);this.webContents.session={};if(options.show===false)this.webContents.mainFrame.framesInSubtree=[{url:'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/index.html',executeJavaScript:async()=>({recognized:true,state:'success',progress:100,initial:true,pages:1})}];}
+  static getFocusedWindow(){return focusedWindow;}
+  constructor(options={}){super();this.options=options;if(!window)window=this;focusedWindow=this;windows.push(this);this.contentView={addChildView(){},removeChildView(){}};this.webContents=contents(ORIGIN+'/tabs.html');Object.assign(this.webContents,{mainFrame:{url:ORIGIN+'/tabs.html'},setWindowOpenHandler(){},send(...args){sent.push(args);onSend?.(...args)},executeJavaScript:async expression=>getRendererState?getRendererState(expression):({...state,opening:state.opening===true})});this.webContents.print=(options,callback)=>onPrint?onPrint(options,callback):callback(false,'cancelled');this.webContents.loadURL=async url=>this.loadURL(url);this.webContents.session={};if(options.show===false)this.webContents.mainFrame.framesInSubtree=[{url:'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/index.html',executeJavaScript:async()=>({recognized:true,state:'success',progress:100,initial:true,pages:1})}];}
+  getContentSize(){return [1360,960]}
   setMenuBarVisibility(value){this.menuBarVisible=value}
-  setTitle(){} setContentSize(){} show(){} focus(){} isDestroyed(){return this.closed===true}
-  async loadURL(url){this.url=url;started=true}
-  destroy(){this.closed=true;this.destroyed=true}
+  setTitle(){} setContentSize(){} show(){} focus(){focusedWindow=this} getParentWindow(){return this.options.parent||null} isDestroyed(){return this.closed===true}
+  async loadURL(url){this.url=url;this.webContents.mainFrame.url=url;}
+  destroy(){this.closed=true;this.destroyed=true;this.webContents.dead=true;this.emit('closed');}
   close(){let stopped=false;this.emit('close',{preventDefault(){stopped=true}});if(!stopped)this.closed=true}
  }
  const ses={protocol:{handle(){}},webRequest:{onBeforeRequest(){}},setPermissionCheckHandler(){},setPermissionRequestHandler(){},on(){}};
- const electron={clipboard:{writeText(text){app.copiedDiagnostics=text}},safeStorage,app,BrowserWindow:Window,ipcMain:{handle:(name,fn)=>handlers.set(name,fn)},protocol:{registerSchemesAsPrivileged(){}},session:{fromPartition:()=>ses},net:{fetch(){}},shell:{openExternal(){},showItemInFolder(target){onShow?.(target);}},Menu:{buildFromTemplate:x=>x,setApplicationMenu(){}},dialog:{showSaveDialog:async()=>saveResponses.shift()||{canceled:true},showErrorBox:(...x)=>{throw Error('Unexpected startup error '+x)},showMessageBox:async(_win,options)=>{dialogs.push(options);const response=responses.shift();return typeof response==='function'?await response():{response:response??0}}}};
+ const electron={clipboard:{writeText(text){app.copiedDiagnostics=text}},safeStorage,app,BrowserWindow:Window,WebContentsView:View,ipcMain:{handle:(name,fn)=>handlers.set(name,fn)},protocol:{registerSchemesAsPrivileged(){}},session:{fromPartition:()=>ses},net:{fetch(){}},shell:{openExternal(){},showItemInFolder(target){onShow?.(target);}},Menu:{buildFromTemplate:x=>x,setApplicationMenu(menu){app.menu=menu}},dialog:{showSaveDialog:async(_win,options)=>{saveDialogs.push(options);const value=saveResponses.shift();return typeof value==='function'?await value():value||{canceled:true}},showErrorBox:(...x)=>{throw Error('Unexpected startup error '+x)},showMessageBox:async(_win,options)=>{dialogs.push(options);dialogParents.push(_win);const response=responses.shift();return typeof response==='function'?await response():{response:response??0}}}};
  const Base=load('./recovery.cjs').Recovery;
  class Recovery extends Base{remove(id){removeCalls++;if(failRemove)return Promise.reject(Error('Injected recovery cleanup failure'));return super.remove(id)}}
  const filename=path.join(directory,document==='pdf'?'test.pdf':'test.docx');if(document)await fs.writeFile(filename,document==='pdf'?'%PDF-public-source':'PKtest-public-document');
- const context={require:name=>name==='electron'?electron:name==='./recovery.cjs'?{Recovery}:name==='./capture.cjs'&&captureLocales?{...load(name),run:()=>new Promise(()=>{})}:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:Object.assign(new EventEmitter(),{platform,getuid:process.getuid,stdout:new EventEmitter(),stderr:new EventEmitter(),argv:['electron',source,...(captureLocales?['--capture-screens',path.join(directory,'captures'),'--locales',captureLocales]:[]),...(document?[filename]:[])],env:{}}),console:{...console},JSON:vm.runInThisContext('JSON'),Buffer,Uint8Array,setTimeout,clearTimeout,URL};
+ const context={require:name=>name==='electron'?electron:name==='./fonts.cjs'&&fontService?{Fonts:class{constructor(){return fontService}}}:name==='./recovery.cjs'?{Recovery}:name==='./capture.cjs'&&captureLocales?{...load(name),run:()=>new Promise(()=>{})}:load(name),module:{exports:{}},exports:{},__dirname:path.dirname(source),process:Object.assign(new EventEmitter(),{platform,getuid:process.getuid,stdout:new EventEmitter(),stderr:new EventEmitter(),argv:['electron',source,...(captureLocales?['--capture-screens',path.join(directory,'captures'),'--locales',captureLocales]:[]),...(document?[filename]:[])],env:{}}),console:{...console},JSON:vm.runInThisContext('JSON'),Buffer,Uint8Array,setTimeout:(fn,ms,...args)=>setTimeout(fn,timerDelay(ms),...args),clearTimeout,URL};
  vm.runInNewContext(await fs.readFile(source,'utf8'),context,{filename:source});
+ for(const file of queuedPaths)app.emit('open-file',{preventDefault(){}},file);
  for(let i=0;i<100&&!started;i++)await new Promise(resolve=>setTimeout(resolve,10));assert(started,'Main did not initialize');
- const event={sender:window.webContents,senderFrame:window.webContents.mainFrame};
- const invoke=(name,...args)=>handlers.get('eo:'+name)(event,...args);
+ const event={sender:documentContents[0],senderFrame:documentContents[0].mainFrame};context.__testEvent=event;
+ const invoke=(name,...args)=>handlers.get('eo:'+name)(event,...(name==='closed-saved'&&!args.length?[sent.findLast(item=>item[1]==='save-close')?.[2]?.attemptId]:args));
  const selected=document?await invoke('initial'):null;
- return {directory,window,windows,app,handlers,process:context.process,dialogs,responses,saveResponses,state,sent,invoke,flushSafety:()=>vm.runInNewContext('safety.flush()',context),flushCloseLog:()=>vm.runInNewContext('closeLogWrite',context),logReason:reason=>vm.runInNewContext('closeReason('+JSON.stringify(reason)+')',context),stallPreferences:()=>vm.runInNewContext('preferences.flush=()=>new Promise(()=>{})',context),rejectDialogs:()=>{const original=electron.dialog.showMessageBox;electron.dialog.showMessageBox=()=>Promise.reject(Error('Injected native dialog rejection'));return ()=>{electron.dialog.showMessageBox=original}},selected,discard:()=>vm.runInNewContext('discard()',context),get removeCalls(){return removeCalls},async cleanup(){await vm.runInNewContext('closeLogWrite',context);await vm.runInNewContext('safety.flush()',context);await fs.rm(directory,{recursive:true,force:true})}};
+ // Legacy window fault hooks deliberately address the document view, not the trusted shell.
+ return {directory,printSentinelPath,shell:window,documents:documentContents,invokeFor:(contents,name,...args)=>handlers.get('eo:'+name)({sender:contents,senderFrame:contents.mainFrame},...args),window:new Proxy(window,{get(target,key){if(key==='webContents')return documentContents[0];const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}}),windows,app,handlers,process:context.process,dialogs,dialogParents,saveDialogs,responses,saveResponses,state,sent,invoke,setFocusedWindow:value=>{focusedWindow=value},quit:()=>vm.runInNewContext('quitApplication()',context),pendingCount:()=>vm.runInNewContext('pendingPaths.length+registry.windows().flatMap(owner=>owner.documents).reduce((count,id)=>count+registry.document(id).state.pending.length,0)',context),closeCompletion:()=>vm.runInNewContext('registry.window(registry.authorizeDocument(__testEvent).windowId).closePromise',context),flushSafety:()=>vm.runInNewContext('safety.flush()',context),flushCloseLog:()=>vm.runInNewContext('closeLogWrite',context),logReason:reason=>vm.runInNewContext('closeReason('+JSON.stringify(reason)+')',context),stallPreferences:()=>vm.runInNewContext('preferences.flush=()=>new Promise(()=>{})',context),rejectDialogs:()=>{const original=electron.dialog.showMessageBox;electron.dialog.showMessageBox=()=>Promise.reject(Error('Injected native dialog rejection'));return ()=>{electron.dialog.showMessageBox=original}},selected,discard:()=>vm.runInNewContext('registry.run(registry.authorizeDocument(__testEvent),()=>discard())',context),get removeCalls(){return removeCalls},async cleanup(){await vm.runInNewContext('closeLogWrite',context);await vm.runInNewContext('safety.flush()',context);await fs.rm(directory,{recursive:true,force:true})}};
 }
 test('fresh clean Home closes without a save/recovery error prompt',async()=>{
  const env=await boot();try{env.window.close();for(let n=0;n<30&&!env.window.closed;n++)await tick();assert.equal(env.window.closed,true);assert.deepEqual(env.dialogs,[]);assert.equal(env.removeCalls,0)}finally{await env.cleanup()}
@@ -193,17 +209,18 @@ test('PDF native atomic Save, cancelled Save As and concurrent replacement prote
  }finally{await b.cleanup();}
 });
 
-test('a stuck opening/save state offers a visible choice, Cancel unlocks and retry can discard',async()=>{
+test('a stuck opening/save state offers a visible choice, Cancel unlocks and retry can discard',{timeout:5000},async()=>{
  const env=await boot({document:true});
  try{
   env.state.opening=true;env.responses.push(0);env.window.close();
-  for(let n=0;n<30&&!env.dialogs.length;n++)await tick();
-  for(let n=0;n<5;n++)await tick();
+  const cancelled=env.closeCompletion();assert(cancelled&&typeof cancelled.then==='function');
+  assert.equal(await cancelled,false,'Cancel must complete the actual close attempt');
   assert.equal(env.dialogs.length,1,'Busy close must reach the user');
   assert.equal(env.window.closed,undefined);
   assert(env.sent.some(args=>args[0]==='eo:action'&&args[1]==='resume-close'),'Cancel must release the input lock');
   env.responses.push(1);env.window.close();
-  for(let n=0;n<30&&!env.window.closed;n++)await tick();
+  const discarded=env.closeCompletion();assert(discarded&&typeof discarded.then==='function');
+  assert.equal(await discarded,true,'Discard must complete the actual close attempt');
   assert.equal(env.window.closed,true,'A subsequent explicit Discard must close');
   assert.equal(env.removeCalls,0,'Unknown/busy state must preserve recovery data');
   // Await the real serialized writer; closing deliberately does not wait for logging.
@@ -230,14 +247,14 @@ test('a hung renderer times out safely and a late state reply cannot lock the UI
 });
 test('renderer save-close unlocks after cancelled save, rejected save or rejected acknowledgement',async()=>{
  const sourceText=require('node:fs').readFileSync(path.join(__dirname,'../../desktop/renderer.js'),'utf8');
- const match=sourceText.match(/eoDesktop\.onAction\((async action=>\{[\s\S]*?)\n\}\);/);assert(match);
+ const match=sourceText.match(/eoDesktop\.onAction\((async \(action,details\)=>\{[\s\S]*?)\n\}\);/);assert(match);
  for(const mode of ['cancel','save-rejection','ack-rejection']){
   let handler,failures=0;
-  const context={closeCheck:true,choosingSaveAs:false,pendingRequested:false,setTimeout,
+  const context={closeCheck:true,choosingSaveAs:false,pendingRequested:false,fontRefreshRequested:false,setTimeout,
    save:async()=>{if(mode==='save-rejection')throw Error('Injected save error');return mode!=='cancel'},
-   fail:()=>{failures++},eoDesktop:{onAction:fn=>{handler=fn},closeSaved:async()=>{throw Error('Injected acknowledgement error')}}};
+   fail:()=>{failures++},eoDesktop:{onAction:fn=>{handler=fn},closeCancelled:async()=>{},closeSaved:async()=>{throw Error('Injected acknowledgement error')}}};
   vm.runInNewContext('eoDesktop.onAction('+match[1]+'\n});',context);
-  await handler('save-close');assert.equal(context.closeCheck,false,mode);
+  await handler('save-close',{attemptId:'test-attempt'});assert.equal(context.closeCheck,false,mode);
   assert.equal(failures,mode==='cancel'?0:1,mode);
  }
 });
@@ -280,9 +297,15 @@ test('a rejected native close dialog releases the input lock and permits a later
 test('saved-close acknowledgement rechecks a late edit instead of destroying unsaved state',async()=>{
  const env=await boot({document:true});
  try{
-  env.state.dirty=true;await env.invoke('closed-saved');assert.equal(env.window.destroyed,undefined);
+  env.state.dirty=true;env.responses.push(0);env.window.close();
+  for(let n=0;n<100&&!env.sent.some(args=>args[1]==='save-close');n++)await new Promise(resolve=>setTimeout(resolve,10));
+  const first=env.sent.findLast(args=>args[1]==='save-close')?.[2]?.attemptId;assert(first);
+  await env.invoke('closed-saved',first);assert.equal(env.window.destroyed,undefined);
   assert(env.sent.some(args=>args[1]==='resume-close'));
-  env.state.dirty=false;await env.invoke('closed-saved');assert.equal(env.window.destroyed,true);
+  env.responses.push(0);env.window.close();
+  for(let n=0;n<100&&env.sent.findLast(args=>args[1]==='save-close')?.[2]?.attemptId===first;n++)await new Promise(resolve=>setTimeout(resolve,10));
+  const second=env.sent.findLast(args=>args[1]==='save-close')?.[2]?.attemptId;assert(second);assert.notEqual(first,second);
+  env.state.dirty=false;await env.invoke('closed-saved',second);assert.equal(env.window.destroyed,true);
  }finally{await env.cleanup()}
 });
 
@@ -335,9 +358,9 @@ test('forgotten main-process rejection leaves IPC and the document alive',async(
 
 test('native actions wait for Save As selection while close lock/resume remain responsive',async()=>{
  const sourceText=require('node:fs').readFileSync(path.join(__dirname,'../../desktop/renderer.js'),'utf8');
- const match=sourceText.match(/eoDesktop\.onAction\((async action=>\{[\s\S]*?)\n\}\);/);assert(match);
+ const match=sourceText.match(/eoDesktop\.onAction\((async \(action,details\)=>\{[\s\S]*?)\n\}\);/);assert(match);
  let handler,calls=0;
- const context={closeCheck:false,choosingSaveAs:true,pendingRequested:false,
+ const context={closeCheck:false,choosingSaveAs:true,pendingRequested:false,fontRefreshRequested:false,
   eoDesktop:{onAction:fn=>{handler=fn}},run:()=>{calls++}};
  vm.runInNewContext('eoDesktop.onAction('+match[1]+'\n});',context);
  await handler('open');assert.equal(calls,0);
@@ -391,4 +414,21 @@ test('fresh desktop enables system fonts while explicit decline and capture rema
    if(allowed){const settings=JSON.parse(await fs.readFile(path.join(env.directory,'desktop-settings.json'),'utf8'));assert.equal(settings.fontChoice,'default');assert.equal(env.dialogs.length,0);}
   }finally{await env.cleanup();}
  }
+});
+
+test('capture startup print-job root preserves ordinary-profile pending print bytes',async()=>{
+ const env=await boot({captureLocales:'en',printSentinel:true});
+ try{
+  assert.notEqual(env.app.getPath('userData'),env.directory);
+  assert.equal(await fs.readFile(env.printSentinelPath,'utf8'),'%PDF-public-sentinel');
+  assert.equal((await fs.stat(path.join(env.app.getPath('userData'),'print-jobs'))).isDirectory(),true);
+ }finally{await env.cleanup()}
+});
+test('ordinary startup print-job root still reaps interrupted jobs in its own profile',async()=>{
+ const env=await boot({printSentinel:true});
+ try{
+  assert.equal(env.app.getPath('userData'),env.directory);
+  await assert.rejects(fs.stat(env.printSentinelPath),error=>error.code==='ENOENT');
+  assert.equal((await fs.stat(path.join(env.directory,'print-jobs'))).isDirectory(),true);
+ }finally{await env.cleanup()}
 });

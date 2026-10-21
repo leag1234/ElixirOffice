@@ -26,6 +26,12 @@ window.EODesktopBackstage=async function(win,main,info,action){
   for(const item of [fm.miRecent,fm.miRename,fm.miProtect,fm.miHistory,fm.miAccess,fm.miSaveCopyAs])item?.hide();
   this.items['elx-ai']?.[win.Common.ElixirAI?.Settings?.isConfigured?.()?'show':'hide']();
   this.items['elx-about']?.show();this.items['elx-about']?.setDisabled(false);
+  if(!info.capture&&!this.items['eo-move']){
+   const el=$('<li id="fm-btn-eo-move" class="fm-btn" role="menuitem" tabindex="0"/>').attr('aria-label',t('tabMove')).insertAfter(fm.$el.find('#fm-btn-elx-close'));
+   const item=new win.Common.UI.MenuItem({el,action:'eo-move',caption:t('tabMove'),canFocused:true,iconCls:'menu__icon'});
+   fm.items.push(item);this.items['eo-move']=item;
+   item.on('click',()=>{fm.hide();return action('move-menu')});
+  }
   if(!this.items['eo-quit']){
    const el=$('<li id="fm-btn-eo-quit" class="fm-btn"/>').insertAfter(fm.$el.find('#fm-btn-elx-about'));
    const item=new win.Common.UI.MenuItem({el,action:'eo-quit',caption:t('quit'),canFocused:false,iconCls:'menu__icon'});
@@ -73,14 +79,41 @@ window.EODesktopBackstage=async function(win,main,info,action){
  bs.enhanceSaveAs=function(){const panel=ensurePanel('saveas');if(!panel)return;panel.$el.empty().append($('<button class="btn btn-primary" type="button"/>').text(t('saveAs')).on('click',()=>action('save-as')),$('<button data-action="rename" type="button"/>').text(bs.txtRename).on('click',()=>{fm.hide();action('rename')}))};
  bs.enhancePrint=function(){};
  bs.onAbout=()=>{fm.hide();return action('about')};
- bs.onClose=()=>action('home');
+ bs.onClose=()=>action('close');
  // Controller callbacks were bound before this desktop extension was installed.
  // Dispatch native commands before those existing web handlers receive the event.
  const openBackstage=chrome.openBackstage;chrome.openBackstage=function(){const result=openBackstage.apply(this,arguments);parent.dispatchEvent(new parent.CustomEvent('eo:backstage-visibility',{detail:true}));return result;};
  const hideFile=fm.hide;fm.hide=function(){const result=hideFile.apply(this,arguments);parent.dispatchEvent(new parent.CustomEvent('eo:backstage-visibility',{detail:false}));return result;};
+ // Keep keyboard focus inside the visible File surface, away from covered
+ // ribbon controls with positive tab indexes.
+ win.document.addEventListener('keydown',event=>{
+  const root=fm.$el?.[0];if(!root||!fm.$el.is(':visible'))return;
+  if(event.isComposing||event.keyCode===229||event.ctrlKey||event.altKey||event.metaKey)return;
+  if($(win.document).find('.asc-window.modal:visible,[role="dialog"][aria-modal="true"]:visible').length)return;
+  const active=win.document.activeElement;
+  if(event.key==='Tab'){
+   const nodes=[...root.querySelectorAll('.fm-btn,button,input,select,textarea,a[href],[tabindex]')].filter(node=>{
+    const item=node.closest('.fm-btn');
+    return (!item||item===node)&&!node.disabled&&!node.closest('.disabled,[inert]')&&node.getAttribute('aria-disabled')!=='true'&&node.getAttribute('aria-hidden')!=='true'&&!node.classList.contains('divider')&&node.getClientRects().length>0&&win.getComputedStyle(node).visibility!=='hidden';
+   });
+   if(!nodes.length)return;
+   const index=nodes.findIndex(node=>node===active||node.contains(active));
+   const next=index<0?(event.shiftKey?nodes.length-1:0):(index+(event.shiftKey?-1:1)+nodes.length)%nodes.length;
+   event.preventDefault();event.stopImmediatePropagation();
+   if(!nodes[next].matches('button,input,select,textarea,a[href],[tabindex]'))nodes[next].setAttribute('tabindex','-1');
+   // A modal close can re-enable SDK input while File remains visible.
+   // Disable its focus redirection before moving to a File control.
+   main.api.asc_enableKeyEvents?.(false);
+   nodes[next].focus();return;
+  }
+  const item=active?.closest?.('.fm-btn');
+  if((event.key==='Enter'||event.key===' ')&&item&&(active===item||active.matches('a.menu-item,[role="menuitem"]'))&&root.contains(item)&&!item.closest('.disabled,[inert]')&&item.getAttribute('aria-disabled')!=='true'){
+   event.preventDefault();event.stopImmediatePropagation();item.click();
+  }
+ },true);
  const fireEvent=fm.fireEvent;
  fm.fireEvent=function(event,args,...rest){
-  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'home','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
+  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'close','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
   if(command){this.hide();return action(command)}
   return fireEvent.call(this,event,args,...rest);
  };

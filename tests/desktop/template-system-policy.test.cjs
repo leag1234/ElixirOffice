@@ -34,7 +34,8 @@ test('actual main Home uses English immediately, shares discovery, refreshes lat
  function harness(failing=false){
   let calls=0,finish,ready=null;const events=[],settings={fontConsent:false},index={bundled:[],system:[]};
   const fonts={generation:0,peek:()=>ready,index(){calls++;return failing?Promise.reject(Error('public fixture discovery failure')):new Promise(resolve=>{finish=()=>{ready=index;resolve(index);};});}};
-  const context=vm.createContext({settings,captureOptions:null,fonts,win:{isDestroyed:()=>false,webContents:{send:(...args)=>events.push(args)}}});
+  const registry={windows:()=>[{id:'window'}],documents:()=>[{contents:{send:(...args)=>events.push(args)}}]};
+  const context=vm.createContext({registry,settings,captureOptions:null,fonts,win:{isDestroyed:()=>false,webContents:{send:(...args)=>events.push(args)}}});
   vm.runInContext(code,context);return {context,settings,fonts,index,events,calls:()=>calls,finish:()=>finish()};
  }
  const h=harness(),c=h.context;
@@ -59,9 +60,7 @@ test('actual main Home uses English immediately, shares discovery, refreshes lat
 test('registered main font IPC returns pending immediately, validates requests and observes a new generation',async()=>{
  const path=require('node:path'),{createRequire}=require('node:module');
  const helper=path.join(__dirname,'close-recovery.test.cjs'),load=createRequire(helper),moduleScope={exports:{}};
- const helperCode=fs.readFileSync(helper,'utf8')
-  .replace('captureLocales,getRendererState','captureLocales,fontService,getRendererState')
-  .replace("name==='electron'?electron:","name==='electron'?electron:name==='./fonts.cjs'&&fontService?{Fonts:class{constructor(){return fontService}}}:");
+ const helperCode=fs.readFileSync(helper,'utf8');
  vm.runInNewContext(helperCode+'\nmodule.exports={boot};',{require:name=>name==='node:test'?()=>{}:load(name),module:moduleScope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate});
  let ready=null,complete,calls=0;
  const fonts={generation:0,configure(){},peek:()=>ready,index(){calls++;return new Promise(resolve=>{complete=()=>{ready={id:'ready',bundled:[],system:[]};resolve(ready);};});},clear(){this.generation++;ready=null;}};
@@ -79,9 +78,9 @@ test('registered main font IPC returns pending immediately, validates requests a
 });
 test('font-ready Home refresh preserves the current view and respects close/save guards',async()=>{
  const source=fs.readFileSync(require.resolve('../../desktop/renderer.js'),'utf8');
- const code=source.slice(source.indexOf('eoDesktop.onAction(async action=>{'),source.indexOf("\ndocument.addEventListener('dragover'"));
+ const code=source.slice(source.indexOf('eoDesktop.onAction(async (action,details)=>{'),source.indexOf("\ndocument.addEventListener('dragover'"));
  let handler;const views=[],home={hidden:false,querySelector:()=>({dataset:{view:'new'}})};
- const context=vm.createContext({eoDesktop:{onAction:callback=>{handler=callback;}},$:()=>home,refreshHome:async view=>views.push(view),closeCheck:false,choosingSaveAs:false});
+ const context=vm.createContext({eoDesktop:{onAction:callback=>{handler=callback;}},$:()=>home,refreshHome:async view=>views.push(view),refreshFonts:async()=>{},fontRefreshRequested:false,closeCheck:false,choosingSaveAs:false});
  vm.runInContext(code,context);
  await handler('font-index-ready');assert.deepEqual(views,['new']);
  home.hidden=true;await handler('font-index-ready');assert.equal(views.length,1);

@@ -88,8 +88,8 @@ test('actual main copies only app-generated diagnostics and rejects iframe or fo
   const header=JSON.parse(env.app.copiedDiagnostics.trim().split('\n')[0]);
   assert.equal(header.app,'ElixirOffice');assert(!env.app.copiedDiagnostics.includes('PRIVATE'));assert(header.windowsBuild);
   const handler=env.handlers.get('eo:copy-save-diagnostics');
-  assert.throws(()=>handler({sender:{},senderFrame:env.window.webContents.mainFrame}),/desktop start window/);
-  assert.throws(()=>handler({sender:env.window.webContents,senderFrame:{url:env.window.webContents.mainFrame.url}}),/desktop start window/);
+  assert.throws(()=>handler({sender:{},senderFrame:env.window.webContents.mainFrame}),/registered document main frame/);
+  assert.throws(()=>handler({sender:env.window.webContents,senderFrame:{url:env.window.webContents.mainFrame.url}}),/registered document main frame/);
  }finally{if(env)await env.cleanup();await f.cleanup()}
 });
 test('successful replacement never deletes a backup substituted before immediate cleanup',async()=>{

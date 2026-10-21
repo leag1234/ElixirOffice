@@ -6,8 +6,8 @@ const source=fs.readFileSync(path.join(root,'desktop/renderer.js'),'utf8');
 const start=source.indexOf('async function showOptions(){'),end=source.indexOf('\nasync function',start+2);
 assert(start>=0&&end>start,'Load the complete production Options function');
 
-function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false}={}){
- const focused=[],boxes=[];let release,opened;const opening=new Promise(r=>opened=r);
+function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false,customTitleBar=false,customTitleBarAvailable=false}={}){
+ const focused=[],boxes=[],windowSaved=[];let release,opened;const opening=new Promise(r=>opened=r);
  const document={activeElement:null,createTextNode:text=>({text}),createElement:tag=>element(tag),querySelector:selector=>selector==='dialog[open]'?boxes.find(b=>b.open)||null:null};
  function element(tag,doc=document){
   const e={tagName:tag.toUpperCase(),ownerDocument:doc,isConnected:true,children:[],listeners:{},parentElement:null,
@@ -28,18 +28,20 @@ function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false
  if(closedInvoker){const old=element('dialog');old.className='desktop-options';old.open=false;invoker=element('button');old.append(invoker);}
  document.activeElement=invoker;
  const context={document,frame:originalFrame,file:originalFile,controller:originalController,main:null,
-  t:x=>x,eoDesktop:{recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
-  modal:()=>{const box=element('dialog');box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
+  t:x=>x,eoDesktop:{windowOptions:async()=>({customTitleBar,customTitleBarAvailable,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
+  modal:()=>{const box=element('dialog');box.className='desktop-options';box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
   addFontOptions:async()=>{},modalButton:(box,label,fn)=>{const b=element('button');b.textContent=label;b.action=fn;box.append(b);return b;}
  };
  vm.createContext(context);vm.runInContext(source.slice(start,end)+'\nthis.runOptions=showOptions;',context);
  const open=async()=>{const result=context.runOptions();await opening;return {box:boxes.at(-1),result};};
  const clear=()=>focused.splice(0);const close=box=>{box.close();clear();box.dispatchClose();};
- return {document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
+ return {windowSaved,document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
 }
 
 test('Options focuses its attached first recovery control before delayed author IPC',async()=>{
- const f=fixture({pending:true}),{box,result}=await f.open(),first=box.children[0].children[0];
+ const f=fixture({pending:true}),{box,result}=await f.open();
+ const controls=node=>(node.children||[]).flatMap(child=>['INPUT','SELECT','BUTTON'].includes(child.tagName)?[child]:controls(child));
+ const first=controls(box)[0];
  assert.equal(first.id,'recovery-enabled');assert.equal(f.document.activeElement,first);assert(box.contains(first));
  f.close(box);f.clear();f.release();await result;
  assert.deepEqual(f.focused,[],'Late detached content must not retake focus');
@@ -72,4 +74,14 @@ test('A replaced iframe Document cancels the old child restoration',async()=>{
 });
 for(const key of ['target','child'])test('A detached '+key+' cannot receive stale focus',async()=>{
  const f=fixture(),{box,result}=await f.open();await result;f[key].isConnected=false;f.close(box);assert.deepEqual(f.focused,[]);
+});
+
+
+for(const [customTitleBar,customTitleBarAvailable] of [[false,false],[true,false],[false,true]])test('grouped Options retains native-frame preference '+customTitleBar+'/'+customTitleBarAvailable,async()=>{
+ const f=fixture({customTitleBar,customTitleBarAvailable}),{box,result}=await f.open();await result;
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box),checkbox=nodes.find(e=>e.id==='custom-title-bar');
+ assert(checkbox);assert.equal(checkbox.checked,customTitleBar);assert.equal(checkbox.disabled,!customTitleBarAvailable&&!customTitleBar);
+ assert(nodes.some(e=>e.id==='custom-title-bar-description'));assert(nodes.some(e=>e.id==='custom-title-bar-note'));
+ checkbox.checked=false;await nodes.find(e=>e.className==='btn btn-primary').action();
+ assert.equal(f.windowSaved.length,1);assert.equal(f.windowSaved[0].customTitleBar,false);
 });

@@ -15,11 +15,25 @@ if [ -z "$AI_BASE" ]; then
   echo "  AI is OFF: no ELIXIR_AI_BASE_URL and no API key. The editor works fully and hides its AI entry points;"
   echo "  users can still connect their own service in File > AI. To enable: see docs/ai.md and .env.example."
 else
+  # Validate before the direct probe can send a key or document text.
+  if ! [[ "$AI_BASE" =~ ^https?://([A-Za-z0-9._-]+|\[[0-9A-Fa-f:]+\])(:[0-9]{1,5})?(/[A-Za-z0-9._~%/-]*)?$ ]]; then
+    bad "Invalid AI endpoint. Use HTTPS for remote services; HTTP is only allowed for literal loopback addresses."
+    exit 1
+  fi
+  if [[ "$AI_BASE" == http://* ]]; then
+    AUTHORITY=${AI_BASE#*://}; AUTHORITY=${AUTHORITY%%/*}
+    case "$(printf '%s' "$AUTHORITY" | tr '[:upper:]' '[:lower:]')" in
+      localhost|localhost:[0-9]*|127.0.0.1|127.0.0.1:[0-9]*|\[::1\]|\[::1\]:[0-9]*) ;;
+      *) bad "Remote AI services require HTTPS; HTTP is only allowed for localhost, 127.0.0.1 or [::1]."; exit 1 ;;
+    esac
+  fi
+  if [ -n "$AI_CA_FILE" ] && { ! [[ "$AI_CA_FILE" =~ ^/[A-Za-z0-9._/-]+$ ]] || [ ! -f "$AI_CA_FILE" ] || [ ! -r "$AI_CA_FILE" ]; }; then bad "Private CA must be a readable absolute certificate bundle"; exit 1; fi
+  providerCurl() { if [ -n "$AI_CA_FILE" ]; then curl --cacert "$AI_CA_FILE" "$@"; else curl "$@"; fi; }
   echo "  base URL : $AI_BASE"; echo "  model    : ${AI_MODEL:-(default of the server)}"; echo "  key      : $([ -n "$AI_KEY" ] && echo "set (${#AI_KEY} characters, not shown)" || echo "none (fine for Ollama and keyless endpoints)")"
-  [[ "$AI_BASE" =~ ^https?://[A-Za-z0-9._:-]+(/[A-Za-z0-9._~%/-]*)?$ ]] && ok "base URL syntax" || bad "base URL syntax (letters, digits . _ : - and path only)"
+  ok "base URL syntax and HTTPS/loopback policy"
   M="${AI_MODEL:-gpt-4.1-mini}"
   BODY=$(printf '{"model":"%s","messages":[{"role":"user","content":"Reply with: ok"}],"max_tokens":5}' "$M")
-  R=$(curl -sS -m 30 -o /tmp/.eo-ai-check.$$ -w '%{http_code}' -H 'Content-Type: application/json' ${AI_KEY:+-H "Authorization: Bearer $AI_KEY"} -d "$BODY" "$AI_BASE/chat/completions" 2>&1) || true
+  R=$(providerCurl -sS -m 30 -o /tmp/.eo-ai-check.$$ -w '%{http_code}' -H 'Content-Type: application/json' ${AI_KEY:+-H "Authorization: Bearer $AI_KEY"} -d "$BODY" "$AI_BASE/chat/completions" 2>&1) || true
   if [ "$R" = "200" ]; then ok "provider answers (HTTP 200) for model $M"
   else bad "provider call: ${R:-no answer} $(head -c 200 /tmp/.eo-ai-check.$$ 2>/dev/null | tr -d '\n' | sed "s/${AI_KEY:-@@@@}/***/g")"; fi
   rm -f /tmp/.eo-ai-check.$$

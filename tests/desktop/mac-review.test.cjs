@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 const test=require('node:test'),assert=require('node:assert/strict');
 const {template}=require('../../desktop/menu.cjs'),{configuration}=require('../../tools/desktop/mac-config.cjs'),{clean,types,unused}=require('../../tools/desktop/mac-after-pack.cjs');
-test('Mac menus preserve editor undo/redo and standard close role',()=>{
+test('Mac menus preserve editor undo/redo, native window role and document Close accelerator',()=>{
  const menu=template('darwin',()=>()=>{},()=>{});assert.deepEqual(menu.map(item=>item.label),['ElixirOffice','File','Edit','Window','Help']);
  for(const platform of ['darwin','linux','win32'])for(const item of template(platform,()=>()=>{},()=>{}).find(item=>item.label==='Edit').submenu.filter(item=>['undo','redo'].includes(item.role)))assert.equal(item.accelerator,'');
+ assert.equal(menu.find(item=>item.label==='File').submenu.find(item=>item.label==='Close').accelerator,'CommandOrControl+W');
  assert(menu[0].submenu.some(item=>item.role==='services'));assert(menu[0].submenu.some(item=>item.label==='Settings…'));
- assert.equal(menu.find(item=>item.label==='Window').submenu.find(item=>item.role==='close').accelerator,'Command+W');
+ assert.equal(menu.find(item=>item.label==='Window').submenu.find(item=>item.role==='close').accelerator,'');
 });
 test('Mac metadata never advertises unused permissions or default ownership',()=>{
  const plist=clean({...Object.fromEntries(unused.map(key=>[key,'unused'])),CFBundleIconFile:'icon.icns'},true);

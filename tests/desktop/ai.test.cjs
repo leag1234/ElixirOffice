@@ -4,7 +4,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),http=requir
 const ai=require('../../desktop/ai.cjs');
 test('AI endpoints allow HTTPS and literal loopback HTTP only',()=>{
  for(const value of ['https://example.org/v1','http://localhost:11434/v1','http://127.0.0.1:8123/v1','http://[::1]:8123/v1'])assert(ai.endpoint(value));
- for(const value of ['http://example.org/v1','http://192.0.2.10','file:///tmp','https://u:p@example.org','https://example.org?a=b','https://example.org/#hash',' https://example.org','http://localhost.example.org'])assert.throws(()=>ai.endpoint(value),value);
+ for(const value of ['http://example.org/v1','http://192.0.2.10','file:///tmp','https://u:p@example.org','https://example.org?a=b','https://example.org/#hash',' https://example.org','http://localhost.example.org','http://localhost:0/v1','https://example.org:0/v1','http://127.1/v1','http://2130706433/v1','http://0177.0.0.1/v1','http://%6cocalhost/v1','http://[0:0:0:0:0:0:0:1]/v1'])assert.throws(()=>ai.endpoint(value),value);
  assert.throws(()=>ai.configuration({endpoint:'http://localhost',model:''}),/model/);
 });
 test('native AI sends only approved model requests and never follows redirects',async()=>{

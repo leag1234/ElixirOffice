@@ -11,7 +11,7 @@ function policy(editor){
 function resolve(url,assets,shell){
  let relative;try{relative=decodeURIComponent(url.pathname)}catch{return {status:400}}
  let root;
- if(['/index.html','/renderer.js','/style.css','/pdf.js','/home.js','/backstage.js','/ai.js','/errors.js','/pdf-compat.js','/feedback.js','/feedback.css','/font-resolver.js','/computer-fonts.js'].includes(relative)){root=shell;relative=relative.slice(1)}
+ if(['/tabs.html','/tabs.js','/tabs.css','/index.html','/renderer.js','/style.css','/pdf.js','/home.js','/backstage.js','/ai.js','/errors.js','/pdf-compat.js','/feedback.js','/feedback.css','/font-resolver.js','/computer-fonts.js'].includes(relative)){root=shell;relative=relative.slice(1)}
  else if(/^\/example\/local-assets\/sdkjs\/common\/desktop\/(pdf|legacy-worker)\.js$/.test(relative)){root=shell;relative=path.basename(relative)}
  else if(relative.startsWith('/example/local-assets/')){
   root=assets;relative=relative.slice('/example/local-assets/'.length).replace(/^\d+\.\d+\.\d+-[a-f0-9]+\//,'');
@@ -74,9 +74,19 @@ async function response(request,assets,shell,transport){
   return new Response(request.method==='HEAD'?null:body,{status:range?206:200,headers});
  }catch(error){return new Response('Missing',{status:error.code==='ENOENT'?404:500})}
 }
+function createFileFetch({net,session,capture=false,identity}){
+ if(!capture)return url=>net.fetch(url);
+ // net.fetch creates a persistent default-session network context. Keep capture
+ // file reads in memory so its shutdown cannot recreate a removed private profile.
+ const isolated=session.fromPartition('elixiroffice-capture-transport-'+identity,{cache:false});
+ return url=>{
+  if(new URL(url).protocol!=='file:')throw Error('Capture file transport accepts only local files');
+  return isolated.fetch(url);
+ };
+}
 async function createHandler(assets,shell,fetch){
  const manifest=JSON.parse(await fs.readFile(path.join(assets,'desktop-manifest.json'),'utf8'));
  const transport={files:manifest.files,html:new Map(),fetch};
  return request=>response(request,assets,shell,transport);
 }
-module.exports={SCHEME,ORIGIN,response,policy,createHandler,byteRange};
+module.exports={SCHEME,ORIGIN,response,policy,createHandler,createFileFetch,byteRange};

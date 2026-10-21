@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -28,6 +28,7 @@
       "*.html",
       "*.css",
       "package.json",
+      "tab-strings.json",
       "icon.png",
       "build-info.json",
       "!build-identity-before-pack.cjs"
@@ -95,7 +96,7 @@
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",
-      "icon": "icon.png",
+      "icon": "../tools/desktop/artwork/mac-icon.icns",
       "identity": null,
       "hardenedRuntime": true,
       "notarize": false,

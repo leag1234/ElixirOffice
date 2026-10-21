@@ -6,10 +6,14 @@ const functions=source.slice(source.indexOf('async function fontConsent()'),sour
 function setup(initial,answers){
  let choice=initial,permission=choice==='granted',dialogs=0,reads=0,disable=0,reloads=0;const elements=[];
  const createElement=tag=>{const e={tag,children:[],append(...nodes){this.children.push(...nodes)},addEventListener(name,fn){this[name]=fn}};elements.push(e);return e};
- const LF={fonts:['cached'],setConsent(value){this.consent=value},setStatus(value){this.status=value},async readList(){reads++},async enable(){this.enabled=true}};
+ const LF={fonts:['cached'],hasConsent(){return !!this.consent},setConsent(value){this.consent=value},setStatus(value){this.status=value},async readList(){reads++},async enable(){this.enabled=true}};
  const eoDesktop={async fontPermission(){return permission},async fontChoice(){return choice},async fontConsent(){if(permission)return true;dialogs++;permission=answers.shift()===true;choice=permission?'granted':'declined';return permission},async fontDisable(){disable++;permission=false;choice='declined';return true}};
- const errors=[],context={document:{createElement,createTextNode:text=>({text})},eoDesktop,frame:{Common:{ElixirLocalFonts:LF},location:{reload(){reloads++}}},main:{api:{}},t:key=>key,installFonts:async()=>{LF.setConsent(permission)},status(){},fail:error=>errors.push(error)};
- vm.createContext(context);vm.runInContext(functions,context);
+ const errors=[],context={document:{createElement,createTextNode:text=>({text})},eoDesktop,frame:{Common:{ElixirLocalFonts:LF},location:{reload(){reloads++}}},main:{api:{}},t:key=>key,installFonts:async()=>{LF.setConsent(permission);await LF.readList();return true},status(){},fail:error=>errors.push(error)};
+ const session={win:context.frame,api:context.main.api,file:{},controller:{}};
+ Object.assign(context,{window:{EOLocalSession:session},file:session.file,controller:session.controller,opening:false,operationBusy:false,choosingSaveAs:false,closeCheck:false,fontRefreshRequested:false,fontRefreshRunning:false,fontRefreshNotify:false,setTimeout,buttons:busy=>{context.operationBusy=busy}});
+ vm.createContext(context);
+ vm.runInContext(source.slice(source.indexOf('async function refreshFonts('),source.indexOf('async function drainPending(')),context);
+ vm.runInContext(functions,context);
  return {context,elements,LF,errors,eoDesktop,stats:()=>({choice,permission,dialogs,reads,disable,reloads})};
 }
 for(const initial of ['unset','declined','granted'])test('Options reports '+initial+' and changes fonts through native consent without reload',async()=>{

@@ -4,6 +4,7 @@ Living document, kept up to date as features land (requested by the test user, 2
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
+| Desktop document tabs (preview) | Separate editor views preserve edits, destinations and AutoRecover while switching tabs or moving between windows; activation raises the selected native view, pending physical Windows confirmation | Not evaluated here | Previously one document per window | [Behavior and qualification](desktop-tabs.md) |
 | Formula wizard keyboard focus candidate | Functions without arguments start on the existing OK button; argument/range focus retained | Not assessed in this task | Observed inherited view had no initial target for a valid zero-argument function | docs/formula-wizard-focus.md; tests/formula-wizard/ |
 | Security hardening candidate | Download token/trust checks, AI proxy origin/auth checks, escaped WOPI/formula text, plain-text base URL and validated cache hash | Not evaluated | Backported selected fixes plus local output validation | docs/security-phase1.md; tests/security/ |
 | Desktop Save As (0.2.1 candidate) | Descriptive format dialog, native destination, source-format/folder defaults and explicit loss/overwrite consent in 45 UI languages | Native format and destination controls | Previous local format-button chooser | the accompanying release acceptance record |
@@ -447,3 +448,71 @@ Word page shadows retain their translucent CSS color through theme changes and d
 The desktop hides its floating status panel while the system print dialog owns the choice, preserving the accessible announcement and restoring submission, cancellation or error feedback. Other file-choice feedback is unchanged. [Behavior](desktop.md#native-print-choice-feedback).
 
 Desktop Windows saves retry scanner-held original/backup operations within one budget; verified replacement succeeds even if backup cleanup must wait. Local allowlisted diagnostics can be copied explicitly, and 45 locales explain how to preserve edits with Save As under a new name. See [Windows file access](windows-file-access.md).
+
+Spreadsheet and presentation statusbar zoom sliders reserve the theme-dependent half-thumb extension already reserved in Word. Geometry and real control regressions cover three editors, normal/fractional/double device scales and light/dark themes. See [zoom spacing](zoom-slider.md).
+
+### Desktop font discovery readiness
+
+An open local document can receive the completed private font index without reopening. Eligible families reach the engine and font selector after guarded background discovery, preserving explicit declines and save/close decisions. The public Nimbus Sans Linux test covers selection, original Save and cold reopening; the specific Arch installation and reported save error remain unverified. [Behavior and regression](desktop-system-fonts.md#late-index-readiness).
+
+### Remote AI endpoint policy
+
+Browser configuration and generated server-managed AI require HTTPS outside explicit loopback endpoints; there is no private-LAN HTTP exception. Invalid settings remain off, and rejected Save/Test attempts make no provider request. Browser AI requests refuse redirects. [Behavior, migration and test scope](ai.md#remote-endpoint-transport-policy).
+
+### Worksheet-bound ODS charts
+
+The ODF converter can recover missing chart caches from worksheet ranges and
+export separate caches for bound sheets without changing their formulas. Text
+labels and sparse point positions are retained. Worksheet names that match the
+internal cache name retain their bindings; generated cache tables avoid collisions.
+Name comparisons ignore case, and literal scatter/bubble domains follow generated
+cache-table renames.
+Each chart shares a one-million-cell budget across series, labels, categories and
+domains, checked before cache allocation. Oversized ranges, including whole-column
+ranges such as A1:A1048576, receive no cache. A rejected worksheet cache keeps its
+source formula; a rejected cache-only range is omitted to avoid dangling references.
+See behavioral tests and qualification.
+
+### ODF CBC export padding (source candidate)
+
+ODF password export reserves a complete padding block for already aligned
+compressed data. The shared writer passes61independent synthetic checks, including
+ODT/ODS/ODP eight-part controls; matched runtime/package acceptance remains pending.
+See the source qualification.
+
+### Tabbed desktop capture diagnostics
+
+The shared harness follows explicit document identities and retains collective
+error/network observations across tab selections and new views. Opt-in capture
+diagnostics record the tab strip and active document together, with explicit
+pixel/locale metadata and fail-closed ownership/geometry checks. Native OS frames
+remain outside those images. [Scope and acceptance](desktop.md#document-tabs-in-review-captures).
+
+### macOS package artwork
+
+Mac packaging has a dedicated contrasting flask tile and an explicit application-to-Applications DMG layout. The original Linux/Windows icons and signing policy remain intact. Source preview checks are separate from native Finder qualification. [Design and scope](desktop-mac-artwork.md).
+
+Mac packages select a pinned Apple-generated ICNS, with native small-size entries and bundle validation to prevent noisy Finder Open With icons. [Mac artwork](desktop-mac-artwork.md#small-macos-icons).
+
+
+### Desktop preferences layout
+
+File > Options groups recovery, author, AI and computer-font controls with aligned fields and shared Fluent actions. Focus restoration and the existing settings/consent behavior remain intact; narrow and RTL layouts keep Save visible. [Behavior and qualification](desktop-preferences.md).
+
+### Desktop Rename dialog
+
+File > Rename uses a labelled, initially selected name and a primary Fluent Save action. Enter submits once; Cancel and Escape leave the file unchanged. Existing filename, collision and source-identity protections remain enforced. [Behavior and scope](desktop-preferences.md#rename-a-local-document).
+
+### Desktop recovery dialog
+
+Startup recovery uses grouped document identities and actions, deliberate Restore/Cancel focus and translated guidance for unavailable copies. Damaged entries retain strict restoration refusal, while Cancel and Escape preserve all records. [Behavior and test scope](desktop-preferences.md#recover-documents-at-startup).
+### Desktop font engine readiness
+
+A prepared system-font index waits for each document's SDK engine instead of reporting a false computer-font read failure at startup. A three-attempt startup budget responds to actual readiness notifications and ends at a 30-second deadline; genuine native errors remain visible, and save/close guards and consent checks still apply. [Design](desktop-system-fonts.md#document-engine-readiness), [regressions](../tests/desktop/font-engine-ready.test.cjs).
+
+### Spreadsheet localization follow-ups for 0.3.1
+
+- Excel-compatible Superscript and Subscript caption localization is missing for Norwegian (`no`), Slovenian (`sl`) and Vietnamese (`vi`); the fix is deferred to 0.3.1.
+- Excel-compatible Add Comment caption localization is missing for Vietnamese (`vi`); the fix is deferred to 0.3.1.
+
+Linux packaging explicitly declares ALSA, GBM and GL dispatch runtime dependencies for minimal installations, with ALSA alternatives across the t64 transition. See [runtime dependency checks](desktop.md#linux-runtime-dependencies).

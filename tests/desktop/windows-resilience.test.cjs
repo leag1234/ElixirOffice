@@ -47,6 +47,7 @@ async function bootWin(virtual,options={}){
  proxy.extension=value=>(windows(value)?winFiles:realFiles).extension(value);
  const modules={
   './files.cjs':proxy,
+  './document-files.cjs':moduleFor('document-files.cjs',virtual.io),
   './recent-files.cjs':moduleFor('recent-files.cjs',virtual.io),
   './save-as.cjs':moduleFor('save-as.cjs',virtual.io,hybrid,{'./files.cjs':proxy}),
   './artifacts.cjs':moduleFor('artifacts.cjs',virtual.io,hybrid,{'./files.cjs':proxy})
@@ -86,6 +87,7 @@ test('Windows UNC metadata errors cannot poison Home, later opens, return Home, 
    await assert.rejects(env.invoke('font-dismiss'),e=>e.code===code);
    await assert.doesNotReject(env.invoke('return-home'));
    assert.equal((await env.invoke('drop',source)).name,'public.xlsx');
+   await env.invoke('return-home');
    const current=await env.invoke('new','xlsx'),destination=code==='EPERM'?'C:\\Public\\local.xlsx':'\\\\server\\share\\Saved\\'+code+'.xlsx';
    await fsp.mkdir(path.dirname(virtual.translate(destination)),{recursive:true});
    env.saveResponses.push({canceled:false,filePath:destination});

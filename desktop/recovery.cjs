@@ -7,7 +7,7 @@ class Recovery {
  constructor(profile){this.root=path.join(profile,'recovery');this.tail=Promise.resolve();}
  async directory(){await fs.mkdir(this.root,{recursive:true,mode:0o700});const stat=await fs.lstat(this.root);if(stat.isSymbolicLink()||!stat.isDirectory())throw Error('Invalid recovery directory');if(process.platform!=='win32'){if(stat.uid!==process.getuid())throw Error('Invalid recovery directory owner');await fs.chmod(this.root,0o700);}}
  queue(run){const next=this.tail.then(run);this.tail=next.catch(()=>{});return next;}
- save(meta,input){return this.queue(async()=>{
+ save(meta,input,writeOptions){return this.queue(async()=>{
   await this.directory();id(meta.id);
   if(!formats.has(meta.format)||!(input instanceof Uint8Array)||input.length<4||input.length>limit||input[0]!==80||input[1]!==75)throw Error('Invalid recovery document');
   const record={id:meta.id,name:path.basename(meta.name).slice(0,240),format:meta.format,modified:new Date().toISOString(),bytes:input.length,hash:crypto.createHash('sha256').update(input).digest('hex')};
@@ -18,7 +18,7 @@ class Recovery {
    const stat=await fs.lstat(path.join(this.root,entry));if(stat.isFile())used+=stat.size;
   }
   if(used+header.length+input.length>limit)throw Error('Recovery storage is full; remove older recovery copies first');
-  await files.atomic(path.join(this.root,meta.id+'.recovery'),Buffer.concat([header,Buffer.from(input)]));
+  await files.atomic(path.join(this.root,meta.id+'.recovery'),Buffer.concat([header,Buffer.from(input)]),undefined,writeOptions);
   return record;
  });}
  async read(value){await this.directory();const filename=path.join(this.root,id(value)+'.recovery'),stat=await fs.lstat(filename);

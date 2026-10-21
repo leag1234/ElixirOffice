@@ -134,8 +134,8 @@ test('failed save/recovery/preferences do not poison later autosave, save, Home 
   assert.equal((await env.invoke('recovery-list')).length,1);
   blocked='desktop-settings.json';await assert.rejects(env.invoke('font-dismiss'),e=>e.code==='EBUSY');
   env.state.dirty=false;assert.equal((await env.invoke('home')).recents.length,1);
-  assert.equal((await env.invoke('drop',target)).name,'test.docx');
-  blocked=null;const reopened=await env.invoke('drop',target);
+  assert.equal(await env.invoke('drop',target),null,'An already open file focuses its existing document');
+  blocked=null;await env.invoke('return-home');const reopened=await env.invoke('drop',target);
   const saved=await env.invoke('save',reopened.token,new Uint8Array(Buffer.from('PKlater-save')),false,{protected:false,remove:false});
   assert(saved.artifactId);assert.equal(await io.readFile(target,'utf8'),'PKlater-save');await env.invoke('return-home');
   assert((await env.invoke('new','xlsx')).token);
@@ -174,7 +174,8 @@ test('main retains the writing operation and busy guard during asynchronous repl
   await assert.rejects(env.invoke('new','xlsx'),/Another file operation/);
   assert(env.sent.some(([channel,event])=>channel==='eo:operation-stage'&&event.id==='local-operation-1'&&event.phase==='writing'));
   assert.equal(await io.readFile(path.join(env.directory,'test.docx'),'utf8'),'PKtest-public-document');
-  assert((await saving).artifactId);assert.equal((await env.invoke('new','xlsx')).format,'xlsx');
+  assert((await saving).artifactId);assert.equal(await env.invoke('new','xlsx'),null);
+  assert.equal((await env.invokeFor(env.documents.at(-1),'initial')).format,'xlsx');
  }finally{if(env)await env.cleanup()}
 });
 

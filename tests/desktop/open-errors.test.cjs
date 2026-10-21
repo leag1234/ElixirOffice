@@ -91,6 +91,8 @@ test('all user-file entry points sanitize the shared read failure while keeping 
   try{
    const selected=path.join(env.directory,'selected.docx');await fsp.writeFile(selected,'PKpublic-selected');
    await env.invoke('drop',selected);const id=(await env.invoke('recents'))[0].id;
+   // Reopening an existing tab deduplicates without disk IO. Test failures from an empty Home.
+   assert.equal(await env.invoke('return-home'),true);
    fsp.open=async(target,...args)=>{if(target===selected)throw fault('EPERM');return open(target,...args)};
    for(const route of [['drop',selected],['recent',id]]){
     const failure=await env.invoke(...route).then(()=>assert.fail('Open must fail'),e=>e);
@@ -104,7 +106,7 @@ test('all user-file entry points sanitize the shared read failure while keeping 
  const main=fs.readFileSync(path.join(product,'desktop/main.cjs'),'utf8');
  for(const name of ['initial','open','drop','saved-open','recent']){
   const a=main.indexOf("handle('"+name+"',"),b=main.indexOf("\n  handle(",a+1);
-  assert(main.slice(a,b<0?undefined:b).includes('select('),name+' must share select');
+  assert(main.slice(a,b<0?undefined:b).includes('openFile('),name+' must share coordinated open');
  }
 });
 test('existing safety log records bounded allowlisted filesystem codes, never arbitrary error text',async()=>{

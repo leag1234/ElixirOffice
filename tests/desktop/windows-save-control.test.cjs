@@ -115,6 +115,23 @@ test('actual main force-close waits for cancelled write cleanup before destroyin
  }finally{release?.();if(env)await env.cleanup();await f.cleanup()}
 });
 
+test('final-tab File Close waits for cancelled write cleanup and blocks new writes before closing its window',async()=>{
+ const f=await fixture({fakeTime:false,env:{EO_WINDOWS_SAVE_RETRY_MS:'15000'}});let env,release;
+ try{
+  env=await scope.exports.bootMain(f);env.state.dirty=true;const token=env.selected.token,target=path.join(env.directory,'test.docx'),original=await io.readFile(target);let attempts=0,cleaning=false,settled=false;
+  const gate=new Promise(resolve=>{release=resolve});
+  f.proxy.rename=async(a,b)=>{if(b===target){attempts++;throw fault('EPERM')}return io.rename(a,b)};
+  f.proxy.unlink=async filename=>{if(String(filename).startsWith(target)&&String(filename).endsWith('.bak')){cleaning=true;await gate}return io.unlink(filename)};
+  const saving=env.invoke('save',token,new Uint8Array(Buffer.from('PKclose cancelled output')),false,{protected:false,remove:false},'local-operation-73').then(()=>assert.fail('Cancelled native save must fail'),e=>{settled=true;return e});
+  await until(()=>attempts>0);env.responses.push(1);const closing=env.invoke('close-tab');closing.catch(()=>{});await until(()=>cleaning);
+  assert.notEqual(env.window.closed,true);assert.equal(settled,false);
+  await assert.rejects(f.files.atomic(path.join(env.directory,'queued-settings.json'),Buffer.from('{}')),error=>error.name==='AbortError');
+  await assert.rejects(io.stat(path.join(env.directory,'queued-settings.json')),error=>error.code==='ENOENT');
+  release();assert.equal((await saving).name,'AbortError');await until(()=>env.window.closed);
+  assert.deepEqual(await io.readFile(target),original);
+ }finally{release?.();if(env)await env.cleanup();await f.cleanup()}
+});
+
 test('force-close acknowledges one sanitized retained-backup warning; a failed warning keeps the window alive',async()=>{
  for(const acknowledge of [true,false]){
   const f=await fixture({fakeTime:false,env:{EO_WINDOWS_SAVE_RETRY_MS:'0'}});let env,releaseWrite,releaseWarning;
@@ -136,13 +153,16 @@ test('force-close acknowledges one sanitized retained-backup warning; a failed w
    if(acknowledge){releaseWarning({response:0});await until(()=>env.window.closed);assert.equal(f.files.writeWarnings().length,0);}
    else{await until(()=>env.sent.some(value=>value[0]==='eo:action'&&value[1]==='resume-close'));assert.notEqual(env.window.closed,true);assert.equal(f.files.writeWarnings().length,1);
     const after=path.join(env.directory,'after-cancel.docx');await f.files.atomic(after,Buffer.from('PKavailable'));assert.equal(await io.readFile(after,'utf8'),'PKavailable');
-     env.state.dirty=false;let acknowledged=false;
-     env.responses.push(()=>new Promise(resolve=>{releaseWarning=resolve}));
+     env.state.dirty=true;let acknowledged=false;
+     env.responses.push(0,()=>new Promise(resolve=>{releaseWarning=resolve}));
+     env.window.close();
+     await until(()=>env.sent.some(value=>value[0]==='eo:action'&&value[1]==='save-close'));
+     env.state.dirty=false;
      const closedSaved=env.invoke('closed-saved').then(()=>{acknowledged=true});
      const concurrentClose=env.invoke('closed-saved');
-     await until(()=>env.dialogs.length===3);await new Promise(setImmediate);
+     await until(()=>env.dialogs.length===4);await new Promise(setImmediate);
      assert.equal(acknowledged,false,'Saved-close acknowledgement must await the retained-backup warning');assert.notEqual(env.window.closed,true);
-     releaseWarning({response:0});await Promise.all([closedSaved,concurrentClose]);assert.equal(env.dialogs.length,3,'Concurrent close acknowledgements share one warning');assert.equal(env.window.closed,true);assert.equal(f.files.writeWarnings().length,0);}
+     releaseWarning({response:0});await Promise.all([closedSaved,concurrentClose]);assert.equal(env.dialogs.length,4,'The genuine Save prompt plus concurrent acknowledgements produce only one warning');assert.equal(env.window.closed,true);assert.equal(f.files.writeWarnings().length,0);}
   }finally{releaseWrite?.();releaseWarning?.({response:0});if(env)await env.cleanup();await f.cleanup()}
  }
 });

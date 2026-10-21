@@ -1,0 +1,10 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- The existing ElixirOffice flask paths, with a Mac-only contrasting tile. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <defs><linearGradient id="tile" x2="0" y2="1"><stop stop-color="#087cc1"/><stop offset="1" stop-color="#004a80"/></linearGradient></defs>
+ <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#tile)"/>
+ <g transform="translate(152 144.5) scale(15)">
+  <path d="M18 4h12v4h-2v10.5l11.6 19.3A5 5 0 0 1 35.3 45H12.7a5 5 0 0 1-4.3-7.2L20 18.5V8h-2z" fill="#fff"/>
+  <path d="M14.2 32h19.6l4.2 7a2.2 2.2 0 0 1-1.9 3.3H11.9A2.2 2.2 0 0 1 10 39z" fill="#7fd3ff"/>
+ </g>
+</svg>

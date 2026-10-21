@@ -9,9 +9,10 @@ function command(input,platform,format) {
  let key=String(input.key||'').toLowerCase();
  // Keep Latin layout labels (including AZERTY); use physical letters for non-Latin layouts.
  if(/^[^\x00-\x7f]+$/u.test(key)&&/^Key[A-Z]$/.test(input.code||''))key=input.code.slice(3).toLowerCase();
+ if(platform!=='darwin'&&input.key==='F4'&&!input.shift)return 'close-tab';
  if(input.shift)return platform==='darwin'&&key==='s'?'save-as':null;
  if(key==='n')return ['xlsx','ods','xls','csv'].includes(format)?'new-xlsx':['pptx','odp','ppt'].includes(format)?'new-pptx':'new-docx';
- return ({o:'open',s:'save',p:'print',...(platform==='darwin'?{q:'quit'}:{})})[key]||null;
+ return ({o:'open',s:'save',p:'print',w:'close-tab',...(platform==='darwin'?{q:'quit'}:{})})[key]||null;
 }
 function install(contents,platform,format,dispatch,enabled=()=>true) {
  contents.on('before-input-event',(event,input)=>{

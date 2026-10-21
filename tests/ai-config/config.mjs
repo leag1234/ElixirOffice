@@ -9,6 +9,10 @@
 // default 172.17.0.1). Playwright: PW_DIR (see tools/eval/lib.mjs).
 //   EO_BASE=http://localhost:8117 node tests/ai-config/config.mjs
 import http from "node:http";
+import https from "node:https";
+import fs from "node:fs";
+import os from "node:os";
+import net from "node:net";
 import { execFileSync, execSync } from "node:child_process";
 import path from "node:path";
 import { REPO, BASE, launch, openEditor, uploadDocx, focusEditor, chromium } from "../../tools/eval/lib.mjs";
@@ -16,6 +20,8 @@ import { REPO, BASE, launch, openEditor, uploadDocx, focusEditor, chromium } fro
 const CONTAINER = process.env.CONTAINER || "eo-aiconfig";
 const MOCK_HOST = process.env.MOCK_HOST || "172.17.0.1";
 const PORT = Number(process.env.MOCK_PORT || 18999);
+const TLS_PORT = Number(process.env.MOCK_TLS_PORT || PORT + 1);
+const CONTAINER_CA = "/tmp/eo-ai-config-ca-" + process.pid + ".pem";
 const SERVER_KEY = "srv-secret-key-0001", USER_KEY = "usr-own-key-0002";
 const results = [];
 const record = (name, ok, extra = "") => { results.push({ name, ok: !!ok }); console.log((ok ? "pass " : "FAIL ") + name + (ok ? "" : "  " + extra)); };
@@ -31,16 +37,28 @@ const mock = http.createServer((req, res) => {
     if (req.method === "OPTIONS") { res.writeHead(cors ? 204 : 404); return res.end(); }
     if (req.method === "POST" && /\/chat\/completions$/.test(req.url)) {
       let j = {}; try { j = JSON.parse(body); } catch (e) {}
-      calls.push({ url: req.url, auth: req.headers.authorization || "", model: j.model, host: req.headers.host, cookie: req.headers.cookie || "" });
+      calls.push({ url: req.url, auth: req.headers.authorization || "", model: j.model, host: req.headers.host, cookie: req.headers.cookie || "", tls: !!req.socket.encrypted });
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ choices: [{ message: { role: "assistant", content: "ok" }, finish_reason: "stop" }], usage: { prompt_tokens: 3, completion_tokens: 1 } }));
     }
     res.writeHead(404); res.end("{}");
   });
 });
+// Test-only TLS material never leaves its private temporary directory.
+const tlsDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "eo-ai-config-tls-"));
+fs.chmodSync(tlsDirectory, 0o700);
+const tlsKey = path.join(tlsDirectory, "key.pem"), tlsCert = path.join(tlsDirectory, "cert.pem");
+if (!/^[A-Za-z0-9._:-]+$/.test(MOCK_HOST)) throw new Error("Invalid public mock hostname");
+const mockNames = [...new Set(["DNS:localhost", "IP:127.0.0.1", (net.isIP(MOCK_HOST) ? "IP:" : "DNS:") + MOCK_HOST])];
+const tlsConfig = path.join(tlsDirectory, "openssl.conf");
+fs.writeFileSync(tlsConfig, "[req]\ndistinguished_name=dn\nx509_extensions=v3\n[dn]\n[v3]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,digitalSignature,keyEncipherment,keyCertSign\nextendedKeyUsage=serverAuth\nsubjectAltName=" + mockNames.join(",") + "\n");
+execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", tlsKey, "-out", tlsCert, "-subj", "/CN=localhost", "-days", "1", "-config", tlsConfig], { stdio: "ignore" });
+fs.chmodSync(tlsKey, 0o600);
+const tlsMock = https.createServer({ key: fs.readFileSync(tlsKey), cert: fs.readFileSync(tlsCert) }, (req, res) => mock.emit("request", req, res));
 await new Promise(r => mock.listen(PORT, "0.0.0.0", r));
+await new Promise(r => tlsMock.listen(TLS_PORT, "0.0.0.0", r));
 
-const install = env => execFileSync(path.join(REPO, "tools/ai-proxy/install.sh"), [CONTAINER], { env: { ...process.env, ELIXIR_AI_ENV: "/dev/null", ELIXIR_AI_BASE_URL: "", ELIXIR_AI_MODEL: "", ELIXIR_AI_API_KEY: "", OPENAI_API_KEY: "", ...env }, stdio: "pipe" });
+const install = env => execFileSync(path.join(REPO, "tools/ai-proxy/install.sh"), [CONTAINER], { env: { ...process.env, ELIXIR_AI_ENV: "/dev/null", ELIXIR_AI_BASE_URL: "", ELIXIR_AI_MODEL: "", ELIXIR_AI_API_KEY: "", OPENAI_API_KEY: "", EO_AI_CA_FILE: "", ...env }, stdio: "pipe" });
 
 // A fresh browser session on a new document; returns helpers
 async function session() {
@@ -99,9 +117,9 @@ try {
   const run = env => execSync(`sh ${gen}`, { env: { PATH: process.env.PATH, ...env } }).toString();
   record("generator: nothing set gives enabled:false", run({}).includes('{"enabled":false}'));
   record("generator: a base URL with an injection attempt keeps AI off", run({ ELIXIR_AI_BASE_URL: "http://x/v1;}location /", ELIXIR_AI_MODEL: "m" }).includes('{"enabled":false}'));
-  record("generator: a non-OpenAI endpoint needs a model", run({ ELIXIR_AI_BASE_URL: "http://ollama:11434/v1" }).includes('{"enabled":false}'));
-  const g = run({ ELIXIR_AI_BASE_URL: "http://ollama:11434/v1/", ELIXIR_AI_MODEL: "llama3.1" });
-  record("generator: keyless Ollama (no Authorization header, host in config.json)", g.includes("proxy_pass http://ollama:11434/v1/chat/completions") && !g.includes("Authorization") && g.includes('"host":"ollama"'));
+  record("generator: a non-OpenAI endpoint needs a model", run({ ELIXIR_AI_BASE_URL: "http://localhost:11434/v1" }).includes('{"enabled":false}'));
+  const g = run({ ELIXIR_AI_BASE_URL: "http://localhost:11434/v1/", ELIXIR_AI_MODEL: "llama3.1" });
+  record("generator: keyless Ollama (no Authorization header, host in config.json)", g.includes("proxy_pass http://localhost:11434/v1/chat/completions") && !g.includes("Authorization") && g.includes('"host":"localhost"'));
   const g2 = run({ ELIXIR_AI_BASE_URL: "https://api.mistral.ai/v1", ELIXIR_AI_MODEL: "mistral-small-latest", ELIXIR_AI_API_KEY: SERVER_KEY });
   record("generator: the key is only in the proxy block, not in config.json", g2.includes("Bearer " + SERVER_KEY) && !/return 200[^\n]*srv-secret/.test(g2));
   record("generator: legacy OPENAI_API_KEY means OpenAI + gpt-4.1-mini", run({ OPENAI_API_KEY: SERVER_KEY }).includes("proxy_pass https://api.openai.com/v1/chat/completions"));
@@ -131,7 +149,8 @@ try {
   await s.browser.close();
 
   // ---- B: server configuration ---------------------------------------------------------------------------------------
-  install({ ELIXIR_AI_BASE_URL: `http://${MOCK_HOST}:${PORT}/v1`, ELIXIR_AI_MODEL: "mock-server-model", ELIXIR_AI_API_KEY: SERVER_KEY });
+  execFileSync("docker", ["exec", "-i", CONTAINER, "sh", "-c", "umask 077; cat > " + CONTAINER_CA], { input: fs.readFileSync(tlsCert), stdio: ["pipe", "pipe", "pipe"] });
+  install({ ELIXIR_AI_BASE_URL: `https://${MOCK_HOST}:${TLS_PORT}/v1`, ELIXIR_AI_MODEL: "mock-server-model", ELIXIR_AI_API_KEY: SERVER_KEY, EO_AI_CA_FILE: CONTAINER_CA });
   s = await session();
   const cfgB = await s.frame.evaluate(() => fetch("/elixir-ai/config.json", { cache: "no-store" }).then(r => r.text()));
   record("B config.json: enabled, same-origin endpoint, host, no key", /"enabled":true/.test(cfgB) && /"endpoint":"\/elixir-ai\/v1"/.test(cfgB) && !cfgB.includes(SERVER_KEY), cfgB);
@@ -144,7 +163,7 @@ try {
   record("B right-click has Ask Elixir", await ctxHasAsk(s.frame, s.page));
   record('B "/" opens the menu', await slashMenu(s.frame, s.page));
   const reply = await s.frame.evaluate(() => { const A = Common.ElixirAI; return A.Connector.chat({ settings: A.Settings.get(), messages: [{ role: "user", content: "hi" }] }).then(r => r.message.content, e => "ERR " + e.message); });
-  record("B a request goes through the server proxy with the server's key and model", reply === "ok" && calls.length === 1 && calls[0].auth === "Bearer " + SERVER_KEY && calls[0].model === "mock-server-model" && calls[0].cookie === "", JSON.stringify({ reply, calls }));
+  record("B a request goes through the server proxy with the server's key and model", reply === "ok" && calls.length === 1 && calls[0].auth === "Bearer " + SERVER_KEY && calls[0].model === "mock-server-model" && calls[0].cookie === "" && calls[0].tls === true, JSON.stringify({ reply, calls }));
   const browserAuth = s.seen.filter(r => /chat\/completions/.test(r.url));
   record("B the browser sent no Authorization header and only talked to the editor host", browserAuth.length === 1 && browserAuth[0].auth === "" && browserAuth[0].url.startsWith(BASE + "/elixir-ai/v1/"), JSON.stringify(browserAuth));
   const stored = await s.frame.evaluate(() => JSON.stringify(Object.assign({}, localStorage)) + document.documentElement.innerHTML.length);
@@ -205,7 +224,10 @@ try {
   record("script error", false, e.stack || e);
 } finally {
   mock.close();
+  await new Promise(resolve => tlsMock.close(resolve));
+  fs.rmSync(tlsDirectory, { recursive: true, force: true });
   try { install({}); } catch (e) {}
+  try { execFileSync("docker", ["exec", CONTAINER, "rm", "-f", CONTAINER_CA], { stdio: "pipe" }); } catch (e) {}
 }
 const failed = results.filter(r => !r.ok).length;
 console.log(`${results.length - failed}/${results.length} pass`);

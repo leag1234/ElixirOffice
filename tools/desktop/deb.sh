@@ -21,7 +21,7 @@ Version: $DEB_VERSION
 Architecture: amd64
 Maintainer: ElixirOffice contributors
 Installed-Size: $SIZE
-Depends: libgtk-3-0, libnotify4, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libuuid1, libsecret-1-0
+Depends: libgtk-3-0, libnotify4, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libuuid1, libsecret-1-0, libasound2t64 | libasound2, libgbm1, libgl1, libegl1, libgles2, libopengl0
 Recommends: libappindicator3-1
 Section: editors
 Priority: optional

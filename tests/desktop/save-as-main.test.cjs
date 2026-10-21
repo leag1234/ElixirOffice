@@ -3,15 +3,11 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:path'),vm=require('node:vm'),{createRequire}=require('node:module');
 const helper=path.join(__dirname,'close-recovery.test.cjs'),load=createRequire(helper),scope={exports:{}};
-let bootstrap=fs.readFileSync(helper,'utf8')
- .replace('dialogs=[],responses=[]','dialogs=[],saveDialogs=[],responses=[]')
- .replace('showSaveDialog:async()=>saveResponses.shift()||{canceled:true}',"showSaveDialog:async(_win,options)=>{saveDialogs.push(options);const value=saveResponses.shift();return typeof value==='function'?await value():value||{canceled:true}}")
- .replace('process:context.process,dialogs,responses','process:context.process,dialogs,saveDialogs,responses');
-assert(bootstrap.includes('saveDialogs.push(options)'));
+const bootstrap=fs.readFileSync(helper,'utf8');
 vm.runInNewContext(bootstrap+'\nmodule.exports={boot};',{require:name=>name==='node:test'?()=>{}:load(name),module:scope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate});
 // These native-dialog mocks model Linux; Mac/Windows require actual runtime proof.
 const {boot:baseBoot}=scope.exports;
-async function boot(options){const env=await baseBoot(options);env.process.platform='linux';return env;}
+async function boot(options){const env=await baseBoot(options);assert(Array.isArray(env.saveDialogs),'The shared boot must record actual native Save dialog options');env.process.platform='linux';return env;}
 const plain=()=>new Uint8Array(Buffer.from('PKpublic-save-as'));
 const protection={protected:false,remove:false};
 test('real-main Save As info includes client PDF per family and preserves converted source default/folder',async()=>{
@@ -21,10 +17,12 @@ test('real-main Save As info includes client PDF per family and preserves conver
   assert.equal(info.nativeFormats,false);assert.equal(info.defaultFormat,'docx');
   assert.deepEqual(Array.from(info.formats,x=>x.value),['docx','odt','rtf','txt','pdf']);
   for(const format of ['xlsx','pptx']){
+   await env.invoke('return-home');
    const selected=await env.invoke('new',format),options=await env.invoke('save-as-info',selected.token);
    assert.equal(options.defaultFormat,format);assert(options.formats.some(x=>x.value==='pdf'));
   }
   const source=path.join(env.directory,'source.rtf');await fsp.writeFile(source,'public RTF fixture');
+  await env.invoke('return-home');
   const selected=await env.invoke('drop',source),options=await env.invoke('save-as-info',selected.token);
   assert.equal(selected.format,'docx');assert.equal(options.defaultFormat,'rtf');
   env.saveResponses.push({canceled:true});assert.equal(await env.invoke('save-as-choose',selected.token,'rtf'),null);
@@ -112,8 +110,9 @@ test('ticket rejects a newly created destination, cancellation, and a switched d
   await assert.rejects(env.invoke('save',env.selected.token,plain(),true,protection,undefined,selected.ticket),/The destination changed\. Choose it again\./);
   env.saveResponses.push({canceled:false,filePath:target});env.responses.push(1);
   selected=await env.invoke('save-as-choose',env.selected.token,'docx');
-  const next=await env.invoke('new','docx');
-  await assert.rejects(env.invoke('save',next.token,plain(),true,protection,undefined,selected.ticket),/The destination changed\. Choose it again\./);
+  assert.equal(await env.invoke('new','docx'),null);
+  const other=env.documents.at(-1),next=await env.invokeFor(other,'initial');
+  await assert.rejects(env.invokeFor(other,'save',next.token,plain(),true,protection,undefined,selected.ticket),/The destination changed\. Choose it again\./);
   assert.equal(await fsp.readFile(target,'utf8'),'PKexternal-new');
  }finally{await env.cleanup()}
 });

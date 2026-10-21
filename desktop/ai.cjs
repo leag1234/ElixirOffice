@@ -4,8 +4,10 @@ const http=require('node:http'),https=require('node:https');
 function endpoint(value){
  if(typeof value!=='string'||value.length>2048||/[\u0000-\u0020\u007f]/.test(value))throw Error('Invalid AI endpoint');
  let url;try{url=new URL(value)}catch{throw Error('Invalid AI endpoint')}
- const local=['localhost','127.0.0.1','[::1]'].includes(url.hostname);
- if(url.username||url.password||url.search||url.hash||!(url.protocol==='https:'||(local&&url.protocol==='http:')))throw Error('Use HTTPS or a loopback AI endpoint');
+ // Require a literal authority before URL() can normalize numeric or encoded aliases.
+ const authority=/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i.exec(value);
+ const local=!!authority&&/^(?:localhost|127\.0\.0\.1|\[::1\])(?::[0-9]+)?$/i.test(authority[1]);
+ if(url.username||url.password||url.search||url.hash||url.port==='0'||!(url.protocol==='https:'||(local&&url.protocol==='http:')))throw Error('Use HTTPS or a loopback AI endpoint');
  url.pathname=url.pathname.replace(/\/+$/,'');return {url:url.href.replace(/\/+$/,''),local};
 }
 function configuration(value){
@@ -27,7 +29,7 @@ function request(config,body,key,signal){
  // Prevent a loopback hostname from resolving to a remote host.
  if(url.hostname==='localhost')url.hostname='127.0.0.1';
  return new Promise((resolve,reject)=>{
-  const req=(url.protocol==='http:'?http:https).request(url,{method:'POST',signal,headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),...(key?{Authorization:'Bearer '+key}:{})}},res=>{
+  const req=(url.protocol==='http:'?http:https).request(url,{method:'POST',signal,...(url.protocol==='https:'?{rejectUnauthorized:true}:{}),headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),...(key?{Authorization:'Bearer '+key}:{})}},res=>{
    const chunks=[];let bytes=0;
    res.on('data',chunk=>{bytes+=chunk.length;if(bytes>16*1024*1024){res.destroy();req.destroy(Error('AI response too large'));return}chunks.push(chunk)});
    res.on('error',()=>reject(Error('AI response interrupted')));

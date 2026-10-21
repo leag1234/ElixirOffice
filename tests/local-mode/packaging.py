@@ -30,7 +30,8 @@ assert manifest["build_flags"]["module_kind"] == "full"
 assert pdf_manifest["build_flags"]["module_kind"] == "pdf"
 for field in ["core_commit", "product_commit", "tools_sha256", "patches", "sources"]:
     assert manifest[field] == pdf_manifest[field], field
-assert len(manifest["patches"]) == 11
+# Overlay numbering skips 0003; the approved inventory contains ten files.
+assert len(manifest["patches"]) == 10
 assert "0011-pdf-preserve-creator.patch" in manifest["patches"]
 assert "0010-office-integrity-rejection.patch" in manifest["patches"]
 assert pdf_manifest["build_flags"]["pdf_original_append"] is True

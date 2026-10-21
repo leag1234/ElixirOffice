@@ -11,7 +11,7 @@ Start ElixirOffice and choose New document, New spreadsheet, New presentation, O
 DOCX, XLSX, PPTX, ODT, ODS and ODP use local conversion. Save writes back to the selected file; Save As offers DOCX/ODT/RTF/TXT/PDF for text, XLSX/ODS/CSV for spreadsheets, and PPTX/ODP/PDF for presentations. Choosing the current editable format saves to a new active destination; choosing a different format exports a copy, preserving the active document and its unsaved state. New files initially use DOCX, XLSX or PPTX. Legacy DOC/XLS/PPT and RTF/TXT/CSV, DOTX/XLTX/POTX, DOCM/XLSM and PPSX imports open as untargeted DOCX/XLSX/PPTX copies. The next Save chooses a destination. Macro-enabled imports do not enable macro execution. CSV is UTF-8, comma-delimited, with the active worksheet only; its translated format warning explains the loss of other sheets and formatting.
 DOCX, XLSX, PPTX, ODT, ODS and ODP use local conversion. Save writes back to the selected file; Save As offers DOCX/ODT/RTF/TXT/PDF for text, XLSX/ODS/CSV/PDF for spreadsheets, and PPTX/ODP/PDF for presentations. Choosing the current editable format saves to a new active destination; choosing a different format exports a copy, preserving the active document and its unsaved state. New files initially use DOCX, XLSX or PPTX. Legacy DOC/XLS/PPT and RTF/TXT/CSV, DOTX/XLTX/POTX, DOCM/XLSM and PPSX imports open as untargeted DOCX/XLSX/PPTX copies. The next Save chooses a destination. Macro-enabled imports do not enable macro execution. CSV is UTF-8, comma-delimited, with the active worksheet only; its translated format warning explains the loss of other sheets and formatting.
 
-An asterisk in the window title means there are unsaved changes. Closing offers Save, Discard and Cancel. Opening another document requires a discard decision when the current document has unsaved changes. Only one app instance runs per user; opening another file sends it to that instance.
+An asterisk in the active tab and window title means there are unsaved changes. Opening or creating another document adds a tab and preserves the current edits. Opening the same file focuses its existing tab. Drag a tab outside its window to detach it, or onto another window’s tab strip to join that window. File > Move document, the strip’s Move document button and Shift+F10 on a focused tab provide the same choices without dragging. Closing a modified tab offers Save, Don't Save and Cancel for that document. Closing a window checks each document in turn and stops if a close is cancelled. On Windows/Linux, closing the last tab closes its window; on macOS a new Home tab remains. Only one app instance runs per user; another file launch sends the file to that instance. See [document tabs and qualification](desktop-tabs.md).
 
 Export PDF uses the native WebAssembly PDF writer with document fonts and images. Print submits the resulting PDF through the operating system's print dialog. Cancelling a dialog does not submit a print job.
 
@@ -30,6 +30,8 @@ The start renderer has a strict self-only script policy, context isolation, a sa
 ## Linux packages
 
 Build outputs are `desktop/dist/ElixirOffice-<version>-linux-x86_64.AppImage` and `desktop/dist/ElixirOffice-<version>-linux-amd64.deb`.
+
+Arch Linux (community package, not maintained by the ElixirOffice project): install with `yay -S elixiroffice-bin` or `paru -S elixiroffice-bin`. It repackages our released .deb; see the [AUR package page](https://aur.archlinux.org/packages/elixiroffice-bin). Report packaging problems on that page and application issues [here](https://github.com/leag1234/elixiroffice/issues).
 
 Make the AppImage executable and run it. Systems without FUSE support can extract it with `--appimage-extract` into a writable folder and run `squashfs-root/AppRun`. Chromium's sandbox needs a supported user-namespace or sandbox configuration; do not add `--no-sandbox` as a workaround.
 
@@ -575,3 +577,33 @@ While the system print dialog owns a print choice, the desktop floating operatio
 ### PDF export progress
 
 Large document exports display conversion stages and real page counts, then keep Open file and Show in folder actions after the native save completes. A generated public 300-page DOCX regression checks intermediate visible counts, all saved page labels and the unchanged source file using the packaged Linux application. [Regression](../tests/pdf-export/README.md).
+
+## Document tabs in review captures
+
+With the tabbed shell, the explicit capture flag records the tab strip together
+with the active document's start page, editor Home and File backstage. The image
+covers the application client area; native OS window decorations are outside it.
+Keep the window unchanged while the capture runs. Captures refuse a changed
+owner, hidden or resized view, inconsistent pixel scale or transparent surface
+instead of producing an incomplete image.
+
+The shell refreshes its language for each requested locale. Each captures.json
+screen records the composition kind, shell language, logical and pixel dimensions,
+scale and excluded native frame. Captured pixels remain in the main process.
+
+The composition helper is checked on real sandboxed Electron44.7 views at scales
+1,1.25,1.5 and2 on private Linux X11. The complete source-app capture flow produces
+six English/French images at1x. New packages and physical Windows/macOS require
+their own acceptance. Capture mode uses its own profile in the output folder.
+Its local resource transport uses an uncached memory session so default-session
+cache writes cannot recreate that profile during shutdown. Startup print-job
+cleanup is bound to the selected capture profile and preserves the ordinary
+profile's pending print files.
+
+### Linux runtime dependencies
+
+The DEB declares `libasound2t64 | libasound2`, `libgbm1`, `libgl1`, `libegl1`, `libgles2` and `libopengl0` explicitly. Ubuntu 26.04 and Debian 13 provide ALSA in `libasound2t64`; Debian 12 uses `libasound2`. The graphics interface package names are shared across these releases; their dependencies resolve the corresponding system graphics implementation.
+
+Audit all packaged ELF files immediately after a DEB-only installation with `--no-install-recommends`, before installing Xvfb or other test tools. Iterate missing-library resolution to a fixed point and compare the result with dynamic-loader observations, the community Arch package and the exact builder defaults. Installing test tools first can conceal missing runtime dependencies. The release assertion builds a DEB and checks the audited dependency set in both `dpkg-deb -f` and `dpkg-deb -I`.
+
+These dependency checks do not certify native startup or application behavior. See the [graphics dependency decision](decisions/desktop-linux-graphics-dependencies.md) for scope and current qualification limits.

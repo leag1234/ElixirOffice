@@ -1,0 +1,21 @@
+{
+  "tabsLabel": "Documents",
+  "tabNew": "New document",
+  "tabClose": "Close {name}",
+  "tabCloseHint": "Press Delete to close this document.",
+  "tabUntitled": "Untitled",
+  "customTitleBar": "Use a custom title bar",
+  "customTitleBarDesc": "Show document tabs in the title bar. Turn this off to use your system window frame.",
+  "customTitleBarRestart": "This change takes effect in new windows.",
+  "nativeTitleBarUnavailable": "The system window frame is used on this platform.",
+  "tabDestinationBusy": "This file is open or selected for saving in another tab. Choose a different destination.",
+  "tabRecoveryOpen": "This recovery copy is in use by an open document.",
+  "tabMove": "Move document",
+  "tabDetach": "Move to new window",
+  "tabMoveWindow": "Move to {name}",
+  "tabMoveBusy": "Wait for the current document operation or dialog to finish before moving this tab.",
+  "tabMoveHint": "Press Shift+F10 to move this document to another window.",
+  "tabActionFailed": "Could not finish the document action. Try again.",
+  "tabLimit": "You can open up to 16 documents at a time. Close a tab before opening another document.",
+  "tabSaveWaitTimeout": "Saving has not finished and may still complete. This document will stay open. Wait for saving to finish, then try closing it again."
+}

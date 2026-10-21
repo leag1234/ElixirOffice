@@ -166,3 +166,50 @@ acceptance are unverified. The earlier five exact versus eight failed PDF text
 extractions retain their r1 attribution; this resilience fix does not claim new
 PDF or native-runtime acceptance. Independent receipts and exact local heads are
 in the external system-fonts-fixes-Z-work evidence and the Z bus report.
+
+## Late index readiness
+
+Desktop discovery runs in the background so that opening a document does not wait
+for the computer's full font inventory. When a cold index finishes, the active
+document now registers eligible families, updates the font selector and loads the
+local faces needed by that document. A readiness notification waits through
+opening, saving, Save As and close decisions. It rechecks permission and document
+identity before registration; an explicit decline remains effective.
+
+The refresh uses its own running guard and never takes the shared save or
+AutoRecover operation lock. User Save and save-and-close continue during a slow
+font enable. Permission is checked again after enabling; revocation restores the
+off state. An explicit consent's availability notice follows the completed queued
+refresh rather than appearing before the fonts are usable.
+
+The regression uses a generated, fictional DOCX with the public URW Nimbus Sans
+font. On Linux, the prior package discovered all four Nimbus Sans faces but left
+the open editor's font index and selector unchanged. Saving that particular file
+already succeeded; it did not reproduce the reported unavailable-font save error.
+With the readiness correction, the actual selector accepts Nimbus Sans without an
+unknown-font warning, Save preserves the font on the edited run, and a fresh
+instance reopens the edit. Index arrival and reopening do not mark the document
+modified; no renderer HTTP requests occur.
+
+This is a Linux package test with a source renderer overlay, not a fresh release
+build or a physical Arch Linux test. The reporter's exact font and installation
+path remain unknown. Fontconfig-only custom directories outside the approved
+roots and the reporter's save error are not qualified by this result. Discovery
+roots, exact-file grants, private-handle checks, byte limits and browser behavior
+are unchanged.
+
+Checks: tests/desktop/font-readiness.test.cjs covers deferred notifications,
+declines, stale documents and revocation during asynchronous discovery/listing.
+Generate a disposable public input with
+python3 tests/desktop/font-readiness-fixture.py /absolute/test/fixtures/nimbus.docx.
+With a sandboxed desktop package and a private display, set EO_FONT_FIXTURE to
+that input, EO_DESKTOP_ROOT to the isolated runtime folder,
+EO_PACKAGE_EXECUTABLE to the test application and EO_PLAYWRIGHT to Playwright,
+then run node tests/desktop/font-readiness.cjs. It uses temporary copies and
+sequential fresh profiles; it never drives a native file or print dialog.
+
+## Document engine readiness
+
+A warm native font inventory can arrive before a document's SDK font application exists. This is a pending initialization state, not a denied permission or unreadable computer. Each document view retains its own state and clears any stale startup warning. Opening continues with packaged fonts. Initial and post-open installation share a three-attempt startup budget with later readiness notifications and the final 30-second deadline. A later notification uses the remaining attempt immediately when the SDK reports ready; otherwise the deadline retries or reports the existing localized font failure without a fourth attempt. There is no polling loop. Closing, navigating away from or removing the editor view cancels its timer and listeners. A save, destination chooser or close check defers this refresh through its existing completion guard; computer-font refresh never takes the save lock.
+
+Declining or revoking permission cancels pending readiness work without another native request. Actual native permission, index or read failures keep their visible warning. The existing font-consent bridge, packaged-font priority and browser behavior are unchanged. [Readiness regressions](../tests/desktop/font-engine-ready.test.cjs) also cover independent engine states in two document frames.

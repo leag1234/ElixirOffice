@@ -5,7 +5,7 @@ const helper=path.join(__dirname,'close-recovery.test.cjs'),load=createRequire(h
 vm.runInNewContext(fs.readFileSync(helper,'utf8')+'\nmodule.exports={boot};',{require:name=>name==='node:test'?()=>{}:load(name),module:moduleScope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate});
 const {boot}=moduleScope.exports,Errors=require('../../desktop/errors.js'),Feedback=require('../../desktop/feedback.js'),catalogs=require('../../tools/desktop/i18n-extra.json'),tick=()=>new Promise(setImmediate);
 
-test('actual saved-file IPC handlers authorize, revalidate copies, guard unsaved open and hide missing paths',async()=>{
+test('actual saved-file IPC handlers authorize, revalidate copies, preserve unsaved tabs and hide missing paths',async()=>{
  const shown=[],e=await boot({document:true,onShow:target=>shown.push(target)});
  try{
   const original=await fsp.readFile(path.join(e.directory,'test.docx')),target=path.join(e.directory,'public-copy.docx');
@@ -14,8 +14,10 @@ test('actual saved-file IPC handlers authorize, revalidate copies, guard unsaved
   await assert.rejects(e.invoke('saved-show',target),/Saved file unavailable/);
   assert(copy.artifactId);assert.equal(await e.invoke('saved-show',copy.artifactId),true);assert.deepEqual(shown,[target]);
   const handler=e.handlers.get('eo:saved-show');
-  assert.throws(()=>handler({sender:{},senderFrame:{}},copy.artifactId),/desktop start window/i);
-  e.state.dirty=true;e.responses.push(0);assert.equal(await e.invoke('saved-open',copy.artifactId),null);assert.equal(e.window.closed,undefined);
+  assert.throws(()=>handler({sender:{},senderFrame:{}},copy.artifactId),/registered document main frame/i);
+  e.state.dirty=true;assert.equal(await e.invoke('saved-open',copy.artifactId),null);assert.equal(e.window.closed,undefined);
+  assert.equal(e.documents.length,2);assert.equal(e.documents[0].state.dirty,true);
+  const firstOpened=await e.invokeFor(e.documents[1],'initial');assert.equal(firstOpened.name,'public-copy.docx');assert.notEqual(firstOpened.token,e.selected.token);
   await fsp.rename(target,target+'.moved');
   for(const action of ['saved-show','saved-open']){
    await assert.rejects(e.invoke(action,copy.artifactId),error=>{
@@ -26,8 +28,10 @@ test('actual saved-file IPC handlers authorize, revalidate copies, guard unsaved
   }
   e.state.dirty=false;const other=path.join(e.directory,'second-copy.docx');e.saveResponses.push({canceled:false,filePath:other});
   const next=await e.invoke('export',e.selected.token,new Uint8Array(Buffer.from('PKpublic-second')),'docx',undefined,'next-job');
-  const opened=await e.invoke('saved-open',next.artifactId);assert.equal(opened.name,'second-copy.docx');assert.notEqual(opened.token,e.selected.token);
-  await assert.rejects(e.invoke('saved-show',next.artifactId),/Saved file unavailable/);
+  assert.equal(await e.invoke('saved-open',next.artifactId),null);assert.equal(e.documents.length,3);
+  const opened=await e.invokeFor(e.documents[2],'initial');assert.equal(opened.name,'second-copy.docx');assert.notEqual(opened.token,e.selected.token);
+  assert.equal(await e.invoke('saved-show',next.artifactId),true,'The original tab retains its saved artifact handle');
+  await assert.rejects(e.invokeFor(e.documents[2],'saved-show',next.artifactId),/Saved file unavailable/);
   assert.deepEqual(await fsp.readFile(path.join(e.directory,'test.docx')),original);
  }finally{await e.cleanup();}
 });

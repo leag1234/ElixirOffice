@@ -15,3 +15,5 @@ AI_BASE=$(getvar ELIXIR_AI_BASE_URL); AI_MODEL=$(getvar ELIXIR_AI_MODEL); AI_KEY
 [ -z "$AI_KEY" ] && [ -z "$AI_BASE" ] && AI_KEY=$(getvar OPENAI_API_KEY)
 [ -z "$AI_BASE" ] && [ -n "$AI_KEY" ] && AI_BASE="https://api.openai.com/v1"
 AI_BASE="${AI_BASE%/}"
+
+AI_CA_FILE=$(getvar EO_AI_CA_FILE)

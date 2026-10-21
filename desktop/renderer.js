@@ -6,6 +6,7 @@ Object.defineProperty(window,'EODesktopState',{value:(lock=true)=>{if(lock)close
 Object.defineProperty(window,'EODesktopCancelOperation',{value:()=>{abort?.abort();openingOperation?.cancel();controller?.dispose();}});
 function blockDuringClose(event){if(closeCheck||info?.capture){event.preventDefault();event.stopImmediatePropagation()}}
 for(const name of ['keydown','beforeinput','click','drop'])document.addEventListener(name,blockDuringClose,true);
+let fontRefreshRequested=false,fontRefreshRunning=false,fontRefreshNotify=false;
 let info,operationBusy=false,backstage,recoveryBusy=false,pdfCompatibility,recoveryNotified=false,feedback,lastOperation,statusOperation;
 const t=key=>info?.strings[key]||({recoveryFailed:'AutoRecover could not keep a recovery copy. Save your document manually.',pdfRecoveryOff:'AutoRecover is not available for PDF files. Save manually; these settings apply to Office files.'})[key]||key;
 const status=(text,operationId)=>{statusOperation=operationId||null;const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[...new Set([text,recovery,frame?.EOComputerFontWarning].filter(Boolean))].join(' — ');$('message').textContent=message;$('message').hidden=!message;};
@@ -21,7 +22,7 @@ async function returnHome(){
   pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
  }catch(error){fail(error)}
 }
-function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
+function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
 
 const fail=(error,saveError=false)=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);if(!saveError)return;
  const copy=document.createElement('button');copy.type='button';copy.textContent=info?.strings.opCopyDiagnostics||'Copy diagnostics';copy.addEventListener('click',()=>eoDesktop.copySaveDiagnostics().catch(()=>{}));$('message').append(' ',copy);};
@@ -29,30 +30,120 @@ function buttons(busy) {
   operationBusy=busy;
   for(const button of $('home').querySelectorAll('button'))button.disabled=busy;
   if(!busy && pendingRequested)setTimeout(drainPending,0);
+  if(!busy && fontRefreshRequested)setTimeout(refreshFonts,0);
 }
 
 function script(win,url){return new Promise((resolve,reject)=>{const element=win.document.createElement('script');element.src=url;element.onload=resolve;element.onerror=()=>reject(Error('Cannot load bundled editor asset'));win.document.head.appendChild(element)})}
 async function recent(){if(!$('home').hidden)await refreshHome();}
 
-async function installFonts(win,waitForIndex=false) {
+async function installFonts(win,waitForIndex=false,isCurrent=()=>true,api) {
+  // A renderer owns one document view; keep startup state attached to that exact engine.
+  const pendingByView=installFonts.pendingByView ||= new WeakMap();
+  const pending=pendingByView.get(win);
+  const clearPending=()=>pending?.cancel();
   const LF=win.Common?.ElixirLocalFonts;
   if(!LF)throw Error('Bundled local font interface missing');
-  const allowed=await eoDesktop.fontPermission();LF.setConsent(allowed);win.EOComputerFontWarning=null;
-  if(!allowed){LF.setStatus('off');return false;}
+  const allowed=await eoDesktop.fontPermission();if(!isCurrent())return false;
+  LF.setConsent(allowed);win.EOComputerFontWarning=null;
+  if(!allowed){clearPending();LF.setStatus('off');if(pending)status('');return false;}
+  if(pending?.failed&&!LF.engineReady?.()){LF.setConsent(false);LF.setStatus('error');win.EOComputerFontWarning=t('fontFailed');status('');return false;}
+  // A ready engine may use the remaining attempt immediately on a notification.
+  // Initial, post-open and later/deadline work share one three-attempt budget.
+  if(pending?.failed){clearPending();return installFonts(win,waitForIndex,isCurrent,api);}
+  if(pending?.attempts>=3){
+    if(!pending.expired){LF.setStatus('loading');return false;}
+    pending.failed=true;pending.stop();LF.setConsent(false);LF.setStatus('error');win.EOComputerFontWarning=t('fontFailed');status('');return false;
+  }
+  if(pending?.retried&&!pending.expired&&!LF.engineReady?.()){LF.setStatus('loading');return false;}
+  if(pending){pending.retried=true;pending.attempts++;}
   try{
     if(!LF.desktopPolicy){
       await script(win,'/font-resolver.js');await script(win,'/computer-fonts.js');
       const index=await eoDesktop.fontIndex(!waitForIndex);
+      if(!isCurrent())return false;
+      if(!await eoDesktop.fontPermission()){if(isCurrent()){clearPending();LF.setConsent(false);LF.setStatus('off');}return false;}
+      if(!isCurrent())return false;
       if(!index){LF.setConsent(false);LF.setStatus('loading');return false;}
       win.EOComputerFonts.install(index);
       // Install eligible families and ranges before document symbol scanning.
-      await LF.readList();LF.register();
+      await LF.readList();if(!isCurrent())return false;
+      if(!await eoDesktop.fontPermission()){if(isCurrent()){clearPending();LF.setConsent(false);LF.setStatus('off');}return false;}
+      if(!isCurrent())return false;
+      const added=LF.register();
+      // A late inventory arrives after the SDK initialized the font selector.
+      if(api?.sync_InitEditorFonts && added?.length)api.sync_InitEditorFonts(LF.guiFonts(added));
     }
+    clearPending();if(pending)status('');
     return true;
   }catch(error){
     // Optional discovery must not prevent opening a document with the packaged fonts.
+    if(!isCurrent())return false;
+    if(error?.message==='Font engine is not ready'&&!pending?.expired){
+      LF.setStatus('loading');win.EOComputerFontWarning=null;status('');
+      if(!pending){
+        const state={retried:false,expired:false,attempts:1,timer:null};
+        let observer;
+        state.stop=()=>{
+          clearTimeout(state.timer);observer?.disconnect();
+          for(const view of [win,window])for(const event of ['pagehide','unload'])view.removeEventListener?.(event,state.cancel);
+        };
+        state.cancel=()=>{state.stop();pendingByView.delete(win);};
+        for(const view of [win,window])for(const event of ['pagehide','unload'])view.addEventListener?.(event,state.cancel,{once:true});
+        // Replacing/removing the editor iframe must release its captured window.
+        if(typeof MutationObserver==='function'&&win.frameElement?.ownerDocument?.documentElement){
+          observer=new MutationObserver(()=>{if(!win.frameElement?.isConnected)state.cancel();});
+          observer.observe(win.frameElement.ownerDocument.documentElement,{childList:true,subtree:true});
+        }
+        pendingByView.set(win,state);fontRefreshRequested=true;
+        // One deadline notification, not recurring polling. Save/open/close guards
+        // retain it until the current document can safely refresh.
+        state.timer=setTimeout(()=>{
+          state.expired=true;
+          if(frame!==win){state.cancel();return;}
+          fontRefreshRequested=true;
+          if(window.EOLocalSession?.win===win)return refreshFonts();
+        },30000);
+      }
+      return false;
+    }
+    if(error?.message==='Font engine is not ready'&&pending?.expired){pending.failed=true;pending.stop();}else clearPending();
     LF.setConsent(false);LF.setStatus('error');win.EOComputerFontWarning=t('fontFailed');status('');
     return false;
+  }
+}
+
+// Keep readiness notifications across opening, native choices and save/close checks.
+async function refreshFonts(){
+  if(!fontRefreshRequested||fontRefreshRunning||opening||operationBusy||choosingSaveAs||closeCheck)return;
+  const session=window.EOLocalSession;
+  fontRefreshRequested=false;
+  if(!session)return;
+  const current=()=>window.EOLocalSession===session && frame===session.win && file===session.file && controller===session.controller;
+  const usable=()=>current()&&!opening&&!operationBusy&&!closeCheck&&!choosingSaveAs;
+  // Font discovery is optional: never take the save/AutoRecover operation lock.
+  fontRefreshRunning=true;
+  try{
+    const LF=session.win.Common.ElixirLocalFonts;
+    if(!await installFonts(session.win,true,usable,session.api)){
+      if(current()&&!usable()){fontRefreshRequested=true;return;}
+      fontRefreshNotify=false;return false;
+    }
+    if(!usable()){if(current())fontRefreshRequested=true;return;}
+    await LF.enable(session.api);
+    if(!current())return false;
+    const allowed=await eoDesktop.fontPermission();
+    if(!current())return false;
+    if(!allowed){LF.setConsent(false);LF.setStatus('off');fontRefreshNotify=false;return false;}
+    if(!usable()){fontRefreshRequested=true;return;}
+    if(fontRefreshNotify){fontRefreshNotify=false;status(t('fontUse'));}
+    return true;
+  }catch(error){
+    fontRefreshNotify=false;
+    if(current()){session.win.EOComputerFontWarning=t('fontFailed');status('');}
+    return false;
+  }finally{
+    fontRefreshRunning=false;
+    if(fontRefreshRequested&&!opening&&!operationBusy&&!choosingSaveAs&&!closeCheck)setTimeout(refreshFonts,0);
   }
 }
 
@@ -117,7 +208,7 @@ async function open(selected) {
             if(!input.byteLength&&['txt','csv'].includes(file.sourceFormat))input=new Uint8Array([10]).buffer;
             if(file.sourceFormat && file.sourceFormat!==format)input=(await frame.EOWasmConvert.convert(new frame.Uint8Array(input),file.sourceFormat,format,{signal:abort.signal,onProgress:openingOperation.progress})).buffer;
             timings.beforeConvert=performance.now();const stats=await controller.open(input,openingOperation);timings.contentReady=performance.now();if(kind==='pdf')pdfCompatibility=EODesktopPdfCompatibility(frame,main,info.strings,status);
-            main.api.asc_registerCallback('asc_onDocumentModifiedChanged',updateDirty);
+            main.api.asc_registerCallback('asc_onDocumentModifiedChanged',()=>{updateDirty().catch(fail)});
             for(const name of ['keydown','beforeinput','click','drop'])frame.document.addEventListener(name,blockDuringClose,true);
             frame.document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files'))event.preventDefault()},true);
             frame.document.addEventListener('drop',drop,true);
@@ -171,9 +262,12 @@ function setDocumentName(name){
 async function rename(){
  if(!controller||operationBusy)return;
  window.EOLocalFailure=null;
- const label=backstage?.renameLabel||'Rename',box=modal(label),input=document.createElement('input'),notice=document.createElement('p');
- input.id='desktop-rename-name';input.value=file.name.replace(/\.[^.]+$/,'');input.maxLength=200;input.setAttribute('aria-label',label);notice.setAttribute('role','status');box.append(input,notice);
- const button=modalButton(box,t('save'),async()=>{
+ const label=backstage?.renameLabel||'Rename',box=modal(label),form=document.createElement('form'),fieldLabel=document.createElement('label'),input=document.createElement('input'),notice=document.createElement('p'),actions=document.createElement('div');
+ box.className+=' desktop-rename';actions.className='desktop-dialog-actions';fieldLabel.textContent=label;fieldLabel.htmlFor='desktop-rename-name';
+ input.type='text';input.id='desktop-rename-name';input.value=file.name.replace(/\.[^.]+$/,'');input.maxLength=200;input.setAttribute('aria-label',label);notice.setAttribute('role','status');form.append(fieldLabel,input,notice,actions);box.append(form);
+ const button=document.createElement('button');button.type='submit';button.textContent=t('save');button.className='btn btn-primary';actions.append(button);
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();
   if(operationBusy)return;buttons(true);button.disabled=true;
   try{
    const renamed=await eoDesktop.rename(file.token,input.value);Object.assign(file,renamed);
@@ -181,7 +275,7 @@ async function rename(){
   }catch(error){notice.textContent=error.message;window.EOLocalFailure=error.message}
   finally{buttons(false);button.disabled=false}
  });
- modalButton(box,t('cancel'),()=>box.close());input.focus();input.select();
+ modalButton(actions,t('cancel'),()=>box.close()).className='btn';input.focus();input.select();
 }
 async function chooseExport(){
  if(!controller||operationBusy||choosingSaveAs)return false;
@@ -203,6 +297,7 @@ async function chooseExport(){
   saveAsTicket=null;choosingSaveAs=false;
   await eoDesktop.saveAsCancel(selectedFile.token).catch(()=>{});
   if(pendingRequested)setTimeout(drainPending,0);
+  if(fontRefreshRequested)setTimeout(refreshFonts,0);
  }
 }
 async function exportAs(format){
@@ -228,6 +323,9 @@ async function pdf(print=false,ticket){
     await script(frame,'/example/local-assets/sdkjs/common/clientpdf/wasm-pdf.js');
     if(!frame.EODesktopPdf)await script(frame,'/example/local-assets/sdkjs/common/desktop/pdf.js');
     }
+    if(abort.signal.aborted)throw Object.assign(Error('PDF export cancelled'),{name:'AbortError',code:'aborted'});
+    // The local snapshot barrier awaits queued picture decoding/insertion before drawing.
+    if(file.format!=='pdf')await controller.snapshot();
     if(abort.signal.aborted)throw Object.assign(Error('PDF export cancelled'),{name:'AbortError',code:'aborted'});
     const plainCopy=await controller.confirmUnprotectedExport?.();
     const result=file.format==='pdf'?{bytes:await controller.serialize(operation),stats:{backend:controller.canSave()?'original-append':'drawingfile'}}:await frame.EODesktopPdf(main.api,file.format,{signal:abort.signal,onProgress:operation.progress});
@@ -266,10 +364,15 @@ function modalButton(box,label,action){
  const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',()=>Promise.resolve(action()).catch(fail));box.append(button);return button;
 }
 async function showOptions(){
- const options=await eoDesktop.recoveryOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
+ const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
  const returnTarget=returnFrame&&(invoker===document.body||invoker?.closest('dialog.desktop-options:not([open])'))?returnFrame.frameElement:invoker;
  const returnDocument=returnTarget?.tagName==='IFRAME'?returnTarget.contentDocument:null,returnChild=returnDocument?.activeElement;
  const box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
+ const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),actions=document.createElement('div');
+ box.className+=' desktop-preferences';
+ for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup])group.className='desktop-setting-section';
+ recoveryRow.className='desktop-recovery-row';actions.className='desktop-dialog-actions';
+ recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,windowGroup,fontGroup);
  box.addEventListener('close',()=>{
   const active=document.activeElement;
   // A close event may run after another dialog, control or document took ownership.
@@ -281,29 +384,46 @@ async function showOptions(){
   }
   returnTarget.focus();returnChild?.focus();
  },{once:true});
- enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));box.append(label);enabled.focus();
+ enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));recoveryRow.append(label);enabled.focus();
  const interval=document.createElement('select');interval.id='recovery-interval';interval.setAttribute('aria-label',t('autoRecover'));
- if(file?.format==='pdf'){const pdfNote=document.createElement('p');pdfNote.textContent=t('pdfRecoveryOff');box.append(pdfNote);}
- for(const seconds of [15,30,60,120,300]){const option=document.createElement('option');option.value=seconds;option.textContent=String(seconds)+' s';option.selected=seconds===options.seconds;interval.append(option)}box.append(interval);
- const authorLabel=document.createElement('label'),author=document.createElement('input');author.id='author-name';author.maxLength=200;author.value=await eoDesktop.author();authorLabel.textContent=t('authorName');authorLabel.append(author);box.append(authorLabel);
+ if(file?.format==='pdf'){const pdfNote=document.createElement('p');pdfNote.textContent=t('pdfRecoveryOff');recoveryGroup.append(pdfNote);}
+ for(const seconds of [15,30,60,120,300]){const option=document.createElement('option');option.value=seconds;option.textContent=String(seconds)+' s';option.selected=seconds===options.seconds;interval.append(option)}recoveryRow.append(interval);
+ const authorLabel=document.createElement('label'),author=document.createElement('input');author.type='text';author.id='author-name';author.maxLength=200;author.value=await eoDesktop.author();authorLabel.textContent=t('authorName');authorLabel.append(author);authorGroup.append(authorLabel);
  const aiController=(frame?.DE||frame?.SSE||frame?.PE||frame?.PDFE)?.getController('Common.Controllers.ElixirAI');
- if(aiController)modalButton(box,'Elixir — '+t('settings'),()=>{box.close();aiController.openSettings(false)});
- const note=document.createElement('p');note.textContent=t('saveCopy')+'. '+t('privacy');box.append(note);
- await addFontOptions(box);
- modalButton(box,t('save'),async()=>{await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
- modalButton(box,t('cancel'),()=>box.close());
+ if(aiController){const aiButton=modalButton(authorGroup,'Elixir — '+t('settings'),()=>{box.close();aiController.openSettings(false)});aiButton.className='btn desktop-ai-settings';}
+ const note=document.createElement('p');note.className='desktop-privacy';note.textContent=t('privacy');box.append(note);
+ const customFrameLabel=document.createElement('label'),customFrame=document.createElement('input'),customFrameDescription=document.createElement('p'),customFrameNote=document.createElement('p');
+ customFrame.type='checkbox';customFrame.id='custom-title-bar';customFrame.checked=windowOptions.customTitleBar;
+ customFrame.disabled=!windowOptions.customTitleBarAvailable&&!customFrame.checked;
+ customFrame.addEventListener('change',()=>{if(!windowOptions.customTitleBarAvailable&&!customFrame.checked)customFrame.disabled=true;});
+ customFrameDescription.id='custom-title-bar-description';customFrameDescription.textContent=t('customTitleBarDesc');
+ customFrameNote.id='custom-title-bar-note';customFrameNote.textContent=windowOptions.customTitleBarAvailable?t('customTitleBarRestart'):t('nativeTitleBarUnavailable');
+ customFrame.setAttribute('aria-describedby',customFrameDescription.id+' '+customFrameNote.id);customFrameLabel.append(customFrame,document.createTextNode(t('customTitleBar')));windowGroup.append(customFrameLabel,customFrameDescription,customFrameNote);
+ await addFontOptions(fontGroup);
+ const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.windowSettings({customTitleBar:customFrame.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
+ saveButton.className='btn btn-primary';
+ modalButton(actions,t('cancel'),()=>box.close()).className='btn';box.append(actions);
 }
 async function offerRecovery(){
- const entries=await eoDesktop.recoveryList();if(!entries.length)return;
- const box=modal(t('autoRecover'));
+ const entries=await eoDesktop.recoveryOffer();if(!entries.length)return;
+ const english={recoveryTitle:'Recover documents',recoveryUnavailable:'Unavailable recovery copy',recoveryDamaged:'This copy is damaged or unavailable and cannot be restored.'};
+ const text=key=>{const value=info?.strings?.[key];return typeof value==='string'&&value.trim()?value:english[key]};
+ const box=modal(text('recoveryTitle'));box.className+=' desktop-recovery';let firstRestore,index=0;
  for(const entry of entries){
-  const row=document.createElement('section'),name=document.createElement('p');name.textContent=entry.name+(entry.modified?' — '+new Intl.DateTimeFormat(info.language,{dateStyle:'short',timeStyle:'short'}).format(new Date(entry.modified)):'');row.append(name);box.append(row);
-  if(!entry.damaged)modalButton(row,t('restore'),async()=>{box.close();await run(()=>eoDesktop.recoveryRestore(entry.id))});
-  modalButton(row,t('discard'),async()=>{await eoDesktop.recoveryRemove(entry.id);row.remove();if(!box.querySelector('section'))box.close()});
+  const row=document.createElement('section'),heading=document.createElement('h3'),name=document.createElement('bdi'),actions=document.createElement('div');
+  row.className='desktop-recovery-entry';heading.id='desktop-recovery-entry-'+(++index);row.setAttribute('aria-labelledby',heading.id);
+  name.textContent=entry.damaged?text('recoveryUnavailable'):entry.name;heading.append(name);row.append(heading);box.append(row);
+  if(entry.damaged){const note=document.createElement('p');note.className='desktop-recovery-damaged';note.textContent=text('recoveryDamaged');row.append(note)}
+  const modified=new Date(entry.modified);
+  if(entry.modified&&Number.isFinite(modified.getTime())){const date=document.createElement('time');date.dateTime=modified.toISOString();date.textContent=new Intl.DateTimeFormat(info.language,{dateStyle:'short',timeStyle:'short'}).format(modified);row.append(date)}
+  actions.className='desktop-dialog-actions';row.append(actions);
+  if(!entry.damaged){const restore=modalButton(actions,t('restore'),async()=>{box.close();await run(()=>eoDesktop.recoveryRestore(entry.id))});restore.className='btn btn-primary desktop-recovery-restore';firstRestore??=restore;}
+  modalButton(actions,t('discard'),async()=>{await eoDesktop.recoveryRemove(entry.id);row.remove();if(!box.querySelector('section'))box.close()}).className='btn';
  }
- modalButton(box,t('cancel'),()=>box.close());
+ const footer=document.createElement('div');footer.className='desktop-recovery-footer';box.append(footer);
+ const cancel=modalButton(footer,t('cancel'),()=>box.close());cancel.className='btn';(firstRestore||cancel).focus();
 }
-async function fontConsent(){try{if(!await eoDesktop.fontConsent())return false;if(frame){if(await installFonts(frame,true)===false)return false;await frame.Common.ElixirLocalFonts.readList();await frame.Common.ElixirLocalFonts.enable(main.api)}status(t('fontUse'));return true}catch(error){fail(error);return false}}
+async function fontConsent(){try{if(!await eoDesktop.fontConsent())return false;if(frame){fontRefreshRequested=true;fontRefreshNotify=true;return await refreshFonts()!==false;}status(t('fontUse'));return true}catch(error){fail(error);return false}}
 async function addFontOptions(box){
  const label=document.createElement('label'),enabled=document.createElement('input'),state=document.createElement('p'),hint=document.createElement('p');
  enabled.type='checkbox';enabled.id='computer-fonts-enabled';state.id='computer-fonts-status';hint.id='computer-fonts-hint';
@@ -332,21 +452,22 @@ eoDesktop.onOperationStage(event=>{
  if(!lastOperation||event.id!==lastOperation.id||event.scope!==file?.token||['ready','warning','complete','error','cancelled'].includes(lastOperation.phase))return;
  if(['awaiting-user','writing'].includes(event.phase))operationEvent({id:event.id,scope:event.scope,kind:lastOperation.kind,phase:event.phase});
 });
-eoDesktop.onAction(async action=>{
+eoDesktop.onAction(async (action,details)=>{
+  if(action==='font-index-ready'){fontRefreshRequested=true;const home=$('home');if(!home.hidden&&!closeCheck&&!choosingSaveAs)await refreshHome(home.querySelector('[aria-current="page"]')?.dataset.view||'home');return refreshFonts();}
   if(action==='prepare-close'){closeCheck=true;return}
-  if(action==='resume-close'){closeCheck=false;if(pendingRequested)setTimeout(drainPending,0);return}
+  if(action==='resume-close'){closeCheck=false;if(pendingRequested)setTimeout(drainPending,0);if(fontRefreshRequested)setTimeout(refreshFonts,0);return}
   if(action==='pending'){pendingRequested=true;return drainPending()}
   if(closeCheck && action!=='save-close')return;
   if(choosingSaveAs)return;
-  if(action==='font-index-ready'){const home=$('home');if(!home.hidden)await refreshHome(home.querySelector('[aria-current="page"]')?.dataset.view||'home');return;}
-  if(action==='save-close'){try{if(await save())await eoDesktop.closeSaved();}catch(error){fail(error)}finally{closeCheck=false;if(pendingRequested)setTimeout(drainPending,0)}return}
-  ({'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
+  if(action==='save-close'){const attemptId=details?.attemptId;if(typeof attemptId!=='string')return;try{if(await save())await eoDesktop.closeSaved(attemptId);}catch(error){fail(error)}finally{closeCheck=false;await eoDesktop.closeCancelled(attemptId).catch(()=>{});if(pendingRequested)setTimeout(drainPending,0);if(fontRefreshRequested)setTimeout(refreshFonts,0)}return}
+  ({'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
 });
 document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();document.body.classList.add('drag')}});
 document.addEventListener('dragleave',()=>document.body.classList.remove('drag'));document.addEventListener('drop',drop,true);
 (async()=>{
+ Object.defineProperty(window,'EODocumentId',{value:(await eoDesktop.identity()).documentId});
  info=await eoDesktop.locale();window.EODesktopStrings=Object.freeze(info.strings);document.documentElement.lang=info.language;document.documentElement.dir=['ar','he','ur'].includes(info.language)?'rtl':'ltr';
- await refreshHome();pendingRequested=true;await drainPending();window.EODesktopReady=true;
+ await refreshHome();pendingRequested=true;await drainPending();window.EODesktopReady=true;await eoDesktop.desktopReady();
  await offerRecovery();
  scheduleRecovery();
  if(info.capture)window.EODesktopCapture={

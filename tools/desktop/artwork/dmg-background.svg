@@ -1,0 +1,10 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- Finder supplies localized item names; the artwork uses only the product name. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+ <defs><linearGradient id="surface" x2="0" y2="1"><stop stop-color="#fafcff"/><stop offset="1" stop-color="#eaf3fc"/></linearGradient></defs>
+ <rect width="640" height="420" fill="url(#surface)"/>
+ <rect width="640" height="5" fill="#0082c9"/>
+ <text x="320" y="75" text-anchor="middle" fill="#143951" font-family="Arial,sans-serif" font-size="28" font-weight="600">ElixirOffice</text>
+ <path d="M286 230h68m-18-18 18 18-18 18" fill="none" stroke="#4384b2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M80 350h480" stroke="#cfdfed"/>
+</svg>
