@@ -2,15 +2,19 @@
 'use strict';
 const path=require('node:path');
 const STRIP_HEIGHT=44;
-function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,root,shellURL,strings,language,direction,actions,platform=process.platform}){
+function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,root,shellURL,strings,language,direction,actions,navigation=()=>({openInTabs:true}),diagnostics=()=>{},geometry={},platform=process.platform}){
+ const stripVisible=owner=>owner.openInTabs&&registry.documents(owner.id).some(document=>document.state.current||document.name);
+ const contentTop=owner=>stripVisible(owner)?STRIP_HEIGHT:0;
+ const snapshot=owner=>({...registry.snapshot(owner.id),openInTabs:owner.openInTabs,stripVisible:!!stripVisible(owner),showHomeTab:navigation().showHomeTab===true});
  const changed=windowId=>{
   const owner=registry.window(windowId);
-  if(!owner.window.isDestroyed()&&!owner.window.webContents.isDestroyed())owner.window.webContents.send('eo:tabs-state',registry.snapshot(windowId));
+  if(!owner.window.isDestroyed()&&!owner.window.webContents.isDestroyed())owner.window.webContents.send('eo:tabs-state',snapshot(owner));
  };
  registry.on('changed',changed);
  ipcMain.handle('eo:tabs-shell',async(event,command,id,focus=true)=>{
   const owner=registry.authorizeShell(event);
-  if(command==='initial')return {state:registry.snapshot(owner.id),strings:strings(),language:language(),direction:direction()};
+  if(command==='initial')return {state:snapshot(owner),strings:strings(),language:language(),direction:direction()};
+  if(command==='home'){if(!owner.openInTabs||navigation().showHomeTab!==true)throw Error('Home tab unavailable');return actions.home(owner);}
   if(command==='end-drag'||command==='drop-drag')return actions.finishDrag(owner,id,command==='drop-drag');
   if(command==='new'){
    if(registry.documents(owner.id).some(document=>document.closing))throw Error('Document close is pending');
@@ -31,15 +35,21 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
  function bounds(owner){
   if(owner.window.isDestroyed())return;
   const [width,height]=owner.window.getContentSize();
-  for(const document of registry.documents(owner.id))document.view.setBounds({x:0,y:STRIP_HEIGHT,width,height:Math.max(1,height-STRIP_HEIGHT)});
+  const top=contentTop(owner);
+  for(const document of registry.documents(owner.id))document.view.setBounds({x:0,y:top,width,height:Math.max(1,height-top)});
  }
  function createWindow(){
+  const started=performance.now();
   // The system frame is the default and stays available on unqualified systems.
-  const window=new BrowserWindow({width:1360,height:960,title:'ElixirOffice',webPreferences:{session,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,webviewTag:false,preload:path.join(root,'tabs-preload.cjs')}});
-  const owner=registry.registerWindow(window);
+  const placement=geometry.restore?.(registry.windows().length);
+  const window=new BrowserWindow({width:1360,height:960,...placement?.bounds,title:'ElixirOffice',webPreferences:{session,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,webviewTag:false,preload:path.join(root,'tabs-preload.cjs')}});
+  const owner=registry.registerWindow(window);owner.openInTabs=navigation().openInTabs===true;
+  diagnostics({stage:'window-create',durationMs:performance.now()-started,outcome:'ok'});
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   window.webContents.on('will-navigate',(event,url)=>{if(url!==shellURL)event.preventDefault();});
-  window.on('resize',()=>bounds(owner));
+  const remember=()=>geometry.changed?.(owner.window);
+  window.on('resize',()=>{bounds(owner);remember();});
+  for(const event of ['move','maximize','unmaximize','leave-full-screen'])window.on(event,remember);
   window.on('close',event=>{
    if(owner.allowClose)return;
    event.preventDefault();Promise.resolve(actions.closeWindow(owner)).catch(()=>actions.failure?.(owner));
@@ -53,6 +63,7 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
   });
   if(platform!=='darwin')window.setMenuBarVisibility(false);
   actions.windowCreated?.(owner);
+  if(placement?.maximized)window.maximize?.();
   owner.ready=window.loadURL(shellURL).catch(error=>{owner.allowClose=true;window.destroy();throw error;});
   // Startup still awaits this promise; install a rejection observer immediately.
   owner.ready.catch(()=>{});
@@ -60,7 +71,9 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
  }
  function addDocument(owner,{preload,state={},name=''}={}){
   registry.assertCapacity(strings().tabLimit);
+  const started=performance.now();
   const view=new WebContentsView({webPreferences:{session,backgroundThrottling:false,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,webviewTag:false,preload:preload||path.join(root,'preload.cjs')}});
+  diagnostics({stage:'view-create',durationMs:performance.now()-started,outcome:'ok'});
   let document;
   try{
   view.setVisible(false);
@@ -132,6 +145,6 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
    throw error;
   }
  }
- return {createWindow,addDocument,loadDocument,removeDocument,moveDocument,bounds,dispose(){registry.removeListener('changed',changed);ipcMain.removeHandler('eo:tabs-shell');}};
+ return {contentTop,setTabbed(owner,value){const previous=owner.openInTabs;owner.openInTabs=value===true;try{bounds(owner);}catch(error){owner.openInTabs=previous;bounds(owner);throw error;}registry.changed(owner.id);},createWindow,addDocument,loadDocument,removeDocument,moveDocument,bounds,dispose(){registry.removeListener('changed',changed);ipcMain.removeHandler('eo:tabs-shell');}};
 }
 module.exports={createTabHost,STRIP_HEIGHT};

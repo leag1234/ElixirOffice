@@ -34,6 +34,7 @@ function buttons(busy) {
 }
 
 function script(win,url){return new Promise((resolve,reject)=>{const element=win.document.createElement('script');element.src=url;element.onload=resolve;element.onerror=()=>reject(Error('Cannot load bundled editor asset'));win.document.head.appendChild(element)})}
+const openPerformance=(stage,durationMs,outcome='ok')=>{void eoDesktop.openPerformance({stage,durationMs,outcome}).catch(()=>{});};
 async function recent(){if(!$('home').hidden)await refreshHome();}
 
 async function installFonts(win,waitForIndex=false,isCurrent=()=>true,api) {
@@ -59,7 +60,7 @@ async function installFonts(win,waitForIndex=false,isCurrent=()=>true,api) {
   try{
     if(!LF.desktopPolicy){
       await script(win,'/font-resolver.js');await script(win,'/computer-fonts.js');
-      const index=await eoDesktop.fontIndex(!waitForIndex);
+      const index=await eoDesktop.fontIndex(!waitForIndex,!waitForIndex);
       if(!isCurrent())return false;
       if(!await eoDesktop.fontPermission()){if(isCurrent()){clearPending();LF.setConsent(false);LF.setStatus('off');}return false;}
       if(!isCurrent())return false;
@@ -177,13 +178,13 @@ async function open(selected) {
         events:{onAppReady:async()=>{
           if(controller)return;
           try {
-            timings.appReady=performance.now();openingOperation.phase('initializing');frame=document.querySelector('#workspace iframe').contentWindow;
+            timings.appReady=performance.now();openPerformance('renderer-ready',timings.appReady-timings.selected);openingOperation.phase('initializing');frame=document.querySelector('#workspace iframe').contentWindow;
             await Promise.all([
               script(frame,'/example/local-assets/sdkjs/common/clientpdf/wasm-fonts.js'),
               script(frame,'/example/local-assets/sdkjs/common/wasm-convert/api.js'),
               frame.Common?.ElixirLocal?Promise.resolve():new Promise((resolve,reject)=>frame.require(['common/main/lib/elixir-local/Controller'],resolve,reject))
             ]);
-            timings.imports=performance.now();const NativeWorker=frame.Worker;
+            timings.imports=performance.now();openPerformance('sdk-load',timings.imports-timings.appReady);const NativeWorker=frame.Worker;
             frame.Worker=function(url,options){
               const parsed=new frame.URL(url,frame.location.href);
               if(parsed.pathname.endsWith('/wasm-convert/worker.js')){
@@ -195,7 +196,7 @@ async function open(selected) {
             frame.Worker.prototype=NativeWorker.prototype;
             Object.assign(frame.EOWasmConvert.formats,{doc:66,xls:258,ppt:130,rtf:68,txt:69,docm:75,dotx:76,csv:260,xlsm:261,xltx:262,ppsx:132,potx:135});
             await EODesktopAI(frame);
-            await installFonts(frame);
+            const fontsAt=performance.now();await installFonts(frame);openPerformance('font-install',performance.now()-fontsAt);
             main=(kind==='word'?frame.DE:kind==='cell'?frame.SSE:kind==='pdf'?frame.PDFE:frame.PE).getController('Main');
             frame.Common.ElixirLocal.prepare(main.api,main);
             main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:kind!=='pdf',comment:true,fillForms:true,download:true,print:false,chat:false}}});
@@ -207,7 +208,10 @@ async function open(selected) {
             let input=new Uint8Array(file.bytes).buffer;
             if(!input.byteLength&&['txt','csv'].includes(file.sourceFormat))input=new Uint8Array([10]).buffer;
             if(file.sourceFormat && file.sourceFormat!==format)input=(await frame.EOWasmConvert.convert(new frame.Uint8Array(input),file.sourceFormat,format,{signal:abort.signal,onProgress:openingOperation.progress})).buffer;
-            timings.beforeConvert=performance.now();const stats=await controller.open(input,openingOperation);timings.contentReady=performance.now();if(kind==='pdf')pdfCompatibility=EODesktopPdfCompatibility(frame,main,info.strings,status);
+            timings.beforeConvert=performance.now();const stats=await controller.open(input,openingOperation);timings.contentReady=performance.now();
+            openPerformance('document-convert',timings.contentReady-timings.beforeConvert);
+            for(const [stage,key] of [['wasm-fetch','wasmFetchMs'],['wasm-compile','wasmCompileMs'],['wasm-instantiate','wasmInstantiateMs']])if(Number.isFinite(stats?.[key]))openPerformance(stage,stats[key],stats.wasmCached&&stage!=='wasm-instantiate'?'skipped':'ok');
+            if(kind==='pdf')pdfCompatibility=EODesktopPdfCompatibility(frame,main,info.strings,status);
             main.api.asc_registerCallback('asc_onDocumentModifiedChanged',()=>{updateDirty().catch(fail)});
             for(const name of ['keydown','beforeinput','click','drop'])frame.document.addEventListener(name,blockDuringClose,true);
             frame.document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files'))event.preventDefault()},true);
@@ -217,6 +221,7 @@ async function open(selected) {
              frame.AscCommon.History.ForceSave=true;main.api.SetDocumentModified(true);
             }
             await updateDirty();backstage=await EODesktopBackstage(frame,main,info,desktopAction);
+            frame.requestAnimationFrame(()=>frame.requestAnimationFrame(()=>openPerformance('first-paint',performance.now()-timings.contentReady)));
             // Report readiness only after the native file actions have been installed.
             window.EOLocalSession={controller,format,stats,api:main.api,file,win:frame,timings,editableMs:performance.now()};
             status(kind==='pdf'&&!controller.canSave()?controller.readOnlyMessage():'');openingOperation.finish({kind:'opened'});resolve();
@@ -392,6 +397,14 @@ async function showOptions(){
  const aiController=(frame?.DE||frame?.SSE||frame?.PE||frame?.PDFE)?.getController('Common.Controllers.ElixirAI');
  if(aiController){const aiButton=modalButton(authorGroup,'Elixir — '+t('settings'),()=>{box.close();aiController.openSettings(false)});aiButton.className='btn desktop-ai-settings';}
  const note=document.createElement('p');note.className='desktop-privacy';note.textContent=t('privacy');box.append(note);
+ const windowHeading=document.createElement('h3');windowHeading.textContent=t('window');windowGroup.append(windowHeading);
+ const tabsLabel=document.createElement('label'),tabs=document.createElement('input'),homeLabel=document.createElement('label'),home=document.createElement('input'),homeNote=document.createElement('p');
+ tabs.type='checkbox';tabs.id='open-documents-in-tabs';tabs.checked=windowOptions.openInTabs===true;
+ home.type='checkbox';home.id='show-home-tab';home.checked=windowOptions.showHomeTab===true;home.disabled=!tabs.checked;
+ homeNote.id='home-tab-requires-tabs';homeNote.textContent=t('homeTabRequiresTabs');home.setAttribute('aria-describedby',homeNote.id);
+ tabs.addEventListener('change',()=>{home.disabled=!tabs.checked;});
+ tabsLabel.append(tabs,document.createTextNode(t('openDocumentsInTabs')));homeLabel.append(home,document.createTextNode(t('showHomeTab')));
+ windowGroup.append(tabsLabel,homeLabel,homeNote);
  const customFrameLabel=document.createElement('label'),customFrame=document.createElement('input'),customFrameDescription=document.createElement('p'),customFrameNote=document.createElement('p');
  customFrame.type='checkbox';customFrame.id='custom-title-bar';customFrame.checked=windowOptions.customTitleBar;
  customFrame.disabled=!windowOptions.customTitleBarAvailable&&!customFrame.checked;
@@ -400,7 +413,7 @@ async function showOptions(){
  customFrameNote.id='custom-title-bar-note';customFrameNote.textContent=windowOptions.customTitleBarAvailable?t('customTitleBarRestart'):t('nativeTitleBarUnavailable');
  customFrame.setAttribute('aria-describedby',customFrameDescription.id+' '+customFrameNote.id);customFrameLabel.append(customFrame,document.createTextNode(t('customTitleBar')));windowGroup.append(customFrameLabel,customFrameDescription,customFrameNote);
  await addFontOptions(fontGroup);
- const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.windowSettings({customTitleBar:customFrame.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
+ const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
  saveButton.className='btn btn-primary';
  modalButton(actions,t('cancel'),()=>box.close()).className='btn';box.append(actions);
 }
@@ -460,7 +473,7 @@ eoDesktop.onAction(async (action,details)=>{
   if(closeCheck && action!=='save-close')return;
   if(choosingSaveAs)return;
   if(action==='save-close'){const attemptId=details?.attemptId;if(typeof attemptId!=='string')return;try{if(await save())await eoDesktop.closeSaved(attemptId);}catch(error){fail(error)}finally{closeCheck=false;await eoDesktop.closeCancelled(attemptId).catch(()=>{});if(pendingRequested)setTimeout(drainPending,0);if(fontRefreshRequested)setTimeout(refreshFonts,0)}return}
-  ({'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
+  ({'tab-limit':()=>status(t('tabLimit')),'backstage-home':()=>backstage?.open().catch(fail),'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
 });
 document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();document.body.classList.add('drag')}});
 document.addEventListener('dragleave',()=>document.body.classList.remove('drag'));document.addEventListener('drop',drop,true);

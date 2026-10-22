@@ -40,7 +40,7 @@ async function run(win,options){
    let image,capture;
    if(win.window||win.view){
     if(win.webContents!==win.view?.webContents)throw Error('Capture document target mismatch');
-    ({image,capture}=await require('./capture-composite.cjs').compose(win.window,win.view,{validate:win.validate,nativeImage:win.nativeImage}));
+    ({image,capture}=await require('./capture-composite.cjs').compose(win.window,win.view,{validate:win.validate,nativeImage:win.nativeImage,getStripHeight:win.getStripHeight}));
     capture.shellLanguage=await win.window.webContents.executeJavaScript('document.documentElement.lang');
     if(capture.shellLanguage!==language)throw Error('Capture tab shell language changed');
    }else{image=await win.webContents.capturePage();capture={kind:'document-only',nativeFrame:false};}

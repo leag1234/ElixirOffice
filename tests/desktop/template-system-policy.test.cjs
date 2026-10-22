@@ -32,11 +32,11 @@ test('actual main Home uses English immediately, shares discovery, refreshes lat
  const source=fs.readFileSync(require.resolve('../../desktop/main.cjs'),'utf8');
  const code=source.slice(source.indexOf('let homeFontDiscovery,homeFontGeneration;'),source.indexOf('function active('));
  function harness(failing=false){
-  let calls=0,finish,ready=null;const events=[],settings={fontConsent:false},index={bundled:[],system:[]};
+  let calls=0,finish,ready=null;const events=[],timers=[],settings={fontConsent:false},index={bundled:[],system:[]},document={status:'ready',state:{busy:false,moving:false},contents:{send:(...args)=>events.push(args)}};
   const fonts={generation:0,peek:()=>ready,index(){calls++;return failing?Promise.reject(Error('public fixture discovery failure')):new Promise(resolve=>{finish=()=>{ready=index;resolve(index);};});}};
-  const registry={windows:()=>[{id:'window'}],documents:()=>[{contents:{send:(...args)=>events.push(args)}}]};
-  const context=vm.createContext({registry,settings,captureOptions:null,fonts,win:{isDestroyed:()=>false,webContents:{send:(...args)=>events.push(args)}}});
-  vm.runInContext(code,context);return {context,settings,fonts,index,events,calls:()=>calls,finish:()=>finish()};
+  const registry={windows:()=>[{id:'window'}],documents:()=>[document]};
+  const context=vm.createContext({registry,settings,captureOptions:null,fonts,setTimeout:fn=>{timers.push(fn);return timers.length},win:{isDestroyed:()=>false,webContents:{send:(...args)=>events.push(args)}}});
+  vm.runInContext(code,context);return {context,settings,fonts,index,events,timers,document,calls:()=>calls,finish:()=>finish()};
  }
  const h=harness(),c=h.context;
  assert.deepEqual(Object.keys(c.templateFonts([entry],'ja')),[]);assert.equal(h.calls(),0);
@@ -55,6 +55,9 @@ test('actual main Home uses English immediately, shares discovery, refreshes lat
  const revoked=harness();revoked.settings.fontConsent=true;revoked.context.templateFonts([entry],'ja');
  revoked.settings.fontConsent=false;revoked.fonts.generation++;revoked.finish();await new Promise(resolve=>setImmediate(resolve));
  assert.equal(revoked.events.length,0);assert.deepEqual(Object.keys(revoked.context.templateFonts([entry],'ja')),[]);
+ const scheduled=harness();scheduled.settings.fontConsent=true;scheduled.document.status='loaded';scheduled.context.scheduleFontDiscovery();assert.equal(scheduled.calls(),0);assert.equal(scheduled.timers.length,1);
+ scheduled.timers.shift()();assert.equal(scheduled.calls(),0);assert.equal(scheduled.timers.length,1,'busy document reschedules the optional scan');
+ scheduled.document.status='ready';scheduled.timers.shift()();assert.equal(scheduled.calls(),1,'idle documents start one shared scan');
 });
 
 test('registered main font IPC returns pending immediately, validates requests and observes a new generation',async()=>{

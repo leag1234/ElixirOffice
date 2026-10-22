@@ -580,5 +580,101 @@ class ReleaseInputs(unittest.TestCase):
                 release.revision(repo, "main;touch canary", "main")
             self.assertFalse((repo / "canary").exists())
 
+
+class HostPreflight(unittest.TestCase):
+    font = "sha256:" + "1" * 64
+    windows = "electronuserland/builder@sha256:" + "2" * 64
+    appimage = "sha256:" + "3" * 64
+    def plan(self, targets=("linux", "windows", "mac")):
+        return {"targets": list(targets), "font_tool_image": self.font,
+                "windows_image": self.windows, "appimage_update": {"image": self.appimage}}
+    def answer(self, command, **kwargs):
+        if command == ["python3", "-m", "pip", "--version"]:
+            return subprocess.CompletedProcess(command, 0, "pip 25.2 from /owned/python\n", "")
+        if command == ["python3", "-m", "pip", "--help"]:
+            return subprocess.CompletedProcess(command, 0, "Options: --python <python>\n", "")
+        image = command[-1]
+        return subprocess.CompletedProcess(command, 0, (image if image.startswith("sha256:") else "sha256:" + "4" * 64) + "\n", "")
+    def test_success_checks_all_required_images_with_clean_environment(self):
+        env = {"PATH": "/owned/bin:/usr/bin:/bin"}
+        with patch.object(release.subprocess, "run", side_effect=self.answer) as run:
+            result = release.host_preflight(self.plan(), env)
+        self.assertEqual(set(result["docker_images"]), {"font_tool", "windows_builder", "appimage_builder"})
+        self.assertTrue(result["python_pip"]["supports_python_option"])
+        self.assertEqual(len(run.call_args_list), 5)
+        for call in run.call_args_list:
+            self.assertIs(call.kwargs["env"], env)
+            self.assertEqual(call.kwargs["timeout"], 20)
+            self.assertTrue(call.kwargs["capture_output"])
+            self.assertNotIn("pull", call.args[0])
+            self.assertNotIn("install", call.args[0])
+    def test_missing_pip_and_each_missing_image_are_reported_together(self):
+        def missing(command, **kwargs):
+            return subprocess.CompletedProcess(command, 1, "", "not found")
+        with patch.object(release.subprocess, "run", side_effect=missing):
+            with self.assertRaises(ValueError) as error:
+                release.host_preflight(self.plan(), {})
+        message = str(error.exception)
+        for value in ("python3 -m pip", self.font, self.windows, self.appimage):
+            self.assertIn(value, message)
+        self.assertNotIn("not found", message)
+    def test_old_pip_without_python_option_stops_before_build(self):
+        def old(command, **kwargs):
+            if command[-1] == "--help":
+                return subprocess.CompletedProcess(command, 0, "Options: --isolated", "")
+            return self.answer(command, **kwargs)
+        with patch.object(release.subprocess, "run", side_effect=old):
+            with self.assertRaisesRegex(ValueError, "python_option"):
+                release.host_preflight(self.plan(), {})
+    def test_mac_export_does_not_require_windows_or_appimage_builders(self):
+        with patch.object(release.subprocess, "run", side_effect=self.answer) as run:
+            result = release.host_preflight(self.plan(("mac",)), {})
+        self.assertEqual(set(result["docker_images"]), {"font_tool"})
+        self.assertEqual(len(run.call_args_list), 3)
+    def test_linux_does_not_require_windows_builder(self):
+        with patch.object(release.subprocess, "run", side_effect=self.answer):
+            result = release.host_preflight(self.plan(("linux",)), {})
+        self.assertEqual(set(result["docker_images"]), {"font_tool", "appimage_builder"})
+    def test_same_image_roles_are_inspected_once(self):
+        plan = self.plan(("linux",))
+        plan["appimage_update"]["image"] = self.font
+        with patch.object(release.subprocess, "run", side_effect=self.answer) as run:
+            result = release.host_preflight(plan, {})
+        self.assertEqual(len(run.call_args_list), 3)
+        self.assertEqual(len(result["docker_images"]), 2)
+    def test_wrong_local_content_id_for_sha256_pin_is_rejected(self):
+        def wrong(command, **kwargs):
+            if command[0] == "docker":
+                return subprocess.CompletedProcess(command, 0, "sha256:" + "9" * 64, "")
+            return self.answer(command, **kwargs)
+        with patch.object(release.subprocess, "run", side_effect=wrong):
+            with self.assertRaisesRegex(ValueError, "font_tool"):
+                release.host_preflight(self.plan(("mac",)), {})
+    def test_mutable_or_option_like_image_is_rejected_without_docker_call(self):
+        for image in ("builder:latest", "--help", "sha256:bad"):
+            plan = self.plan(("mac",))
+            plan["font_tool_image"] = image
+            with patch.object(release.subprocess, "run", side_effect=self.answer) as run:
+                with self.assertRaisesRegex(ValueError, "immutable image pin"):
+                    release.host_preflight(plan, {})
+                self.assertFalse(any(c.args[0][0] == "docker" for c in run.call_args_list))
+    def test_missing_executable_and_timeout_are_actionable_failures(self):
+        for error in (FileNotFoundError(), subprocess.TimeoutExpired(["docker"], 20)):
+            with patch.object(release.subprocess, "run", side_effect=error):
+                with self.assertRaisesRegex(ValueError, "preflight failed"):
+                    release.host_preflight(self.plan(), {})
+    def test_execution_failure_does_not_create_outputs_or_reserve_build_number(self):
+        with tempfile.TemporaryDirectory() as folder:
+            driver = object.__new__(release.Build)
+            driver.plan, driver.env = self.plan(), {}
+            driver.out = Path(folder) / "not-created"
+            driver.info = {}
+            with patch.object(release, "host_preflight", side_effect=ValueError("missing pip")), \
+                    patch.object(release.build_identity, "reserve") as reserve:
+                with self.assertRaisesRegex(ValueError, "missing pip"):
+                    driver.execute()
+                reserve.assert_not_called()
+            self.assertFalse(driver.out.exists())
+
 if __name__ == "__main__":
     unittest.main()

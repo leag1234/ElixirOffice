@@ -46,13 +46,28 @@ window.EODesktopBackstage=async function(win,main,info,action){
   fm.miInfo?.show();fm.miInfo?.setCaption(t('info'));fm.$el.find('#fm-btn-info').insertAfter(fm.$el.find('#fm-btn-elx-open'));
   for(const item of [fm.miNew,fm.miSave,fm.miDownload,fm.miPrint]){item?.show();item?.setDisabled(false)}
   if(fm.miPrint)fm.miPrintWithPreview?.hide();else{fm.miPrintWithPreview?.show();fm.miPrintWithPreview?.setDisabled(false);fm.miPrintWithPreview?.setCaption(t('print'));}
-  fm.miRename?.show();fm.miRename?.setDisabled(false);fm.miRename?.setCaption(bs.txtRename);
+  fm.miRename?.hide();
   if(win.PDFE)fm.miSave?.setDisabled(!main.api.elixirPdfSaveAllowed?.());
   fm.miSave?.setCaption(t('save'));fm.miDownload?.setCaption(t('saveAs'));
   fm.miPrint?.setCaption(t('print'));
-  this.items['elx-export']?.setCaption(t('pdf'));
+  this.items['elx-export']?.setCaption(bs.txtExport);
+  // Keep the existing menu objects, delegated callbacks and focus model.
+  // Editors ship different rail orders; append the live nodes in Office order.
+  this.items['eo-move']?.hide();
+  const rail=fm.$el.find('.panel-menu');
+  if(rail[0]?.append){
+   for(const id of ['save-desktop','save-copy','rename','edit','export-pdf','suggest'])fm.$el.find('#fm-btn-'+id).hide();
+   rail.find('.devider,.devider-last').hide();
+   for(const id of ['elx-home','create','elx-open','info','save','download','print','print-with-preview','elx-export','elx-close','elx-ai','settings','help','elx-about','eo-quit'])
+    fm.$el.find('#fm-btn-'+id).appendTo(rail);
+   for(const [id,before]of [['eo-doc-separator','info'],['eo-app-separator','elx-ai']]){
+    let divider=fm.$el.find('#'+id);
+    if(!divider.length)divider=$('<li class="devider" role="separator"/>').attr('id',id);
+    divider.insertBefore(fm.$el.find('#fm-btn-'+before)).show();
+   }
+  }
  };
- const captions={txtInfo:'info',txtHome:'home',txtNew:'new',txtOpen:'open',txtSaveAs:'saveAs',txtPrint:'print',txtExport:'pdf',txtClose:'close',txtOptions:'options',txtHelp:'help',txtAbout:'about'};
+ const captions={txtInfo:'info',txtHome:'home',txtNew:'new',txtOpen:'open',txtSaveAs:'saveAs',txtPrint:'print',txtClose:'close',txtOptions:'options',txtHelp:'help',txtAbout:'about'};
  for(const [key,value] of Object.entries(captions))bs[key]=t(value);
  for(const [name,label] of [['elx-home','home'],['elx-open','open'],['elx-close','close'],['elx-about','about']])bs.items?.[name]?.setCaption(t(label));
  const ensurePanel=name=>{
@@ -77,6 +92,15 @@ window.EODesktopBackstage=async function(win,main,info,action){
   const show=panel.show;if(!panel.eoDesktopShow){panel.eoDesktopShow=true;panel.show=function(){show.apply(this,arguments);this.refresh()};}
  };
  bs.enhanceSaveAs=function(){const panel=ensurePanel('saveas');if(!panel)return;panel.$el.empty().append($('<button class="btn btn-primary" type="button"/>').text(t('saveAs')).on('click',()=>action('save-as')),$('<button data-action="rename" type="button"/>').text(bs.txtRename).on('click',()=>{fm.hide();action('rename')}))};
+ // Extend, rather than replace, the shared SDK property/protection surface.
+ const refreshInfoTiles=bs.refreshInfoTiles;
+ bs.refreshInfoTiles=function(panel){
+  const result=refreshInfoTiles.apply(this,arguments),target=panel.$el.find('.elx-info-actions');
+  const buttons=[['rename',bs.txtRename],['save-as',t('saveAs')]];
+  if(!info.capture)buttons.push(['move-menu',t('tabMoveOtherWindow')]);
+  target.append(...buttons.map(([command,label])=>$('<button type="button" class="btn normal dlg-btn eo-info-action"/>').text(label).attr('title',command==='move-menu'?t('tabMoveHint'):label).on('click',()=>{fm.hide();return action(command)})));
+  return result;
+ };
  bs.enhancePrint=function(){};
  bs.onAbout=()=>{fm.hide();return action('about')};
  bs.onClose=()=>action('close');
@@ -113,7 +137,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
  },true);
  const fireEvent=fm.fireEvent;
  fm.fireEvent=function(event,args,...rest){
-  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'close','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'pdf'}[args?.[1]];
+  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'close','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'save-as'}[args?.[1]];
   if(command){this.hide();return action(command)}
   return fireEvent.call(this,event,args,...rest);
  };
@@ -122,7 +146,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
  main.api.downloadAs=(_action,options)=>options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
  const link=win.document.createElement('link');link.rel='stylesheet';link.href='/example/local-assets/desktop-home/backstage-home.css';win.document.head.append(link);
  const style=win.document.createElement('style');
- style.textContent='.eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
+ style.textContent='.eo-info-action{width:auto!important;min-width:120px;min-height:36px;padding:6px 16px;justify-self:start;white-space:normal;text-align:start} .eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';
  win.document.head.append(style);
  let operationFeedback,pendingOperation;
  const operationRender=bs.onRender;bs.onRender=function(){const result=operationRender.apply(this,arguments);if(pendingOperation)showOperation(pendingOperation);return result;};

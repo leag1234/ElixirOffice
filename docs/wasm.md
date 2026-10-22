@@ -151,3 +151,22 @@ The actual consumer rebuild passes five SDK and 23 web production tasks, under t
 - Physical Windows, macOS, Wayland and printer behavior require their own release checks.
 - Exact raw bytes are not promised when semantically irrelevant package metadata differs.
 - New converter patches require fresh full and PDF-only builds; manifests must never point to mixed core revisions.
+
+### 2026-10-22 — Desktop navigation source candidate
+
+The 0.3.1 shell navigation foundation changes window ownership and optional tabs without changing conversion runtime pins or document serialization. Default A, optional B/C, safe last-close Home and current-family New use the existing opaque document handles, recovery and global cap16. Source tests and private Linux checks are tracked separately from release/package acceptance in [desktop navigation](desktop-tabs.md).
+
+### 2026-10-22 — Equation toolbar SVG source correction
+
+The shared web-apps button templates recognize the existing legacy SVG equation category IDs. No wasm, SDK, font or conversion pin changes are needed;112source template cases pass after104baseline failures. Fresh assembled web assets/packages remain a separate acceptance step. See [equation icons](equation-icons.md).
+
+### Desktop File-menu source candidate (2026-10-22)
+
+The Office-order Backstage slice changes only desktop presentation and native-action dispatch. Existing runtime pins, conversion formats and save/export acknowledgement rules remain unchanged. The private Linux source test verifies Info title persistence in actual DOCX/XLSX/PPTX core XML and cancellation of the shared native-backed Export chooser. This is source-UI evidence, not a new runtime build or package qualification. [Behavior](desktop.md#031-file-backstage-candidate).
+### 2026-10-22 — Desktop window state and feedback source slice
+
+Persisted normal window bounds, accessible file-type tabs and quiet successful-open feedback use the existing desktop document ownership and conversion runtime. No wasm/SDK pin or serialization change is made. Source/runtime qualification is recorded in [desktop windows](desktop-tabs.md#window-placement-and-tab-state-031-source-candidate); native/platform and fresh-package gates remain separate.
+
+### Shared desktop start-page source checks (2026-10-22)
+
+The start-page/application-rail slice reuses the existing template/recent renderer and changes no runtime pin, worker lifetime, conversion or save format. Its strict source-capture fix accounts for the trusted0px or44px chrome offset; only visible surfaces are captured, retaining ownership, stable geometry, alpha and scale validation. Actual Linux Home checks and EN/FR capture exit are source evidence, separate from rebuilt packages and physical platform qualification. [Behavior](desktop.md#031-shared-start-page-follow-up).

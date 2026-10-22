@@ -13,3 +13,11 @@ button:focus-visible{outline:2px solid Highlight;outline-offset:-2px}
 .document-dirty{font-weight:bold}.document-close{padding:0 8px;flex:none}#move-tab,#new-tab{flex:none;min-width:32px;font-size:22px}
 #tab-error{position:fixed;top:4px;left:4px;right:80px;height:36px;z-index:2;display:flex;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--tab-border);border-radius:4px;background:var(--tab-active)}
 #tab-error[hidden]{display:none}#tab-error-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#tab-error-dismiss{flex:none}
+
+#tab-bar[hidden]{display:none}
+
+#home-tab{flex:none;padding:0 12px}#home-tab[hidden]{display:none}
+
+.document-icon{width:16px;height:16px;flex:none;fill:currentColor}.document-icon.t-word{color:#185abd}.document-icon.t-cell{color:#107c41}.document-icon.t-slide{color:#c43e1c}.document-icon.t-pdf{color:#c52f2f}
+.document-dirty{font-size:8px;line-height:1;flex:none}
+@media(prefers-color-scheme:dark){.document-icon.t-word{color:#83b4ff}.document-icon.t-cell{color:#73d5a0}.document-icon.t-slide{color:#ffac91}.document-icon.t-pdf{color:#ff9e9e}}

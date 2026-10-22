@@ -607,3 +607,67 @@ The DEB declares `libasound2t64 | libasound2`, `libgbm1`, `libgl1`, `libegl1`, `
 Audit all packaged ELF files immediately after a DEB-only installation with `--no-install-recommends`, before installing Xvfb or other test tools. Iterate missing-library resolution to a fixed point and compare the result with dynamic-loader observations, the community Arch package and the exact builder defaults. Installing test tools first can conceal missing runtime dependencies. The release assertion builds a DEB and checks the audited dependency set in both `dpkg-deb -f` and `dpkg-deb -I`.
 
 These dependency checks do not certify native startup or application behavior. See the [graphics dependency decision](decisions/desktop-linux-graphics-dependencies.md) for scope and current qualification limits.
+
+## 0.3.1 File backstage candidate
+
+The desktop extension reorders the existing shared menu nodes, preserving their
+controllers and keyboard focus handling: Home, New, Open; Info, Save, Save As,
+Print, Export, Close; Options, Help, About. Back and guarded Quit remain available.
+A configured AI connection retains its existing entry beside Options. The web
+interface is unchanged.
+
+Rename lives in Info and the existing Save As area. Info keeps the shared
+property fields, protection and inspection controls. Its window action is
+explicitly labelled **Move to another window** in all 45 shell locales; it moves
+the live document view through the existing guarded destination menu. It does
+not move or delete a file on disk. Physical file relocation and a local folder
+display are still pending separate implementation.
+
+Export opens the same native-backed format selection flow as Save As, including
+PDF and the current document family's supported formats. Cancellation retains
+the editor and its saved state. This slice does not change conversion, native
+destination leases, print handling, close/recovery ownership or Home/New content.
+
+Tests: the focused VM cases cover both Print variants, stable repeated ordering,
+native Export dispatch and Info actions. The isolated sandboxed Linux source
+smoke clicks the real shared views, cancels Rename and Export, and edits a title
+through Info before verifying its actual saved DOCX/XLSX/PPTX core XML. PDF
+metadata round-trip, native platform dialogs, real Windows/macOS and rebuilt
+packages remain separate acceptance checks. Run the source smoke with the
+existing private-display runner, `tests/desktop/tabs-native.py --suite backstage`.
+
+## 0.3.1 shared start-page follow-up
+
+The standalone desktop Home page uses the Office-style left rail: Home, New and
+Open, with Options, Help and About below. Options works before a document opens;
+Cancel leaves Home available. The window owns application identity, so Home
+does not add another brand bar. A 200-pixel text rail uses the existing Fluent
+theme tokens and 14-pixel labels, with a narrower layout for small windows and
+logical spacing for RTL.
+
+The same renderer supplies embedded File Home/New/Open. It adds no second rail
+there. Three blank thumbnails, four localized approved templates, Browse,
+recent-file type/name/folder/date and the local-document privacy footer remain
+the existing shared components. This slice changes no runtime, conversion or
+native save/close/recovery policy. The compact title bar is a separate slice;
+the native frame remains in use here.
+
+The opt-in capture path now obtains the expected content offset from the trusted
+window host. A visible document strip still requires a strict two-surface
+composite. When the strip is absent, the document view covers the complete
+client area; Chromium cannot capture the fully occluded shell. In that layout
+the capture uses the visible full-client document surface. Both paths verify
+live ownership/attachment, unchanged revision and bounds, measured native alpha,
+opaque visible pixels and matching pixel scale. Capture receipts report the
+actual strip height and whether a full-client view or composite was captured.
+The existing explicit-flag/parser restrictions remain.
+
+Source evidence: functional Home/template tests, all legacy and new compositor
+checks, actual isolated sandboxed Linux Home/Options/recent/keyboard/RTL/dark
+checks, and the normal strict capture CLI producing six EN/FR start/editor/File
+PNGs with exit0. A diagnostic logging wrapper identified the occluded-shell
+error but is not used for final acceptance. No installed package, native
+Windows/macOS, physical keyboard/window-manager or native file-dialog
+qualification is inferred. Tests: `tests/desktop/home-content.test.cjs`,
+`home-native.cjs`, `home-capture-native.cjs` and
+`capture-composite.test.cjs`.

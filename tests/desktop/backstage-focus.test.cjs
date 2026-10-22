@@ -19,7 +19,7 @@ async function fixture(){
  const element={0:root,attr(){return this},find(){return this},off(){return this},on(){return this},insertAfter(){return this},is:()=>state.visible};
  const fm={items:[],$el:element,hide(){},fireEvent(){}};
  const bs={rendered:true,fm,items:{},afterApplyMode(){}};
- const win={document,SSE:{getController:()=>({backstage:bs})},getComputedStyle:()=>({visibility:'visible'}),Common:{UI:{MenuItem:class{on(){}}}},$:target=>target===document?{find:()=>({length:Number(state.modal)})}:element};
+ const win={document,SSE:{getController:()=>({backstage:bs})},getComputedStyle:()=>({visibility:'visible'}),Common:{UI:{MenuItem:class{on(){}hide(){}}}},$:target=>target===document?{find:()=>({length:Number(state.modal)})}:element};
  const window={CustomEvent:class{},dispatchEvent(){}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/backstage.js'),'utf8'),{window});
  await window.EODesktopBackstage(win,{api:{asc_enableKeyEvents(value){state.sdkEnabled=value}}},{strings:{},language:'en'},()=>{});

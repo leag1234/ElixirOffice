@@ -17,7 +17,7 @@ async function dirty(e,view,selection){
 }
 const menuItems=items=>items.flatMap(item=>[item,...(item.submenu?menuItems(item.submenu):[])]);
 test('New and OS open refusal at sixteen documents preserve existing dirty tabs and allow exact-file focus',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   e.state.dirty=true;await e.invoke('state',e.selected.token,true);
   for(let n=1;n<16;n++)await add(e,e.documents[0]);
@@ -35,7 +35,7 @@ test('New and OS open refusal at sixteen documents preserve existing dirty tabs 
  }finally{await e.cleanup()}
 });
 test('startup OS-open queue is bounded and reports overflow after a document becomes ready',async()=>{
- const e=await boot({document:true,queuedPaths:Array.from({length:22},(_,i)=>'/tmp/eo-public-queued-'+i+'.docx')});
+ const e=await boot({fontSettings:{openInTabs:true},document:true,queuedPaths:Array.from({length:22},(_,i)=>'/tmp/eo-public-queued-'+i+'.docx')});
  try{
   assert.equal(e.pendingCount(),15,'One of at most sixteen queued opens was consumed by initial');
   await e.invoke('desktop-ready');assert(e.sent.some(args=>args[0]==='eo:tabs-limit'));
@@ -43,7 +43,7 @@ test('startup OS-open queue is bounded and reports overflow after a document bec
  }finally{await e.cleanup()}
 });
 test('window close stops at Cancel and preserves later tabs after earlier explicit Discard',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const a=e.documents[0],b=await add(e,a),c=await add(e,a,'pptx');
   await dirty(e,a,e.selected);await dirty(e,b.view,b.selection);await dirty(e,c.view,c.selection);
@@ -59,7 +59,7 @@ test('window close stops at Cancel and preserves later tabs after earlier explic
  }finally{await e.cleanup()}
 });
 test('quit across two windows stops on second-window Cancel without prompting later documents',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const a=e.documents[0],b=await add(e,a),c=await add(e,a,'pptx');
   await tabs(e,e.shell,'detach',c.id);const target=e.windows.at(-1),d=await add(e,c.view,'docx');
@@ -77,7 +77,7 @@ test('quit across two windows stops on second-window Cancel without prompting la
  }finally{await e.cleanup()}
 });
 test('a document destroyed after the close snapshot is treated as already closed',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const a=e.documents[0],b=await add(e,a);a.state.dirty=true;
   e.responses.push(()=>{b.view.close();return {response:discard}});
@@ -93,7 +93,7 @@ test('quit catches native app failure and permits a later explicit retry',async(
  }finally{await e.cleanup()}
 });
 test('application menu actions do nothing when no native window is focused',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   e.state.dirty=true;e.setFocusedWindow(null);
   const close=menuItems(e.app.menu).find(item=>item.accelerator==='CommandOrControl+W');assert(close);
@@ -102,7 +102,7 @@ test('application menu actions do nothing when no native window is focused',asyn
  }finally{await e.cleanup()}
 });
 test('hung save-close has a visible watchdog, aborts quit and rejects its late acknowledgement',async()=>{
- const e=await boot({document:true,timerDelay:ms=>ms===30000?30:ms});
+ const e=await boot({fontSettings:{openInTabs:true},document:true,timerDelay:ms=>ms===30000?30:ms});
  try{
   e.state.dirty=true;e.responses.push(0);
   const pending=e.quit();
@@ -117,7 +117,7 @@ test('hung save-close has a visible watchdog, aborts quit and rejects its late a
 });
 
 test('untitled close pauses its watchdog during native Save As and restarts it after selection',async()=>{
- const e=await boot({document:true,timerDelay:ms=>ms===30000?30:ms});
+ const e=await boot({fontSettings:{openInTabs:true},document:true,timerDelay:ms=>ms===30000?30:ms});
  try{
   const untitled=await add(e,e.documents[0]);await dirty(e,untitled.view,untitled.selection);
   e.responses.push(0);
@@ -144,7 +144,7 @@ test('untitled close pauses its watchdog during native Save As and restarts it a
 
 test('native Save As cancel and rejection settle tab close and Quit without a hang',{timeout:5000},async()=>{
  for(const chooser of ['save','save-as-choose'])for(const closeMode of ['tab','quit'])for(const outcome of ['cancel','reject']){
-  const e=await boot({document:true,timerDelay:ms=>ms===30000?30:ms});
+  const e=await boot({fontSettings:{openInTabs:true},document:true,timerDelay:ms=>ms===30000?30:ms});
   try{
    const untitled=await add(e,e.documents[0]);await dirty(e,untitled.view,untitled.selection);
    e.responses.push(0);
@@ -166,7 +166,7 @@ test('native Save As cancel and rejection settle tab close and Quit without a ha
 });
 
 test('macOS can detach a sole tab at the global cap without allocating a placeholder',async()=>{
- const e=await boot({document:true,platform:'darwin'});
+ const e=await boot({fontSettings:{openInTabs:true},document:true,platform:'darwin'});
  try{
   for(let n=1;n<16;n++)await add(e,e.documents[0]);
   const moved=e.documents.at(-1),id=(await e.invokeFor(moved,'identity')).documentId;
@@ -181,7 +181,7 @@ test('macOS can detach a sole tab at the global cap without allocating a placeho
 });
 
 test('dead contents without a destroyed event cannot strand the earlier document close promise',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const a=e.documents[0],b=await add(e,a);a.state.dirty=true;
   e.responses.push(()=>{b.view.dead=true;return {response:discard}});
@@ -191,7 +191,7 @@ test('dead contents without a destroyed event cannot strand the earlier document
  }finally{await e.cleanup()}
 });
 test('an active document crash during a close prompt is closed and later Cancel still stops the window',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const a=e.documents[0],b=await add(e,a),c=await add(e,a,'pptx');
   await dirty(e,a,e.selected);await dirty(e,b.view,b.selection);await dirty(e,c.view,c.selection);
@@ -206,7 +206,7 @@ test('an active document crash during a close prompt is closed and later Cancel 
 });
 test('the shared printer captures the originating document window and allows only one native job across windows',async()=>{
  let start,callbacks=[];
- const e=await boot({document:true,onPrint:(_options,callback)=>{callbacks.push(callback);start?.()}});
+ const e=await boot({fontSettings:{openInTabs:true},document:true,onPrint:(_options,callback)=>{callbacks.push(callback);start?.()}});
  try{
   const a=e.documents[0],b=await add(e,a);await dirty(e,a,e.selected);await dirty(e,b.view,b.selection);
   await tabs(e,e.shell,'detach',b.id);const other=e.windows.at(-1),pdf=new Uint8Array(Buffer.from('%PDF-public-vector'));

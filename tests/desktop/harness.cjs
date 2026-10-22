@@ -61,15 +61,32 @@ async function launch({file,sourceExecutable=process.env.EO_SOURCE_ELECTRON,prof
     assert(owner,'Document shell not found');await owner.evaluate(id=>window.eoTabs.activate(id),id);env.page=selected;env.shell=owner;return selected;},
    activeDocument:()=>{monitor.refresh();return documents.activeDocument(browser,env.shell)}};
   return env;
- }catch(error) {monitor?.dispose();if(application.pid&&application.exitCode===null&&application.signalCode===null){try{process.kill(-application.pid,'SIGTERM')}catch(cleanup){if(cleanup.code!=='ESRCH')throw cleanup}}await log.close();throw error}
+ }catch(error) {monitor?.dispose();await terminate(application);await log.close();throw error}
+}
+async function exited(application,timeout=3000) {
+ const deadline=Date.now()+timeout;
+ while(application.exitCode===null&&application.signalCode===null&&Date.now()<deadline)await sleep(50);
+ return application.exitCode!==null||application.signalCode!==null;
+}
+async function terminate(application) {
+ if(!application?.pid||application.exitCode!==null||application.signalCode!==null)return;
+ if(process.platform==='darwin'){
+  try{process.kill(-application.pid,'SIGKILL')}catch(error){if(error.code!=='ESRCH')throw error}
+  await exited(application,1000);return;
+ }
+ try{process.kill(application.pid,'SIGTERM')}catch(error){if(error.code!=='ESRCH')throw error}
+ if(!await exited(application)){
+  try{process.kill(-application.pid,'SIGKILL')}catch(error){if(error.code!=='ESRCH')throw error}
+  await exited(application,1000);
+ }
 }
 async function stop(env) {
- // A native Mac sheet can block CDP Browser.close during test cleanup.
- // Kill only this harness's live, detached child group; documents are temp copies.
- if(process.platform==='darwin'&&env.application.exitCode===null&&env.application.signalCode===null){try{process.kill(-env.application.pid,'SIGKILL')}catch(error){if(error.code!=='ESRCH')throw error}}
+ // Disconnect CDP before terminating the owned app. On Linux, let Electron's main
+ // process reap its children; signalling the whole live group can race GPU teardown.
+ if(process.platform==='darwin')await terminate(env.application);
  await env.browser.close().catch(()=>{});
- if(process.platform!=='darwin'&&env.application.exitCode===null&&env.application.signalCode===null){try{process.kill(-env.application.pid,'SIGTERM')}catch(error){if(error.code!=='ESRCH')throw error}}
- await sleep(500);env.disposeObservers?.();await env.log.close();
+ if(process.platform!=='darwin')await terminate(env.application);
+ env.disposeObservers?.();await env.log.close();
 }
 async function editable(env) {
  try{await env.page.waitForFunction(()=>window.EOLocalSession||window.EOLocalFailure,null,{timeout:120000})}

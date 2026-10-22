@@ -27,7 +27,7 @@ test('the captured document handle stays fixed until an explicit selection',asyn
  await env.selectDocument(f.state.activeId);assert.notEqual(env.page,captured);
 });
 test('ambiguous initial active identities fail closed instead of choosing another page',async()=>{
- const f=fixture({duplicate:true});await assert.rejects(f.api.launch(),/exactly one/);assert.equal(f.kills.length,1);
+ const f=fixture({duplicate:true});await assert.rejects(f.api.launch(),/exactly one/);assert.deepEqual(Array.from(f.kills),[[99999999,'SIGTERM'],[-99999999,'SIGKILL']]);
 });
 test('stop removes lifecycle observers after owned shutdown without late metric mutation',async()=>{
  const f=fixture(),env=await f.api.launch();await f.api.stop(env);

@@ -283,6 +283,51 @@ def clean_environment(node, cache):
             "npm_config_cache": str(Path(cache) / "npm"),
             "PYTHONDONTWRITEBYTECODE": "1", "EO_RELEASE_REQUIRE_BUILDER": "1"}
 
+def host_preflight(plan, env):
+    """Read-only host checks; never install packages, pull images or allocate a build."""
+    failures, result = [], {"python_pip": {}, "docker_images": {}}
+    for label, command in (
+        ("version", ["python3", "-m", "pip", "--version"]),
+        ("python_option", ["python3", "-m", "pip", "--help"]),
+    ):
+        try:
+            probe = subprocess.run(command, env=env, capture_output=True, text=True, timeout=20)
+        except (OSError, subprocess.TimeoutExpired):
+            failures.append("python3 -m pip is unavailable (" + label + "); select a build environment with pip and --python support")
+            continue
+        if probe.returncode or (label == "python_option" and "--python" not in probe.stdout):
+            failures.append("python3 -m pip lacks " + label + "; select a build environment with pip and --python support")
+        elif label == "version":
+            result["python_pip"]["version"] = probe.stdout.strip()
+        else:
+            result["python_pip"]["supports_python_option"] = True
+    images = {"font_tool": plan["font_tool_image"]}
+    if "windows" in plan["targets"]:
+        images["windows_builder"] = plan["windows_image"]
+    if "linux" in plan["targets"]:
+        images["appimage_builder"] = plan["appimage_update"]["image"]
+    checked = {}
+    for role, image in images.items():
+        if not re.fullmatch(r"(?:[A-Za-z0-9./:_-]+@)?sha256:[0-9a-f]{64}", image) or image.startswith("-"):
+            raise ValueError("Preflight requires an immutable image pin: " + role)
+        if image not in checked:
+            try:
+                probe = subprocess.run(["docker", "image", "inspect", "--format", "{{.Id}}", image],
+                                       env=env, capture_output=True, text=True, timeout=20)
+            except (OSError, subprocess.TimeoutExpired):
+                checked[image] = None
+            else:
+                actual = probe.stdout.strip()
+                checked[image] = actual if probe.returncode == 0 and re.fullmatch(r"sha256:[0-9a-f]{64}", actual) else None
+        actual = checked[image]
+        if actual is None or (image.startswith("sha256:") and actual != image):
+            failures.append("Required pinned Docker image is not available locally: " + role + " " + image + "; restore the exact reviewed image before building (no automatic pull)")
+        else:
+            result["docker_images"][role] = {"pin": image, "image_id": actual}
+    if failures:
+        raise ValueError("Release host preflight failed: " + "; ".join(failures))
+    return result
+
 class Build:
     def __init__(self, args, plan):
         self.args, self.plan = args, plan
@@ -530,6 +575,8 @@ job.mkdir()
         self.info["gates"]["linux-six-format"] = "pass"
 
     def execute(self):
+        # Recheck host state before creating outputs or consuming a build number.
+        self.info["host_preflight"] = host_preflight(self.plan, self.env)
         self.out.parent.mkdir(parents=True, exist_ok=True)
         self.out.mkdir(exist_ok=False)
         (self.out / "logs").mkdir()
@@ -665,6 +712,7 @@ def make_plan(args):
         plan["mac"] = endpoint(args.mac_host, args.mac_root or "")
     if "linux" in args.targets and not args.build_only:
         plan["linux"] = endpoint(args.linux_host, args.linux_root)
+    plan["host_preflight"] = host_preflight(plan, clean_environment(args.node, args.cache))
     return plan
 
 if __name__ == "__main__":

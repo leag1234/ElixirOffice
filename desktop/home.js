@@ -8,12 +8,18 @@ function render(container,info,actions,view='home'){
  const icon=name=>{const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg'),use=doc.createElementNS(svg.namespaceURI,'use');svg.setAttribute('class','ic');svg.setAttribute('aria-hidden','true');use.setAttribute('href',base+'icons.svg#i-'+name);svg.append(use);return svg};
  const button=(label,fn,cls='btn')=>{const b=element('button',cls,label);b.type='button';b.onclick=fn;return b};
  container.replaceChildren();container.classList.add('eo-desktop-page');window.EOHomeTheme?.bind(container);
- const header=element('div','topbar');header.append(element('span','brand-text','ElixirOffice'));if(!info.embedded)container.append(header);
  const layout=element('div',info.embedded?'desktop-home-content':'layout'),rail=element('nav','rail');rail.setAttribute('aria-label',t('home'));
  for(const [name,symbol] of [['home','home'],['new','add'],['open','open']]){
   const b=button('',()=>render(container,info,actions,name),'rail-item');b.append(icon(symbol),element('span','',t(name)));b.dataset.view=name;if(name===view)b.setAttribute('aria-current','page');rail.append(b);
  }
- if(!info.embedded)layout.append(rail);const main=element('main');main.append(element('h1','section-title',t(view)));layout.append(main);container.append(layout);
+ if(!info.embedded){
+  const application=element('div','rail-actions');
+  for(const [label,command]of [['options','settings'],['help','help'],['about','about']]){
+   const b=button(t(label),()=>actions(command),'rail-item');b.dataset.action=command;application.append(b);
+  }
+  rail.append(application);layout.append(rail);
+ }
+ const main=element('main');main.append(element('h1','section-title',t(view)));layout.append(main);container.append(layout);
  if(view!=='open'){
   const section=element('section','start'),tiles=element('div','tiles');
   for(const [format,type,key] of [['docx','word','blankDoc'],['xlsx','cell','blankBook'],['pptx','slide','blankSlide']]){

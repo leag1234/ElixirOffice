@@ -5,14 +5,18 @@
  */
 'use strict';
 var preparation;
+function directCompile(runtime){
+ return (async function(){
+  var fetchAt=performance.now(),response=await fetch(runtime+'x2t.wasm',{credentials:'same-origin',cache:'force-cache'});
+  if(!response.ok)throw new Error('Cannot load conversion runtime');
+  var fetchMs=performance.now()-fetchAt,compileAt=performance.now(),compiled=await WebAssembly.compileStreaming(response);
+  return {compiled:compiled,fetchMs:fetchMs,compileMs:performance.now()-compileAt,cached:false};
+ })();
+}
 function prepare(runtime){
  if(!preparation||preparation.runtime!==runtime){
-  preparation={runtime:runtime,promise:(async function(){
-   importScripts(runtime+'x2t.js');
-   var response=await fetch(runtime+'x2t.wasm',{credentials:'same-origin',cache:'force-cache'});
-   if(!response.ok)throw new Error('Cannot load conversion runtime');
-   return WebAssembly.compileStreaming(response);
-  })()};
+  importScripts(runtime+'x2t.js');
+  preparation={runtime:runtime,promise:directCompile(runtime)};
   // Early preparation reports any failure through the conversion job.
   preparation.promise.catch(function(){});
  }
@@ -27,10 +31,10 @@ self.onmessage=async function(event){
   importScripts('/example/local-assets/sdkjs/common/wasm-convert/password-options.js');
   self.EOWasmPasswordOptions.check(job);
   progress('loading-runtime');
-  var compiled=await prepare(job.runtime);
+  var prepared=await prepare(job.runtime),compiled=prepared.compiled,instantiateMs=0;
   progress('initializing');
   var mod=await createX2t({noInitialRun:true,print:function(){},printErr:function(){},
-   instantiateWasm:function(imports,receive){var instance=new WebAssembly.Instance(compiled,imports);receive(instance,compiled);return instance.exports;}
+   instantiateWasm:function(imports,receive){var at=performance.now(),instance=new WebAssembly.Instance(compiled,imports);instantiateMs=performance.now()-at;receive(instance,compiled);return instance.exports;}
   });
   var FS=mod.FS,codes={docx:65,doc:66,odt:67,rtf:68,txt:69,docm:75,dotx:76,pptx:129,ppt:130,odp:131,ppsx:132,potx:135,xlsx:257,xls:258,ods:259,csv:260,xlsm:261,xltx:262,doct:8193,xlst:8194,pptt:8195};
   if(!codes[job.from]||!codes[job.to])throw new Error('Unsupported conversion format');
@@ -56,7 +60,7 @@ self.onmessage=async function(event){
   var resources=[];
   function walk(path){FS.readdir(path).forEach(function(n){if(n==='.'||n==='..')return;var p=path+'/'+n;if(FS.isDir(FS.stat(p).mode))walk(p);else resources.push({path:p.slice('/work/'.length),bytes:FS.readFile(p)});});}
   ['media','themes'].forEach(function(p){try{walk('/work/'+p);}catch(e){if(e.code!=='ENOENT'&&e.errno!==44)throw e;}});
-  self.postMessage({bytes:bytes,resources:resources,stats:{initMs:Math.round(initMs),convertMs:Math.round(performance.now()-at),heapBytes:mod.HEAPU8.length}},
+  self.postMessage({bytes:bytes,resources:resources,stats:{initMs:Math.round(initMs),convertMs:Math.round(performance.now()-at),heapBytes:mod.HEAPU8.length,wasmFetchMs:Math.round(prepared.fetchMs*100)/100,wasmCompileMs:Math.round(prepared.compileMs*100)/100,wasmInstantiateMs:Math.round(instantiateMs*100)/100,wasmCached:prepared.cached===true}},
    [bytes.buffer].concat(resources.map(function(f){return f.bytes.buffer;})));
  }catch(e){self.postMessage(self.EOWasmPasswordOptions?self.EOWasmPasswordOptions.failure(e,job,nativeStatus):{error:'Cannot load document password support',code:'runtime'});}
  finally{job.openPassword=undefined;job.savePassword=undefined;}

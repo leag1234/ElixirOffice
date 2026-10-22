@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),{compose}=require('../../desktop/capture-composite.cjs');
-function fixture(scale=1,alpha=3){
+function fixture(scale=1,alpha=3,top=44){
  let version='stable',hidden=false,destroyed=false,attached=true,rootCalls=0,childCalls=0;
- const bounds={x:0,y:44,width:4,height:4},size=[4,48];
+ const bounds={x:0,y:top,width:4,height:48-top},size=[4,48];
  function image(width,height,fill){
   const data=Buffer.alloc(width*height*4,fill),header=Buffer.alloc(24);for(let i=alpha;i<data.length;i+=4)data[i]=255;
   Buffer.from('89504e470d0a1a0a','hex').copy(header);header.write('IHDR',12);header.writeUInt32BE(width,16);header.writeUInt32BE(height,20);
   return{isEmpty:()=>false,toPNG:()=>header,toBitmap:()=>Buffer.from(data),data,getSize:()=>({width,height})};
  }
- const root=image(4*scale,48*scale,17),child=image(4*scale,4*scale,34);
+ const root=image(4*scale,48*scale,17),child=image(4*scale,(48-top)*scale,34);
  const contents={isDestroyed:()=>destroyed,capturePage:async()=>{childCalls++;return child}};
  const view={webContents:contents,getBounds:()=>({...bounds}),getVisible:()=>!hidden};
  const shell={isDestroyed:()=>destroyed,capturePage:async()=>{rootCalls++;return root}};
@@ -53,4 +53,31 @@ test('unexpected transparency and an unknown native format fail instead of writi
  }
  const f=fixture();f.nativeImage.createFromBuffer=()=>({toBitmap:()=>Buffer.from([255,255,255,255])});
  await assert.rejects(compose(f.window,f.view,f),/layout/);
+});
+
+for(const scale of [1,1.25,1.5,2])test('no-strip owner captures the complete real view at scale '+scale,async()=>{
+ const f=fixture(scale,3,0),result=await compose(f.window,f.view,{...f,getStripHeight:()=>0});
+ assert.deepEqual(result.image.data,f.child.data);assert.equal(result.capture.stripHeight,0);
+ assert.equal(result.capture.kind,'document-full-client');assert.deepEqual(f.calls(),{root:0,child:1});
+});
+test('trusted strip height must match view geometry and remain one supported layout',async()=>{
+ for(const [top,expected]of [[0,44],[44,0],[0,43],[0,NaN],[0,null]]){
+  const f=fixture(1,3,top);await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>expected}),/Capture/);
+  assert.deepEqual(f.calls(),{root:0,child:0});
+ }
+});
+test('a changed trusted chrome height after shell capture refuses a mixed image',async()=>{
+ const f=fixture(),layout={top:44};
+ f.window.webContents.capturePage=async()=>{layout.top=0;return f.root};
+ await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>layout.top}),/Capture/);
+ assert.equal(f.calls().child,0);
+});
+
+test('a fully covered no-strip shell is never captured; ownership and child opacity remain mandatory',async()=>{
+ const f=fixture(1,3,0);
+ f.window.webContents.capturePage=async()=>{throw Error('UnknownVizError')};
+ const result=await compose(f.window,f.view,{...f,getStripHeight:()=>0});
+ assert.deepEqual(result.image.data,f.child.data);
+ f.child.data[3]=128;await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>0}),/opaque/);
+ f.hide();await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>0}),/Capture/);
 });

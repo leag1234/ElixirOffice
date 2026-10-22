@@ -2,6 +2,7 @@
 'use strict';
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('eoTabs',Object.freeze({
+ home:()=>ipcRenderer.invoke('eo:tabs-shell','home'),
  initial:()=>ipcRenderer.invoke('eo:tabs-shell','initial'),
  activate:(id,focus=true)=>ipcRenderer.invoke('eo:tabs-shell','activate',id,focus),
  close:id=>ipcRenderer.invoke('eo:tabs-shell','close',id),

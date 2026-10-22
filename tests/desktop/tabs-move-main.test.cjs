@@ -9,9 +9,20 @@ vm.runInNewContext(code+'\nmodule.exports={boot};',{require:name=>name==='node:t
 const {boot}=scope.exports;
 const event=window=>({sender:window.webContents,senderFrame:window.webContents.mainFrame});
 const tabs=(env,window,command,...args)=>env.handlers.get('eo:tabs-shell')(event(window),command,...args);
+async function assertBlankReplacement(env,window,removedId){
+ assert.equal(window.closed,undefined);
+ let documents;
+ for(let n=0;n<100;n++){documents=(await tabs(env,window,'initial')).state.documents;if(documents.length===1&&documents[0].status==='loaded')break;await new Promise(setImmediate);}
+ assert.equal(documents.length,1);assert.notEqual(documents[0].id,removedId);
+ assert.deepEqual({name:documents[0].name,dirty:documents[0].dirty,closing:documents[0].closing,status:documents[0].status},{name:'',dirty:false,closing:false,status:'loaded'});
+}
+async function assertVacated(env,window,removedId){
+ if(env.process.platform==='darwin')await assertBlankReplacement(env,window,removedId);
+ else assert.equal(window.closed,true);
+}
 async function prepare(env){assert.equal(await env.invoke('new','xlsx'),null);const b=env.documents.at(-1);return {b,selection:await env.invokeFor(b,'initial'),a:await env.invoke('identity')};}
 test('actual main detach retains document sender and token, with save and close routed to its new owner',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const {b,a}=await prepare(e),view=e.documents[0],originalToken=e.selected.token;
   const moved=await tabs(e,e.shell,'detach',a.documentId),target=e.windows.at(-1);
@@ -21,11 +32,11 @@ test('actual main detach retains document sender and token, with save and close 
   const snapshot=(await tabs(e,target,'initial')).state;assert.deepEqual(snapshot.documents.map(d=>d.id),[a.documentId]);
   const saved=await e.invoke('save',originalToken,new Uint8Array(Buffer.from('PKmoved-public-save')),false);assert(saved.artifactId);
   assert.equal(await fsp.readFile(path.join(e.directory,'test.docx'),'utf8'),'PKmoved-public-save');
-  assert.equal(await tabs(e,target,'close',a.documentId),true);assert.equal(target.closed,true);assert.equal(e.shell.closed,undefined);assert.equal(b.isDestroyed(),false);
+  assert.equal(await tabs(e,target,'close',a.documentId),true);await assertBlankReplacement(e,target,a.documentId);assert.equal(view.isDestroyed(),true);assert.equal(await e.invokeFor(e.documents.at(-1),'initial'),null);assert.equal(e.shell.closed,undefined);assert.equal(b.isDestroyed(),false);
  }finally{await e.cleanup();}
 });
 test('a pending move prevents close and another file operation until its renderer guard settles',async()=>{
- let hold=false,release;const e=await boot({document:true,getRendererState:(_expression,wc)=>hold?new Promise(resolve=>{release=()=>resolve({...wc.state,opening:false})}):({...wc.state,opening:false})});
+ let hold=false,release;const e=await boot({fontSettings:{openInTabs:true},document:true,getRendererState:(_expression,wc)=>hold?new Promise(resolve=>{release=()=>resolve({...wc.state,opening:false})}):({...wc.state,opening:false})});
  try{
   const {a}=await prepare(e);hold=true;
   const pending=tabs(e,e.shell,'detach',a.documentId);
@@ -35,7 +46,7 @@ test('a pending move prevents close and another file operation until its rendere
  }finally{release?.();await e.cleanup();}
 });
 test('drag completion uses trusted main cursor and one-use capability for detach and reattach',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const {a}=await prepare(e),one=randomUUID();
   assert.equal(await tabs(e,e.shell,'begin-drag',a.documentId,one),true);point={x:1400,y:500};
@@ -44,7 +55,7 @@ test('drag completion uses trusted main cursor and one-use capability for detach
   const two=randomUUID();assert.equal(await tabs(e,detached,'begin-drag',a.documentId,two),true);
   point={x:200,y:500};assert.equal(await tabs(e,e.shell,'drop-drag',two),false,'A drop outside the target tab strip cannot consume the drag');
   point={x:200,y:20};assert.equal((await tabs(e,e.shell,'drop-drag',two)).windowId,a.windowId);
-  assert.equal(detached.closed,true);assert.equal((await tabs(e,e.shell,'initial')).state.documents.length,2);
+  await assertVacated(e,detached,a.documentId);assert.equal((await tabs(e,e.shell,'initial')).state.documents.length,2);
   assert.equal(await tabs(e,e.shell,'end-drag',two),false);
  }finally{await e.cleanup();}
 });

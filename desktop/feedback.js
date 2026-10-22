@@ -38,11 +38,12 @@
   let latest=null,scope=null,id=null,closed=false,lastAnnouncement=0,previousFocus,obscured=false,dismissed=false,actionKey=null;
   const view=document.defaultView||globalThis;
   let timer=null,due=0,remaining=8000,hovered=false;
+  function quietOpen(event){return event?.kind==='open'&&event.phase==='complete'&&event.outcome==='opened'&&!notice.classList.contains('eo-operation-backstage');}
   function hasFileActions(event){return event.phase==="ready"&&!!event.artifactId&&!!(actions.open||actions.show);}
   function clearTimer(){if(timer!==null)view.clearTimeout(timer);timer=null;}
   function pauseTimer(){if(timer!==null)remaining=Math.max(0,due-view.Date.now());clearTimer();}
   function schedule(){
-   if(closed||dismissed||obscured||hovered||notice.contains(document.activeElement)||!latest||hasFileActions(latest)||!["ready","complete","cancelled"].includes(latest.phase)||notice.classList.contains("eo-operation-backstage"))return;
+   if(closed||dismissed||obscured||hovered||notice.contains(document.activeElement)||!latest||quietOpen(latest)||hasFileActions(latest)||!["ready","complete","cancelled"].includes(latest.phase)||notice.classList.contains("eo-operation-backstage"))return;
    clearTimer();due=view.Date.now()+remaining;
    timer=view.setTimeout(()=>{timer=null;dismissed=true;notice.hidden=true;},remaining);
   }
@@ -64,7 +65,7 @@
   function update(event){
    if(closed||event.scope!==scope)return false;
    if(event.phase==='preparing'){dismissed=false;id=event.id;if(!notice.contains(document.activeElement))previousFocus=document.activeElement;}else if(event.id!==id)return false;
-   latest=event;notice.hidden=obscured||dismissed||nativePrintChoice(event);const ended=terminal.has(event.phase),message=label(event,strings);
+   latest=event;notice.hidden=obscured||dismissed||nativePrintChoice(event)||quietOpen(event);const ended=terminal.has(event.phase),message=label(event,strings);
    notice.setAttribute('aria-busy',String(!ended));announcement.setAttribute('role',event.phase==='error'?'alert':'status');text.textContent=message;
    // Keep visual progress current; throttle page-count announcements for assistive technology.
    if(ended||event.phase!=='converting'||Date.now()-lastAnnouncement>=1000){announcement.textContent=message;lastAnnouncement=Date.now();}
@@ -91,7 +92,7 @@
    if(timer===null)schedule();
    return true;
   }
-  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured||nativePrintChoice(latest);if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
+  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured||nativePrintChoice(latest)||quietOpen(latest);if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
  }
  return {mount,label,fallback,paint,canCancel,isolate};
 });

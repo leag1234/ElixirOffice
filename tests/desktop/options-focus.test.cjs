@@ -6,7 +6,7 @@ const source=fs.readFileSync(path.join(root,'desktop/renderer.js'),'utf8');
 const start=source.indexOf('async function showOptions(){'),end=source.indexOf('\nasync function',start+2);
 assert(start>=0&&end>start,'Load the complete production Options function');
 
-function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false,customTitleBar=false,customTitleBarAvailable=false}={}){
+function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false,customTitleBar=false,customTitleBarAvailable=false,openInTabs=false,showHomeTab=false}={}){
  const focused=[],boxes=[],windowSaved=[];let release,opened;const opening=new Promise(r=>opened=r);
  const document={activeElement:null,createTextNode:text=>({text}),createElement:tag=>element(tag),querySelector:selector=>selector==='dialog[open]'?boxes.find(b=>b.open)||null:null};
  function element(tag,doc=document){
@@ -28,7 +28,7 @@ function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false
  if(closedInvoker){const old=element('dialog');old.className='desktop-options';old.open=false;invoker=element('button');old.append(invoker);}
  document.activeElement=invoker;
  const context={document,frame:originalFrame,file:originalFile,controller:originalController,main:null,
-  t:x=>x,eoDesktop:{windowOptions:async()=>({customTitleBar,customTitleBarAvailable,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
+  t:x=>x,eoDesktop:{windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
   modal:()=>{const box=element('dialog');box.className='desktop-options';box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
   addFontOptions:async()=>{},modalButton:(box,label,fn)=>{const b=element('button');b.textContent=label;b.action=fn;box.append(b);return b;}
  };
@@ -84,4 +84,14 @@ for(const [customTitleBar,customTitleBarAvailable] of [[false,false],[true,false
  assert(nodes.some(e=>e.id==='custom-title-bar-description'));assert(nodes.some(e=>e.id==='custom-title-bar-note'));
  checkbox.checked=false;await nodes.find(e=>e.className==='btn btn-primary').action();
  assert.equal(f.windowSaved.length,1);assert.equal(f.windowSaved[0].customTitleBar,false);
+});
+
+test('Window Options defaults to A and enables Home only for tab modes without forgetting its stored choice',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
+ const tabs=nodes.find(n=>n.id==='open-documents-in-tabs'),home=nodes.find(n=>n.id==='show-home-tab');
+ assert(tabs&&home);assert.equal(tabs.checked,false);assert.equal(home.checked,false);assert.equal(home.disabled,true);
+ tabs.checked=true;for(const fn of tabs.listeners.change||[])fn();assert.equal(home.disabled,false);
+ home.checked=true;tabs.checked=false;for(const fn of tabs.listeners.change||[])fn();assert.equal(home.disabled,true);assert.equal(home.checked,true);
+ await nodes.find(n=>n.className==='btn btn-primary').action();assert.equal(f.windowSaved[0].openInTabs,false);assert.equal(f.windowSaved[0].showHomeTab,true);
 });

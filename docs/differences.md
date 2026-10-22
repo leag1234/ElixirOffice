@@ -516,3 +516,18 @@ A prepared system-font index waits for each document's SDK engine instead of rep
 - Excel-compatible Add Comment caption localization is missing for Vietnamese (`vi`); the fix is deferred to 0.3.1.
 
 Linux packaging explicitly declares ALSA, GBM and GL dispatch runtime dependencies for minimal installations, with ALSA alternatives across the t64 transition. See [runtime dependency checks](desktop.md#linux-runtime-dependencies).
+
+### Desktop 0.3.1 navigation foundation (source candidate)
+
+One window per document is the default. Options offers document tabs and an optional Home affordance, both off by default; changing routing keeps existing editors alive. Current-family New, already-open-file focus and last-document Home preserve separate save/recovery ownership and the global 16-view limit. A retained Home accepts new writes after cancellation cleanup. App interface size follows OS settings by design (issue36); document zoom remains separate. Native packaging and later compact-titlebar/Backstage work are not accepted by this slice. [Behavior and tests](desktop-tabs.md).
+
+### Equation category icons (0.3.1 source candidate)
+
+The shared button templates render the twelve existing equation category SVG symbols. Modern icons, image overrides and custom fallback remain unchanged; the SDK's mathematical choices and conversion runtime are untouched. The issue was reproduced in Linux0.2.4 and0.3.0 before the source fix. [Source tests and qualification boundaries](equation-icons.md).
+
+Desktop 0.3.1 File-menu candidate: Office rail order, Rename in Info and Export through the native-backed supported-format chooser. Existing property editors remain; saved OOXML titles are checked in the real Linux source app. Window movement is explicitly labelled and keeps file data in place. Physical file relocation, folder display and native/package qualification remain pending. [Details](desktop.md#031-file-backstage-candidate).
+### Desktop window placement and tab state (0.3.1 source candidate)
+
+Window bounds restore within current display work areas, including removed-monitor and minimized-close cases. Tabs reuse Fluent file-type icons and a separate modified dot with45-locale accessible state. Successful Open finishes without a floating toast; File details, live announcements and important progress/actions remain available. Source checks and actual private Linux normal-window checks are separate from window-manager, native-platform and installed-package acceptance. [Scope](desktop-tabs.md#window-placement-and-tab-state-031-source-candidate).
+
+Desktop start-page follow-up candidate: empty Home offers Options/Help/About in the same Office-style application rail while retaining shared localized templates, recent metadata and privacy footer. Embedded File content keeps one rail. Strict review capture supports both visible-strip composites and full-client no-strip views with ownership/opacity/scale checks; native frame/compact-titlebar qualification remains separate. [Details](desktop.md#031-shared-start-page-follow-up).

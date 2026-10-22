@@ -7,7 +7,7 @@ for(const [name,ai,enabled]of [['absent',undefined,false],['empty',{},false],['l
   const element={attr(){return this},find(){return this},off(){return this},on(_name,fn){handler=fn;return this},insertAfter(){return this}};
   const fm={items:[],$el:element,miHelp:{show(){shown++},setDisabled(value){disabled=value}},hide(){hidden++},fireEvent(){throw Error('Server event must not receive native Help')}};
   const bs={rendered:true,fm,items:{'elx-ai':{show(){aiVisible=true},hide(){aiVisible=false}}},afterApplyMode(){}};
-  const win={SSE:{getController:()=>({backstage:bs})},Common:{ElixirAI:ai,UI:{MenuItem:class{constructor(options){this.options=options}on(){}}}},$:()=>element,document:{addEventListener(){},createElement:()=>({}),head:{append(){}}}};
+  const win={SSE:{getController:()=>({backstage:bs})},Common:{ElixirAI:ai,UI:{MenuItem:class{constructor(options){this.options=options}on(){}hide(){}}}},$:()=>element,document:{addEventListener(){},createElement:()=>({}),head:{append(){}}}};
   const visibility=[],window={CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;}},dispatchEvent(event){visibility.push(event);}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/backstage.js'),'utf8'),{window});
   const adapter=await window.EODesktopBackstage(win,{api:{}},{strings:{},language:'en'},value=>{command=value});
   assert.doesNotThrow(()=>adapter.operation({id:'local-operation-1',scope:'public',phase:'ready',name:'public.docx'}),'Lifecycle observer must survive an unrendered File menu');

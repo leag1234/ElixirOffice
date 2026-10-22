@@ -5,9 +5,9 @@ const english=require('../../desktop/tab-strings.json'),catalog=require('../../t
 test('every tab English reference matches the shared canonical English catalog',()=>{
  for(const [key,value] of Object.entries(english))assert.equal(catalog.en[key],value,key);
 });
-test('all 45 locale catalogs define the complete 19-key tab contract',()=>{
+test('all 45 locale catalogs define the complete 24-key tab and navigation contract',()=>{
  const keys=Object.keys(english);
- assert.equal(keys.length,19);
+ assert.equal(keys.length,24);
  assert.equal(Object.keys(catalog).length,45);
  const placeholders=value=>[...value.matchAll(/\{[^{}]+\}/g)].map(match=>match[0]).sort();
  for(const [locale,strings] of Object.entries(catalog)){

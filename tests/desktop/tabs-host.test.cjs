@@ -21,9 +21,9 @@ function setup(fault={}){
  }
  class View{
   constructor(options){this.options=options;this.webContents=new Contents();this.webContents.document=true;views.push(this);}
-  setVisible(){}setBounds(){}
+  setVisible(){}setBounds(value){this.bounds=value;}
  }
- const host=createTabHost({BrowserWindow:Window,WebContentsView:View,ipcMain:{handle(){},removeHandler(){}},registry,session:{},root:'/trusted/desktop',shellURL,strings:()=>({}),language:()=> 'en',direction:()=> 'ltr',actions:{create(){},close(){},closeWindow(){}}});
+ const host=createTabHost({BrowserWindow:Window,WebContentsView:View,ipcMain:{handle(){},removeHandler(){}},registry,session:{},root:'/trusted/desktop',shellURL,strings:()=>({}),language:()=> 'en',direction:()=> 'ltr',navigation:()=>({openInTabs:fault.openInTabs!==false}),actions:{create(){},close(){},closeWindow(){}}});
  return {host,registry,views,owner:host.createWindow()};
 }
 test('host distinguishes navigation-loaded state from editor-ready state',async()=>{
@@ -108,4 +108,21 @@ test('host refuses a seventeenth tab before allocating its expensive editor rend
  assert.throws(()=>host.addDocument(owner),{code:'DOCUMENT_LIMIT'});
  assert.equal(views.length,16,'Refusal must precede WebContentsView allocation');
  assert.equal(registry.documents(owner.id).length+registry.documents(other.id).length,16);
+});
+
+test('mode A uses the whole client area; enabling B changes bounds without recreating the editor',async()=>{
+ const {host,registry,owner}=setup({openInTabs:false});await owner.ready;
+ const document=host.addDocument(owner,{state:{current:{format:'docx'}}});await host.loadDocument(document);
+ assert.equal(document.view.bounds.y,0);assert.equal(document.view.bounds.height,600);
+ const contents=document.contents,generation=document.generation;
+ host.setTabbed(owner,true);assert.equal(document.view.bounds.y,44);assert.equal(document.view.bounds.height,556);
+ assert.equal(document.contents,contents);assert.equal(document.generation,generation);assert.equal(registry.documents(owner.id).length,1);
+});
+
+test('empty startup uses the full client area even when B is selected; the first real document reveals its strip',async()=>{
+ const {host,owner}=setup();await owner.ready;
+ const document=host.addDocument(owner,{state:{current:null}});
+ assert.equal(document.view.bounds.y,0);assert.equal(document.view.bounds.height,600);
+ document.state.current={format:'xlsx'};host.bounds(owner);
+ assert.equal(document.view.bounds.y,44);assert.equal(document.view.bounds.height,556);
 });

@@ -124,7 +124,12 @@
     "tabSaveWaitTimeout": "Saving has not finished and may still complete. This document will stay open. Wait for saving to finish, then try closing it again.",
     "recoveryTitle": "Recover documents",
     "recoveryUnavailable": "Unavailable recovery copy",
-    "recoveryDamaged": "This copy is damaged or unavailable and cannot be restored."
+    "recoveryDamaged": "This copy is damaged or unavailable and cannot be restored.",
+    "openDocumentsInTabs": "Open documents in tabs",
+    "showHomeTab": "Show Home tab",
+    "homeTabRequiresTabs": "The Home tab is available when documents open in tabs.",
+    "tabMoveOtherWindow": "Move to another window",
+    "tabModified": "Unsaved changes"
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -251,7 +256,12 @@
     "tabMoveWindow": "Déplacer vers {name}",
     "tabMoveBusy": "Attendez la fin de l’opération en cours sur le document ou la fermeture de la boîte de dialogue avant de déplacer cet onglet.",
     "tabLimit": "Vous pouvez ouvrir jusqu’à 16 documents à la fois. Fermez un onglet avant d’ouvrir un autre document.",
-    "tabSaveWaitTimeout": "L’enregistrement n’est pas terminé et peut encore aboutir. Ce document restera ouvert. Attendez la fin de l’enregistrement, puis essayez à nouveau de le fermer."
+    "tabSaveWaitTimeout": "L’enregistrement n’est pas terminé et peut encore aboutir. Ce document restera ouvert. Attendez la fin de l’enregistrement, puis essayez à nouveau de le fermer.",
+    "openDocumentsInTabs": "Ouvrir les documents dans des onglets",
+    "showHomeTab": "Afficher l’onglet Accueil",
+    "homeTabRequiresTabs": "L’onglet Accueil est disponible lorsque les documents s’ouvrent dans des onglets.",
+    "tabMoveOtherWindow": "Déplacer vers une autre fenêtre",
+    "tabModified": "Modifications non enregistrées"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -378,7 +388,12 @@
     "tabMoveWindow": "Nach {name} verschieben",
     "tabMoveBusy": "Warten Sie, bis der aktuelle Dokumentvorgang abgeschlossen oder das Dialogfeld geschlossen ist, bevor Sie diesen Tab verschieben.",
     "tabLimit": "Sie können bis zu 16 Dokumente gleichzeitig öffnen. Schließen Sie einen Tab, bevor Sie ein weiteres Dokument öffnen.",
-    "tabSaveWaitTimeout": "Das Speichern ist noch nicht abgeschlossen und kann noch beendet werden. Dieses Dokument bleibt geöffnet. Warten Sie, bis das Speichern abgeschlossen ist, und versuchen Sie dann erneut, es zu schließen."
+    "tabSaveWaitTimeout": "Das Speichern ist noch nicht abgeschlossen und kann noch beendet werden. Dieses Dokument bleibt geöffnet. Warten Sie, bis das Speichern abgeschlossen ist, und versuchen Sie dann erneut, es zu schließen.",
+    "openDocumentsInTabs": "Dokumente in Registerkarten öffnen",
+    "showHomeTab": "Registerkarte Start anzeigen",
+    "homeTabRequiresTabs": "Die Registerkarte Start ist verfügbar, wenn Dokumente in Registerkarten geöffnet werden.",
+    "tabMoveOtherWindow": "In ein anderes Fenster verschieben",
+    "tabModified": "Ungespeicherte Änderungen"
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -505,7 +520,12 @@
     "tabMoveWindow": "Mover a {name}",
     "tabMoveBusy": "Espere a que termine la operación actual del documento o se cierre el cuadro de diálogo antes de mover esta pestaña.",
     "tabLimit": "Puede abrir hasta 16 documentos a la vez. Cierre una pestaña antes de abrir otro documento.",
-    "tabSaveWaitTimeout": "El guardado no ha terminado y aún puede completarse. Este documento permanecerá abierto. Espere a que termine el guardado y vuelva a intentar cerrarlo."
+    "tabSaveWaitTimeout": "El guardado no ha terminado y aún puede completarse. Este documento permanecerá abierto. Espere a que termine el guardado y vuelva a intentar cerrarlo.",
+    "openDocumentsInTabs": "Abrir documentos en pestañas",
+    "showHomeTab": "Mostrar la pestaña Inicio",
+    "homeTabRequiresTabs": "La pestaña Inicio está disponible al abrir documentos en pestañas.",
+    "tabMoveOtherWindow": "Mover a otra ventana",
+    "tabModified": "Cambios sin guardar"
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -632,7 +652,12 @@
     "tabMoveWindow": "Sposta in {name}",
     "tabMoveBusy": "Attendi che termini l’operazione in corso sul documento o che venga chiusa la finestra di dialogo prima di spostare questa scheda.",
     "tabLimit": "Puoi aprire fino a 16 documenti contemporaneamente. Chiudi una scheda prima di aprire un altro documento.",
-    "tabSaveWaitTimeout": "Il salvataggio non è terminato e potrebbe ancora completarsi. Questo documento resterà aperto. Attendi la fine del salvataggio, poi prova di nuovo a chiuderlo."
+    "tabSaveWaitTimeout": "Il salvataggio non è terminato e potrebbe ancora completarsi. Questo documento resterà aperto. Attendi la fine del salvataggio, poi prova di nuovo a chiuderlo.",
+    "openDocumentsInTabs": "Apri documenti in schede",
+    "showHomeTab": "Mostra la scheda Home",
+    "homeTabRequiresTabs": "La scheda Home è disponibile quando i documenti si aprono in schede.",
+    "tabMoveOtherWindow": "Sposta in un’altra finestra",
+    "tabModified": "Modifiche non salvate"
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -759,7 +784,12 @@
     "tabMoveWindow": "Mover para {name}",
     "tabMoveBusy": "Aguarde o término da operação atual no documento ou o fechamento da caixa de diálogo antes de mover esta aba.",
     "tabLimit": "Você pode abrir até 16 documentos de cada vez. Feche uma aba antes de abrir outro documento.",
-    "tabSaveWaitTimeout": "O salvamento não terminou e ainda pode ser concluído. Este documento permanecerá aberto. Aguarde o fim do salvamento e tente fechá-lo novamente."
+    "tabSaveWaitTimeout": "O salvamento não terminou e ainda pode ser concluído. Este documento permanecerá aberto. Aguarde o fim do salvamento e tente fechá-lo novamente.",
+    "openDocumentsInTabs": "Abrir documentos em abas",
+    "showHomeTab": "Mostrar a aba Início",
+    "homeTabRequiresTabs": "A aba Início está disponível quando os documentos são abertos em abas.",
+    "tabMoveOtherWindow": "Mover para outra janela",
+    "tabModified": "Alterações não salvas"
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -886,7 +916,12 @@
     "tabMoveWindow": "Mover para {name}",
     "tabMoveBusy": "Aguarde o fim da operação atual no documento ou o fecho da caixa de diálogo antes de mover este separador.",
     "tabLimit": "Pode abrir até 16 documentos de cada vez. Feche um separador antes de abrir outro documento.",
-    "tabSaveWaitTimeout": "A gravação não terminou e ainda pode ser concluída. Este documento permanecerá aberto. Aguarde o fim da gravação e tente fechá-lo novamente."
+    "tabSaveWaitTimeout": "A gravação não terminou e ainda pode ser concluída. Este documento permanecerá aberto. Aguarde o fim da gravação e tente fechá-lo novamente.",
+    "openDocumentsInTabs": "Abrir documentos em separadores",
+    "showHomeTab": "Mostrar o separador Início",
+    "homeTabRequiresTabs": "O separador Início está disponível quando os documentos são abertos em separadores.",
+    "tabMoveOtherWindow": "Mover para outra janela",
+    "tabModified": "Alterações não guardadas"
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1013,7 +1048,12 @@
     "tabMoveWindow": "Verplaatsen naar {name}",
     "tabMoveBusy": "Wacht tot de huidige documentbewerking is voltooid of het dialoogvenster is gesloten voordat u dit tabblad verplaatst.",
     "tabLimit": "U kunt maximaal 16 documenten tegelijk openen. Sluit een tabblad voordat u een ander document opent.",
-    "tabSaveWaitTimeout": "Het opslaan is nog niet voltooid en kan alsnog worden afgerond. Dit document blijft open. Wacht tot het opslaan is voltooid en probeer het daarna opnieuw te sluiten."
+    "tabSaveWaitTimeout": "Het opslaan is nog niet voltooid en kan alsnog worden afgerond. Dit document blijft open. Wacht tot het opslaan is voltooid en probeer het daarna opnieuw te sluiten.",
+    "openDocumentsInTabs": "Documenten in tabbladen openen",
+    "showHomeTab": "Tabblad Start weergeven",
+    "homeTabRequiresTabs": "Het tabblad Start is beschikbaar wanneer documenten in tabbladen worden geopend.",
+    "tabMoveOtherWindow": "Naar een ander venster verplaatsen",
+    "tabModified": "Niet-opgeslagen wijzigingen"
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1140,7 +1180,12 @@
     "tabMoveWindow": "Przenieś do {name}",
     "tabMoveBusy": "Przed przeniesieniem tej karty poczekaj na zakończenie bieżącej operacji na dokumencie lub zamknięcie okna dialogowego.",
     "tabLimit": "Możesz otworzyć jednocześnie do 16 dokumentów. Zamknij kartę przed otwarciem kolejnego dokumentu.",
-    "tabSaveWaitTimeout": "Zapisywanie nie zostało zakończone i może jeszcze się zakończyć. Ten dokument pozostanie otwarty. Poczekaj na zakończenie zapisywania, a następnie spróbuj ponownie go zamknąć."
+    "tabSaveWaitTimeout": "Zapisywanie nie zostało zakończone i może jeszcze się zakończyć. Ten dokument pozostanie otwarty. Poczekaj na zakończenie zapisywania, a następnie spróbuj ponownie go zamknąć.",
+    "openDocumentsInTabs": "Otwieraj dokumenty na kartach",
+    "showHomeTab": "Pokaż kartę Start",
+    "homeTabRequiresTabs": "Karta Start jest dostępna, gdy dokumenty są otwierane na kartach.",
+    "tabMoveOtherWindow": "Przenieś do innego okna",
+    "tabModified": "Niezapisane zmiany"
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1267,7 +1312,12 @@
     "tabMoveWindow": "Переместить в {name}",
     "tabMoveBusy": "Перед перемещением этой вкладки дождитесь завершения текущей операции с документом или закрытия диалогового окна.",
     "tabLimit": "Можно открыть не более 16 документов одновременно. Закройте вкладку, прежде чем открыть другой документ.",
-    "tabSaveWaitTimeout": "Сохранение ещё не завершено и всё ещё может завершиться. Этот документ останется открытым. Дождитесь окончания сохранения, затем попробуйте закрыть его снова."
+    "tabSaveWaitTimeout": "Сохранение ещё не завершено и всё ещё может завершиться. Этот документ останется открытым. Дождитесь окончания сохранения, затем попробуйте закрыть его снова.",
+    "openDocumentsInTabs": "Открывать документы во вкладках",
+    "showHomeTab": "Показывать вкладку «Главная»",
+    "homeTabRequiresTabs": "Вкладка «Главная» доступна при открытии документов во вкладках.",
+    "tabMoveOtherWindow": "Переместить в другое окно",
+    "tabModified": "Несохранённые изменения"
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1394,7 +1444,12 @@
     "tabMoveWindow": "{name} に移動",
     "tabMoveBusy": "このタブを移動する前に、現在のドキュメント操作が完了するか、ダイアログが閉じるまでお待ちください。",
     "tabLimit": "同時に開けるドキュメントは最大 16 個です。別のドキュメントを開く前に、タブを閉じてください。",
-    "tabSaveWaitTimeout": "保存はまだ完了しておらず、今後完了する可能性があります。このドキュメントは開いたままになります。保存が完了するまで待ってから、もう一度閉じてください。"
+    "tabSaveWaitTimeout": "保存はまだ完了しておらず、今後完了する可能性があります。このドキュメントは開いたままになります。保存が完了するまで待ってから、もう一度閉じてください。",
+    "openDocumentsInTabs": "ドキュメントをタブで開く",
+    "showHomeTab": "ホームタブを表示",
+    "homeTabRequiresTabs": "ホームタブはドキュメントをタブで開く場合に利用できます。",
+    "tabMoveOtherWindow": "別のウィンドウに移動",
+    "tabModified": "未保存の変更"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -1521,7 +1576,12 @@
     "tabMoveWindow": "移至 {name}",
     "tabMoveBusy": "请等待当前文档操作完成或对话框关闭后，再移动此标签页。",
     "tabLimit": "您最多可以同时打开 16 个文档。请先关闭一个标签页，再打开其他文档。",
-    "tabSaveWaitTimeout": "保存尚未完成，仍有可能完成。此文档将保持打开。请等待保存完成后，再尝试关闭此文档。"
+    "tabSaveWaitTimeout": "保存尚未完成，仍有可能完成。此文档将保持打开。请等待保存完成后，再尝试关闭此文档。",
+    "openDocumentsInTabs": "在选项卡中打开文档",
+    "showHomeTab": "显示主页选项卡",
+    "homeTabRequiresTabs": "在选项卡中打开文档时可以使用主页选项卡。",
+    "tabMoveOtherWindow": "移至其他窗口",
+    "tabModified": "未保存的更改"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -1651,7 +1711,12 @@
     "tabMoveWindow": "移至 {name}",
     "tabMoveBusy": "請等待目前的文件操作完成或對話方塊關閉後，再移動此分頁。",
     "tabLimit": "您最多可以同時開啟 16 份文件。請先關閉一個分頁，再開啟其他文件。",
-    "tabSaveWaitTimeout": "儲存尚未完成，仍有可能完成。此文件將保持開啟。請等待儲存完成後，再嘗試關閉此文件。"
+    "tabSaveWaitTimeout": "儲存尚未完成，仍有可能完成。此文件將保持開啟。請等待儲存完成後，再嘗試關閉此文件。",
+    "openDocumentsInTabs": "在索引標籤中開啟文件",
+    "showHomeTab": "顯示首頁索引標籤",
+    "homeTabRequiresTabs": "在索引標籤中開啟文件時可以使用首頁索引標籤。",
+    "tabMoveOtherWindow": "移至其他視窗",
+    "tabModified": "尚未儲存的變更"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -1781,7 +1846,12 @@
     "tabMoveWindow": "نقل إلى {name}",
     "tabMoveBusy": "انتظر انتهاء العملية الحالية على المستند أو إغلاق مربع الحوار قبل نقل علامة التبويب هذه.",
     "tabLimit": "يمكنك فتح ما يصل إلى 16 مستندًا في الوقت نفسه. أغلق علامة تبويب قبل فتح مستند آخر.",
-    "tabSaveWaitTimeout": "لم يكتمل الحفظ وقد يكتمل لاحقًا. سيبقى هذا المستند مفتوحًا. انتظر اكتمال الحفظ، ثم حاول إغلاقه مرة أخرى."
+    "tabSaveWaitTimeout": "لم يكتمل الحفظ وقد يكتمل لاحقًا. سيبقى هذا المستند مفتوحًا. انتظر اكتمال الحفظ، ثم حاول إغلاقه مرة أخرى.",
+    "openDocumentsInTabs": "فتح المستندات في علامات تبويب",
+    "showHomeTab": "إظهار علامة تبويب الصفحة الرئيسية",
+    "homeTabRequiresTabs": "تتوفر علامة تبويب الصفحة الرئيسية عند فتح المستندات في علامات تبويب.",
+    "tabMoveOtherWindow": "نقل إلى نافذة أخرى",
+    "tabModified": "تغييرات غير محفوظة"
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -1911,7 +1981,12 @@
     "tabMoveWindow": "{name} pəncərəsinə köçür",
     "tabMoveBusy": "Bu vərəqi köçürməzdən əvvəl sənədlə bağlı cari əməliyyatın tamamlanmasını və ya dialoq pəncərəsinin bağlanmasını gözləyin.",
     "tabLimit": "Eyni vaxtda ən çox 16 sənəd aça bilərsiniz. Başqa sənəd açmazdan əvvəl bir vərəqi bağlayın.",
-    "tabSaveWaitTimeout": "Saxlama hələ tamamlanmayıb və sonradan tamamlana bilər. Bu sənəd açıq qalacaq. Saxlamanın tamamlanmasını gözləyin, sonra onu yenidən bağlamağa cəhd edin."
+    "tabSaveWaitTimeout": "Saxlama hələ tamamlanmayıb və sonradan tamamlana bilər. Bu sənəd açıq qalacaq. Saxlamanın tamamlanmasını gözləyin, sonra onu yenidən bağlamağa cəhd edin.",
+    "openDocumentsInTabs": "Sənədləri vərəqlərdə aç",
+    "showHomeTab": "Əsas səhifə vərəqini göstər",
+    "homeTabRequiresTabs": "Əsas səhifə vərəqi sənədlər vərəqlərdə açıldıqda əlçatandır.",
+    "tabMoveOtherWindow": "Başqa pəncərəyə köçür",
+    "tabModified": "Saxlanılmamış dəyişikliklər"
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2041,7 +2116,12 @@
     "tabMoveWindow": "Перамясціць у {name}",
     "tabMoveBusy": "Перад перамяшчэннем гэтай укладкі дачакайцеся завяршэння бягучай аперацыі з дакументам або закрыцця дыялогавага акна.",
     "tabLimit": "Можна адкрыць не больш за 16 дакументаў адначасова. Закрыйце ўкладку, перш чым адкрыць іншы дакумент.",
-    "tabSaveWaitTimeout": "Захаванне яшчэ не завершана і яшчэ можа завяршыцца. Гэты дакумент застанецца адкрытым. Дачакайцеся заканчэння захавання, затым паспрабуйце закрыць яго яшчэ раз."
+    "tabSaveWaitTimeout": "Захаванне яшчэ не завершана і яшчэ можа завяршыцца. Гэты дакумент застанецца адкрытым. Дачакайцеся заканчэння захавання, затым паспрабуйце закрыць яго яшчэ раз.",
+    "openDocumentsInTabs": "Адкрываць дакументы ва ўкладках",
+    "showHomeTab": "Паказваць укладку «Галоўная»",
+    "homeTabRequiresTabs": "Укладка «Галоўная» даступная, калі дакументы адкрываюцца ва ўкладках.",
+    "tabMoveOtherWindow": "Перамясціць у іншае акно",
+    "tabModified": "Незахаваныя змены"
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -2174,7 +2254,12 @@
     "tabMoveWindow": "Преместване в {name}",
     "tabMoveBusy": "Изчакайте текущата операция с документа да завърши или диалоговият прозорец да се затвори, преди да преместите този раздел.",
     "tabLimit": "Можете да отворите до 16 документа едновременно. Затворете раздел, преди да отворите друг документ.",
-    "tabSaveWaitTimeout": "Записването не е завършило и все още може да завърши. Този документ ще остане отворен. Изчакайте записването да завърши, след което опитайте да го затворите отново."
+    "tabSaveWaitTimeout": "Записването не е завършило и все още може да завърши. Този документ ще остане отворен. Изчакайте записването да завърши, след което опитайте да го затворите отново.",
+    "openDocumentsInTabs": "Отваряне на документи в раздели",
+    "showHomeTab": "Показване на раздела Начало",
+    "homeTabRequiresTabs": "Разделът Начало е наличен при отваряне на документи в раздели.",
+    "tabMoveOtherWindow": "Преместване в друг прозорец",
+    "tabModified": "Незапазени промени"
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -2304,7 +2389,12 @@
     "tabMoveWindow": "Mou a {name}",
     "tabMoveBusy": "Espereu que acabi l’operació actual del document o es tanqui el quadre de diàleg abans de moure aquesta pestanya.",
     "tabLimit": "Podeu obrir fins a 16 documents alhora. Tanqueu una pestanya abans d’obrir un altre document.",
-    "tabSaveWaitTimeout": "El desament no ha acabat i encara es pot completar. Aquest document continuarà obert. Espereu que acabi el desament i torneu a provar de tancar-lo."
+    "tabSaveWaitTimeout": "El desament no ha acabat i encara es pot completar. Aquest document continuarà obert. Espereu que acabi el desament i torneu a provar de tancar-lo.",
+    "openDocumentsInTabs": "Obre els documents en pestanyes",
+    "showHomeTab": "Mostra la pestanya Inici",
+    "homeTabRequiresTabs": "La pestanya Inici està disponible quan els documents s’obren en pestanyes.",
+    "tabMoveOtherWindow": "Mou a una altra finestra",
+    "tabModified": "Canvis sense desar"
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -2434,7 +2524,12 @@
     "tabMoveWindow": "Přesunout do {name}",
     "tabMoveBusy": "Před přesunutím této karty počkejte na dokončení aktuální operace s dokumentem nebo zavření dialogového okna.",
     "tabLimit": "Současně můžete otevřít nejvýše 16 dokumentů. Před otevřením dalšího dokumentu zavřete kartu.",
-    "tabSaveWaitTimeout": "Ukládání ještě neskončilo a může se ještě dokončit. Tento dokument zůstane otevřený. Počkejte na dokončení ukládání a potom jej zkuste znovu zavřít."
+    "tabSaveWaitTimeout": "Ukládání ještě neskončilo a může se ještě dokončit. Tento dokument zůstane otevřený. Počkejte na dokončení ukládání a potom jej zkuste znovu zavřít.",
+    "openDocumentsInTabs": "Otevírat dokumenty na kartách",
+    "showHomeTab": "Zobrazit kartu Domů",
+    "homeTabRequiresTabs": "Karta Domů je dostupná, když se dokumenty otevírají na kartách.",
+    "tabMoveOtherWindow": "Přesunout do jiného okna",
+    "tabModified": "Neuložené změny"
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -2564,7 +2659,12 @@
     "tabMoveWindow": "Flyt til {name}",
     "tabMoveBusy": "Vent, til den aktuelle dokumenthandling er færdig, eller dialogboksen er lukket, før du flytter denne fane.",
     "tabLimit": "Du kan åbne op til 16 dokumenter ad gangen. Luk en fane, før du åbner et andet dokument.",
-    "tabSaveWaitTimeout": "Lagringen er ikke færdig og kan stadig blive fuldført. Dette dokument forbliver åbent. Vent, til lagringen er færdig, og prøv så at lukke det igen."
+    "tabSaveWaitTimeout": "Lagringen er ikke færdig og kan stadig blive fuldført. Dette dokument forbliver åbent. Vent, til lagringen er færdig, og prøv så at lukke det igen.",
+    "openDocumentsInTabs": "Åbn dokumenter i faner",
+    "showHomeTab": "Vis fanen Hjem",
+    "homeTabRequiresTabs": "Fanen Hjem er tilgængelig, når dokumenter åbnes i faner.",
+    "tabMoveOtherWindow": "Flyt til et andet vindue",
+    "tabModified": "Ikke-gemte ændringer"
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -2694,7 +2794,12 @@
     "tabMoveWindow": "Μετακίνηση στο {name}",
     "tabMoveBusy": "Περιμένετε να ολοκληρωθεί η τρέχουσα λειτουργία του εγγράφου ή να κλείσει το παράθυρο διαλόγου πριν μετακινήσετε αυτή την καρτέλα.",
     "tabLimit": "Μπορείτε να ανοίξετε έως 16 έγγραφα ταυτόχρονα. Κλείστε μια καρτέλα πριν ανοίξετε άλλο έγγραφο.",
-    "tabSaveWaitTimeout": "Η αποθήκευση δεν έχει ολοκληρωθεί και μπορεί ακόμη να ολοκληρωθεί. Αυτό το έγγραφο θα παραμείνει ανοιχτό. Περιμένετε να ολοκληρωθεί η αποθήκευση και δοκιμάστε ξανά να το κλείσετε."
+    "tabSaveWaitTimeout": "Η αποθήκευση δεν έχει ολοκληρωθεί και μπορεί ακόμη να ολοκληρωθεί. Αυτό το έγγραφο θα παραμείνει ανοιχτό. Περιμένετε να ολοκληρωθεί η αποθήκευση και δοκιμάστε ξανά να το κλείσετε.",
+    "openDocumentsInTabs": "Άνοιγμα εγγράφων σε καρτέλες",
+    "showHomeTab": "Εμφάνιση καρτέλας Αρχική",
+    "homeTabRequiresTabs": "Η καρτέλα Αρχική είναι διαθέσιμη όταν τα έγγραφα ανοίγουν σε καρτέλες.",
+    "tabMoveOtherWindow": "Μετακίνηση σε άλλο παράθυρο",
+    "tabModified": "Μη αποθηκευμένες αλλαγές"
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -2824,7 +2929,12 @@
     "tabMoveWindow": "Eraman hona: {name}",
     "tabMoveBusy": "Fitxa hau eraman aurretik, itxaron dokumentuaren uneko eragiketa amaitu arte edo elkarrizketa-koadroa itxi arte.",
     "tabLimit": "Gehienez 16 dokumentu ireki ditzakezu aldi berean. Itxi fitxa bat beste dokumentu bat ireki aurretik.",
-    "tabSaveWaitTimeout": "Gordetzea ez da amaitu eta oraindik amaitu daiteke. Dokumentu hau irekita geratuko da. Itxaron gordetzea amaitu arte eta saiatu berriro ixten."
+    "tabSaveWaitTimeout": "Gordetzea ez da amaitu eta oraindik amaitu daiteke. Dokumentu hau irekita geratuko da. Itxaron gordetzea amaitu arte eta saiatu berriro ixten.",
+    "openDocumentsInTabs": "Ireki dokumentuak fitxetan",
+    "showHomeTab": "Erakutsi Hasiera fitxa",
+    "homeTabRequiresTabs": "Hasiera fitxa erabilgarri dago dokumentuak fitxetan irekitzen direnean.",
+    "tabMoveOtherWindow": "Eraman beste leiho batera",
+    "tabModified": "Gorde gabeko aldaketak"
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -2956,7 +3066,12 @@
     "tabMoveWindow": "Siirrä ikkunaan {name}",
     "tabMoveBusy": "Odota, että nykyinen asiakirjatoiminto päättyy tai valintaikkuna suljetaan, ennen kuin siirrät tämän välilehden.",
     "tabLimit": "Voit avata enintään 16 asiakirjaa kerrallaan. Sulje välilehti ennen uuden asiakirjan avaamista.",
-    "tabSaveWaitTimeout": "Tallennus ei ole vielä valmistunut, mutta se voi vielä valmistua. Tämä asiakirja pysyy avoinna. Odota tallennuksen valmistumista ja yritä sitten sulkea se uudelleen."
+    "tabSaveWaitTimeout": "Tallennus ei ole vielä valmistunut, mutta se voi vielä valmistua. Tämä asiakirja pysyy avoinna. Odota tallennuksen valmistumista ja yritä sitten sulkea se uudelleen.",
+    "openDocumentsInTabs": "Avaa asiakirjat välilehdissä",
+    "showHomeTab": "Näytä Aloitus-välilehti",
+    "homeTabRequiresTabs": "Aloitus-välilehti on käytettävissä, kun asiakirjat avataan välilehdissä.",
+    "tabMoveOtherWindow": "Siirrä toiseen ikkunaan",
+    "tabModified": "Tallentamattomat muutokset"
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -3086,7 +3201,12 @@
     "tabMoveWindow": "Mover a {name}",
     "tabMoveBusy": "Agarde a que remate a operación actual do documento ou se peche a caixa de diálogo antes de mover esta lapela.",
     "tabLimit": "Pode abrir ata 16 documentos á vez. Peche unha lapela antes de abrir outro documento.",
-    "tabSaveWaitTimeout": "O gardado non rematou e aínda pode completarse. Este documento permanecerá aberto. Agarde a que remate o gardado e ténteo pechar de novo."
+    "tabSaveWaitTimeout": "O gardado non rematou e aínda pode completarse. Este documento permanecerá aberto. Agarde a que remate o gardado e ténteo pechar de novo.",
+    "openDocumentsInTabs": "Abrir documentos en lapelas",
+    "showHomeTab": "Mostrar a lapela Inicio",
+    "homeTabRequiresTabs": "A lapela Inicio está dispoñible cando os documentos se abren en lapelas.",
+    "tabMoveOtherWindow": "Mover a outra xanela",
+    "tabModified": "Cambios sen gardar"
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -3216,7 +3336,12 @@
     "tabMoveWindow": "העברה אל {name}",
     "tabMoveBusy": "יש להמתין לסיום הפעולה הנוכחית במסמך או לסגירת תיבת הדו־שיח לפני העברת כרטיסייה זו.",
     "tabLimit": "אפשר לפתוח עד 16 מסמכים בו־זמנית. יש לסגור כרטיסייה לפני פתיחת מסמך נוסף.",
-    "tabSaveWaitTimeout": "השמירה טרם הסתיימה וייתכן שעוד תושלם. מסמך זה יישאר פתוח. יש להמתין לסיום השמירה ואז לנסות לסגור אותו שוב."
+    "tabSaveWaitTimeout": "השמירה טרם הסתיימה וייתכן שעוד תושלם. מסמך זה יישאר פתוח. יש להמתין לסיום השמירה ואז לנסות לסגור אותו שוב.",
+    "openDocumentsInTabs": "פתיחת מסמכים בכרטיסיות",
+    "showHomeTab": "הצגת כרטיסיית הבית",
+    "homeTabRequiresTabs": "כרטיסיית הבית זמינה כאשר מסמכים נפתחים בכרטיסיות.",
+    "tabMoveOtherWindow": "העברה לחלון אחר",
+    "tabModified": "שינויים שלא נשמרו"
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -3346,7 +3471,12 @@
     "tabMoveWindow": "Áthelyezés ide: {name}",
     "tabMoveBusy": "A lap áthelyezése előtt várja meg az aktuális dokumentumművelet befejezését vagy a párbeszédablak bezárását.",
     "tabLimit": "Egyszerre legfeljebb 16 dokumentumot nyithat meg. Újabb dokumentum megnyitása előtt zárjon be egy lapot.",
-    "tabSaveWaitTimeout": "A mentés még nem fejeződött be, de még befejeződhet. Ez a dokumentum nyitva marad. Várja meg a mentés befejezését, majd próbálja újra bezárni."
+    "tabSaveWaitTimeout": "A mentés még nem fejeződött be, de még befejeződhet. Ez a dokumentum nyitva marad. Várja meg a mentés befejezését, majd próbálja újra bezárni.",
+    "openDocumentsInTabs": "Dokumentumok megnyitása lapokon",
+    "showHomeTab": "Kezdőlap megjelenítése",
+    "homeTabRequiresTabs": "A Kezdőlap akkor érhető el, ha a dokumentumok lapokon nyílnak meg.",
+    "tabMoveOtherWindow": "Áthelyezés másik ablakba",
+    "tabModified": "Nem mentett módosítások"
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -3476,7 +3606,12 @@
     "tabMoveWindow": "Տեղափոխել դեպի {name}",
     "tabMoveBusy": "Այս ներդիրը տեղափոխելուց առաջ սպասեք փաստաթղթի ընթացիկ գործողության ավարտին կամ երկխոսության պատուհանի փակմանը։",
     "tabLimit": "Կարող եք միաժամանակ բացել մինչև 16 փաստաթուղթ։ Մեկ այլ փաստաթուղթ բացելուց առաջ փակեք որևէ ներդիր։",
-    "tabSaveWaitTimeout": "Պահպանումը դեռ չի ավարտվել և դեռ կարող է ավարտվել։ Այս փաստաթուղթը կմնա բաց։ Սպասեք պահպանման ավարտին, ապա կրկին փորձեք փակել այն։"
+    "tabSaveWaitTimeout": "Պահպանումը դեռ չի ավարտվել և դեռ կարող է ավարտվել։ Այս փաստաթուղթը կմնա բաց։ Սպասեք պահպանման ավարտին, ապա կրկին փորձեք փակել այն։",
+    "openDocumentsInTabs": "Բացել փաստաթղթերը ներդիրներում",
+    "showHomeTab": "Ցուցադրել Գլխավոր ներդիրը",
+    "homeTabRequiresTabs": "Գլխավոր ներդիրը հասանելի է, երբ փաստաթղթերը բացվում են ներդիրներում։",
+    "tabMoveOtherWindow": "Տեղափոխել այլ պատուհան",
+    "tabModified": "Չպահված փոփոխություններ"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -3606,7 +3741,12 @@
     "tabMoveWindow": "Pindahkan ke {name}",
     "tabMoveBusy": "Tunggu hingga operasi dokumen saat ini selesai atau kotak dialog ditutup sebelum memindahkan tab ini.",
     "tabLimit": "Anda dapat membuka hingga 16 dokumen sekaligus. Tutup tab sebelum membuka dokumen lain.",
-    "tabSaveWaitTimeout": "Penyimpanan belum selesai dan masih dapat selesai. Dokumen ini akan tetap terbuka. Tunggu hingga penyimpanan selesai, lalu coba tutup lagi."
+    "tabSaveWaitTimeout": "Penyimpanan belum selesai dan masih dapat selesai. Dokumen ini akan tetap terbuka. Tunggu hingga penyimpanan selesai, lalu coba tutup lagi.",
+    "openDocumentsInTabs": "Buka dokumen dalam tab",
+    "showHomeTab": "Tampilkan tab Beranda",
+    "homeTabRequiresTabs": "Tab Beranda tersedia saat dokumen dibuka dalam tab.",
+    "tabMoveOtherWindow": "Pindahkan ke jendela lain",
+    "tabModified": "Perubahan belum disimpan"
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -3736,7 +3876,12 @@
     "tabMoveWindow": "{name}(으)로 이동",
     "tabMoveBusy": "이 탭을 이동하기 전에 현재 문서 작업이 완료되거나 대화 상자가 닫힐 때까지 기다리세요.",
     "tabLimit": "한 번에 최대 16개의 문서를 열 수 있습니다. 다른 문서를 열기 전에 탭을 닫으세요.",
-    "tabSaveWaitTimeout": "저장이 아직 끝나지 않았으며 이후 완료될 수 있습니다. 이 문서는 열린 상태로 유지됩니다. 저장이 끝날 때까지 기다린 다음 다시 닫아 보세요."
+    "tabSaveWaitTimeout": "저장이 아직 끝나지 않았으며 이후 완료될 수 있습니다. 이 문서는 열린 상태로 유지됩니다. 저장이 끝날 때까지 기다린 다음 다시 닫아 보세요.",
+    "openDocumentsInTabs": "문서를 탭으로 열기",
+    "showHomeTab": "홈 탭 표시",
+    "homeTabRequiresTabs": "문서를 탭으로 열 때 홈 탭을 사용할 수 있습니다.",
+    "tabMoveOtherWindow": "다른 창으로 이동",
+    "tabModified": "저장하지 않은 변경 사항"
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -3866,7 +4011,12 @@
     "tabMoveWindow": "ຍ້າຍໄປ {name}",
     "tabMoveBusy": "ລໍຖ້າໃຫ້ການດຳເນີນງານປັດຈຸບັນຂອງເອກະສານສຳເລັດ ຫຼື ປິດກ່ອງໂຕ້ຕອບກ່ອນຍ້າຍແຖບນີ້.",
     "tabLimit": "ທ່ານສາມາດເປີດໄດ້ສູງສຸດ 16 ເອກະສານໃນເວລາດຽວກັນ. ປິດແຖບໜຶ່ງກ່ອນເປີດເອກະສານອື່ນ.",
-    "tabSaveWaitTimeout": "ການບັນທຶກຍັງບໍ່ສຳເລັດ ແລະ ອາດຈະສຳເລັດໃນພາຍຫຼັງ. ເອກະສານນີ້ຈະຍັງເປີດຢູ່. ລໍຖ້າໃຫ້ການບັນທຶກສຳເລັດ ແລ້ວລອງປິດອີກຄັ້ງ."
+    "tabSaveWaitTimeout": "ການບັນທຶກຍັງບໍ່ສຳເລັດ ແລະ ອາດຈະສຳເລັດໃນພາຍຫຼັງ. ເອກະສານນີ້ຈະຍັງເປີດຢູ່. ລໍຖ້າໃຫ້ການບັນທຶກສຳເລັດ ແລ້ວລອງປິດອີກຄັ້ງ.",
+    "openDocumentsInTabs": "ເປີດເອກະສານໃນແຖບ",
+    "showHomeTab": "ສະແດງແຖບໜ້າຫຼັກ",
+    "homeTabRequiresTabs": "ແຖບໜ້າຫຼັກມີໃຫ້ໃຊ້ເມື່ອເປີດເອກະສານໃນແຖບ.",
+    "tabMoveOtherWindow": "ຍ້າຍໄປໜ້າຕ່າງອື່ນ",
+    "tabModified": "ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ"
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -3996,7 +4146,12 @@
     "tabMoveWindow": "Pārvietot uz {name}",
     "tabMoveBusy": "Pirms šīs cilnes pārvietošanas uzgaidiet, līdz beidzas pašreizējā darbība ar dokumentu vai tiek aizvērts dialoglodziņš.",
     "tabLimit": "Vienlaikus var atvērt līdz 16 dokumentiem. Pirms cita dokumenta atvēršanas aizveriet cilni.",
-    "tabSaveWaitTimeout": "Saglabāšana vēl nav pabeigta un vēl var tikt pabeigta. Šis dokuments paliks atvērts. Uzgaidiet, līdz saglabāšana beidzas, un pēc tam mēģiniet to aizvērt vēlreiz."
+    "tabSaveWaitTimeout": "Saglabāšana vēl nav pabeigta un vēl var tikt pabeigta. Šis dokuments paliks atvērts. Uzgaidiet, līdz saglabāšana beidzas, un pēc tam mēģiniet to aizvērt vēlreiz.",
+    "openDocumentsInTabs": "Atvērt dokumentus cilnēs",
+    "showHomeTab": "Rādīt cilni Sākums",
+    "homeTabRequiresTabs": "Cilne Sākums ir pieejama, ja dokumenti tiek atvērti cilnēs.",
+    "tabMoveOtherWindow": "Pārvietot uz citu logu",
+    "tabModified": "Nesaglabātas izmaiņas"
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -4126,7 +4281,12 @@
     "tabMoveWindow": "Pindahkan ke {name}",
     "tabMoveBusy": "Tunggu sehingga operasi dokumen semasa selesai atau kotak dialog ditutup sebelum memindahkan tab ini.",
     "tabLimit": "Anda boleh membuka sehingga 16 dokumen pada satu masa. Tutup tab sebelum membuka dokumen lain.",
-    "tabSaveWaitTimeout": "Penyimpanan belum selesai dan masih boleh diselesaikan. Dokumen ini akan kekal terbuka. Tunggu sehingga penyimpanan selesai, kemudian cuba menutupnya semula."
+    "tabSaveWaitTimeout": "Penyimpanan belum selesai dan masih boleh diselesaikan. Dokumen ini akan kekal terbuka. Tunggu sehingga penyimpanan selesai, kemudian cuba menutupnya semula.",
+    "openDocumentsInTabs": "Buka dokumen dalam tab",
+    "showHomeTab": "Tunjukkan tab Utama",
+    "homeTabRequiresTabs": "Tab Utama tersedia apabila dokumen dibuka dalam tab.",
+    "tabMoveOtherWindow": "Pindahkan ke tetingkap lain",
+    "tabModified": "Perubahan belum disimpan"
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -4267,7 +4427,12 @@
     "tabMoveWindow": "Flytt til {name}",
     "tabMoveBusy": "Vent til den gjeldende dokumenthandlingen er fullført eller dialogboksen er lukket, før du flytter denne fanen.",
     "tabLimit": "Du kan åpne opptil 16 dokumenter samtidig. Lukk en fane før du åpner et annet dokument.",
-    "tabSaveWaitTimeout": "Lagringen er ikke ferdig og kan fortsatt bli fullført. Dette dokumentet forblir åpent. Vent til lagringen er ferdig, og prøv deretter å lukke det igjen."
+    "tabSaveWaitTimeout": "Lagringen er ikke ferdig og kan fortsatt bli fullført. Dette dokumentet forblir åpent. Vent til lagringen er ferdig, og prøv deretter å lukke det igjen.",
+    "openDocumentsInTabs": "Åpne dokumenter i faner",
+    "showHomeTab": "Vis Hjem-fanen",
+    "homeTabRequiresTabs": "Hjem-fanen er tilgjengelig når dokumenter åpnes i faner.",
+    "tabMoveOtherWindow": "Flytt til et annet vindu",
+    "tabModified": "Ulagrede endringer"
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -4397,7 +4562,12 @@
     "tabMoveWindow": "Mută în {name}",
     "tabMoveBusy": "Așteptați finalizarea operației curente asupra documentului sau închiderea casetei de dialog înainte de a muta această filă.",
     "tabLimit": "Puteți deschide până la 16 documente simultan. Închideți o filă înainte de a deschide alt document.",
-    "tabSaveWaitTimeout": "Salvarea nu s-a încheiat și încă se poate finaliza. Acest document va rămâne deschis. Așteptați încheierea salvării, apoi încercați să îl închideți din nou."
+    "tabSaveWaitTimeout": "Salvarea nu s-a încheiat și încă se poate finaliza. Acest document va rămâne deschis. Așteptați încheierea salvării, apoi încercați să îl închideți din nou.",
+    "openDocumentsInTabs": "Deschide documentele în file",
+    "showHomeTab": "Afișează fila Acasă",
+    "homeTabRequiresTabs": "Fila Acasă este disponibilă când documentele se deschid în file.",
+    "tabMoveOtherWindow": "Mută în altă fereastră",
+    "tabModified": "Modificări nesalvate"
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -4527,7 +4697,12 @@
     "tabMoveWindow": "{name} වෙත ගෙන යන්න",
     "tabMoveBusy": "මෙම ටැබය ගෙන යාමට පෙර ලේඛනයේ වත්මන් මෙහෙයුම අවසන් වන තෙක් හෝ සංවාද කොටුව වැසෙන තෙක් රැඳී සිටින්න.",
     "tabLimit": "ඔබට එකවර ලේඛන 16ක් දක්වා විවෘත කළ හැක. තවත් ලේඛනයක් විවෘත කිරීමට පෙර ටැබයක් වසන්න.",
-    "tabSaveWaitTimeout": "සුරැකීම තවමත් අවසන් වී නැති අතර පසුව අවසන් විය හැක. මෙම ලේඛනය විවෘතව පවතිනු ඇත. සුරැකීම අවසන් වන තෙක් රැඳී සිට, එය වැසීමට නැවත උත්සාහ කරන්න."
+    "tabSaveWaitTimeout": "සුරැකීම තවමත් අවසන් වී නැති අතර පසුව අවසන් විය හැක. මෙම ලේඛනය විවෘතව පවතිනු ඇත. සුරැකීම අවසන් වන තෙක් රැඳී සිට, එය වැසීමට නැවත උත්සාහ කරන්න.",
+    "openDocumentsInTabs": "ලේඛන ටැබ් තුළ විවෘත කරන්න",
+    "showHomeTab": "මුල් පිටුව ටැබය පෙන්වන්න",
+    "homeTabRequiresTabs": "ලේඛන ටැබ් තුළ විවෘත කරන විට මුල් පිටුව ටැබය ලබා ගත හැක.",
+    "tabMoveOtherWindow": "වෙනත් කවුළුවකට ගෙන යන්න",
+    "tabModified": "සුරැකී නැති වෙනස්කම්"
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -4657,7 +4832,12 @@
     "tabMoveWindow": "Presunúť do {name}",
     "tabMoveBusy": "Pred presunutím tejto karty počkajte na dokončenie aktuálnej operácie s dokumentom alebo na zatvorenie dialógového okna.",
     "tabLimit": "Naraz môžete otvoriť najviac 16 dokumentov. Pred otvorením ďalšieho dokumentu zatvorte kartu.",
-    "tabSaveWaitTimeout": "Ukladanie sa ešte neskončilo a stále sa môže dokončiť. Tento dokument zostane otvorený. Počkajte na dokončenie ukladania a potom ho skúste znova zatvoriť."
+    "tabSaveWaitTimeout": "Ukladanie sa ešte neskončilo a stále sa môže dokončiť. Tento dokument zostane otvorený. Počkajte na dokončenie ukladania a potom ho skúste znova zatvoriť.",
+    "openDocumentsInTabs": "Otvárať dokumenty na kartách",
+    "showHomeTab": "Zobraziť kartu Domov",
+    "homeTabRequiresTabs": "Karta Domov je dostupná, keď sa dokumenty otvárajú na kartách.",
+    "tabMoveOtherWindow": "Presunúť do iného okna",
+    "tabModified": "Neuložené zmeny"
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -4791,7 +4971,12 @@
     "tabMoveWindow": "Premakni v {name}",
     "tabMoveBusy": "Pred premikanjem tega zavihka počakajte, da se trenutna operacija z dokumentom konča ali da se pogovorno okno zapre.",
     "tabLimit": "Hkrati lahko odprete največ 16 dokumentov. Preden odprete drug dokument, zaprite zavihek.",
-    "tabSaveWaitTimeout": "Shranjevanje še ni končano in se še lahko dokonča. Ta dokument bo ostal odprt. Počakajte, da se shranjevanje konča, nato ga poskusite znova zapreti."
+    "tabSaveWaitTimeout": "Shranjevanje še ni končano in se še lahko dokonča. Ta dokument bo ostal odprt. Počakajte, da se shranjevanje konča, nato ga poskusite znova zapreti.",
+    "openDocumentsInTabs": "Odpri dokumente v zavihkih",
+    "showHomeTab": "Pokaži zavihek Domov",
+    "homeTabRequiresTabs": "Zavihek Domov je na voljo, ko se dokumenti odpirajo v zavihkih.",
+    "tabMoveOtherWindow": "Premakni v drugo okno",
+    "tabModified": "Neshranjene spremembe"
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -4921,7 +5106,12 @@
     "tabMoveWindow": "Zhvendos te {name}",
     "tabMoveBusy": "Prisni të përfundojë veprimi aktual mbi dokumentin ose të mbyllet kutia e dialogut përpara se ta zhvendosni këtë skedë.",
     "tabLimit": "Mund të hapni deri në 16 dokumente njëkohësisht. Mbyllni një skedë përpara se të hapni një dokument tjetër.",
-    "tabSaveWaitTimeout": "Ruajtja nuk ka përfunduar dhe ende mund të përfundojë. Ky dokument do të mbetet i hapur. Prisni të përfundojë ruajtja, pastaj provoni ta mbyllni përsëri."
+    "tabSaveWaitTimeout": "Ruajtja nuk ka përfunduar dhe ende mund të përfundojë. Ky dokument do të mbetet i hapur. Prisni të përfundojë ruajtja, pastaj provoni ta mbyllni përsëri.",
+    "openDocumentsInTabs": "Hap dokumentet në skeda",
+    "showHomeTab": "Shfaq skedën Kryefaqja",
+    "homeTabRequiresTabs": "Skeda Kryefaqja është e disponueshme kur dokumentet hapen në skeda.",
+    "tabMoveOtherWindow": "Zhvendos në një dritare tjetër",
+    "tabModified": "Ndryshime të paruajtura"
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -5051,7 +5241,12 @@
     "tabMoveWindow": "Premesti u {name}",
     "tabMoveBusy": "Pre premeštanja ove kartice sačekajte da se trenutna radnja sa dokumentom završi ili da se dijalog zatvori.",
     "tabLimit": "Možete otvoriti najviše 16 dokumenata istovremeno. Zatvorite karticu pre nego što otvorite drugi dokument.",
-    "tabSaveWaitTimeout": "Čuvanje nije završeno i još može da se završi. Ovaj dokument će ostati otvoren. Sačekajte da se čuvanje završi, pa pokušajte ponovo da ga zatvorite."
+    "tabSaveWaitTimeout": "Čuvanje nije završeno i još može da se završi. Ovaj dokument će ostati otvoren. Sačekajte da se čuvanje završi, pa pokušajte ponovo da ga zatvorite.",
+    "openDocumentsInTabs": "Otvaraj dokumente na karticama",
+    "showHomeTab": "Prikaži karticu Početak",
+    "homeTabRequiresTabs": "Kartica Početak je dostupna kada se dokumenti otvaraju na karticama.",
+    "tabMoveOtherWindow": "Premesti u drugi prozor",
+    "tabModified": "Nesačuvane izmene"
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -5181,7 +5376,12 @@
     "tabMoveWindow": "Премести у {name}",
     "tabMoveBusy": "Пре премештања ове картице сачекајте да се тренутна радња са документом заврши или да се дијалог затвори.",
     "tabLimit": "Можете отворити највише 16 докумената истовремено. Затворите картицу пре него што отворите други документ.",
-    "tabSaveWaitTimeout": "Чување није завршено и још може да се заврши. Овај документ ће остати отворен. Сачекајте да се чување заврши, па покушајте поново да га затворите."
+    "tabSaveWaitTimeout": "Чување није завршено и још може да се заврши. Овај документ ће остати отворен. Сачекајте да се чување заврши, па покушајте поново да га затворите.",
+    "openDocumentsInTabs": "Отварај документе на картицама",
+    "showHomeTab": "Прикажи картицу Почетак",
+    "homeTabRequiresTabs": "Картица Почетак је доступна када се документи отварају на картицама.",
+    "tabMoveOtherWindow": "Премести у други прозор",
+    "tabModified": "Несачуване измене"
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -5311,7 +5511,12 @@
     "tabMoveWindow": "Flytta till {name}",
     "tabMoveBusy": "Vänta tills den aktuella dokumentåtgärden är klar eller dialogrutan är stängd innan du flyttar den här fliken.",
     "tabLimit": "Du kan öppna upp till 16 dokument samtidigt. Stäng en flik innan du öppnar ett annat dokument.",
-    "tabSaveWaitTimeout": "Sparandet är inte klart och kan fortfarande slutföras. Det här dokumentet förblir öppet. Vänta tills sparandet är klart och försök sedan stänga det igen."
+    "tabSaveWaitTimeout": "Sparandet är inte klart och kan fortfarande slutföras. Det här dokumentet förblir öppet. Vänta tills sparandet är klart och försök sedan stänga det igen.",
+    "openDocumentsInTabs": "Öppna dokument i flikar",
+    "showHomeTab": "Visa fliken Start",
+    "homeTabRequiresTabs": "Fliken Start är tillgänglig när dokument öppnas i flikar.",
+    "tabMoveOtherWindow": "Flytta till ett annat fönster",
+    "tabModified": "Osparade ändringar"
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -5441,7 +5646,12 @@
     "tabMoveWindow": "{name} penceresine taşı",
     "tabMoveBusy": "Bu sekmeyi taşımadan önce geçerli belge işleminin bitmesini veya iletişim kutusunun kapanmasını bekleyin.",
     "tabLimit": "Aynı anda en fazla 16 belge açabilirsiniz. Başka bir belge açmadan önce bir sekmeyi kapatın.",
-    "tabSaveWaitTimeout": "Kaydetme henüz bitmedi ve hâlâ tamamlanabilir. Bu belge açık kalacaktır. Kaydetmenin bitmesini bekleyin, ardından kapatmayı yeniden deneyin."
+    "tabSaveWaitTimeout": "Kaydetme henüz bitmedi ve hâlâ tamamlanabilir. Bu belge açık kalacaktır. Kaydetmenin bitmesini bekleyin, ardından kapatmayı yeniden deneyin.",
+    "openDocumentsInTabs": "Belgeleri sekmelerde aç",
+    "showHomeTab": "Giriş sekmesini göster",
+    "homeTabRequiresTabs": "Belgeler sekmelerde açıldığında Giriş sekmesi kullanılabilir.",
+    "tabMoveOtherWindow": "Başka bir pencereye taşı",
+    "tabModified": "Kaydedilmemiş değişiklikler"
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -5571,7 +5781,12 @@
     "tabMoveWindow": "Перемістити в {name}",
     "tabMoveBusy": "Перш ніж переміщати цю вкладку, дочекайтеся завершення поточної операції з документом або закриття діалогового вікна.",
     "tabLimit": "Можна відкрити не більше 16 документів одночасно. Закрийте вкладку, перш ніж відкрити інший документ.",
-    "tabSaveWaitTimeout": "Збереження ще не завершено і все ще може завершитися. Цей документ залишиться відкритим. Дочекайтеся завершення збереження, а потім спробуйте закрити його знову."
+    "tabSaveWaitTimeout": "Збереження ще не завершено і все ще може завершитися. Цей документ залишиться відкритим. Дочекайтеся завершення збереження, а потім спробуйте закрити його знову.",
+    "openDocumentsInTabs": "Відкривати документи у вкладках",
+    "showHomeTab": "Показувати вкладку «Основне»",
+    "homeTabRequiresTabs": "Вкладка «Основне» доступна, коли документи відкриваються у вкладках.",
+    "tabMoveOtherWindow": "Перемістити в інше вікно",
+    "tabModified": "Незбережені зміни"
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -5701,7 +5916,12 @@
     "tabMoveWindow": "{name} میں منتقل کریں",
     "tabMoveBusy": "اس ٹیب کو منتقل کرنے سے پہلے دستاویز کی موجودہ کارروائی مکمل ہونے یا ڈائیلاگ بند ہونے کا انتظار کریں۔",
     "tabLimit": "آپ ایک وقت میں زیادہ سے زیادہ 16 دستاویزات کھول سکتے ہیں۔ دوسری دستاویز کھولنے سے پہلے ایک ٹیب بند کریں۔",
-    "tabSaveWaitTimeout": "محفوظ کرنے کا عمل ابھی مکمل نہیں ہوا اور بعد میں مکمل ہو سکتا ہے۔ یہ دستاویز کھلی رہے گی۔ محفوظ کرنے کا عمل مکمل ہونے کا انتظار کریں، پھر اسے بند کرنے کی دوبارہ کوشش کریں۔"
+    "tabSaveWaitTimeout": "محفوظ کرنے کا عمل ابھی مکمل نہیں ہوا اور بعد میں مکمل ہو سکتا ہے۔ یہ دستاویز کھلی رہے گی۔ محفوظ کرنے کا عمل مکمل ہونے کا انتظار کریں، پھر اسے بند کرنے کی دوبارہ کوشش کریں۔",
+    "openDocumentsInTabs": "دستاویزات ٹیبز میں کھولیں",
+    "showHomeTab": "ہوم ٹیب دکھائیں",
+    "homeTabRequiresTabs": "ہوم ٹیب تب دستیاب ہوتا ہے جب دستاویزات ٹیبز میں کھولی جائیں۔",
+    "tabMoveOtherWindow": "دوسری ونڈو میں منتقل کریں",
+    "tabModified": "غیر محفوظ تبدیلیاں"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -5836,6 +6056,11 @@
     "tabMoveWindow": "Chuyển sang {name}",
     "tabMoveBusy": "Hãy chờ thao tác hiện tại với tài liệu hoàn tất hoặc hộp thoại đóng trước khi chuyển thẻ này.",
     "tabLimit": "Bạn có thể mở tối đa 16 tài liệu cùng lúc. Hãy đóng một thẻ trước khi mở tài liệu khác.",
-    "tabSaveWaitTimeout": "Việc lưu chưa hoàn tất và vẫn có thể hoàn tất sau đó. Tài liệu này sẽ vẫn mở. Hãy chờ lưu xong rồi thử đóng lại."
+    "tabSaveWaitTimeout": "Việc lưu chưa hoàn tất và vẫn có thể hoàn tất sau đó. Tài liệu này sẽ vẫn mở. Hãy chờ lưu xong rồi thử đóng lại.",
+    "openDocumentsInTabs": "Mở tài liệu trong các thẻ",
+    "showHomeTab": "Hiện thẻ Trang chủ",
+    "homeTabRequiresTabs": "Thẻ Trang chủ khả dụng khi tài liệu được mở trong các thẻ.",
+    "tabMoveOtherWindow": "Chuyển sang cửa sổ khác",
+    "tabModified": "Thay đổi chưa lưu"
   }
 }

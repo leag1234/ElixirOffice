@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 (()=>{
+ const home=document.querySelector('#home-tab');
  const list=document.querySelector('#tabs'),add=document.querySelector('#new-tab'),move=document.querySelector('#move-tab'),error=document.querySelector('#tab-error'),errorText=document.querySelector('#tab-error-text'),dismiss=document.querySelector('#tab-error-dismiss');
  let current,pendingState,initialized=false,strings={},limitNotice=false,activeDrag=null,dragState=null;
  const DRAG_TYPE='application/x-elixiroffice-document-tab';
@@ -12,6 +13,8 @@
  function render(state){
   if(activeDrag){if(!dragState||state.revision>=dragState.revision)dragState=state;return;}
   if(current&&state.revision<current.revision)return;
+  document.querySelector('#tab-bar').hidden=state.openInTabs===false||state.stripVisible===false;
+  if(home)home.hidden=state.openInTabs===false||!state.showHomeTab;
   current=state;move.disabled=!state.activeId;const focused=list.contains(document.activeElement),focusedId=document.activeElement?.dataset?.document;
   list.replaceChildren();
   for(const item of state.documents){
@@ -19,9 +22,13 @@
    group.className='document-tab'+(item.id===state.activeId?' selected':'');group.setAttribute('role','presentation');
    tab.type='button';tab.className='document-label';tab.dataset.document=item.id;tab.setAttribute('role','tab');tab.setAttribute('aria-selected',String(item.id===state.activeId));tab.tabIndex=item.id===state.activeId?0:-1;
    const label=String(item.name||strings.tabUntitled).replace(/[\u0000-\u001f\u007f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'').trim()||strings.tabUntitled;
+   const type=/\.pdf$/i.test(label)?'pdf':/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(label)?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(label)?'slide':'word';
+   const icon=document.createElementNS('http://www.w3.org/2000/svg','svg'),use=document.createElementNS(icon.namespaceURI||'http://www.w3.org/2000/svg','use');
+   icon.setAttribute('class','document-icon t-'+type);icon.setAttribute('aria-hidden','true');
+   use.setAttribute('href','/example/local-assets/desktop-home/icons.svg#i-'+type);icon.append(use);
    const accessibleName='\u2068'+label+'\u2069';name.className='document-name';name.textContent=label;tab.title=label;
-   tab.setAttribute('aria-description',strings.tabCloseHint+' '+strings.tabMoveHint);dirty.className='document-dirty';dirty.textContent=item.dirty?'*':'';dirty.setAttribute('aria-hidden','true');
-   tab.setAttribute('aria-label',accessibleName+(item.dirty?' *':''));tab.append(name,dirty);
+   tab.setAttribute('aria-description',strings.tabCloseHint+' '+strings.tabMoveHint);dirty.className='document-dirty';dirty.textContent=item.dirty?'●':'';dirty.setAttribute('aria-hidden','true');
+   tab.setAttribute('aria-label',accessibleName+(item.dirty?', '+strings.tabModified:''));tab.append(icon,name,dirty);
    close.type='button';close.className='document-close';close.tabIndex=-1;close.textContent='×';close.setAttribute('aria-label',strings.tabClose.replace('{name}',()=>accessibleName));close.disabled=item.closing;
    group.draggable=true;
    group.ondragstart=event=>{
@@ -56,11 +63,13 @@
  move.onclick=()=>{if(current?.activeId)action(window.eoTabs.moveMenu(current.activeId));};
  document.querySelector('#tab-bar').ondragover=event=>{if([...event.dataTransfer.types].includes(DRAG_TYPE)){event.preventDefault();event.dataTransfer.dropEffect='move';}};
  document.querySelector('#tab-bar').ondrop=event=>{const token=event.dataTransfer.getData(DRAG_TYPE);if(token){event.preventDefault();action(window.eoTabs.dropDrag(token));}};
+ if(home)home.onclick=()=>action(window.eoTabs.home());
  add.onclick=()=>action(window.eoTabs.create());
  window.eoTabs.onLimit(showLimit);
  window.eoTabs.onState(state=>{if(!initialized){if(!pendingState||state.revision>=pendingState.revision)pendingState=state;return;}render(state);});
  window.eoTabs.initial().then(value=>{
   strings=value.strings;document.documentElement.lang=value.language;document.dir=value.direction;
+  if(home){home.textContent=strings.home||'Home';home.setAttribute('aria-label',strings.home||'Home');}
   dismiss.setAttribute('aria-label',strings.close||'Close');
   move.title=strings.tabMove;move.setAttribute('aria-label',strings.tabMove);
   list.setAttribute('aria-label',strings.tabsLabel);add.title=strings.tabNew;add.setAttribute('aria-label',strings.tabNew);initialized=true;render(pendingState&&pendingState.revision>value.state.revision?pendingState:value.state);

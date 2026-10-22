@@ -7,7 +7,7 @@ const bootstrap=fs.readFileSync(helper,'utf8');
 vm.runInNewContext(bootstrap+'\nmodule.exports={boot};',{require:name=>name==='node:test'?()=>{}:load(name),module:scope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate});
 // These native-dialog mocks model Linux; Mac/Windows require actual runtime proof.
 const {boot:baseBoot}=scope.exports;
-async function boot(options){const env=await baseBoot(options);assert(Array.isArray(env.saveDialogs),'The shared boot must record actual native Save dialog options');env.process.platform='linux';return env;}
+async function boot(options){const env=await baseBoot({...options,platform:'linux'});assert(Array.isArray(env.saveDialogs),'The shared boot must record actual native Save dialog options');return env;}
 const plain=()=>new Uint8Array(Buffer.from('PKpublic-save-as'));
 const protection={protected:false,remove:false};
 test('real-main Save As info includes client PDF per family and preserves converted source default/folder',async()=>{

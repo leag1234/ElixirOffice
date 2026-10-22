@@ -115,7 +115,7 @@ test('actual main force-close waits for cancelled write cleanup before destroyin
  }finally{release?.();if(env)await env.cleanup();await f.cleanup()}
 });
 
-test('final-tab File Close waits for cancelled write cleanup and blocks new writes before closing its window',async()=>{
+test('final-document File Close waits for cancelled write cleanup and blocks new writes before returning Home',async()=>{
  const f=await fixture({fakeTime:false,env:{EO_WINDOWS_SAVE_RETRY_MS:'15000'}});let env,release;
  try{
   env=await scope.exports.bootMain(f);env.state.dirty=true;const token=env.selected.token,target=path.join(env.directory,'test.docx'),original=await io.readFile(target);let attempts=0,cleaning=false,settled=false;
@@ -127,7 +127,11 @@ test('final-tab File Close waits for cancelled write cleanup and blocks new writ
   assert.notEqual(env.window.closed,true);assert.equal(settled,false);
   await assert.rejects(f.files.atomic(path.join(env.directory,'queued-settings.json'),Buffer.from('{}')),error=>error.name==='AbortError');
   await assert.rejects(io.stat(path.join(env.directory,'queued-settings.json')),error=>error.code==='ENOENT');
-  release();assert.equal((await saving).name,'AbortError');await until(()=>env.window.closed);
+  release();assert.equal((await saving).name,'AbortError');assert.equal(await closing,true);
+  assert.equal(env.window.closed,undefined);assert.equal(env.documents[0].isDestroyed(),true);
+  assert.equal(await env.invokeFor(env.documents.at(-1),'initial'),null);
+  await f.files.atomic(path.join(env.directory,'after-home.json'),Buffer.from('{}'));
+  assert.equal(await io.readFile(path.join(env.directory,'after-home.json'),'utf8'),'{}');
   assert.deepEqual(await io.readFile(target),original);
  }finally{release?.();if(env)await env.cleanup();await f.cleanup()}
 });

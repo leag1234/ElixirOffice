@@ -3,7 +3,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function fixture(){
  class Node{
-  constructor(){this.children=[];this.dataset={};this.attributes={};this.hidden=false;}
+  constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.attributes={};this.hidden=false;}
   setAttribute(key,value){this.attributes[key]=value;}append(...items){this.children.push(...items);}replaceChildren(...items){this.children=items;}
   contains(){return false;}querySelector(){return null;}querySelectorAll(){return [];}scrollIntoView(){}focus(){}
  }
@@ -11,12 +11,12 @@ function fixture(){
  let listener,limitListener,resolve;
  const initial=new Promise(done=>{resolve=done;});
  const window={eoTabs:{onLimit:callback=>{limitListener=callback},onState:callback=>{listener=callback;},initial:()=>initial}};
- const document={documentElement:{},dir:'ltr',activeElement:null,querySelector:key=>elements[key],createElement:()=>new Node()};
+ const document={documentElement:{},dir:'ltr',activeElement:null,querySelector:key=>elements[key],createElement:tag=>new Node(tag),createElementNS:(_namespace,tag)=>new Node(tag)};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/tabs.js'),'utf8'),{window,document,Promise});
  const state=(revision,id)=>({windowId:'owner',revision,activeId:id,documents:[{id,name:id,dirty:false,closing:false,status:'ready'}]});
- const initialize=state=>resolve({strings:{tabsLabel:'Documents',tabNew:'New document',tabClose:'Close {name}',tabCloseHint:'Delete',tabUntitled:'Untitled'},language:'en',direction:'ltr',state});
+ const initialize=state=>resolve({strings:{tabsLabel:'Documents',tabNew:'New document',tabClose:'Close {name}',tabCloseHint:'Delete',tabUntitled:'Untitled',tabModified:'Unsaved changes'},language:'en',direction:'ltr',state});
  elements['#tab-error'].hidden=true;
- return {window,elements,state,initialize,emit:value=>listener(value),limit:()=>limitListener(),label:()=>elements['#tabs'].children[0].children[0].children[0].textContent};
+ return {window,elements,state,initialize,emit:value=>listener(value),limit:()=>limitListener(),label:()=>elements['#tabs'].children[0].children[0].children.find(n=>n.className==='document-name').textContent};
 }
 test('tab changes arriving before initialization are queued and newer state wins',async()=>{
  const f=fixture();assert.doesNotThrow(()=>f.emit(f.state(2,'newer')));
@@ -51,4 +51,11 @@ test('OS-open capacity refusal remains visible in the shell even before document
  assert.match(f.elements['#tab-error-text'].textContent,/16 documents/);
  assert.equal(f.label(),'one');
  f.elements['#tab-error-dismiss'].onclick();assert.equal(f.elements['#tab-error'].hidden,true);
+});
+
+for(const [name,symbol] of [['Public.docx','word'],['Public.ODT','word'],['Public.xlsx','cell'],['Public.csv','cell'],['Public.pptx','slide'],['Public.ppsx','slide'],['Public.pdf','pdf']])test('tab '+name+' reuses the shared Fluent '+symbol+' icon with a separate modified dot',async()=>{
+ const f=fixture(),state=f.state(1,'stable');state.documents[0].name=name;state.documents[0].dirty=true;f.initialize(state);await new Promise(setImmediate);
+ const tab=f.elements['#tabs'].children[0].children[0],icon=tab.children.find(n=>n.tagName==='svg'),dot=tab.children.find(n=>n.className==='document-dirty');
+ assert(icon);assert.equal(icon.attributes['aria-hidden'],'true');assert.equal(icon.children[0].attributes.href,'/example/local-assets/desktop-home/icons.svg#i-'+symbol);
+ assert.equal(dot.textContent,'●');assert.equal(dot.attributes['aria-hidden'],'true');assert.equal(tab.attributes['aria-label'],'⁨'+name+'⁩, Unsaved changes');assert.equal(f.label(),name);
 });

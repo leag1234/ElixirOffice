@@ -3,9 +3,9 @@
 from pathlib import Path
 import subprocess,os,time,signal,json,secrets,socket,struct,argparse
 parser=argparse.ArgumentParser(description='Run document tabs on a fresh private authorized Xvfb.')
-parser.add_argument('--suite',choices=['tabs','detach'],default='tabs')
+parser.add_argument('--suite',choices=['tabs','detach','navigation','backstage','home','home-capture'],default='tabs')
 suite=parser.parse_args().suite
-driver_file=Path(__file__).with_name('tabs-detach-native.cjs' if suite=='detach' else 'tabs-native.cjs')
+driver_file=Path(__file__).with_name({'tabs':'tabs-native.cjs','detach':'tabs-detach-native.cjs','navigation':'navigation-native.cjs','backstage':'backstage-native.cjs','home':'home-native.cjs','home-capture':'home-capture-native.cjs'}[suite])
 required=['EO_NATIVE_WORK','EO_PRODUCT_ROOT','EO_ELECTRON','EO_PLAYWRIGHT','EO_XVFB','EO_NODE']
 for name in required:
     if not os.environ.get(name):raise RuntimeError('Required environment variable: '+name)

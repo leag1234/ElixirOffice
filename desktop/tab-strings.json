@@ -17,5 +17,10 @@
   "tabMoveHint": "Press Shift+F10 to move this document to another window.",
   "tabActionFailed": "Could not finish the document action. Try again.",
   "tabLimit": "You can open up to 16 documents at a time. Close a tab before opening another document.",
-  "tabSaveWaitTimeout": "Saving has not finished and may still complete. This document will stay open. Wait for saving to finish, then try closing it again."
+  "tabSaveWaitTimeout": "Saving has not finished and may still complete. This document will stay open. Wait for saving to finish, then try closing it again.",
+  "openDocumentsInTabs": "Open documents in tabs",
+  "showHomeTab": "Show Home tab",
+  "homeTabRequiresTabs": "The Home tab is available when documents open in tabs.",
+  "tabMoveOtherWindow": "Move to another window",
+  "tabModified": "Unsaved changes"
 }

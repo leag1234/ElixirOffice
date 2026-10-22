@@ -8,7 +8,7 @@ const bytes=value=>new Uint8Array(Buffer.from('PK'+value));
 async function second(env){assert.equal(await env.invoke('new','xlsx'),null);const view=env.documents.at(-1);return {view,selected:await env.invokeFor(view,'initial')};}
 const shellEvent=env=>({sender:env.shell.webContents,senderFrame:env.shell.webContents.mainFrame});
 test('main keeps document handles, dirty state and Cancel/Discard private to each tab',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   e.state.dirty=true;await e.invoke('state',e.selected.token,true);
   const b=await second(e),aIdentity=await e.invoke('identity'),bIdentity=await e.invokeFor(b.view,'identity');
@@ -26,7 +26,7 @@ test('main keeps document handles, dirty state and Cancel/Discard private to eac
  }finally{await e.cleanup();}
 });
 test('recovery restore owns a fresh durable record and password lock removes only its own tab record',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   const b=await second(e);e.state.dirty=true;b.view.state.dirty=true;
   await Promise.all([e.invoke('recovery-save',e.selected.token,0,bytes('public-A')),e.invokeFor(b.view,'recovery-save',b.selected.token,0,bytes('public-B'))]);
@@ -41,7 +41,7 @@ test('recovery restore owns a fresh durable record and password lock removes onl
  }finally{await e.cleanup();}
 });
 test('shell and document IPC cannot impersonate each other or a document subframe',async()=>{
- const e=await boot({document:true});
+ const e=await boot({fontSettings:{openInTabs:true},document:true});
  try{
   assert.throws(()=>e.handlers.get('eo:identity')(shellEvent(e)),/registered document main frame/);
   const view=e.documents[0];assert.throws(()=>e.handlers.get('eo:identity')({sender:view,senderFrame:{url:view.getURL()}}),/registered document main frame/);

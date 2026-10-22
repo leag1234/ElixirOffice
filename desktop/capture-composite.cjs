@@ -25,31 +25,34 @@ function raster(image){
  if(bytes.length!==width*height*4)throw failure();
  return{width,height,bytes};
 }
-async function compose(window,view,{validate,nativeImage}={}){
- if(typeof validate!=='function'||!window||!view)throw failure();
+async function compose(window,view,{validate,nativeImage,getStripHeight=()=>STRIP_HEIGHT}={}){
+ if(typeof validate!=='function'||typeof getStripHeight!=='function'||!window||!view)throw failure();
  const shell=window.webContents,contents=view.webContents;
  function state(){
   const version=validate();
   if(typeof version!=='string'||!version||window.isDestroyed()||shell.isDestroyed()||contents.isDestroyed()||
     window.webContents!==shell||view.webContents!==contents||!window.contentView.children.includes(view)||!view.getVisible())throw failure();
-  const [width,height]=window.getContentSize(),bounds=view.getBounds();
+  const [width,height]=window.getContentSize(),bounds=view.getBounds(),top=getStripHeight();
   if(![width,height,bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isSafeInteger)||
-    width<=0||height<=STRIP_HEIGHT||bounds.x!==0||bounds.y!==STRIP_HEIGHT||bounds.width!==width||bounds.height!==height-STRIP_HEIGHT)throw failure();
+    ![0,STRIP_HEIGHT].includes(top)||width<=0||height<=top||bounds.x!==0||bounds.y!==top||bounds.width!==width||bounds.height!==height-top)throw failure();
   return{version,width,height,bounds};
  }
  const before=state(),key=JSON.stringify(before),check=()=>{if(JSON.stringify(state())!==key)throw failure()};
- const root=await shell.capturePage();check();
+ // With no strip the view covers the entire client. Chromium cannot capture
+ // that fully occluded shell (UnknownVizError); it contributes no visible pixels.
+ let root;
+ if(before.bounds.y){root=await shell.capturePage();check();}
  const document=await contents.capturePage();check();
- const base=raster(root),child=raster(document),scale=base.width/before.width;
+ const child=raster(document),base=root?raster(root):null,scale=child.width/before.bounds.width;
  const same=value=>Number.isFinite(value)&&Math.abs(value-scale)<1e-8;
- if(!same(base.height/before.height)||!same(child.width/before.bounds.width)||!same(child.height/before.bounds.height))throw failure();
+ if(!same(child.height/before.bounds.height)||base&&(!same(base.width/before.width)||!same(base.height/before.height)))throw failure();
  const x=before.bounds.x*scale,y=before.bounds.y*scale;
- if(![x,y].every(Number.isSafeInteger)||x+child.width>base.width||y+child.height!==base.height)throw failure();
- const factory=nativeImage||require('electron').nativeImage,alpha=alphaOffset(factory);opaque(base,alpha);opaque(child,alpha);
- for(let row=0;row<child.height;row++)child.bytes.copy(base.bytes,((y+row)*base.width+x)*4,row*child.width*4,(row+1)*child.width*4);
+ if(![x,y].every(Number.isSafeInteger)||base&&(x+child.width>base.width||y+child.height!==base.height))throw failure();
+ const factory=nativeImage||require('electron').nativeImage,alpha=alphaOffset(factory);opaque(child,alpha);if(base)opaque(base,alpha);
+ if(base)for(let row=0;row<child.height;row++)child.bytes.copy(base.bytes,((y+row)*base.width+x)*4,row*child.width*4,(row+1)*child.width*4);
  check();
- const image=factory.createFromBitmap(base.bytes,{width:base.width,height:base.height,scaleFactor:1});
+ const pixels=base||child,image=factory.createFromBitmap(pixels.bytes,{width:pixels.width,height:pixels.height,scaleFactor:1});
  if(image.isEmpty())throw failure();
- return{image,capture:{kind:'shell-and-document-composite',opacity:'opaque-native-surfaces',stripHeight:STRIP_HEIGHT,logicalSize:{width:before.width,height:before.height},pixelSize:{width:base.width,height:base.height},scale,nativeFrame:false}};
+ return{image,capture:{kind:base?'shell-and-document-composite':'document-full-client',opacity:'opaque-native-surfaces',stripHeight:before.bounds.y,logicalSize:{width:before.width,height:before.height},pixelSize:{width:pixels.width,height:pixels.height},scale,nativeFrame:false}};
 }
 module.exports={compose};

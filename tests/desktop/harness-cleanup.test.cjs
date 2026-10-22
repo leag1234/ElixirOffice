@@ -20,6 +20,20 @@ test('Linux cleanup reevaluates child death after browser.close',async()=>{
  await api.stop({application,browser:{close:async()=>{application.signalCode='SIGTERM'}},log:{close:async()=>{}}});
  assert.equal(kills.length,0);
 });
+test('Linux cleanup signals the main process before considering a group fallback',async()=>{
+ const kills=[],api=harness('linux',kills),application={pid:12345,exitCode:null,get signalCode(){return kills.some(entry=>entry.pid===12345)?'SIGTERM':null}};
+ await api.stop({application,browser:{close:async()=>{}},log:{close:async()=>{}},disposeObservers(){}});
+ assert.equal(kills.length,1);
+ assert.equal(kills[0].pid,12345);
+ assert.equal(kills[0].signal,'SIGTERM');
+});
+test('Linux cleanup uses only SIGKILL for a timed-out owned group',async()=>{
+ const kills=[],api=harness('linux',kills);
+ await api.stop({application:{pid:12345,exitCode:null,signalCode:null},browser:{close:async()=>{}},log:{close:async()=>{}},disposeObservers(){}});
+ assert.equal(kills.length,2);
+ assert.deepEqual(kills.map(entry=>entry.pid),[12345,-12345]);
+ assert.deepEqual(kills.map(entry=>entry.signal),['SIGTERM','SIGKILL']);
+});
 test('live Mac child is signalled once by its owned group before closing browser',async()=>{
  const kills=[],api=harness('darwin',kills);
  await api.stop({application:{pid:12345,exitCode:null,signalCode:null},browser:{close:async()=>{}},log:{close:async()=>{}}});

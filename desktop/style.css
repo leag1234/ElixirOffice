@@ -1,9 +1,16 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 html,body{margin:0;height:100%}#home{min-height:100%;display:flex;flex-direction:column}.topbar{grid-template-columns:1fr}.tiles{margin-top:24px}button.tile{text-align:start}.file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.file-link .ic{width:28px;height:28px;flex:none}.file-name{display:block;font-weight:600}.desktop-footer{margin-top:auto;padding:16px 40px;color:var(--text-2);font-size:12px}#workspace{position:absolute;inset:0;height:100%;overflow:hidden;padding:0}#editor{height:100%}#message{position:fixed;z-index:2000;bottom:24px;left:50%;transform:translateX(-50%);max-width:90%;padding:10px 18px;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-2)}[hidden]{display:none!important}body.drag{outline:4px solid var(--accent);outline-offset:-4px}
 
-#home>.layout{min-height:calc(100vh - var(--topbar-h) - 52px)}
-
-#home .rail{height:calc(100vh - var(--topbar-h) - 52px)}button.tile{border:0;background:transparent;padding:0}
+/* The native window already owns application identity. Home shares the
+   Backstage's text rail, with application actions below the file navigation. */
+#home>.layout{grid-template-columns:200px minmax(0,1fr);min-height:calc(100dvh - 52px)}
+#home .rail{top:0;height:calc(100dvh - 52px);display:flex;flex-direction:column;overflow-y:auto}
+#home .rail-item{flex:none;display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;min-height:44px;height:auto;padding:10px 16px;font-size:14px;line-height:20px;text-align:start}
+#home .rail-item .ic{width:20px;height:20px;flex:none}
+#home .rail-actions{margin-block-start:auto;padding-block-start:16px;border-block-start:1px solid var(--border)}
+#home .rail-actions .rail-item{padding-inline-start:48px}
+button.tile{border:0;background:transparent;padding:0}
+@media(max-width:640px){#home>.layout{grid-template-columns:148px minmax(0,1fr)}#home .rail-item{padding-inline:10px;gap:8px}#home .rail-actions .rail-item{padding-inline-start:38px}}
 
 .desktop-options{font:14px system-ui;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);max-width:560px;padding:24px}.desktop-options::backdrop{background:#0004}.desktop-options button,.desktop-options select{margin:8px;padding:8px}.desktop-options label{display:block}.desktop-options section{border-bottom:1px solid var(--border);padding:8px}
 
