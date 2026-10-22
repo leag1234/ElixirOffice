@@ -1,5 +1,23 @@
 # Changelog
 
+## Desktop 0.3.1 — release preparation (2026-10-22)
+
+### Changed and fixed
+
+- Open each document in a separate window by default; offer optional tabs and Home in Options.
+- Share an Office-style start screen; arrange File commands in Office order, with Rename/Move in Info and Export through Save As.
+- Remember window placement, show file-type icons and modified dots, remove the successful-open floating notice, and focus already-open files.
+- Render equation category SVG icons and support late menu captions (issue34).
+- Defer automatic computer-font discovery and add bounded, content-free opening diagnostics.
+- Check pip capability and exact pinned local builder images before release allocation.
+- Correct platform fixtures and Linux test-harness teardown without claiming a product crash fix.
+
+### Qualification
+
+- Compact title bar is not included. Wasm recompilation per new window remains.
+- Windows opening delays require measurement; simulated Mac fixtures do not certify physical macOS, and revised tabs/windows await physical Windows qualification.
+- Final installers and platform results remain pending. See [release notes](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1) for inherited conversion, signing and native limits.
+
 ## Desktop 0.3.0
 
 ### Added
@@ -107,4 +125,3 @@ This release includes security fixes for the server version and for links in doc
 Upstream security-fix attribution: server download/WOPI commits [a82922ed](https://github.com/ONLYOFFICE/server/commit/a82922ed2349d06495bfb85bed924be17fb71740), [fba41289](https://github.com/ONLYOFFICE/server/commit/fba41289d55fee1a90d34df41fa115b7de8f4f1d); AI proxy commits [ae8eb764](https://github.com/ONLYOFFICE/server/commit/ae8eb764354f75539fbb3c1ca12e0d967d02cdf0), [b98384e6](https://github.com/ONLYOFFICE/server/commit/b98384e6524fbc0376c8db4332ca0398e00abf67); WOPI text commit [4927e10d](https://github.com/ONLYOFFICE/web-apps/commit/4927e10d44b9f9f2ee6f9656d96be4a950fdd707). Only code hunks dated before 2026-05-14 were ported; original licence headers are retained. Base-URL, cache, Formula Wizard, hyperlink policy and Review-panel corrections are ElixirOffice changes.
 
 Further converter hardening and explicit per-document confirmation before running macros are planned for desktop 0.2.2 and server 0.1.2. A separate execution realm for macros remains an architecture backlog item. The 0.2.1 build retains its existing converter runtime; the source branch and regression results do not certify the later rebuilt converter.
-
