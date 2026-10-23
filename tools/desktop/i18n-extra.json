@@ -129,7 +129,15 @@
     "showHomeTab": "Show Home tab",
     "homeTabRequiresTabs": "The Home tab is available when documents open in tabs.",
     "tabMoveOtherWindow": "Move to another window",
-    "tabModified": "Unsaved changes"
+    "tabModified": "Unsaved changes",
+    "releaseAvailable": "New version available: {version}",
+    "releaseNotes": "Release notes",
+    "releaseDownload": "Download",
+    "releaseLater": "Remind me later",
+    "releaseSkip": "Skip this version",
+    "releaseChecks": "Check for updates",
+    "releasePrivacy": "Contacts github.com to check for new versions. No document data is sent.",
+    "releaseUpdates": "Updates"
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -261,7 +269,15 @@
     "showHomeTab": "Afficher l’onglet Accueil",
     "homeTabRequiresTabs": "L’onglet Accueil est disponible lorsque les documents s’ouvrent dans des onglets.",
     "tabMoveOtherWindow": "Déplacer vers une autre fenêtre",
-    "tabModified": "Modifications non enregistrées"
+    "tabModified": "Modifications non enregistrées",
+    "releaseAvailable": "Nouvelle version disponible : {version}",
+    "releaseNotes": "Notes de version",
+    "releaseDownload": "Télécharger",
+    "releaseLater": "Me le rappeler plus tard",
+    "releaseSkip": "Ignorer cette version",
+    "releaseChecks": "Rechercher les mises à jour",
+    "releasePrivacy": "Contacte github.com pour rechercher de nouvelles versions. Aucune donnée de document n’est envoyée.",
+    "releaseUpdates": "Mises à jour"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -393,7 +409,15 @@
     "showHomeTab": "Registerkarte Start anzeigen",
     "homeTabRequiresTabs": "Die Registerkarte Start ist verfügbar, wenn Dokumente in Registerkarten geöffnet werden.",
     "tabMoveOtherWindow": "In ein anderes Fenster verschieben",
-    "tabModified": "Ungespeicherte Änderungen"
+    "tabModified": "Ungespeicherte Änderungen",
+    "releaseAvailable": "Neue Version verfügbar: {version}",
+    "releaseNotes": "Versionshinweise",
+    "releaseDownload": "Herunterladen",
+    "releaseLater": "Später erinnern",
+    "releaseSkip": "Diese Version überspringen",
+    "releaseChecks": "Nach Updates suchen",
+    "releasePrivacy": "Kontaktiert github.com, um nach neuen Versionen zu suchen. Es werden keine Dokumentdaten gesendet.",
+    "releaseUpdates": "Updates"
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -525,7 +549,15 @@
     "showHomeTab": "Mostrar la pestaña Inicio",
     "homeTabRequiresTabs": "La pestaña Inicio está disponible al abrir documentos en pestañas.",
     "tabMoveOtherWindow": "Mover a otra ventana",
-    "tabModified": "Cambios sin guardar"
+    "tabModified": "Cambios sin guardar",
+    "releaseAvailable": "Nueva versión disponible: {version}",
+    "releaseNotes": "Notas de la versión",
+    "releaseDownload": "Descargar",
+    "releaseLater": "Recordármelo más tarde",
+    "releaseSkip": "Omitir esta versión",
+    "releaseChecks": "Buscar actualizaciones",
+    "releasePrivacy": "Contacta con github.com para buscar nuevas versiones. No se envían datos de documentos.",
+    "releaseUpdates": "Actualizaciones"
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -657,7 +689,15 @@
     "showHomeTab": "Mostra la scheda Home",
     "homeTabRequiresTabs": "La scheda Home è disponibile quando i documenti si aprono in schede.",
     "tabMoveOtherWindow": "Sposta in un’altra finestra",
-    "tabModified": "Modifiche non salvate"
+    "tabModified": "Modifiche non salvate",
+    "releaseAvailable": "Nuova versione disponibile: {version}",
+    "releaseNotes": "Note di rilascio",
+    "releaseDownload": "Scarica",
+    "releaseLater": "Ricordamelo più tardi",
+    "releaseSkip": "Salta questa versione",
+    "releaseChecks": "Controlla aggiornamenti",
+    "releasePrivacy": "Contatta github.com per cercare nuove versioni. Non vengono inviati dati dei documenti.",
+    "releaseUpdates": "Aggiornamenti"
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -789,7 +829,15 @@
     "showHomeTab": "Mostrar a aba Início",
     "homeTabRequiresTabs": "A aba Início está disponível quando os documentos são abertos em abas.",
     "tabMoveOtherWindow": "Mover para outra janela",
-    "tabModified": "Alterações não salvas"
+    "tabModified": "Alterações não salvas",
+    "releaseAvailable": "Nova versão disponível: {version}",
+    "releaseNotes": "Notas da versão",
+    "releaseDownload": "Baixar",
+    "releaseLater": "Lembrar mais tarde",
+    "releaseSkip": "Ignorar esta versão",
+    "releaseChecks": "Verificar atualizações",
+    "releasePrivacy": "Conecta-se ao github.com para verificar novas versões. Nenhum dado de documento é enviado.",
+    "releaseUpdates": "Atualizações"
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -921,7 +969,15 @@
     "showHomeTab": "Mostrar o separador Início",
     "homeTabRequiresTabs": "O separador Início está disponível quando os documentos são abertos em separadores.",
     "tabMoveOtherWindow": "Mover para outra janela",
-    "tabModified": "Alterações não guardadas"
+    "tabModified": "Alterações não guardadas",
+    "releaseAvailable": "Nova versão disponível: {version}",
+    "releaseNotes": "Notas da versão",
+    "releaseDownload": "Transferir",
+    "releaseLater": "Lembrar mais tarde",
+    "releaseSkip": "Ignorar esta versão",
+    "releaseChecks": "Procurar atualizações",
+    "releasePrivacy": "Contacta github.com para procurar novas versões. Não são enviados dados dos documentos.",
+    "releaseUpdates": "Atualizações"
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1053,7 +1109,15 @@
     "showHomeTab": "Tabblad Start weergeven",
     "homeTabRequiresTabs": "Het tabblad Start is beschikbaar wanneer documenten in tabbladen worden geopend.",
     "tabMoveOtherWindow": "Naar een ander venster verplaatsen",
-    "tabModified": "Niet-opgeslagen wijzigingen"
+    "tabModified": "Niet-opgeslagen wijzigingen",
+    "releaseAvailable": "Nieuwe versie beschikbaar: {version}",
+    "releaseNotes": "Uitgaveopmerkingen",
+    "releaseDownload": "Downloaden",
+    "releaseLater": "Later herinneren",
+    "releaseSkip": "Deze versie overslaan",
+    "releaseChecks": "Controleren op updates",
+    "releasePrivacy": "Maakt verbinding met github.com om naar nieuwe versies te zoeken. Er worden geen documentgegevens verzonden.",
+    "releaseUpdates": "Updates"
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1185,7 +1249,15 @@
     "showHomeTab": "Pokaż kartę Start",
     "homeTabRequiresTabs": "Karta Start jest dostępna, gdy dokumenty są otwierane na kartach.",
     "tabMoveOtherWindow": "Przenieś do innego okna",
-    "tabModified": "Niezapisane zmiany"
+    "tabModified": "Niezapisane zmiany",
+    "releaseAvailable": "Dostępna nowa wersja: {version}",
+    "releaseNotes": "Informacje o wydaniu",
+    "releaseDownload": "Pobierz",
+    "releaseLater": "Przypomnij później",
+    "releaseSkip": "Pomiń tę wersję",
+    "releaseChecks": "Sprawdzaj aktualizacje",
+    "releasePrivacy": "Łączy się z github.com, aby sprawdzić nowe wersje. Dane dokumentów nie są wysyłane.",
+    "releaseUpdates": "Aktualizacje"
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1317,7 +1389,15 @@
     "showHomeTab": "Показывать вкладку «Главная»",
     "homeTabRequiresTabs": "Вкладка «Главная» доступна при открытии документов во вкладках.",
     "tabMoveOtherWindow": "Переместить в другое окно",
-    "tabModified": "Несохранённые изменения"
+    "tabModified": "Несохранённые изменения",
+    "releaseAvailable": "Доступна новая версия: {version}",
+    "releaseNotes": "Примечания к выпуску",
+    "releaseDownload": "Скачать",
+    "releaseLater": "Напомнить позже",
+    "releaseSkip": "Пропустить эту версию",
+    "releaseChecks": "Проверять обновления",
+    "releasePrivacy": "Обращается к github.com для проверки новых версий. Данные документов не отправляются.",
+    "releaseUpdates": "Обновления"
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1449,7 +1529,15 @@
     "showHomeTab": "ホームタブを表示",
     "homeTabRequiresTabs": "ホームタブはドキュメントをタブで開く場合に利用できます。",
     "tabMoveOtherWindow": "別のウィンドウに移動",
-    "tabModified": "未保存の変更"
+    "tabModified": "未保存の変更",
+    "releaseAvailable": "新しいバージョンが利用可能です: {version}",
+    "releaseNotes": "リリースノート",
+    "releaseDownload": "ダウンロード",
+    "releaseLater": "後で通知する",
+    "releaseSkip": "このバージョンをスキップ",
+    "releaseChecks": "更新を確認する",
+    "releasePrivacy": "新しいバージョンを確認するために github.com に接続します。文書のデータは送信されません。",
+    "releaseUpdates": "更新"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -1581,7 +1669,15 @@
     "showHomeTab": "显示主页选项卡",
     "homeTabRequiresTabs": "在选项卡中打开文档时可以使用主页选项卡。",
     "tabMoveOtherWindow": "移至其他窗口",
-    "tabModified": "未保存的更改"
+    "tabModified": "未保存的更改",
+    "releaseAvailable": "有新版本可用：{version}",
+    "releaseNotes": "发行说明",
+    "releaseDownload": "下载",
+    "releaseLater": "稍后提醒我",
+    "releaseSkip": "跳过此版本",
+    "releaseChecks": "检查更新",
+    "releasePrivacy": "连接 github.com 以检查新版本。不会发送任何文档数据。",
+    "releaseUpdates": "更新"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -1716,7 +1812,15 @@
     "showHomeTab": "顯示首頁索引標籤",
     "homeTabRequiresTabs": "在索引標籤中開啟文件時可以使用首頁索引標籤。",
     "tabMoveOtherWindow": "移至其他視窗",
-    "tabModified": "尚未儲存的變更"
+    "tabModified": "尚未儲存的變更",
+    "releaseAvailable": "有新版本可用：{version}",
+    "releaseNotes": "版本說明",
+    "releaseDownload": "下載",
+    "releaseLater": "稍後提醒我",
+    "releaseSkip": "略過此版本",
+    "releaseChecks": "檢查更新",
+    "releasePrivacy": "連線至 github.com 以檢查新版本。不會傳送任何文件資料。",
+    "releaseUpdates": "更新"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -1851,7 +1955,15 @@
     "showHomeTab": "إظهار علامة تبويب الصفحة الرئيسية",
     "homeTabRequiresTabs": "تتوفر علامة تبويب الصفحة الرئيسية عند فتح المستندات في علامات تبويب.",
     "tabMoveOtherWindow": "نقل إلى نافذة أخرى",
-    "tabModified": "تغييرات غير محفوظة"
+    "tabModified": "تغييرات غير محفوظة",
+    "releaseAvailable": "يتوفر إصدار جديد: {version}",
+    "releaseNotes": "ملاحظات الإصدار",
+    "releaseDownload": "تنزيل",
+    "releaseLater": "ذكّرني لاحقًا",
+    "releaseSkip": "تخطي هذا الإصدار",
+    "releaseChecks": "التحقق من وجود تحديثات",
+    "releasePrivacy": "يتصل بموقع github.com للتحقق من الإصدارات الجديدة. لا تُرسل أي بيانات من المستندات.",
+    "releaseUpdates": "التحديثات"
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -1986,7 +2098,15 @@
     "showHomeTab": "Əsas səhifə vərəqini göstər",
     "homeTabRequiresTabs": "Əsas səhifə vərəqi sənədlər vərəqlərdə açıldıqda əlçatandır.",
     "tabMoveOtherWindow": "Başqa pəncərəyə köçür",
-    "tabModified": "Saxlanılmamış dəyişikliklər"
+    "tabModified": "Saxlanılmamış dəyişikliklər",
+    "releaseAvailable": "Yeni versiya mövcuddur: {version}",
+    "releaseNotes": "Buraxılış qeydləri",
+    "releaseDownload": "Endir",
+    "releaseLater": "Sonra xatırlat",
+    "releaseSkip": "Bu versiyanı ötür",
+    "releaseChecks": "Yeniləmələri yoxla",
+    "releasePrivacy": "Yeni versiyaları yoxlamaq üçün github.com ilə əlaqə saxlayır. Sənəd məlumatları göndərilmir.",
+    "releaseUpdates": "Yeniləmələr"
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2121,7 +2241,15 @@
     "showHomeTab": "Паказваць укладку «Галоўная»",
     "homeTabRequiresTabs": "Укладка «Галоўная» даступная, калі дакументы адкрываюцца ва ўкладках.",
     "tabMoveOtherWindow": "Перамясціць у іншае акно",
-    "tabModified": "Незахаваныя змены"
+    "tabModified": "Незахаваныя змены",
+    "releaseAvailable": "Даступная новая версія: {version}",
+    "releaseNotes": "Заўвагі да выпуску",
+    "releaseDownload": "Спампаваць",
+    "releaseLater": "Нагадаць пазней",
+    "releaseSkip": "Прапусціць гэту версію",
+    "releaseChecks": "Правяраць абнаўленні",
+    "releasePrivacy": "Звяртаецца да github.com для праверкі новых версій. Даныя дакументаў не адпраўляюцца.",
+    "releaseUpdates": "Абнаўленні"
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -2259,7 +2387,15 @@
     "showHomeTab": "Показване на раздела Начало",
     "homeTabRequiresTabs": "Разделът Начало е наличен при отваряне на документи в раздели.",
     "tabMoveOtherWindow": "Преместване в друг прозорец",
-    "tabModified": "Незапазени промени"
+    "tabModified": "Незапазени промени",
+    "releaseAvailable": "Налична е нова версия: {version}",
+    "releaseNotes": "Бележки към изданието",
+    "releaseDownload": "Изтегляне",
+    "releaseLater": "Напомни ми по-късно",
+    "releaseSkip": "Пропусни тази версия",
+    "releaseChecks": "Проверка за актуализации",
+    "releasePrivacy": "Свързва се с github.com за проверка на нови версии. Не се изпращат данни от документи.",
+    "releaseUpdates": "Актуализации"
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -2394,7 +2530,15 @@
     "showHomeTab": "Mostra la pestanya Inici",
     "homeTabRequiresTabs": "La pestanya Inici està disponible quan els documents s’obren en pestanyes.",
     "tabMoveOtherWindow": "Mou a una altra finestra",
-    "tabModified": "Canvis sense desar"
+    "tabModified": "Canvis sense desar",
+    "releaseAvailable": "Nova versió disponible: {version}",
+    "releaseNotes": "Notes de la versió",
+    "releaseDownload": "Baixa",
+    "releaseLater": "Recorda-m’ho més tard",
+    "releaseSkip": "Omet aquesta versió",
+    "releaseChecks": "Cerca actualitzacions",
+    "releasePrivacy": "Contacta amb github.com per cercar versions noves. No s’envien dades dels documents.",
+    "releaseUpdates": "Actualitzacions"
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -2529,7 +2673,15 @@
     "showHomeTab": "Zobrazit kartu Domů",
     "homeTabRequiresTabs": "Karta Domů je dostupná, když se dokumenty otevírají na kartách.",
     "tabMoveOtherWindow": "Přesunout do jiného okna",
-    "tabModified": "Neuložené změny"
+    "tabModified": "Neuložené změny",
+    "releaseAvailable": "Je dostupná nová verze: {version}",
+    "releaseNotes": "Poznámky k vydání",
+    "releaseDownload": "Stáhnout",
+    "releaseLater": "Připomenout později",
+    "releaseSkip": "Přeskočit tuto verzi",
+    "releaseChecks": "Kontrolovat aktualizace",
+    "releasePrivacy": "Připojuje se k github.com a kontroluje nové verze. Data dokumentů se neodesílají.",
+    "releaseUpdates": "Aktualizace"
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -2664,7 +2816,15 @@
     "showHomeTab": "Vis fanen Hjem",
     "homeTabRequiresTabs": "Fanen Hjem er tilgængelig, når dokumenter åbnes i faner.",
     "tabMoveOtherWindow": "Flyt til et andet vindue",
-    "tabModified": "Ikke-gemte ændringer"
+    "tabModified": "Ikke-gemte ændringer",
+    "releaseAvailable": "Ny version tilgængelig: {version}",
+    "releaseNotes": "Udgivelsesnoter",
+    "releaseDownload": "Download",
+    "releaseLater": "Mind mig om det senere",
+    "releaseSkip": "Spring denne version over",
+    "releaseChecks": "Søg efter opdateringer",
+    "releasePrivacy": "Kontakter github.com for at søge efter nye versioner. Ingen dokumentdata sendes.",
+    "releaseUpdates": "Opdateringer"
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -2799,7 +2959,15 @@
     "showHomeTab": "Εμφάνιση καρτέλας Αρχική",
     "homeTabRequiresTabs": "Η καρτέλα Αρχική είναι διαθέσιμη όταν τα έγγραφα ανοίγουν σε καρτέλες.",
     "tabMoveOtherWindow": "Μετακίνηση σε άλλο παράθυρο",
-    "tabModified": "Μη αποθηκευμένες αλλαγές"
+    "tabModified": "Μη αποθηκευμένες αλλαγές",
+    "releaseAvailable": "Διαθέσιμη νέα έκδοση: {version}",
+    "releaseNotes": "Σημειώσεις έκδοσης",
+    "releaseDownload": "Λήψη",
+    "releaseLater": "Υπενθύμιση αργότερα",
+    "releaseSkip": "Παράλειψη αυτής της έκδοσης",
+    "releaseChecks": "Έλεγχος για ενημερώσεις",
+    "releasePrivacy": "Συνδέεται στο github.com για έλεγχο νέων εκδόσεων. Δεν αποστέλλονται δεδομένα εγγράφων.",
+    "releaseUpdates": "Ενημερώσεις"
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -2934,7 +3102,15 @@
     "showHomeTab": "Erakutsi Hasiera fitxa",
     "homeTabRequiresTabs": "Hasiera fitxa erabilgarri dago dokumentuak fitxetan irekitzen direnean.",
     "tabMoveOtherWindow": "Eraman beste leiho batera",
-    "tabModified": "Gorde gabeko aldaketak"
+    "tabModified": "Gorde gabeko aldaketak",
+    "releaseAvailable": "Bertsio berria eskuragarri: {version}",
+    "releaseNotes": "Argitalpen-oharrak",
+    "releaseDownload": "Deskargatu",
+    "releaseLater": "Gogorarazi geroago",
+    "releaseSkip": "Saltatu bertsio hau",
+    "releaseChecks": "Bilatu eguneratzeak",
+    "releasePrivacy": "Bertsio berriak bilatzeko github.com-ekin konektatzen da. Ez da dokumentuen daturik bidaltzen.",
+    "releaseUpdates": "Eguneratzeak"
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -3071,7 +3247,15 @@
     "showHomeTab": "Näytä Aloitus-välilehti",
     "homeTabRequiresTabs": "Aloitus-välilehti on käytettävissä, kun asiakirjat avataan välilehdissä.",
     "tabMoveOtherWindow": "Siirrä toiseen ikkunaan",
-    "tabModified": "Tallentamattomat muutokset"
+    "tabModified": "Tallentamattomat muutokset",
+    "releaseAvailable": "Uusi versio saatavilla: {version}",
+    "releaseNotes": "Julkaisutiedot",
+    "releaseDownload": "Lataa",
+    "releaseLater": "Muistuta myöhemmin",
+    "releaseSkip": "Ohita tämä versio",
+    "releaseChecks": "Tarkista päivitykset",
+    "releasePrivacy": "Ottaa yhteyden github.comiin uusien versioiden tarkistamiseksi. Asiakirjojen tietoja ei lähetetä.",
+    "releaseUpdates": "Päivitykset"
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -3206,7 +3390,15 @@
     "showHomeTab": "Mostrar a lapela Inicio",
     "homeTabRequiresTabs": "A lapela Inicio está dispoñible cando os documentos se abren en lapelas.",
     "tabMoveOtherWindow": "Mover a outra xanela",
-    "tabModified": "Cambios sen gardar"
+    "tabModified": "Cambios sen gardar",
+    "releaseAvailable": "Nova versión dispoñible: {version}",
+    "releaseNotes": "Notas da versión",
+    "releaseDownload": "Descargar",
+    "releaseLater": "Lembrarmo máis tarde",
+    "releaseSkip": "Omitir esta versión",
+    "releaseChecks": "Buscar actualizacións",
+    "releasePrivacy": "Conéctase a github.com para buscar novas versións. Non se envían datos dos documentos.",
+    "releaseUpdates": "Actualizacións"
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -3341,7 +3533,15 @@
     "showHomeTab": "הצגת כרטיסיית הבית",
     "homeTabRequiresTabs": "כרטיסיית הבית זמינה כאשר מסמכים נפתחים בכרטיסיות.",
     "tabMoveOtherWindow": "העברה לחלון אחר",
-    "tabModified": "שינויים שלא נשמרו"
+    "tabModified": "שינויים שלא נשמרו",
+    "releaseAvailable": "גרסה חדשה זמינה: {version}",
+    "releaseNotes": "הערות גרסה",
+    "releaseDownload": "הורדה",
+    "releaseLater": "להזכיר לי מאוחר יותר",
+    "releaseSkip": "דילוג על גרסה זו",
+    "releaseChecks": "בדיקת עדכונים",
+    "releasePrivacy": "נוצר קשר עם github.com כדי לבדוק גרסאות חדשות. לא נשלחים נתוני מסמכים.",
+    "releaseUpdates": "עדכונים"
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -3476,7 +3676,15 @@
     "showHomeTab": "Kezdőlap megjelenítése",
     "homeTabRequiresTabs": "A Kezdőlap akkor érhető el, ha a dokumentumok lapokon nyílnak meg.",
     "tabMoveOtherWindow": "Áthelyezés másik ablakba",
-    "tabModified": "Nem mentett módosítások"
+    "tabModified": "Nem mentett módosítások",
+    "releaseAvailable": "Új verzió érhető el: {version}",
+    "releaseNotes": "Kiadási megjegyzések",
+    "releaseDownload": "Letöltés",
+    "releaseLater": "Emlékeztessen később",
+    "releaseSkip": "Verzió kihagyása",
+    "releaseChecks": "Frissítések keresése",
+    "releasePrivacy": "A github.com webhelyhez kapcsolódva ellenőrzi az új verziókat. Dokumentumadatokat nem küld.",
+    "releaseUpdates": "Frissítések"
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -3611,7 +3819,15 @@
     "showHomeTab": "Ցուցադրել Գլխավոր ներդիրը",
     "homeTabRequiresTabs": "Գլխավոր ներդիրը հասանելի է, երբ փաստաթղթերը բացվում են ներդիրներում։",
     "tabMoveOtherWindow": "Տեղափոխել այլ պատուհան",
-    "tabModified": "Չպահված փոփոխություններ"
+    "tabModified": "Չպահված փոփոխություններ",
+    "releaseAvailable": "Հասանելի է նոր տարբերակ՝ {version}",
+    "releaseNotes": "Թողարկման նշումներ",
+    "releaseDownload": "Ներբեռնել",
+    "releaseLater": "Հիշեցնել ավելի ուշ",
+    "releaseSkip": "Բաց թողնել այս տարբերակը",
+    "releaseChecks": "Ստուգել թարմացումները",
+    "releasePrivacy": "Նոր տարբերակներ ստուգելու համար կապվում է github.com-ի հետ։ Փաստաթղթի տվյալներ չեն ուղարկվում։",
+    "releaseUpdates": "Թարմացումներ"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -3746,7 +3962,15 @@
     "showHomeTab": "Tampilkan tab Beranda",
     "homeTabRequiresTabs": "Tab Beranda tersedia saat dokumen dibuka dalam tab.",
     "tabMoveOtherWindow": "Pindahkan ke jendela lain",
-    "tabModified": "Perubahan belum disimpan"
+    "tabModified": "Perubahan belum disimpan",
+    "releaseAvailable": "Versi baru tersedia: {version}",
+    "releaseNotes": "Catatan rilis",
+    "releaseDownload": "Unduh",
+    "releaseLater": "Ingatkan nanti",
+    "releaseSkip": "Lewati versi ini",
+    "releaseChecks": "Periksa pembaruan",
+    "releasePrivacy": "Menghubungi github.com untuk memeriksa versi baru. Tidak ada data dokumen yang dikirim.",
+    "releaseUpdates": "Pembaruan"
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -3881,7 +4105,15 @@
     "showHomeTab": "홈 탭 표시",
     "homeTabRequiresTabs": "문서를 탭으로 열 때 홈 탭을 사용할 수 있습니다.",
     "tabMoveOtherWindow": "다른 창으로 이동",
-    "tabModified": "저장하지 않은 변경 사항"
+    "tabModified": "저장하지 않은 변경 사항",
+    "releaseAvailable": "새 버전을 사용할 수 있습니다: {version}",
+    "releaseNotes": "릴리스 정보",
+    "releaseDownload": "다운로드",
+    "releaseLater": "나중에 알림",
+    "releaseSkip": "이 버전 건너뛰기",
+    "releaseChecks": "업데이트 확인",
+    "releasePrivacy": "새 버전을 확인하기 위해 github.com에 연결합니다. 문서 데이터는 전송되지 않습니다.",
+    "releaseUpdates": "업데이트"
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -4016,7 +4248,15 @@
     "showHomeTab": "ສະແດງແຖບໜ້າຫຼັກ",
     "homeTabRequiresTabs": "ແຖບໜ້າຫຼັກມີໃຫ້ໃຊ້ເມື່ອເປີດເອກະສານໃນແຖບ.",
     "tabMoveOtherWindow": "ຍ້າຍໄປໜ້າຕ່າງອື່ນ",
-    "tabModified": "ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ"
+    "tabModified": "ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ",
+    "releaseAvailable": "ມີເວີຊັນໃໝ່: {version}",
+    "releaseNotes": "ບັນທຶກການອອກເວີຊັນ",
+    "releaseDownload": "ດາວໂຫຼດ",
+    "releaseLater": "ເຕືອນຂ້ອຍພາຍຫຼັງ",
+    "releaseSkip": "ຂ້າມເວີຊັນນີ້",
+    "releaseChecks": "ກວດຫາການອັບເດດ",
+    "releasePrivacy": "ຕິດຕໍ່ github.com ເພື່ອກວດຫາເວີຊັນໃໝ່. ບໍ່ສົ່ງຂໍ້ມູນເອກະສານ.",
+    "releaseUpdates": "ການອັບເດດ"
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -4151,7 +4391,15 @@
     "showHomeTab": "Rādīt cilni Sākums",
     "homeTabRequiresTabs": "Cilne Sākums ir pieejama, ja dokumenti tiek atvērti cilnēs.",
     "tabMoveOtherWindow": "Pārvietot uz citu logu",
-    "tabModified": "Nesaglabātas izmaiņas"
+    "tabModified": "Nesaglabātas izmaiņas",
+    "releaseAvailable": "Pieejama jauna versija: {version}",
+    "releaseNotes": "Laidiena piezīmes",
+    "releaseDownload": "Lejupielādēt",
+    "releaseLater": "Atgādināt vēlāk",
+    "releaseSkip": "Izlaist šo versiju",
+    "releaseChecks": "Pārbaudīt atjauninājumus",
+    "releasePrivacy": "Sazinās ar github.com, lai pārbaudītu jaunas versijas. Dokumentu dati netiek sūtīti.",
+    "releaseUpdates": "Atjauninājumi"
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -4286,7 +4534,15 @@
     "showHomeTab": "Tunjukkan tab Utama",
     "homeTabRequiresTabs": "Tab Utama tersedia apabila dokumen dibuka dalam tab.",
     "tabMoveOtherWindow": "Pindahkan ke tetingkap lain",
-    "tabModified": "Perubahan belum disimpan"
+    "tabModified": "Perubahan belum disimpan",
+    "releaseAvailable": "Versi baharu tersedia: {version}",
+    "releaseNotes": "Nota keluaran",
+    "releaseDownload": "Muat turun",
+    "releaseLater": "Ingatkan saya kemudian",
+    "releaseSkip": "Langkau versi ini",
+    "releaseChecks": "Semak kemas kini",
+    "releasePrivacy": "Menghubungi github.com untuk menyemak versi baharu. Tiada data dokumen dihantar.",
+    "releaseUpdates": "Kemas kini"
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -4432,7 +4688,15 @@
     "showHomeTab": "Vis Hjem-fanen",
     "homeTabRequiresTabs": "Hjem-fanen er tilgjengelig når dokumenter åpnes i faner.",
     "tabMoveOtherWindow": "Flytt til et annet vindu",
-    "tabModified": "Ulagrede endringer"
+    "tabModified": "Ulagrede endringer",
+    "releaseAvailable": "Ny versjon tilgjengelig: {version}",
+    "releaseNotes": "Versjonsmerknader",
+    "releaseDownload": "Last ned",
+    "releaseLater": "Minn meg på det senere",
+    "releaseSkip": "Hopp over denne versjonen",
+    "releaseChecks": "Se etter oppdateringer",
+    "releasePrivacy": "Kontakter github.com for å se etter nye versjoner. Ingen dokumentdata sendes.",
+    "releaseUpdates": "Oppdateringer"
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -4567,7 +4831,15 @@
     "showHomeTab": "Afișează fila Acasă",
     "homeTabRequiresTabs": "Fila Acasă este disponibilă când documentele se deschid în file.",
     "tabMoveOtherWindow": "Mută în altă fereastră",
-    "tabModified": "Modificări nesalvate"
+    "tabModified": "Modificări nesalvate",
+    "releaseAvailable": "Versiune nouă disponibilă: {version}",
+    "releaseNotes": "Note de lansare",
+    "releaseDownload": "Descarcă",
+    "releaseLater": "Amintește-mi mai târziu",
+    "releaseSkip": "Omite această versiune",
+    "releaseChecks": "Verifică actualizările",
+    "releasePrivacy": "Contactează github.com pentru a verifica versiunile noi. Nu sunt trimise date din documente.",
+    "releaseUpdates": "Actualizări"
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -4702,7 +4974,15 @@
     "showHomeTab": "මුල් පිටුව ටැබය පෙන්වන්න",
     "homeTabRequiresTabs": "ලේඛන ටැබ් තුළ විවෘත කරන විට මුල් පිටුව ටැබය ලබා ගත හැක.",
     "tabMoveOtherWindow": "වෙනත් කවුළුවකට ගෙන යන්න",
-    "tabModified": "සුරැකී නැති වෙනස්කම්"
+    "tabModified": "සුරැකී නැති වෙනස්කම්",
+    "releaseAvailable": "නව අනුවාදයක් තිබේ: {version}",
+    "releaseNotes": "නිකුතු සටහන්",
+    "releaseDownload": "බාගන්න",
+    "releaseLater": "පසුව මතක් කරන්න",
+    "releaseSkip": "මෙම අනුවාදය මඟ හරින්න",
+    "releaseChecks": "යාවත්කාලීන සොයන්න",
+    "releasePrivacy": "නව අනුවාද සෙවීමට github.com අමතයි. ලේඛන දත්ත යවන්නේ නැත.",
+    "releaseUpdates": "යාවත්කාලීන"
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -4837,7 +5117,15 @@
     "showHomeTab": "Zobraziť kartu Domov",
     "homeTabRequiresTabs": "Karta Domov je dostupná, keď sa dokumenty otvárajú na kartách.",
     "tabMoveOtherWindow": "Presunúť do iného okna",
-    "tabModified": "Neuložené zmeny"
+    "tabModified": "Neuložené zmeny",
+    "releaseAvailable": "Je dostupná nová verzia: {version}",
+    "releaseNotes": "Poznámky k vydaniu",
+    "releaseDownload": "Stiahnuť",
+    "releaseLater": "Pripomenúť neskôr",
+    "releaseSkip": "Preskočiť túto verziu",
+    "releaseChecks": "Kontrolovať aktualizácie",
+    "releasePrivacy": "Pripája sa ku github.com a kontroluje nové verzie. Údaje dokumentov sa neodosielajú.",
+    "releaseUpdates": "Aktualizácie"
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -4976,7 +5264,15 @@
     "showHomeTab": "Pokaži zavihek Domov",
     "homeTabRequiresTabs": "Zavihek Domov je na voljo, ko se dokumenti odpirajo v zavihkih.",
     "tabMoveOtherWindow": "Premakni v drugo okno",
-    "tabModified": "Neshranjene spremembe"
+    "tabModified": "Neshranjene spremembe",
+    "releaseAvailable": "Na voljo je nova različica: {version}",
+    "releaseNotes": "Opombe ob izdaji",
+    "releaseDownload": "Prenesi",
+    "releaseLater": "Opomni me pozneje",
+    "releaseSkip": "Preskoči to različico",
+    "releaseChecks": "Preverjaj posodobitve",
+    "releasePrivacy": "Poveže se z github.com in preveri nove različice. Podatki dokumentov se ne pošiljajo.",
+    "releaseUpdates": "Posodobitve"
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -5111,7 +5407,15 @@
     "showHomeTab": "Shfaq skedën Kryefaqja",
     "homeTabRequiresTabs": "Skeda Kryefaqja është e disponueshme kur dokumentet hapen në skeda.",
     "tabMoveOtherWindow": "Zhvendos në një dritare tjetër",
-    "tabModified": "Ndryshime të paruajtura"
+    "tabModified": "Ndryshime të paruajtura",
+    "releaseAvailable": "Version i ri i disponueshëm: {version}",
+    "releaseNotes": "Shënimet e versionit",
+    "releaseDownload": "Shkarko",
+    "releaseLater": "Më kujto më vonë",
+    "releaseSkip": "Anashkalo këtë version",
+    "releaseChecks": "Kontrollo për përditësime",
+    "releasePrivacy": "Kontakton github.com për të kontrolluar për versione të reja. Nuk dërgohen të dhëna të dokumenteve.",
+    "releaseUpdates": "Përditësime"
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -5246,7 +5550,15 @@
     "showHomeTab": "Prikaži karticu Početak",
     "homeTabRequiresTabs": "Kartica Početak je dostupna kada se dokumenti otvaraju na karticama.",
     "tabMoveOtherWindow": "Premesti u drugi prozor",
-    "tabModified": "Nesačuvane izmene"
+    "tabModified": "Nesačuvane izmene",
+    "releaseAvailable": "Nova verzija je dostupna: {version}",
+    "releaseNotes": "Beleške o izdanju",
+    "releaseDownload": "Preuzmi",
+    "releaseLater": "Podseti me kasnije",
+    "releaseSkip": "Preskoči ovu verziju",
+    "releaseChecks": "Proveri ažuriranja",
+    "releasePrivacy": "Kontaktira github.com radi provere novih verzija. Podaci dokumenata se ne šalju.",
+    "releaseUpdates": "Ažuriranja"
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -5381,7 +5693,15 @@
     "showHomeTab": "Прикажи картицу Почетак",
     "homeTabRequiresTabs": "Картица Почетак је доступна када се документи отварају на картицама.",
     "tabMoveOtherWindow": "Премести у други прозор",
-    "tabModified": "Несачуване измене"
+    "tabModified": "Несачуване измене",
+    "releaseAvailable": "Нова верзија је доступна: {version}",
+    "releaseNotes": "Белешке о издању",
+    "releaseDownload": "Преузми",
+    "releaseLater": "Подсети ме касније",
+    "releaseSkip": "Прескочи ову верзију",
+    "releaseChecks": "Провери ажурирања",
+    "releasePrivacy": "Контактира github.com ради провере нових верзија. Подаци докумената се не шаљу.",
+    "releaseUpdates": "Ажурирања"
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -5516,7 +5836,15 @@
     "showHomeTab": "Visa fliken Start",
     "homeTabRequiresTabs": "Fliken Start är tillgänglig när dokument öppnas i flikar.",
     "tabMoveOtherWindow": "Flytta till ett annat fönster",
-    "tabModified": "Osparade ändringar"
+    "tabModified": "Osparade ändringar",
+    "releaseAvailable": "Ny version tillgänglig: {version}",
+    "releaseNotes": "Versionsinformation",
+    "releaseDownload": "Hämta",
+    "releaseLater": "Påminn mig senare",
+    "releaseSkip": "Hoppa över den här versionen",
+    "releaseChecks": "Sök efter uppdateringar",
+    "releasePrivacy": "Kontaktar github.com för att söka efter nya versioner. Inga dokumentdata skickas.",
+    "releaseUpdates": "Uppdateringar"
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -5651,7 +5979,15 @@
     "showHomeTab": "Giriş sekmesini göster",
     "homeTabRequiresTabs": "Belgeler sekmelerde açıldığında Giriş sekmesi kullanılabilir.",
     "tabMoveOtherWindow": "Başka bir pencereye taşı",
-    "tabModified": "Kaydedilmemiş değişiklikler"
+    "tabModified": "Kaydedilmemiş değişiklikler",
+    "releaseAvailable": "Yeni sürüm mevcut: {version}",
+    "releaseNotes": "Sürüm notları",
+    "releaseDownload": "İndir",
+    "releaseLater": "Daha sonra hatırlat",
+    "releaseSkip": "Bu sürümü atla",
+    "releaseChecks": "Güncellemeleri denetle",
+    "releasePrivacy": "Yeni sürümleri denetlemek için github.com ile bağlantı kurar. Belge verileri gönderilmez.",
+    "releaseUpdates": "Güncellemeler"
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -5786,7 +6122,15 @@
     "showHomeTab": "Показувати вкладку «Основне»",
     "homeTabRequiresTabs": "Вкладка «Основне» доступна, коли документи відкриваються у вкладках.",
     "tabMoveOtherWindow": "Перемістити в інше вікно",
-    "tabModified": "Незбережені зміни"
+    "tabModified": "Незбережені зміни",
+    "releaseAvailable": "Доступна нова версія: {version}",
+    "releaseNotes": "Примітки до випуску",
+    "releaseDownload": "Завантажити",
+    "releaseLater": "Нагадати пізніше",
+    "releaseSkip": "Пропустити цю версію",
+    "releaseChecks": "Перевіряти оновлення",
+    "releasePrivacy": "Звертається до github.com для перевірки нових версій. Дані документів не надсилаються.",
+    "releaseUpdates": "Оновлення"
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -5921,7 +6265,15 @@
     "showHomeTab": "ہوم ٹیب دکھائیں",
     "homeTabRequiresTabs": "ہوم ٹیب تب دستیاب ہوتا ہے جب دستاویزات ٹیبز میں کھولی جائیں۔",
     "tabMoveOtherWindow": "دوسری ونڈو میں منتقل کریں",
-    "tabModified": "غیر محفوظ تبدیلیاں"
+    "tabModified": "غیر محفوظ تبدیلیاں",
+    "releaseAvailable": "نیا ورژن دستیاب ہے: {version}",
+    "releaseNotes": "اجرا کی تفصیلات",
+    "releaseDownload": "ڈاؤن لوڈ",
+    "releaseLater": "بعد میں یاد دلائیں",
+    "releaseSkip": "یہ ورژن چھوڑ دیں",
+    "releaseChecks": "اپ ڈیٹس کی جانچ کریں",
+    "releasePrivacy": "نئے ورژن کی جانچ کے لیے github.com سے رابطہ کرتا ہے۔ دستاویز کا کوئی ڈیٹا نہیں بھیجا جاتا۔",
+    "releaseUpdates": "اپ ڈیٹس"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -6061,6 +6413,14 @@
     "showHomeTab": "Hiện thẻ Trang chủ",
     "homeTabRequiresTabs": "Thẻ Trang chủ khả dụng khi tài liệu được mở trong các thẻ.",
     "tabMoveOtherWindow": "Chuyển sang cửa sổ khác",
-    "tabModified": "Thay đổi chưa lưu"
+    "tabModified": "Thay đổi chưa lưu",
+    "releaseAvailable": "Có phiên bản mới: {version}",
+    "releaseNotes": "Ghi chú phát hành",
+    "releaseDownload": "Tải xuống",
+    "releaseLater": "Nhắc tôi sau",
+    "releaseSkip": "Bỏ qua phiên bản này",
+    "releaseChecks": "Kiểm tra bản cập nhật",
+    "releasePrivacy": "Kết nối với github.com để kiểm tra phiên bản mới. Không gửi dữ liệu tài liệu.",
+    "releaseUpdates": "Cập nhật"
   }
 }

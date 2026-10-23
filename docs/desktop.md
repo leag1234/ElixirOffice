@@ -21,7 +21,7 @@ Save prepares and flushes a sibling temporary file, verifies the selected origin
 
 ## Privacy and fonts
 
-There is no TCP document server, telemetry or automatic updater. The app serves its own privileged eoapp resource scheme inside Electron; external resource and network requests are blocked. Local conversion and PDF export use packaged bytes. AI is disabled until explicitly configured. The beta2 candidate uses the native consent and transport described below; other renderer resource/network requests remain blocked.
+There is no TCP document server, telemetry or automatic updater. The app serves its own privileged eoapp resource scheme inside Electron; renderer external resources and network requests are blocked. The 0.3.2 candidate adds an optional, default-on bounded GitHub release-metadata check in the main process, with an Options toggle and no document data or automatic download; see [release notices](desktop-release-notice.md). Local conversion and PDF export use packaged bytes. AI is disabled until explicitly configured. The beta2 candidate uses the native consent and transport described below; other renderer resource/network requests remain blocked.
 
 The standard free font set and its licenses are bundled: metric-compatible office fonts, school fonts including Marelle, and UI and symbol fonts. The full set remains available as a separate build option; an optional download is not implemented yet. Computer fonts asks for consent in a native dialog before enumerating standard system and user font folders. Consent is stored once in the app's local profile. The renderer receives opaque font handles, not filesystem paths, and reads only recognized font files under those folders, capped at 20 MiB each. Recent document names and native paths are stored locally, limited to fifteen entries.
 
@@ -671,3 +671,7 @@ Windows/macOS, physical keyboard/window-manager or native file-dialog
 qualification is inferred. Tests: `tests/desktop/home-content.test.cjs`,
 `home-native.cjs`, `home-capture-native.cjs` and
 `capture-composite.test.cjs`.
+
+### Compact title bar (0.3.2 candidate)
+
+Options > Window offers a compact title bar on qualified Linux/X11. It applies to new windows; turning it off restores the system frame for subsequent windows. Windows/macOS/Wayland keep the native frame. [Behavior, tests and limits](desktop-compact-titlebar.md).

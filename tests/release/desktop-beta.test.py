@@ -582,12 +582,19 @@ class ReleaseInputs(unittest.TestCase):
 
 
 class HostPreflight(unittest.TestCase):
+    def setUp(self):
+        # These tests isolate pip/image probes; tool-cache.test.py uses real raw files.
+        cache = patch.object(release.appimage_update, "verify_cached_tools", return_value={})
+        cache.start()
+        self.addCleanup(cache.stop)
     font = "sha256:" + "1" * 64
     windows = "electronuserland/builder@sha256:" + "2" * 64
     appimage = "sha256:" + "3" * 64
     def plan(self, targets=("linux", "windows", "mac")):
         return {"targets": list(targets), "font_tool_image": self.font,
-                "windows_image": self.windows, "appimage_update": {"image": self.appimage}}
+                "windows_image": self.windows, "appimage_update": {"image": self.appimage,
+                    "tool_cache": "/srv/elixiroffice/cache/release-tools/appimage/public-fixture",
+                    "pins_sha256": release.digest(source.with_name("appimage-tools.json"))}}
     def answer(self, command, **kwargs):
         if command == ["python3", "-m", "pip", "--version"]:
             return subprocess.CompletedProcess(command, 0, "pip 25.2 from /owned/python\n", "")

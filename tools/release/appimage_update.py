@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import tempfile
 import urllib.parse
@@ -71,13 +72,74 @@ def tool_environment(cache, home):
                 MAGIC=str(cache / "file-tools/usr/lib/file/magic.mgc"))
 
 
-def prepare(cache, manifest):
+def verify_cached_tools(cache, manifest):
+    """Read every raw pin without creating, chmodding, downloading or extracting."""
+    cache = Path(cache).absolute()
+    if ".." in cache.parts or any(p.is_symlink() for p in (cache, *cache.parents)):
+        raise ValueError("Symlink or traversal in AppImage tool cache")
+    failures = []
+    for name, item in manifest["files"].items():
+        file = cache / name
+        try:
+            metadata = file.lstat()
+            valid = (stat.S_ISREG(metadata.st_mode) and metadata.st_size == item["bytes"]
+                     and digest(file) == item["sha256"])
+        except OSError:
+            valid = False
+        if not valid:
+            failures.append(name)
+    if failures:
+        raise ValueError("AppImage tool cache " + str(cache) + " is missing or differs from pins: "
+                         + ", ".join(failures) + "; restore the exact reviewed raw files "
+                         "with their pinned size and SHA-256 before allocating a build (no automatic download)")
+    return {name: dict(item) for name, item in manifest["files"].items()}
+
+
+def stage_cached_tools(source, destination, manifest):
+    """Copy raw pins into disposable build storage; never trust derived receipts."""
+    source, destination = Path(source).absolute(), Path(destination).absolute()
+    verify_cached_tools(source, manifest)
+    if (".." in destination.parts
+            or any(p.is_symlink() for p in (destination, *destination.parents))
+            or source.is_relative_to(destination) or destination.is_relative_to(source)):
+        raise ValueError("Persistent raw tools and derived build cache must be disjoint regular paths")
+    destination.mkdir(parents=True, exist_ok=True)
+    for name, item in manifest["files"].items():
+        file = destination / name
+        if file.exists() or file.is_symlink():
+            metadata = file.lstat()
+            if (not stat.S_ISREG(metadata.st_mode) or metadata.st_size != item["bytes"]
+                    or digest(file) != item["sha256"]):
+                raise ValueError("Existing staged tool differs from pin: " + name)
+            continue
+        with tempfile.NamedTemporaryFile(dir=destination, delete=False) as output:
+            temp = Path(output.name)
+            try:
+                with (source / name).open("rb") as input_file:
+                    shutil.copyfileobj(input_file, output, 1024 * 1024)
+                output.flush()
+                os.fsync(output.fileno())
+                if temp.stat().st_size != item["bytes"] or digest(temp) != item["sha256"]:
+                    raise ValueError("Staged tool differs from pin: " + name)
+                # Exclusive publication: another writer cannot replace an input.
+                os.link(temp, file)
+            finally:
+                temp.unlink(missing_ok=True)
+    verify_cached_tools(destination, manifest)
+
+
+def prepare(cache, manifest, allow_download=True):
+    if not allow_download:
+        verify_cached_tools(cache, manifest)
     cache.mkdir(parents=True, exist_ok=True)
     for name, item in manifest["files"].items():
         file = cache / name
         if file.is_symlink():
             raise ValueError("Tool cache contains a symlink")
         if not file.exists():
+            if not allow_download:
+                raise ValueError("Cached-only AppImage tool is missing: " + name
+                                 + "; restore its exact pinned bytes (downloads disabled)")
             with tempfile.NamedTemporaryFile(dir=cache, delete=False) as out:
                 temp = Path(out.name)
                 try:
@@ -244,6 +306,8 @@ def main():
     p.add_argument("--pins", type=Path, default=HERE / "appimage-tools.json")
     p.add_argument("--cache", type=Path, required=True)
     p.add_argument("--work", type=Path)
+    p.add_argument("--tool-cache", type=Path, help="Verified persistent raw tools; copied to the owned build cache without downloads")
+    p.add_argument("--cached-tools-only", action="store_true", help="Reject missing raw tools instead of downloading them")
     p.add_argument("--appimage", type=Path)
     p.add_argument("--image")
     p.add_argument("--channel", default="latest-all")
@@ -255,7 +319,7 @@ def main():
     if a.inside:
         if not Path("/.dockerenv").is_file() or os.getuid() != 1000:
             raise ValueError("Internal operations require the non-root builder")
-        result = prepare(a.cache, manifest) if a.inside == "prepare" else build(a.work, a.cache, manifest, a.name, a.channel)
+        result = prepare(a.cache, manifest, allow_download=not a.cached_tools_only) if a.inside == "prepare" else build(a.work, a.cache, manifest, a.name, a.channel)
         destination = a.cache if a.inside == "prepare" else a.work
         (destination / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
         return
@@ -264,10 +328,24 @@ def main():
         raise ValueError("Builder image must be pinned")
     if image != manifest["builder_image"]:
         raise ValueError("Builder differs from reviewed manifest; re-pin with provenance review")
+    if a.tool_cache:
+        verify_cached_tools(a.tool_cache, manifest)
+        # Reject aliases/nesting before the owned-directory marker can be written.
+        raw, target = a.tool_cache.absolute(), a.cache.absolute()
+        if raw.is_relative_to(target) or target.is_relative_to(raw):
+            raise ValueError("Persistent raw tools and build cache must be disjoint")
+        a.cached_tools_only = True
+    elif a.cached_tools_only:
+        verify_cached_tools(a.cache, manifest)
     cache = owned(a.cache)
+    if a.tool_cache:
+        stage_cached_tools(a.tool_cache, cache, manifest)
     base = ["docker", "run", "--rm", "--user=1000:1000", "--cpus=2", "--memory=4g", "--memory-swap=4g", "--pids-limit=512", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--mount", "type=bind,source=" + str(HERE) + ",target=/driver,readonly", "--mount", "type=bind,source=" + str(a.pins.resolve()) + ",target=/pins.json,readonly", "--mount", "type=bind,source=" + str(cache) + ",target=/cache"]
     command = ["python3", "/driver/appimage_update.py", "--pins", "/pins.json", "--cache", "/cache"]
-    subprocess.run(base + ["--network=bridge", image, *command, "--inside", "prepare"], check=True)
+    if a.cached_tools_only:
+        command += ["--cached-tools-only"]
+    network = "--network=none" if a.cached_tools_only else "--network=bridge"
+    subprocess.run(base + [network, image, *command, "--inside", "prepare"], check=True)
     if a.prepare_only:
         return
     if not a.work or not a.appimage or not re.fullmatch(r"ElixirOffice-[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?-x86_64\.AppImage", a.appimage.name):

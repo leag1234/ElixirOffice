@@ -4,6 +4,7 @@ Living document, kept up to date as features land (requested by the test user, 2
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
+| Desktop release notices (0.3.2 candidate) | Default-on optional daily release metadata, including prereleases; browser-only download page, per-version skip/reminder, explicit GitHub privacy disclosure; no document data or installer | Not evaluated in this task | No comparison claim in this task | [Policy and checks](desktop-release-notice.md) |
 | Desktop document tabs (preview) | Separate editor views preserve edits, destinations and AutoRecover while switching tabs or moving between windows; activation raises the selected native view, pending physical Windows confirmation | Not evaluated here | Previously one document per window | [Behavior and qualification](desktop-tabs.md) |
 | Formula wizard keyboard focus candidate | Functions without arguments start on the existing OK button; argument/range focus retained | Not assessed in this task | Observed inherited view had no initial target for a valid zero-argument function | docs/formula-wizard-focus.md; tests/formula-wizard/ |
 | Security hardening candidate | Download token/trust checks, AI proxy origin/auth checks, escaped WOPI/formula text, plain-text base URL and validated cache hash | Not evaluated | Backported selected fixes plus local output validation | docs/security-phase1.md; tests/security/ |
@@ -531,3 +532,13 @@ Desktop 0.3.1 File-menu candidate: Office rail order, Rename in Info and Export 
 Window bounds restore within current display work areas, including removed-monitor and minimized-close cases. Tabs reuse Fluent file-type icons and a separate modified dot with45-locale accessible state. Successful Open finishes without a floating toast; File details, live announcements and important progress/actions remain available. Source checks and actual private Linux normal-window checks are separate from window-manager, native-platform and installed-package acceptance. [Scope](desktop-tabs.md#window-placement-and-tab-state-031-source-candidate).
 
 Desktop start-page follow-up candidate: empty Home offers Options/Help/About in the same Office-style application rail while retaining shared localized templates, recent metadata and privacy footer. Embedded File content keeps one rail. Strict review capture supports both visible-strip composites and full-client no-strip views with ownership/opacity/scale checks; native frame/compact-titlebar qualification remains separate. [Details](desktop.md#031-shared-start-page-follow-up).
+
+### Compact desktop title bar (0.3.2 candidate)
+
+Opt-in Linux/X11 chrome combines document titles or tabs with existing Header actions and the actual command-search widget. The system paints window controls; unqualified platforms use the native frame. Live document moves restore the matching editor header without recreating the SDK. [Qualification boundaries](desktop-compact-titlebar.md).
+
+Desktop header alignment: the native document-type icon is vertically centered with Quick Access and the document title; all four editors are checked in both frame modes and themes. Hosted styling is unchanged. [Geometry regression](desktop-compact-titlebar.md#header-icon-alignment).
+
+## Desktop 0.3.2 preparation
+
+The draft notes separate integrated release notices, opt-in Linux/X11 compact windows, icon alignment, font matching and release tooling from linguistic review deferred to0.3.3 and final package/platform acceptance still pending. Automatic installation is not enabled.

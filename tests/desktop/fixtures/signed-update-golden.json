@@ -1,0 +1,29 @@
+{
+  "notice": "SYNTHETIC PUBLIC RFC8032 VECTOR ONLY; not a production key or release",
+  "context": {
+    "schema": 1,
+    "repository": "leag1234/elixiroffice",
+    "tag": "v0.4.0",
+    "version": "0.4.0",
+    "build": 18,
+    "sequence": 1,
+    "channel": "stable",
+    "platform": "win32",
+    "arch": "x64",
+    "packageType": "nsis",
+    "issuedAt": 1792742400000,
+    "expiresAt": 1800518400000,
+    "metadataName": "latest.yml",
+    "metadataSha512": "V+KeOII12xN5iMDo4Kw2V5LfXz9oOM8bIT1Z1+ZyN31TC5QC7rkwWQ5qlzX/heTWAAQuYvq+Q4qMeUHb/0clFg==",
+    "artifact": {
+      "name": "ElixirOffice-0.4.0-win-x64.exe",
+      "size": 28,
+      "sha512": "UNiz7xCjK8goiQglhc4/ReTq57jsZP76hPZdSyo+/CeV9rKn1CF3ryJyOkZe2xdWkxgtx3AoGcZCnUc774T61w=="
+    }
+  },
+  "metadata": "version: 0.4.0\nfiles:\n  - url: ElixirOffice-0.4.0-win-x64.exe\n",
+  "payloadBase64": "c3ludGhldGljIGluc3RhbGxlciBmaXh0dXJlCg==",
+  "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=\n-----END PUBLIC KEY-----\n",
+  "signingBytesBase64": "RWxpeGlyT2ZmaWNlIHNpZ25lZCB1cGRhdGUgdjEKWzEsImxlYWcxMjM0L2VsaXhpcm9mZmljZSIsInYwLjQuMCIsIjAuNC4wIiwxOCwxLCJzdGFibGUiLCJ3aW4zMiIsIng2NCIsIm5zaXMiLDE3OTI3NDI0MDAwMDAsMTgwMDUxODQwMDAwMCwibGF0ZXN0LnltbCIsIlYrS2VPSUkxMnhONWlNRG80S3cyVjVMZlh6OW9PTThiSVQxWjErWnlOMzFUQzVRQzdya3dXUTVxbHpYL2hlVFdBQVF1WXZxK1E0cU1lVUhiLzBjbEZnPT0iLFsiRWxpeGlyT2ZmaWNlLTAuNC4wLXdpbi14NjQuZXhlIiwyOCwiVU5pejd4Q2pLOGdvaVFnbGhjNC9SZVRxNTdqc1pQNzZoUFpkU3lvKy9DZVY5cktuMUNGM3J5SnlPa1plMnhkV2t4Z3R4M0FvR2NaQ25VYzc3NFQ2MXc9PSJdXQ==",
+  "envelope": "{\"context\":{\"schema\":1,\"repository\":\"leag1234/elixiroffice\",\"tag\":\"v0.4.0\",\"version\":\"0.4.0\",\"build\":18,\"sequence\":1,\"channel\":\"stable\",\"platform\":\"win32\",\"arch\":\"x64\",\"packageType\":\"nsis\",\"issuedAt\":1792742400000,\"expiresAt\":1800518400000,\"metadataName\":\"latest.yml\",\"metadataSha512\":\"V+KeOII12xN5iMDo4Kw2V5LfXz9oOM8bIT1Z1+ZyN31TC5QC7rkwWQ5qlzX/heTWAAQuYvq+Q4qMeUHb/0clFg==\",\"artifact\":{\"name\":\"ElixirOffice-0.4.0-win-x64.exe\",\"size\":28,\"sha512\":\"UNiz7xCjK8goiQglhc4/ReTq57jsZP76hPZdSyo+/CeV9rKn1CF3ryJyOkZe2xdWkxgtx3AoGcZCnUc774T61w==\"}},\"signatures\":[{\"keyId\":\"rfc8032-test-only\",\"signature\":\"ExiZr1gQ4H3LGJvp4yq6AWBMDARijKig87MyAqkhPv9NysPvc6da/hTi7OpmNOM1nBci4maKNo4JgHNDKeo8AQ==\"}]}\n"
+}

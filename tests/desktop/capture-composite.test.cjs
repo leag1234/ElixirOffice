@@ -81,3 +81,15 @@ test('a fully covered no-strip shell is never captured; ownership and child opac
  f.child.data[3]=128;await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>0}),/opaque/);
  f.hide();await assert.rejects(compose(f.window,f.view,{...f,getStripHeight:()=>0}),/Capture/);
 });
+
+for(const scale of [1,1.25,1.5,2])test('compact36 capture preserves real shell/document bytes at scale '+scale,async()=>{
+ const f=fixture(scale,3,36);f.getStripHeight=()=>36;
+ const result=await compose(f.window,f.view,f),length=36*scale*4*scale*4;
+ assert.equal(result.capture.stripHeight,36);
+ assert.deepEqual(result.image.data.subarray(0,length),f.root.data.subarray(0,length));
+ assert.deepEqual(result.image.data.subarray(length),f.child.data);
+});
+for(const top of [1,35,37,40,43,45])test('unknown band height '+top+' remains rejected',async()=>{
+ const f=fixture(1,3,top);f.getStripHeight=()=>top;
+ await assert.rejects(compose(f.window,f.view,f),/Capture/);assert.deepEqual(f.calls(),{root:0,child:0});
+});

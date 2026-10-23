@@ -283,6 +283,17 @@ def clean_environment(node, cache):
             "npm_config_cache": str(Path(cache) / "npm"),
             "PYTHONDONTWRITEBYTECODE": "1", "EO_RELEASE_REQUIRE_BUILDER": "1"}
 
+def appimage_tool_cache(root):
+    """Manifest-addressed raw inputs live outside disposable release/task caches."""
+    root = Path(root).absolute()
+    protected = Path("/srv/elixiroffice/cache/release-tools")
+    if (".." in root.parts or not root.is_relative_to(protected)
+            or any(p.is_symlink() for p in (root, *root.parents))):
+        raise ValueError("Persistent AppImage tool cache must be a regular path under "
+                         "/srv/elixiroffice/cache/release-tools (protected from task cleanup)")
+    return root / digest(HERE / "appimage-tools.json")
+
+
 def host_preflight(plan, env):
     """Read-only host checks; never install packages, pull images or allocate a build."""
     failures, result = [], {"python_pip": {}, "docker_images": {}}
@@ -324,6 +335,17 @@ def host_preflight(plan, env):
             failures.append("Required pinned Docker image is not available locally: " + role + " " + image + "; restore the exact reviewed image before building (no automatic pull)")
         else:
             result["docker_images"][role] = {"pin": image, "image_id": actual}
+    if "linux" in plan["targets"]:
+        try:
+            update = plan["appimage_update"]
+            if digest(HERE / "appimage-tools.json") != update["pins_sha256"]:
+                raise ValueError("AppImage tool manifest changed after planning")
+            files = appimage_update.verify_cached_tools(Path(update["tool_cache"]),
+                                                       appimage_update.pins(HERE / "appimage-tools.json"))
+            result["appimage_tools"] = {"cache": update["tool_cache"],
+                                       "pins_sha256": update["pins_sha256"], "files": files}
+        except (OSError, ValueError) as error:
+            failures.append(str(error))
     if failures:
         raise ValueError("Release host preflight failed: " + "; ".join(failures))
     return result
@@ -498,7 +520,8 @@ job.mkdir()
             self.run("linux-packaged-version", [self.args.node, self.product / "tools/desktop/check-version.cjs", unpacked / "resources/app.asar"])
             update_work = self.work / "appimage-update"
             self.run("appimage-external-update", ["python3", self.driver / "appimage_update.py",
-                     "--pins", self.driver / "appimage-tools.json", "--cache", Path(self.args.cache) / "appimage-tools",
+                     "--pins", self.driver / "appimage-tools.json", "--cache", self.work / "appimage-tools",
+                     "--tool-cache", self.plan["appimage_update"]["tool_cache"],
                      "--work", update_work, "--appimage", self.product / "desktop/dist" / appimage,
                      "--channel", self.plan["appimage_update"]["channel"],
                      "--image", self.plan["appimage_update"]["image"]])
@@ -506,7 +529,7 @@ job.mkdir()
                 shutil.copy2(update_work / name, self.out / name)
             appimage_update.verify_zsync(self.out / appimage, self.out / control)
             self.info["appimage_update"] = json.loads((update_work / "receipt.json").read_text())
-            self.info["appimage_tools"] = json.loads((Path(self.args.cache) / "appimage-tools/receipt.json").read_text())
+            self.info["appimage_tools"] = json.loads((self.work / "appimage-tools/receipt.json").read_text())
             shutil.copyfile(self.product / "desktop/dist" / f"ElixirOffice-{version}-linux-amd64.deb", self.out / f"ElixirOffice-{version}-linux-amd64.deb")
             self.save()
             self.run("deb-extract", ["dpkg-deb", "-x", self.out / f"ElixirOffice-{version}-linux-amd64.deb", self.work / "deb"])
@@ -632,6 +655,8 @@ def parser():
     p.add_argument("--label", default="")
     p.add_argument("--node", default=os.environ.get("EO_RELEASE_NODE", "node"))
     p.add_argument("--cache", default="/srv/elixiroffice/cache/release-beta2-D")
+    p.add_argument("--appimage-tool-cache", type=Path, default=Path("/srv/elixiroffice/cache/release-tools/appimage"),
+                   help="Protected persistent raw tool root, independent of --cache; files are addressed by manifest SHA-256")
     p.add_argument("--appimage-builder-image", help="Optional assertion of the reviewed isolated builder image pin")
     p.add_argument("--appimage-channel", choices=["latest", "latest-all", "latest-pre"], default="latest-all")
     p.add_argument("--font-tool-image", default=DEFAULT_FONT_IMAGE)
@@ -706,6 +731,8 @@ def make_plan(args):
     plan["appimage_update"] = {"channel": args.appimage_channel, "image": image,
                               "information": appimage_update.update_information(args.appimage_channel),
                               "pins_sha256": digest(HERE / "appimage-tools.json")}
+    if "linux" in args.targets:
+        plan["appimage_update"]["tool_cache"] = str(appimage_tool_cache(args.appimage_tool_cache))
     plan["pdf_source_pin_path"] = pdf_pin_path
     plan["mac_export_only"] = args.mac_export_only
     if "mac" in args.targets and not args.mac_export_only:

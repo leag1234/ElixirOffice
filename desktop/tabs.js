@@ -3,6 +3,12 @@
 (()=>{
  const home=document.querySelector('#home-tab');
  const list=document.querySelector('#tabs'),add=document.querySelector('#new-tab'),move=document.querySelector('#move-tab'),error=document.querySelector('#tab-error'),errorText=document.querySelector('#tab-error-text'),dismiss=document.querySelector('#tab-error-dismiss');
+ const quick=document.querySelector('#quick-access'),single=document.querySelector('#single-title'),search=document.querySelector('#command-search');
+ // Existing Fluent UI System Icons (Microsoft, MIT); see tools/fluent-icons/LICENSE.
+ const glyphs={"save":{"viewBox":"0 0 24 24","paths":["M3 5.75A2.75 2.75 0 0 1 5.75 3h9.96c.87 0 1.7.34 2.3.95L20.05 6c.6.6.95 1.43.95 2.3v9.96A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25zM5.75 4.5c-.69 0-1.25.56-1.25 1.25v12.5c0 .69.56 1.25 1.25 1.25H6v-5.25C6 13.01 7 12 8.25 12h7.5c1.24 0 2.25 1 2.25 2.25v5.25h.25c.69 0 1.25-.56 1.25-1.25V8.29c0-.47-.18-.91-.51-1.24L16.95 5q-.4-.4-.95-.49v2.73c0 1.24-1 2.25-2.25 2.25h-4.5C8.01 9.5 7 8.5 7 7.25V4.5zm10.75 15v-5.25a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0-.75.75v5.25zm-8-15v2.75c0 .41.34.75.75.75h4.5c.41 0 .75-.34.75-.75V4.5z"]},"undo":{"viewBox":"-2 -2 24 24","paths":["M5 2.5a.5.5 0 0 0-1 0v4.9c0 .33.27.6.6.6h4.9a.5.5 0 0 0 0-1H5.9l3.48-3.02a4 4 0 0 1 5.25 6.04l-8.17 7.1a.5.5 0 0 0 .65.76l8.17-7.1a5 5 0 0 0-6.56-7.55L5 6.46z"]},"redo":{"viewBox":"-2 -2 24 24","paths":["M15 2.5a.5.5 0 0 1 1 0v4.9a.6.6 0 0 1-.6.6h-4.9a.5.5 0 0 1 0-1h3.6l-3.48-3.02a4 4 0 1 0-5.24 6.04l8.17 7.1a.5.5 0 1 1-.66.76l-8.17-7.1a5 5 0 1 1 6.56-7.55L15 6.46z"]}};
+ for(const button of quick.querySelectorAll('button')){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),glyph=glyphs[button.dataset.quick];svg.setAttribute('viewBox',glyph.viewBox);svg.setAttribute('aria-hidden','true');for(const data of glyph.paths){const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',data);svg.append(path);}button.append(svg);}
+
+ for(const button of document.querySelectorAll('[data-quick]'))button.onclick=()=>{if(current?.activeId)action(window.eoTabs.quickAction(current.activeId,button.dataset.quick));};
  let current,pendingState,initialized=false,strings={},limitNotice=false,activeDrag=null,dragState=null;
  const DRAG_TYPE='application/x-elixiroffice-document-tab';
  function renderAfterDrag(){activeDrag=null;if(dragState){const value=dragState;dragState=null;render(value);}}
@@ -13,7 +19,21 @@
  function render(state){
   if(activeDrag){if(!dragState||state.revision>=dragState.revision)dragState=state;return;}
   if(current&&state.revision<current.revision)return;
-  document.querySelector('#tab-bar').hidden=state.openInTabs===false||state.stripVisible===false;
+  const compact=state.effectiveFrame==='compact',active=state.documents.find(item=>item.id===state.activeId);
+  document.body.classList.toggle('compact',compact);
+  document.querySelector('#tab-bar').hidden=!compact&&(state.openInTabs===false||state.stripVisible===false);
+  list.hidden=compact&&(!state.openInTabs||!state.stripVisible);
+  single.hidden=!compact||state.openInTabs&&state.stripVisible;single.dataset.hasDocument=String(!!active?.name);
+  document.querySelector('#single-name').textContent=String(active?.name||'ElixirOffice').replace(/[\u0000-\u001f\u007f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'');
+  document.querySelector('#single-dirty').textContent=active?.dirty?'●':'';
+  const type=/\.pdf$/i.test(active?.name||'')?'pdf':/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(active?.name||'')?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(active?.name||'')?'slide':'word';
+  const icon=single.querySelector('svg');icon.setAttribute('class','document-icon t-'+type);icon.querySelector('use').setAttribute('href','/example/local-assets/desktop-home/icons.svg#i-'+type);
+  quick.hidden=!compact||!state.quick;
+  for(const button of document.querySelectorAll('[data-quick]')){
+   const value=state.quick?.[button.dataset.quick];button.hidden=!compact||!value?.visible;button.disabled=!value?.enabled;button.title=value?.label||'';button.setAttribute('aria-label',value?.label||button.dataset.quick);
+   if(button===search)button.textContent=value?.label||'';
+  }
+  add.hidden=compact&&(!state.openInTabs||!state.stripVisible);move.hidden=compact&&(!state.openInTabs||!state.stripVisible);
   if(home)home.hidden=state.openInTabs===false||!state.showHomeTab;
   current=state;move.disabled=!state.activeId;const focused=list.contains(document.activeElement),focusedId=document.activeElement?.dataset?.document;
   list.replaceChildren();
@@ -65,6 +85,10 @@
  document.querySelector('#tab-bar').ondrop=event=>{const token=event.dataTransfer.getData(DRAG_TYPE);if(token){event.preventDefault();action(window.eoTabs.dropDrag(token));}};
  if(home)home.onclick=()=>action(window.eoTabs.home());
  add.onclick=()=>action(window.eoTabs.create());
+ document.addEventListener('keydown',event=>{
+  if(current?.effectiveFrame!=='compact'||!current.activeId||!event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||!(event.code==='KeyQ'||String(event.key).toLowerCase()==='q'))return;
+  event.preventDefault();event.stopPropagation();action(window.eoTabs.quickAction(current.activeId,'search'));
+ });
  window.eoTabs.onLimit(showLimit);
  window.eoTabs.onState(state=>{if(!initialized){if(!pendingState||state.revision>=pendingState.revision)pendingState=state;return;}render(state);});
  window.eoTabs.initial().then(value=>{
@@ -74,6 +98,10 @@
   move.title=strings.tabMove;move.setAttribute('aria-label',strings.tabMove);
   list.setAttribute('aria-label',strings.tabsLabel);add.title=strings.tabNew;add.setAttribute('aria-label',strings.tabNew);initialized=true;render(pendingState&&pendingState.revision>value.state.revision?pendingState:value.state);
   if(limitNotice)showLimit();
+  let lastAppearance;
+  const appearance=()=>{const value=document.documentElement.getAttribute?.('data-eo-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');if(value===lastAppearance)return;lastAppearance=value;window.eoTabs.appearance(value).catch(failed);};
+  appearance();matchMedia('(prefers-color-scheme:dark)').addEventListener('change',appearance);
+  if(window.MutationObserver)new MutationObserver(appearance).observe(document.documentElement,{attributes:true,attributeFilter:['data-eo-theme']});
   window.EOTabShellReady=true;
  }).catch(failed);
 })();

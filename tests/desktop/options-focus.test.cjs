@@ -28,7 +28,7 @@ function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false
  if(closedInvoker){const old=element('dialog');old.className='desktop-options';old.open=false;invoker=element('button');old.append(invoker);}
  document.activeElement=invoker;
  const context={document,frame:originalFrame,file:originalFile,controller:originalController,main:null,
-  t:x=>x,eoDesktop:{windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
+  t:x=>x,eoDesktop:{releaseOptions:async()=>({enabled:true}),releaseSettings:async()=>{},windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
   modal:()=>{const box=element('dialog');box.className='desktop-options';box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
   addFontOptions:async()=>{},modalButton:(box,label,fn)=>{const b=element('button');b.textContent=label;b.action=fn;box.append(b);return b;}
  };

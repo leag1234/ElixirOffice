@@ -3,16 +3,18 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function fixture(){
  class Node{
-  constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.attributes={};this.hidden=false;}
+  constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.attributes={};this.hidden=false;const classes=new Set();this.classList={toggle:(name,value)=>{if(value)classes.add(name);else classes.delete(name)},contains:name=>classes.has(name)};}
   setAttribute(key,value){this.attributes[key]=value;}append(...items){this.children.push(...items);}replaceChildren(...items){this.children=items;}
-  contains(){return false;}querySelector(){return null;}querySelectorAll(){return [];}scrollIntoView(){}focus(){}
+  contains(){return false;}querySelector(key){return this.children.find(child=>child.tagName===key)||null;}querySelectorAll(){return [];}scrollIntoView(){}focus(){}
  }
  const elements={'#tab-bar':new Node(),'#move-tab':new Node(),'#tabs':new Node(),'#new-tab':new Node(),'#tab-error':new Node(),'#tab-error-text':new Node(),'#tab-error-dismiss':new Node()};
+ for(const name of ['quick-access','single-title','single-name','single-dirty','command-search'])elements['#'+name]=new Node();
+ const svg=new Node('svg');svg.append(new Node('use'));elements['#single-title'].append(svg);
  let listener,limitListener,resolve;
  const initial=new Promise(done=>{resolve=done;});
- const window={eoTabs:{onLimit:callback=>{limitListener=callback},onState:callback=>{listener=callback;},initial:()=>initial}};
- const document={documentElement:{},dir:'ltr',activeElement:null,querySelector:key=>elements[key],createElement:tag=>new Node(tag),createElementNS:(_namespace,tag)=>new Node(tag)};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/tabs.js'),'utf8'),{window,document,Promise});
+ const window={eoTabs:{appearance:()=>Promise.resolve(),onLimit:callback=>{limitListener=callback},onState:callback=>{listener=callback;},initial:()=>initial}};
+ const document={addEventListener(){},body:new Node('body'),querySelectorAll:()=>[],documentElement:{},dir:'ltr',activeElement:null,querySelector:key=>elements[key],createElement:tag=>new Node(tag),createElementNS:(_namespace,tag)=>new Node(tag)};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../desktop/tabs.js'),'utf8'),{window,document,Promise,matchMedia:()=>({matches:false,addEventListener(){}})});
  const state=(revision,id)=>({windowId:'owner',revision,activeId:id,documents:[{id,name:id,dirty:false,closing:false,status:'ready'}]});
  const initialize=state=>resolve({strings:{tabsLabel:'Documents',tabNew:'New document',tabClose:'Close {name}',tabCloseHint:'Delete',tabUntitled:'Untitled',tabModified:'Unsaved changes'},language:'en',direction:'ltr',state});
  elements['#tab-error'].hidden=true;

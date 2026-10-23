@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const {STRIP_HEIGHT}=require('./tabs-host.cjs');
+const {COMPACT_HEIGHT}=require('./window-chrome.cjs');
 const failure=()=>Error('Capture ownership, geometry or pixel scale changed');
 const layouts=new WeakMap();
 function alphaOffset(factory){
@@ -34,7 +35,7 @@ async function compose(window,view,{validate,nativeImage,getStripHeight=()=>STRI
     window.webContents!==shell||view.webContents!==contents||!window.contentView.children.includes(view)||!view.getVisible())throw failure();
   const [width,height]=window.getContentSize(),bounds=view.getBounds(),top=getStripHeight();
   if(![width,height,bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isSafeInteger)||
-    ![0,STRIP_HEIGHT].includes(top)||width<=0||height<=top||bounds.x!==0||bounds.y!==top||bounds.width!==width||bounds.height!==height-top)throw failure();
+    ![0,STRIP_HEIGHT,COMPACT_HEIGHT].includes(top)||width<=0||height<=top||bounds.x!==0||bounds.y!==top||bounds.width!==width||bounds.height!==height-top)throw failure();
   return{version,width,height,bounds};
  }
  const before=state(),key=JSON.stringify(before),check=()=>{if(JSON.stringify(state())!==key)throw failure()};

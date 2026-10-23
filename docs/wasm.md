@@ -170,3 +170,18 @@ Persisted normal window bounds, accessible file-type tabs and quiet successful-o
 ### Shared desktop start-page source checks (2026-10-22)
 
 The start-page/application-rail slice reuses the existing template/recent renderer and changes no runtime pin, worker lifetime, conversion or save format. Its strict source-capture fix accounts for the trusted0px or44px chrome offset; only visible surfaces are captured, retaining ownership, stable geometry, alpha and scale validation. Actual Linux Home checks and EN/FR capture exit are source evidence, separate from rebuilt packages and physical platform qualification. [Behavior](desktop.md#031-shared-start-page-follow-up).
+
+### Desktop compact chrome qualification (0.3.2 candidate)
+
+The desktop frame candidate changes no WebAssembly runtime, artifact selector or pin. It reuses each live editor and its undo/recovery state when moving between compact and native owners. UI and native Linux checks are tracked separately from conversion measurements and installed-package gates. [Scope and checks](desktop-compact-titlebar.md).
+
+### Persistent release-tool inputs (0.3.2 candidate)
+
+The release driver keeps verified AppImage raw tools outside disposable task
+caches, checks every manifest pin before allocation and prepares build-local
+extractions without network access. This changes no WebAssembly runtime,
+source selector, dependency or builder-image pin. [Preflight and retention](release-preflight.md).
+
+### Desktop 0.3.2 release preparation (2026-10-23)
+
+The preparation branch reuses the unchanged matched full/PDF runtime pins from 0.3.1. No converter or Wasm rebuild is part of this version/notes task. The application baseline is frozen by release review, linguistic review is deferred to0.3.3 and package qualification remains pending; see draft release notes.

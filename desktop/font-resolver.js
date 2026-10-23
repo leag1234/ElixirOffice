@@ -4,7 +4,14 @@
  // SDK FontStyle bits: bold=1, italic=2. AllFonts positional slots are converted by the index.
  const order={0:[0,2,1,3],1:[1,0,3,2],2:[2,0,3,1],3:[3,1,2,0]};
  const fallbackFamilies=Object.freeze(['Elixir Fallback Arabic','Elixir Fallback Sinhala']);
- const normalize=name=>String(name||'').normalize('NFC').toLocaleLowerCase('en-US');
+ const normalizedNames=new Map(),NORMALIZED_NAME_LIMIT=4096;
+ const normalize=name=>{
+  const raw=String(name||'');
+  if(normalizedNames.has(raw))return normalizedNames.get(raw);
+  const value=raw.normalize('NFC').toLocaleLowerCase('en-US');
+  if(normalizedNames.size>=NORMALIZED_NAME_LIMIT)normalizedNames.delete(normalizedNames.keys().next().value);
+  normalizedNames.set(raw,value);return value;
+ };
  function classify(style){
   let bits=0,other=0,alt=0;
   for(const word of String(style||'').toLowerCase().split(/[\s_\-]+/).filter(Boolean)){

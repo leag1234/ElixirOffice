@@ -21,3 +21,25 @@ button:focus-visible{outline:2px solid Highlight;outline-offset:-2px}
 .document-icon{width:16px;height:16px;flex:none;fill:currentColor}.document-icon.t-word{color:#185abd}.document-icon.t-cell{color:#107c41}.document-icon.t-slide{color:#c43e1c}.document-icon.t-pdf{color:#c52f2f}
 .document-dirty{font-size:8px;line-height:1;flex:none}
 @media(prefers-color-scheme:dark){.document-icon.t-word{color:#83b4ff}.document-icon.t-cell{color:#73d5a0}.document-icon.t-slide{color:#ffac91}.document-icon.t-pdf{color:#ff9e9e}}
+
+/* The native Window Controls Overlay paints its window buttons; only this safe area is interactive. */
+.compact #tab-bar{height:36px;position:fixed;top:0;left:env(titlebar-area-x,0px);width:env(titlebar-area-width,calc(100vw - 144px));padding:3px 8px;gap:6px;app-region:drag}
+.compact button,.compact #tabs{app-region:no-drag}
+.compact #tabs{flex:1}.compact .document-tab{max-width:230px;min-width:90px;border-radius:6px;border-color:transparent}.compact .document-tab.selected{border-color:var(--tab-border)}
+#quick-access{display:flex;gap:2px;align-items:center;flex:none}#quick-access button{width:28px;height:28px;padding:4px}#quick-access svg{width:20px;height:20px;fill:currentColor}
+#single-title{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:80px;overflow:hidden}#single-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#single-dirty{font-size:8px}
+#command-search{flex:0 1 230px;min-width:40px;max-width:28vw;text-align:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--tab-border);padding:2px 10px}
+#drag-space{display:none}.compact #drag-space{display:block;min-width:32px;flex:none}
+#tabs[hidden],#quick-access[hidden],#single-title[hidden],#command-search[hidden],button[hidden]{display:none}
+button:disabled{opacity:.5;cursor:default}.compact button:not(:disabled):hover{background:var(--tab-active)}
+@media(max-width:760px){.compact #command-search{flex-basis:100px;max-width:20vw}.compact #drag-space{min-width:16px}.compact #new-tab,.compact #move-tab{min-width:24px}}
+
+.compact #drag-space,.compact #single-title{app-region:drag;user-select:none}
+
+:root[data-eo-theme=light]{color-scheme:light;--tab-bg:#f2f3f5;--tab-active:#fff;--tab-text:#252525;--tab-border:#9c9fa5}
+:root[data-eo-theme=dark]{color-scheme:dark;--tab-bg:#23252a;--tab-active:#383b42;--tab-text:#f4f4f4;--tab-border:#888d98}
+:root[data-eo-theme=light] .document-icon.t-word{color:#185abd}:root[data-eo-theme=light] .document-icon.t-cell{color:#107c41}:root[data-eo-theme=light] .document-icon.t-slide{color:#c43e1c}:root[data-eo-theme=light] .document-icon.t-pdf{color:#c52f2f}
+:root[data-eo-theme=dark] .document-icon.t-word{color:#83b4ff}:root[data-eo-theme=dark] .document-icon.t-cell{color:#73d5a0}:root[data-eo-theme=dark] .document-icon.t-slide{color:#ffac91}:root[data-eo-theme=dark] .document-icon.t-pdf{color:#ff9e9e}
+
+#single-title[data-has-document=false] .document-icon{display:none}
+[dir=rtl] [data-quick=undo] svg,[dir=rtl] [data-quick=redo] svg{transform:scaleX(-1)}

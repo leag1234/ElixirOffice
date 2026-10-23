@@ -40,8 +40,14 @@ safety.install(process,console,async()=>{
  finally{await safety.flush();app.exit(1);}
 });
 
-let preferences,recovery,geometryTimer;
+let preferences,recovery,geometryTimer,releaseNotice;
 const windowState=require('./window-state.cjs');
+function chromeOptions(){
+ return {platform:process.platform,customTitleBar:settings.customTitleBar===true,
+  overlayAvailable:typeof BrowserWindow.prototype.setTitleBarOverlay==='function',
+  displayBackend:app.commandLine.getSwitchValue?.('ozone-platform')||process.env.XDG_SESSION_TYPE||(process.env.DISPLAY&&!process.env.WAYLAND_DISPLAY?'x11':'unknown')};
+}
+
 function rememberGeometry(window,{flush=false}={}){
  if(captureOptions)return;
  const value=windowState.capture(window);
@@ -462,6 +468,7 @@ async function performClose(document){
  }
 }
 function closeWindow(owner){
+ if(owner.replacingFrame)return owner.nativeRecoveryPromise.then(()=>closeWindow(owner),()=>false);
  if(owner.closePromise)return owner.closePromise;
  owner.closeAllPending=true;
  owner.closePromise=(async()=>{
@@ -484,7 +491,7 @@ function closeWindow(owner){
   }
   if(!owner.window.isDestroyed()){owner.allowClose=true;owner.window.destroy();}
   return true;
- })().catch(()=>{owner.allowClose=false;void safety.log('window-close-failure');return false;}).finally(()=>{owner.closePromise=null;owner.closeAllPending=false;});
+ })().catch(()=>{owner.allowClose=false;void safety.log('window-close-failure');return false;}).finally(()=>{owner.closePromise=null;owner.closeAllPending=false;if(registry.windows().includes(owner)&&!owner.window.isDestroyed())registry.changed(owner.id);});
  return owner.closePromise;
 }
 let quitPending;
@@ -655,8 +662,8 @@ async function operation(run){
  if(state.busy||state.moving)throw Error('Another file operation is running');
  const closeSave=['save','save-as-choose','save-as-info','save-as-cancel','password-lock','recovery-clear','export','pdf'];
  if(state.closePending&&!(state.waitingSave&&closeSave.includes(command)))throw Error('Document close is pending');
- const validate=registry.capture(registry.context().id);
- state.busy=true;try{const result=await run();validate();return result;}catch(error){if(['save','save-as-choose','export','pdf','rename'].includes(command))clearDestination();if(error.code==='DOCUMENT_DESTINATION_OPEN')throw Error(t('tabDestinationBusy'));throw error;}finally{state.busy=false;}
+ const document=registry.context(),validate=registry.capture(document.id);
+ state.busy=true;try{const result=await run();validate();return result;}catch(error){if(['save','save-as-choose','export','pdf','rename'].includes(command))clearDestination();if(error.code==='DOCUMENT_DESTINATION_OPEN')throw Error(t('tabDestinationBusy'));throw error;}finally{state.busy=false;if(document.live)registry.changed(document.windowId);}
 }
 function operationStage(scope,id,phase){
  if(typeof id==='string'&&/^local-operation-[0-9]+$/.test(id))docContents().send('eo:operation-stage',{scope,id,phase});
@@ -695,6 +702,17 @@ async function start() {
   try{settings=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'desktop-settings.json'),'utf8'));settings.recents=require('./recent-files.cjs').normalize(settings.recents);settings.fontConsent=settings.fontConsent===true;}
   catch(error){if(error.code!=='ENOENT')throw error}
   settings=require('./font-preferences.cjs').migrate(settings,{capture:!!captureOptions});
+  releaseNotice=require('./release-notice.cjs').create({
+   version:app.getVersion(),state:settings.releaseNotice,
+   save:value=>{settings.releaseNotice=value;return persist();},
+   open:url=>shell.openExternal(url),
+   changed:notice=>{
+    if(captureOptions)return;
+    for(const owner of registry.windows())for(const document of registry.documents(owner.id)){
+     try{if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:release-notice',notice);}catch{}
+    }
+   }
+  });
   if(!captureOptions)await persist();
   const manifestBytes=await fs.readFile(path.join(assets,'desktop-manifest.json'));
   const manifest=JSON.parse(manifestBytes);
@@ -712,9 +730,14 @@ async function start() {
    BrowserWindow,WebContentsView,ipcMain,registry,platform:process.platform,session:ses,root:__dirname,shellURL:resources.ORIGIN+'/tabs.html',
    geometry:{restore:restoreGeometry,changed:rememberGeometry},
    navigation:()=>({openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true}),
+   chrome:chromeOptions,
    strings:localizedStrings,language:()=>languageInfo.language,direction:()=>['ar','he','ur'].includes(languageInfo.language)?'rtl':'ltr',
    actions:{
     windowCreated:installShellShortcuts,
+    windowReplaced:(owner,previous)=>{if(win===previous)win=owner.window;},
+    disableCompact:()=>{settings.customTitleBar=false;return persist();},
+    frameFailure:()=>safety.log('window-frame-failure'),
+    quickAction:(document,name)=>{document.contents.send('eo:action','quick-'+name);return true;},
     home:owner=>{const document=registry.active(owner.id);if(document)document.contents.send('eo:action','backstage-home');return true;},
     detach:document=>moveSession(document),moveMenu:showMoveMenu,beginDrag:beginTabDrag,finishDrag:finishTabDrag,
     create:async owner=>{
@@ -729,6 +752,8 @@ async function start() {
   const owner=tabHost.createWindow();win=owner.window;await owner.ready;
   const initialDocument=createSession(owner.id,{pending:pendingPaths.splice(0)});
   await registry.run(initialDocument,async()=>{
+  handle('chrome-mode',()=>({compact:registry.window(registry.context().windowId).frame?.effectiveFrame==='compact'}));
+  handle('chrome-state',value=>{const state=require('./compact-state.cjs').normalize(value),document=registry.context();document.state.chromeState=state;registry.changed(document.windowId);return true;});
   handle('identity',()=>({documentId:registry.context().id,windowId:registry.context().windowId}));
   handle('desktop-ready',()=>{const document=registry.context();registry.status(document.id,'ready');if(pendingLimitNotice)showTabLimit(document);return true;});
   handle('open-performance',async event=>{await openDiagnostics.record({...event,trace:documentState().openTrace});if(event?.stage==='first-paint')scheduleFontDiscovery();if(['renderer-ready','first-paint'].includes(event?.stage))await openDiagnostics.flush();return true;});
@@ -761,7 +786,7 @@ async function start() {
   });
   handle('return-home',()=>operation(async()=>{
     const decision=await discard(true);if(decision!==true)return decision;
-    releaseSession(registry.context());clearDestination();documentState().current=null;documentState().dirty=false;title();return true;
+    releaseSession(registry.context());clearDestination();documentState().current=null;documentState().dirty=false;documentState().chromeState=null;title();return true;
   }));
   handle('template',id=>operation(()=>prepareDocument(async()=>{
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
@@ -923,17 +948,27 @@ async function start() {
     return {artifactId:documentState().artifacts.register(saved,documentState().current.token),name:path.basename(saved.target),bytes:saved.bytes,format,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
   })));
   handle('recovery-failure',()=>safety.log('recovery-failure').then(()=>true));
+  handle('release-state',()=>captureOptions?null:releaseNotice.notice());
+  handle('release-options',()=>releaseNotice.options());
+  handle('release-settings',async value=>{
+   if(captureOptions)throw Error('Release settings unavailable in capture mode');
+   if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||typeof value.enabled!=='boolean')throw Error('Invalid release settings');
+   await releaseNotice.configure(value.enabled);
+   if(value.enabled)void releaseNotice.check();
+   return true;
+  });
+  handle('release-action',(name,expectedVersion)=>captureOptions?false:releaseNotice.action(name,expectedVersion));
   handle('window-options',()=>({
     customTitleBar:settings.customTitleBar===true,
     openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true,
-    // No native overlay platform has completed the required interaction gates yet.
-    customTitleBarAvailable:false,effectiveFrame:'native'
+    customTitleBarAvailable:tabHost.compactAvailable(),
+    effectiveFrame:registry.window(registry.context().windowId).frame?.effectiveFrame||'native'
   }));
   handle('window-settings',async value=>{
     if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid window settings');
     for(const key of ['customTitleBar','openInTabs','showHomeTab'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
     if(!['customTitleBar','openInTabs','showHomeTab'].some(key=>key in value))throw Error('Invalid window settings');
-    if(value.customTitleBar&&settings.customTitleBar!==true)throw Error(t('nativeTitleBarUnavailable'));
+    if(value.customTitleBar&&settings.customTitleBar!==true&&!tabHost.compactAvailable())throw Error(t('nativeTitleBarUnavailable'));
     for(const key of ['customTitleBar','openInTabs','showHomeTab'])if(key in value)settings[key]=value[key];
     await persist();for(const owner of registry.windows())registry.changed(owner.id);return true;
   });
@@ -1069,6 +1104,7 @@ async function start() {
 
   documentHandlersReady=true;
   await tabHost.loadDocument(initialDocument);registry.activate(initialDocument.id);
+  if(!captureOptions)void releaseNotice.check();
   if(captureOptions){
     (async()=>{
       for(let i=0;i<600;i++){if(await docContents().executeJavaScript('!!window.EODesktopCapture'))break;await new Promise(resolve=>setTimeout(resolve,200));if(i===599)throw Error('Capture shell did not become ready')}
@@ -1087,3 +1123,5 @@ async function start() {
 app.on('window-all-closed',()=>{if(!captureOptions&&process.platform!=='darwin')app.quit();});
 app.on('before-quit',event=>{if(appClosing||captureOptions)return;event.preventDefault();void quitApplication();});
 app.on('activate',()=>{if(tabHost&&!registry.windows().length){const owner=tabHost.createWindow();win=owner.window;owner.ready.then(()=>loadSession(createSession(owner.id))).catch(()=>safety.log('startup-failure'));}});
+
+app.on('will-quit',()=>releaseNotice?.dispose());

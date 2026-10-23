@@ -21,9 +21,10 @@ function ownRuntimeSources(directory){
  });
 }
 
-// Run the existing real-main bootstrap with failing network/updater boundaries.
+// Owner release review permits only anonymous release metadata, never an updater.
+// Mock that API in the real-main fixture; every other network boundary fails.
 // No Electron window or renderer process is started by this unit check.
-async function guardedBoot(document=false,injected=''){
+async function guardedBoot(document=false,injected='',enabled=true){
  const calls=[],directories=[],originalLoad=Module._load,originalFetch=global.fetch;
  const fail=kind=>(...args)=>{calls.push(kind);throw Error('Forbidden update/network access: '+kind)};
  const http=require('node:http'),https=require('node:https'),saved=[];
@@ -52,7 +53,8 @@ async function guardedBoot(document=false,injected=''){
   vm.runInNewContext(fs.readFileSync(helper,'utf8')+'\nmodule.exports={boot};',{
    require:name=>name==='node:test'?()=>{}:name==='node:vm'?wrappedVM:load(name),module:moduleScope,__dirname,process,console,Buffer,Uint8Array,URL,setTimeout,clearTimeout,setImmediate
   });
-  const env=await moduleScope.exports.boot({document});
+  const env=await moduleScope.exports.boot({document,fontSettings:{releaseNotice:{enabled}}});
+  assert.equal(env.releaseRequests.length,enabled?1:0,'Only the default-on mocked metadata check is allowed');
   try{assert.equal(env.shell.url,load('../../desktop/resources.cjs').ORIGIN+'/tabs.html');assert.equal(env.documents[0].getURL(),load('../../desktop/resources.cjs').ORIGIN+'/index.html');if(document)assert(env.selected.token);assert.deepEqual(calls,[]);}
   finally{await env.cleanup()}
  }finally{
@@ -73,7 +75,7 @@ test('own runtime sources and production dependency lock contain no application 
  assert.doesNotThrow(()=>assertNoUpdaterDependencies({dependencies:{}},{packages:{'node_modules/electron-updater':{dev:true}}}));
  assert.throws(()=>assertNoUpdater("require('electron-updater').autoUpdater.checkForUpdates()"),/updater/);
 });
-test('real main Home and document bootstrap make no update or network call',async()=>{await guardedBoot();await guardedBoot(true)});
+test('real main Home/document allow one mocked release check and no other network; off makes no check',async()=>{await guardedBoot();await guardedBoot(true);await guardedBoot(false,'',false)});
 test('bootstrap guard rejects an injected updater and direct network request before access',async()=>{
  for(const code of ["require('electron').autoUpdater.checkForUpdates();","require('electron-updater');","require('node:https').get('https://example.invalid/update');","require('node:net').connect(443,'example.invalid');"])
   await assert.rejects(guardedBoot(false,code),/Forbidden update\/network access/);

@@ -7,6 +7,7 @@ Object.defineProperty(window,'EODesktopCancelOperation',{value:()=>{abort?.abort
 function blockDuringClose(event){if(closeCheck||info?.capture){event.preventDefault();event.stopImmediatePropagation()}}
 for(const name of ['keydown','beforeinput','click','drop'])document.addEventListener(name,blockDuringClose,true);
 let fontRefreshRequested=false,fontRefreshRunning=false,fontRefreshNotify=false;
+let compactChrome,compactMode=false;
 let info,operationBusy=false,backstage,recoveryBusy=false,pdfCompatibility,recoveryNotified=false,feedback,lastOperation,statusOperation;
 const t=key=>info?.strings[key]||({recoveryFailed:'AutoRecover could not keep a recovery copy. Save your document manually.',pdfRecoveryOff:'AutoRecover is not available for PDF files. Save manually; these settings apply to Office files.'})[key]||key;
 const status=(text,operationId)=>{statusOperation=operationId||null;const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[...new Set([text,recovery,frame?.EOComputerFontWarning].filter(Boolean))].join(' — ');$('message').textContent=message;$('message').hidden=!message;};
@@ -19,7 +20,7 @@ async function returnHome(){
    decision=await eoDesktop.returnHome();
   }
   if(decision!==true)return;
-  pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
+  compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
  }catch(error){fail(error)}
 }
 function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
@@ -27,7 +28,7 @@ function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>
 const fail=(error,saveError=false)=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);if(!saveError)return;
  const copy=document.createElement('button');copy.type='button';copy.textContent=info?.strings.opCopyDiagnostics||'Copy diagnostics';copy.addEventListener('click',()=>eoDesktop.copySaveDiagnostics().catch(()=>{}));$('message').append(' ',copy);};
 function buttons(busy) {
-  operationBusy=busy;
+  operationBusy=busy;compactChrome?.refresh();
   for(const button of $('home').querySelectorAll('button'))button.disabled=busy;
   if(!busy && pendingRequested)setTimeout(drainPending,0);
   if(!busy && fontRefreshRequested)setTimeout(refreshFonts,0);
@@ -161,7 +162,7 @@ async function open(selected) {
   const cancelPreparation=()=>{preparedWorker?.terminate();preparedWorker=null};
   abort.signal.addEventListener('abort',cancelPreparation,{once:true});
   try {
-    pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();file=selected;feedback?.dispose();lastOperation=null;feedback=EOOperationFeedback.mount(document,document.body,info.strings,{diagnostics:()=>eoDesktop.copySaveDiagnostics(),open:id=>run(()=>eoDesktop.savedOpen(id)),show:id=>eoDesktop.savedShow(id),error:operationEvent,cancel:id=>{if(lastOperation?.id===id&&EOOperationFeedback.canCancel(lastOperation))abort?.abort();}});feedback.reset(file.token);
+    compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;editor?.destroyEditor();file=selected;feedback?.dispose();lastOperation=null;feedback=EOOperationFeedback.mount(document,document.body,info.strings,{diagnostics:()=>eoDesktop.copySaveDiagnostics(),open:id=>run(()=>eoDesktop.savedOpen(id)),show:id=>eoDesktop.savedShow(id),error:operationEvent,cancel:id=>{if(lastOperation?.id===id&&EOOperationFeedback.canCancel(lastOperation))abort?.abort();}});feedback.reset(file.token);
     const openingTracker=Common.ElixirLocalOperation.create(operationEvent,file.token,'desktop-open');openingOperation=openingTracker.begin('open',{name:file.name});
     await EOOperationFeedback.paint(window);
     const timings={selected:performance.now()};
@@ -221,6 +222,7 @@ async function open(selected) {
              frame.AscCommon.History.ForceSave=true;main.api.SetDocumentModified(true);
             }
             await updateDirty();backstage=await EODesktopBackstage(frame,main,info,desktopAction);
+            compactChrome=EOCompactChrome.create({win:frame,main,bridge:eoDesktop,isBusy:()=>opening||operationBusy||choosingSaveAs||closeCheck});compactChrome.configure(compactMode);
             frame.requestAnimationFrame(()=>frame.requestAnimationFrame(()=>openPerformance('first-paint',performance.now()-timings.contentReady)));
             // Report readiness only after the native file actions have been installed.
             window.EOLocalSession={controller,format,stats,api:main.api,file,win:frame,timings,editableMs:performance.now()};
@@ -229,7 +231,7 @@ async function open(selected) {
         },onError:event=>reject(Error(event.data?.errorDescription||'Local editor failed'))}
       });
     });
-  } catch(error){openingOperation?.fail(error);pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;await refreshHome();fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;openingOperation=null;buttons(false);recent().catch(fail)}
+  } catch(error){openingOperation?.fail(error);compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;await refreshHome();fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;openingOperation=null;buttons(false);recent().catch(fail)}
 }
 window.addEventListener('eo:backstage-visibility',event=>feedback?.obscure(event.detail));
 window.addEventListener('eo:saved-open',event=>run(()=>eoDesktop.savedOpen(event.detail)));
@@ -368,16 +370,17 @@ function modal(title){
 function modalButton(box,label,action){
  const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',()=>Promise.resolve(action()).catch(fail));box.append(button);return button;
 }
+let releaseBanner;
 async function showOptions(){
- const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
+ const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),releaseOptions=await eoDesktop.releaseOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
  const returnTarget=returnFrame&&(invoker===document.body||invoker?.closest('dialog.desktop-options:not([open])'))?returnFrame.frameElement:invoker;
  const returnDocument=returnTarget?.tagName==='IFRAME'?returnTarget.contentDocument:null,returnChild=returnDocument?.activeElement;
  const box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
- const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),actions=document.createElement('div');
+ const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),releaseGroup=document.createElement('section'),actions=document.createElement('div');
  box.className+=' desktop-preferences';
- for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup])group.className='desktop-setting-section';
+ for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup])group.className='desktop-setting-section';
  recoveryRow.className='desktop-recovery-row';actions.className='desktop-dialog-actions';
- recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,windowGroup,fontGroup);
+ recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup);
  box.addEventListener('close',()=>{
   const active=document.activeElement;
   // A close event may run after another dialog, control or document took ownership.
@@ -413,7 +416,11 @@ async function showOptions(){
  customFrameNote.id='custom-title-bar-note';customFrameNote.textContent=windowOptions.customTitleBarAvailable?t('customTitleBarRestart'):t('nativeTitleBarUnavailable');
  customFrame.setAttribute('aria-describedby',customFrameDescription.id+' '+customFrameNote.id);customFrameLabel.append(customFrame,document.createTextNode(t('customTitleBar')));windowGroup.append(customFrameLabel,customFrameDescription,customFrameNote);
  await addFontOptions(fontGroup);
- const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
+ const releaseHeading=document.createElement('h3');releaseHeading.textContent=t('releaseUpdates');releaseGroup.append(releaseHeading);
+ const releaseLabel=document.createElement('label'),releaseEnabled=document.createElement('input'),releasePrivacy=document.createElement('p');
+ releaseEnabled.type='checkbox';releaseEnabled.id='release-checks-enabled';releaseEnabled.checked=releaseOptions.enabled;
+ releaseLabel.append(releaseEnabled,document.createTextNode(t('releaseChecks')));releasePrivacy.id='release-checks-privacy';releasePrivacy.textContent=t('releasePrivacy');releaseEnabled.setAttribute('aria-describedby',releasePrivacy.id);releaseGroup.append(releaseLabel,releasePrivacy);
+ const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
  saveButton.className='btn btn-primary';
  modalButton(actions,t('cancel'),()=>box.close()).className='btn';box.append(actions);
 }
@@ -473,13 +480,17 @@ eoDesktop.onAction(async (action,details)=>{
   if(closeCheck && action!=='save-close')return;
   if(choosingSaveAs)return;
   if(action==='save-close'){const attemptId=details?.attemptId;if(typeof attemptId!=='string')return;try{if(await save())await eoDesktop.closeSaved(attemptId);}catch(error){fail(error)}finally{closeCheck=false;await eoDesktop.closeCancelled(attemptId).catch(()=>{});if(pendingRequested)setTimeout(drainPending,0);if(fontRefreshRequested)setTimeout(refreshFonts,0)}return}
+  if(/^quick-(save|undo|redo|search)$/.test(action)){compactChrome?.perform(action.slice(6));return;}
   ({'tab-limit':()=>status(t('tabLimit')),'backstage-home':()=>backstage?.open().catch(fail),'external-error':()=>status(t('error')),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort(),'new-docx':()=>run(()=>eoDesktop.create('docx')),'new-xlsx':()=>run(()=>eoDesktop.create('xlsx')),'new-pptx':()=>run(()=>eoDesktop.create('pptx')),open:()=>run(()=>eoDesktop.choose()),save:()=>save(),'save-as':()=>save(true),pdf:()=>pdf(),print:()=>pdf(true)}[action]||(()=>{}))();
 });
 document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();document.body.classList.add('drag')}});
 document.addEventListener('dragleave',()=>document.body.classList.remove('drag'));document.addEventListener('drop',drop,true);
 (async()=>{
  Object.defineProperty(window,'EODocumentId',{value:(await eoDesktop.identity()).documentId});
+ compactMode=(await eoDesktop.chromeMode()).compact===true;eoDesktop.onChromeMode(value=>{compactMode=value?.compact===true;compactChrome?.configure(compactMode)});
  info=await eoDesktop.locale();window.EODesktopStrings=Object.freeze(info.strings);document.documentElement.lang=info.language;document.documentElement.dir=['ar','he','ur'].includes(info.language)?'rtl':'ltr';
+ releaseBanner=EOReleaseBanner.create({document,bridge:eoDesktop,t});
+ window.addEventListener('pagehide',()=>releaseBanner?.dispose(),{once:true});
  await refreshHome();pendingRequested=true;await drainPending();window.EODesktopReady=true;await eoDesktop.desktopReady();
  await offerRecovery();
  scheduleRecovery();

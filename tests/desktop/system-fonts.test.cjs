@@ -25,6 +25,17 @@ test('exact normalized Unicode names preserve punctuation and do not collide acr
  for(const name of ['Font-A','Font A','خط','글꼴'])assert.equal(policy.resolve({name}).family,name);
  assert.equal(policy.resolve({name:'font a'}).family,'Font A');
 });
+test('font-name normalization reuses repeated values and stays correct after bounded eviction',async()=>{
+ const source=await fs.readFile(path.join(root,'desktop/font-resolver.js'),'utf8');
+ const context={module:{exports:{}},exports:{}};vm.createContext(context);
+ vm.runInContext("let calls=0;const original=String.prototype.normalize;String.prototype.normalize=function(){calls++;return original.apply(this,arguments)};"+source+";globalThis.normalizeCalls=()=>calls",context);
+ const isolated=context.module.exports;
+ assert.equal(isolated.normalize('Repeated Name'),'repeated name');
+ assert.equal(isolated.normalize('Repeated Name'),'repeated name');
+ assert.equal(context.normalizeCalls(),1);
+ for(let i=0;i<5000;i++)isolated.normalize('Unique '+i);
+ assert.equal(isolated.normalize('E\u0301cole'),isolated.normalize('\u00c9cole'));
+});
 test('private index caches real SFNT coverage, exposes no paths and rejects changed handle bytes',async()=>{
  const temp=await fs.mkdtemp(path.join(os.tmpdir(),'eo-system-fonts-'));try{
   const directory=path.join(temp,'fonts');await fs.mkdir(directory);

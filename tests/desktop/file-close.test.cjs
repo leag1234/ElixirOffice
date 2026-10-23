@@ -12,7 +12,7 @@ const from=renderer.indexOf('async function returnHome(){'),to=renderer.indexOf(
 assert(from>=0&&to>from);
 function lifecycle(env,save){
  const removed=[],elements={workspace:{hidden:false},home:{hidden:true}},failures=[];
- const c={eoDesktop:{returnHome:()=>env.invoke('return-home')},save,
+ const c={compactChrome:null,eoDesktop:{returnHome:()=>env.invoke('return-home')},save,
   pdfCompatibility:{dispose:()=>removed.push('pdf')},controller:{dispose:()=>removed.push('controller')},
   feedback:{dispose:()=>removed.push('feedback')},editor:{destroyEditor:()=>removed.push('editor')},
   file:{token:env.selected.token},frame:{},main:{},lastOperation:{},window:{EOLocalSession:{}},

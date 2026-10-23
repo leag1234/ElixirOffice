@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
-html,body{margin:0;height:100%}#home{min-height:100%;display:flex;flex-direction:column}.topbar{grid-template-columns:1fr}.tiles{margin-top:24px}button.tile{text-align:start}.file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.file-link .ic{width:28px;height:28px;flex:none}.file-name{display:block;font-weight:600}.desktop-footer{margin-top:auto;padding:16px 40px;color:var(--text-2);font-size:12px}#workspace{position:absolute;inset:0;height:100%;overflow:hidden;padding:0}#editor{height:100%}#message{position:fixed;z-index:2000;bottom:24px;left:50%;transform:translateX(-50%);max-width:90%;padding:10px 18px;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-2)}[hidden]{display:none!important}body.drag{outline:4px solid var(--accent);outline-offset:-4px}
+html,body{margin:0;height:100%}#home{min-height:100%;display:flex;flex-direction:column}.topbar{grid-template-columns:1fr}.tiles{margin-top:24px}button.tile{text-align:start}.file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.file-link .ic{width:28px;height:28px;flex:none}.file-name{display:block;font-weight:600}.desktop-footer{margin-top:auto;padding:16px 40px;color:var(--text-2);font-size:12px}#workspace{position:absolute;inset:0;height:100%;overflow:hidden;padding:0}#editor{height:100%}#message{position:fixed;z-index:2000;bottom:calc(24px + var(--desktop-release-height,0px));left:50%;transform:translateX(-50%);max-width:90%;padding:10px 18px;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-2)}[hidden]{display:none!important}body.drag{outline:4px solid var(--accent);outline-offset:-4px}
 
 /* The native window already owns application identity. Home shares the
    Backstage's text rail, with application actions below the file navigation. */
@@ -54,3 +54,17 @@ button.tile{border:0;background:transparent;padding:0}
 .desktop-recovery .btn{min-width:88px;margin:0;padding:0 16px}
 .desktop-recovery-footer{position:sticky;inset-block-end:0;padding-block-start:12px;background:var(--surface)}
 .desktop-recovery button:focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}
+
+/* Release metadata is an optional message bar, separate from the Office ribbon.
+   Reserve its measured height so no document controls or status bar are covered. */
+body{padding-block-end:var(--desktop-release-height,0px);box-sizing:border-box}
+#workspace{inset-block-end:var(--desktop-release-height,0px);height:calc(100% - var(--desktop-release-height,0px))}
+#home{min-height:calc(100dvh - var(--desktop-release-height,0px))}
+#home>.layout{min-height:calc(100dvh - 52px - var(--desktop-release-height,0px))}
+#home .rail{height:calc(100dvh - 52px - var(--desktop-release-height,0px))}
+.desktop-release-notice{position:fixed;inset-inline:0;inset-block-end:0;z-index:1500;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;box-sizing:border-box;max-height:40dvh;overflow:auto;padding:12px 20px;border-block-start:1px solid var(--border-strong);border-inline-start:4px solid var(--accent-fill);background:var(--surface);color:var(--text);font:14px/1.4 system-ui}
+.desktop-release-title{font-weight:600;overflow-wrap:anywhere}
+.desktop-release-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.desktop-release-actions .btn{font:inherit;margin:0;min-height:32px;padding:5px 12px}
+.desktop-release-actions .btn:focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}
+@media(max-width:640px){.desktop-release-notice{padding:10px 12px;gap:8px}.desktop-release-actions{gap:6px}.desktop-release-actions .btn{padding-inline:8px}}
