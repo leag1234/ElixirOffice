@@ -10,15 +10,18 @@ ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument 
 
 | Version | For whom | Why choose it | Get it |
 |---|---|---|---|
-| **Desktop app** 0.3.1 | Anyone, on their own computer | 100 % local and offline: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-linux-amd64.deb) |
+| **Desktop app** 0.3.2 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-linux-amd64.deb) |
 | **Server version** 0.1.1 (beta 1.1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1.1` |
 
-Release notes, checksums and source archives: [desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1). Older versions: [desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0), [desktop 0.2.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4), [desktop 0.2.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3), [desktop 0.2.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2), [desktop 0.2.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1), [desktop 0.2.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0), [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
+Release notes, checksums and source archives: [desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1). Older versions: [desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1), [desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0), [desktop 0.2.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4), [desktop 0.2.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3), [desktop 0.2.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2), [desktop 0.2.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1), [desktop 0.2.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0), [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
+
+Desktop documents stay on your computer. Check for updates is on by default: at most once per day the app requests release metadata from GitHub (including prereleases); GitHub receives normal HTTPS connection metadata, including your IP address. Disable it in File > Options > Updates. No documents, file names, paths, recent files or user identity are sent. Notes and Download open the release page in your system browser; the app does not download or install updates.
 
 ## Release history
 
 | Version | Date | What it is |
 |---|---|---|
+| [Desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2) | 2026-10-23 | Optional Linux/X11 compact title bar, controlled release notices, aligned header icons, faster repeated font-name matching and reliable AppImage release tools |
 | [Desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1) | 2026-10-22 | Separate document windows, optional tabs/Home, Office-style start and File commands, remembered placement, equation/menu fixes and opening diagnostics |
 | [Desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0) | 2026-10-21 | Add document tabs and detach/move; improve dialogs, fonts, ODS chart caches and Linux dependencies |
 | [Desktop 0.2.4 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4) | 2026-10-20 | Improve Windows saving and diagnostics; fix toolbar contrast, page shadows and print feedback |
@@ -49,6 +52,9 @@ They would love an office suite that is open source **and** easy to use. ElixirO
 
 ### More things you will like
 
+- **A compact title bar when you want it**: opt in on Linux/X11 to combine the title or tabs with Quick Access and command search. It stays off by default; Windows, macOS and Wayland keep native frames. [Behavior and qualification](docs/desktop-compact-titlebar.md).
+- **Less repeated font matching work**: cached normalized font names reduce the demonstrated large-font-list hot path. The effect on the Windows reporter machine remains unmeasured. [Computer fonts](docs/desktop-system-fonts.md).
+- **Release notices under your control**: daily GitHub release metadata, reminders and per-version skipping, with an Options toggle and browser-only release links. [Privacy and checks](docs/desktop-release-notice.md).
 - **PDF made on your computer**: Download as PDF and Print create the PDF locally, with the fonts you see on screen.
 - **Your computer's fonts**: in Chrome or Edge, one click and the editor uses the fonts installed on your computer, nothing uploaded.
 - **Comments in the margin**, like Word: balloons next to the text, reply and resolve in place.
@@ -95,16 +101,16 @@ In your language (here French, German and Japanese):
 | For | organisations, Murena Workspace / Nextcloud, shared documents | individuals, offline use |
 | How | your own server (Docker), in the browser | Windows, macOS (Apple Silicon), Linux |
 | Documents | real-time co-editing, cloud storage; optional "convert locally" mode | 100 % local, no document server |
-| Available | 0.1.1 beta 1.1 | 0.3.1 |
+| Available | 0.1.1 beta 1.1 | 0.3.2 |
 | Install | [docs/install-server.md](docs/install-server.md) | [docs/desktop.md](docs/desktop.md) |
 
 ## Try it
 
 **Desktop app (offline, nothing to install on a server)**
 
-- **Windows**: download the [installer](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-win-x64.exe) and run it. It is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
-- **macOS** (Apple Silicon): download the [disk image](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-mac-arm64.dmg), open it and drag ElixirOffice to Applications. It is not notarized yet: if macOS blocks it, open **System Settings > Privacy & Security** and click **Open Anyway**.
-- **Linux**: download the [AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-x86_64.AppImage), make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the [.deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.1/ElixirOffice-0.3.1-linux-amd64.deb) with `sudo apt install ./ElixirOffice-*.deb`.
+- **Windows**: download the [installer](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-win-x64.exe) and run it. It is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
+- **macOS** (Apple Silicon): download the [disk image](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-mac-arm64.dmg), open it and drag ElixirOffice to Applications. It is not notarized yet: if macOS blocks it, open **System Settings > Privacy & Security** and click **Open Anyway**.
+- **Linux**: download the [AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-x86_64.AppImage), make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the [.deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-linux-amd64.deb) with `sudo apt install ./ElixirOffice-*.deb`.
 
 Then create a document or open a .docx, .xlsx, .pptx, .odt, .ods or .odp file, edit it and save: the file stays on your computer.
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## Desktop 0.3.2 (2026-10-23)
+
+### Changed and fixed
+
+- Offer bounded, daily GitHub release notices with an Updates opt-out, reminder/skip choices and browser-based release pages; no automatic download or installation.
+- Offer an opt-in compact title bar on Linux/X11, with guarded native-frame recovery and existing document controls/search.
+- Center native document header icons across the four desktop editors.
+- Cache normalized computer-font name matching work (issue31); reporter Windows impact remains unmeasured.
+- Keep AppImage raw tools in a persistent pin-verified store, check every file before allocation, and forbid cached-only download fallback even after a verified input disappears.
+
+### Qualification
+
+- Frozen by the lead on 2026-10-23; linguistic review is deferred to 0.3.3. Final packages and native acceptance remain pending actual results.
+- Compact source evidence is Linux/X11 only; other platforms retain the native frame. Windows opening delays and physical printing remain platform investigations.
+- Automatic installation is outside this release; inherited conversion/signing limits remain. See [draft notes](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2).
+
 ## Desktop 0.3.1 — release preparation (2026-10-22)
 
 ### Changed and fixed
