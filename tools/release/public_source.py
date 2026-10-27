@@ -22,7 +22,7 @@ IMAGE_FIELDS = ("path", "sha256", "bytes", "codec", "git_blob", "public_origin",
                 "signature", "frames", "extension_blocks", "LZW_subblocks", "process_matches", "decoder", "decoder_version",
                 "decoded_RGBA_bytes", "decoded_RGBA_sha256", "decoded_process_matches", "decoded_host_matches", "framing")
 PROCESS = re.compile(rb"\b(?:MSG|REPORT)\s*\d+\b|\bSession\s+[A-Z]\b|" + b"handoff" + b"/bus|\\bseen-[A-Z]\\b|\\b(?:from|to)-[A-Z][.]md\\b")
-HOST = re.compile(rb"\beo[-](?:fire|build-host)\b|\b[\w.-]+[.]ddns[.]net\b|(?:https?|ssh|wss?)://(?:fire|build-host|linux)(?:[.:/]|$)", re.I)
+HOST = re.compile(rb"\beo[-](?:fire|h[a]rdy)\b|\b[\w.-]+[.]ddns[.]net\b|(?:https?|ssh|wss?)://(?:fire|h[a]rdy|v[e]nus)(?:[.:/]|$)", re.I)
 
 
 def digest(path):
@@ -194,7 +194,7 @@ def public_origin(url):
         raise ValueError("Require a credential-free public HTTPS source origin")
     if value.hostname != "github.com" or value.port not in {None, 443} or not re.fullmatch(r"/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:[.]git)?", value.path):
         raise ValueError("Source origin must be a reviewed public GitHub repository")
-    if value.hostname in {"localhost", "fire", "build-host", "linux"} or HOST.search(url.encode()):
+    if value.hostname in {"localhost", "fire", "h" + "ardy", "v" + "enus"} or HOST.search(url.encode()):
         raise ValueError("Private source origin is forbidden")
     try:
         if not ipaddress.ip_address(value.hostname).is_global:

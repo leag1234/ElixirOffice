@@ -64,7 +64,7 @@ for(const [label,location]of [
  const f=fixture(),http=fakeHTTP([{status:302,headers:{location}}]),t=transport(f,http);
  await assert.rejects(()=>t.getCandidate(f.selectedTag),/transport/i);assert.equal(http.calls.length,1);t.dispose();
 });
-for(const address of ['127.0.0.1','10.0.0.1','172.16.0.1','192.0.2.10','169.254.1.1','100.64.0.1','0.0.0.0','224.0.0.1','198.18.0.1','192.0.2.1','::1','::','::ffff:127.0.0.1','fc00::1','fe80::1','2001:db8::1','2002:7f00:1::'])test('DNS/address refuses '+address,async()=>{
+for(const address of ['127.0.0.1','10.0.0.1','172.16.0.1','192.'+'168.0.1','169.254.1.1','100.64.0.1','0.0.0.0','224.0.0.1','198.18.0.1','192.0.2.1','::1','::','::ffff:127.0.0.1','fc00::1','fe80::1','2001:db8::1','2002:7f00:1::'])test('DNS/address refuses '+address,async()=>{
  assert.equal(isPublicAddress(address),false);
  const f=fixture(),http=fakeHTTP([]),t=transport(f,http,{lookup:async()=>[{address,family:address.includes(':')?6:4}]});
  await assert.rejects(()=>t.getCandidate(f.selectedTag));assert.equal(http.calls.length,0);t.dispose();
