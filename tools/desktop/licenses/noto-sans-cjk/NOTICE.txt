@@ -1,0 +1,4 @@
+Noto Sans CJK 2.004 — Copyright 2014-2021 Adobe (http://www.adobe.com/). Noto is a trademark of Google Inc.
+Unmodified static pan-CJK OTC Regular/Bold files. The collections retain their original JP/KR/SC/TC/HK and matching monospace names; generated application metadata exposes distinct Elixir Fallback aliases so installed system fonts keep priority. Italic is synthesized by the editor.
+Sources: https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTC/NotoSansCJK-Regular.ttc, https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTC/NotoSansCJK-Bold.ttc
+Source SHA256: b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a, faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb

@@ -11,14 +11,17 @@ test('default-on applies to unset desktop only and preserves explicit decline wi
  assert.equal(migrate({fontConsent:true},{capture:true}).fontConsent,false);
 });
 test('priority is bundled requested/metric, then usable regional system, then fallback for the requested style/script',()=>{
- const policy=resolver.create([face('Carlito','bundled'),face('Calibri','system'),face('Noto Sans CJK JP','system',0,[[0x3040,0x30ff]]),face('Noto Sans CJK KR','system',0,[[0x3040,0x30ff]]),face('Emergency','fallback',0,[[0x600,0x6ff]])],{substitutes:{Calibri:['Carlito']}});
+ const policy=resolver.create([face('Carlito','bundled'),face('Calibri','system'),face('Noto Sans CJK JP','system',0,[[0x3040,0x30ff]]),face('Noto Sans CJK KR','system',0,[[0x3040,0x30ff]]),face('Elixir Fallback CJK JP','fallback',0,[[0x3040,0x30ff]]),face('Emergency','fallback',0,[[0x600,0x6ff]])],{substitutes:{Calibri:['Carlito']}});
  assert.equal(policy.resolve({name:'Calibri'}).family,'Carlito');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ja'}).family,'Noto Sans CJK JP');
+ assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ja'}).source,'system');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ko'}).family,'Noto Sans CJK KR');
  assert.equal(policy.resolve({name:'Calibri',codepoints:[0x600],candidates:['Emergency']}).source,'fallback');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x600]}),null);
  const italic=policy.resolve({name:'Calibri',style:2});assert.equal(italic.family,'Carlito');assert.equal(italic.syntheticItalic,true);
  assert.throws(()=>policy.resolve({name:'Calibri',style:4}),/style/);
+ const packaged=resolver.create([face('Elixir Fallback CJK JP','fallback',0,[[0x3040,0x30ff]])]).resolve({name:'Unknown',style:2,codepoints:[0x3042],locale:'ja',candidates:['Noto Sans CJK JP','Elixir Fallback CJK JP']});
+ assert.equal(packaged.source,'fallback');assert.equal(packaged.syntheticItalic,true);
 });
 test('exact normalized Unicode names preserve punctuation and do not collide across scripts',()=>{
  const policy=resolver.create([face('Font-A','bundled'),face('Font A','system'),face('خط','system'),face('글꼴','system')]);
@@ -85,7 +88,7 @@ test('revocation during private discovery rejects the pending index and leaves n
   const pending=fonts.index();fonts.clear();await assert.rejects(pending,/stopped|changed/);assert.equal(fonts.files.size,0);
  }finally{await fs.rm(temp,{recursive:true,force:true});}
 });
-test('actual bundled metadata preserves all49 shared families and110 faces plus the exact optional desktop fallbacks',async()=>{
+test('actual bundled metadata preserves all49 shared families and110 faces plus the exact desktop fallbacks',async()=>{
  const fonts=new Fonts();fonts.allowed=[];fonts.configure({bundled:assets,bundleIdentity:'actual-pack'});
  try{
   const index=await fonts.index(),profile=require('./fixtures/shared-font-profile.json'),sha=bytes=>require('node:crypto').createHash('sha256').update(bytes).digest('hex');
@@ -102,18 +105,26 @@ test('actual bundled metadata preserves all49 shared families and110 faces plus 
    expected.delete(key);
   }
   assert.equal(expected.size,0);
-  assert([0,4].includes(extra.length),'Only the complete four-face desktop fallback extension is allowed');
-  if(extra.length){
+  assert.equal(extra.length,24,'Four small-script faces plus twenty pan-CJK collection faces are required');
+  {
    const fallbacks=require('../../tools/desktop/fallback-fonts.json'),seen=new Set(),wire=[160,102,214,32,20,150,71,250,149,105,184,80,176,65,73,72];
    for(const f of extra){
-    const spec=fallbacks.find(item=>item.family===f.family),style=['Regular','Bold'][f.styleCode];assert(spec&&style);assert.equal(f.faceIndex,0);assert.equal(f.source,'fallback');
+    const spec=fallbacks.find(item=>item.family===f.family||item.aliases&&item.aliases.includes(f.family)),style=['Regular','Bold'][f.styleCode];assert(spec&&style);assert.equal(f.source,'fallback');
     const key=f.family+'|'+style;assert(!seen.has(key));seen.add(key);
     const raw=Buffer.from(await fs.readFile(path.join(assets,'fonts',f.file)));for(let i=0;i<Math.min(32,raw.length);i++)raw[i]^=wire[i%16];
-    assert.equal(sha(raw),spec.outputs.find(item=>item.style===style).sha256);
+    if(spec.mode==='copy'){
+     assert.equal(f.faceIndex,spec.aliases.indexOf(f.family));
+     assert.equal(sha(raw),spec.fonts.find(item=>item.style===style).sha256);
+    }else{
+     assert.equal(f.faceIndex,0);assert.equal(sha(raw),spec.outputs.find(item=>item.style===style).sha256);
+    }
    }
-   assert.equal(seen.size,4);assert.equal(new Set(index.bundled.map(f=>f.family)).size,51);assert.equal(index.bundled.length,114);
+   assert.equal(seen.size,24);assert.equal(new Set(index.bundled.map(f=>f.family)).size,61);assert.equal(index.bundled.length,134);
   }
   const info=shared.find(f=>f.family==='Carlito'&&f.styleCode===0);assert(info);assert(resolver.covers(info,[65]));assert.equal(info.faceIndex,0);assert(!resolver.covers(info,[0x3042]));
+  for(const family of ['Elixir Fallback CJK JP','Elixir Fallback CJK SC','Elixir Fallback CJK TC','Elixir Fallback CJK KR']){
+   const cjk=extra.find(f=>f.family===family&&f.styleCode===0);assert(cjk&&resolver.covers(cjk,[0x4e00]));
+  }
  }finally{fonts.clear();}
 });
 

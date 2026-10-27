@@ -1,0 +1,1242 @@
+[
+  {
+    "id": "generate-lesson-en",
+    "lang": "en",
+    "category": "generate",
+    "instruction": "Append two slides for a class about the water cycle. Use the exact titles “Evaporation” and “Condensation”. Give each slide two short factual body paragraphs. Keep the existing slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 2,
+      "titles": [
+        "Evaporation",
+        "Condensation"
+      ],
+      "exactBodyParagraphs": 2
+    }
+  },
+  {
+    "id": "generate-business-en",
+    "lang": "en",
+    "category": "generate",
+    "instruction": "Append one slide titled “Weekly sales”. Use exactly two body paragraphs: “Sales: 2400 euros.” and “Profit: 600 euros.” Keep the existing slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 1,
+      "titles": [
+        "Weekly sales"
+      ],
+      "requiredBody": [
+        "Sales: 2400 euros.",
+        "Profit: 600 euros."
+      ],
+      "exactBodyParagraphs": 2
+    }
+  },
+  {
+    "id": "generate-from-deck-en",
+    "lang": "en",
+    "category": "generate",
+    "instruction": "From the project described in slide 1, append one slide titled “Thank you”. Include the facts 120 books and 15 days in its body. Keep the existing slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 1,
+      "titles": [
+        "Thank you"
+      ],
+      "requiredBodyTerms": [
+        "120 books",
+        "15 days"
+      ]
+    }
+  },
+  {
+    "id": "shorten-en",
+    "lang": "en",
+    "category": "rewrite",
+    "instruction": "Shorten only the first body paragraph on slide 1 to at most 85 characters, preserving the facts 120 books and 15 days. Keep all other text.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 85,
+      "terms": [
+        "120",
+        "15"
+      ]
+    }
+  },
+  {
+    "id": "rewrite-simple-en",
+    "lang": "en",
+    "category": "rewrite",
+    "instruction": "Rewrite only the first body paragraph of slide 1 in simpler language for children, preserving 120 books, 15 days and the library. Keep every other paragraph.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 180,
+      "terms": [
+        "120",
+        "15",
+        "library"
+      ]
+    }
+  },
+  {
+    "id": "rewrite-polite-en",
+    "lang": "en",
+    "category": "rewrite",
+    "instruction": "On slide 1 rewrite only the first body paragraph politely and constructively. Include “Thank you” and remove “terrible”. Keep every other paragraph.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Your work was terrible and you did not listen.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 250,
+      "terms": [
+        "Thank you"
+      ],
+      "forbidden": [
+        "terrible"
+      ]
+    }
+  },
+  {
+    "id": "notes-replace-en",
+    "lang": "en",
+    "category": "notes",
+    "instruction": "Replace only the speaker notes on slide 2 with exactly “Explain the 600 euro profit.”",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "notes",
+      "slide": 2,
+      "expected": "Explain the 600 euro profit."
+    }
+  },
+  {
+    "id": "notes-append-en",
+    "lang": "en",
+    "category": "notes",
+    "instruction": "Append “Ask for one example.” as a new paragraph to the speaker notes on slide 1, keeping the current notes.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "notes",
+      "slide": 1,
+      "expected": "Begin with a question.\nAsk for one example."
+    }
+  },
+  {
+    "id": "layout-content-en",
+    "lang": "en",
+    "category": "layout",
+    "instruction": "Apply the embedded “Title and Content” layout (master 1, layout 2) to slide 1 only. Preserve every text and the other slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "layout",
+      "slide": 1,
+      "layoutName": "Title and Content"
+    }
+  },
+  {
+    "id": "layout-blank-en",
+    "lang": "en",
+    "category": "layout",
+    "instruction": "Apply the embedded “Blank” layout (master 1, layout 7) to slide 2 only. Preserve all existing text and other slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "layout",
+      "slide": 2,
+      "layoutName": "Blank"
+    }
+  },
+  {
+    "id": "align-left-en",
+    "lang": "en",
+    "category": "align",
+    "instruction": "Align the two text shapes on slide 1 by their left edges. Do not resize or change text or other slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question.",
+        "positions": [
+          [
+            1000000,
+            800000,
+            4000000,
+            1800000
+          ],
+          [
+            2000000,
+            3000000,
+            6000000,
+            2200000
+          ]
+        ]
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "align",
+      "slide": 1,
+      "alignment": "left"
+    }
+  },
+  {
+    "id": "align-top-en",
+    "lang": "en",
+    "category": "align",
+    "instruction": "Align the two text shapes on slide 1 by their top edges. Do not resize or change text or other slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question.",
+        "positions": [
+          [
+            1000000,
+            800000,
+            4000000,
+            1800000
+          ],
+          [
+            2000000,
+            3000000,
+            6000000,
+            2200000
+          ]
+        ]
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "align",
+      "slide": 1,
+      "alignment": "top"
+    }
+  },
+  {
+    "id": "theme-citrus-en",
+    "lang": "en",
+    "category": "theme",
+    "instruction": "Apply the second embedded theme, Public Citrus, to slide 2 only. Preserve all text and keep the theme and layout of the other slides.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "theme",
+      "slide": 2,
+      "accent1": "FF8800"
+    }
+  },
+  {
+    "id": "summarize-en",
+    "lang": "en",
+    "category": "summary",
+    "instruction": "Summarize the deck in three short sentences. Mention the book count and days, revenue, costs and profit. Do not edit anything.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "answer",
+      "readOnly": true,
+      "answerTerms": [
+        "120",
+        "15",
+        "2400",
+        "1800",
+        "600"
+      ]
+    }
+  },
+  {
+    "id": "outline-en",
+    "lang": "en",
+    "category": "outline",
+    "instruction": "Suggest a three-part outline based on this deck as a plain-text answer, mentioning the class project, the business figures and next steps. Do not create slides or modify anything.",
+    "slides": [
+      {
+        "title": "Class project",
+        "bullets": [
+          "Our class collected 120 books in 15 days, and the volunteers carefully checked every book before sending the complete collection to the local library.",
+          "The workshop begins at 10:00."
+        ],
+        "notes": "Begin with a question."
+      },
+      {
+        "title": "Small business",
+        "bullets": [
+          "Revenue: 2400 euros. Costs: 1800 euros.",
+          "Profit: 600 euros."
+        ],
+        "notes": "Explain the difference between revenue and profit."
+      },
+      {
+        "title": "Next steps",
+        "bullets": [
+          "Invite the volunteers and thank them."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "answer",
+      "readOnly": true,
+      "answerGroups": [
+        [
+          "project",
+          "class",
+          "books"
+        ],
+        [
+          "business",
+          "revenue",
+          "profit"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "generate-lesson-fr",
+    "lang": "fr",
+    "category": "generate",
+    "instruction": "Ajoute deux diapositives pour un cours sur le cycle de l’eau. Utilise les titres exacts « Évaporation » et « Condensation ». Chaque diapositive doit avoir deux courts paragraphes factuels. Conserve les diapositives existantes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 2,
+      "titles": [
+        "Évaporation",
+        "Condensation"
+      ],
+      "exactBodyParagraphs": 2
+    }
+  },
+  {
+    "id": "generate-business-fr",
+    "lang": "fr",
+    "category": "generate",
+    "instruction": "Ajoute une diapositive intitulée « Ventes hebdomadaires ». Utilise exactement deux paragraphes : « Ventes : 2400 euros. » et « Bénéfice : 600 euros. ». Conserve les diapositives existantes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 1,
+      "titles": [
+        "Ventes hebdomadaires"
+      ],
+      "requiredBody": [
+        "Ventes : 2400 euros.",
+        "Bénéfice : 600 euros."
+      ],
+      "exactBodyParagraphs": 2
+    }
+  },
+  {
+    "id": "generate-from-deck-fr",
+    "lang": "fr",
+    "category": "generate",
+    "instruction": "À partir du projet décrit sur la diapositive 1, ajoute une diapositive intitulée « Merci ». Mentionne les faits 120 livres et 15 jours dans son corps. Conserve les diapositives existantes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "generate",
+      "added": 1,
+      "titles": [
+        "Merci"
+      ],
+      "requiredBodyTerms": [
+        "120 livres",
+        "15 jours"
+      ]
+    }
+  },
+  {
+    "id": "shorten-fr",
+    "lang": "fr",
+    "category": "rewrite",
+    "instruction": "Raccourcis uniquement le premier paragraphe du corps de la diapositive 1 à 85 caractères maximum, en conservant les faits 120 livres et 15 jours. Conserve tous les autres textes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 85,
+      "terms": [
+        "120",
+        "15"
+      ]
+    }
+  },
+  {
+    "id": "rewrite-simple-fr",
+    "lang": "fr",
+    "category": "rewrite",
+    "instruction": "Réécris uniquement le premier paragraphe du corps de la diapositive 1 dans un langage plus simple pour des enfants, en conservant 120 livres, 15 jours et la bibliothèque. Garde les autres paragraphes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 180,
+      "terms": [
+        "120",
+        "15",
+        "bibliothèque"
+      ]
+    }
+  },
+  {
+    "id": "rewrite-polite-fr",
+    "lang": "fr",
+    "category": "rewrite",
+    "instruction": "Sur la diapositive 1, réécris uniquement le premier paragraphe du corps avec un ton poli et constructif. Inclus « Merci » et retire « nul ». Garde les autres paragraphes.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Votre travail était nul et vous n’avez rien écouté.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "rewrite",
+      "slide": 1,
+      "paragraph": 1,
+      "maxLength": 250,
+      "terms": [
+        "Merci"
+      ],
+      "forbidden": [
+        "nul"
+      ]
+    }
+  },
+  {
+    "id": "notes-replace-fr",
+    "lang": "fr",
+    "category": "notes",
+    "instruction": "Remplace uniquement les notes du présentateur de la diapositive 2 par exactement « Expliquer le bénéfice de 600 euros. ».",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "notes",
+      "slide": 2,
+      "expected": "Expliquer le bénéfice de 600 euros."
+    }
+  },
+  {
+    "id": "notes-append-fr",
+    "lang": "fr",
+    "category": "notes",
+    "instruction": "Ajoute « Demander un exemple. » dans un nouveau paragraphe aux notes du présentateur de la diapositive 1, en conservant les notes actuelles.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "notes",
+      "slide": 1,
+      "expected": "Commencer par une question.\nDemander un exemple."
+    }
+  },
+  {
+    "id": "layout-content-fr",
+    "lang": "fr",
+    "category": "layout",
+    "instruction": "Applique la disposition intégrée « Title and Content » (masque 1, disposition 2) uniquement à la diapositive 1. Préserve tous les textes et les autres diapositives.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "layout",
+      "slide": 1,
+      "layoutName": "Title and Content"
+    }
+  },
+  {
+    "id": "layout-blank-fr",
+    "lang": "fr",
+    "category": "layout",
+    "instruction": "Applique la disposition intégrée « Blank » (masque 1, disposition 7) uniquement à la diapositive 2. Préserve les textes existants et les autres diapositives.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "layout",
+      "slide": 2,
+      "layoutName": "Blank"
+    }
+  },
+  {
+    "id": "align-left-fr",
+    "lang": "fr",
+    "category": "align",
+    "instruction": "Aligne les deux formes de texte de la diapositive 1 par leur bord gauche. Ne modifie ni leur taille, ni le texte, ni les autres diapositives.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question.",
+        "positions": [
+          [
+            1000000,
+            800000,
+            4000000,
+            1800000
+          ],
+          [
+            2000000,
+            3000000,
+            6000000,
+            2200000
+          ]
+        ]
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "align",
+      "slide": 1,
+      "alignment": "left"
+    }
+  },
+  {
+    "id": "align-top-fr",
+    "lang": "fr",
+    "category": "align",
+    "instruction": "Aligne les deux formes de texte de la diapositive 1 par leur bord supérieur. Ne modifie ni leur taille, ni le texte, ni les autres diapositives.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question.",
+        "positions": [
+          [
+            1000000,
+            800000,
+            4000000,
+            1800000
+          ],
+          [
+            2000000,
+            3000000,
+            6000000,
+            2200000
+          ]
+        ]
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "align",
+      "slide": 1,
+      "alignment": "top"
+    }
+  },
+  {
+    "id": "theme-citrus-fr",
+    "lang": "fr",
+    "category": "theme",
+    "instruction": "Applique le deuxième thème intégré, Public Citrus, uniquement à la diapositive 2. Préserve tous les textes, ainsi que le thème et la disposition des autres diapositives.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "theme",
+      "slide": 2,
+      "accent1": "FF8800"
+    }
+  },
+  {
+    "id": "summarize-fr",
+    "lang": "fr",
+    "category": "summary",
+    "instruction": "Résume la présentation en trois phrases courtes. Mentionne le nombre de livres et de jours, les recettes, les coûts et le bénéfice. Ne modifie rien.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "answer",
+      "readOnly": true,
+      "answerTerms": [
+        "120",
+        "15",
+        "2400",
+        "1800",
+        "600"
+      ]
+    }
+  },
+  {
+    "id": "outline-fr",
+    "lang": "fr",
+    "category": "outline",
+    "instruction": "Propose un plan en trois parties à partir de cette présentation, sous forme de réponse textuelle, en mentionnant le projet de classe, les chiffres de l’entreprise et les prochaines étapes. Ne crée aucune diapositive et ne modifie rien.",
+    "slides": [
+      {
+        "title": "Projet de classe",
+        "bullets": [
+          "Notre classe a collecté 120 livres en 15 jours, et les bénévoles ont vérifié soigneusement chaque livre avant de remettre la collecte complète à la bibliothèque.",
+          "L’atelier commence à 10 h."
+        ],
+        "notes": "Commencer par une question."
+      },
+      {
+        "title": "Petite entreprise",
+        "bullets": [
+          "Recettes : 2400 euros. Coûts : 1800 euros.",
+          "Bénéfice : 600 euros."
+        ],
+        "notes": "Expliquer la différence entre recettes et bénéfice."
+      },
+      {
+        "title": "Prochaines étapes",
+        "bullets": [
+          "Inviter les bénévoles et les remercier."
+        ],
+        "notes": ""
+      }
+    ],
+    "criteria": {
+      "type": "answer",
+      "readOnly": true,
+      "answerGroups": [
+        [
+          "projet",
+          "classe",
+          "livres"
+        ],
+        [
+          "entreprise",
+          "recettes",
+          "bénéfice"
+        ]
+      ]
+    }
+  }
+]

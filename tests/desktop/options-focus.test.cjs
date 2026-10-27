@@ -7,7 +7,7 @@ const start=source.indexOf('async function showOptions(){'),end=source.indexOf('
 assert(start>=0&&end>start,'Load the complete production Options function');
 
 function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false,customTitleBar=false,customTitleBarAvailable=false,openInTabs=false,showHomeTab=false}={}){
- const focused=[],boxes=[],windowSaved=[],languageSaved=[],restarts=[];let release,opened;const opening=new Promise(r=>opened=r);
+ const focused=[],boxes=[],windowSaved=[],languageSaved=[],interfaceSaved=[],restarts=[];let release,opened;const opening=new Promise(r=>opened=r);
  const document={activeElement:null,createTextNode:text=>({text}),createElement:tag=>element(tag),querySelector:selector=>selector==='dialog[open]'?boxes.find(b=>b.open)||null:null};
  function element(tag,doc=document){
   const e={tagName:tag.toUpperCase(),ownerDocument:doc,isConnected:true,children:[],listeners:{},parentElement:null,
@@ -28,21 +28,21 @@ function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false
  if(closedInvoker){const old=element('dialog');old.className='desktop-options';old.open=false;invoker=element('button');old.append(invoker);}
  document.activeElement=invoker;
  const context={document,frame:originalFrame,file:originalFile,controller:originalController,main:null,
-  t:x=>x,eoDesktop:{languageOptions:async()=>({value:'',active:'en',system:'en',locales:[{language:'en',name:'English'},{language:'de',name:'Deutsch'},{language:'fr',name:'français'}]}),languageSettings:async value=>languageSaved.push(value),restart:async()=>restarts.push(true),releaseOptions:async()=>({enabled:true}),releaseSettings:async()=>{},windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
+  t:x=>x,eoDesktop:{interfaceSize:async()=>({value:100,levels:require('../../desktop/interface-size.cjs').levels}),interfaceSizeSet:async value=>{interfaceSaved.push(require('../../desktop/interface-size.cjs').validate(value));return {value};},languageOptions:async()=>({value:'',active:'en',system:'en',locales:[{language:'en',name:'English'},{language:'de',name:'Deutsch'},{language:'fr',name:'français'}]}),languageSettings:async value=>languageSaved.push(value),restart:async()=>restarts.push(true),releaseOptions:async()=>({enabled:true}),releaseSettings:async()=>{},windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
   modal:()=>{const box=element('dialog');box.className='desktop-options';box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
   addFontOptions:async()=>{},modalButton:(box,label,fn)=>{const b=element('button');b.textContent=label;b.action=fn;box.append(b);return b;}
  };
  vm.createContext(context);vm.runInContext(source.slice(start,end)+'\nthis.runOptions=showOptions;',context);
  const open=async()=>{const result=context.runOptions();await opening;return {box:boxes.at(-1),result};};
  const clear=()=>focused.splice(0);const close=box=>{box.close();clear();box.dispatchClose();};
- return {windowSaved,languageSaved,restarts,document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
+ return {windowSaved,languageSaved,interfaceSaved,restarts,document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
 }
 
-test('Options focuses its attached first recovery control before delayed author IPC',async()=>{
+test('Options focuses its attached first General control before delayed author IPC',async()=>{
  const f=fixture({pending:true}),{box,result}=await f.open();
  const controls=node=>(node.children||[]).flatMap(child=>['INPUT','SELECT','BUTTON'].includes(child.tagName)?[child]:controls(child));
  const first=controls(box)[0];
- assert.equal(first.id,'recovery-enabled');assert.equal(f.document.activeElement,first);assert(box.contains(first));
+ assert.equal(first.id,'interface-size');assert.equal(f.document.activeElement,first);assert(box.contains(first));
  f.close(box);f.clear();f.release();await result;
  assert.deepEqual(f.focused,[],'Late detached content must not retake focus');
 });
@@ -119,4 +119,19 @@ test('A display-language persistence error prevents restart',async()=>{
  const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
  await assert.rejects(nodes.find(n=>n.id==='display-language-restart-now').action(),/language write failure/);
  assert.equal(f.restarts.length,0);assert.equal(box.open,true);
+});
+
+test('General interface size offers bounded presets and persists only after explicit Save',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box),field=nodes.find(node=>node.id==='interface-size');
+ assert.equal(field.value,'100');assert.deepEqual(field.children.map(node=>node.textContent),['80%','90%','100%','110%','125%','150%','175%','200%']);
+ field.value='125';assert.deepEqual(f.interfaceSaved,[]);
+ await nodes.find(node=>node.className==='btn btn-primary').action();assert.deepEqual(f.interfaceSaved,[125]);
+});
+test('a failed interface-size write keeps Options open and prevents restart',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ f.context.eoDesktop.interfaceSizeSet=async()=>{throw Error('Synthetic interface-size failure')};
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
+ await assert.rejects(nodes.find(node=>node.id==='display-language-restart-now').action(),/interface-size failure/);
+ assert.equal(box.open,true);assert.deepEqual(f.restarts,[]);
 });

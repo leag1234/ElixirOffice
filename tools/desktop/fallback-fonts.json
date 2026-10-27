@@ -50,5 +50,58 @@
       }
     ],
     "noticeSha256": "0aad5dafb09d62fd3851b815ab21ffe50f32171ea6168beaaa2c9437bb4f6c77"
+  },
+  {
+    "family": "Noto Sans CJK",
+    "upstreamFamily": "Noto Sans CJK",
+    "version": "2.004",
+    "copyright": "Copyright 2014-2021 Adobe (http://www.adobe.com/). Noto is a trademark of Google Inc.",
+    "directory": "noto-sans-cjk",
+    "mode": "copy",
+    "families": [
+      "Noto Sans CJK JP",
+      "Noto Sans CJK KR",
+      "Noto Sans CJK SC",
+      "Noto Sans CJK TC",
+      "Noto Sans CJK HK",
+      "Noto Sans Mono CJK JP",
+      "Noto Sans Mono CJK KR",
+      "Noto Sans Mono CJK SC",
+      "Noto Sans Mono CJK TC",
+      "Noto Sans Mono CJK HK"
+    ],
+    "aliases": [
+      "Elixir Fallback CJK JP",
+      "Elixir Fallback CJK KR",
+      "Elixir Fallback CJK SC",
+      "Elixir Fallback CJK TC",
+      "Elixir Fallback CJK HK",
+      "Elixir Fallback Mono CJK JP",
+      "Elixir Fallback Mono CJK KR",
+      "Elixir Fallback Mono CJK SC",
+      "Elixir Fallback Mono CJK TC",
+      "Elixir Fallback Mono CJK HK"
+    ],
+    "fonts": [
+      {
+        "style": "Regular",
+        "filename": "NotoSansCJK-Regular.ttc",
+        "url": "https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTC/NotoSansCJK-Regular.ttc",
+        "bytes": 19484784,
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+      },
+      {
+        "style": "Bold",
+        "filename": "NotoSansCJK-Bold.ttc",
+        "url": "https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTC/NotoSansCJK-Bold.ttc",
+        "bytes": 20050760,
+        "sha256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb"
+      }
+    ],
+    "license": {
+      "url": "https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/LICENSE",
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    "noticeSha256": "dba48899fb3e605efe252cd608dea8d4209dbae6efc33b97787582829a4a08ed"
   }
 ]

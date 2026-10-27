@@ -45,6 +45,11 @@ Bundled fonts are available offline. Optional computer fonts are indexed only af
 
 Missing fonts use the documented metric-compatible fallback set. Local font discovery failure does not disable saving or conversion.
 
+A late Word font refresh can require editor layout after conversion has finished.
+The 0.4 source candidate preserves its reading viewport through SDK anchors; this
+is an editor fix, with no Wasm rebuild or runtime change. Native evidence does
+not measure the duration of a micro-freeze. See [font refresh](word-font-relayout.md).
+
 ## Build and patch set
 
 [build.sh](../tools/wasm/build.sh) runs the reproducible Emscripten build in the pinned container, applies the ordered patches in [patches](../tools/wasm/patches), and emits JavaScript glue, the Wasm module and compressed variants. Use one work directory for a build series and run containers with the caller's UID and GID.
@@ -189,3 +194,18 @@ The preparation branch reuses the unchanged matched full/PDF runtime pins from 0
 ### Closed desktop updater controller (2026-10-24 source candidate)
 
 The signed-update controller/UI changes no converter, Wasm runtime or artifact pin. Qualification uses the existing packaged resources and an isolated Linux X11 source app with mocked installer effects. No new conversion or startup performance measurement is claimed. [Controller gates](desktop-updater-app-proposal.md#slice-5d-controller-and-ui-production-closed).
+
+
+### Held0.4 spreadsheet AI qualification
+The spreadsheet AI adapter uses the existing public builder and runtime; no x2t.wasm or SDK patch is required. Authored sandboxed XLSX checks cover native grouped Undo, cancellation, types, charts/pivots and actual Save/reopen. Model evaluations use the already approved server-managed proxy, not a new Wasm/network route. [Scope and distinct qualification evidence](ai-cell-tools.md).
+
+
+### Held 0.4 presentation AI qualification
+The slide adapter uses existing public presentation builder APIs, with no converter, SDK or Wasm pin change. Sandboxed Linux checks cover native Undo/cancellation, notes-format preservation, actual Save/reopen, compiled consent/UI and generated canvas visibility. The rendered-text regression caught inherited white text that text/state-only checks missed; explicit theme text color and half-point font sizes fixed it. Model quality and private deterministic checks are separate measurements. [Scope and current evidence](ai-slide-tools.md).
+
+
+### Illustrated AI guide qualification
+The held 0.4 [AI guide](ai-features.md) uses the existing runtime and correctly themed compiled editor resources on a private Linux display. Screenshots verify actual public-tool output and native consent with deterministic in-memory replies. No converter/Wasm/SDK pin changes, provider calls or conversion-performance claims accompany this documentation delta.
+
+## Desktop interface-size qualification (2026-10-27)
+The0.4 source candidate retains the pinned Wasm runtime. Official SDK JavaScript bootstraps were rebuilt to preserve real desktop fractional density. Private Linux checks cover32preset/editor states, Options save and fresh restart in4formats, plus independent PDF page/text geometry checks. The pre-existing scale-derived noncustom spreadsheet default-height rewrite is recorded for0.5. [Scope and limitations](desktop-interface-size.md).

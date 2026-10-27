@@ -6,9 +6,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
 const sdk = process.env.EO_SDKJS || path.join(process.env.HOME, 'elixiroffice/wt/w1/sdkjs');
+const window = { location: { href: 'http://localhost/web-apps/apps/documenteditor/main/index.html' }, AscCommon: {} };
 const context = { URL, Uint8Array, DataView, Map, Number, Promise,
-	window: { location: { href: 'http://localhost/web-apps/apps/documenteditor/main/index.html' } },
-	AscCommon: { ClientPdf: { registerBackend() {}, unsupported(code) { const e = new Error(code); e.code = code; return e; } } } };
+	window, AscCommon: window.AscCommon };
+vm.runInNewContext(fs.readFileSync(path.join(sdk, 'common/clientpdf/clientpdf.js'), 'utf8'), context);
+assert.deepEqual(Array.from(window.AscCommon.ClientPdf.cjkRanges, range=>Array.from(range)),
+	[[0x1100,0x11FF],[0x2E80,0xA4CF],[0xAC00,0xD7FF],[0xF900,0xFAFF],[0xFF61,0xFF9F],[0x20000,0x323AF]]);
 vm.runInNewContext(fs.readFileSync(path.join(sdk, 'common/clientpdf/wasm-pdf.js'), 'utf8'), context);
 const Scanner = context.window.EOWasmPdf.Scanner;
 const s = new Scanner();
@@ -22,6 +25,10 @@ assert.equal(s.fonts.get('Fira Sans|1').style, 1);
 assert.equal(s.images.get('blob:test').path, 'media/image0.png');
 assert.equal(output[0], 202);
 assert.ok(Buffer.from(output).includes(Buffer.from('media/image0.png', 'utf16le')));
+const cjk = Buffer.concat([Buffer.from([202, 41]), str('Text'), Buffer.from([83]), int(0), Buffer.alloc(8), int(1), int(0x65E5), Buffer.from([203])]);
+assert.throws(() => new Scanner().feed(new Uint8Array(cjk)), error => error.code === 'cjk');
+const negativeGlyphCount = Buffer.concat([Buffer.from([202, 83]), int(0), Buffer.alloc(8), int(-1), Buffer.from([203])]);
+assert.throws(() => new Scanner().feed(new Uint8Array(negativeGlyphCount)), error => error.code === 'command');
 for (const broken of [[41, 255, 255], [83, 0], [31, 0], [169, 0, 0, 0, 0], [111, 255, 255, 255, 255], [8]]) {
 	assert.throws(() => new Scanner().feed(new Uint8Array(broken)));
 }

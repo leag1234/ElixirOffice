@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   about: () => ipcRenderer.invoke('eo:about'),
   quit: () => ipcRenderer.invoke('eo:quit'),
   restart: () => ipcRenderer.invoke('eo:restart'),
+  interfaceSize: () => ipcRenderer.invoke('eo:interface-size'),
+  interfaceSizeSet: value => ipcRenderer.invoke('eo:interface-size-set', value),
   languageOptions: () => ipcRenderer.invoke('eo:language-options'),
   languageSettings: value => ipcRenderer.invoke('eo:language-settings', value),
   help: () => ipcRenderer.invoke('eo:help'),

@@ -12,6 +12,8 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const SDKJS = process.env.SDKJS || path.join(os.homedir(), "elixiroffice/DocumentServer/sdkjs");
+globalThis.window=globalThis;
+require(path.join(SDKJS, "common/clientpdf/clientpdf.js"));
 const fontkit = require(path.join(SDKJS, "common/clientpdf/vendor/fontkit/fontkit.umd.min.js"));
 require(path.join(SDKJS, "common/clientpdf/eo-pdf.js"));
 const EOPdf = globalThis.EOPdf;
@@ -119,6 +121,42 @@ ok("pdftoppm renders both pages", fs.existsSync(ppm + "-1.png") && fs.existsSync
   ok("no error from poppler while rendering", !/Error/i.test(r.stderr), r.stderr.slice(0, 300));
 }
 ok("glyph and path counts", writer.stats.glyphs > 30 && writer.stats.paths === 2 && writer.stats.gradients === 1, JSON.stringify(writer.stats));
+
+if (TTC) {
+  const alias="Elixir Fallback CJK SC",source="日本語中文";
+  fonts[alias]={key:alias,bytes:new Uint8Array(fs.readFileSync(TTC)),faceIndex:2};
+  globalThis.AscFonts={FontPickerByCharacter:{getFontBySymbol:()=>alias}};
+  const cjk=new W();cjk.byte(202).byte(41).str("Text").byte(42).dbl(14).byte(43).int(0);
+  let x=20;for(const char of source){cjk.byte(83).int(0).dbl(x).dbl(30).int(1).int(char.codePointAt(0));x+=8;}cjk.byte(203);
+  const cw=new EOPdf.Writer({fontkit,getFont:async name=>fonts[name]||null,getImage:async()=>null});
+  await cw.feed(cjk.bytes());const cjkOut=path.join(os.tmpdir(),"eo-writer-cjk-missing-gids.pdf");fs.writeFileSync(cjkOut,await cw.finish());
+  ok("CJK fallback recomputes missing GIDs from Unicode",sh("pdftotext",[cjkOut,"-"]).replace(/\s/g,"").includes(source));
+  delete globalThis.AscFonts;
+}
+
+if (TTC) {
+  const jp='Elixir Fallback CJK JP',sc='Elixir Fallback CJK SC';
+  fonts[jp]={key:jp,bytes:new Uint8Array(fs.readFileSync(TTC)),faceIndex:1};
+  fonts[sc]={key:sc,bytes:new Uint8Array(fs.readFileSync(TTC)),faceIndex:2};
+  globalThis.AscFonts={FontPickerByCharacter:{getFontBySymbol:()=>sc}};
+  let jpFont=fontkit.create(fs.readFileSync(TTC));jpFont=jpFont.fonts[1];
+  const bone=jpFont.glyphForCodePoint(0x9AA8);
+  const mixed=new W();mixed.byte(202).byte(41).str(jp).byte(42).dbl(14).byte(43).int(0);
+  mixed.byte(83).int(bone.id).dbl(20).dbl(30).int(1).int(0x9AA8);
+  mixed.byte(41).str('Sym');
+  mixed.byte(83).int(0).dbl(30).dbl(30).int(1).int(0x65E5);
+  const latinFont=fontkit.create(fs.readFileSync(SYM)),ligature=latinFont.layout('ffi').glyphs.find(g=>g.codePoints.length>1);
+  mixed.byte(83).int(ligature.id).dbl(40).dbl(30).int(ligature.codePoints.length);
+  ligature.codePoints.forEach(cp=>mixed.int(cp));mixed.byte(203);
+  const mw=new EOPdf.Writer({fontkit,getFont:async name=>fonts[name]||null,getImage:async()=>null});
+  await mw.feed(mixed.bytes());const mixedOut=path.join(os.tmpdir(),'eo-writer-cjk-local-fallback.pdf');fs.writeFileSync(mixedOut,await mw.finish());
+  const mixedText=sh('pdftotext',[mixedOut,'-']).replace(/\s/g,'');
+  ok('valid JP glyph keeps the declared regional font',mw.fontByName.has(jp+'|0')&&mw.fontByName.get(jp+'|0').entry.cids.has(bone.id));
+  const textEntry=mw.fontByName.get('Sym|0').entry,ligatureCid=textEntry.cids.get(ligature.id);
+  ok('missing Han fallback stays local and following ffi keeps shaped glyph',mixedText.includes('骨日ffi')&&mw.st.font==='Sym'&&
+    textEntry.cids.has(ligature.id)&&String(textEntry.uni.get(ligatureCid))==='102,102,105',JSON.stringify({mixedText,font:mw.st.font,ligatureId:ligature.id,ligatureCid,unicode:textEntry.uni.get(ligatureCid)}));
+  delete globalThis.AscFonts;
+}
 
 // unsupported content -> explicit error code (the editor falls back to the server)
 {

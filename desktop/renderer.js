@@ -372,15 +372,19 @@ function modalButton(box,label,action){
 }
 let releaseBanner;
 async function showOptions(){
- const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),releaseOptions=await eoDesktop.releaseOptions(),languageOptions=await eoDesktop.languageOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
+ const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),releaseOptions=await eoDesktop.releaseOptions(),languageOptions=await eoDesktop.languageOptions(),interfaceOptions=await eoDesktop.interfaceSize(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
  const returnTarget=returnFrame&&(invoker===document.body||invoker?.closest('dialog.desktop-options:not([open])'))?returnFrame.frameElement:invoker;
  const returnDocument=returnTarget?.tagName==='IFRAME'?returnTarget.contentDocument:null,returnChild=returnDocument?.activeElement;
  const box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
- const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),releaseGroup=document.createElement('section'),languageGroup=document.createElement('section'),actions=document.createElement('div');
+ const generalGroup=document.createElement('section'),recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),releaseGroup=document.createElement('section'),languageGroup=document.createElement('section'),actions=document.createElement('div');
  box.className+=' desktop-preferences';
- for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup,languageGroup])group.className='desktop-setting-section';
+ for(const group of [generalGroup,recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup,languageGroup])group.className='desktop-setting-section';
  recoveryRow.className='desktop-recovery-row';actions.className='desktop-dialog-actions';
- recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,languageGroup,windowGroup,fontGroup,releaseGroup);
+ recoveryGroup.append(recoveryRow);box.append(generalGroup,recoveryGroup,authorGroup,languageGroup,windowGroup,fontGroup,releaseGroup);
+ const generalHeading=document.createElement('h3'),interfaceLabel=document.createElement('label'),interfaceSelect=document.createElement('select'),interfaceNote=document.createElement('p');
+ generalHeading.textContent=t('generalSettings');interfaceLabel.textContent=t('interfaceSize');interfaceSelect.id='interface-size';interfaceNote.id='interface-size-description';interfaceNote.textContent=t('interfaceSizeDescription');interfaceSelect.setAttribute('aria-describedby',interfaceNote.id);
+ for(const size of interfaceOptions.levels){const option=document.createElement('option');option.value=size;option.textContent=size+'%';interfaceSelect.append(option);}
+ interfaceSelect.value=String(interfaceOptions.value);interfaceLabel.append(interfaceSelect);generalGroup.append(generalHeading,interfaceLabel,interfaceNote);
  box.addEventListener('close',()=>{
   const active=document.activeElement;
   // A close event may run after another dialog, control or document took ownership.
@@ -392,7 +396,7 @@ async function showOptions(){
   }
   returnTarget.focus();returnChild?.focus();
  },{once:true});
- enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));recoveryRow.append(label);enabled.focus();
+ enabled.type='checkbox';enabled.checked=options.enabled;enabled.id='recovery-enabled';label.append(enabled,document.createTextNode(t('autoRecover')));recoveryRow.append(label);interfaceSelect.focus();
  const interval=document.createElement('select');interval.id='recovery-interval';interval.setAttribute('aria-label',t('autoRecover'));
  if(file?.format==='pdf'){const pdfNote=document.createElement('p');pdfNote.textContent=t('pdfRecoveryOff');recoveryGroup.append(pdfNote);}
  for(const seconds of [15,30,60,120,300]){const option=document.createElement('option');option.value=seconds;option.textContent=String(seconds)+' s';option.selected=seconds===options.seconds;interval.append(option)}recoveryRow.append(interval);
@@ -439,7 +443,7 @@ async function showOptions(){
  displayLanguage.addEventListener('change',refreshRestart);refreshRestart();
  async function saveOptions(restart=false){
   if(savingOptions)return;savingOptions=true;saveButton.disabled=true;restartButton.disabled=true;
-  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
+  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
   finally{savingOptions=false;saveButton.disabled=false;restartButton.disabled=false;}
  }
  const saveButton=modalButton(actions,t('save'),()=>saveOptions());

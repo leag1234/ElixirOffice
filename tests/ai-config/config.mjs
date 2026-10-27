@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // AI is OFF unless configured (docs/ai.md §0): three configurations of the same instance, each in a fresh
 // browser with no stored settings, against a local mock OpenAI-compatible server (no real provider, no key).
-//   A  no configuration: the editor works, no AI entry point, a discreet "Set up AI…", zero AI network calls, no console error
+//   A  no configuration: visible Ask entries open explicit setup, zero provider calls, no console error
 //   B  server configuration (ELIXIR_AI_* applied with tools/ai-proxy/install.sh): entry points on, the key stays on the server
 //   C  user configuration in File > AI (own endpoint and key in the browser): direct calls to that endpoint, notice, Test connection,
 //      CORS hint, Remove settings
@@ -17,14 +17,20 @@ import { execFileSync, execSync } from "node:child_process";
 import path from "node:path";
 import { REPO, BASE, launch, openEditor, uploadDocx, focusEditor, chromium } from "../../tools/eval/lib.mjs";
 
-const CONTAINER = process.env.CONTAINER || "eo-aiconfig";
+const CONTAINER = process.env.CONTAINER;
+if (!process.env.EO_BASE || BASE !== 'http://127.0.0.1:18368' || CONTAINER !== 'eo-ai-cell-A')
+  throw new Error('This mutating proxy test requires the explicit owned eo-ai-cell-A instance on port18368; main/demo are forbidden.');
+if (execFileSync('docker',['inspect',CONTAINER,'--format','{{index .Config.Labels "org.elixiroffice.qa.owner"}}'],{encoding:'utf8'}).trim() !== 'A-ai-discover')
+  throw new Error('Owned container label mismatch.');
+if (execFileSync('docker',['port',CONTAINER,'80/tcp'],{encoding:'utf8'}).trim() !== '127.0.0.1:18368')
+  throw new Error('Owned container port mismatch.');
 const MOCK_HOST = process.env.MOCK_HOST || "172.17.0.1";
 const PORT = Number(process.env.MOCK_PORT || 18999);
 const TLS_PORT = Number(process.env.MOCK_TLS_PORT || PORT + 1);
 const CONTAINER_CA = "/tmp/eo-ai-config-ca-" + process.pid + ".pem";
 const SERVER_KEY = "srv-secret-key-0001", USER_KEY = "usr-own-key-0002";
-const results = [];
-const record = (name, ok, extra = "") => { results.push({ name, ok: !!ok }); console.log((ok ? "pass " : "FAIL ") + name + (ok ? "" : "  " + extra)); };
+const results = [], liveBrowsers = new Set();
+const record = (name, ok, extra = "") => { results.push({ name, ok: !!ok }); console.log((ok ? "pass " : "FAIL ") + name + (ok ? "" : "  " + String(extra).split(SERVER_KEY).join("[test credential]").split(USER_KEY).join("[test credential]"))); };
 
 // ---- mock OpenAI-compatible server -----------------------------------------------------------------------------------
 const calls = [];
@@ -63,6 +69,7 @@ const install = env => execFileSync(path.join(REPO, "tools/ai-proxy/install.sh")
 // A fresh browser session on a new document; returns helpers
 async function session() {
   const s = await launch();
+  liveBrowsers.add(s.browser);
   const seen = [];
   s.page.on("request", r => seen.push({ url: r.url(), method: r.method(), auth: r.headers()["authorization"] || "" }));
   const frame = await openEditor(s.page);   // blank document, a line of text typed in
@@ -72,7 +79,7 @@ async function session() {
   return { ...s, frame, seen };
 }
 const aiCalls = seen => seen.filter(r => /\/chat\/completions|\/elixir-ai\/v1/.test(r.url) || (!r.url.startsWith(BASE) && !/^(data|blob|about):/.test(r.url)));
-const tabVisible = frame => frame.evaluate(() => { const a = document.querySelector('a[data-tab="elixir"]'); return !!a && a.offsetParent !== null && getComputedStyle(a.parentElement).display !== "none"; });
+const tabVisible = frame => frame.evaluate(() => { const a = document.querySelector('#elixir[role="tab"],a[data-tab="elixir"]'); return !!a && a.offsetParent !== null && getComputedStyle(a.parentElement).display !== "none"; });
 async function typeInSearch(frame, page, text) {
   await page.keyboard.press("Alt+q");
   await frame.waitForTimeout(300);
@@ -131,17 +138,20 @@ try {
   record("A config.json answers 200 {enabled:false} (no 404 in the console)", cfg.status === 200 && /"enabled":false/.test(cfg.text), JSON.stringify(cfg));
   await selectWord(s.frame, s.page);
   record("A editor works: text typed and selectable", await s.frame.evaluate(() => Asc.editor.asc_GetSelectedText().length > 0));
-  record("A Elixir tab hidden", !(await tabVisible(s.frame)));
-  record("A mini toolbar sparkle hidden", !(await miniVisible(s.frame)));
+  record("A unconfigured Elixir tab remains visible", await tabVisible(s.frame));
+  record("A unconfigured mini-toolbar sparkle remains visible", await miniVisible(s.frame));
   await s.page.keyboard.press("Escape");
-  record("A right-click has no Ask Elixir", !(await ctxHasAsk(s.frame, s.page)));
+  record("A unconfigured right-click has Ask Elixir", await ctxHasAsk(s.frame, s.page));
   record('A "/" opens no menu', !(await slashMenu(s.frame, s.page)));
   const sr = await typeInSearch(s.frame, s.page, "zzqq");
-  record('A search box: no "Ask Elixir" row, a discreet "Set up AI…" row, plain placeholder', !sr.ask && sr.setup && !/ask|elixir/i.test(sr.ph), JSON.stringify(sr));
-  await s.frame.click(".elx-sr-setup");
+  record('A search offers Ask before configuration', sr.ask && !sr.setup && /ask|elixir/i.test(sr.ph), JSON.stringify(sr));
+  await s.frame.click(".elx-sr-ask");
   await s.frame.waitForTimeout(800);
-  record('A "Set up AI…" opens the File > AI page', await pageVisible(s.frame));
-  await s.page.keyboard.press("Escape");
+  record('A Ask opens an empty explicit setup, without replaying the search', await s.frame.evaluate(() => {
+    const dialog=document.getElementById('elixir-ai-setup-dialog');
+    return !!dialog && dialog.open && ['endpoint','model','key'].every(id=>document.getElementById('elixir-ai-setup-'+id).value==='');
+  }));
+  await s.frame.click('#elixir-ai-setup-cancel');
   const ai = aiCalls(s.seen).filter(r => !/\/elixir-ai\/config\.json$/.test(r.url));
   record("A no AI network call (only same-origin config.json)", ai.length === 0, JSON.stringify(ai.slice(0, 3)));
   record("A no console or page error", s.errors.length === 0, JSON.stringify(s.errors.slice(0, 3)));
@@ -175,10 +185,19 @@ try {
   install({});
   calls.length = 0;
   s = await session();
-  record("C starts with AI off", !(await tabVisible(s.frame)));
+  record("C starts with AI inactive and discoverable", await tabVisible(s.frame) && await s.frame.evaluate(()=>!Common.ElixirAI.Settings.isConfigured()));
   await openAiPage(s.frame, s.page);
-  record("C File > AI page shows the form", await pageVisible(s.frame));
+  record("C File AI opens the generic setup", await s.frame.locator('#elixir-ai-setup-dialog').isVisible());
   const f = s.frame;
+  record("C setup makes no automatic provider request",calls.length===0);
+  await f.fill('#elixir-ai-setup-endpoint', 'https://127.0.0.1:'+TLS_PORT+'/v1');
+  await f.fill('#elixir-ai-setup-model','mock-user-model');
+  await f.fill('#elixir-ai-setup-key',USER_KEY);
+  await f.click('#elixir-ai-setup-continue');
+  await f.locator('#elixir-ai-setup-dialog').waitFor({state:'detached'});
+  record("C explicit setup saves without testing automatically", calls.length===0 && await f.evaluate(()=>Common.ElixirAI.Settings.isConfigured()));
+  await openAiPage(f,s.page);
+  record("C configured File AI retains the connection form", await pageVisible(f));
   await f.selectOption("#panel-elx-ai #elixir-ai-preset", "ollama");
   record("C Ollama preset fills the local URL and a model, shows the CORS note", await f.evaluate(() => document.querySelector("#panel-elx-ai #elixir-ai-endpoint").value === "http://localhost:11434/v1" && document.querySelector("#panel-elx-ai #elixir-ai-model").value !== "" && /OLLAMA_ORIGINS/.test(document.querySelector("#panel-elx-ai .elixir-ai-cors").textContent) && document.querySelector("#panel-elx-ai .elixir-ai-cors").offsetParent !== null));
   // not reachable (no CORS on the mock): a clear hint
@@ -209,20 +228,21 @@ try {
   await openAiPage(f, s.page);
   await f.click("#panel-elx-ai [data-act=clear]");
   await f.waitForTimeout(800);
-  record("C Remove settings turns AI off again", !(await tabVisible(f)) && await f.evaluate(() => localStorage.getItem("elixir-ai-settings") === null));
+  record("C Remove settings stops AI while entries remain visible", (await tabVisible(f)) && await f.evaluate(()=>!Common.ElixirAI.Settings.isConfigured()) && await f.evaluate(() => localStorage.getItem("elixir-ai-settings") === null));
   record("C no console or page error", s.errors.every(e => /Access-Control|Failed to load resource|ERR_FAILED/.test(e.text)), JSON.stringify(s.errors.slice(0, 3)));
   await s.browser.close();
 
-  // ---- D: the demo's client configuration (no "enabled" field) is read as a server configuration -------------------------
+  // ---- D: the legacy managed client configuration (no "enabled" field) is read as a server configuration -------------------------
   const demoConf = `location = /elixir-ai/config.json {\n  default_type application/json;\n  add_header Cache-Control "no-store" always;\n  return 200 '{"endpoint":"/elixir-ai/v1","model":"gpt-4.1-mini","managed":true}';\n}\nlocation /elixir-ai/v1/ { return 404; }\n`;
   execFileSync("docker", ["exec", "-i", CONTAINER, "sh", "-c", "umask 077; cat > /etc/nginx/includes/ds-elixir-ai.conf && nginx -t -q && service nginx reload >/dev/null"], { input: demoConf, stdio: ["pipe", "pipe", "pipe"] });
   s = await session();
-  record("D demo configuration (no enabled field): AI on, tab visible, server notice", await tabVisible(s.frame) && await s.frame.evaluate(() => Common.ElixirAI.Settings.isConfigured() && Common.ElixirAI.dataNotice("") !== "" && Common.ElixirAI.Settings.managed.managed === true));
+  record("D legacy managed configuration (no enabled field): AI on, tab visible, server notice", await tabVisible(s.frame) && await s.frame.evaluate(() => Common.ElixirAI.Settings.isConfigured() && Common.ElixirAI.dataNotice("") !== "" && Common.ElixirAI.Settings.managed.managed === true));
   record("D no console or page error", s.errors.length === 0, JSON.stringify(s.errors.slice(0, 3)));
   await s.browser.close();
 } catch (e) {
   record("script error", false, e.stack || e);
 } finally {
+  await Promise.allSettled([...liveBrowsers].map(browser=>browser.close()));
   mock.close();
   await new Promise(resolve => tlsMock.close(resolve));
   fs.rmSync(tlsDirectory, { recursive: true, force: true });

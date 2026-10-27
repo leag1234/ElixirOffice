@@ -8,16 +8,16 @@ const {launch,stop,editable,fixture,root}=require('./harness.cjs'),assert=requir
   await frame.locator('#file[role=tab]').click();await frame.locator('#fm-btn-settings').click();
   const settings=await env.page.evaluate(()=>EODesktopStrings.settings);
   await env.page.locator('.desktop-options button').filter({hasText:'Elixir — '+settings}).click();
-  const form=frame.locator('.elixir-ai-cfg:visible');await form.waitFor();
+  const form=frame.locator('#elixir-ai-setup-dialog:visible');await form.waitFor();
   const text=await form.innerText(),language=(await env.page.evaluate(()=>eoDesktop.locale())).language;
   assert.equal(typeof language,'string');
   assert.match(text,/encrypted by your operating system|chiffrée par votre système/);
   assert.match(text,/never shown again|ne sera jamais réaffichée/);
   assert.doesNotMatch(text,/localStorage|in clear text|en clair|stored only in this browser|dans ce navigateur/i);
   assert.equal(await frame.evaluate(()=>typeof window.eoDesktopAI),'object');
-  assert.equal(await frame.locator('#elixir-ai-key:visible').inputValue(),'');
+  assert.equal(await frame.locator('#elixir-ai-setup-key:visible').inputValue(),'');
   await env.page.screenshot({path:path.join(root,'results','ai-disclosure-'+process.platform+'.png')});
   await fs.writeFile(path.join(root,'results','ai-disclosure-'+process.platform+'.json'),JSON.stringify({language,text,errors:env.errors},null,2));
-  assert.deepEqual(env.errors,[]);console.log('PASS actual packaged desktop AI encrypted-key disclosure, no browser/plaintext message',language);
+  assert.deepEqual(env.errors,[]);console.log('PASS actual desktop setup encrypted-key disclosure, no browser/plaintext message',language);
  }finally{await stop(env)}
 })().catch(error=>{console.error(error);process.exitCode=1});

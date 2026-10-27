@@ -62,6 +62,22 @@ pdftoppm -png -r 144 -singlefile "$EO_FONT_WORK/wasm-input/arabic-italic/output.
 python3 tests/fonts/verify-bundled-fallbacks.py "$EO_FONT_WORK/wasm-input"
 ```
 
+## Pan-CJK packaged fallback gate
+
+Use generated assets that contain the pinned Noto Sans CJK Regular/Bold OTCs and a public system Noto directory. The test fails rather than skipping when required inputs are absent:
+
+```sh
+export EO_SDKJS=/absolute/owned/sdkjs
+export EO_FONT_WORK=/absolute/owned/cjk-proof
+export EO_FONT_ASSETS=/absolute/owned/generated-assets
+export EO_FONT_SYSTEM_DIRECTORY=/usr/share/fonts/opentype/noto
+node tests/fonts/cjk-fallbacks.mjs
+SDKJS="$EO_SDKJS" FONT_TTC=/absolute/pinned/NotoSansCJK-Regular.ttc \
+  node tests/client-pdf/writer.test.mjs
+```
+
+The first gate runs the real common SDK metadata/picker/preloader used by Word, Sheet and Slides. It requires zero initial CJK transport, exactly one same-origin lazy read of each shared Regular/Bold collection, cache reuse, correct JP/SC/TC/KR ordinals, system-font priority, revocation fallback and selected-font PDF inputs. The writer test embeds an actual collection face, extracts its CJK text and renders both pages with Poppler. Native packaged reopen/layout parity and full installer-size measurements are separate gates.
+
 Public fixtures must include real static Noto Sans Arabic and Sinhala Regular/Bold files. The gate executes the real generated AllFonts, SDK packaged loader/asynchronous preloader/selected service and desktop policy. Only same-origin packaged HTTP transport is mapped to local generated files; external URLs fail. It proves no private bridge reads while consent is off, system priority after enabling, reserved normalized-name collision exclusion and fallback restoration on revocation. Actual PDF-Wasm runs use only production-selected files. The oracle checks every emitted glyph's static contours and actual italic text matrices, nonblank/distinct rendered output, and separately records Unicode extraction.
 
 All seven current Arabic/Urdu/Sinhala exact text-extraction samples FAIL; do not treat conversion/contour/style PASS as extraction acceptance. Native editor/ASAR/other OS/thumbnail and whole-installer sizes remain unverified. Size evidence compares controlled font resources including metadata/previews/notices; codec archive growth is not an installer delta.

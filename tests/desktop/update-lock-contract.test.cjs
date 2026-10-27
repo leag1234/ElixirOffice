@@ -2,8 +2,9 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const guard=require('./fixtures/deny-update-network.cjs')(),cp=require('node:child_process');
+const {storeTest}=require('./fixtures/updater-platform.cjs');
 const {createStore}=require('../../desktop/update-store.cjs');
-test('cold production cannot touch the lock helper; only the exact fd invocation is allowed',async()=>{
+storeTest('cold production cannot touch the lock helper; only the exact fd invocation is allowed',async()=>{
  const {production}=require('../../desktop/update-policy.cjs'),{createCache}=require('../../desktop/update-cache.cjs');
  const directory=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'eo-lock-contract-'))),root=path.join(directory,'cache');
  try{

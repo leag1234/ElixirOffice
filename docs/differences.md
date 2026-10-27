@@ -24,6 +24,7 @@ Living document, kept up to date as features land (requested by the test user, 2
 | PDF export (Word) | Download as PDF and Print use the native PDF writer in a lazy WebAssembly worker with selected font files and a persistent server-font cache (3.13 MB brotli) from the editor's own drawing commands: original images, same fonts as the screen (local fonts included), selectable and searchable text, embedded font subsets, links and outline; neither the document nor the fonts go to the server; automatic JS then server fallback with an explicit server reason (form fields, restricted font licence…); PDF/A by the server | Desktop export (own layout engine) | The browser sends the document's drawing commands to the server, which writes the PDF with the server's fonts | docs/client-pdf.md, tests/client-pdf |
 | Layout fidelity vs Word | Measured on a corpus; score C tracked in CI | Not measured publicly | upstream baseline C = 55.9 | docs/fidelity.md |
 | Fonts of the user's computer | Chrome/Edge over HTTPS: with one click (consent) the editor lays the document out with the fonts installed on the computer (Calibri, Cambria, Wingdings, school fonts), nothing uploaded; PDF files are made in the browser with these fonts (other server-side conversions still use the server fonts) | Desktop app only | Server fonts only in the web editor | docs/localfonts.md, tests/localfonts |
+| Offline CJK fallback (0.4 candidate) | Desktop packages cover Japanese, simplified/traditional Chinese and Korean with pinned Noto Sans CJK Regular/Bold when no eligible system font is available; browser-local editors lazy-load and cache the same-origin fallback only after CJK text needs it | System CJK fonts normally available through the desktop OS | Local/browser editing otherwise depends on the server or an accessible local font | [Scope, size and gates](desktop-system-fonts.md#pan-cjk-packaged-fallback--04-issue-39-candidate) |
 | Language and Borders controls | Word-like Language dialog (Review tab and status bar): current language on top, recently used, search in native and English names, full list with a check on the current one, "Set As Default" (document default) and "Do not check spelling or grammar" (here the spell checking switch: the engine has no per-run no-proofing flag); drop-down with recent languages. Borders button and menu: ten glyphs where the active edges are solid and the others dotted (Bottom, Top, Left, Right, No, All, Outside, Inside, Inside horizontal and vertical), readable at 100% and 150%, light and dark | Language dialog (Tools > Language), borders in the toolbar | 250-entry combo box drawn wider than the window; Bottom, Top, Left and Right borders glyphs all alike | docs/ui.md (First tester feedback), tests/shortcuts/language-borders.mjs |
 | Shapes in tables, page breaks at headings | Grouping floating shapes inside a table cell keeps the group in the cell (group, ungroup, undo, saved .docx); a page break before a heading is one "Page Break" paragraph, Backspace merges then removes it and the heading keeps its style and numbering | Group kept in the cell; page break is a paragraph attribute | Group drifted by the cell origin (once off the page); heading lost its style after Backspace | docs/backlog.md F8, F9; tests/layout/layout.mjs |
 | Copy and paste of table cells | Cells pasted into cells of a table take the source cell formatting like Word (rotated text, shading, borders, margins, vertical alignment), the target keeps its merges and widths; pasted as a new table or into another document everything is kept, row height rule included; the HTML clipboard carries rotated text and vertical alignment to and from Word | Not checked | Overwrite Cells kept only the text; HTML lost the text direction | docs/backlog.md F11; tests/clipboard/cellpaste.mjs |
@@ -563,3 +564,31 @@ pending generations are cleaned before the next update. Production remains
 restricted to the qualified AppImage and NSIS paths after the reviewed native
 Windows result. The AppImage destination crash lease is unchanged.
 See [scope and remaining gates](desktop-updater-app-proposal.md#cache-lease-and-pending-generation-cleanup-2026-10-25-source-candidate).
+
+### Elixir AI discoverability — held0.4 source candidate
+Supported Word Ask entries and File AI stay visible without a configured service; a one-screen setup explains context/destination and delegates to native consent. Generic HTTPS endpoint/model/key start empty, deployment presets default empty, no provider discovery or automatic check. Existing configured operation and native encrypted storage/transport remain unchanged. Source, sandboxed Linux and platform qualification are distinguished in [the design](ai-040.md); spreadsheet tools are the next task, not claimed here.
+
+
+### Spreadsheet AI tools — held0.4 source candidate
+The spreadsheet editor gains its own validated public-builder toolset through the existing AI connector, planner and verification UI. It handles formulas, literal-safe cleaning, explicit dates/numbers, complete-row sort/filter, new charts/pivots and bounded summaries. No SDK/runtime extension or new provider path is required. Read-only plans cannot be widened; native grouped Undo, no-op history and actual Save/reopen are tested separately from model quality. English source strings for45locales await Z. See [design, safeguards and measurement](ai-cell-tools.md).
+
+
+### Presentation AI tools — held 0.4 source candidate
+The presentation editor uses a separate schema-validated public-builder adapter with the existing planner, consent and transport. It can append plain slides, rewrite supported text, choose embedded layouts/themes, align scoped drawings, preserve notes formatting and summarize bounded deck text. It leaves existing Word/Cell behavior intact. Text fragments and unsupported rich inline content are refused instead of silently widening or flattening edits. Grouped Undo, native cancellation, stale discard and missing completion callbacks have independent runtime checks. This is held source, not a released package or cross-platform qualification. [Design and evidence](ai-slide-tools.md).
+
+
+### Illustrated AI-assisted features guide — held 0.4
+A concise [user guide](ai-features.md) shows actual Word entries/results, spreadsheet formulas/cleaning/chart/pivot, presentation generation/notes, empty setup and real native consent. Linux screenshots use public synthetic fixtures and deterministic replies after consent, with no provider/key. It distinguishes optional AI, user-selected service/jurisdiction, publisher privacy and desktop OS-encrypted key storage from server/browser policies. No runtime or release claim is added.
+
+The illustrated guide now separates service choice from an EU-jurisdiction warning, with a dated list of provider protection statements. Primary-source evidence checks APIs, processing and corporate ownership, records exclusions and makes no legal-immunity or interoperability guarantee.
+
+### Desktop interface size — 0.4 source candidate
+Options > General adds eight persisted sizes from80% to200%; macOS native View commands have no default accelerators. The desktop SDK preserves actual fractional DPR while hosted scaling stays unchanged. Whole-view scaling changes physical on-screen extent, not the SDK document zoom percentage. Reviewed seven-key translations cover45locales. Source Linux qualification and the pre-existing automatic spreadsheet default-height limitation are detailed in [Interface size](desktop-interface-size.md).
+
+## Word font refresh reading position
+
+The 0.4 source candidate opts Word local-font relayout into the SDK viewport anchor
+and selection-state machinery. Later user navigation takes priority; ordinary
+recalculation and actual font loading remain intact. Windows sampled viewport
+proof and separate selection/performance limits are recorded in
+[the qualification note](word-font-relayout.md).

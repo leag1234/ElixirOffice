@@ -152,7 +152,14 @@
     "displayLanguage": "Display language",
     "displayLanguageSystem": "Use system language",
     "displayLanguageRestart": "Restart ElixirOffice to apply.",
-    "displayLanguageRestartNow": "Restart now"
+    "displayLanguageRestartNow": "Restart now",
+    "interfaceSize": "Interface size",
+    "interfaceSizeDescription": "Scale the interface without changing the document zoom percentage.",
+    "interfaceZoomIn": "Interface zoom in",
+    "interfaceZoomOut": "Interface zoom out",
+    "interfaceZoomReset": "Reset interface zoom to 100%",
+    "generalSettings": "General",
+    "viewMenu": "View"
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -307,7 +314,14 @@
     "displayLanguage": "Langue d’affichage",
     "displayLanguageSystem": "Utiliser la langue du système",
     "displayLanguageRestart": "Redémarrez ElixirOffice pour appliquer les modifications.",
-    "displayLanguageRestartNow": "Redémarrer maintenant"
+    "displayLanguageRestartNow": "Redémarrer maintenant",
+    "interfaceSize": "Taille de l’interface",
+    "interfaceSizeDescription": "Mettez l’interface à l’échelle sans modifier le pourcentage de zoom du document.",
+    "interfaceZoomIn": "Augmenter le zoom de l’interface",
+    "interfaceZoomOut": "Réduire le zoom de l’interface",
+    "interfaceZoomReset": "Rétablir le zoom de l’interface à 100 %",
+    "generalSettings": "Général",
+    "viewMenu": "Affichage"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -462,7 +476,14 @@
     "displayLanguage": "Anzeigesprache",
     "displayLanguageSystem": "Systemsprache verwenden",
     "displayLanguageRestart": "Starten Sie ElixirOffice neu, um die Änderung anzuwenden.",
-    "displayLanguageRestartNow": "Jetzt neu starten"
+    "displayLanguageRestartNow": "Jetzt neu starten",
+    "interfaceSize": "Größe der Benutzeroberfläche",
+    "interfaceSizeDescription": "Skalieren Sie die Benutzeroberfläche, ohne den Zoomfaktor des Dokuments zu ändern.",
+    "interfaceZoomIn": "Benutzeroberfläche vergrößern",
+    "interfaceZoomOut": "Benutzeroberfläche verkleinern",
+    "interfaceZoomReset": "Zoom der Benutzeroberfläche auf 100 % zurücksetzen",
+    "generalSettings": "Allgemein",
+    "viewMenu": "Ansicht"
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -617,7 +638,14 @@
     "displayLanguage": "Idioma para mostrar",
     "displayLanguageSystem": "Usar el idioma del sistema",
     "displayLanguageRestart": "Reinicie ElixirOffice para aplicar los cambios.",
-    "displayLanguageRestartNow": "Reiniciar ahora"
+    "displayLanguageRestartNow": "Reiniciar ahora",
+    "interfaceSize": "Tamaño de la interfaz",
+    "interfaceSizeDescription": "Cambie la escala de la interfaz sin modificar el porcentaje de zoom del documento.",
+    "interfaceZoomIn": "Acercar la interfaz",
+    "interfaceZoomOut": "Alejar la interfaz",
+    "interfaceZoomReset": "Restablecer el zoom de la interfaz al 100 %",
+    "generalSettings": "General",
+    "viewMenu": "Ver"
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -772,7 +800,14 @@
     "displayLanguage": "Lingua di visualizzazione",
     "displayLanguageSystem": "Usa la lingua di sistema",
     "displayLanguageRestart": "Riavvia ElixirOffice per applicare le modifiche.",
-    "displayLanguageRestartNow": "Riavvia ora"
+    "displayLanguageRestartNow": "Riavvia ora",
+    "interfaceSize": "Dimensioni dell’interfaccia",
+    "interfaceSizeDescription": "Ridimensiona l’interfaccia senza modificare la percentuale di zoom del documento.",
+    "interfaceZoomIn": "Aumenta lo zoom dell’interfaccia",
+    "interfaceZoomOut": "Riduci lo zoom dell’interfaccia",
+    "interfaceZoomReset": "Reimposta lo zoom dell’interfaccia al 100%",
+    "generalSettings": "Generale",
+    "viewMenu": "Visualizza"
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -927,7 +962,14 @@
     "displayLanguage": "Idioma de exibição",
     "displayLanguageSystem": "Usar o idioma do sistema",
     "displayLanguageRestart": "Reinicie o ElixirOffice para aplicar as alterações.",
-    "displayLanguageRestartNow": "Reiniciar agora"
+    "displayLanguageRestartNow": "Reiniciar agora",
+    "interfaceSize": "Tamanho da interface",
+    "interfaceSizeDescription": "Dimensione a interface sem alterar o percentual de zoom do documento.",
+    "interfaceZoomIn": "Aumentar o zoom da interface",
+    "interfaceZoomOut": "Diminuir o zoom da interface",
+    "interfaceZoomReset": "Redefinir o zoom da interface para 100%",
+    "generalSettings": "Geral",
+    "viewMenu": "Exibir"
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1082,7 +1124,14 @@
     "displayLanguage": "Idioma de apresentação",
     "displayLanguageSystem": "Utilizar o idioma do sistema",
     "displayLanguageRestart": "Reinicie o ElixirOffice para aplicar as alterações.",
-    "displayLanguageRestartNow": "Reiniciar agora"
+    "displayLanguageRestartNow": "Reiniciar agora",
+    "interfaceSize": "Tamanho da interface",
+    "interfaceSizeDescription": "Dimensione a interface sem alterar a percentagem de zoom do documento.",
+    "interfaceZoomIn": "Ampliar a interface",
+    "interfaceZoomOut": "Reduzir a interface",
+    "interfaceZoomReset": "Repor o zoom da interface a 100%",
+    "generalSettings": "Geral",
+    "viewMenu": "Ver"
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1237,7 +1286,14 @@
     "displayLanguage": "Weergavetaal",
     "displayLanguageSystem": "Systeemtaal gebruiken",
     "displayLanguageRestart": "Start ElixirOffice opnieuw om de wijziging toe te passen.",
-    "displayLanguageRestartNow": "Nu opnieuw starten"
+    "displayLanguageRestartNow": "Nu opnieuw starten",
+    "interfaceSize": "Grootte van de interface",
+    "interfaceSizeDescription": "Schaal de interface zonder het zoompercentage van het document te wijzigen.",
+    "interfaceZoomIn": "Inzoomen op de interface",
+    "interfaceZoomOut": "Uitzoomen op de interface",
+    "interfaceZoomReset": "Zoom van de interface terugzetten op 100%",
+    "generalSettings": "Algemeen",
+    "viewMenu": "Beeld"
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1392,7 +1448,14 @@
     "displayLanguage": "Język wyświetlania",
     "displayLanguageSystem": "Użyj języka systemu",
     "displayLanguageRestart": "Uruchom ponownie ElixirOffice, aby zastosować zmianę.",
-    "displayLanguageRestartNow": "Uruchom ponownie teraz"
+    "displayLanguageRestartNow": "Uruchom ponownie teraz",
+    "interfaceSize": "Rozmiar interfejsu",
+    "interfaceSizeDescription": "Skaluj interfejs bez zmiany procentowego powiększenia dokumentu.",
+    "interfaceZoomIn": "Powiększ interfejs",
+    "interfaceZoomOut": "Pomniejsz interfejs",
+    "interfaceZoomReset": "Zresetuj powiększenie interfejsu do 100%",
+    "generalSettings": "Ogólne",
+    "viewMenu": "Widok"
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1547,7 +1610,14 @@
     "displayLanguage": "Язык интерфейса",
     "displayLanguageSystem": "Использовать язык системы",
     "displayLanguageRestart": "Перезапустите ElixirOffice, чтобы применить изменение.",
-    "displayLanguageRestartNow": "Перезапустить сейчас"
+    "displayLanguageRestartNow": "Перезапустить сейчас",
+    "interfaceSize": "Размер интерфейса",
+    "interfaceSizeDescription": "Масштабируйте интерфейс, не изменяя масштаб документа.",
+    "interfaceZoomIn": "Увеличить масштаб интерфейса",
+    "interfaceZoomOut": "Уменьшить масштаб интерфейса",
+    "interfaceZoomReset": "Сбросить масштаб интерфейса до 100 %",
+    "generalSettings": "Общие",
+    "viewMenu": "Вид"
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1702,7 +1772,14 @@
     "displayLanguage": "表示言語",
     "displayLanguageSystem": "システム言語を使用",
     "displayLanguageRestart": "適用するには ElixirOffice を再起動してください。",
-    "displayLanguageRestartNow": "今すぐ再起動"
+    "displayLanguageRestartNow": "今すぐ再起動",
+    "interfaceSize": "インターフェイスのサイズ",
+    "interfaceSizeDescription": "ドキュメントのズーム率を変更せずに、インターフェイスを拡大または縮小します。",
+    "interfaceZoomIn": "インターフェイスを拡大",
+    "interfaceZoomOut": "インターフェイスを縮小",
+    "interfaceZoomReset": "インターフェイスのズームを 100% にリセット",
+    "generalSettings": "全般",
+    "viewMenu": "表示"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -1857,7 +1934,14 @@
     "displayLanguage": "显示语言",
     "displayLanguageSystem": "使用系统语言",
     "displayLanguageRestart": "重启 ElixirOffice 以应用更改。",
-    "displayLanguageRestartNow": "立即重启"
+    "displayLanguageRestartNow": "立即重启",
+    "interfaceSize": "界面大小",
+    "interfaceSizeDescription": "缩放界面，而不更改文档的缩放百分比。",
+    "interfaceZoomIn": "放大界面",
+    "interfaceZoomOut": "缩小界面",
+    "interfaceZoomReset": "将界面缩放重置为 100%",
+    "generalSettings": "常规",
+    "viewMenu": "视图"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -2015,7 +2099,14 @@
     "displayLanguage": "顯示語言",
     "displayLanguageSystem": "使用系統語言",
     "displayLanguageRestart": "重新啟動 ElixirOffice 以套用變更。",
-    "displayLanguageRestartNow": "立即重新啟動"
+    "displayLanguageRestartNow": "立即重新啟動",
+    "interfaceSize": "介面大小",
+    "interfaceSizeDescription": "縮放介面，而不變更文件的縮放百分比。",
+    "interfaceZoomIn": "放大介面",
+    "interfaceZoomOut": "縮小介面",
+    "interfaceZoomReset": "將介面縮放重設為 100%",
+    "generalSettings": "一般",
+    "viewMenu": "檢視"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -2173,7 +2264,14 @@
     "displayLanguage": "لغة العرض",
     "displayLanguageSystem": "استخدام لغة النظام",
     "displayLanguageRestart": "أعد تشغيل ElixirOffice لتطبيق التغيير.",
-    "displayLanguageRestartNow": "إعادة التشغيل الآن"
+    "displayLanguageRestartNow": "إعادة التشغيل الآن",
+    "interfaceSize": "حجم الواجهة",
+    "interfaceSizeDescription": "غيّر مقياس الواجهة من دون تغيير نسبة تكبير المستند.",
+    "interfaceZoomIn": "تكبير الواجهة",
+    "interfaceZoomOut": "تصغير الواجهة",
+    "interfaceZoomReset": "إعادة تعيين تكبير الواجهة إلى 100٪",
+    "generalSettings": "عام",
+    "viewMenu": "عرض"
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -2331,7 +2429,14 @@
     "displayLanguage": "Görüntüləmə dili",
     "displayLanguageSystem": "Sistem dilindən istifadə edin",
     "displayLanguageRestart": "Tətbiq etmək üçün ElixirOffice-i yenidən başladın.",
-    "displayLanguageRestartNow": "İndi yenidən başlat"
+    "displayLanguageRestartNow": "İndi yenidən başlat",
+    "interfaceSize": "İnterfeys ölçüsü",
+    "interfaceSizeDescription": "Sənədin miqyas faizini dəyişmədən interfeysin miqyasını dəyişin.",
+    "interfaceZoomIn": "İnterfeysi böyüt",
+    "interfaceZoomOut": "İnterfeysi kiçilt",
+    "interfaceZoomReset": "İnterfeys miqyasını 100%-ə sıfırla",
+    "generalSettings": "Ümumi",
+    "viewMenu": "Görünüş"
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2489,7 +2594,14 @@
     "displayLanguage": "Мова інтэрфейсу",
     "displayLanguageSystem": "Выкарыстоўваць мову сістэмы",
     "displayLanguageRestart": "Перазапусціце ElixirOffice, каб прымяніць змену.",
-    "displayLanguageRestartNow": "Перазапусціць зараз"
+    "displayLanguageRestartNow": "Перазапусціць зараз",
+    "interfaceSize": "Памер інтэрфейсу",
+    "interfaceSizeDescription": "Маштабуйце інтэрфейс, не змяняючы працэнт маштабу дакумента.",
+    "interfaceZoomIn": "Павялічыць маштаб інтэрфейсу",
+    "interfaceZoomOut": "Паменшыць маштаб інтэрфейсу",
+    "interfaceZoomReset": "Скінуць маштаб інтэрфейсу да 100 %",
+    "generalSettings": "Агульныя",
+    "viewMenu": "Выгляд"
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -2650,7 +2762,14 @@
     "displayLanguage": "Език за показване",
     "displayLanguageSystem": "Използване на системния език",
     "displayLanguageRestart": "Рестартирайте ElixirOffice, за да приложите промяната.",
-    "displayLanguageRestartNow": "Рестартиране сега"
+    "displayLanguageRestartNow": "Рестартиране сега",
+    "interfaceSize": "Размер на интерфейса",
+    "interfaceSizeDescription": "Мащабирайте интерфейса, без да променяте процента на мащабиране на документа.",
+    "interfaceZoomIn": "Увеличаване на мащаба на интерфейса",
+    "interfaceZoomOut": "Намаляване на мащаба на интерфейса",
+    "interfaceZoomReset": "Нулиране на мащаба на интерфейса до 100%",
+    "generalSettings": "Общи",
+    "viewMenu": "Изглед"
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -2808,7 +2927,14 @@
     "displayLanguage": "Llengua de visualització",
     "displayLanguageSystem": "Utilitza la llengua del sistema",
     "displayLanguageRestart": "Reinicieu l’ElixirOffice per aplicar el canvi.",
-    "displayLanguageRestartNow": "Reinicia ara"
+    "displayLanguageRestartNow": "Reinicia ara",
+    "interfaceSize": "Mida de la interfície",
+    "interfaceSizeDescription": "Escaleu la interfície sense canviar el percentatge de zoom del document.",
+    "interfaceZoomIn": "Augmenta el zoom de la interfície",
+    "interfaceZoomOut": "Redueix el zoom de la interfície",
+    "interfaceZoomReset": "Restableix el zoom de la interfície al 100%",
+    "generalSettings": "General",
+    "viewMenu": "Visualització"
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -2966,7 +3092,14 @@
     "displayLanguage": "Jazyk zobrazení",
     "displayLanguageSystem": "Použít jazyk systému",
     "displayLanguageRestart": "Změnu použijete restartováním aplikace ElixirOffice.",
-    "displayLanguageRestartNow": "Restartovat nyní"
+    "displayLanguageRestartNow": "Restartovat nyní",
+    "interfaceSize": "Velikost rozhraní",
+    "interfaceSizeDescription": "Změňte měřítko rozhraní beze změny procenta přiblížení dokumentu.",
+    "interfaceZoomIn": "Přiblížit rozhraní",
+    "interfaceZoomOut": "Oddálit rozhraní",
+    "interfaceZoomReset": "Obnovit přiblížení rozhraní na 100 %",
+    "generalSettings": "Obecné",
+    "viewMenu": "Zobrazení"
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -3124,7 +3257,14 @@
     "displayLanguage": "Visningssprog",
     "displayLanguageSystem": "Brug systemsprog",
     "displayLanguageRestart": "Genstart ElixirOffice for at anvende ændringen.",
-    "displayLanguageRestartNow": "Genstart nu"
+    "displayLanguageRestartNow": "Genstart nu",
+    "interfaceSize": "Størrelse på brugerflade",
+    "interfaceSizeDescription": "Skaler brugerfladen uden at ændre dokumentets zoomprocent.",
+    "interfaceZoomIn": "Zoom ind på brugerfladen",
+    "interfaceZoomOut": "Zoom ud på brugerfladen",
+    "interfaceZoomReset": "Nulstil brugerfladens zoom til 100 %",
+    "generalSettings": "Generelt",
+    "viewMenu": "Vis"
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -3282,7 +3422,14 @@
     "displayLanguage": "Γλώσσα εμφάνισης",
     "displayLanguageSystem": "Χρήση γλώσσας συστήματος",
     "displayLanguageRestart": "Επανεκκινήστε το ElixirOffice για να εφαρμοστεί η αλλαγή.",
-    "displayLanguageRestartNow": "Επανεκκίνηση τώρα"
+    "displayLanguageRestartNow": "Επανεκκίνηση τώρα",
+    "interfaceSize": "Μέγεθος περιβάλλοντος εργασίας",
+    "interfaceSizeDescription": "Κλιμακώστε το περιβάλλον εργασίας χωρίς να αλλάξετε το ποσοστό ζουμ του εγγράφου.",
+    "interfaceZoomIn": "Μεγέθυνση περιβάλλοντος εργασίας",
+    "interfaceZoomOut": "Σμίκρυνση περιβάλλοντος εργασίας",
+    "interfaceZoomReset": "Επαναφορά ζουμ περιβάλλοντος εργασίας στο 100%",
+    "generalSettings": "Γενικά",
+    "viewMenu": "Προβολή"
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -3440,7 +3587,14 @@
     "displayLanguage": "Bistaratzeko hizkuntza",
     "displayLanguageSystem": "Erabili sistemaren hizkuntza",
     "displayLanguageRestart": "Berrabiarazi ElixirOffice aldaketa aplikatzeko.",
-    "displayLanguageRestartNow": "Berrabiarazi orain"
+    "displayLanguageRestartNow": "Berrabiarazi orain",
+    "interfaceSize": "Interfazearen tamaina",
+    "interfaceSizeDescription": "Eskalatu interfazea dokumentuaren zoom-ehunekoa aldatu gabe.",
+    "interfaceZoomIn": "Handitu interfazearen zooma",
+    "interfaceZoomOut": "Txikitu interfazearen zooma",
+    "interfaceZoomReset": "Berrezarri interfazearen zooma % 100era",
+    "generalSettings": "Orokorra",
+    "viewMenu": "Ikusi"
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -3600,7 +3754,14 @@
     "displayLanguage": "Näyttökieli",
     "displayLanguageSystem": "Käytä järjestelmän kieltä",
     "displayLanguageRestart": "Ota muutos käyttöön käynnistämällä ElixirOffice uudelleen.",
-    "displayLanguageRestartNow": "Käynnistä uudelleen nyt"
+    "displayLanguageRestartNow": "Käynnistä uudelleen nyt",
+    "interfaceSize": "Käyttöliittymän koko",
+    "interfaceSizeDescription": "Skaalaa käyttöliittymää muuttamatta asiakirjan zoomausprosenttia.",
+    "interfaceZoomIn": "Lähennä käyttöliittymää",
+    "interfaceZoomOut": "Loitonna käyttöliittymää",
+    "interfaceZoomReset": "Palauta käyttöliittymän zoomaus 100 prosenttiin",
+    "generalSettings": "Yleiset",
+    "viewMenu": "Näytä"
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -3758,7 +3919,14 @@
     "displayLanguage": "Idioma de visualización",
     "displayLanguageSystem": "Usar o idioma do sistema",
     "displayLanguageRestart": "Reinicie ElixirOffice para aplicar o cambio.",
-    "displayLanguageRestartNow": "Reiniciar agora"
+    "displayLanguageRestartNow": "Reiniciar agora",
+    "interfaceSize": "Tamaño da interface",
+    "interfaceSizeDescription": "Cambie a escala da interface sen modificar a porcentaxe de zoom do documento.",
+    "interfaceZoomIn": "Ampliar a interface",
+    "interfaceZoomOut": "Reducir a interface",
+    "interfaceZoomReset": "Restablecer o zoom da interface ao 100 %",
+    "generalSettings": "Xeral",
+    "viewMenu": "Ver"
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -3916,7 +4084,14 @@
     "displayLanguage": "שפת תצוגה",
     "displayLanguageSystem": "השתמש בשפת המערכת",
     "displayLanguageRestart": "יש להפעיל מחדש את ElixirOffice כדי להחיל את השינוי.",
-    "displayLanguageRestartNow": "הפעל מחדש עכשיו"
+    "displayLanguageRestartNow": "הפעל מחדש עכשיו",
+    "interfaceSize": "גודל הממשק",
+    "interfaceSizeDescription": "שנה את קנה המידה של הממשק מבלי לשנות את אחוז גודל התצוגה של המסמך.",
+    "interfaceZoomIn": "הגדלת הממשק",
+    "interfaceZoomOut": "הקטנת הממשק",
+    "interfaceZoomReset": "איפוס גודל התצוגה של הממשק ל־100%",
+    "generalSettings": "כללי",
+    "viewMenu": "תצוגה"
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -4074,7 +4249,14 @@
     "displayLanguage": "Megjelenítési nyelv",
     "displayLanguageSystem": "A rendszer nyelvének használata",
     "displayLanguageRestart": "A módosítás alkalmazásához indítsa újra az ElixirOffice-t.",
-    "displayLanguageRestartNow": "Újraindítás most"
+    "displayLanguageRestartNow": "Újraindítás most",
+    "interfaceSize": "Felület mérete",
+    "interfaceSizeDescription": "Méretezze át a felületet a dokumentum nagyítási százalékának módosítása nélkül.",
+    "interfaceZoomIn": "Felület nagyítása",
+    "interfaceZoomOut": "Felület kicsinyítése",
+    "interfaceZoomReset": "Felület nagyításának visszaállítása 100%-ra",
+    "generalSettings": "Általános",
+    "viewMenu": "Nézet"
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -4232,7 +4414,14 @@
     "displayLanguage": "Ցուցադրման լեզու",
     "displayLanguageSystem": "Օգտագործել համակարգի լեզուն",
     "displayLanguageRestart": "Փոփոխությունը կիրառելու համար վերագործարկեք ElixirOffice-ը։",
-    "displayLanguageRestartNow": "Վերագործարկել հիմա"
+    "displayLanguageRestartNow": "Վերագործարկել հիմա",
+    "interfaceSize": "Միջերեսի չափը",
+    "interfaceSizeDescription": "Փոխեք միջերեսի մասշտաբը՝ առանց փաստաթղթի խոշորացման տոկոսը փոխելու։",
+    "interfaceZoomIn": "Մեծացնել միջերեսը",
+    "interfaceZoomOut": "Փոքրացնել միջերեսը",
+    "interfaceZoomReset": "Վերակայել միջերեսի խոշորացումը 100%-ի",
+    "generalSettings": "Ընդհանուր",
+    "viewMenu": "Տեսք"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -4390,7 +4579,14 @@
     "displayLanguage": "Bahasa tampilan",
     "displayLanguageSystem": "Gunakan bahasa sistem",
     "displayLanguageRestart": "Mulai ulang ElixirOffice untuk menerapkan perubahan.",
-    "displayLanguageRestartNow": "Mulai ulang sekarang"
+    "displayLanguageRestartNow": "Mulai ulang sekarang",
+    "interfaceSize": "Ukuran antarmuka",
+    "interfaceSizeDescription": "Ubah skala antarmuka tanpa mengubah persentase zoom dokumen.",
+    "interfaceZoomIn": "Perbesar antarmuka",
+    "interfaceZoomOut": "Perkecil antarmuka",
+    "interfaceZoomReset": "Atur ulang zoom antarmuka ke 100%",
+    "generalSettings": "Umum",
+    "viewMenu": "Tampilan"
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -4548,7 +4744,14 @@
     "displayLanguage": "표시 언어",
     "displayLanguageSystem": "시스템 언어 사용",
     "displayLanguageRestart": "적용하려면 ElixirOffice를 다시 시작하세요.",
-    "displayLanguageRestartNow": "지금 다시 시작"
+    "displayLanguageRestartNow": "지금 다시 시작",
+    "interfaceSize": "인터페이스 크기",
+    "interfaceSizeDescription": "문서 확대/축소 비율을 변경하지 않고 인터페이스 크기를 조정합니다.",
+    "interfaceZoomIn": "인터페이스 확대",
+    "interfaceZoomOut": "인터페이스 축소",
+    "interfaceZoomReset": "인터페이스 확대/축소를 100%로 재설정",
+    "generalSettings": "일반",
+    "viewMenu": "보기"
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -4706,7 +4909,14 @@
     "displayLanguage": "ພາສາສະແດງ",
     "displayLanguageSystem": "ໃຊ້ພາສາຂອງລະບົບ",
     "displayLanguageRestart": "ເລີ່ມ ElixirOffice ຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງ.",
-    "displayLanguageRestartNow": "ເລີ່ມຄືນໃໝ່ຕອນນີ້"
+    "displayLanguageRestartNow": "ເລີ່ມຄືນໃໝ່ຕອນນີ້",
+    "interfaceSize": "ຂະໜາດສ່ວນຕິດຕໍ່",
+    "interfaceSizeDescription": "ປັບຂະໜາດສ່ວນຕິດຕໍ່ໂດຍບໍ່ປ່ຽນເປີເຊັນການຊູມເອກະສານ.",
+    "interfaceZoomIn": "ຂະຫຍາຍສ່ວນຕິດຕໍ່",
+    "interfaceZoomOut": "ຫຍໍ້ສ່ວນຕິດຕໍ່",
+    "interfaceZoomReset": "ຣີເຊັດການຊູມສ່ວນຕິດຕໍ່ເປັນ 100%",
+    "generalSettings": "ທົ່ວໄປ",
+    "viewMenu": "ເບິ່ງ"
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -4864,7 +5074,14 @@
     "displayLanguage": "Displeja valoda",
     "displayLanguageSystem": "Izmantot sistēmas valodu",
     "displayLanguageRestart": "Restartējiet ElixirOffice, lai lietotu izmaiņu.",
-    "displayLanguageRestartNow": "Restartēt tūlīt"
+    "displayLanguageRestartNow": "Restartēt tūlīt",
+    "interfaceSize": "Saskarnes izmērs",
+    "interfaceSizeDescription": "Mērogojiet saskarni, nemainot dokumenta tālummaiņas procentu.",
+    "interfaceZoomIn": "Tuvināt saskarni",
+    "interfaceZoomOut": "Attālināt saskarni",
+    "interfaceZoomReset": "Atiestatīt saskarnes tālummaiņu uz 100%",
+    "generalSettings": "Vispārīgi",
+    "viewMenu": "Skats"
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -5022,7 +5239,14 @@
     "displayLanguage": "Bahasa paparan",
     "displayLanguageSystem": "Gunakan bahasa sistem",
     "displayLanguageRestart": "Mulakan semula ElixirOffice untuk menggunakan perubahan.",
-    "displayLanguageRestartNow": "Mulakan semula sekarang"
+    "displayLanguageRestartNow": "Mulakan semula sekarang",
+    "interfaceSize": "Saiz antara muka",
+    "interfaceSizeDescription": "Ubah skala antara muka tanpa mengubah peratus zum dokumen.",
+    "interfaceZoomIn": "Zum masuk antara muka",
+    "interfaceZoomOut": "Zum keluar antara muka",
+    "interfaceZoomReset": "Tetapkan semula zum antara muka kepada 100%",
+    "generalSettings": "Umum",
+    "viewMenu": "Paparan"
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -5191,7 +5415,14 @@
     "displayLanguage": "Visningsspråk",
     "displayLanguageSystem": "Bruk systemspråk",
     "displayLanguageRestart": "Start ElixirOffice på nytt for å bruke endringen.",
-    "displayLanguageRestartNow": "Start på nytt nå"
+    "displayLanguageRestartNow": "Start på nytt nå",
+    "interfaceSize": "Størrelse på brukergrensesnitt",
+    "interfaceSizeDescription": "Skaler brukergrensesnittet uten å endre dokumentets zoomprosent.",
+    "interfaceZoomIn": "Zoom inn i brukergrensesnittet",
+    "interfaceZoomOut": "Zoom ut av brukergrensesnittet",
+    "interfaceZoomReset": "Tilbakestill brukergrensesnittets zoom til 100 %",
+    "generalSettings": "Generelt",
+    "viewMenu": "Vis"
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -5349,7 +5580,14 @@
     "displayLanguage": "Limbă de afișare",
     "displayLanguageSystem": "Utilizați limba sistemului",
     "displayLanguageRestart": "Reporniți ElixirOffice pentru a aplica modificarea.",
-    "displayLanguageRestartNow": "Reporniți acum"
+    "displayLanguageRestartNow": "Reporniți acum",
+    "interfaceSize": "Dimensiunea interfeței",
+    "interfaceSizeDescription": "Scalați interfața fără a modifica procentajul de zoom al documentului.",
+    "interfaceZoomIn": "Măriți interfața",
+    "interfaceZoomOut": "Micșorați interfața",
+    "interfaceZoomReset": "Resetați zoomul interfeței la 100%",
+    "generalSettings": "General",
+    "viewMenu": "Vizualizare"
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -5507,7 +5745,14 @@
     "displayLanguage": "සංදර්ශන භාෂාව",
     "displayLanguageSystem": "පද්ධති භාෂාව භාවිත කරන්න",
     "displayLanguageRestart": "යෙදීම සඳහා ElixirOffice නැවත අරඹන්න.",
-    "displayLanguageRestartNow": "දැන් නැවත අරඹන්න"
+    "displayLanguageRestartNow": "දැන් නැවත අරඹන්න",
+    "interfaceSize": "අතුරුමුහුණතේ ප්‍රමාණය",
+    "interfaceSizeDescription": "ලේඛනයේ විශාලන ප්‍රතිශතය වෙනස් නොකර අතුරුමුහුණත පරිමාණය කරන්න.",
+    "interfaceZoomIn": "අතුරුමුහුණත විශාල කරන්න",
+    "interfaceZoomOut": "අතුරුමුහුණත කුඩා කරන්න",
+    "interfaceZoomReset": "අතුරුමුහුණතේ විශාලනය 100%ට යළි සකසන්න",
+    "generalSettings": "සාමාන්‍ය",
+    "viewMenu": "දසුන"
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -5665,7 +5910,14 @@
     "displayLanguage": "Jazyk zobrazenia",
     "displayLanguageSystem": "Použiť jazyk systému",
     "displayLanguageRestart": "Ak chcete použiť zmenu, reštartujte ElixirOffice.",
-    "displayLanguageRestartNow": "Reštartovať teraz"
+    "displayLanguageRestartNow": "Reštartovať teraz",
+    "interfaceSize": "Veľkosť rozhrania",
+    "interfaceSizeDescription": "Zmeňte mierku rozhrania bez zmeny percenta priblíženia dokumentu.",
+    "interfaceZoomIn": "Priblížiť rozhranie",
+    "interfaceZoomOut": "Oddialiť rozhranie",
+    "interfaceZoomReset": "Obnoviť priblíženie rozhrania na 100%",
+    "generalSettings": "Všeobecné",
+    "viewMenu": "Zobraziť"
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -5827,7 +6079,14 @@
     "displayLanguage": "Jezik uporabniškega vmesnika",
     "displayLanguageSystem": "Uporabi sistemski jezik",
     "displayLanguageRestart": "Za uveljavitev spremembe znova zaženite ElixirOffice.",
-    "displayLanguageRestartNow": "Znova zaženi zdaj"
+    "displayLanguageRestartNow": "Znova zaženi zdaj",
+    "interfaceSize": "Velikost vmesnika",
+    "interfaceSizeDescription": "Spremenite merilo vmesnika, ne da bi spremenili odstotek povečave dokumenta.",
+    "interfaceZoomIn": "Povečaj vmesnik",
+    "interfaceZoomOut": "Pomanjšaj vmesnik",
+    "interfaceZoomReset": "Ponastavi povečavo vmesnika na 100 %",
+    "generalSettings": "Splošno",
+    "viewMenu": "Pogled"
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -5985,7 +6244,14 @@
     "displayLanguage": "Gjuha e shfaqjes",
     "displayLanguageSystem": "Përdor gjuhën e sistemit",
     "displayLanguageRestart": "Rinisni ElixirOffice për të zbatuar ndryshimin.",
-    "displayLanguageRestartNow": "Rinisni tani"
+    "displayLanguageRestartNow": "Rinisni tani",
+    "interfaceSize": "Madhësia e ndërfaqes",
+    "interfaceSizeDescription": "Shkallëzoni ndërfaqen pa ndryshuar përqindjen e zmadhimit të dokumentit.",
+    "interfaceZoomIn": "Zmadho ndërfaqen",
+    "interfaceZoomOut": "Zvogëlo ndërfaqen",
+    "interfaceZoomReset": "Rivendos zmadhimin e ndërfaqes në 100%",
+    "generalSettings": "Të përgjithshme",
+    "viewMenu": "Pamja"
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -6143,7 +6409,14 @@
     "displayLanguage": "Jezik prikaza",
     "displayLanguageSystem": "Koristi jezik sistema",
     "displayLanguageRestart": "Ponovo pokrenite ElixirOffice da biste primenili izmenu.",
-    "displayLanguageRestartNow": "Ponovo pokreni sada"
+    "displayLanguageRestartNow": "Ponovo pokreni sada",
+    "interfaceSize": "Veličina interfejsa",
+    "interfaceSizeDescription": "Skalirajte interfejs bez menjanja procenta uvećanja dokumenta.",
+    "interfaceZoomIn": "Uvećaj interfejs",
+    "interfaceZoomOut": "Umanji interfejs",
+    "interfaceZoomReset": "Vrati uvećanje interfejsa na 100%",
+    "generalSettings": "Opšte",
+    "viewMenu": "Prikaz"
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -6301,7 +6574,14 @@
     "displayLanguage": "Језик приказа",
     "displayLanguageSystem": "Користи језик система",
     "displayLanguageRestart": "Поново покрените ElixirOffice да бисте применили измену.",
-    "displayLanguageRestartNow": "Поново покрени сада"
+    "displayLanguageRestartNow": "Поново покрени сада",
+    "interfaceSize": "Величина интерфејса",
+    "interfaceSizeDescription": "Скалирајте интерфејс без мењања процента увећања документа.",
+    "interfaceZoomIn": "Увећај интерфејс",
+    "interfaceZoomOut": "Умањи интерфејс",
+    "interfaceZoomReset": "Врати увећање интерфејса на 100%",
+    "generalSettings": "Опште",
+    "viewMenu": "Приказ"
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -6459,7 +6739,14 @@
     "displayLanguage": "Visningsspråk",
     "displayLanguageSystem": "Använd systemspråk",
     "displayLanguageRestart": "Starta om ElixirOffice för att tillämpa ändringen.",
-    "displayLanguageRestartNow": "Starta om nu"
+    "displayLanguageRestartNow": "Starta om nu",
+    "interfaceSize": "Gränssnittsstorlek",
+    "interfaceSizeDescription": "Skala gränssnittet utan att ändra dokumentets zoomprocent.",
+    "interfaceZoomIn": "Zooma in gränssnittet",
+    "interfaceZoomOut": "Zooma ut gränssnittet",
+    "interfaceZoomReset": "Återställ gränssnittets zoom till 100 %",
+    "generalSettings": "Allmänt",
+    "viewMenu": "Visa"
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -6617,7 +6904,14 @@
     "displayLanguage": "Görüntüleme dili",
     "displayLanguageSystem": "Sistem dilini kullan",
     "displayLanguageRestart": "Değişikliği uygulamak için ElixirOffice'i yeniden başlatın.",
-    "displayLanguageRestartNow": "Şimdi yeniden başlat"
+    "displayLanguageRestartNow": "Şimdi yeniden başlat",
+    "interfaceSize": "Arayüz boyutu",
+    "interfaceSizeDescription": "Belgenin yakınlaştırma yüzdesini değiştirmeden arayüzü ölçeklendirin.",
+    "interfaceZoomIn": "Arayüzü yakınlaştır",
+    "interfaceZoomOut": "Arayüzü uzaklaştır",
+    "interfaceZoomReset": "Arayüz yakınlaştırmasını %100'e sıfırla",
+    "generalSettings": "Genel",
+    "viewMenu": "Görünüm"
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -6775,7 +7069,14 @@
     "displayLanguage": "Мова інтерфейсу",
     "displayLanguageSystem": "Використовувати мову системи",
     "displayLanguageRestart": "Перезапустіть ElixirOffice, щоб застосувати зміну.",
-    "displayLanguageRestartNow": "Перезапустити зараз"
+    "displayLanguageRestartNow": "Перезапустити зараз",
+    "interfaceSize": "Розмір інтерфейсу",
+    "interfaceSizeDescription": "Масштабуйте інтерфейс, не змінюючи відсоток масштабу документа.",
+    "interfaceZoomIn": "Збільшити масштаб інтерфейсу",
+    "interfaceZoomOut": "Зменшити масштаб інтерфейсу",
+    "interfaceZoomReset": "Скинути масштаб інтерфейсу до 100%",
+    "generalSettings": "Загальні",
+    "viewMenu": "Вигляд"
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -6933,7 +7234,14 @@
     "displayLanguage": "ڈسپلے کی زبان",
     "displayLanguageSystem": "سسٹم کی زبان استعمال کریں",
     "displayLanguageRestart": "تبدیلی لاگو کرنے کے لیے ElixirOffice کو دوبارہ شروع کریں۔",
-    "displayLanguageRestartNow": "ابھی دوبارہ شروع کریں"
+    "displayLanguageRestartNow": "ابھی دوبارہ شروع کریں",
+    "interfaceSize": "انٹرفیس کا سائز",
+    "interfaceSizeDescription": "دستاویز کی زوم شرح تبدیل کیے بغیر انٹرفیس کا پیمانہ تبدیل کریں۔",
+    "interfaceZoomIn": "انٹرفیس زوم اِن",
+    "interfaceZoomOut": "انٹرفیس زوم آؤٹ",
+    "interfaceZoomReset": "انٹرفیس زوم کو 100% پر دوبارہ سیٹ کریں",
+    "generalSettings": "عمومی",
+    "viewMenu": "دیکھیں"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -7096,6 +7404,13 @@
     "displayLanguage": "Ngôn ngữ hiển thị",
     "displayLanguageSystem": "Sử dụng ngôn ngữ hệ thống",
     "displayLanguageRestart": "Khởi động lại ElixirOffice để áp dụng thay đổi.",
-    "displayLanguageRestartNow": "Khởi động lại ngay"
+    "displayLanguageRestartNow": "Khởi động lại ngay",
+    "interfaceSize": "Kích thước giao diện",
+    "interfaceSizeDescription": "Điều chỉnh tỷ lệ giao diện mà không thay đổi phần trăm thu phóng tài liệu.",
+    "interfaceZoomIn": "Phóng to giao diện",
+    "interfaceZoomOut": "Thu nhỏ giao diện",
+    "interfaceZoomReset": "Đặt lại mức thu phóng giao diện về 100%",
+    "generalSettings": "Chung",
+    "viewMenu": "Xem"
   }
 }

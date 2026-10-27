@@ -23,6 +23,7 @@ async function launch({file,sourceExecutable=process.env.EO_SOURCE_ELECTRON,prof
  if(!executable&&!parseVersion(sourceVersion))throw Error('Invalid source package version '+sourceVersion+'; complete SemVer required');
  if(file&&path.dirname(path.resolve(file))===path.join(root,'fixtures')&&/^sample/.test(path.basename(file)))file=await fixture(file);
  const directory=path.join(root,'profiles',profile);await fs.mkdir(directory,{recursive:true});
+ if(process.env.EO_TEST_FONT_DECLINED==='1')await fs.writeFile(path.join(directory,'desktop-settings.json'),JSON.stringify({recents:[],fontConsent:false,fontChoice:'declined',releaseNotice:{enabled:false}})+'\n',{flag:'wx',mode:0o600});
  const listener=net.createServer();await new Promise(resolve=>listener.listen(0,'127.0.0.1',resolve));const port=listener.address().port;await new Promise(resolve=>listener.close(resolve));
  await fs.mkdir(path.join(root,'results'),{recursive:true});
  // Capture mode creates its own unique profile; its strict parser rejects debug flags.

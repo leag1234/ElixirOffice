@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -29,6 +29,7 @@
       "*.css",
       "package.json",
       "tab-strings.json",
+      "interface-size-strings.json",
       "icon.png",
       "build-info.json",
       "update-cache.yml",

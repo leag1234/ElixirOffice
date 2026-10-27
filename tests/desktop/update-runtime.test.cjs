@@ -2,6 +2,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),Module=require('node:module');
 const network=require('./fixtures/deny-update-network.cjs')(),{fixture}=require('./fixtures/update-test-kit.cjs');
+const {storeTest}=require('./fixtures/updater-platform.cjs');
 const {createCandidate}=require('../../desktop/update-candidate.cjs'),{createAdapter}=require('../../desktop/update-handoff.cjs'),{createPolicy}=require('../../desktop/update-policy.cjs');
 const {createRuntimeSession}=require('../../desktop/update-runtime.cjs');
 const roots=[],notice={version:'0.4.0',url:'https://github.com/leag1234/elixiroffice/releases/tag/v0.4.0'};
@@ -29,27 +30,27 @@ test('closed policy or failed package eligibility refuses before dependency load
   assert.equal(imports,0);assert.equal(profile,0);assert.equal(eligibility,1);
  }finally{Module._load=load;}
 });
-for(const platform of ['win32','linux'])test(platform+' actual pinned protected bookkeeping and independently authorized install compose without stock I/O',async()=>{
+for(const platform of ['win32','linux'])storeTest(platform+' actual pinned protected bookkeeping and independently authorized install compose without stock I/O',async()=>{
  const e=await environment({platform}),receipt=await e.session.prepare(notice);
  assert.deepEqual(e.calls.get,['v0.4.0']);assert.equal(e.calls.download,1);assert.equal(e.calls.launch,0);
  const prepared=await e.session.install(receipt,{automatic:true});assert.equal(await prepared.revalidate(),true);
  assert.equal(prepared.adapter.install(),true);await prepared.adapter.acknowledgement;assert.equal(e.calls.launch,1);
  assert.deepEqual(e.calls.authority,[{silent:true,relaunch:false}]);await prepared.release();e.session.dispose();
 });
-test('a valid signed candidate for another displayed release fails before cache writes or downloads',async()=>{
+storeTest('a valid signed candidate for another displayed release fails before cache writes or downloads',async()=>{
  const e=await environment({candidate:f=>createCandidate({...fixture({now:f.now,version:'0.4.1'}),policy:f.policy})});
  await assert.rejects(()=>e.session.prepare(notice),/runtime/i);assert.equal(e.calls.download,0);
  assert.equal(await fs.stat(e.root).catch(()=>null),null);e.session.dispose();
 });
-test('copied candidate cannot cross provenance into runtime composition',async()=>{
+storeTest('copied candidate cannot cross provenance into runtime composition',async()=>{
  const e=await environment({candidate:f=>({...createCandidate(f)})});
  await assert.rejects(()=>e.session.prepare(notice),/runtime/i);assert.equal(e.calls.download,0);assert.equal(await fs.stat(e.root).catch(()=>null),null);e.session.dispose();
 });
-test('eligibility revoked after preparation prevents platform handoff',async()=>{
+storeTest('eligibility revoked after preparation prevents platform handoff',async()=>{
  const e=await environment(),receipt=await e.session.prepare(notice);e.allowed=false;
  await assert.rejects(()=>e.session.install(receipt),/runtime/i);assert.equal(e.calls.adapter,0);e.session.dispose();
 });
-test('cache mutation or expired metadata prevents adapter construction',async()=>{
+storeTest('cache mutation or expired metadata prevents adapter construction',async()=>{
  for(const kind of ['mutation','expired']){
   const e=await environment(),receipt=await e.session.prepare(notice);
   if(kind==='mutation'){const name=(await fs.readdir(e.root)).find(n=>n.startsWith('payload-'));await fs.writeFile(path.join(e.root,name),Buffer.alloc(e.f.payload.length,1));}
@@ -57,13 +58,13 @@ test('cache mutation or expired metadata prevents adapter construction',async()=
   await assert.rejects(()=>e.session.install(receipt));assert.equal(e.calls.adapter,0);e.session.dispose();
  }
 });
-test('wrong receipts and arbitrary installer flags are rejected before native preparation',async()=>{
+storeTest('wrong receipts and arbitrary installer flags are rejected before native preparation',async()=>{
  const e=await environment(),receipt=await e.session.prepare(notice);
  await assert.rejects(()=>e.session.install({...receipt}),/runtime/i);
  await assert.rejects(()=>e.session.install(receipt,{automatic:true,args:['/D=unsafe']}),/runtime/i);
  assert.equal(e.calls.adapter,0);e.session.dispose();
 });
-test('disposal aborts pending metadata and prohibits late download/install',async()=>{
+storeTest('disposal aborts pending metadata and prohibits late download/install',async()=>{
  let context;const e=await environment({get:value=>{context=value;return new Promise((_,reject)=>value.signal.addEventListener('abort',()=>reject(Error('synthetic aborted')),{once:true}));}});
  const pending=e.session.prepare(notice);for(let n=0;n<20&&!context;n++)await new Promise(setImmediate);assert(context);e.session.dispose();
  await assert.rejects(()=>pending,/runtime/i);assert.equal(context.signal.aborted,true);assert.equal(e.calls.download,0);assert.equal(e.calls.adapter,0);

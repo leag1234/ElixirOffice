@@ -1,0 +1,950 @@
+[
+  {
+    "id": "teacher-cost",
+    "category": "formula",
+    "lang": "en",
+    "data": [
+      [
+        "Item",
+        "Units",
+        "Price"
+      ],
+      [
+        "Pencils",
+        4,
+        2
+      ],
+      [
+        "Books",
+        3,
+        10
+      ],
+      [
+        "Rulers",
+        5,
+        3
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "For the classroom order, write the line cost in D2:D4 as Units times Price.",
+    "criteria": {
+      "cells": {
+        "D2": "8",
+        "D3": "30",
+        "D4": "15"
+      },
+      "formulas": [
+        "D2",
+        "D3",
+        "D4"
+      ]
+    }
+  },
+  {
+    "id": "shop-total",
+    "category": "formula",
+    "lang": "fr",
+    "data": [
+      [
+        "Sales"
+      ],
+      [
+        20
+      ],
+      [
+        30
+      ],
+      [
+        50
+      ]
+    ],
+    "selection": "A1:A4",
+    "instruction": "Écris en A5 la formule du total des ventes.",
+    "criteria": {
+      "cells": {
+        "A5": "100"
+      },
+      "formulas": [
+        "A5"
+      ]
+    }
+  },
+  {
+    "id": "teacher-average",
+    "category": "formula",
+    "lang": "en",
+    "data": [
+      [
+        "Student",
+        "Score1",
+        "Score2"
+      ],
+      [
+        "Ada",
+        12,
+        16
+      ],
+      [
+        "Grace",
+        18,
+        20
+      ],
+      [
+        "Linus",
+        10,
+        14
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Write the average of the two scores for each student in D2:D4.",
+    "criteria": {
+      "cells": {
+        "D2": "14",
+        "D3": "19",
+        "D4": "12"
+      },
+      "formulas": [
+        "D2",
+        "D3",
+        "D4"
+      ]
+    }
+  },
+  {
+    "id": "shop-ratio",
+    "category": "formula",
+    "lang": "fr",
+    "data": [
+      [
+        "Product",
+        "Sold",
+        "Stock"
+      ],
+      [
+        "A",
+        5,
+        10
+      ],
+      [
+        "B",
+        3,
+        12
+      ]
+    ],
+    "selection": "A1:C3",
+    "instruction": "Écris en D2:D3 le rapport vendu / stock sous forme de nombre, sans format pourcentage.",
+    "criteria": {
+      "cells": {
+        "D2": "0.5",
+        "D3": "0.25"
+      },
+      "formulas": [
+        "D2",
+        "D3"
+      ]
+    }
+  },
+  {
+    "id": "teacher-pass",
+    "category": "formula",
+    "lang": "en",
+    "data": [
+      [
+        "Student",
+        "Score"
+      ],
+      [
+        "Ada",
+        12
+      ],
+      [
+        "Grace",
+        8
+      ],
+      [
+        "Linus",
+        15
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Write Pass if the score is at least10, otherwise Retry, in C2:C4 using formulas.",
+    "criteria": {
+      "cells": {
+        "C2": "Pass",
+        "C3": "Retry",
+        "C4": "Pass"
+      },
+      "formulas": [
+        "C2",
+        "C3",
+        "C4"
+      ]
+    }
+  },
+  {
+    "id": "shop-count",
+    "category": "formula",
+    "lang": "fr",
+    "data": [
+      [
+        "Status"
+      ],
+      [
+        "Paid"
+      ],
+      [
+        "Pending"
+      ],
+      [
+        "Paid"
+      ],
+      [
+        "Paid"
+      ]
+    ],
+    "selection": "A1:A5",
+    "instruction": "En B1, écris une formule qui compte les cellules « Paid » de A2:A5.",
+    "criteria": {
+      "cells": {
+        "B1": "3"
+      },
+      "formulas": [
+        "B1"
+      ]
+    }
+  },
+  {
+    "id": "explain-total",
+    "category": "explain",
+    "lang": "en",
+    "data": [
+      [
+        "Sales"
+      ],
+      [
+        20
+      ],
+      [
+        30
+      ],
+      [
+        "=SUM(A2:A3)"
+      ]
+    ],
+    "selection": "A1:A4",
+    "instruction": "Explain the formula in A4 and its current result. Do not edit.",
+    "criteria": {
+      "readOnly": true,
+      "answerContains": [
+        "50"
+      ]
+    }
+  },
+  {
+    "id": "explain-threshold",
+    "category": "explain",
+    "lang": "fr",
+    "data": [
+      [
+        "Score",
+        "Decision"
+      ],
+      [
+        12,
+        "=IF(A2>=10,\"Pass\",\"Retry\")"
+      ]
+    ],
+    "selection": "A1:B2",
+    "instruction": "Explique B2, y compris ce qui se passe si la note descend sous10. Ne modifie rien.",
+    "criteria": {
+      "readOnly": true,
+      "answerContains": [
+        "10",
+        "Pass",
+        "Retry"
+      ]
+    }
+  },
+  {
+    "id": "explain-average",
+    "category": "explain",
+    "lang": "en",
+    "data": [
+      [
+        "Math",
+        "Science",
+        "Average"
+      ],
+      [
+        14,
+        18,
+        "=AVERAGE(A2:B2)"
+      ]
+    ],
+    "selection": "A1:C2",
+    "instruction": "Explain the teacher average formula in C2 and the result. Do not edit.",
+    "criteria": {
+      "readOnly": true,
+      "answerContains": [
+        "16"
+      ]
+    }
+  },
+  {
+    "id": "trim-names",
+    "category": "clean",
+    "lang": "fr",
+    "data": [
+      [
+        "Name"
+      ],
+      [
+        "'  Ada  Lovelace "
+      ],
+      [
+        "' Grace  Hopper "
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Supprime les espaces en début et fin et réduis les espaces répétés dans ces noms d’élèves.",
+    "criteria": {
+      "cells": {
+        "A2": "Ada Lovelace",
+        "A3": "Grace Hopper"
+      }
+    }
+  },
+  {
+    "id": "trim-injection",
+    "category": "clean",
+    "lang": "en",
+    "data": [
+      [
+        "Customer"
+      ],
+      [
+        "' =1+2 "
+      ],
+      [
+        "' 0012 "
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Trim spaces in customer codes A2:A3, keeping them as literal text and preserving leading zeros.",
+    "criteria": {
+      "cells": {
+        "A2": "=1+2",
+        "A3": "0012"
+      },
+      "literal": [
+        "A2",
+        "A3"
+      ]
+    }
+  },
+  {
+    "id": "split-pupils",
+    "category": "clean",
+    "lang": "fr",
+    "data": [
+      [
+        "'Ada;Lovelace"
+      ],
+      [
+        "'Grace;Hopper"
+      ]
+    ],
+    "selection": "A1:A2",
+    "instruction": "Sépare la colonne A sur le point-virgule littéral dans A1:B2 ; il n’y a pas d’en-tête.",
+    "criteria": {
+      "cells": {
+        "A1": "Ada",
+        "B1": "Lovelace",
+        "A2": "Grace",
+        "B2": "Hopper"
+      }
+    }
+  },
+  {
+    "id": "split-orders",
+    "category": "clean",
+    "lang": "en",
+    "data": [
+      [
+        "'REF-01|North"
+      ],
+      [
+        "'REF-02|South"
+      ]
+    ],
+    "selection": "A1:A2",
+    "instruction": "Split each order reference and region on | into A1:B2, without headers.",
+    "criteria": {
+      "cells": {
+        "A1": "REF-01",
+        "B1": "North",
+        "A2": "REF-02",
+        "B2": "South"
+      }
+    }
+  },
+  {
+    "id": "dedupe-contacts",
+    "category": "clean",
+    "lang": "fr",
+    "data": [
+      [
+        "Name",
+        "Email"
+      ],
+      [
+        "Ada",
+        "ada@example.invalid"
+      ],
+      [
+        "Grace",
+        "grace@example.invalid"
+      ],
+      [
+        "Ada",
+        "ada@example.invalid"
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Supprime les lignes de contacts entièrement identiques dans A1:B4, conserve la première ligne d’en-tête et l’ordre initial.",
+    "criteria": {
+      "cells": {
+        "A2": "Ada",
+        "A3": "Grace",
+        "A4": "",
+        "B4": ""
+      }
+    }
+  },
+  {
+    "id": "dedupe-inventory",
+    "category": "clean",
+    "lang": "en",
+    "data": [
+      [
+        "Code",
+        "Units"
+      ],
+      [
+        "A",
+        2
+      ],
+      [
+        "B",
+        3
+      ],
+      [
+        "A",
+        2
+      ],
+      [
+        "A",
+        4
+      ]
+    ],
+    "selection": "A1:B5",
+    "instruction": "Remove exact duplicate inventory rows in this table, preserving the header and the A/4 entry.",
+    "criteria": {
+      "cells": {
+        "A2": "A",
+        "B2": "2",
+        "A3": "B",
+        "B3": "3",
+        "A4": "A",
+        "B4": "4",
+        "A5": "",
+        "B5": ""
+      }
+    }
+  },
+  {
+    "id": "dates-dmy",
+    "category": "clean",
+    "lang": "fr",
+    "data": [
+      [
+        "Date"
+      ],
+      [
+        "'26/10/2026"
+      ],
+      [
+        "'29/02/2024"
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Convertis A2:A3 du texte explicite JJ/MM/AAAA en vraies dates de tableur affichées yyyy-mm-dd.",
+    "criteria": {
+      "cells": {
+        "A2": "46321",
+        "A3": "45351"
+      },
+      "dateFormat": [
+        "A2",
+        "A3"
+      ]
+    }
+  },
+  {
+    "id": "dates-iso",
+    "category": "clean",
+    "lang": "en",
+    "data": [
+      [
+        "Due"
+      ],
+      [
+        "'2026-01-15"
+      ],
+      [
+        "'2026-12-31"
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Normalize the ISO YYYY-MM-DD text in A2:A3 to real dates displayed yyyy-mm-dd.",
+    "criteria": {
+      "cells": {
+        "A2": "46037",
+        "A3": "46387"
+      },
+      "dateFormat": [
+        "A2",
+        "A3"
+      ]
+    }
+  },
+  {
+    "id": "numbers-comma",
+    "category": "clean",
+    "lang": "fr",
+    "data": [
+      [
+        "Amount"
+      ],
+      [
+        "'1 234,50"
+      ],
+      [
+        "'2 000,25"
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Convertis A2:A3 en nombres : virgule décimale et espace comme séparateur de milliers.",
+    "criteria": {
+      "cells": {
+        "A2": "1234.5",
+        "A3": "2000.25"
+      },
+      "numeric": [
+        "A2",
+        "A3"
+      ]
+    }
+  },
+  {
+    "id": "numbers-dot",
+    "category": "clean",
+    "lang": "en",
+    "data": [
+      [
+        "Amount"
+      ],
+      [
+        "'1,234.50"
+      ],
+      [
+        "'-2,000.25"
+      ]
+    ],
+    "selection": "A1:A3",
+    "instruction": "Normalize A2:A3 into numbers: dot decimal, comma grouping separator.",
+    "criteria": {
+      "cells": {
+        "A2": "1234.5",
+        "A3": "-2000.25"
+      },
+      "numeric": [
+        "A2",
+        "A3"
+      ]
+    }
+  },
+  {
+    "id": "sort-sales",
+    "category": "sort",
+    "lang": "fr",
+    "data": [
+      [
+        "Name",
+        "Amount",
+        "Region"
+      ],
+      [
+        "B",
+        20,
+        "North"
+      ],
+      [
+        "A",
+        10,
+        "South"
+      ],
+      [
+        "C",
+        30,
+        "North"
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Trie les lignes de ventes complètes par Amount décroissant, en conservant l’en-tête.",
+    "criteria": {
+      "cells": {
+        "A2": "C",
+        "B2": "30",
+        "A3": "B",
+        "A4": "A"
+      }
+    }
+  },
+  {
+    "id": "sort-pupils",
+    "category": "sort",
+    "lang": "en",
+    "data": [
+      [
+        "Pupil",
+        "Score"
+      ],
+      [
+        "Grace",
+        18
+      ],
+      [
+        "Ada",
+        12
+      ],
+      [
+        "Linus",
+        15
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Sort complete pupil rows alphabetically by Pupil ascending; first row is the header.",
+    "criteria": {
+      "cells": {
+        "A2": "Ada",
+        "B2": "12",
+        "A3": "Grace",
+        "B3": "18",
+        "A4": "Linus",
+        "B4": "15"
+      }
+    }
+  },
+  {
+    "id": "sort-two-keys",
+    "category": "sort",
+    "lang": "fr",
+    "data": [
+      [
+        "Region",
+        "Sales"
+      ],
+      [
+        "West",
+        10
+      ],
+      [
+        "East",
+        20
+      ],
+      [
+        "East",
+        30
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Trie par Region croissant puis Sales décroissant, conserve l’en-tête et les lignes complètes.",
+    "criteria": {
+      "cells": {
+        "A2": "East",
+        "B2": "30",
+        "A3": "East",
+        "B3": "20",
+        "A4": "West",
+        "B4": "10"
+      }
+    }
+  },
+  {
+    "id": "filter-region",
+    "category": "filter",
+    "lang": "en",
+    "data": [
+      [
+        "Name",
+        "Amount",
+        "Region"
+      ],
+      [
+        "B",
+        20,
+        "North"
+      ],
+      [
+        "A",
+        10,
+        "South"
+      ],
+      [
+        "C",
+        30,
+        "North"
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Show only sales rows where Region equals North; use the filter, do not delete data.",
+    "criteria": {
+      "hidden": [
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "id": "filter-scores",
+    "category": "filter",
+    "lang": "fr",
+    "data": [
+      [
+        "Pupil",
+        "Score"
+      ],
+      [
+        "Ada",
+        12
+      ],
+      [
+        "Grace",
+        8
+      ],
+      [
+        "Linus",
+        15
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Filtre pour afficher uniquement les notes au moins égales à10, sans supprimer de lignes.",
+    "criteria": {
+      "hidden": [
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "id": "filter-customer",
+    "category": "filter",
+    "lang": "en",
+    "data": [
+      [
+        "Customer",
+        "Sales"
+      ],
+      [
+        "North School",
+        20
+      ],
+      [
+        "West Shop",
+        10
+      ],
+      [
+        "North Books",
+        30
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Filter customers whose name contains North, keeping the underlying rows intact.",
+    "criteria": {
+      "hidden": [
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "id": "chart-sales",
+    "category": "chart",
+    "lang": "fr",
+    "data": [
+      [
+        "Month",
+        "Sales"
+      ],
+      [
+        "Jan",
+        20
+      ],
+      [
+        "Feb",
+        30
+      ],
+      [
+        "Mar",
+        25
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Crée un nouvel histogramme des ventes mensuelles intitulé Monthly sales.",
+    "criteria": {
+      "charts": 1
+    }
+  },
+  {
+    "id": "chart-attendance",
+    "category": "chart",
+    "lang": "en",
+    "data": [
+      [
+        "Week",
+        "Attendance"
+      ],
+      [
+        "W1",
+        25
+      ],
+      [
+        "W2",
+        28
+      ],
+      [
+        "W3",
+        27
+      ]
+    ],
+    "selection": "A1:B4",
+    "instruction": "Create a line chart showing attendance by week, title Attendance.",
+    "criteria": {
+      "charts": 1
+    }
+  },
+  {
+    "id": "pivot-sales",
+    "category": "pivot",
+    "lang": "fr",
+    "data": [
+      [
+        "Name",
+        "Amount",
+        "Region"
+      ],
+      [
+        "B",
+        20,
+        "North"
+      ],
+      [
+        "A",
+        10,
+        "South"
+      ],
+      [
+        "C",
+        30,
+        "North"
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Crée un tableau croisé dans une nouvelle feuille Sales Summary, avec Region en lignes et la somme de Amount.",
+    "criteria": {
+      "pivotValues": [
+        "North",
+        "50",
+        "South",
+        "10",
+        "60"
+      ]
+    }
+  },
+  {
+    "id": "pivot-teachers",
+    "category": "pivot",
+    "lang": "en",
+    "data": [
+      [
+        "Class",
+        "Pupil",
+        "Score"
+      ],
+      [
+        "A",
+        "Ada",
+        12
+      ],
+      [
+        "B",
+        "Grace",
+        18
+      ],
+      [
+        "A",
+        "Linus",
+        16
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Create a pivot in a new sheet Class Summary, rows Class and average of Score.",
+    "criteria": {
+      "pivotValues": [
+        "A",
+        "14",
+        "B",
+        "18"
+      ]
+    }
+  },
+  {
+    "id": "summarize-sales",
+    "category": "summary",
+    "lang": "fr",
+    "data": [
+      [
+        "Name",
+        "Amount",
+        "Region"
+      ],
+      [
+        "B",
+        20,
+        "North"
+      ],
+      [
+        "A",
+        10,
+        "South"
+      ],
+      [
+        "C",
+        30,
+        "North"
+      ]
+    ],
+    "selection": "A1:C4",
+    "instruction": "Résume les ventes en langage courant, indique le total de Amount. Ne modifie rien.",
+    "criteria": {
+      "readOnly": true,
+      "answerContains": [
+        "60"
+      ]
+    }
+  }
+]

@@ -2,7 +2,7 @@
 
 On Linux/X11, Options > Window > Use a custom title bar puts the window title or document tabs, Quick Access and command-search entry in one 36-pixel band. It is an opt-in preference and applies to new windows. Turn it off to use the system frame for subsequent windows. The default remains the native frame.
 
-Windows, macOS, Wayland and unknown display backends automatically retain their native frame, including when a profile contains the custom preference. They have not been qualified for this feature. There is no interface-size preference; the interface follows system scaling, independently of document zoom.
+Windows, macOS, Wayland and unknown display backends automatically retain their native frame, including when a profile contains the custom preference. They have not been qualified for this feature. The 0.4 source candidate adds [Interface size](desktop-interface-size.md) to Options > General, independently of the document zoom percentage; compact strip and overlay bounds follow the preference.
 
 ## Behavior and safety
 

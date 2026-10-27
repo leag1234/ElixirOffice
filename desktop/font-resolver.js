@@ -3,7 +3,13 @@
  'use strict';
  // SDK FontStyle bits: bold=1, italic=2. AllFonts positional slots are converted by the index.
  const order={0:[0,2,1,3],1:[1,0,3,2],2:[2,0,3,1],3:[3,1,2,0]};
- const fallbackFamilies=Object.freeze(['Elixir Fallback Arabic','Elixir Fallback Sinhala']);
+ const reservedFallbackFamilies=Object.freeze(['Elixir Fallback Arabic','Elixir Fallback Sinhala']);
+ const cjkFallbackFamilies=Object.freeze([
+  'Elixir Fallback CJK JP','Elixir Fallback CJK KR','Elixir Fallback CJK SC','Elixir Fallback CJK TC','Elixir Fallback CJK HK',
+  'Elixir Fallback Mono CJK JP','Elixir Fallback Mono CJK KR','Elixir Fallback Mono CJK SC','Elixir Fallback Mono CJK TC','Elixir Fallback Mono CJK HK'
+ ]);
+ // Packaged CJK faces are fallbacks, but same-named system faces remain eligible and win.
+ const fallbackFamilies=Object.freeze([...reservedFallbackFamilies,...cjkFallbackFamilies]);
  const normalizedNames=new Map(),NORMALIZED_NAME_LIMIT=4096;
  const normalize=name=>{
   const raw=String(name||'');
@@ -49,7 +55,7 @@
   if(cp>=0xac00&&cp<=0xd7ff||cp>=0x1100&&cp<=0x11ff||cp>=0xa960&&cp<=0xa97f||cp>=0x3130&&cp<=0x318f)region='KR';
   if(cp>=0x3100&&cp<=0x312f)region='TC';
   const os={JP:['Yu Gothic','MS Gothic','Hiragino Sans','Meiryo'],TC:['Microsoft JhengHei','MingLiU','PingFang TC'],KR:['Malgun Gothic','Batang','Apple SD Gothic Neo'],SC:['Microsoft YaHei','SimSun','PingFang SC']};
-  return ['Noto Sans CJK '+region,'Noto Serif CJK '+region,...os[region]];
+  return ['Noto Sans CJK '+region,'Noto Serif CJK '+region,...os[region],'Elixir Fallback CJK '+region];
  }
  function namedCandidates(name){
   const key=normalize(name);
@@ -59,7 +65,7 @@
   }
   return [];
  }
- function eligible(face){return face.source!=='system'||!fallbackFamilies.some(name=>normalize(name)===normalize(face.family))&&(!face.variable||!(face.faceIndex>>>16)||face.instanceDefault===true);}
+ function eligible(face){return face.source!=='system'||!reservedFallbackFamilies.some(name=>normalize(name)===normalize(face.family))&&(!face.variable||!(face.faceIndex>>>16)||face.instanceDefault===true);}
  function prepare(faces){return faces.filter(eligible).map(face=>face.source==='system'&&face.variable&&face.instanceDefault?{...face,faceIndex:face.faceIndex&65535}:face).sort((a,b)=>Number(!!a.variable)-Number(!!b.variable));}
  function create(faces,{substitutes={}}={}){
   const safeAliases=new Map();
@@ -105,5 +111,5 @@
   }
   return Object.freeze({resolve,covers,families,protectedName:name=>!!resolve({name})&&resolve({name}).source==='bundled'});
  }
- return Object.freeze({create,styleOf,covers,normalize,slots,scriptCandidates,eligible,prepare,fallbackFamilies,namedCandidates});
+ return Object.freeze({create,styleOf,covers,normalize,slots,scriptCandidates,eligible,prepare,fallbackFamilies,reservedFallbackFamilies,cjkFallbackFamilies,namedCandidates});
 });

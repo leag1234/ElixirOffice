@@ -1,0 +1,9 @@
+{
+  "interfaceSize": "Interface size",
+  "interfaceSizeDescription": "Scale the interface without changing the document zoom percentage.",
+  "interfaceZoomIn": "Interface zoom in",
+  "interfaceZoomOut": "Interface zoom out",
+  "interfaceZoomReset": "Reset interface zoom to 100%",
+  "generalSettings": "General",
+  "viewMenu": "View"
+}

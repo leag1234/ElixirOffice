@@ -1,5 +1,22 @@
 # Changelog
 
+## Desktop0.4.0 — corresponding-source candidate
+
+- Make Ask Elixir/setup discoverable; retain optional, off-by-default AI with
+  explicit configuration, consent and user requests across the three editors.
+- Persist interface size independently of document zoom (#38).
+- Preserve Word reading view/selection during optional late-font layout, while
+  newer editing/navigation wins (#37). Limited sampled Windows evidence does not
+  measure a CPU or micro-freeze improvement.
+- Include pinned CJK sans Regular/Bold fallbacks and regional/glyph/cache source
+  corrections (#39); synthetic italic and documented typography limits apply.
+
+This row describes corresponding source. New package/Mac/native acceptance,
+owner signatures and publication remain distinct; no old platform allowance or
+new release date is inferred. All previous published history and legal notices
+below are preserved.
+
+
 ## 0.3.3 — corresponding-source preparation
 
 - Record source for desktop build 19 with Electron 44.9.1, Node 22.23.3 and unchanged full/PDF runtime pins.

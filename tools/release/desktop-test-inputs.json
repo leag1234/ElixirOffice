@@ -30,6 +30,7 @@
   ],
   "sdkjs_files": [
     "pdf/src/thumbnails.js",
-    "common/GlobalLoaders.js"
+    "common/GlobalLoaders.js",
+    "common/device_scale.js"
   ]
 }

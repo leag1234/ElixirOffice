@@ -5,7 +5,7 @@ const keys=['releaseInstall','releaseAutomatic','releaseAutomaticDescription','r
 test('install UI has English source,45 locale fields and an explicit non-English Z review queue',()=>{
  const source=require('../../desktop/update-strings.cjs'),catalogs=require('../../tools/desktop/i18n-extra.json');
  for(const key of keys)assert.equal(typeof source[key],'string','English fallback '+key);
- const review=require('../../docs/handoff/update-installation-strings-Z.json');
+ const review=require('../fixtures/reviewed-i18n/update-installation-strings-Z.json');
  assert.equal(Object.keys(catalogs).length,45);assert.deepEqual(review.keys,keys);
  for(const [locale,strings]of Object.entries(catalogs)){
   for(const key of keys)assert(typeof strings[key]==='string'&&strings[key].trim(),locale+':'+key);

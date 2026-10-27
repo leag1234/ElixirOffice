@@ -2,17 +2,18 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
 const {spawn}=require('node:child_process'),{once}=require('node:events');
+const {storeTest}=require('./fixtures/updater-platform.cjs');
 const {createStore}=require('../../desktop/update-store.cjs');
 const roots=[];
 async function setup(){const dir=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'eo-lock-test-')));roots.push(dir);return {dir,root:path.join(dir,'cache')};}
 test.after(async()=>{for(const d of roots)await fs.rm(d,{recursive:true,force:true});});
-test('persistent guard survives release without granting a simultaneous second owner',async()=>{
+storeTest('persistent guard survives release without granting a simultaneous second owner',async()=>{
  const f=await setup(),a=createStore(f),b=createStore(f),release=await a.lock();
  await assert.rejects(()=>b.lock());await release();await release();
  assert.deepEqual(await fs.readdir(f.root),['guard-v2']);const before=await fs.stat(path.join(f.root,'guard-v2'));
  const next=await b.lock();await next();assert.equal((await fs.stat(path.join(f.root,'guard-v2'))).ino,before.ino);
 });
-test('a real crashed holder releases the kernel lock and the next process succeeds',{timeout:10000},async()=>{
+storeTest('a real crashed holder releases the kernel lock and the next process succeeds',{timeout:10000},async()=>{
  const f=await setup(),source="const {createStore}=require(process.argv[1]);createStore({root:process.argv[2]}).lock().then(()=>{process.stdout.write('LOCKED\\n');setInterval(()=>{},1000);}).catch(()=>process.exit(2));";
  const child=spawn(process.execPath,['-e',source,path.resolve(__dirname,'../../desktop/update-store.cjs'),f.root],{stdio:['ignore','pipe','pipe']});
  try{await new Promise((resolve,reject)=>{child.stdout.once('data',resolve);child.once('exit',code=>reject(Error('holder exited '+code)));});
@@ -20,7 +21,7 @@ test('a real crashed holder releases the kernel lock and the next process succee
  const unlock=await createStore(f).lock();await unlock();assert.deepEqual(await fs.readdir(f.root),['guard-v2']);
  }finally{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');}
 });
-test('legacy zero-byte lease needs trusted profile ownership; unsafe legacy files are retained',async()=>{
+storeTest('legacy zero-byte lease needs trusted profile ownership; unsafe legacy files are retained',async()=>{
  for(const kind of ['safe','nonempty','public','link','hardlink']){
  const f=await setup();await fs.mkdir(f.root,{mode:0o700});const old=path.join(f.root,'lease'),other=path.join(f.dir,'other');
  await fs.writeFile(other,'',{mode:0o600});
@@ -31,7 +32,7 @@ test('legacy zero-byte lease needs trusted profile ownership; unsafe legacy file
  else{await assert.rejects(()=>store.lock());assert(await fs.lstat(old));}
  }
 });
-test('guard symlinks, hardlinks and public mode cannot be acquired',async()=>{
+storeTest('guard symlinks, hardlinks and public mode cannot be acquired',async()=>{
  for(const kind of ['link','hardlink','public']){
  const f=await setup();await fs.mkdir(f.root,{mode:0o700});const file=path.join(f.root,'guard-v2'),other=path.join(f.dir,'other');await fs.writeFile(other,'',{mode:0o600});
  if(kind==='link')await fs.symlink(other,file);else if(kind==='hardlink')await fs.link(other,file);else await fs.writeFile(file,'',{mode:0o644});

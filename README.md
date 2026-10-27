@@ -1,5 +1,28 @@
 # ElixirOffice
 
+## 0.4.0 corresponding-source candidate
+
+This source candidate includes visible Ask Elixir/setup and optional Word,
+Spreadsheet and Presentation actions. AI remains off by default: configuration,
+consent and an explicit request are required. Interface size80–200% stays separate
+from document zoom (#38). Word late-font layout preserves the reading view and
+selection while newer editing/navigation takes priority (#37). Pinned Noto Sans
+CJK Regular/Bold fallbacks add JP/SC/TC/KR coverage with installed-font priority;
+italic is synthesized (#39).
+
+These are source features, not a declaration that a new installer was published
+or that every platform/native/performance check passed. The Word observations
+are limited to sampled private Windows views and visible selection retention;
+no micro-freeze/CPU gain or exact relayout overlap was measured. Mac/native,
+provider/model, conversion and CJK typography limits remain separate.
+
+Original product revision:52bf9a5426f343efa6b6be22e3d55d7938859c12.
+Original DocumentServer revision:1bd3bc3989c3ac3ffc53fd6b1204171b8dc4cb4e.
+The corresponding-source records declare all public adaptations and the public
+SDK/Web child revisions. Original package bytes and runtime selections are not
+changed by this source preparation; clean rebuild equivalence is not claimed.
+
+
 ## 0.3.3 corresponding-source snapshot
 
 This source snapshot corresponds to ElixirOffice desktop 0.3.3, build 19, from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` and DocumentServer `adc905b591220200bd00907f66cc2d5b9e6144aa`. Electron is 44.9.1; external build Node stays 22.23.3 and the full/PDF converter pins are unchanged.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-for(const [name,ai,enabled]of [['absent',undefined,false],['empty',{},false],['locale-only',{ConfigForm:{desktopKeyLabel:'localized'}},false],['unconfigured',{Settings:{isConfigured:()=>false}},false],['configured',{Settings:{isConfigured:()=>true}},true]]){
+for(const [name,ai,enabled]of [['absent',undefined,false],['empty',{},false],['locale-only',{ConfigForm:{desktopKeyLabel:'localized'}},false],['unconfigured',{Settings:{isConfigured:()=>false}},true],['configured',{Settings:{isConfigured:()=>true}},true]]){
  test('native backstage accepts '+name+' AI namespace and preserves Help',async()=>{
   let shown=0,disabled,aiVisible,hidden=0,handler,command;
   const element={attr(){return this},find(){return this},off(){return this},on(_name,fn){handler=fn;return this},insertAfter(){return this}};

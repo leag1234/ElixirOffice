@@ -2,7 +2,7 @@
 
 Every previously bundled font remains. Computer fonts are added locally, without contacting a font service or uploading font files. Unset desktop settings enable the option; explicit previous declines remain disabled. File > Options keeps the switch and native confirmation when re-enabling. Capture mode does not enumerate or read computer fonts. Server fonts and browser Local Font Access behavior remain unchanged.
 
-The priority is a requested bundled document family or bundled metric substitute, then an eligible system family, then a small bundled fallback. Existing office layout therefore keeps its packaged fonts when the computer also has Arial or Calibri. Full CJK fonts are not added to packages. S3 adds only the small Arabic/Sinhala fallback set described below; six localized templates follow in S4.
+The priority is a requested bundled document family or bundled metric substitute, then an eligible system family, then a bundled fallback. Existing office layout therefore keeps its packaged fonts when the computer also has Arial or Calibri. S3 originally added the small Arabic/Sinhala fallback set described below; the 0.4 issue-39 candidate adds the pan-CJK fallback described at the end of this document.
 
 This is a source/build/test review candidate, outside frozen 0.2.1. Actual Electron/editor/ASAR, Windows, macOS and Flatpak acceptance remains unverified.
 
@@ -207,6 +207,16 @@ that input, EO_DESKTOP_ROOT to the isolated runtime folder,
 EO_PACKAGE_EXECUTABLE to the test application and EO_PLAYWRIGHT to Playwright,
 then run node tests/desktop/font-readiness.cjs. It uses temporary copies and
 sequential fresh profiles; it never drives a native file or print dialog.
+
+## Pan-CJK packaged fallback — 0.4 issue 39 candidate
+
+The desktop package now carries the unmodified Noto Sans CJK 2.004 Regular and Bold pan-CJK OTC files under OFL 1.1. Together they add exactly **39,535,544 bytes (37.70 MiB) raw** to the generated font payload. The pinned source URLs, byte counts and SHA-256 values are in `tools/desktop/fallback-fonts.json`; the exact OFL and attribution notice are shipped with the package and tracked under `tools/desktop/licenses/noto-sans-cjk/`.
+
+Generated metadata exposes JP, SC, TC, KR and HK proportional and monospace faces as `Elixir Fallback CJK …` aliases. The original font files and their internal names are unchanged. This prevents the packaged collection from shadowing an installed Noto face: requested bundled/metric fonts remain first, then eligible system Noto or OS regional families, then the matching packaged alias. Hiragana/Katakana map to JP, Hangul to KR, Bopomofo to TC and otherwise unqualified Han deterministically to SC. Regular and Bold are physical collection faces; italic and bold italic use explicit synthesis.
+
+`AllFonts.js` remains small metadata and causes no initial CJK font transfer. In web local mode, the common SDK picker requests the two same-origin encoded resources only after document text contains covered CJK code points; its normal font cache reuses each fetched OTC. Desktop packages already contain those resources locally. No Local Font Access permission, private-font bridge read or new external network path is required for the fallback.
+
+The focused gate executes the real generated metadata, common SDK lazy loader, production desktop resolver, consent/revocation path and PDF selected-font service. It verifies JP/SC/TC/KR face ordinals, system priority, fallback restoration, synthetic italic, two lazy same-origin OTC requests with no repeated request, and a real CJK collection-face PDF with exact text extraction and rendering. The shared SDK font path is used by Word, Sheet and Slides. Native packaged cross-platform document/reopen screenshots and complete installer deltas remain separate acceptance work; the hosted-server font inventory is unchanged and its editor regressions are gated separately.
 
 ## Document engine readiness
 

@@ -1,5 +1,7 @@
 # AI layer of the Word editor (Elixir AI)
 
+**0.4 source candidate (not integrated):** supported-editor Ask entries remain visible while AI is off and open a consent-gated setup assistant. No default provider/model or automatic checks. See [design and current evidence](ai-040.md). The historical0.3.x configuration/measurements below remain the reference for the existing Word tools; the new setup does not select their historical default model.
+
 Updated: 2026-10-06 ("ai2" redesign). Replaces `docs/ai-v0.md` (v0 of 2026-10-05, whose history stays in git).
 
 Branches:
@@ -9,6 +11,22 @@ Branches:
 Reliability work ("aistab" work item, §6.6): `elixir/aistab` in `web-apps` (worktree `/srv/elixiroffice/wt/aistab`) and `feat/aistab` in this repository (`/srv/elixiroffice/wt/aistab-repo`), integrated into `elixir/dev` and `main` on 2026-10-06.
 
 Integrated into `elixir/dev` (sdkjs and web-apps) and `main` on 2026-10-06: the main dev instance (`eo`, port **8080**, `make ai-proxy`) carries the redesign; the test instance `eo-ai2` (port 8092) is stopped. Since the integration, the "Search or ask Elixir" search lives in the shared title bar (`apps/common/main/lib/elixir-chrome/TitleBar.js`): the "Ask Elixir" row only appears there if Elixir AI is loaded in the editor (Word only for now); Excel and PowerPoint keep command search alone.
+
+## Held 0.4 presentation tools
+
+The presentation source candidate adds a separate public-builder toolset for slide generation/outline, rewriting, embedded layouts/themes, alignment, speaker notes and summaries. It uses the existing optional endpoint, setup and consent; there is no automatic provider discovery or new network route. Existing Word measurements below describe Word only. See [presentation safeguards and qualification](ai-slide-tools.md) and the separate [spreadsheet measurement](ai-cell-tools.md).
+
+### Corrected presentation measurement (held 0.4)
+
+On 2026-10-27, the single owner-authorized 30-task ×3 measurement through the
+existing managed gpt-4.1-mini proxy/scaffold passed **86/90 (95.6%)**, median
+**3,691 ms**, p90 **5,041 ms**. English: 45/45; French: 41/45. Three French shortening
+actions were refused without edits (88 characters proposed against a limit of 85);
+one generated an extra body paragraph and reported a failed goal. All 75 changed
+results restored with one Undo; 12 read-only cases stayed unchanged; no renderer
+error or failed Undo. These are presentation results only, distinct from the
+earlier pre-visual-fix diagnostic and the Word/Cell results below.
+[Scope, categories, source hashes and limits](ai-slide-tools.md#corrected-source-real-model-measurement-2026-10-27).
 
 ## 0. In brief
 
@@ -350,6 +368,30 @@ Reading:
 - gpt-5.4-mini (3 runs per task, on 8080 after integration, without temperature): **94/96 (98%)**, median latency 5.9 s; failures on `e-fix-spelling` and `e-reduce-spacing` (once each). gpt-4.1-mini remains the default model (same success, lower latency and cost).
 
 Results: `eval/results/2026-10-06-aistab/` (`summary-*.json` and `runs-*.json`, one line per run: task, success, latency, failed criteria, tools called; the request bodies, 50 MB per measurement, stay on development host in `/srv/elixiroffice/wt/aistab-work/*/requests/`).
+
+
+### 6.7 Spreadsheet tools, held 0.4 source (2026-10-26)
+
+Thirty authored teacher/small-business tasks, 15 English and 15 French, repeated three times through the existing development host development instance's managed proxy. Model: gpt-4.1-mini, scaffold, deterministic sampling. No key was read or copied, and no new real provider endpoint or server configuration was introduced.
+
+| Measure | Result |
+| --- | --- |
+| Independent task outcomes | 88/90 (97.8%) |
+| Median action time | 2.911 s |
+| p90 action time | 3.673 s |
+| Actual mutations restored by one native Undo | 76/76 |
+| Read-only explanation/summary tasks unchanged | 12/12 |
+| Renderer errors | 0 |
+
+Action time includes the managed settings load and the complete planner/tool/verification loop; upload/editor startup is excluded. All 90 attempts are timed. This is end-to-end action latency, not a standalone provider inference measurement. Fixtures contain typed OOXML values and invariant formulas, authored independently of the adapter. Candidate AMD modules are loaded into the owned browser frame by the harness; no server files or proxy configuration are changed. Compiled source/native and private hosted UI checks are separate.
+
+Formula writing/explanation, trimming/splitting/deduping, explicit date normalization, sorting/filtering, charts, pivots and summaries all have independent final-state criteria. The two failures are numbers-comma runs 2 and 3: the model unnecessarily asked for confirmation of an ordinary U+0020 grouping space after trying U+00A0. Both left the cells unchanged. The exact-separator guard remains strict; these failures are not turned into passes by guessing.
+
+The first diagnostic run scored 71/90, and the next independent run 84/90. Their failures and the targeted 6/6 rerun remain separate evidence, not an aggregate claimed as one perfect run. The final 88/90 receipt seals the measured source and per-case outcomes. A later missing-commit/cancel-callback reporting fix changes only exceptional cleanup and UI paths: model-visible schemas, prompts, public command bodies and policy are byte-identical, with executable fault coverage and actual compiled callback-loss testing.
+
+Source qualification also covers real sandboxed Linux entry/setup/consent, native Save/reopen, merged/protected refusal, no-op history and uncertain-cancellation reporting. The hosted mock configuration suite retains TLS, CORS, managed-key isolation and direct-user behavior checks on an explicitly owned instance. release maintainer reviewed the 19 spreadsheet UI keys in all 44 non-English locales (v2 artifact 6586e65c); the English source and all unrelated fields remain unchanged. This is held source work, not a rendered-locale, Windows/macOS/package or release qualification.
+
+Compact receipt, [design, safeguards, tests and reproduction](ai-cell-tools.md).
 
 ## 7. Adding a task from a user's AI log
 

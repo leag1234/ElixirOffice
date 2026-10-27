@@ -112,13 +112,22 @@ test('Checks OFF cancels preparation, persists OFF and suppresses late ready sta
  }finally{await e.cleanup();}
 });
 
-test('native menu Quit keeps explicit user authority without a Ctrl+Q accelerator',async()=>{
+test('native menu Quit keeps explicit user authority with the platform shortcut',async()=>{
  const e=await boot({automatic:true});
  try{
   await e.ready();
   function all(items){return items.flatMap(item=>[item,...(Array.isArray(item.submenu)?all(item.submenu):[])]);}
-  const item=all(e.app.menu).find(item=>item.id==='eo-menu-quit');assert(item);
-  assert.equal(item.accelerator,undefined);assert.equal(await item.click(),true);
+  let quit;
+  if(process.platform==='darwin'){
+   const appMenu=e.app.menu[0];assert.equal(appMenu.label,'ElixirOffice');
+   const item=all(appMenu.submenu).find(item=>item.role==='quit');assert(item);
+   assert.equal(require('../../desktop/shortcuts.cjs').command({type:'keyDown',key:'q',meta:true},'darwin','docx'),'quit');
+   quit=e.invoke('quit');
+  }else{
+   const item=all(e.app.menu).find(item=>item.id==='eo-menu-quit');assert(item);
+   assert.equal(item.accelerator,undefined);quit=item.click();
+  }
+  assert.equal(await quit,true);
   assert.equal(e.calls.nativeLaunch,1);assert.equal(e.app.quitCalls,1);
  }finally{await e.cleanup();}
 });

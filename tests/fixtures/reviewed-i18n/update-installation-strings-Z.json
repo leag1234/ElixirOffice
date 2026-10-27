@@ -1,0 +1,156 @@
+{
+  "source": "en",
+  "scope": "Signed update installation UI; production remains closed",
+  "keys": [
+    "releaseInstall",
+    "releaseAutomatic",
+    "releaseAutomaticDescription",
+    "releaseInstallUnavailable",
+    "releasePreparing",
+    "releaseDownloading",
+    "releaseReady",
+    "releaseClosing",
+    "releaseInstallFailed",
+    "releaseProgress"
+  ],
+  "locales": {
+    "fr": {
+      "status": "reviewed"
+    },
+    "de": {
+      "status": "reviewed"
+    },
+    "es": {
+      "status": "reviewed"
+    },
+    "it": {
+      "status": "reviewed"
+    },
+    "pt": {
+      "status": "reviewed"
+    },
+    "pt-pt": {
+      "status": "reviewed"
+    },
+    "nl": {
+      "status": "reviewed"
+    },
+    "pl": {
+      "status": "reviewed"
+    },
+    "ru": {
+      "status": "reviewed"
+    },
+    "ja": {
+      "status": "reviewed"
+    },
+    "zh": {
+      "status": "reviewed"
+    },
+    "zh-tw": {
+      "status": "reviewed"
+    },
+    "ar": {
+      "status": "reviewed"
+    },
+    "az": {
+      "status": "reviewed"
+    },
+    "be": {
+      "status": "reviewed"
+    },
+    "bg": {
+      "status": "reviewed"
+    },
+    "ca": {
+      "status": "reviewed"
+    },
+    "cs": {
+      "status": "reviewed"
+    },
+    "da": {
+      "status": "reviewed"
+    },
+    "el": {
+      "status": "reviewed"
+    },
+    "eu": {
+      "status": "reviewed"
+    },
+    "fi": {
+      "status": "reviewed"
+    },
+    "gl": {
+      "status": "reviewed"
+    },
+    "he": {
+      "status": "reviewed"
+    },
+    "hu": {
+      "status": "reviewed"
+    },
+    "hy": {
+      "status": "reviewed"
+    },
+    "id": {
+      "status": "reviewed"
+    },
+    "ko": {
+      "status": "reviewed"
+    },
+    "lo": {
+      "status": "reviewed"
+    },
+    "lv": {
+      "status": "reviewed"
+    },
+    "ms": {
+      "status": "reviewed"
+    },
+    "no": {
+      "status": "reviewed"
+    },
+    "ro": {
+      "status": "reviewed"
+    },
+    "si": {
+      "status": "reviewed"
+    },
+    "sk": {
+      "status": "reviewed"
+    },
+    "sl": {
+      "status": "reviewed"
+    },
+    "sq": {
+      "status": "reviewed"
+    },
+    "sr": {
+      "status": "reviewed"
+    },
+    "sr-cyrl": {
+      "status": "reviewed"
+    },
+    "sv": {
+      "status": "reviewed"
+    },
+    "tr": {
+      "status": "reviewed"
+    },
+    "uk": {
+      "status": "reviewed"
+    },
+    "ur": {
+      "status": "reviewed"
+    },
+    "vi": {
+      "status": "reviewed"
+    }
+  },
+  "review": {
+    "reviewer": "translation reviewer",
+    "sourceHead": "165230218a34de82c8de8c10b6f682d6052e1233",
+    "sha256": "ec6f6fca24450e256790054de9bb9e2b57010ac38bf1d90e67a47f6164fca9b3",
+    "note": "translation reviewer; Office-style menu and update terminology; 2026-10-24"
+  }
+}

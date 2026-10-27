@@ -3,13 +3,13 @@
 const path=require('node:path');
 const STRIP_HEIGHT=44;
 const {policy,COMPACT_HEIGHT}=require('./window-chrome.cjs');
-function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,root,shellURL,strings,language,direction,actions,navigation=()=>({openInTabs:true}),diagnostics=()=>{},geometry={},platform=process.platform,chrome=()=>({})}){
- let compactDisabled=false,disableReady;const idleWaiters=new Set();
+function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,root,shellURL,strings,language,direction,actions,navigation=()=>({openInTabs:true}),diagnostics=()=>{},geometry={},interfaceScale=()=>1,platform=process.platform,chrome=()=>({})}){
+ let compactDisabled=false,disableReady;const idleWaiters=new Set(),overlayHeights=new WeakMap();
  const reportFailure=owner=>{try{Promise.resolve(actions.failure?.(owner)).catch(()=>{});}catch{}};
  const reportFrameFailure=owner=>{try{Promise.resolve((actions.frameFailure||actions.failure)?.(owner)).catch(()=>{});}catch{}};
  function disableCompact(owner){compactDisabled=true;if(!disableReady)disableReady=Promise.resolve().then(()=>actions.disableCompact?.()).catch(()=>reportFrameFailure(owner));return disableReady;}
  const stripVisible=owner=>owner.openInTabs&&registry.documents(owner.id).some(document=>document.state.current||document.name);
- const contentTop=owner=>owner.frame?.effectiveFrame==='compact'?COMPACT_HEIGHT:(stripVisible(owner)?STRIP_HEIGHT:0);
+ const contentTop=owner=>Math.ceil((owner.frame?.effectiveFrame==='compact'?COMPACT_HEIGHT:(stripVisible(owner)?STRIP_HEIGHT:0))*interfaceScale());
  const snapshot=owner=>{
   const active=registry.active(owner.id),state=active?.state,quick=state?.current?state.chromeState:null;
   const ready=!!active&&!owner.replacingFrame&&!owner.closeAllPending&&!active.closing&&active.status==='ready'&&!state.busy&&!state.moving&&!state.closePending;
@@ -32,7 +32,7 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
    if(!['light','dark'].includes(id))throw Error('Invalid shell appearance');
    if(owner.frame?.effectiveFrame==='compact'){
     if(owner.nativeRecoveryPromise){await owner.nativeRecoveryPromise;return true;}
-    try{owner.window.setTitleBarOverlay({height:COMPACT_HEIGHT,color:id==='dark'?'#23252a':'#f2f3f5',symbolColor:id==='dark'?'#f4f4f4':'#252525'});}
+    try{owner.window.setTitleBarOverlay({height:Math.ceil(COMPACT_HEIGHT*interfaceScale()),color:id==='dark'?'#23252a':'#f2f3f5',symbolColor:id==='dark'?'#f4f4f4':'#252525'});}
     catch{await recoverNative(owner);}
    }
    return true;
@@ -64,6 +64,10 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
   if(owner.window.isDestroyed())return;
   const [width,height]=owner.window.getContentSize();
   const top=contentTop(owner);
+  if(owner.frame?.effectiveFrame==='compact'&&overlayHeights.get(owner.window)!==top&&typeof owner.window.setTitleBarOverlay==='function'){
+   try{owner.window.setTitleBarOverlay({height:top});overlayHeights.set(owner.window,top);}
+   catch{void recoverNative(owner).catch(()=>reportFrameFailure(owner));}
+  }
   for(const document of registry.documents(owner.id))document.view.setBounds({x:0,y:top,width,height:Math.max(1,height-top)});
  }
  function live(owner){return registry.windows().includes(owner)&&!owner.window.isDestroyed();}

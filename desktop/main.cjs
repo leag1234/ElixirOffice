@@ -3,6 +3,8 @@
 const {app, screen, BrowserWindow, WebContentsView, ipcMain, dialog:nativeDialog, Menu, session, protocol, net, shell, clipboard, powerMonitor} = require('electron');
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
 const packageGuard=require('./package-guard.cjs'),password=require('./password.cjs');
+const interfaceSize=require('./interface-size.cjs');
+let refreshInterfaceMenu=()=>{};
 const saveAs=require('./save-as.cjs');
 const files = require('./files.cjs'), resources = require('./resources.cjs'), {Fonts} = require('./fonts.cjs');
 // Keep the existing profile location while correcting the native app identity.
@@ -67,7 +69,7 @@ let captureOptions,captureStartupError;
 let languageInfo,defaultDocumentLanguage;
 function documentLanguage(){return captureOptions?languageInfo.language:defaultDocumentLanguage;}
 const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
-const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs')};
+const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json')};
 function localizedStrings(){
  const strings={...languageInfo?.strings};
  for(const [key,value] of Object.entries(tabEnglish))if(typeof strings[key]!=='string'||!strings[key].trim())strings[key]=value;
@@ -136,12 +138,14 @@ function dispatchDocumentAction(document,name){
  catch{return Promise.resolve(failed());}
 }
 function installShellShortcuts(owner){
+ installInterfaceZoom(owner.window.webContents);
  require('./shortcuts.cjs').install(owner.window.webContents,process.platform,()=>registry.active(owner.id)?.state.current?.format,name=>{
   const document=registry.active(owner.id);if(document)return dispatchDocumentAction(document,name);
  },()=>!captureOptions&&!!registry.active(owner.id));
 }
 function createSession(windowId,{pending=[]}={}){
  const document=tabHost.addDocument(registry.window(windowId),{state:{current:null,dirty:false,busy:false,closing:false,ready:false,pending,closePending:false,finishClosePending:null,destinations:new saveAs.Destinations(),artifacts:new (require('./artifacts.cjs').Artifacts)(),closePromise:null,closeResolve:null,waitingSave:false,closeAttempt:null,initialSelection:null,destinationLease:null,aiJobs:new Map(),openTrace:++openTrace}});
+ installInterfaceZoom(document.contents);
  document.contents.setWindowOpenHandler(require('./external.cjs').handler(url=>shell.openExternal(url),()=>{if(document.live)document.contents.send('eo:action','external-error');}));
  require('./shortcuts.cjs').install(document.contents,process.platform,()=>document.state.current?.format,name=>{if(document.live)return dispatchDocumentAction(document,name);},()=>!captureOptions&&document.live);
  return document;
@@ -551,6 +555,32 @@ function preferenceWrite(run){
 }
 function persist(){return preferenceWrite(()=>preferences.save(settings))}
 function flushPreferences(){return preferenceWriteQueue.catch(()=>{}).then(()=>preferences.flush())}
+function interfaceOptions(){return {value:captureOptions?100:interfaceSize.read(settings.interfaceSize),levels:interfaceSize.levels};}
+function applyInterfaceZoom(contents){
+ if(!contents||contents.isDestroyed())return;
+ contents.setZoomFactor?.(interfaceOptions().value/100);
+}
+function installInterfaceZoom(contents){
+ applyInterfaceZoom(contents);
+ contents.on('did-finish-load',()=>applyInterfaceZoom(contents));
+}
+function setInterfaceSize(value){
+ if(captureOptions)throw Error('Interface size unavailable in capture mode');
+ if(quitPending||appClosing||systemExiting)throw Error('Application close is pending');
+ const selected=interfaceSize.validate(value);
+ return preferenceWrite(async()=>{
+  // Do not publish or apply a preference until its atomic write succeeds.
+  await preferences.save({...settings,interfaceSize:selected});
+  settings.interfaceSize=selected;
+  for(const owner of registry.windows()){
+   applyInterfaceZoom(owner.window.webContents);
+   for(const document of registry.documents(owner.id))applyInterfaceZoom(document.contents);
+   tabHost.bounds(owner);registry.changed(owner.id);
+  }
+  refreshInterfaceMenu();return interfaceOptions();
+ });
+}
+
 
 
 function title(){
@@ -795,6 +825,7 @@ async function start() {
   tabHost=require('./tabs-host.cjs').createTabHost({
    BrowserWindow,WebContentsView,ipcMain,registry,platform:process.platform,session:ses,root:__dirname,shellURL:resources.ORIGIN+'/tabs.html',
    geometry:{restore:restoreGeometry,changed:rememberGeometry},
+   interfaceScale:()=>interfaceOptions().value/100,
    navigation:()=>({openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true}),
    chrome:chromeOptions,
    strings:localizedStrings,language:()=>languageInfo.language,direction:()=>['ar','he','ur'].includes(languageInfo.language)?'rtl':'ltr',
@@ -1039,6 +1070,8 @@ async function start() {
    next:locale.choose([displayLanguage.supportedLocale(settings.displayLanguage,languageInfo.supported),...(app.getPreferredSystemLanguages?.()||[]),app.getLocale()].filter(Boolean),languageInfo.supported),
    locales:displayLanguage.choices(languageInfo.supported)
   });
+  handle('interface-size',interfaceOptions);
+  handle('interface-size-set',setInterfaceSize);
   handle('language-options',languageOptions);
   handle('language-settings',value=>{
    if(captureOptions)throw Error('Display language unavailable in capture mode');
@@ -1192,7 +1225,9 @@ async function start() {
     await helpWindow.loadURL(prefix+'index.htm');
   };
   showHelpAction=help;showAboutAction=showAbout;
-  Menu.setApplicationMenu(Menu.buildFromTemplate(require('./menu.cjs').template(process.platform,name=>name==='quit'?()=>quitApplication('user'):()=>withActive(name==='about'?showAbout:action(name)),()=>withActive(()=>help().catch(()=>dialog.showErrorBox(t('help'),t('error')))),t)));
+  const interfaceAction=name=>()=>Promise.resolve().then(()=>setInterfaceSize(name==='interface-zoom-reset'?100:interfaceSize.step(interfaceOptions().value,name==='interface-zoom-in'?1:-1))).catch(()=>dialog.showErrorBox(t('interfaceSize'),t('error')));
+  refreshInterfaceMenu=()=>Menu.setApplicationMenu(Menu.buildFromTemplate(require('./menu.cjs').template(process.platform,name=>name.startsWith('interface-zoom-')?interfaceAction(name):name==='quit'?()=>quitApplication('user'):()=>withActive(name==='about'?showAbout:action(name)),()=>withActive(()=>help().catch(()=>dialog.showErrorBox(t('help'),t('error')))),t,{interfaceSize:interfaceOptions().value,interfaceSizeEnabled:!captureOptions})));
+  refreshInterfaceMenu();
   if(process.platform!=="darwin")win.setMenuBarVisibility(false);
 
   documentHandlersReady=true;

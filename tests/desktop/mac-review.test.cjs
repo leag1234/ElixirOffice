@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {template}=require('../../desktop/menu.cjs'),{configuration}=require('../../tools/desktop/mac-config.cjs'),{clean,types,unused}=require('../../tools/desktop/mac-after-pack.cjs');
 test('Mac menus preserve editor undo/redo, native window role and document Close accelerator',()=>{
- const menu=template('darwin',()=>()=>{},()=>{});assert.deepEqual(menu.map(item=>item.label),['ElixirOffice','File','Edit','Window','Help']);
+ const menu=template('darwin',()=>()=>{},()=>{});assert.deepEqual(menu.map(item=>item.label),['ElixirOffice','File','Edit','View','Window','Help']);
  for(const platform of ['darwin','linux','win32'])for(const item of template(platform,()=>()=>{},()=>{}).find(item=>item.label==='Edit').submenu.filter(item=>['undo','redo'].includes(item.role)))assert.equal(item.accelerator,'');
  assert.equal(menu.find(item=>item.label==='File').submenu.find(item=>item.label==='Close').accelerator,'CommandOrControl+W');
  assert(menu[0].submenu.some(item=>item.role==='services'));assert(menu[0].submenu.some(item=>item.label==='Settings…'));

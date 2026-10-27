@@ -24,7 +24,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
   for(const id of ['elx-home','elx-open','elx-export','elx-close'])this.items[id]?.show();
   for(const id of ['elx-share'])this.items[id]?.hide();
   for(const item of [fm.miRecent,fm.miRename,fm.miProtect,fm.miHistory,fm.miAccess,fm.miSaveCopyAs])item?.hide();
-  this.items['elx-ai']?.[win.Common.ElixirAI?.Settings?.isConfigured?.()?'show':'hide']();
+  this.items['elx-ai']?.[typeof win.Common.ElixirAI?.Settings?.isConfigured==='function'?'show':'hide']();
   this.items['elx-about']?.show();this.items['elx-about']?.setDisabled(false);
   if(!info.capture&&!this.items['eo-move']){
    const el=$('<li id="fm-btn-eo-move" class="fm-btn" role="menuitem" tabindex="0"/>').attr('aria-label',t('tabMove')).insertAfter(fm.$el.find('#fm-btn-elx-close'));
