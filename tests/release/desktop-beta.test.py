@@ -216,13 +216,27 @@ class ReleaseInputs(unittest.TestCase):
                 "tools/example/template-layouts/letterhead.docx": b"public source layout",
                 "tools/example/template-layouts/localized/ur/letterhead.docx": b"public unshipped unit variant",
             }
-            for name, data in template_sources.items():
+            # These are the actual frozen sources required by desktop unit tests
+            # after transport; do not synthesize or weaken the imported helper.
+            test_tool_sources = {
+                name: (source.parents[2] / name).read_bytes()
+                for name in ("tools/desktop-updates/README.md",
+                             "tools/desktop-updates/signed-metadata.cjs")
+            }
+            exported_sources = {**template_sources, **test_tool_sources}
+            for name, data in exported_sources.items():
                 file = build.product / name
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_bytes(data)
             stale_cache = build.product / "tools/example/template-layouts/__pycache__/stale.pyc"
             stale_cache.parent.mkdir()
             stale_cache.write_bytes(b"unrelated build cache")
+            helper_caches = []
+            for name in ("node_modules", ".git", "__pycache__"):
+                cache = build.product / "tools/desktop-updates" / name / "excluded.txt"
+                cache.parent.mkdir()
+                cache.write_bytes(b"unrelated helper cache")
+                helper_caches.append(str(cache.relative_to(build.product)))
             archive = build.archive()
             with tarfile.open(archive) as exported:
                 self.assertEqual(json.load(exported.extractfile("desktop/build-info.json")),build.plan["build_identity"])
@@ -234,19 +248,23 @@ class ReleaseInputs(unittest.TestCase):
                 for name in manifest["files"]:
                     self.assertTrue(exported.getmember("desktop/assets/" + name).isfile())
                 self.assertNotIn("desktop/dist/stale.exe", exported.getnames())
-                for name, data in template_sources.items():
+                for name, data in exported_sources.items():
                     self.assertTrue(exported.getmember(name).isfile())
                     self.assertEqual(exported.extractfile(name).read(), data)
                 self.assertNotIn(str(stale_cache.relative_to(build.product)), exported.getnames())
+                for cache in helper_caches:
+                    self.assertNotIn(cache, exported.getnames())
             self.assertEqual(release.verify_archive_resources(archive, assets), len(manifest["files"]))
             build.args.node = root / "configured-node/bin/node"
             build.args.node.parent.mkdir(parents=True)
             build.args.node.write_bytes(b"public node fixture")
             (build.args.node.parent.parent / "LICENSE").write_text("public node license fixture")
             with tarfile.open(build.archive(include_assets=False)) as exported:
-                for name, data in template_sources.items():
+                for name, data in exported_sources.items():
                     self.assertEqual(exported.extractfile(name).read(), data)
                 self.assertNotIn("desktop/assets/desktop-manifest.json", exported.getnames())
+                for cache in helper_caches:
+                    self.assertNotIn(cache, exported.getnames())
 
     def test_upstream_export_uses_recorded_blobs_not_ambient_head(self):
         with tempfile.TemporaryDirectory() as folder:

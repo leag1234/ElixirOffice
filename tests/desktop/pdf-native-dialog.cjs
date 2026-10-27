@@ -10,7 +10,7 @@ try{
  await action(env.page,'save-as','pdf');await modal(env);keys(env,'escape');
  await env.page.waitForFunction(()=>!EOLocalSession.controller.isSaving());
  assert(await env.page.evaluate(()=>EOLocalSession.controller.isModified()));assert.deepEqual(await fs.readFile(source),original);
- await action(env.page,'save-as','pdf');await modal(env);keys(env,'save-path',target);
+ await action(env.page,'save-as','pdf');await require('./save-as-native.cjs').path(env,target);
  await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
  assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
  assert.equal(await env.page.evaluate(()=>EOLocalSession.controller.isModified()),false);

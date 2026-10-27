@@ -1,6 +1,6 @@
 # Signed desktop updates — design for review
 
-Status: proposal for release review, after 0.3.2; no implementation or release change authorized by this document. Base: private product e2f7514. The 0.3.2 notification banner remains unchanged.
+Status: original release review design baseline, after 0.3.2. release review/269 approved the unshipped verifier and finite metadata interpreter; release review/271 approve the separate [owner signer and future inventory contract](../tools/desktop-updates/SIGNING.md). The original slice ordering below is historical; no app/updater/driver integration follows merely from this document. Base: private product e2f7514. The 0.3.2 notification banner remains unchanged.
 
 ## Scope and user behavior
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
-const {app, screen, BrowserWindow, WebContentsView, ipcMain, dialog:nativeDialog, Menu, session, protocol, net, shell, clipboard} = require('electron');
+const {app, screen, BrowserWindow, WebContentsView, ipcMain, dialog:nativeDialog, Menu, session, protocol, net, shell, clipboard, powerMonitor} = require('electron');
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
 const packageGuard=require('./package-guard.cjs'),password=require('./password.cjs');
 const saveAs=require('./save-as.cjs');
@@ -14,7 +14,7 @@ app.commandLine.appendSwitch('disable-component-update');
 protocol.registerSchemesAsPrivileged([{scheme:resources.SCHEME,privileges:{standard:true,secure:true,supportFetchAPI:true,codeCache:true,corsEnabled:true}}]);
 const assets = app.isPackaged ? path.join(process.resourcesPath,'assets') : path.join(__dirname,'assets');
 let conversionRuntime;
-let win, settings={recents:[],fontConsent:false},tabHost,appClosing=false,documentHandlersReady=false;
+let win, settings={recents:[],fontConsent:false},tabHost,appClosing=false,documentHandlersReady=false,updateController,systemExiting=false,updateExitSafe=true;
 const {DocumentRegistry,MAX_DOCUMENTS}=require('./document-registry.cjs');
 const registry=new DocumentRegistry({documentURL:resources.ORIGIN+'/index.html',shellURL:resources.ORIGIN+'/tabs.html',report:()=>safety.log('tab-notification-failure')});
 const documentState=()=>registry.context().state;
@@ -31,7 +31,7 @@ const captureConsoleError=console.error.bind(console);
 const safety=require('./safety-log.cjs').create(()=>app.getPath('userData'));
 let saveDiagnostics,openDiagnostics,openTrace=0;
 safety.install(process,console,async()=>{
- appClosing=true;
+ updateController?.dispose();appClosing=true;
  try{
   if(!app.isReady?.()){app.exit(1);return;}
   const options={type:'error',message:t('fatalMessage'),detail:t('fatalDetail'),buttons:[t('close')],normalizeAccessKeys:true,defaultId:0,cancelId:0};
@@ -40,7 +40,7 @@ safety.install(process,console,async()=>{
  finally{await safety.flush();app.exit(1);}
 });
 
-let preferences,recovery,geometryTimer,releaseNotice;
+let preferences,recovery,geometryTimer,releaseNotice,preferenceWriteQueue=Promise.resolve();
 const windowState=require('./window-state.cjs');
 function chromeOptions(){
  return {platform:process.platform,customTitleBar:settings.customTitleBar===true,
@@ -64,9 +64,10 @@ function restoreGeometry(ordinal){
 }
 const locale=require('./locale.cjs'),capture=require('./capture.cjs'),decisions=require('./decisions.cjs');
 let captureOptions,captureStartupError;
-let languageInfo;
+let languageInfo,defaultDocumentLanguage;
+function documentLanguage(){return captureOptions?languageInfo.language:defaultDocumentLanguage;}
 const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
-const tabEnglish=require('./tab-strings.json');
+const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs')};
 function localizedStrings(){
  const strings={...languageInfo?.strings};
  for(const [key,value] of Object.entries(tabEnglish))if(typeof strings[key]!=='string'||!strings[key].trim())strings[key]=value;
@@ -112,7 +113,7 @@ function withActive(run){
  const document=registry.document(owner.activeId);return registry.run(document,run);
 }
 function sendAction(name){
- if(name==='quit')return quitApplication();
+ if(name==='quit')return quitApplication('user');
  if(name==='move-menu')return showMoveMenu(registry.context());
  if(name==='close-tab')return closeDocument(registry.context());
  if(name==='help')return showHelpAction?.();
@@ -351,7 +352,7 @@ async function prepareDocument(prepare){
 async function newBlank(format){
  return prepareDocument(async()=>{
   if(!['docx','xlsx','pptx'].includes(format))throw Error('Unsupported template');
-  const bytes=await fs.readFile(format==='docx'?path.join(assets,'desktop-home/blanks',languageInfo.language+'.docx'):path.join(assets,'templates','new.'+format));
+  const bytes=await fs.readFile(format==='docx'?path.join(assets,'desktop-home/blanks',documentLanguage()+'.docx'):path.join(assets,'templates','new.'+format));
   clearDestination();documentState().current={token:crypto.randomUUID(),name:t('untitled')+'.'+format,format,target:null};documentState().dirty=false;title();
   return {token:documentState().current.token,name:documentState().current.name,format,bytes:new Uint8Array(bytes),runtime:conversionRuntime};
  });
@@ -423,7 +424,7 @@ function matchesCloseAttempt(attemptId){
  return typeof attemptId==='string'&&state.closeAttempt===attemptId&&state.closePending&&state.waitingSave;
 }
 function closeDocument(document){
- if(!document.live||document.contents.isDestroyed())return Promise.resolve(true);
+ if(!document.live||document.contents.isDestroyed()){if(quitPending)updateExitSafe=false;return Promise.resolve(true);}
  return registry.run(document,()=>{
   const state=documentState();if(state.moving)return Promise.resolve(false);if(state.closePromise)return state.closePromise;
   const owner=registry.window(document.windowId);
@@ -442,7 +443,7 @@ async function performClose(document){
  try{
   const state=await rendererState();validate();
   if(documentState().busy||state.opening)throw Error('close-busy');
-  await closeDeadline(preferences.flush());validate();
+  await closeDeadline(flushPreferences());validate();
   const confirmed=await rendererState(false);validate();
   if(documentState().busy||confirmed.opening)throw Error('close-busy');
   documentState().dirty=confirmed.dirty===true;title();
@@ -476,6 +477,7 @@ function closeWindow(owner){
   for(const id of [...owner.documents]){
    let document;
    try{document=registry.document(id);}catch{
+    if(quitPending)updateExitSafe=false;
     const unavailable=registry.remove(id);
     if(unavailable){
      try{releaseSession(unavailable);settleClose(unavailable,true);owner.window.contentView.removeChildView(unavailable.view);}
@@ -495,20 +497,61 @@ function closeWindow(owner){
  return owner.closePromise;
 }
 let quitPending;
-function quitApplication(){
+function markSystemExit(){
+ systemExiting=true;updateExitSafe=false;updateController?.dispose();releaseNotice?.dispose();
+}
+async function restoreAfterExitFailure(){
+ appClosing=false;files.resumeWrites();
+ const live=registry.windows().find(owner=>!owner.window.isDestroyed());
+ if(live){live.allowClose=false;live.window.show();return;}
+ if(!tabHost)return;
+ const owner=tabHost.createWindow();win=owner.window;
+ await owner.ready;await loadSession(createSession(owner.id));
+}
+function quitApplication(reason='unknown',{restart=false}={}){
  if(quitPending)return quitPending;
  quitPending=(async()=>{
-  for(const owner of registry.windows())if(!await closeWindow(owner))return false;
-  appClosing=true;app.quit();return true;
- })().catch(()=>{appClosing=false;void safety.log('application-quit-failure');return false;}).finally(()=>{quitPending=null;});
+  const barrier=async({installing=false}={})=>{
+   updateExitSafe=true;
+   for(const owner of registry.windows())if(!await closeWindow(owner))return false;
+   if(registry.windows().some(owner=>!owner.window.isDestroyed()))return false;
+   if(installing||restart){
+    if(!updateExitSafe||systemExiting)return false;
+    await closeDeadline(preferenceWriteQueue);await closeDeadline(preferences.barrier());await closeDeadline(recovery.barrier());
+    await closeDeadline(files.cancelPending({deadline:Date.now()+3000}));
+    await closeDeadline(files.cleanupBackups());
+    await closeDeadline(Promise.all([preferences.barrier(),recovery.barrier(),saveDiagnostics.flush()]));
+    if(!updateExitSafe||systemExiting||registry.windows().some(owner=>!owner.window.isDestroyed()))return false;
+   }
+   return true;
+  };
+  const quit=()=>{
+   if(restart){if(systemExiting)throw Error('System exit pending');app.relaunch({args:require('./display-language.cjs').restartArguments(process.argv.slice(1))});}
+   appClosing=true;app.quit();
+  };
+  if(updateController)return updateController.exit({reason:systemExiting?'shutdown':reason,barrier,quit,restore:restoreAfterExitFailure});
+  if(!await barrier())return false;quit();return true;
+ })().catch(async()=>{appClosing=false;if(restart)try{await restoreAfterExitFailure();}catch{}void safety.log('application-quit-failure');return false;}).finally(()=>{quitPending=null;});
  return quitPending;
+}
+function broadcastReleaseNotice(){
+ let notice=captureOptions?null:releaseNotice?.notice()||null;
+ if(notice&&updateController)notice=updateController.decorate(notice);
+ for(const owner of registry.windows())for(const document of registry.documents(owner.id)){
+  try{if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:release-notice',notice);}catch{}
+ }
 }
 
 function authorize(event) {
  if(safety.failed)throw Error(t('fatalMessage'));
  return registry.authorizeDocument(event);
 }
-function persist(){return preferences.save(settings)}
+function preferenceWrite(run){
+ const saved=preferenceWriteQueue.catch(()=>{}).then(run);preferenceWriteQueue=saved;return saved;
+}
+function persist(){return preferenceWrite(()=>preferences.save(settings))}
+function flushPreferences(){return preferenceWriteQueue.catch(()=>{}).then(()=>preferences.flush())}
+
 
 function title(){
  const document=registry.context(),owner=registry.window(document.windowId);
@@ -543,6 +586,7 @@ function finishClose(){
 }
 let closeLogWrite=Promise.resolve();
 function closeReason(reason) {
+  if(quitPending)updateExitSafe=false;
   // Fixed reason codes only; serialize writes and retain at most 64 KiB.
   closeLogWrite=closeLogWrite.then(async()=>{
     const flags=require('node:fs').constants;
@@ -587,7 +631,7 @@ async function discard(allowSave=false) {
   const state=await rendererState();
   if(state.opening)throw Error('Wait for the document to finish opening');
   documentState().dirty=state.dirty===true;
-        await preferences.flush();
+        await flushPreferences();
   if(allowSave){const confirmed=await rendererState(false);if(confirmed.opening)throw Error('Wait for the document to finish opening');documentState().dirty=confirmed.dirty===true;}
   if(!documentState().dirty){if(documentState().current)await recovery.remove(documentState().current.recoveryId||documentState().current.token);return true;}
   const result=await dialog.showMessageBox(documentWindow(),decisions.unsaved(t,allowSave,documentState().current?.name,process.platform));
@@ -688,8 +732,12 @@ async function start() {
   await printer.cleanup().catch(()=>safety.log('print-cleanup-failure'));
   preferences=require('./settings-store.cjs')(app.getPath('userData'));
   recovery=new (require('./recovery.cjs').Recovery)(app.getPath('userData'));
+  try{settings=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'desktop-settings.json'),'utf8'));settings.recents=require('./recent-files.cjs').normalize(settings.recents);settings.fontConsent=settings.fontConsent===true;}
+  catch(error){if(error.code!=='ENOENT')throw error}
   const preferred=captureOptions?captureOptions.locales:[...(app.getPreferredSystemLanguages?.()||[]),app.getLocale()];
-  languageInfo=await locale.load(assets,preferred);
+  languageInfo=await locale.load(assets,preferred,captureOptions?undefined:{argv:process.argv.slice(app.isPackaged?1:2),setting:settings.displayLanguage});
+  // Display preferences never rewrite document content or default proofing language.
+  defaultDocumentLanguage=locale.choose(preferred,languageInfo.supported);
   let buildIdentity;
   try{buildIdentity=require('./build-identity.cjs').validate(JSON.parse(await fs.readFile(path.join(__dirname,'build-info.json'),'utf8')));}
   catch(error){if(app.isPackaged||error.code!=='ENOENT')throw error;}
@@ -699,8 +747,6 @@ async function start() {
 
   if(captureOptions&&captureOptions.locales.some(value=>!languageInfo.supported.includes(value)))throw Error('Unsupported capture locale');
 
-  try{settings=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'desktop-settings.json'),'utf8'));settings.recents=require('./recent-files.cjs').normalize(settings.recents);settings.fontConsent=settings.fontConsent===true;}
-  catch(error){if(error.code!=='ENOENT')throw error}
   settings=require('./font-preferences.cjs').migrate(settings,{capture:!!captureOptions});
   releaseNotice=require('./release-notice.cjs').create({
    version:app.getVersion(),state:settings.releaseNotice,
@@ -708,11 +754,31 @@ async function start() {
    open:url=>shell.openExternal(url),
    changed:notice=>{
     if(captureOptions)return;
-    for(const owner of registry.windows())for(const document of registry.documents(owner.id)){
-     try{if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:release-notice',notice);}catch{}
-    }
+    if(updateController)void updateController.offer(notice).catch(()=>safety.log('update-state-failure'));
+    else broadcastReleaseNotice();
    }
   });
+  const policy=require('./update-policy.cjs').production;
+  const eligibility=require('./update-package.cjs').createEligibility({
+   platform:process.platform,arch:process.arch,electronVersion:process.versions?.electron,packaged:app.isPackaged,
+   windowsStore:process.windowsStore,execPath:process.execPath,appImage:process.env.APPIMAGE,appDir:process.env.APPDIR,snap:process.env.SNAP,flatpak:process.env.FLATPAK_ID
+  });
+  // Capture the packaged startup destination before discovery, but never probe
+  // files/registry or load the library while production qualification is closed.
+  const eligible=!captureOptions&&policy.capability(eligibility.target).enabled?eligibility.check():Promise.resolve(false);
+  require('./update-lock.cjs').registerProfileAuthority(app.getPath('userData'),()=>app.hasSingleInstanceLock?.()===true);
+  updateController=require('./update-controller.cjs').createController({
+   version:app.getVersion(),runtime:eligibility.target,policy,eligible:()=>eligible,
+   initial:{enabled:releaseNotice.options().enabled,automatic:settings.updateAutomatic===true},
+   persist:async value=>{
+    await releaseNotice.configure(value.enabled);
+    const previous=settings.updateAutomatic;settings.updateAutomatic=value.automatic;
+    try{await persist();}catch(error){if(previous===undefined)delete settings.updateAutomatic;else settings.updateAutomatic=previous;throw error;}
+   },
+   changed:broadcastReleaseNotice,report:code=>safety.log(code),
+   createSession:context=>require('./update-runtime.cjs').createRuntimeSession({...context,app,version:app.getVersion(),eligibility,cacheRoot:path.join(app.getPath('userData'),'signed-updates-v1')})
+  });
+  if(!captureOptions)void updateController.offer(releaseNotice.notice()).catch(()=>safety.log('update-state-failure'));
   if(!captureOptions)await persist();
   const manifestBytes=await fs.readFile(path.join(assets,'desktop-manifest.json'));
   const manifest=JSON.parse(manifestBytes);
@@ -768,21 +834,22 @@ async function start() {
   handle('author-save',async value=>{if(typeof value!=='string'||!value.trim()||value.length>200||/[\u0000-\u001f\u007f]/.test(value))throw Error('Invalid author name');settings.author=value.trim();await persist();return settings.author;});
   handle('help',()=>help());
   handle('about',()=>showAbout());
-  handle('quit',()=>quitApplication());
+  handle('quit',()=>quitApplication('user'));
+  handle('restart',()=>{if(captureOptions||quitPending||systemExiting)return false;return quitApplication('restart',{restart:true});});
   // Authorized top-frame action, with no renderer-supplied clipboard text.
   handle('copy-save-diagnostics',async()=>{await Promise.all([saveDiagnostics.flush(),openDiagnostics.flush()]);clipboard.writeText(saveDiagnostics.text()+'\n'+openDiagnostics.text());return true;});
-  handle('locale',async()=>({...languageInfo,strings:localizedStrings(),capture:!!captureOptions}));
+  handle('locale',async()=>({...languageInfo,documentLanguage:documentLanguage(),strings:localizedStrings(),capture:!!captureOptions}));
   handle('capture-locale',async language=>{
     if(!captureOptions||!captureOptions.locales.includes(language))throw Error('Capture locale unavailable');
-    languageInfo=await locale.load(assets,[language]);return {...languageInfo,strings:localizedStrings(),capture:true};
+    languageInfo=await locale.load(assets,[language]);return {...languageInfo,documentLanguage:documentLanguage(),strings:localizedStrings(),capture:true};
   });
   handle('home',async()=>{
     const recents=await require('./recent-files.cjs').metadata(settings.recents,async error=>{
       await safety.log('file-error');await safety.log(error?.code);
     });
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
-    const fontOptions=await templateFonts(templates,languageInfo.language,documentState().pending.length>0||!!documentState().initialSelection);
-    return {templates:templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language,fontOptions)),recents};
+    const fontOptions=await templateFonts(templates,documentLanguage(),documentState().pending.length>0||!!documentState().initialSelection);
+    return {templates:templates.map(item=>require('./templates.cjs').resolve(item,documentLanguage(),fontOptions)),recents};
   });
   handle('return-home',()=>operation(async()=>{
     const decision=await discard(true);if(decision!==true)return decision;
@@ -791,8 +858,8 @@ async function start() {
   handle('template',id=>operation(()=>prepareDocument(async()=>{
     const templates=JSON.parse(await fs.readFile(path.join(assets,'desktop-home/templates.json'),'utf8'));
     const selected=templates.find(item=>item.id===id);if(!selected)throw Error('Unknown template');
-    const fontOptions=await templateFonts([selected],languageInfo.language);
-    const template=require('./templates.cjs').resolve(selected,languageInfo.language,fontOptions);
+    const fontOptions=await templateFonts([selected],documentLanguage());
+    const template=require('./templates.cjs').resolve(selected,documentLanguage(),fontOptions);
     const bytes=await fs.readFile(path.join(assets,'desktop-home/templates',template.file));
     clearDestination();documentState().current={token:crypto.randomUUID(),name:(template.title||t(template.titleKey))+'.'+template.format,format:template.format,target:null};documentState().dirty=false;title();
     return {token:documentState().current.token,name:documentState().current.name,format:documentState().current.format,bytes:new Uint8Array(bytes),runtime:conversionRuntime};
@@ -948,16 +1015,42 @@ async function start() {
     return {artifactId:documentState().artifacts.register(saved,documentState().current.token),name:path.basename(saved.target),bytes:saved.bytes,format,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
   })));
   handle('recovery-failure',()=>safety.log('recovery-failure').then(()=>true));
-  handle('release-state',()=>captureOptions?null:releaseNotice.notice());
-  handle('release-options',()=>releaseNotice.options());
+  handle('release-state',()=>captureOptions?null:updateController.decorate(releaseNotice.notice()));
+  handle('release-options',()=>updateController.options());
   handle('release-settings',async value=>{
    if(captureOptions)throw Error('Release settings unavailable in capture mode');
-   if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||typeof value.enabled!=='boolean')throw Error('Invalid release settings');
-   await releaseNotice.configure(value.enabled);
+   require('./update-controller.cjs').validateSettings(value);
+   await updateController.configure(value);
    if(value.enabled)void releaseNotice.check();
    return true;
   });
-  handle('release-action',(name,expectedVersion)=>captureOptions?false:releaseNotice.action(name,expectedVersion));
+  handle('release-action',async(name,expectedVersion)=>{
+   if(captureOptions)return false;
+   if(name!=='install')return releaseNotice.action(name,expectedVersion);
+   const result=await updateController.request(expectedVersion);
+   if(result.exitRequested)return quitApplication('user');
+   return result.accepted;
+  });
+  const displayLanguage=require('./display-language.cjs');
+  const languageOptions=()=>({
+   value:displayLanguage.supportedLocale(settings.displayLanguage,languageInfo.supported)||'',
+   active:languageInfo.language,
+   system:locale.choose([...(app.getPreferredSystemLanguages?.()||[]),app.getLocale()],languageInfo.supported),
+   next:locale.choose([displayLanguage.supportedLocale(settings.displayLanguage,languageInfo.supported),...(app.getPreferredSystemLanguages?.()||[]),app.getLocale()].filter(Boolean),languageInfo.supported),
+   locales:displayLanguage.choices(languageInfo.supported)
+  });
+  handle('language-options',languageOptions);
+  handle('language-settings',value=>{
+   if(captureOptions)throw Error('Display language unavailable in capture mode');
+   if(quitPending||appClosing||systemExiting)throw Error('Application close is pending');
+   const selected=displayLanguage.validate(value,languageInfo.supported);
+   return preferenceWrite(async()=>{
+    // Publish the choice only after durable success. Other preference writes
+    // share this queue and cannot persist a tentative or rejected language.
+    await preferences.save({...settings,displayLanguage:selected});
+    settings.displayLanguage=selected;return languageOptions();
+   });
+  });
   handle('window-options',()=>({
     customTitleBar:settings.customTitleBar===true,
     openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true,
@@ -1030,7 +1123,7 @@ async function start() {
     }finally{jobs.delete(id)}
   });
   handle('ai-cancel',id=>{aiJobs().get(id)?.abort();return true});
-  handle('font-choice',async()=>{await preferences.flush();return settings.fontConsent===true?'granted':settings.fontChoice==='declined'?'declined':'unset'});
+  handle('font-choice',async()=>{await flushPreferences();return settings.fontConsent===true?'granted':settings.fontChoice==='declined'?'declined':'unset'});
   handle('font-dismiss',async()=>{settings.fontChoice='declined';await persist();return true});
   handle('font-disable',async()=>{settings.fontChoice='declined';settings.fontConsent=false;fonts.clear();homeFontDiscovery=null;await persist();return true});
   handle('font-permission',async()=>!captureOptions&&settings.fontConsent===true);
@@ -1099,7 +1192,7 @@ async function start() {
     await helpWindow.loadURL(prefix+'index.htm');
   };
   showHelpAction=help;showAboutAction=showAbout;
-  Menu.setApplicationMenu(Menu.buildFromTemplate(require('./menu.cjs').template(process.platform,name=>()=>withActive(name==='about'?showAbout:action(name)),()=>withActive(()=>help().catch(()=>dialog.showErrorBox(t('help'),t('error')))),t)));
+  Menu.setApplicationMenu(Menu.buildFromTemplate(require('./menu.cjs').template(process.platform,name=>name==='quit'?()=>quitApplication('user'):()=>withActive(name==='about'?showAbout:action(name)),()=>withActive(()=>help().catch(()=>dialog.showErrorBox(t('help'),t('error')))),t)));
   if(process.platform!=="darwin")win.setMenuBarVisibility(false);
 
   documentHandlersReady=true;
@@ -1120,8 +1213,11 @@ async function start() {
 
   });
 }
-app.on('window-all-closed',()=>{if(!captureOptions&&process.platform!=='darwin')app.quit();});
-app.on('before-quit',event=>{if(appClosing||captureOptions)return;event.preventDefault();void quitApplication();});
+app.on('window-all-closed',()=>{if(!quitPending&&!captureOptions&&process.platform!=='darwin')app.quit();});
+app.on('before-quit',event=>{if(appClosing||captureOptions)return;event.preventDefault();void updateController?.cancel();void quitApplication('unknown');});
+powerMonitor?.on('shutdown',markSystemExit);
+app.on('browser-window-created',(_event,window)=>{window.on('query-session-end',markSystemExit);window.on('session-end',markSystemExit);});
+app.on('render-process-gone',(_event,_contents,details)=>{if(details?.reason==='clean-exit')return;updateExitSafe=false;void updateController?.cancel();});
 app.on('activate',()=>{if(tabHost&&!registry.windows().length){const owner=tabHost.createWindow();win=owner.window;owner.ready.then(()=>loadSession(createSession(owner.id))).catch(()=>safety.log('startup-failure'));}});
 
-app.on('will-quit',()=>releaseNotice?.dispose());
+app.on('will-quit',()=>{updateController?.dispose();releaseNotice?.dispose();});

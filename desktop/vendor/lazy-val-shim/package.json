@@ -1,0 +1,10 @@
+{
+  "name": "@elixiroffice/lazy-val-shim",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Original dependency-free Lazy API shim for the verified updater",
+  "license": "AGPL-3.0-only",
+  "author": "ElixirOffice contributors",
+  "main": "index.cjs",
+  "files": ["index.cjs", "LICENSE", "package.json"]
+}

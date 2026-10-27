@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-24T12:03:23.765754+00:00",
+  "route": "release review original API-contract AGPL shim; updater-scoped local override; no upstream implementation copied",
+  "source_package": {
+    "name": "@elixiroffice/lazy-val-shim",
+    "version": "1.0.0",
+    "files": {
+      "index.cjs": "33f1c787a5617c6578402cab193a5d25569459fe6ffdda3397dc071a55c739ac",
+      "package.json": "96dbc4130cec945062c89a71c9e90e156a25f3ae5de6508f123324f2d5bd623f",
+      "LICENSE": "d8a6cc31abc16b6748c7a21f21611f5a1ec33f67d22ca23d7da1c19b95496bee"
+    }
+  },
+  "package_lock_sha256": "fdb3e35af073ccd99d7bd3c193597ac1339965dfc7617d339c6e27c738d29c1d",
+  "registry_lazy_val_dev_only": true,
+  "probe": {
+    "synthetic_version": "0.0.0",
+    "builder": "26.15.3",
+    "electron": "44.7.0",
+    "native_runtime_executed": false,
+    "installed": false,
+    "ledger_allocated": false,
+    "manifests": [
+      {
+        "path": "node_modules/@elixiroffice/lazy-val-shim/package.json",
+        "name": "@elixiroffice/lazy-val-shim",
+        "version": "1.0.0",
+        "license": "AGPL-3.0-only"
+      },
+      {
+        "path": "node_modules/argparse/package.json",
+        "name": "argparse",
+        "version": "2.0.1",
+        "license": "Python-2.0"
+      },
+      {
+        "path": "node_modules/builder-util-runtime/package.json",
+        "name": "builder-util-runtime",
+        "version": "9.7.0",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/debug/package.json",
+        "name": "debug",
+        "version": "4.4.3",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/electron-updater/package.json",
+        "name": "electron-updater",
+        "version": "6.8.9",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/fs-extra/package.json",
+        "name": "fs-extra",
+        "version": "10.1.0",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/graceful-fs/package.json",
+        "name": "graceful-fs",
+        "version": "4.2.11",
+        "license": "ISC"
+      },
+      {
+        "path": "node_modules/js-yaml/package.json",
+        "name": "js-yaml",
+        "version": "4.3.2",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/jsonfile/package.json",
+        "name": "jsonfile",
+        "version": "6.2.1",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/lazy-val/package.json",
+        "name": "@elixiroffice/lazy-val-shim",
+        "version": "1.0.0",
+        "license": "AGPL-3.0-only"
+      },
+      {
+        "path": "node_modules/lodash.escaperegexp/package.json",
+        "name": "lodash.escaperegexp",
+        "version": "4.1.2",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/lodash.isequal/package.json",
+        "name": "lodash.isequal",
+        "version": "4.5.0",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/ms/package.json",
+        "name": "ms",
+        "version": "2.1.3",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/sax/package.json",
+        "name": "sax",
+        "version": "1.6.1",
+        "license": "BlueOak-1.0.0"
+      },
+      {
+        "path": "node_modules/semver/package.json",
+        "name": "semver",
+        "version": "7.7.4",
+        "license": "ISC"
+      },
+      {
+        "path": "node_modules/tiny-typed-emitter/package.json",
+        "name": "tiny-typed-emitter",
+        "version": "2.1.0",
+        "license": "MIT"
+      },
+      {
+        "path": "node_modules/universalify/package.json",
+        "name": "universalify",
+        "version": "2.0.1",
+        "license": "MIT"
+      },
+      {
+        "path": "package.json",
+        "name": "eo-updater-dependency-probe",
+        "version": "0.0.0",
+        "license": "AGPL-3.0-only"
+      }
+    ],
+    "lazy_directory": "node_modules/lazy-val",
+    "shim_instances": 2,
+    "source_and_notice_hashes_verified": true
+  },
+  "audit_production": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 19,
+      "dev": 274,
+      "optional": 23,
+      "peer": 13,
+      "peerOptional": 0,
+      "total": 292
+    }
+  },
+  "audit_complete": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 2,
+      "critical": 0,
+      "total": 3
+    },
+    "dependencies": {
+      "prod": 19,
+      "dev": 274,
+      "optional": 23,
+      "peer": 13,
+      "peerOptional": 0,
+      "total": 292
+    }
+  },
+  "feature_enabled": false,
+  "open_gates": [
+    "E implementation review",
+    "integrated qualified Electron44.9.1 by D",
+    "owner embedded public key",
+    "remaining5b provider/transport/cache/UI/platform qualification"
+  ]
+}

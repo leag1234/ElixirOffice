@@ -1,5 +1,12 @@
 # ElixirOffice
 
+## 0.3.3 corresponding-source snapshot
+
+This source snapshot corresponds to ElixirOffice desktop 0.3.3, build 19, from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` and DocumentServer `adc905b591220200bd00907f66cc2d5b9e6144aa`. Electron is 44.9.1; external build Node stays 22.23.3 and the full/PDF converter pins are unchanged.
+
+This is adapted public corresponding source under independent review. It does not announce publication or certify native platform acceptance. The published release information elsewhere in this document remains historical until the owner completes release review. Original package inputs and public source revisions are recorded separately; rebuilt bytes may differ.
+
+
 **An open source office suite for people used to Microsoft Office.**
 
 ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs as a desktop app that works entirely offline, or in the browser on your own server. It is free software (AGPLv3), private by design, and fast.

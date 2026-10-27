@@ -372,15 +372,15 @@ function modalButton(box,label,action){
 }
 let releaseBanner;
 async function showOptions(){
- const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),releaseOptions=await eoDesktop.releaseOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
+ const options=await eoDesktop.recoveryOptions(),windowOptions=await eoDesktop.windowOptions(),releaseOptions=await eoDesktop.releaseOptions(),languageOptions=await eoDesktop.languageOptions(),invoker=document.activeElement,returnFrame=frame,returnFile=file,returnController=controller;
  const returnTarget=returnFrame&&(invoker===document.body||invoker?.closest('dialog.desktop-options:not([open])'))?returnFrame.frameElement:invoker;
  const returnDocument=returnTarget?.tagName==='IFRAME'?returnTarget.contentDocument:null,returnChild=returnDocument?.activeElement;
  const box=modal(t('options')),label=document.createElement('label'),enabled=document.createElement('input');
- const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),releaseGroup=document.createElement('section'),actions=document.createElement('div');
+ const recoveryGroup=document.createElement('section'),recoveryRow=document.createElement('div'),authorGroup=document.createElement('section'),windowGroup=document.createElement('section'),fontGroup=document.createElement('section'),releaseGroup=document.createElement('section'),languageGroup=document.createElement('section'),actions=document.createElement('div');
  box.className+=' desktop-preferences';
- for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup])group.className='desktop-setting-section';
+ for(const group of [recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup,languageGroup])group.className='desktop-setting-section';
  recoveryRow.className='desktop-recovery-row';actions.className='desktop-dialog-actions';
- recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,windowGroup,fontGroup,releaseGroup);
+ recoveryGroup.append(recoveryRow);box.append(recoveryGroup,authorGroup,languageGroup,windowGroup,fontGroup,releaseGroup);
  box.addEventListener('close',()=>{
   const active=document.activeElement;
   // A close event may run after another dialog, control or document took ownership.
@@ -420,7 +420,29 @@ async function showOptions(){
  const releaseLabel=document.createElement('label'),releaseEnabled=document.createElement('input'),releasePrivacy=document.createElement('p');
  releaseEnabled.type='checkbox';releaseEnabled.id='release-checks-enabled';releaseEnabled.checked=releaseOptions.enabled;
  releaseLabel.append(releaseEnabled,document.createTextNode(t('releaseChecks')));releasePrivacy.id='release-checks-privacy';releasePrivacy.textContent=t('releasePrivacy');releaseEnabled.setAttribute('aria-describedby',releasePrivacy.id);releaseGroup.append(releaseLabel,releasePrivacy);
- const saveButton=modalButton(actions,t('save'),async()=>{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}box.close()});
+ const automaticLabel=document.createElement('label'),automatic=document.createElement('input'),automaticNote=document.createElement('p');
+ automatic.type='checkbox';automatic.id='release-install-automatically';automatic.checked=releaseOptions.automatic===true;
+ automaticNote.id='release-install-privacy';automatic.setAttribute('aria-describedby',automaticNote.id);
+ automaticLabel.append(automatic,document.createTextNode(t('releaseAutomatic')));
+ const refreshAutomatic=()=>{automatic.disabled=!releaseOptions.installationAvailable||!releaseEnabled.checked;automaticNote.textContent=t(releaseOptions.installationAvailable?'releaseAutomaticDescription':'releaseInstallUnavailable');};
+ releaseEnabled.addEventListener('change',refreshAutomatic);refreshAutomatic();releaseGroup.append(automaticLabel,automaticNote);
+ const languageHeading=document.createElement('h3'),languageLabel=document.createElement('label'),displayLanguage=document.createElement('select'),restartNotice=document.createElement('p');
+ languageHeading.textContent=t('displayLanguageHeading');languageLabel.textContent=t('displayLanguage');
+ displayLanguage.id='display-language';restartNotice.id='display-language-restart';restartNotice.textContent=t('displayLanguageRestart');
+ displayLanguage.setAttribute('aria-describedby',restartNotice.id);
+ const systemLanguage=document.createElement('option');systemLanguage.value='';systemLanguage.textContent=t('displayLanguageSystem');displayLanguage.append(systemLanguage);
+ for(const locale of languageOptions.locales){const option=document.createElement('option');option.value=locale.language;option.textContent=locale.name;displayLanguage.append(option);}
+ displayLanguage.value=languageOptions.value;languageLabel.append(displayLanguage);languageGroup.append(languageHeading,languageLabel,restartNotice);
+ let savingOptions=false;
+ const restartButton=modalButton(languageGroup,t('displayLanguageRestartNow'),()=>saveOptions(true));restartButton.id='display-language-restart-now';restartButton.className='btn';
+ const refreshRestart=()=>{const changed=(displayLanguage.value||languageOptions.system)!==languageOptions.active;restartNotice.hidden=!changed;restartButton.hidden=!changed;};
+ displayLanguage.addEventListener('change',refreshRestart);refreshRestart();
+ async function saveOptions(restart=false){
+  if(savingOptions)return;savingOptions=true;saveButton.disabled=true;restartButton.disabled=true;
+  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
+  finally{savingOptions=false;saveButton.disabled=false;restartButton.disabled=false;}
+ }
+ const saveButton=modalButton(actions,t('save'),()=>saveOptions());
  saveButton.className='btn btn-primary';
  modalButton(actions,t('cancel'),()=>box.close()).className='btn';box.append(actions);
 }

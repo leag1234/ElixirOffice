@@ -62,3 +62,18 @@ preallocation failure, target selection, build-local derived caches and
 network-free release preparation, including a pin disappearing after successful
 verification. These tests allocate no release number and
 build no installer.
+
+## Mac input test-helper completeness
+
+The private Mac input and asset-free test input include the selected Product's
+`tools/desktop-updates/` source directory as well as `tools/desktop/`. Desktop
+unit tests import `signed-metadata.cjs`; exporting the tests without that helper
+previously required a frozen-source supplement during the 0.3.2 Mac gate. The
+archive regression compares the actual exported README and helper bytes with
+the selected source in both transport modes, retains resource/build-identity
+checks, and rejects helper caches (`node_modules`, `.git`, `__pycache__`). This
+exports test support only; it does not enable or package a runtime updater.
+
+Existing released inputs and their qualification remain immutable. This fix
+applies to newly prepared inputs after independent review and lead integration;
+unit archive checks do not qualify a physical Mac application or DMG.

@@ -185,3 +185,7 @@ source selector, dependency or builder-image pin. [Preflight and retention](rele
 ### Desktop 0.3.2 release preparation (2026-10-23)
 
 The preparation branch reuses the unchanged matched full/PDF runtime pins from 0.3.1. No converter or Wasm rebuild is part of this version/notes task. The application baseline is frozen by release review, linguistic review is deferred to0.3.3 and package qualification remains pending; see draft release notes.
+
+### Closed desktop updater controller (2026-10-24 source candidate)
+
+The signed-update controller/UI changes no converter, Wasm runtime or artifact pin. Qualification uses the existing packaged resources and an isolated Linux X11 source app with mocked installer effects. No new conversion or startup performance measurement is claimed. [Controller gates](desktop-updater-app-proposal.md#slice-5d-controller-and-ui-production-closed).

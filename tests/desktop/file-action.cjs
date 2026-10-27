@@ -8,6 +8,10 @@ module.exports=async function fileAction(page,action,format){
  if(!await frame.locator('#fm-btn-save').isVisible())await frame.locator('#file[role=tab]').click({timeout:20000});
  const selectors={save:'#fm-btn-save','save-as':'#fm-btn-download',open:'#fm-btn-elx-open',pdf:'#fm-btn-elx-export',print:'#fm-btn-print:visible,#fm-btn-print-with-preview:visible'};
  if(!selectors[action])throw Error('Unknown File action');
+ if(action==='save')await frame.waitForFunction(()=>{
+  const save=document.getElementById('fm-btn-save');
+  return save&&save.getClientRects().length>0&&!save.closest('.disabled,[aria-disabled=true],[hidden]')&&!save.matches(':disabled');
+ },null,{timeout:20000});
  await frame.locator(selectors[action]).click({timeout:20000});
  if(action==='save-as'){
   const selected=format||await page.evaluate(()=>EOLocalSession.format);

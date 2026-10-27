@@ -2,11 +2,12 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),vm=require('node:vm'),{createRequire}=require('node:module'),{EventEmitter}=require('node:events');
 const source=path.resolve(__dirname,'../../desktop/main.cjs'),load=createRequire(source);
-for(const kind of ['inspect','cdp','locale-only','duplicate','missing-folder','nonempty-folder','invalid-parent']){
+for(const kind of ['inspect','cdp','locale-only','duplicate','missing-folder','nonempty-folder','invalid-parent','display-language']){
  test('capture startup '+kind+' fails closed and logged without a main error popup',()=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'eo-capture-startup-'));
   try{
    let folder=path.join(root,'screens');let args=['--capture-screens',folder,'--locales','en'];
+   if(kind==='display-language')args.push('--lang=en-US');
    if(kind==='inspect')args.push('--inspect=0');
    if(kind==='cdp')args.push('--remote-debugging-port=12345');
    if(kind==='locale-only')args=['--locales','en'];

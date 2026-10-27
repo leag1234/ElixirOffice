@@ -5,11 +5,46 @@ const helper=path.join(__dirname,'close-recovery.test.cjs'),load=Module.createRe
 const forbidden=/\b(?:autoUpdater|checkForUpdates(?:AndNotify)?|setFeedURL)\b|electron-updater|appimageupdatetool/i;
 function assertNoUpdater(code){assert(!forbidden.test(code),'Application updater code is forbidden; updates are external and user initiated');}
 
+// release review permits one explicitly gated source loader. Every other forbidden
+// call/import remains rejected, including the legacy negative fixtures.
+function assertGatedLoader(code){
+ const line=" const library=require('electron-updater');";
+ assert.deepEqual(code.split(/\r?\n/).filter(value=>forbidden.test(value)),[line],'Only the reviewed literal load may be exempted');
+ const policy=code.indexOf('if(!policy.capability(target).enabled)refused();');
+ const eligible=code.indexOf('if(!eligibility||await eligibility.check()!==true)refused();');
+ const loaded=code.indexOf(line);
+ assert(policy>=0&&eligible>policy&&loaded>eligible,'Both policy and physical-package gates must precede the load');
+}
 function assertNoUpdaterDependencies(pkg,lock){
  const updater=name=>/updat|squirrel/i.test(name);
  assert(!Object.keys(pkg.dependencies||{}).some(updater),'Direct production updater dependency');
  for(const [name,entry]of Object.entries(lock.packages||{}))
   if(name&&entry.dev!==true)assert(!updater(name),'Transitive production updater dependency: '+name);
+}
+// release review/278 approve this exact dependency closure. Production capability is
+// still admitted only by the separate reviewed source qualification.
+function assertDormantUpdaterDependencies(pkg,lock){
+ assert.deepEqual(pkg.dependencies,{'electron-updater':'6.8.9','@elixiroffice/lazy-val-shim':'file:vendor/lazy-val-shim'});
+ assert.deepEqual(pkg.overrides,{'electron-updater':{'lazy-val':'file:../../vendor/lazy-val-shim'}});
+ const reviewed=require('../../docs/reviews/electron-updater-6.8.9.json').packages.filter(p=>p.name!=='lazy-val');
+ const pins=new Map(reviewed.map(p=>[p.name,p])),seen=new Set();
+ for(const [name,entry] of Object.entries(lock.packages)){
+  if(!name||entry.dev===true)continue;
+  if(['node_modules/@elixiroffice/lazy-val-shim','node_modules/electron-updater/node_modules/lazy-val'].includes(name)){
+   assert.equal(entry.link,true);assert.equal(entry.resolved,'vendor/lazy-val-shim');continue;
+  }
+  if(name==='vendor/lazy-val-shim'){
+   assert.equal(entry.name,'@elixiroffice/lazy-val-shim');assert.equal(entry.version,'1.0.0');assert.equal(entry.license,'AGPL-3.0-only');continue;
+  }
+  const moduleName=name.split('node_modules/').at(-1),pin=pins.get(moduleName);
+  assert(pin,'Unreviewed production dependency: '+moduleName);
+  assert.equal(entry.version,pin.version);assert.equal(entry.integrity,pin.integrity);
+  assert.equal(entry.resolved,pin.resolved);assert.equal(entry.license,pin.license);seen.add(moduleName);
+ }
+ assert.equal(seen.size,pins.size);
+ const production=require('../../desktop/update-policy.cjs').production;
+ assert.equal(production.capability({platform:'linux',packageType:'AppImage',arch:'x64',electronVersion:'44.9.1'}).enabled,true);
+ assert.equal(production.capability({platform:'win32',packageType:'nsis',arch:'x64',electronVersion:'44.9.1'}).enabled,true);
 }
 function ownRuntimeSources(directory){
  const skip=new Set(['assets','node_modules','dist','mac-licenses','.git']);
@@ -21,7 +56,8 @@ function ownRuntimeSources(directory){
  });
 }
 
-// Owner release review permits only anonymous release metadata, never an updater.
+// Owner release review permits anonymous release metadata. release review/284 allow the gated
+// runtime loader; unsupported or physically ineligible bootstraps must never import it.
 // Mock that API in the real-main fixture; every other network boundary fails.
 // No Electron window or renderer process is started by this unit check.
 async function guardedBoot(document=false,injected='',enabled=true){
@@ -64,13 +100,16 @@ async function guardedBoot(document=false,injected='',enabled=true){
  }
 }
 
-test('own runtime sources and production dependency lock contain no application updater',()=>{
+test('production activation retains one reviewed gated loader and exact dependency closure',()=>{
  const desktop=path.resolve(__dirname,'../../desktop'),pkg=require(path.join(desktop,'package.json'));
- const lock=JSON.parse(fs.readFileSync(path.join(desktop,'package-lock.json'),'utf8'));assertNoUpdaterDependencies(pkg,lock);
+ const lock=JSON.parse(fs.readFileSync(path.join(desktop,'package-lock.json'),'utf8'));assertDormantUpdaterDependencies(pkg,lock);
  assert.equal(pkg.build.publish,null);
  assert.equal(pkg.build.appImage.artifactName,'ElixirOffice-${version}-x86_64.${ext}');
  assert(pkg.scripts.package.includes('--publish never'));
- for(const file of ownRuntimeSources(desktop))assertNoUpdater(fs.readFileSync(file,'utf8'));
+ for(const file of ownRuntimeSources(desktop)){
+  const code=fs.readFileSync(file,'utf8');
+  if(path.relative(desktop,file)==='update-runtime.cjs')assertGatedLoader(code);else assertNoUpdater(code);
+ }
  assert.throws(()=>assertNoUpdaterDependencies({dependencies:{}},{packages:{'node_modules/nested/node_modules/electron-updater':{}}}),/Transitive/);
  assert.doesNotThrow(()=>assertNoUpdaterDependencies({dependencies:{}},{packages:{'node_modules/electron-updater':{dev:true}}}));
  assert.throws(()=>assertNoUpdater("require('electron-updater').autoUpdater.checkForUpdates()"),/updater/);
@@ -79,4 +118,32 @@ test('real main Home/document allow one mocked release check and no other networ
 test('bootstrap guard rejects an injected updater and direct network request before access',async()=>{
  for(const code of ["require('electron').autoUpdater.checkForUpdates();","require('electron-updater');","require('node:https').get('https://example.invalid/update');","require('node:net').connect(443,'example.invalid');"])
   await assert.rejects(guardedBoot(false,code),/Forbidden update\/network access/);
+});
+
+for(const [label,change] of [
+ ['unreviewed updater version',(p,l)=>p.dependencies['electron-updater']='6.8.10'],
+ ['global override',(p,l)=>p.overrides={'lazy-val':'file:vendor/lazy-val-shim'}],
+ ['foreign shim alias',(p,l)=>l.packages['node_modules/electron-updater/node_modules/lazy-val'].resolved='other-folder'],
+ ['original runtime Lazy',(p,l)=>l.packages['node_modules/lazy-val'].dev=false],
+ ['changed registry integrity',(p,l)=>l.packages['node_modules/electron-updater'].integrity='sha512-invalid'],
+ ['unknown runtime package',(p,l)=>l.packages['node_modules/unreviewed']={version:'1.0.0'}],
+])test('dormant closure refuses '+label,()=>{
+ const desktop=path.resolve(__dirname,'../../desktop'),p=JSON.parse(fs.readFileSync(path.join(desktop,'package.json'),'utf8')),l=JSON.parse(fs.readFileSync(path.join(desktop,'package-lock.json'),'utf8'));
+ change(p,l);assert.throws(()=>assertDormantUpdaterDependencies(p,l));
+});
+
+
+test('approved loader boundary refuses extra imports, stock APIs, missing gates and moved load',()=>{
+ const code=fs.readFileSync(path.resolve(__dirname,'../../desktop/update-runtime.cjs'),'utf8'),line=" const library=require('electron-updater');";
+ assert.doesNotThrow(()=>assertGatedLoader(code));
+ const changes=[
+  "require('electron-updater');\n"+code,
+  code+"\nupdater.checkForUpdates();",
+  code+"\nupdater.setFeedURL('https://example.invalid/');",
+  code.replace('if(!policy.capability(target).enabled)refused();',''),
+  code.replace('if(!eligibility||await eligibility.check()!==true)refused();',''),
+  line+'\n'+code.replace(line,''),
+ ];
+ for(const changed of changes)assert.throws(()=>assertGatedLoader(changed));
+ assert.throws(()=>assertNoUpdater(line),'The same load in another own source file is still forbidden');
 });

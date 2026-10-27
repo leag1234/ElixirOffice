@@ -30,6 +30,20 @@ appimage_update = importlib.util.module_from_spec(_update_spec)
 _update_spec.loader.exec_module(appimage_update)
 
 
+def public_source_module():
+    spec = importlib.util.spec_from_file_location("public_source", HERE / "public_source.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def signed_updates_module():
+    spec = importlib.util.spec_from_file_location("signed_updates", HERE / "signed_updates.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def appimage_names(version):
     if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?", version):
         raise ValueError("Invalid package version")
@@ -37,7 +51,15 @@ def appimage_names(version):
     return name, name + ".zsync"
 
 
+def qa_guard_module():
+    spec = importlib.util.spec_from_file_location("qa_guard", HERE / "qa_guard.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def validate_desktop_version(package, published_path=None):
+    qa_guard_module().reject_qa(package)
     version = package.get("version", "")
     if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){2}(?:-rc\.[1-9][0-9]*)?", version):
         raise ValueError("Invalid desktop package version")
@@ -65,11 +87,20 @@ def validate_update_packaging(package):
         raise ValueError("AppImage naming/publish policy is not configured")
 
 
-def public_artifact_names(folder):
+def public_artifact_names(folder, privacy_policy=None, privacy_policy_sha256=None, source_selection=None, source_selection_sha256=None, decoder_node="node"):
+    qa_guard_module().reject_folder(folder)
     names = []
     for file in Path(folder).iterdir():
         if re.fullmatch(r"(?:(?:latest|beta|alpha)[^/]*|app-update)\.yml", file.name):
             raise ValueError("Application updater feed must not be published")
+        if file.name == "elixiroffice-desktop-source.tar.gz":
+            if not file.is_file() or file.is_symlink():
+                raise ValueError("Source archive must be a regular file")
+            helper = public_source_module()
+            if privacy_policy is None:
+                raise ValueError("Public source archive requires a fingerprinted privacy policy")
+            helper.verify_archive(file, helper.load_policy(privacy_policy, privacy_policy_sha256, decoder_node), source_selection, source_selection_sha256)
+            names.append(file.name)
         if file.suffix in {".AppImage", ".zsync", ".deb", ".exe", ".dmg", ".flatpak"} or file.name.endswith("-evidence.tar") or file.name in {"RELEASE-NOTES.md", "MAC-INPUT.tar"}:
             if not file.is_file() or file.is_symlink():
                 raise ValueError("Artifact must be a regular file")
@@ -366,6 +397,8 @@ class Build:
     def save(self):
         temp = self.out / "BUILD-INFO.json.tmp"
         temp.write_text(json.dumps(self.info, indent=2) + "\n")
+        if self.plan.get("signed_updates"):
+            temp.chmod(0o600)
         temp.replace(self.out / "BUILD-INFO.json")
 
     def run(self, name, command, env=None, cwd=None):
@@ -447,7 +480,7 @@ class Build:
             raise ValueError("Archive build identity differs from planned identity")
         file = self.work / ("mac-input.tar" if include_assets else "test-input.tar")
         with tarfile.open(file, "w") as tar:
-            folders = ("desktop", "tools/desktop", "tests/desktop",
+            folders = ("desktop", "tools/desktop", "tools/desktop-updates", "tests/desktop",
                        "branding/example/nodejs/public/elixir/brand/templates",
                        "branding/desktop-templates",
                        "tools/example/template-layouts")
@@ -601,8 +634,9 @@ job.mkdir()
         # Recheck host state before creating outputs or consuming a build number.
         self.info["host_preflight"] = host_preflight(self.plan, self.env)
         self.out.parent.mkdir(parents=True, exist_ok=True)
-        self.out.mkdir(exist_ok=False)
-        (self.out / "logs").mkdir()
+        mode = 0o700 if self.plan.get("signed_updates") else 0o777
+        self.out.mkdir(mode=mode, exist_ok=False)
+        (self.out / "logs").mkdir(mode=mode)
         self.save()
         try:
             self.info["build_allocation"] = build_identity.reserve(self.args.build_ledger, self.args.published_versions, self.plan["build_identity"])
@@ -626,6 +660,11 @@ job.mkdir()
             names = public_artifact_names(self.out)
             self.info["artifacts"] = checksum_inventory(self.out, names)
             complete = set(self.args.targets) == {"linux", "windows", "mac"} and not self.args.build_only and all(self.info["gates"].get(x) == "pass" for x in ("linux-six-format", "mac-six-format"))
+            if self.plan.get("signed_updates"):
+                signed_updates_module().prepare(self.out, self.info, self.plan["signed_updates"], self.args.node, self.product)
+                self.save()
+                print(self.out)
+                return 3  # Owner signing is a separate, mandatory operation.
             self.info["state"] = "review-candidate" if complete else "partial-unverified"
             self.save()
             print(self.out)
@@ -671,10 +710,17 @@ def parser():
     p.add_argument("--ssh-option", action="append", default=[])
     p.add_argument("--targets", default="linux,windows,mac")
     p.add_argument("--build-only", action="store_true", help="Explicit partial preview; never returns a complete candidate")
+    p.add_argument("--signed-updates", choices=["owner-signed-v1"], help="Explicit future signed-feed mode; default remains no feeds")
+    p.add_argument("--signed-update-sequence", type=int)
+    p.add_argument("--signed-update-issued-at", type=int, help="UTC epoch milliseconds")
+    p.add_argument("--signed-update-expires-at", type=int, help="UTC epoch milliseconds, at most 90 days after issue")
     p.add_argument("--plan", action="store_true", help="Validate immutable source/runtime inputs without building")
     return p
 
 def make_plan(args):
+    signed_config = None
+    if any(getattr(args, name, None) is not None for name in ("signed_updates", "signed_update_sequence", "signed_update_issued_at", "signed_update_expires_at")):
+        signed_config = signed_updates_module().configuration(args)
     args.targets = args.targets.split(",")
     if not args.targets or len(set(args.targets)) != len(args.targets) or set(args.targets) - {"linux", "windows", "mac"}:
         raise ValueError("Select linux,windows,mac once each")
@@ -717,7 +763,18 @@ def make_plan(args):
     cache = Path(args.cache).resolve()
     if not cache.is_relative_to("/srv/elixiroffice/cache"):
         raise ValueError("Large caches must stay under /srv/elixiroffice/cache")
-    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "build_identity.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta3-release-notes.md", "desktop-release-notes.md", "desktop-test-inputs.json", "appimage_update.py", "appimage-tools.json")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    plan = {"product_revision": product, "documentserver_revision": ds, "submodules": modules, "sdk_source_full_pin": full_pin, "full_runtime": full, "pdf_runtime": pdf, "output": str(output), "targets": args.targets, "build_only": args.build_only, "driver_files": {name: digest(HERE / name) for name in ("desktop-beta.sh", "desktop_beta.py", "build_identity.py", "packaged-smoke.cjs", "remote-build.sh", "desktop-beta3-release-notes.md", "desktop-release-notes.md", "desktop-test-inputs.json", "appimage_update.py", "appimage-tools.json", "public_source.py")}, "font_tool_image": args.font_tool_image, "windows_image": args.windows_image}
+    if signed_config:
+        if not set(args.targets) & {"linux", "windows"}:
+            raise ValueError("Signed updates require NSIS or AppImage")
+        tools = signed_updates_module().tool_hashes(Path(__file__).resolve().parents[2])
+        for name, sha in tools.items():
+            selected = subprocess.check_output(["git", "-C", str(args.product_repo), "show", product + ":" + name])
+            if hashlib.sha256(selected).hexdigest() != sha:
+                raise ValueError("Selected source must contain the reviewed public verifier")
+        plan["signed_updates"] = signed_config
+        plan["signed_update_tools"] = tools
+        plan["driver_files"]["signed_updates.py"] = digest(HERE / "signed_updates.py")
     plan["build_identity"] = identity
     plan["identity_module_sha256"] = digest(identity_module)
     plan["publication_inventory"] = publication
@@ -744,6 +801,10 @@ def make_plan(args):
 
 if __name__ == "__main__":
     try:
+        if sys.argv[1:2] == ["verify-signed-updates"]:
+            sys.exit(signed_updates_module().main(sys.argv[2:]))
+        if sys.argv[1:2] == ["public-source"]:
+            sys.exit(public_source_module().main(sys.argv[2:]))
         args = parser().parse_args()
         plan = make_plan(args)
         if args.plan:

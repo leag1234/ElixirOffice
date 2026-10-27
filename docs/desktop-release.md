@@ -20,6 +20,29 @@ For 0.2.1 and later, follow the [build identity and publication guard](desktop-b
 
 The product revision must be an ancestor of main and DocumentServer an ancestor of elixir/dev. All eleven gitlinks are checked out at exact hashes in fresh detached worktrees under /srv/elixiroffice/wt/. Source repositories are never reset.
 
+## Public corresponding-source archives
+
+The private Mac input export and a public corresponding-source archive have different scopes. Create the public archive only from independently qualified public bare Git exports at exact selected revisions. Never stream the private repositories or filter a private source tarball into a public asset.
+
+Use the release driver's separate source command after public Git qualification:
+
+    tools/release/desktop-beta.sh public-source create \
+      --selection public-source-selection.json --selection-sha256 <reviewed-selection-sha256> \
+      --policy archive-privacy-policy.json --policy-sha256 <reviewed-policy-sha256> \
+      --node <installed-node-22.23.3-executable> \
+      --archive owned-output/elixiroffice-desktop-source.tar.gz \
+      --proof owned-output/source-archive-proof.json
+
+The selection records public repository paths, exact public commits, credential-free public HTTPS origins, fingerprinted qualification receipts, source roots, separately pinned build-support files and required source/legal/runtime paths. Every nested Gitlink must be present at its exact revision. A separately reviewed historical-to-public revision mapping is accepted only with a fingerprinted exact-tree-equivalence receipt and a newly verified public tree ID; the archive manifest discloses this mapping.
+
+The external privacy policy carries the reviewed operator-specific patterns rather than copying private identifiers into source code. It must provide all required marker classes. An inherited canonical fixture allowance is limited to the exact reviewed path, full-file fingerprint and marker class. Internal instruction files, internal handoff directories, coordination markers, private hosts and private corpus paths fail closed. The scanner examines actual member names and bytes, including link targets, rather than trusting the source manifest. Exact encoded-data coincidences require a separately fingerprinted approval tuple. A classified Brotli runtime is decoded with pinned Node and checked against the actual raw archive pair. A classified canonical public GIF binds its public revision/origin and published baseline blob, complete GIF structure, exact marker count wholly inside image LZW data, and an independently measured, fingerprinted all-frame decode receipt with its explicit RGBA framing. The GIF bytes must remain exactly identical to that measured proof; metadata, changed payloads and other findings remain forbidden. No general binary or image exclusion is provided.
+
+Creation checks source Git blob integrity, modes, nested closure, legal/runtime requirements and pinned supplemental bytes, then independently reads and checks the completed archive before committing a fresh output. Verification requires the same fingerprinted external selection; it re-enumerates the qualified public trees and compares every actual payload to its expected Git blob, mode and type. It rejects unsafe paths, symlink chain escapes, duplicate members and members beneath file or symlink ancestors. No build number is allocated, package is rebuilt, application pin is changed, or publication performed by this command.
+
+Use the same command with verify and a fresh proof path for an independently supplied archive. The artifact collector refuses to checksum a source archive without its fingerprinted policy and selection. Keep historical rejected assets and receipts outside the publication folder, update the public archive metadata and checksums coherently, and obtain an independent review before replacing an asset or announcing readiness.
+
+Regression fixtures: python3 tests/release/public-source.test.py.
+
 ## Source-pinned runtimes
 
 The full converter pin is read from the selected SDK commit's common/wasm-convert/runtime-release.json. The PDF-only pin is read from the selected product commit's tools/wasm/pdf-runtime-release.json. For older revisions where that file is absent, tools/wasm/runtime-release.json is accepted only if its matched manifest identifies a PDF-only module. A present malformed or wrong-kind dedicated pin fails; it never falls back. BUILD-INFO records the selected PDF pin path. Both releases are resolved under /srv/elixiroffice/wasm-artifacts (override the directory with --wasm-artifacts). There is no hardcoded release version. Missing releases, manifest SHA mismatches, mismatched versions, incorrect kinds or any of the six artifact byte/hash mismatches stop the build.
@@ -77,3 +100,5 @@ Current6241519 already includes14add05's lazy backstage PDF event-routing fix. T
 2026-10-13 release review source-pin alignment: thirteen pipeline tests pass for dedicated and legacy layouts, strict PDF-kind rejection and malformed-new-pin failure. Actual --plan exits0 for product56c93e8/DocumentServer6bdd048487 (full769ba807df31/PDFa6337ac5034f) and legacy4714b3c/dbb08c17b8. This is input validation only; no final beta2 package was built.
 
 2026-10-13 release review inventory extension: fourteen pipeline tests PASS. Exact A product960ac83/web-apps95c1c59cf2 source tests fail7of64 with the old47-file export. With142recorded files/135locales and the new shared-inventory unit,65/65 pass with zero skips under both strict empty HOME plus EO_UPSTREAM and the isolated HOME fallback. Seven actual hash-verified asset prerequisites and their unchanged manifest were supplied to the unit-only checkout; initial missing-asset failures are retained. These are source/unit input proofs, not final package or native platform acceptance. No A worktree or feature code changed.
+
+The public-source privacy regression suite constructs synthetic denied operator/process values at runtime. Its helper and test source must remain publishable under the same hard name/process/host guards, without suppressing those guards or changing the rejected runtime fixture bytes.

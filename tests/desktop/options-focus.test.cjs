@@ -7,7 +7,7 @@ const start=source.indexOf('async function showOptions(){'),end=source.indexOf('
 assert(start>=0&&end>start,'Load the complete production Options function');
 
 function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false,customTitleBar=false,customTitleBarAvailable=false,openInTabs=false,showHomeTab=false}={}){
- const focused=[],boxes=[],windowSaved=[];let release,opened;const opening=new Promise(r=>opened=r);
+ const focused=[],boxes=[],windowSaved=[],languageSaved=[],restarts=[];let release,opened;const opening=new Promise(r=>opened=r);
  const document={activeElement:null,createTextNode:text=>({text}),createElement:tag=>element(tag),querySelector:selector=>selector==='dialog[open]'?boxes.find(b=>b.open)||null:null};
  function element(tag,doc=document){
   const e={tagName:tag.toUpperCase(),ownerDocument:doc,isConnected:true,children:[],listeners:{},parentElement:null,
@@ -28,14 +28,14 @@ function fixture({home=false,bodyInvoker=false,closedInvoker=false,pending=false
  if(closedInvoker){const old=element('dialog');old.className='desktop-options';old.open=false;invoker=element('button');old.append(invoker);}
  document.activeElement=invoker;
  const context={document,frame:originalFrame,file:originalFile,controller:originalController,main:null,
-  t:x=>x,eoDesktop:{releaseOptions:async()=>({enabled:true}),releaseSettings:async()=>{},windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
+  t:x=>x,eoDesktop:{languageOptions:async()=>({value:'',active:'en',system:'en',locales:[{language:'en',name:'English'},{language:'de',name:'Deutsch'},{language:'fr',name:'français'}]}),languageSettings:async value=>languageSaved.push(value),restart:async()=>restarts.push(true),releaseOptions:async()=>({enabled:true}),releaseSettings:async()=>{},windowOptions:async()=>({customTitleBar,customTitleBarAvailable,openInTabs,showHomeTab,effectiveFrame:'native'}),windowSettings:async value=>windowSaved.push(value),recoveryOptions:async()=>({enabled:false,seconds:30}),author:()=>pending?new Promise(r=>release=r):Promise.resolve('Public author'),recoverySettings:async()=>{},authorSave:async v=>v},
   modal:()=>{const box=element('dialog');box.className='desktop-options';box.open=true;boxes.push(box);document.activeElement=document.body;opened();return box;},
   addFontOptions:async()=>{},modalButton:(box,label,fn)=>{const b=element('button');b.textContent=label;b.action=fn;box.append(b);return b;}
  };
  vm.createContext(context);vm.runInContext(source.slice(start,end)+'\nthis.runOptions=showOptions;',context);
  const open=async()=>{const result=context.runOptions();await opening;return {box:boxes.at(-1),result};};
  const clear=()=>focused.splice(0);const close=box=>{box.close();clear();box.dispatchClose();};
- return {windowSaved,document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
+ return {windowSaved,languageSaved,restarts,document,inner,child,target,context,boxes,focused,originalFrame,originalFile,originalController,element,open,clear,close,release:()=>release('Public delayed author')};
 }
 
 test('Options focuses its attached first recovery control before delayed author IPC',async()=>{
@@ -94,4 +94,29 @@ test('Window Options defaults to A and enables Home only for tab modes without f
  tabs.checked=true;for(const fn of tabs.listeners.change||[])fn();assert.equal(home.disabled,false);
  home.checked=true;tabs.checked=false;for(const fn of tabs.listeners.change||[])fn();assert.equal(home.disabled,true);assert.equal(home.checked,true);
  await nodes.find(n=>n.className==='btn btn-primary').action();assert.equal(f.windowSaved[0].openInTabs,false);assert.equal(f.windowSaved[0].showHomeTab,true);
+});
+
+
+test('Display language keeps its selection separate until Save and offers a guarded restart',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
+ const field=nodes.find(n=>n.id==='display-language'),notice=nodes.find(n=>n.id==='display-language-restart'),restart=nodes.find(n=>n.id==='display-language-restart-now');
+ assert.equal(field.value,'');assert.equal(notice.hidden,true);assert.equal(restart.hidden,true);
+ assert.deepEqual(field.children.map(n=>n.textContent),['displayLanguageSystem','English','Deutsch','français']);
+ field.value='de';for(const fn of field.listeners.change||[])fn();
+ assert.equal(notice.hidden,false);assert.equal(restart.hidden,false);assert.equal(f.languageSaved.length,0);assert.equal(f.restarts.length,0);
+ await restart.action();assert.deepEqual(f.languageSaved,['de']);assert.equal(f.restarts.length,1);assert.equal(box.open,false);
+});
+test('Display language Save preserves the current session without relaunching',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
+ nodes.find(n=>n.id==='display-language').value='fr';await nodes.find(n=>n.className==='btn btn-primary').action();
+ assert.deepEqual(f.languageSaved,['fr']);assert.equal(f.restarts.length,0);
+});
+test('A display-language persistence error prevents restart',async()=>{
+ const f=fixture(),{box,result}=await f.open();await result;
+ f.context.eoDesktop.languageSettings=async()=>{throw Error('Synthetic language write failure');};
+ const all=node=>[node,...(node.children||[]).flatMap(all)],nodes=all(box);
+ await assert.rejects(nodes.find(n=>n.id==='display-language-restart-now').action(),/language write failure/);
+ assert.equal(f.restarts.length,0);assert.equal(box.open,true);
 });

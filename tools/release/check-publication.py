@@ -6,10 +6,11 @@ import json
 from pathlib import Path
 import subprocess
 import build_identity
+import qa_guard
 if __name__=="__main__":
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--build-info",required=True,type=Path);p.add_argument("--published-versions",required=True,type=Path);p.add_argument("--node",default="node")
-    a=p.parse_args();info=json.loads(a.build_info.read_text());identity=info["build_identity"]
+    a=p.parse_args();info=json.loads(a.build_info.read_text());qa_guard.reject_folder(a.build_info.parent);qa_guard.reject_qa(info);identity=info["build_identity"]
     module=Path(__file__).resolve().parents[2]/"desktop/build-identity.cjs"
     expected=json.loads(subprocess.check_output([a.node,module,"create",json.dumps([identity["base_version"],identity["channel"],identity["build_number"],identity["product_revision"],identity["documentserver_revision"]])],text=True))
     if identity!=expected:raise ValueError("Inconsistent build identity")

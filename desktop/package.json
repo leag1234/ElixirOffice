@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -14,13 +14,13 @@
     "test:print-viewer": "electron ../tests/desktop/print-viewer-contract.cjs"
   },
   "devDependencies": {
-    "electron": "44.7.0",
+    "electron": "44.9.1",
     "electron-builder": "26.15.3"
   },
   "build": {
     "appId": "org.elixiroffice.desktop",
     "productName": "ElixirOffice",
-    "electronVersion": "44.7.0",
+    "electronVersion": "44.9.1",
     "asar": true,
     "files": [
       "*.cjs",
@@ -31,7 +31,10 @@
       "tab-strings.json",
       "icon.png",
       "build-info.json",
-      "!build-identity-before-pack.cjs"
+      "update-cache.yml",
+      "!build-identity-before-pack.cjs",
+      "!qa/**",
+      "!QA-DO-NOT-PUBLISH.json"
     ],
     "extraResources": [
       {
@@ -120,5 +123,14 @@
     },
     "beforePack": "./build-identity-before-pack.cjs"
   },
-  "desktopName": "org.elixiroffice.desktop.desktop"
+  "desktopName": "org.elixiroffice.desktop.desktop",
+  "dependencies": {
+    "electron-updater": "6.8.9",
+    "@elixiroffice/lazy-val-shim": "file:vendor/lazy-val-shim"
+  },
+  "overrides": {
+    "electron-updater": {
+      "lazy-val": "file:../../vendor/lazy-val-shim"
+    }
+  }
 }

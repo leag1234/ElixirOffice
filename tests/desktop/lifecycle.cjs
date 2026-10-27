@@ -2,8 +2,8 @@
 const {launch,stop,editable,root,sleep,fixture}=require('./harness.cjs');
 const fs=require('node:fs/promises'),path=require('node:path'),cp=require('node:child_process'),assert=require('node:assert/strict');
 const report=[],marker='EODESKTOP',display=process.env.EO_DESKTOP_DISPLAY||':0';
-function keys(env,action,value) {
- const result=cp.spawnSync('python3',[path.join(root,'tests/desktop/native-input.py'),action,...(value?[value]:[])],{cwd:root,env:{...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_NATIVE_PID:String(env.application.pid)},encoding:'utf8'});
+function keys(env,action,value,{window}={}) {
+ const result=cp.spawnSync('python3',[path.join(root,'tests/desktop/native-input.py'),action,...(value?[value]:[])],{cwd:root,env:{...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_NATIVE_PID:String(env.application.pid),EO_NATIVE_IDENTITY:JSON.stringify(env.nativeIdentity),...(window?{EO_NATIVE_WINDOW:window}:{})},encoding:'utf8',timeout:20000});
  assert.equal(result.status,0,result.stderr||result.stdout);
 }
 function text(file) {
@@ -24,24 +24,32 @@ async function edit(env) {
  await env.page.waitForFunction(()=>EOLocalSession.controller.isModified());
  await env.page.waitForFunction(marker=>{const bytes=new Uint8Array(EOLocalSession.controller.serialize()),needle=Array.from(marker).flatMap(c=>[c.charCodeAt(0),0]);return bytes.some((_value,index)=>needle.every((value,j)=>bytes[index+j]===value))},marker);
 }
+function nativeDialogs(env,expectedTitle) {
+ const xenv={...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority')};
+ let list=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:xenv,encoding:'utf8',timeout:3000}).match(/0x[0-9a-f]+/g)||[];
+ if(!list.length&&process.env.EO_XVFB_PID)list=Array.from(cp.execFileSync('xwininfo',['-root','-tree'],{env:xenv,encoding:'utf8',timeout:3000}).matchAll(/^\s+(0x[0-9a-f]+)\s/gm),match=>match[1]);
+ const own=new RegExp('= '+env.application.pid+'(?:\\n|$)'),found=[];
+ for(const id of [...new Set(list)].filter(id=>parseInt(id,16)>1)){
+  try{
+   const info=cp.execFileSync('xwininfo',['-id',id],{env:xenv,encoding:'utf8',timeout:3000,stdio:['ignore','pipe','pipe']});
+   if(!info.includes('Map State: IsViewable'))continue;
+   const properties=cp.execFileSync('xprop',['-id',id,'_NET_WM_PID','WM_TRANSIENT_FOR','_NET_WM_WINDOW_TYPE'],{env:xenv,encoding:'utf8',timeout:3000,stdio:['ignore','pipe','pipe']});
+   const parent=/WM_TRANSIENT_FOR.*?(0x[0-9a-f]+)/.exec(properties);
+   if(!parent||!properties.includes('_NET_WM_WINDOW_TYPE_DIALOG'))continue;
+   const name=cp.execFileSync('xprop',['-id',id,'WM_NAME'],{env:xenv,encoding:'utf8',timeout:3000,stdio:['ignore','pipe','pipe']});
+   if(expectedTitle&&!name.includes('= "'+expectedTitle+'"'))continue;
+   if(own.test(properties)&&name.includes('= "Print document PDF"'))continue;
+   const owner=cp.execFileSync('xprop',['-id',parent[1],'_NET_WM_PID'],{env:xenv,encoding:'utf8',timeout:3000,stdio:['ignore','pipe','pipe']});
+   if(own.test(owner)&&own.test(properties))found.push(id);
+  }catch(error){if(!String(error.stderr||error.message).includes('BadWindow'))throw error;}
+ }
+ return found;
+}
 async function modal(env,expectedTitle) {
  for(let attempt=0;attempt<300;attempt++){
   const failure=await env.page.evaluate(()=>window.EOLocalFailure);if(failure)throw Error(failure);
-  const xenv={...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority')};
-  let list=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:xenv,encoding:'utf8'}).match(/0x[0-9a-f]+/g)||[];
-  // A private Xvfb can have no window manager and therefore no client-list property.
-  // native-input.py verifies the exact Xvfb process before any focus/key injection.
-  if(!list.length&&process.env.EO_XVFB_PID)list=Array.from(cp.execFileSync('xwininfo',['-root','-tree'],{env:xenv,encoding:'utf8'}).matchAll(/^\s+(0x[0-9a-f]+)\s/gm),match=>match[1]);
-  for(const id of [...new Set(list)].filter(id=>parseInt(id,16)>1)){
-   try{
-   const properties=cp.execFileSync('xprop',['-id',id,'_NET_WM_PID','WM_TRANSIENT_FOR','_NET_WM_WINDOW_TYPE'],{env:xenv,encoding:'utf8'});
-   const parent=/WM_TRANSIENT_FOR.*?(0x[0-9a-f]+)/.exec(properties);
-   if(parent && properties.includes('_NET_WM_WINDOW_TYPE_DIALOG')){
-   const ownPid=properties.includes('= '+env.application.pid);
-   if(expectedTitle&&!cp.execFileSync('xprop',['-id',id,'WM_NAME'],{env:xenv,encoding:'utf8'}).includes('= "'+expectedTitle+'"'))continue;
-   if(ownPid && cp.execFileSync('xprop',['-id',id,'WM_NAME'],{env:xenv,encoding:'utf8'}).includes('= "Print document PDF"'))continue;const owner=cp.execFileSync('xprop',['-id',parent[1],'_NET_WM_PID'],{env:xenv,encoding:'utf8'});if(owner.includes('= '+env.application.pid)){keys(env,'focus',id);await sleep(200);return}}
-   }catch(error){if(!String(error.stderr||error.message).includes('BadWindow'))throw error;}
-  }
+  const found=nativeDialogs(env,expectedTitle);assert(found.length<=1,'Ambiguous mapped owned native dialogs');
+  if(found.length){keys(env,'focus',found[0],{window:found[0]});return found[0]}
   await sleep(200);
  }
  throw Error('Own native dialog not found: '+JSON.stringify({state:await env.page.evaluate(()=>({failure:window.EOLocalFailure,message:document.getElementById('message').textContent,pdf:window.EOLastPdf})),errors:env.errors,requests:env.requests.slice(-12)}));
@@ -63,7 +71,7 @@ async function roundtrip(format,entry='argument') {
   }
   await editable(env);if(process.env.EO_DIRTY_TRACE==='1')await env.page.evaluate(()=>{const api=EOLocalSession.api,original=api.SetDocumentModified;window.EODirtyTrace=[];api.SetDocumentModified=function(value){EODirtyTrace.push({value,time:performance.now(),index:EOLocalSession.win.AscCommon.History.Index,stack:new Error().stack.split('\n').slice(1,5)});return original.apply(this,arguments)}});await edit(env);
   const dirtyTitle=cp.execFileSync('xprop',['-root','_NET_CLIENT_LIST'],{env:{...process.env,DISPLAY:display,XAUTHORITY:path.join(root,'desktop.Xauthority')},encoding:'utf8'});
-  await env.page.waitForFunction(()=>document.getElementById('save').disabled===false);
+  await env.page.waitForFunction(()=>EODesktopState(false).dirty&&!EODesktopState(false).opening);
   await require('./file-action.cjs')(env.page,'save');await env.page.waitForFunction(()=>window.EOLastSave||window.EOLocalFailure,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
   try{await env.page.waitForFunction(()=>!EOLocalSession.controller.isModified())}catch(error){console.log('DIRTY SAVE STATE',JSON.stringify(await env.page.evaluate(()=>({canSave:EOLocalSession.api.canSave,modified:EOLocalSession.api.isDocumentModify,frame:EOLocalSession.api.isOpenedFrameEditor,saved:window.EOLastSave,error:window.EOLocalFailure,trace:window.EODirtyTrace?.slice(-12)})),null,2));throw error}
@@ -71,7 +79,7 @@ async function roundtrip(format,entry='argument') {
   const nativeBridge=await env.page.evaluate(async()=>{try{await eoDesktop.save('invalid',new Uint8Array([80,75,3,4]));return false}catch(error){return /active document/.test(error.message)}});
   assert(nativeBridge,'Invalid handle accepted');
   if(entry==='argument'){
-   await require('./file-action.cjs')(env.page,'pdf');await modal(env);keys(env,'save-path',target.replace(/\.[^.]+$/,'.pdf'));
+   await require('./save-as-native.cjs').pdf(env,target.replace(/\.[^.]+$/,'.pdf'));
    await env.page.waitForFunction(()=>window.EOLastPdf||window.EOLocalFailure,null,{timeout:90000});
    assert.equal(await env.page.evaluate(()=>window.EOLocalFailure),null);
    const pdf=await env.page.evaluate(()=>window.EOLastPdf),pdfFile=target.replace(/\.[^.]+$/,'.pdf');
@@ -101,4 +109,4 @@ if(require.main===module)(async()=>{
  await fs.writeFile(path.join(root,'results/lifecycle-failures.json'),JSON.stringify(failures,null,2));
  if(failures.length)throw Error(failures.length+' lifecycle cases failed');
 })().catch(error=>{console.error(error);process.exitCode=1});
-module.exports={keys,modal,edit,text};
+module.exports={keys,modal,nativeDialogs,edit,text};

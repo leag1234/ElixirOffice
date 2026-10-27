@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3 — corresponding-source preparation
+
+- Record source for desktop build 19 with Electron 44.9.1, Node 22.23.3 and unchanged full/PDF runtime pins.
+- Include the selected update, display-language and desktop source changes from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de`.
+- Preserve established public legal notices, source history and earlier release entries. Publication date and platform acceptance are recorded separately after actual owner review; this source entry claims neither.
+
+
 ## Desktop 0.3.2 (2026-10-23)
 
 ### Changed and fixed

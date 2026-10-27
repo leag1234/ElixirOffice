@@ -1,0 +1,10 @@
+{
+  "main.cjs": "b6462e1d693111c4ad736dc1f8fa7d0d54dddd35edd7fe366f2a91403347f6fe",
+  "update-transport.cjs": "ed01134a93bf8e3f047c700b5904435c539c05bd6e0f2fb393868bca2b4631db",
+  "update-production-qualification.cjs": "19494ce93070adc6a003bf6a30356ed757a6eb27a239993837372e14576c8324",
+  "update-policy.cjs": "1bdd392528f8822d106df33202d55a8838c1d9014c23f0a5d68669dc69a380f5",
+  "update-runtime.cjs": "26bebebefea36589fc9bb644763ae295aff855cf791b6f87f335ee6dc2a1686c",
+  "update-windows-security.cjs": "b93a286f18c3a0189da6e4aab38f36d6a9c63e9797645ff4dfb225d2945fa590",
+  "update-package.cjs": "303fc8c8121cd2ab846c80f3cb89e3c3f80dac14822bec5124d738a44d6ed53b",
+  "update-installers.cjs": "48ffb56f2f3455695df8c1cfe6188c9115ab3cb4527226290cd42f2dcd76a032"
+}

@@ -4,6 +4,7 @@ Living document, kept up to date as features land (requested by the test user, 2
 
 | Area | ElixirOffice | LibreOffice | OnlyOffice / upstream | Evidence |
 |---|---|---|---|---|
+| Desktop display language (0.3.3 candidate) | Persistent UI-language choice with language autonyms, temporary startup override and guarded restart; document defaults stay separate | Not evaluated in this task | No comparison claim in this task | [Behavior and tests](desktop-display-language.md) |
 | Desktop release notices (0.3.2 candidate) | Default-on optional daily release metadata, including prereleases; browser-only download page, per-version skip/reminder, explicit GitHub privacy disclosure; no document data or installer | Not evaluated in this task | No comparison claim in this task | [Policy and checks](desktop-release-notice.md) |
 | Desktop document tabs (preview) | Separate editor views preserve edits, destinations and AutoRecover while switching tabs or moving between windows; activation raises the selected native view, pending physical Windows confirmation | Not evaluated here | Previously one document per window | [Behavior and qualification](desktop-tabs.md) |
 | Formula wizard keyboard focus candidate | Functions without arguments start on the existing OK button; argument/range focus retained | Not assessed in this task | Observed inherited view had no initial target for a valid zero-argument function | docs/formula-wizard-focus.md; tests/formula-wizard/ |
@@ -542,3 +543,23 @@ Desktop header alignment: the native document-type icon is vertically centered w
 ## Desktop 0.3.2 preparation
 
 The draft notes separate integrated release notices, opt-in Linux/X11 compact windows, icon alignment, font matching and release tooling from linguistic review deferred to0.3.3 and final package/platform acceptance still pending. Automatic installation is not enabled.
+
+### Signed-update production activation candidate
+
+The desktop has a shared install controller and existing-banner/Options integration with approved public trust. The 0.3.3 candidate enables signed installation for eligible x64 AppImage and Windows x64 NSIS packages; Windows activation follows D's reviewed native QA PASS in validation report. Manual Install is available only after policy and physical-package checks. Automatic installation remains OFF by default. The Windows installer keeps its reviewed wizard behavior; silent installation is deferred to 0.4. macOS, DEB, Flatpak, Snap, Store and development packages keep release-page downloads. Explicit Quit is the only qualified automatic-exit path; native last-window close does not install. macOS keeps its built-in Quit role. Strict persistence barriers supplement legacy tolerant drains. release maintainer reviewed the44non-English installation strings. [Behavior and gates](desktop-updater-app-proposal.md#033-production-activation-candidate).
+
+Updater native QA preparation is a separate, unpublished source flavor with a
+sealed manifest, isolated profile/NSIS identity and loopback-only transport.
+Ordinary packages and publication reject its reserved versions and markers;
+production capability cannot be supplied by the QA flavor. No native candidate is built by this
+preparer. [QA workflow and limits](desktop-updater-qa.md).
+
+### Signed-update cache cleanup source candidate
+
+The signed updater awaits acknowledged cleanup before quitting and retains
+the terminal acknowledgement on cleanup failure. Linux kernel-held cache
+locking survives process crashes without stale-file guessing; exact signed
+pending generations are cleaned before the next update. Production remains
+restricted to the qualified AppImage and NSIS paths after the reviewed native
+Windows result. The AppImage destination crash lease is unchanged.
+See [scope and remaining gates](desktop-updater-app-proposal.md#cache-lease-and-pending-generation-cleanup-2026-10-25-source-candidate).

@@ -22,3 +22,11 @@ test('compact preload exposes named state only and strips Electron mode events',
  const off=e.api.onChromeMode(value=>values.push(value));e.listeners.get('eo:chrome-mode')({sender:'not exposed'},{compact:true});
  assert.deepEqual(values,[{compact:true}]);off();assert.equal(e.listeners.size,0);
 });
+
+test('update install reuses fixed release IPC and never forwards renderer install paths or extra arguments',async()=>{
+ const e=preload();
+ await e.api.releaseSettings({enabled:true,automatic:false});
+ await e.api.releaseAction('install','0.4.0',{path:'/tmp/untrusted',url:'https://evil.invalid/'});
+ assert.deepEqual(e.calls.map(call=>Array.from(call)),[['eo:release-settings',{enabled:true,automatic:false}],['eo:release-action','install','0.4.0']]);
+ for(const name of ['installUpdate','downloadUpdate','quitAndInstall','setFeedURL'])assert.equal(e.api[name],undefined);
+});

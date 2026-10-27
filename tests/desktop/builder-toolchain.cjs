@@ -9,5 +9,8 @@ module.exports=function builderRequire(context,root,required=process.env.EO_RELE
   context.skip('Packaging toolchain is absent: run npm ci in desktop; release builds require this check.');
   return null;
  }
+ // Node 22 test workers reserve stdout for framed runner messages. Keep all
+ // builder diagnostics on its line-oriented stderr channel instead.
+ load('builder-util/out/log.js').log.stream=process.stderr;
  return load;
 };

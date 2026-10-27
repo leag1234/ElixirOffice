@@ -19,9 +19,11 @@ test('four Home templates resolve every UI language and matching existing thumbn
  }
  execFileSync('python3',[path.join(__dirname,'home-templates.test.py')],{stdio:'pipe'});
 });
-test('native Home and opening use the current UI language and localized title',()=>{
+test('native Home content keeps document-language defaults separate from display UI and retains localized title',()=>{
  const main=fs.readFileSync(path.join(__dirname,'../../desktop/main.cjs'),'utf8'),home=fs.readFileSync(path.join(__dirname,'../../desktop/home.js'),'utf8');
- assert(main.includes("templates.map(item=>require('./templates.cjs').resolve(item,languageInfo.language,fontOptions))"));
- assert(main.includes("require('./templates.cjs').resolve(selected,languageInfo.language,fontOptions)"));
+ assert(main.includes("templates.map(item=>require('./templates.cjs').resolve(item,documentLanguage(),fontOptions))"));
+ assert(main.includes("require('./templates.cjs').resolve(selected,documentLanguage(),fontOptions)"));
  assert(home.includes('template.title||t(template.titleKey)'));
+ assert(main.includes('defaultDocumentLanguage=locale.choose(preferred,languageInfo.supported)'));
+ const renderer=fs.readFileSync(path.join(__dirname,'../../desktop/renderer.js'),'utf8');assert(renderer.includes("editorConfig:{mode:'edit',lang:info.language"));
 });

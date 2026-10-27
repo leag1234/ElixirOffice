@@ -24,6 +24,7 @@ test('beforePack rejects missing/mismatched identity and verifies platform optio
   const v=create(),pkg={version:v.version,build:{buildNumber:'42',buildVersion:v.windows_version,mac:{bundleShortVersion:'0.2.1',bundleVersion:'42'}}};
   fs.writeFileSync(path.join(root,'build-info.json'),JSON.stringify(v));fs.writeFileSync(path.join(root,'package.json'),JSON.stringify(pkg));
   fs.copyFileSync(path.resolve(__dirname,'../../desktop/build-identity.cjs'),path.join(root,'build-identity.cjs'));
+  fs.copyFileSync(path.resolve(__dirname,'../../desktop/update-production-trust.cjs'),path.join(root,'update-production-trust.cjs'));
   await before(context);context.electronPlatformName='darwin';context.packager.appInfo.buildVersion='42';await before(context);
   context.packager.appInfo.buildVersion='0.2.1';await assert.rejects(before(context));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
@@ -70,11 +71,12 @@ test('actual Linux and Windows builder contexts validate identity before packagi
  const {build,Platform}=load('app-builder-lib'),before=require('../../desktop/build-identity-before-pack.cjs');
  for(const platform of [Platform.LINUX,Platform.WINDOWS]){
   const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'eo-builder-context-')),v=create();
-  const config={appId:'org.elixiroffice.identity-preflight',productName:'Identity preflight',electronVersion:'44.7.0',buildNumber:'42',buildVersion:v.windows_version,mac:{bundleShortVersion:'0.2.1',bundleVersion:'42'},directories:{output:'out'},npmRebuild:false};
+  const config={appId:'org.elixiroffice.identity-preflight',productName:'Identity preflight',electronVersion:'44.9.1',buildNumber:'42',buildVersion:v.windows_version,mac:{bundleShortVersion:'0.2.1',bundleVersion:'42'},directories:{output:'out'},npmRebuild:false};
   const pkg={name:'identity-preflight',version:v.version,description:'Synthetic packaging identity check',author:'ElixirOffice contributors',license:'AGPL-3.0-only',main:'main.cjs',build:config};
   fs.writeFileSync(path.join(fixture,'package.json'),JSON.stringify(pkg));
   fs.writeFileSync(path.join(fixture,'build-info.json'),JSON.stringify(v));
   fs.copyFileSync(path.join(root,'build-identity.cjs'),path.join(fixture,'build-identity.cjs'));
+  fs.copyFileSync(path.join(root,'update-production-trust.cjs'),path.join(fixture,'update-production-trust.cjs'));
   let calls=0;
   try{
    await assert.rejects(build({projectDir:fixture,targets:platform.createTarget('dir'),publish:'never',config:{...config,beforePack:async context=>{

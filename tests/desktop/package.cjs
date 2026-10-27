@@ -12,7 +12,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
   assert(text(file).includes('EODESKTOP'));assert.deepEqual(env.errors,[]);
   assert.equal(await env.page.evaluate(()=>typeof require),'undefined');
   await require('./privacy.cjs').networkDenied(env.page);
-  await require('./file-action.cjs')(env.page,'pdf');await modal(env);keys(env,'save-path',file.replace(/docx$/,'pdf'));
+  await require('./save-as-native.cjs').pdf(env,file.replace(/docx$/,'pdf'));
   await env.page.waitForFunction(()=>window.EOLastPdf,null,{timeout:90000});
   assert.equal(await env.page.evaluate(()=>EOLastPdf.stats.backend),'wasm');
   const pdf=file.replace(/docx$/,'pdf');assert(cp.execFileSync('pdftotext',[pdf,'-'],{encoding:'utf8'}).includes('EODESKTOP'));

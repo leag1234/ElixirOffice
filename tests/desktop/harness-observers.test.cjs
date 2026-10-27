@@ -39,3 +39,27 @@ test('stop removes lifecycle observers after owned shutdown without late metric 
 test('one exact document retains the original early-window startup allowance while the strip initializes',async()=>{
  const f=fixture({single:true,shellReady:false}),env=await f.api.launch();assert.equal(env.page,f.a);assert.equal(env.shell,f.shell);
 });
+
+test('native input identity retains the observed PID kernel start executable and command',async()=>{
+ const env=await fixture().api.launch();
+ assert.equal(env.nativeIdentity.pid,99999999);assert.equal(env.nativeIdentity.executable,'/synthetic/electron');assert.equal(env.nativeIdentity.startTime,'123456');
+ assert.equal(env.nativeIdentity.commandSha256,require('node:crypto').createHash('sha256').update('electron /synthetic/main.cjs').digest('hex'));
+ assert.equal(env.nativeIdentity.profile,env.directory);
+});
+test('secondary launch retains the exact selected runtime private display and isolated environment',async()=>{
+ const env=await fixture({environment:{EO_SOURCE_ELECTRON:'/synthetic/owned-electron',EO_DESKTOP_DISPLAY:':321',AT_SPI_BUS_ADDRESS:'unix:path=/synthetic/unrelated-bus'}}).api.launch();
+ assert.equal(env.launchSpec.executable,'/synthetic/owned-electron');assert.equal(env.launchSpec.environment.DISPLAY,':321');
+ assert.equal(env.launchSpec.environment.EO_DESKTOP_PROFILE,env.directory);
+ assert.equal(env.launchSpec.environment.DBUS_SESSION_BUS_ADDRESS,'unix:path='+env.directory+'/no-session-bus');
+ assert.equal(env.launchSpec.environment.AT_SPI_BUS_ADDRESS,'unix:path='+env.directory+'/no-a11y-bus');
+ assert.deepEqual(Array.from(env.launchSpec.entry),['/synthetic/no-profile-written/desktop']);
+});
+
+test('disabled desktop buses encode profile separators as one endpoint',async()=>{
+ const env=await fixture().api.launch({profile:'private;unix:path=foreign,bus'});
+ for(const [name,leaf] of [['DBUS_SESSION_BUS_ADDRESS','no-session-bus'],['AT_SPI_BUS_ADDRESS','no-a11y-bus']]){
+  const address=env.launchSpec.environment[name];
+  assert.equal(address,'unix:path='+encodeURIComponent(env.directory+'/'+leaf).replace(/%2F/g,'/'));
+  assert(!address.includes(';')&&!address.includes(','));
+ }
+});

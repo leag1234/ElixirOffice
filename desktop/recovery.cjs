@@ -4,9 +4,10 @@ const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('n
 const formats=new Set(['docx','odt','xlsx','ods','pptx','odp']),limit=512*1024*1024;
 function id(value){if(!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(value||''))throw Error('Invalid recovery handle');return value;}
 class Recovery {
- constructor(profile){this.root=path.join(profile,'recovery');this.tail=Promise.resolve();}
+ constructor(profile){this.root=path.join(profile,'recovery');this.tail=Promise.resolve();this.latest=this.tail;}
+ async barrier(){for(;;){const observed=this.latest;await observed;if(observed===this.latest)return;}}
  async directory(){await fs.mkdir(this.root,{recursive:true,mode:0o700});const stat=await fs.lstat(this.root);if(stat.isSymbolicLink()||!stat.isDirectory())throw Error('Invalid recovery directory');if(process.platform!=='win32'){if(stat.uid!==process.getuid())throw Error('Invalid recovery directory owner');await fs.chmod(this.root,0o700);}}
- queue(run){const next=this.tail.then(run);this.tail=next.catch(()=>{});return next;}
+ queue(run){const next=this.tail.then(run);this.latest=next;this.tail=next.catch(()=>{});return next;}
  save(meta,input,writeOptions){return this.queue(async()=>{
   await this.directory();id(meta.id);
   if(!formats.has(meta.format)||!(input instanceof Uint8Array)||input.length<4||input.length>limit||input[0]!==80||input[1]!==75)throw Error('Invalid recovery document');

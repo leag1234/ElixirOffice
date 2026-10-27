@@ -1,0 +1,621 @@
+{
+  "schema": 1,
+  "scope": "proposal only; not an application dependency or production lock",
+  "captured_at": "2026-10-24T10:54:29.421410+00:00",
+  "base": "55701bb5571343ca787079b2d09fba4359f70bd0",
+  "node": "22.23.3",
+  "npm": "10.9.9",
+  "existing_builder": "26.15.3",
+  "existing_electron": "44.7.0",
+  "updater_lock_sha256": "25dbf667c3543034e920553dd4bb15859ed62ddc8363e6f6ad0252cb4ebcd923",
+  "combined_lock_sha256": "ae2187469763da815daf99b24c8985cbbad06ad3a5f959639a8a9609ca2a8959",
+  "combined_path_changes": [
+    {
+      "path": "node_modules/argparse",
+      "old": {
+        "version": "2.0.1",
+        "dev": true
+      },
+      "new": {
+        "version": "2.0.1",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/builder-util-runtime",
+      "old": {
+        "version": "9.7.0",
+        "dev": true
+      },
+      "new": {
+        "version": "9.7.0",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/debug",
+      "old": {
+        "version": "4.4.3",
+        "dev": true
+      },
+      "new": {
+        "version": "4.4.3",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/electron-updater",
+      "old": null,
+      "new": {
+        "version": "6.8.9",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/electron-updater/node_modules/semver",
+      "old": null,
+      "new": {
+        "version": "7.7.4",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/fs-extra",
+      "old": {
+        "version": "10.1.0",
+        "dev": true
+      },
+      "new": {
+        "version": "10.1.0",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/graceful-fs",
+      "old": {
+        "version": "4.2.11",
+        "dev": true
+      },
+      "new": {
+        "version": "4.2.11",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/js-yaml",
+      "old": {
+        "version": "4.3.2",
+        "dev": true
+      },
+      "new": {
+        "version": "4.3.2",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/jsonfile",
+      "old": {
+        "version": "6.2.1",
+        "dev": true
+      },
+      "new": {
+        "version": "6.2.1",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/lazy-val",
+      "old": {
+        "version": "1.0.5",
+        "dev": true
+      },
+      "new": {
+        "version": "1.0.5",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/lodash.escaperegexp",
+      "old": null,
+      "new": {
+        "version": "4.1.2",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/lodash.isequal",
+      "old": null,
+      "new": {
+        "version": "4.5.0",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/ms",
+      "old": {
+        "version": "2.1.3",
+        "dev": true
+      },
+      "new": {
+        "version": "2.1.3",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/sax",
+      "old": {
+        "version": "1.6.1",
+        "dev": true
+      },
+      "new": {
+        "version": "1.6.1",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/tiny-typed-emitter",
+      "old": null,
+      "new": {
+        "version": "2.1.0",
+        "dev": false
+      }
+    },
+    {
+      "path": "node_modules/universalify",
+      "old": {
+        "version": "2.0.1",
+        "dev": true
+      },
+      "new": {
+        "version": "2.0.1",
+        "dev": false
+      }
+    }
+  ],
+  "packages": [
+    {
+      "name": "argparse",
+      "version": "2.0.1",
+      "license": "Python-2.0",
+      "manifest_license": "Python-2.0",
+      "dependencies": {},
+      "integrity": "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==",
+      "tarball_sha256": "27903847fc8215e6fc5a33e81490f7baba66403f8aade33771b988cca097728c",
+      "tarball_bytes": 39740,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "de4d1f2d2ad5ad0cfd1657a106476b31cb5db5ef9d1ff842b237c0c81f0c8a23",
+          "bytes": 12775
+        }
+      ],
+      "scripts": {
+        "lint": "eslint .",
+        "test": "npm run lint && nyc mocha",
+        "coverage": "npm run test && nyc report --reporter html"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz"
+    },
+    {
+      "name": "builder-util-runtime",
+      "version": "9.7.0",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "debug": "^4.3.4",
+        "sax": "^1.2.4"
+      },
+      "integrity": "sha512-g/kR520giAFYkSXTzcmF3kqQq7wi8F6N6SzeDgZrqTBN+VHdmgWOyTdD1yD7AATDId/yXLvuP34CxW46/BwCdw==",
+      "tarball_sha256": "6b1f079463c7ddb2992c10ceea45761ef9be63a8e2290105fea918d869c23498",
+      "tarball_bytes": 49937,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "bed8d0ab3e6031817f775a641ff37313b0f5591bc8ba0ed79b978dafbd4231ce",
+          "bytes": 1084
+        }
+      ],
+      "scripts": {},
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/builder-util-runtime/-/builder-util-runtime-9.7.0.tgz"
+    },
+    {
+      "name": "debug",
+      "version": "4.4.3",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "ms": "^2.1.3"
+      },
+      "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
+      "tarball_sha256": "89c1ac9c946ee8905a875837114528e97eeae35e03be3190584b2216af43e4a7",
+      "tarball_bytes": 13449,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "3a61c6c96caf5c1d9b623fb9b04c822b783dfcb78aa7e49c76a3f643e6ed7f95",
+          "bytes": 1139
+        }
+      ],
+      "scripts": {
+        "lint": "xo",
+        "test": "npm run test:node && npm run test:browser && npm run lint",
+        "test:node": "mocha test.js test.node.js",
+        "test:browser": "karma start --single-run",
+        "test:coverage": "cat ./coverage/lcov.info | coveralls"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz"
+    },
+    {
+      "name": "electron-updater",
+      "version": "6.8.9",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "builder-util-runtime": "9.7.0",
+        "fs-extra": "^10.1.0",
+        "js-yaml": "^4.1.0",
+        "lazy-val": "^1.0.5",
+        "lodash.escaperegexp": "^4.1.2",
+        "lodash.isequal": "^4.5.0",
+        "semver": "~7.7.3",
+        "tiny-typed-emitter": "^2.1.0"
+      },
+      "integrity": "sha512-ZhVxM9iGONUpZGI1FxdMRgJjUFXi7AYGVa5PwKlO1tV1/4zDxQmfKpXOHVztKrd6L9rLcFjERvi1Mf2vxyTkig==",
+      "tarball_sha256": "0b95d12dde27a0979eb8911f29559daab89580d884904dcf7b4a78b89513288b",
+      "tarball_bytes": 136914,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "bed8d0ab3e6031817f775a641ff37313b0f5591bc8ba0ed79b978dafbd4231ce",
+          "bytes": 1084
+        }
+      ],
+      "scripts": {},
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/electron-updater/-/electron-updater-6.8.9.tgz"
+    },
+    {
+      "name": "fs-extra",
+      "version": "10.1.0",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "graceful-fs": "^4.2.0",
+        "jsonfile": "^6.0.1",
+        "universalify": "^2.0.0"
+      },
+      "integrity": "sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==",
+      "tarball_sha256": "50aa67852e866bb06b35c23f83fd07fc21b06c21ac96283956d0480922971fea",
+      "tarball_bytes": 16920,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "1e76029602ae9b21cc4e612db2496d92febed882ba13ba745f8b3309e85f9d39",
+          "bytes": 1084
+        }
+      ],
+      "scripts": {
+        "lint": "standard",
+        "test-find": "find ./lib/**/__tests__ -name *.test.js | xargs mocha",
+        "test": "npm run lint && npm run unit",
+        "unit": "nyc node test.js"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/fs-extra/-/fs-extra-10.1.0.tgz"
+    },
+    {
+      "name": "graceful-fs",
+      "version": "4.2.11",
+      "license": "ISC",
+      "manifest_license": "ISC",
+      "dependencies": {},
+      "integrity": "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==",
+      "tarball_sha256": "3961374aa161e6fed80d6f4b6aaf2fb7eafd2c9e5be34e865b375f0114dd099c",
+      "tarball_bytes": 9804,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "f65c5d9f22a317b2a10803bd1868461ce6499c2ed7217bc80c0cc772a748789c",
+          "bytes": 791
+        }
+      ],
+      "scripts": {
+        "preversion": "npm test",
+        "postversion": "npm publish",
+        "postpublish": "git push origin --follow-tags",
+        "test": "nyc --silent node test.js | tap -c -",
+        "posttest": "nyc report"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz"
+    },
+    {
+      "name": "js-yaml",
+      "version": "4.3.2",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "argparse": "^2.0.1"
+      },
+      "integrity": "sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==",
+      "tarball_sha256": "c7b241d2224cf9253ff53854aa4cee87da91bd889c4d0fa3a3ffd1041ecee5b1",
+      "tarball_bytes": 227545,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "a07bc24468b9654ce76a547d47a2db282d07733b715db4c73a98bd63961f9550",
+          "bytes": 1084
+        }
+      ],
+      "scripts": {
+        "lint": "eslint .",
+        "lint-fix": "eslint . --fix",
+        "test": "npm run lint && npm run test:core && npm run test:build",
+        "test:core": "node --test test/core/*.test.*",
+        "test:build": "npm run build && node --test test/build/*.test.*",
+        "coverage": "npm run build && c8 --include 'lib/**' -r text -r html -r lcov node --test test/core/*.test.*",
+        "build": "node support/build-dist.mjs",
+        "build:demo": "npm run lint && node support/build_demo.mjs",
+        "gh-demo": "npm run build:demo && gh-pages -d demo -f",
+        "prepack": "npm test && npm run build"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-4.3.2.tgz"
+    },
+    {
+      "name": "jsonfile",
+      "version": "6.2.1",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {
+        "universalify": "^2.0.0"
+      },
+      "integrity": "sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==",
+      "tarball_sha256": "6c1ae1dbfc6c518b10858d2e37c31d31e1fb39eaf32d77c10f1d84c573540d36",
+      "tarball_bytes": 3519,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "a9801fb52ba22ef808682a094da8a7a480584b7ed0dfd0d888ab543616335031",
+          "bytes": 1110
+        }
+      ],
+      "scripts": {
+        "lint": "standard",
+        "test": "npm run lint && npm run unit",
+        "unit": "mocha"
+      },
+      "optionalDependencies": {
+        "graceful-fs": "^4.1.6"
+      },
+      "resolved": "https://registry.npmjs.org/jsonfile/-/jsonfile-6.2.1.tgz"
+    },
+    {
+      "name": "lazy-val",
+      "version": "1.0.5",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-0/BnGCCfyUMkBpeDgWihanIAF9JmZhHBgUhEqzvf+adhNGLoP6TaiI5oF8oyb3I45P+PcnrqihSf01M0l0G5+Q==",
+      "tarball_sha256": "7d8602ad98db3d19fbd5b46fbf3831dd996197a013ef1ff7badc205e41435372",
+      "tarball_bytes": 1182,
+      "notice_files": [],
+      "scripts": {
+        "compile": "tsc",
+        "release": "pnpm compile && pnpm publish --no-git-checks"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/lazy-val/-/lazy-val-1.0.5.tgz"
+    },
+    {
+      "name": "lodash.escaperegexp",
+      "version": "4.1.2",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==",
+      "tarball_sha256": "17e49a4288031a39d917abaecd2ad41919240806799dbea7f26b72748a8c483a",
+      "tarball_bytes": 3265,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "ffd8b33b354585f4ce119f19c53728281e48a97b074491eb6bf6d5c5ff305272",
+          "bytes": 1951
+        }
+      ],
+      "scripts": {
+        "test": "echo \"See https://travis-ci.org/lodash/lodash-cli for testing details.\""
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/lodash.escaperegexp/-/lodash.escaperegexp-4.1.2.tgz"
+    },
+    {
+      "name": "lodash.isequal",
+      "version": "4.5.0",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==",
+      "tarball_sha256": "a3b534a55485caad0c28ce56779eb4faea13d3c23a55691eaedca6a0b9834278",
+      "tarball_bytes": 12308,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "e159c6d48c989185448658f276375bfb2300362ec6d4ae5525a2d49c4bcb947d",
+          "bytes": 1950
+        }
+      ],
+      "scripts": {
+        "test": "echo \"See https://travis-ci.org/lodash/lodash-cli for testing details.\""
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/lodash.isequal/-/lodash.isequal-4.5.0.tgz"
+    },
+    {
+      "name": "ms",
+      "version": "2.1.3",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
+      "tarball_sha256": "f6616e15e530ed552f9daa2d3ce71963947c6bc7c98c9b64fd3e673fd02622c6",
+      "tarball_bytes": 2967,
+      "notice_files": [
+        {
+          "member": "package/license.md",
+          "sha256": "1662fae9b5314d11cf51284e2dcd1f006a354f7343f08712a730fcff9a359801",
+          "bytes": 1079
+        }
+      ],
+      "scripts": {
+        "precommit": "lint-staged",
+        "lint": "eslint lib/* bin/*",
+        "test": "mocha tests.js"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz"
+    },
+    {
+      "name": "sax",
+      "version": "1.6.1",
+      "license": "BlueOak-1.0.0",
+      "manifest_license": "BlueOak-1.0.0",
+      "dependencies": {},
+      "integrity": "sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==",
+      "tarball_sha256": "6e9abf03478608b80894bb8b6421271a0e583504f785f749a700d6bb35be85bd",
+      "tarball_bytes": 16800,
+      "notice_files": [
+        {
+          "member": "package/LICENSE.md",
+          "sha256": "8a1af140fdfbf5afd3df27f7e662f989c5b963a300020dfafce42033cae9e004",
+          "bytes": 1552
+        }
+      ],
+      "scripts": {
+        "test": "tap",
+        "preversion": "npm test",
+        "postversion": "npm publish",
+        "postpublish": "git push origin --all; git push origin --tags",
+        "format": "prettier --write . --log-level warn"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/sax/-/sax-1.6.1.tgz"
+    },
+    {
+      "name": "semver",
+      "version": "7.7.4",
+      "license": "ISC",
+      "manifest_license": "ISC",
+      "dependencies": {},
+      "integrity": "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==",
+      "tarball_sha256": "09267ad08cfe300e6790c9b8dc3db079103b4700cc465a67779b15662fe9418c",
+      "tarball_bytes": 28442,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+          "bytes": 765
+        }
+      ],
+      "scripts": {
+        "test": "tap",
+        "snap": "tap",
+        "lint": "npm run eslint",
+        "postlint": "template-oss-check",
+        "lintfix": "npm run eslint -- --fix",
+        "posttest": "npm run lint",
+        "template-oss-apply": "template-oss-apply --force",
+        "eslint": "eslint \"**/*.{js,cjs,ts,mjs,jsx,tsx}\""
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/semver/-/semver-7.7.4.tgz"
+    },
+    {
+      "name": "tiny-typed-emitter",
+      "version": "2.1.0",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-qVtvMxeXbVej0cQWKqVSSAHmKZEHAvxdF8HEUBFWts8h+xEo5m/lEiPakuyZ3BnCBjOD8i24kzNOiOLLgsSxhA==",
+      "tarball_sha256": "3987c8bf8c418a308d1031d0ac7d0539c7ae9d85a1c383eab449cc8507e6ab3a",
+      "tarball_bytes": 2378,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "4b3faf884ee71eec3df920b66c98fc6618af28e824cf3a32ef3d8774048cc76d",
+          "bytes": 1104
+        }
+      ],
+      "scripts": {
+        "release": "npm publish"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/tiny-typed-emitter/-/tiny-typed-emitter-2.1.0.tgz"
+    },
+    {
+      "name": "universalify",
+      "version": "2.0.1",
+      "license": "MIT",
+      "manifest_license": "MIT",
+      "dependencies": {},
+      "integrity": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==",
+      "tarball_sha256": "7d07313bb61836a12f0ba5485e67673334a3ee955e7aefb3c4b3fc5a1b7b7865",
+      "tarball_bytes": 2068,
+      "notice_files": [
+        {
+          "member": "package/LICENSE",
+          "sha256": "3fda5977c0904e226190b4e21d64340c1731e2142d6fe5f3dee0090a216b8b63",
+          "bytes": 1100
+        }
+      ],
+      "scripts": {
+        "test": "standard && nyc --reporter text --reporter lcovonly tape test/*.js | colortape"
+      },
+      "optionalDependencies": {},
+      "resolved": "https://registry.npmjs.org/universalify/-/universalify-2.0.1.tgz"
+    }
+  ],
+  "audit": {
+    "updater_production": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "dependencies": {
+        "prod": 17,
+        "dev": 0,
+        "optional": 0,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 16
+      }
+    },
+    "combined_all": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 1,
+        "high": 2,
+        "critical": 0,
+        "total": 3
+      },
+      "dependencies": {
+        "prod": 17,
+        "dev": 273,
+        "optional": 23,
+        "peer": 13,
+        "peerOptional": 0,
+        "total": 289
+      }
+    }
+  },
+  "license_open_item": "lazy-val1.0.5 declares MIT in its npm manifest but publishes no license text; the exact upstream gitHead b69ad4119f1b19bdab13c61ee2fcc88d46b89071 also has no license file. Resolve notice provenance before shipment.",
+  "registry": "https://registry.npmjs.org"
+}
