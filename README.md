@@ -6,9 +6,11 @@ This source candidate includes visible Ask Elixir/setup and optional Word,
 Spreadsheet and Presentation actions. AI remains off by default: configuration,
 consent and an explicit request are required. Interface size80–200% stays separate
 from document zoom (#38). Word late-font layout preserves the reading view and
-selection while newer editing/navigation takes priority (#37). Pinned Noto Sans
-CJK Regular/Bold fallbacks add JP/SC/TC/KR coverage with installed-font priority;
-italic is synthesized (#39).
+selection while newer editing/navigation takes priority (#37). CJK text displays
+correctly when Computer fonts is allowed and a CJK font is installed, as on
+normal Windows/macOS setups (#39). Noto Sans CJK resources are bundled, but the
+fallback is not applied on initial open when Computer fonts is declined or no
+CJK font is installed. This known limitation is scheduled for 0.5.
 
 These are source features, not a declaration that a new installer was published
 or that every platform/native/performance check passed. The Word observations

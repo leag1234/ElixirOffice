@@ -8,8 +8,10 @@
 - Preserve Word reading view/selection during optional late-font layout, while
   newer editing/navigation wins (#37). Limited sampled Windows evidence does not
   measure a CPU or micro-freeze improvement.
-- Include pinned CJK sans Regular/Bold fallbacks and regional/glyph/cache source
-  corrections (#39); synthetic italic and documented typography limits apply.
+- Address the reported CJK case when Computer fonts is allowed and a CJK font is
+  installed (#39), normally available on Windows/macOS. Pinned CJK Regular/Bold
+  resources are included, but their fallback is not applied on initial open if
+  Computer fonts is declined or no CJK font is installed; this remains for 0.5.
 
 This row describes corresponding source. New package/Mac/native acceptance,
 owner signatures and publication remain distinct; no old platform allowance or
