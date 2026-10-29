@@ -98,7 +98,7 @@ On a Linux host with Docker and a public DNS name, download the deployment bundl
 
 ## Features
 
-The detailed, benefit-oriented list of what has been built (Word, Excel and PowerPoint parity, fidelity, privacy, AI) is kept up to date in [docs/differences.md](docs/differences.md). A comparison with LibreOffice and ONLYOFFICE is in [docs/differences.md](docs/differences.md).
+Feature by feature, compared with LibreOffice and ONLYOFFICE: [docs/differences.md](docs/differences.md).
 
 ## Release history
 
