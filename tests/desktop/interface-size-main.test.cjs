@@ -72,14 +72,21 @@ test('native View actions step and reset interface size without any default acce
   await e.invoke('interface-size-set',80);assert.equal(items().find(x=>x.id==='eo-interface-zoom-out').enabled,false);
  }finally{await e.cleanup();}
 });
-test('scaled tab and compact-title bounds reserve the actual UI strip height',async()=>{
- for(const compact of [false,true]){
-  const e=await boot({document:true,overlayAvailable:true,fontSettings:{interfaceSize:125,openInTabs:true,customTitleBar:compact}});
+test('scaled tab and title bounds follow the effective frame on Linux and macOS',async()=>{
+ for(const [platform,compact] of [['linux',false],['linux',true],['darwin',false],['darwin',true]]){
+  const e=await boot({platform,document:true,overlayAvailable:true,fontSettings:{interfaceSize:125,openInTabs:true,customTitleBar:compact}});
   try{
+   const effectiveCompact=platform==='linux'&&compact;
    const top=e.evaluate('tabHost.contentTop(registry.windows()[0])');
-   assert.equal(top,Math.ceil((compact?36:44)*1.25));
+   assert.equal(top,Math.ceil((effectiveCompact?36:44)*1.25));
    assert.equal(e.evaluate('registry.document(registry.windows()[0].documents[0]).view.bounds.y'),top);
-   if(compact)assert.equal(e.shell.overlay.height,top);
+   assert.equal((await e.invoke('chrome-mode')).compact,effectiveCompact);
+   assert.equal((await e.invoke('window-options')).effectiveFrame,effectiveCompact?'compact':'native');
+   if(effectiveCompact)assert.equal(e.shell.overlay.height,top);
+   if(platform==='darwin'){
+    assert.equal(e.shell.options.titleBarStyle,undefined);
+    assert.equal((await e.invoke('window-options')).customTitleBarAvailable,false);
+   }
   }finally{await e.cleanup();}
  }
 });

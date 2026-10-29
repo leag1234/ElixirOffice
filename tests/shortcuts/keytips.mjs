@@ -211,3 +211,4 @@ fs.mkdirSync(path.dirname(outFile), { recursive: true });
 fs.writeFileSync(outFile, JSON.stringify({ date: new Date().toISOString(), results }, null, 1));
 console.log(`${results.filter(r => r.status === "pass").length}/${results.length} pass`);
 await browser.close();
+process.exitCode = results.some(row => row.status === "fail") ? 1 : 0;

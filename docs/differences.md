@@ -128,4 +128,4 @@ Learn more: [Thesaurus](thesaurus.md) and [Interface notes](ui.md).
 - **PDF**: editing the original text of a PDF, OCR and PDF to Word conversion are not supported.
 - **Beta software.** The server version is 0.1.1 and complex formatting, fonts and embedded objects can still convert differently: check important documents.
 
-Detailed engineering notes: [historical engineering log](handoff/differences-log.md).
+Detailed engineering notes: historical engineering log.

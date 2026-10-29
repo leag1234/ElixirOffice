@@ -178,3 +178,18 @@ being the browser file and the reference the server's file for the same editor c
   can be matched to the wrong occurrence. Multi-column blocks are
   treated as a full-width band.
 - The corpus is provisional (no real teacher worksheet): state it in every report.
+
+## Desktop differential diagnostics
+
+[The local desktop differential harness](DIFFERENTIAL.md) adds unique-token
+page/wrap divergence, per-glyph font/advance evidence, raster geometry and
+per-file HTML/JSON plus aggregate CSV. It uses explicit bundled/system font
+modes, isolated profiles and bounded sequential batches; exploratory scores
+and self-reference smoke results are not Word-equivalence claims.
+
+### Owner-operated cloud references
+
+[The Graph reference guide](GRAPH-REFERENCES.md) prepares an owner-only public
+DOCX export with delegated Files.Read, a protected token cache and verified
+resume. The agent does not log in or upload. Graph/cloud outputs have a distinct
+reference source; an owner pilot and separate Word-web UI controls are required.

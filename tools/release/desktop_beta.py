@@ -16,6 +16,10 @@ import sys
 import tarfile
 from zoneinfo import ZoneInfo
 
+# Apply before project imports, including when Python starts in isolated mode.
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 HERE = Path(__file__).resolve().parent
 DEFAULT_FONT_IMAGE = "sha256:88c561d6fb2bb8529df467fc0543becc6323e58d18734136e2396c683afeef96"
 DEFAULT_WIN_IMAGE = "electronuserland/builder@sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff"
@@ -407,7 +411,7 @@ class Build:
         self.save()
         print(name, flush=True)
         with (self.out / record["log"]).open("w") as log:
-            result = subprocess.run([str(x) for x in command], env=env or self.env, cwd=cwd, stdout=log, stderr=subprocess.STDOUT)
+            result = subprocess.run([str(x) for x in command], env={**(self.env if env is None else env), "PYTHONDONTWRITEBYTECODE": "1"}, cwd=cwd, stdout=log, stderr=subprocess.STDOUT)
         record["exit_code"] = result.returncode
         record["finished"] = datetime.datetime.now(ZoneInfo("Europe/Paris")).isoformat()
         self.save()
@@ -415,7 +419,7 @@ class Build:
             raise RuntimeError(name + " failed; see " + record["log"])
 
     def ssh(self, remote, command, **kwargs):
-        return ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", *self.args.ssh_option, remote["host"], shlex.join([str(x) for x in command])]
+        return ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", *self.args.ssh_option, remote["host"], shlex.join(["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", *[str(x) for x in command]])]
 
     def checkout(self):
         self.work.mkdir(parents=True, exist_ok=False)

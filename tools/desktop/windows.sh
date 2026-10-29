@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Build only: the owner accepts native Windows behavior on a real PC/VM later.
 set -euo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 : "${WINDOWS_BUILDER_IMAGE:?immutable electronuserland/builder image digest}"
 : "${WINDOWS_BUILD_CACHE:?isolated writable build cache outside source}"
@@ -16,6 +17,6 @@ docker run --rm --user "$(id -u):$(id -g)" \
   --workdir /project/desktop \
   --env HOME=/work/home --env ELECTRON_BUILDER_CACHE=/work/builder-cache \
   --env CSC_IDENTITY_AUTO_DISCOVERY=false --env USE_SYSTEM_WINE=true \
-  --env EO_RELEASE_REQUIRE_BUILDER=1 \
+  --env PYTHONDONTWRITEBYTECODE=1 --env EO_RELEASE_REQUIRE_BUILDER=1 \
   --entrypoint /bin/bash "$WINDOWS_BUILDER_IMAGE" \
   -c 'set -euo pipefail; python3 /project/tools/desktop/build-python.py /project /work; export PATH="/work/python/bin:$PATH"; npm ci; npm run test; npm run package:windows'

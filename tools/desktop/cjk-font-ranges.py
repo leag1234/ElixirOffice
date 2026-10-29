@@ -32,10 +32,27 @@ LAZY_LOADER = r'''
   var requested=false;
   var families=['Elixir Fallback CJK JP','Elixir Fallback CJK SC','Elixir Fallback CJK TC','Elixir Fallback CJK KR'];
   var aliases=[['Elixir Fallback CJK JP','Noto Sans CJK JP'],['Elixir Fallback CJK KR','Noto Sans CJK KR'],['Elixir Fallback CJK SC','Noto Sans CJK SC'],['Elixir Fallback CJK TC','Noto Sans CJK TC'],['Elixir Fallback CJK HK','Noto Sans CJK HK'],['Elixir Fallback Mono CJK JP','Noto Sans Mono CJK JP'],['Elixir Fallback Mono CJK KR','Noto Sans Mono CJK KR'],['Elixir Fallback Mono CJK SC','Noto Sans Mono CJK SC'],['Elixir Fallback Mono CJK TC','Noto Sans Mono CJK TC'],['Elixir Fallback Mono CJK HK','Noto Sans Mono CJK HK']];
+  var aliasTargets={},sourceAliases={},bundledAliases={},originalGetFontFileWeb=app.GetFontFileWeb;
   for(var aliasIndex=0;aliasIndex<aliases.length;aliasIndex++){
-   var alias=aliases[aliasIndex][0],mapped=app.GetFontFileWeb(aliases[aliasIndex][1],0);
-   if(mapped){var aliasFile=Object.create(mapped);aliasFile.m_wsFontName=alias;app.FontPickerMap[alias]=aliasFile;}
+   var alias=aliases[aliasIndex][0],target=aliases[aliasIndex][1],direct=originalGetFontFileWeb.call(app,alias,0);
+   aliasTargets[alias]=target;
+   sourceAliases[target]=alias;
+   if(direct&&direct.m_wsFontName===alias)bundledAliases[alias]=direct;
   }
+  app.GetFontFileWeb=function(name,lStyle){
+   var aliasName=sourceAliases[name]||name,target=aliasTargets[aliasName];
+   if(target){
+    var cached=this.FontPickerMap[name];
+    if(cached&&(cached.m_wsFontName===name||cached.m_wsFontName===target))return cached;
+    var direct=originalGetFontFileWeb.apply(this,arguments);
+    if(direct&&(direct.m_wsFontName===name||direct.m_wsFontName===target))return direct;
+    if(bundledAliases[aliasName]){this.FontPickerMap[name]=bundledAliases[aliasName];return bundledAliases[aliasName];}
+    var mapped=originalGetFontFileWeb.call(this,target,lStyle);
+    if(mapped){if(mapped.m_wsFontName===target)return mapped;var aliasFile=Object.create(mapped);aliasFile.m_wsFontName=aliasName;this.FontPickerMap[name]=aliasFile;return aliasFile;}
+   }
+   return originalGetFontFileWeb.apply(this,arguments);
+  };
+  for(aliasIndex=0;aliasIndex<aliases.length;aliasIndex++)app.GetFontFileWeb(aliases[aliasIndex][0],0);
   var CJK_TRIGGER_RANGES=__CJK_TRIGGER_RANGES__;
   function isCjk(codepoint){for(var rangeIndex=0;rangeIndex<CJK_TRIGGER_RANGES.length;rangeIndex++)if(codepoint>=CJK_TRIGGER_RANGES[rangeIndex][0]&&codepoint<=CJK_TRIGGER_RANGES[rangeIndex][1])return true;return false;}
   function containsCjk(value,isCodes){
@@ -62,7 +79,9 @@ LAZY_LOADER = r'''
      var checks=0,finish=function(){
       for(var i=0;i<files.length;i++)if(files[i].Status!==0){if(checks++<1200){setTimeout(finish,25);return;}picker.__elixirCjkLoadState='failed';requested=false;return;}
       picker.__elixirCjkLoadState='loaded';
-      if(editor.WordControl&&editor.WordControl.OnResize)editor.WordControl.OnResize(true);
+      var localFonts=window.Common&&window.Common.ElixirLocalFonts;
+      var relaid=localFonts&&localFonts.relayout&&localFonts.relayout(editor);
+      if(!relaid&&editor.WordControl&&editor.WordControl.OnResize)editor.WordControl.OnResize(true);
      };
      finish();
     };
@@ -72,7 +91,7 @@ LAZY_LOADER = r'''
   var originalString=picker.getFontsByString,originalCodes=picker.getFontsByString2,originalSymbol=picker.getFontBySymbol;
   picker.getFontsByString=function(value){var result=originalString.apply(this,arguments);if(value&&containsCjk(value,false))request();return result;};
   picker.getFontsByString2=function(value){var result=originalCodes.apply(this,arguments);if(value&&containsCjk(value,true))request();return result;};
-  picker.getFontBySymbol=function(codepoint){var result=originalSymbol.apply(this,arguments),counter=window.AscCommon&&window.AscCommon.g_oIdCounter;if(isCjk(codepoint)&&(editor.isDocumentLoadComplete||(counter&&(counter.m_bLoad||counter.m_bRead))))request();return result;};
+  picker.getFontBySymbol=function(codepoint){var result=originalSymbol.apply(this,arguments),counter=window.AscCommon&&window.AscCommon.g_oIdCounter;if(isCjk(codepoint)&&!picker.__elixirEastAsiaWidthProbe&&(editor.isDocumentLoadComplete||(counter&&(counter.m_bLoad||counter.m_bRead))))request();return result;};
   function wrapEnter(attempt){
    var active=window.Asc&&window.Asc.editor,current=active&&active.asc_enterText;
    if(current&&!current.__elixirCjkInput){var wrapped=function(value){if(value&&containsCjk(value,typeof value!=='string'))request();return current.apply(this,arguments);};wrapped.__elixirCjkInput=true;active.asc_enterText=wrapped;}

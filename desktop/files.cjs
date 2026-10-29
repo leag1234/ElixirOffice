@@ -45,9 +45,11 @@ async function realDirectory(directory) {
   }
   return fs.realpath(directory);
 }
-async function read(filename) {
+async function read(filename,options={}) {
   const target = validatePath(path.resolve(filename));
   if (!formats.includes(extension(target))) throw Error('Unsupported document format');
+  const maxBytes=options.maxBytes===undefined?512*1024*1024:options.maxBytes;
+  if(!Number.isSafeInteger(maxBytes)||maxBytes<1||maxBytes>512*1024*1024)throw Error('Invalid document read limit');
   let selected;
   for(let attempt=0;;attempt++){
     try{
@@ -56,23 +58,23 @@ async function read(filename) {
         selected=await fs.lstat(target,{bigint:true});
         if(!selected.isFile() || selected.isSymbolicLink()) throw Error('Choose a regular document, not a symbolic link');
       }
-      return await readSelected(target,selected);
+      return await readSelected(target,selected,maxBytes);
     }catch(error){
       if(error.code!=='EBUSY'||attempt!==0)throw error;
       await new Promise(resolve=>setTimeout(resolve,100));
     }
   }
 }
-async function readSelected(target,selected){
+async function readSelected(target,selected,maxBytes){
   const handle = await fs.open(target, constants.O_RDONLY | (process.platform==='win32'?0:(constants.O_NOFOLLOW || 0)));
   try {
     const identity=await handle.stat({bigint:true}), named=await fs.lstat(target,{bigint:true});
     if(named.isSymbolicLink() || !named.isFile() || identity.ino!==selected.ino || identity.dev!==selected.dev ||
        named.ino!==identity.ino || named.dev!==identity.dev) throw Error('Document changed during open');
     const stat=await handle.stat();
-    if (!stat.isFile() || stat.size > 512 * 1024 * 1024) throw Error('Choose a regular document under 512 MiB');
+    if (!stat.isFile() || stat.size > maxBytes) throw Error(maxBytes===20*1024*1024?'Choose a recipient file under 20 MiB':'Choose a regular document under 512 MiB');
     const bytes = await handle.readFile();
-    if (bytes.length > 512 * 1024 * 1024) throw Error('Document grew beyond 512 MiB during read');
+    if (bytes.length > maxBytes) throw Error(maxBytes===20*1024*1024?'Recipient file grew beyond 20 MiB during read':'Document grew beyond 512 MiB during read');
     if(['txt','csv'].includes(extension(target))){try{new TextDecoder('utf-8',{fatal:true}).decode(bytes)}catch{throw Error('Text and CSV documents must use UTF-8');}}
     return {target, bytes, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, embeddedObjects:['odt','ods','odp'].includes(extension(target))?packageGuard.embeddedObjects(bytes):0};
   } finally { await handle.close(); }

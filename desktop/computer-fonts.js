@@ -12,8 +12,7 @@
    const bundled=index.bundled.filter(face=>A.g_map_font_index[face.family]!==undefined);
    const options={substitutes:app.g_fontDictionary?.FD_Substitutes||{}};
    const preliminary=window.EOFontResolver.create(bundled,options);
-   const protectedName=name=>preliminary.resolve({name,aliases:[...(app.GetSubstituteList?.(name)||[]),...(app.DocumentAltNames?.[name]?[app.DocumentAltNames[name]]:[])]})?.source==='bundled';
-   const system=index.system.filter(face=>!protectedName(face.family));
+   const system=index.system.filter(face=>!preliminary.protectedName(face.family));
    const resolver=window.EOFontResolver.create([...bundled,...system],options);
    const picker=A.FontPickerByCharacter,originalRanges=picker?.Ranges?.slice()||[];
    const candidates=window.EOFontResolver.scriptCandidates;

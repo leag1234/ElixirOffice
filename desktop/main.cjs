@@ -51,7 +51,7 @@ function chromeOptions(){
 }
 
 function rememberGeometry(window,{flush=false}={}){
- if(captureOptions)return;
+ if(captureOptions||settings.rememberWindowPlacement===false)return;
  const value=windowState.capture(window);
  if(value)settings.windowState=value;
  if((!value&&!flush)||!settings.windowState)return;
@@ -62,7 +62,7 @@ function rememberGeometry(window,{flush=false}={}){
 function restoreGeometry(ordinal){
  const primary=screen?.getPrimaryDisplay?.(),all=screen?.getAllDisplays?.()||[];
  const displays=primary?[primary,...all.filter(display=>display.id!==primary.id)]:all;
- return windowState.restore(settings.windowState,displays,ordinal);
+ return windowState.restore(settings.rememberWindowPlacement===false?undefined:settings.windowState,displays,ordinal);
 }
 const locale=require('./locale.cjs'),capture=require('./capture.cjs'),decisions=require('./decisions.cjs');
 let captureOptions,captureStartupError;
@@ -900,6 +900,17 @@ async function start() {
     const result=await dialog.showOpenDialog(documentWindow(),{title:t('open'),properties:['openFile'],filters:[{name:t('file'),extensions:files.formats}]});
     return result.canceled?null:openFile(result.filePaths[0]);
   }));
+  handle('mail-merge-recipients',token=>operation(async()=>{
+    active(token);
+    if(captureOptions)throw Error('Mail merge is unavailable in capture mode');
+    const result=await dialog.showOpenDialog(documentWindow(),{title:'Select recipients',properties:['openFile'],filters:[{name:'CSV or Excel',extensions:['csv','xlsx','xls']}]});
+    active(token);if(result.canceled)return null;
+    const format=files.extension(result.filePaths[0]);
+    if(!['csv','xlsx','xls'].includes(format))throw Error('Choose a CSV or Excel recipient file');
+    const selected=await files.read(result.filePaths[0],{maxBytes:20*1024*1024});
+    if(selected.bytes.length>20*1024*1024)throw Error('Choose a recipient file under 20 MiB');
+    active(token);return {name:path.basename(result.filePaths[0]),fileType:format,data:new Uint8Array(selected.bytes)};
+  }));
   handle('drop',filename=>operation(async()=>{if(captureOptions)throw Error('Capture mode uses generated documents only');if(typeof filename!=='string'||!filename)throw Error('Drop a file from this computer');return openFile(filename)}));
   handle('saved-open',(id)=>operation(async()=>{
     if(captureOptions)throw Error('Capture mode unavailable');
@@ -1086,16 +1097,25 @@ async function start() {
   });
   handle('window-options',()=>({
     customTitleBar:settings.customTitleBar===true,
+    rememberWindowPlacement:settings.rememberWindowPlacement!==false,
     openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true,
     customTitleBarAvailable:tabHost.compactAvailable(),
     effectiveFrame:registry.window(registry.context().windowId).frame?.effectiveFrame||'native'
   }));
   handle('window-settings',async value=>{
     if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid window settings');
-    for(const key of ['customTitleBar','openInTabs','showHomeTab'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
-    if(!['customTitleBar','openInTabs','showHomeTab'].some(key=>key in value))throw Error('Invalid window settings');
+    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
+    if(!['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'].some(key=>key in value))throw Error('Invalid window settings');
     if(value.customTitleBar&&settings.customTitleBar!==true&&!tabHost.compactAvailable())throw Error(t('nativeTitleBarUnavailable'));
-    for(const key of ['customTitleBar','openInTabs','showHomeTab'])if(key in value)settings[key]=value[key];
+    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'])if(key in value)settings[key]=value[key];
+    if('rememberWindowPlacement' in value){
+      clearTimeout(geometryTimer);geometryTimer=null;
+      if(!value.rememberWindowPlacement)delete settings.windowState;
+      else {
+        const placement=windowState.capture(registry.window(registry.context().windowId).window);
+        if(placement)settings.windowState=placement;
+      }
+    }
     await persist();for(const owner of registry.windows())registry.changed(owner.id);return true;
   });
   handle('recovery-options',()=>({enabled:settings.recoveryEnabled!==false,seconds:[15,30,60,120,300].includes(settings.recoverySeconds)?settings.recoverySeconds:60}));

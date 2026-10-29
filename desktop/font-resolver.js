@@ -93,13 +93,15 @@
    if(!order[style])throw Error('Invalid font style');
    const aliases=requestedAliases||substitutes[name]||Object.entries(substitutes).find(([key])=>normalize(key)===normalize(name))?.[1]||[];
    const safeName=safeAliases.get(normalize(name));
-   for(const n of [name,...aliases,...(safeName?[safeName,...(substitutes[safeName]||[])]:[])]){const found=choose(n,'bundled',style,codepoints);if(found)return found;}
+   let found=choose(name,'bundled',style,codepoints);if(found)return found;
+   found=choose(name,'system',style,codepoints);if(found)return found;
+   for(const n of [...aliases,...(safeName?[safeName,...(substitutes[safeName]||[])]:[])]){found=choose(n,'bundled',style,codepoints);if(found)return found;}
    const regional=String(locale).toLowerCase();
    const suffix=regional.startsWith('ja')?'JP':regional.startsWith('ko')?'KR':/zh-(tw|hant)/.test(regional)?'TC':regional.startsWith('zh')?'SC':null;
-   const names=[name,...(safeName?[safeName]:[]),...candidates,...(suffix?['Noto Sans CJK '+suffix,'Noto Serif CJK '+suffix]:[])];
+   const names=[...(safeName?[safeName]:[]),...candidates,...(suffix?['Noto Sans CJK '+suffix,'Noto Serif CJK '+suffix]:[])];
    let synthesized=null;
    for(const n of names){
-    const found=choose(n,'system',style,codepoints);
+    found=choose(n,'system',style,codepoints);
     if(!found)continue;
     if(!found.syntheticBold&&!found.syntheticItalic)return found;
     if(!synthesized)synthesized=found;
@@ -109,7 +111,7 @@
    for(const n of [name,...candidates]){const found=choose(n,'fallback',style,codepoints);if(found)return found;}
    return null;
   }
-  return Object.freeze({resolve,covers,families,protectedName:name=>!!resolve({name})&&resolve({name}).source==='bundled'});
+  return Object.freeze({resolve,covers,families,protectedName:name=>!!choose(name,'bundled',0,[])});
  }
  return Object.freeze({create,styleOf,covers,normalize,slots,scriptCandidates,eligible,prepare,fallbackFamilies,reservedFallbackFamilies,cjkFallbackFamilies,namedCandidates});
 });

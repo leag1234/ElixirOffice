@@ -1,0 +1,4 @@
+msal==1.39.0
+requests==2.34.2
+pypdf==6.21.3
+pdfminer.six==20260107

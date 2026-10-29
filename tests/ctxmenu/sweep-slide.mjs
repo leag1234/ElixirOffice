@@ -3,6 +3,8 @@
 // (and submenu items) from a fresh menu, record errors, popups and effects.
 //   node tests/ctxmenu/sweep-slide.mjs [--only id1,id2] [--out file.json] [--max-sub N]
 import fs from "node:fs";
+import { selectLastDrawing } from "./slide-drawing.mjs";
+import { cancelHtmlDialogs } from "../html-dialogs.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { launch } from "../shortcuts/lib.mjs";
@@ -32,19 +34,21 @@ const thumbPt = async n => { const r = await frame.evaluate(() => { const b = do
 const goSlide = async n => { await frame.evaluate(n => PE.getController("Main").api.goToPage(n), n); await page.waitForTimeout(500); };
 const cmd = src => frame.evaluate(src => new Promise(res => Asc.editor.callCommand(src, true, r => res(r))), src);
 
+let drawingPoint;
 const scenarios = [
   { id: "slide-empty-area", setup: async () => { await goSlide(0); }, target: () => slidePt(0.9, 0.9) },
   { id: "title-text", setup: async () => { await goSlide(0); const p = await slidePt(0.5, 0.3); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); await page.keyboard.press("Control+A"); await page.waitForTimeout(300); }, target: () => slidePt(0.5, 0.3) },
   { id: "title-shape", setup: async () => { await goSlide(0); const p = await slidePt(0.5, 0.3); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(300); }, target: () => slidePt(0.5, 0.3) },
-  { id: "shape", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var sh = Api.CreateShape("rect", 2000000, 1000000, Api.CreateSolidFill(Api.CreateRGBColor(200,220,255)), Api.CreateStroke(0, Api.CreateNoFill())); sh.SetPosition(1000000, 3800000); s.AddObject(sh); return 1; })()`); await page.waitForTimeout(500); const p = await slidePt(0.2, 0.75); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); }, target: () => slidePt(0.2, 0.75) },
-  { id: "picture", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var im = Api.CreateImage("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", 2000000, 1000000); im.SetPosition(1000000, 3800000); s.AddObject(im); return 1; })()`); await page.waitForTimeout(500); const p = await slidePt(0.2, 0.75); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); }, target: () => slidePt(0.2, 0.75) },
-  { id: "table", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var t = Api.CreateTable(2, 2); t.SetPosition(1000000, 3800000); t.SetSize(3000000, 800000); s.AddObject(t); return 1; })()`); await page.waitForTimeout(500); const p = await slidePt(0.2, 0.75); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); }, target: () => slidePt(0.2, 0.75) },
+  { id: "shape", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var sh = Api.CreateShape("rect", 2000000, 1000000, Api.CreateSolidFill(Api.CreateRGBColor(200,220,255)), Api.CreateStroke(0, Api.CreateNoFill())); sh.SetPosition(1000000, 3800000); s.AddObject(sh); return 1; })()`); await page.waitForTimeout(500); drawingPoint = await selectLastDrawing(frame, page, fb, "Shape"); }, target: () => drawingPoint },
+  { id: "picture", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var im = Api.CreateImage("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", 2000000, 1000000); im.SetPosition(1000000, 3800000); s.AddObject(im); return 1; })()`); await page.waitForTimeout(500); drawingPoint = await selectLastDrawing(frame, page, fb, "ImageShape"); }, target: () => drawingPoint },
+  { id: "table", setup: async () => { await goSlide(0); await cmd(`(function(){ var s = Api.GetPresentation().GetSlideByIndex(0); var t = Api.CreateTable(2, 2); t.SetPosition(1000000, 3800000); t.SetSize(3000000, 800000); s.AddObject(t); return 1; })()`); await page.waitForTimeout(500); drawingPoint = await selectLastDrawing(frame, page, fb, "GraphicFrame"); }, target: () => drawingPoint },
   { id: "thumbnail", setup: async () => { await goSlide(0); const p = await thumbPt(0); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); }, target: () => thumbPt(0) },
   { id: "thumbnail-2", setup: async () => { await goSlide(1); const p = await thumbPt(1); await page.mouse.click(p.x, p.y); await page.waitForTimeout(300); }, target: () => thumbPt(1) },
   { id: "thumbnail-empty-area", setup: async () => { await goSlide(0); }, target: async () => { const r = await frame.evaluate(() => { const b = document.querySelector("#id_panel_thumbnails").getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; }); return { x: fb.x + r[0] + r[2] / 2, y: fb.y + r[1] + r[3] - 10 }; } },
 ];
 
 const reset = async () => {
+  await cancelHtmlDialogs(frame);
   await page.keyboard.press("Escape");
   await frame.evaluate(() => {
     try { Common.UI.Menu.Manager.hideAll(); } catch (e) {}
@@ -53,7 +57,7 @@ const reset = async () => {
     try { $("#pe-preview").is(":visible") && PE.getController("Main").api.EndDemonstration(); } catch (e) {}
     try { const api = PE.getController("Main").api, H = api.WordControl.m_oLogicDocument.History; for (let i = 0; i < 100 && H.Index > window.__eoBase && H.Can_Undo(); i++) api.WordControl.m_oLogicDocument.Document_Undo(); } catch (e) {}
   });
-  await frame.waitForFunction(() => !Array.from(document.querySelectorAll(".modals-mask,.asc-window")).some(w => w.getClientRects().length && getComputedStyle(w).display !== "none"), null, { timeout: 4000 }).catch(() => {});
+  await frame.waitForFunction(() => !Array.from(document.querySelectorAll(".modals-mask,.asc-window,dialog[open]")).some(w => w.getClientRects().length && getComputedStyle(w).display !== "none"), null, { timeout: 4000 }).catch(() => {});
   await page.mouse.move(5, 5);
   await page.waitForTimeout(200);
 };

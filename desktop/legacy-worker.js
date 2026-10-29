@@ -36,7 +36,7 @@ self.onmessage=async function(event){
   var mod=await createX2t({noInitialRun:true,print:function(){},printErr:function(){},
    instantiateWasm:function(imports,receive){var at=performance.now(),instance=new WebAssembly.Instance(compiled,imports);instantiateMs=performance.now()-at;receive(instance,compiled);return instance.exports;}
   });
-  var FS=mod.FS,codes={docx:65,doc:66,odt:67,rtf:68,txt:69,docm:75,dotx:76,pptx:129,ppt:130,odp:131,ppsx:132,potx:135,xlsx:257,xls:258,ods:259,csv:260,xlsm:261,xltx:262,doct:8193,xlst:8194,pptt:8195};
+  var FS=mod.FS,codes={docx:65,doc:66,odt:67,rtf:68,txt:69,docm:75,dotx:76,pptx:129,ppt:130,odp:131,ppsx:132,potx:135,xlsx:257,xls:258,ods:259,csv:260,xlsm:261,xltx:262,json:2056,doct:8193,xlst:8194,pptt:8195};
   if(!codes[job.from]||!codes[job.to])throw new Error('Unsupported conversion format');
   ['/work/media','/fonts','/tmp/conversion'].forEach(function(p){FS.mkdirTree(p);});
   FS.writeFile('/work/input.'+job.from,job.bytes);

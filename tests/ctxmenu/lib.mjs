@@ -29,9 +29,9 @@ export const sigSource = {
 };
 
 export async function visibleWindows(frame) {
-  return frame.evaluate(() => Array.from(document.querySelectorAll(".asc-window")).filter(w => w.getClientRects().length && getComputedStyle(w).display !== "none" && getComputedStyle(w).visibility !== "hidden").map(w => ({
-    cls: w.className.replace(/\s+/g, " ").trim(),
-    title: ((w.querySelector(".title") || {}).textContent || "").trim(),
+  return frame.evaluate(() => Array.from(document.querySelectorAll(".asc-window,dialog[open]")).filter(w => w.getClientRects().length && getComputedStyle(w).display !== "none" && getComputedStyle(w).visibility !== "hidden").map(w => ({
+    cls: (w.tagName === "DIALOG" ? "dialog " : "") + w.className.replace(/\s+/g, " ").trim(),
+    title: ((w.querySelector(".title") || w.querySelector("h1,h2,h3") || {}).textContent || "").trim(),
     body: ((w.querySelector(".body") || w).textContent || "").replace(/\s+/g, " ").trim().slice(0, 160),
     alert: /\balert\b/.test(w.className),
   })));

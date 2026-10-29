@@ -340,7 +340,7 @@ def main():
     cache = owned(a.cache)
     if a.tool_cache:
         stage_cached_tools(a.tool_cache, cache, manifest)
-    base = ["docker", "run", "--rm", "--user=1000:1000", "--cpus=2", "--memory=4g", "--memory-swap=4g", "--pids-limit=512", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--mount", "type=bind,source=" + str(HERE) + ",target=/driver,readonly", "--mount", "type=bind,source=" + str(a.pins.resolve()) + ",target=/pins.json,readonly", "--mount", "type=bind,source=" + str(cache) + ",target=/cache"]
+    base = ["docker", "run", "--rm", "--env=PYTHONDONTWRITEBYTECODE=1", "--user=1000:1000", "--cpus=2", "--memory=4g", "--memory-swap=4g", "--pids-limit=512", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--mount", "type=bind,source=" + str(HERE) + ",target=/driver,readonly", "--mount", "type=bind,source=" + str(a.pins.resolve()) + ",target=/pins.json,readonly", "--mount", "type=bind,source=" + str(cache) + ",target=/cache"]
     command = ["python3", "/driver/appimage_update.py", "--pins", "/pins.json", "--cache", "/cache"]
     if a.cached_tools_only:
         command += ["--cached-tools-only"]

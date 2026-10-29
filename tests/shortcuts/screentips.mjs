@@ -108,3 +108,4 @@ record("tip.no-page-error", errs.length === 0, errs.map(e => e.text).join(" | ")
 fs.mkdirSync(path.dirname(outFile), { recursive: true });
 fs.writeFileSync(outFile, JSON.stringify({ date: new Date().toISOString(), results }, null, 1));
 console.log(`${results.filter(r => r.status === "pass").length}/${results.length} pass`);
+process.exitCode = results.some(row => row.status === "fail") ? 1 : 0;

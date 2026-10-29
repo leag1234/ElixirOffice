@@ -10,15 +10,17 @@ test('default-on applies to unset desktop only and preserves explicit decline wi
  assert.deepEqual(migrate({fontConsent:true,fontChoice:'granted'}),{fontConsent:true,fontChoice:'granted'});
  assert.equal(migrate({fontConsent:true},{capture:true}).fontConsent,false);
 });
-test('priority is bundled requested/metric, then usable regional system, then fallback for the requested style/script',()=>{
+test('priority is exact bundled, exact system, bundled metric, regional system, then packaged fallback',()=>{
  const policy=resolver.create([face('Carlito','bundled'),face('Calibri','system'),face('Noto Sans CJK JP','system',0,[[0x3040,0x30ff]]),face('Noto Sans CJK KR','system',0,[[0x3040,0x30ff]]),face('Elixir Fallback CJK JP','fallback',0,[[0x3040,0x30ff]]),face('Emergency','fallback',0,[[0x600,0x6ff]])],{substitutes:{Calibri:['Carlito']}});
- assert.equal(policy.resolve({name:'Calibri'}).family,'Carlito');
+ assert.equal(policy.resolve({name:'Calibri'}).family,'Calibri');
+ assert.equal(resolver.create([face('Carlito','bundled')],{substitutes:{Calibri:['Carlito']}}).resolve({name:'Calibri'}).family,'Carlito');
+ assert.equal(resolver.create([face('Exact','bundled'),face('Exact','system')]).resolve({name:'Exact'}).source,'bundled');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ja'}).family,'Noto Sans CJK JP');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ja'}).source,'system');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x3042],locale:'ko'}).family,'Noto Sans CJK KR');
  assert.equal(policy.resolve({name:'Calibri',codepoints:[0x600],candidates:['Emergency']}).source,'fallback');
  assert.equal(policy.resolve({name:'Unknown',codepoints:[0x600]}),null);
- const italic=policy.resolve({name:'Calibri',style:2});assert.equal(italic.family,'Carlito');assert.equal(italic.syntheticItalic,true);
+ const italic=policy.resolve({name:'Calibri',style:2});assert.equal(italic.family,'Calibri');assert.equal(italic.syntheticItalic,true);
  assert.throws(()=>policy.resolve({name:'Calibri',style:4}),/style/);
  const packaged=resolver.create([face('Elixir Fallback CJK JP','fallback',0,[[0x3040,0x30ff]])]).resolve({name:'Unknown',style:2,codepoints:[0x3042],locale:'ja',candidates:['Noto Sans CJK JP','Elixir Fallback CJK JP']});
  assert.equal(packaged.source,'fallback');assert.equal(packaged.syntheticItalic,true);
@@ -57,10 +59,10 @@ test('private index caches real SFNT coverage, exposes no paths and rejects chan
 test('SFNT and TTC bounds fail closed for malformed tables and collections',()=>{
  for(const bytes of [Buffer.alloc(2),Buffer.alloc(12),Buffer.from('ttcf0000ffffffff','ascii')])assert.throws(()=>{for(const offset of sfnt.offsets(bytes))sfnt.inspect(bytes,offset);});
 });
-test('desktop policy stays outside legacy local-first hooks in both registration load orders',async()=>{
+test('desktop policy selects present exact system faces and absent metric aliases in both registration load orders',async()=>{
  const core=await fs.readFile(process.env.UPSTREAM?path.join(process.env.UPSTREAM,'web-apps/apps/common/main/lib/elixir-localfonts/Core.js'):path.join(assets,'desktop-home/localfonts-Core.js'),'utf8');
  const adapter=await fs.readFile(path.join(root,'desktop/computer-fonts.js'),'utf8');
- for(const late of [false,true]){
+ for(const present of [false,true])for(const late of [false,true]){
   const store=new Map(),files=[],infos=[{name:'Carlito'},{name:'Font-A'}];
   const app={g_fontDictionary:{FD_Substitutes:{Calibri:['Carlito']}},GetSubstituteList:name=>name==='Calibri'?['Carlito']:[],GetFontFile:name=>({m_wsFontName:name}),GetFontFileWeb:name=>({m_wsFontName:name})};
   const A={DesktopFontPolicyVersion:1,g_map_font_index:{Carlito:0,'Font-A':1},g_font_infos:infos,g_font_files:files,g_fontApplication:app,CFontFileLoader:function(id){this.Id=id;},CFontInfo:function(name){this.name=name;}};
@@ -69,16 +71,17 @@ test('desktop policy stays outside legacy local-first hooks in both registration
   vm.runInNewContext(core,context);const LF=window.Common.ElixirLocalFonts;
   if(!late)LF.install();
   vm.runInNewContext(adapter,context);
-  const index={id:'fixture',bundled:[face('Carlito','bundled'),face('Carlito','bundled',1),face('Carlito','bundled',2),face('Font-A','bundled')],system:[face('Calibri','system'),face('Font A','system'),face('خط','system'),face('글꼴','system')]};
+  const exact=present?[0,1,2].map(style=>face('Calibri','system',style)):[];
+  const index={id:'fixture-'+present+'-'+late,bundled:[face('Carlito','bundled'),face('Carlito','bundled',1),face('Carlito','bundled',2),face('Font-A','bundled')],system:[...exact,face('Font A','system'),face('خط','system'),face('글꼴','system')]};
   A.DesktopFontPolicyVersion=0;assert.throws(()=>window.EOComputerFonts.install(index),/engine update/);A.DesktopFontPolicyVersion=1;
   const policy=window.EOComputerFonts.install(index);LF.fonts=index.system.map(f=>({...f,postscriptName:f.family,fullName:f.family,blob(){}}));LF.register();
   assert.equal(policy.resolve('Calibri',1).styleCode,1);assert.equal(policy.resolve('Calibri',2).styleCode,2);
-  assert.equal(A.g_map_font_index.Calibri,undefined,'Protected metric alias must not register a local override');
-  assert.equal(app.GetFontFileWeb('Calibri').m_wsFontName,'Carlito');
+  assert.equal(A.g_map_font_index.Calibri===undefined,!present,'Only an exact bundled-name collision may block system registration');
+  assert.equal(app.GetFontFileWeb('Calibri').m_wsFontName,present?'Calibri':'Carlito');
   assert.equal(app.GetFontFileWeb('Font-A').m_wsFontName,'Font-A');
   assert.equal(LF.resolveName('خط'),'خط');assert.equal(LF.resolveName('글꼴'),'글꼴');assert.equal(LF.resolveName('not-installed'),null);
   assert.equal(app.GetFontFileWeb('Font A').m_wsFontName,'Font A');
-  LF.register();assert.equal(app.GetFontFileWeb('Calibri').m_wsFontName,'Carlito');assert.equal(window.EOComputerFonts.install(index),policy);
+  LF.register();assert.equal(app.GetFontFileWeb('Calibri').m_wsFontName,present?'Calibri':'Carlito');assert.equal(window.EOComputerFonts.install(index),policy);
  }
 });
 
@@ -167,7 +170,7 @@ test('variable system fonts expose only default instances and prefer eligible st
  assert.equal(defaults.resolve({name:'Ubuntu Sans Medium'}).id,'default');
  const otherBold={...face('Static Alternative','system',1),id:'other-bold',variable:false};
  const alternatives=resolver.create([regular,medium,bold,otherBold]);
- assert.equal(alternatives.resolve({name:'Ubuntu Sans',style:1,candidates:['Static Alternative']}).id,'other-bold','A known eligible physical style precedes synthetic fallback');
+ assert.equal(alternatives.resolve({name:'Ubuntu Sans',style:1,candidates:['Static Alternative']}).id,'default','An exact installed family keeps its identity when the requested style needs synthesis');
  const staticR={...regular,id:'static-regular',variable:false},staticB={...bold,id:'static-bold',variable:false,faceIndex:0};
  const statics=resolver.create([regular,medium,bold,staticR,staticB]);
  assert.equal(statics.resolve({name:'Ubuntu Sans',style:0}).id,'static-regular');

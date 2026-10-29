@@ -1,5 +1,24 @@
 # Changelog
 
+## Desktop 0.5.0 — build 21, awaiting release qualification
+
+### Added and fixed
+
+- Merge local CSV/XLSX recipients from Word's Mailings tab.
+- Prefer the requested installed font over a bundled metric substitute.
+- Apply the bundled CJK fallback at open, including when computer-font access is declined.
+- Avoid loading the CJK collection for Latin-only document startup.
+- Fill spreadsheet cells down with Ctrl+D and right with Ctrl+R.
+- Offer an option to remember window position and size (#35).
+- Honor the document compatibility option preventing wrapped floating tables from splitting.
+- Recover from missing selected-font metadata when opening a document.
+
+### Qualification and limitations
+
+- Frozen build 21 has passed its Linux and Windows portable suites and independent package-content checks. Native platform acceptance is recorded separately; this entry does not claim a measured startup-speed improvement.
+- Installers remain publisher-unsigned. macOS is arm64-only, ad-hoc signed and unnotarized; the AppImage sandbox limitation remains. Silent updates are not included.
+- Existing conversion, AI, shutdown, printing and long-session memory limitations remain. Publication is performed by the owner after final qualification.
+
 ## Desktop0.4.0 — corresponding-source candidate
 
 - Make Ask Elixir/setup discoverable; retain optional, off-by-default AI with

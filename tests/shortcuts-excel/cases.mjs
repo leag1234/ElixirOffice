@@ -236,8 +236,30 @@ export const CASES = [
   { id: "edit.clear-active", win: ["Backspace"], mac: ["Backspace"], sel: "A1", check: all(editing, async ctx => eq((await ctx.st()).formulaBar, "", "formula bar")) },
   { id: "edit.delete-cells", win: ["Control+Minus"], mac: ["Meta+Minus", "Control+Minus"], sel: "B2", check: windowCase(/delete/i), control: async ctx => ctx.page.keyboard.press("Control+Shift+Minus") },
   { id: "edit.insert-cells", win: ["Control+Shift+Equal"], mac: ["Control+Shift+Equal"], sel: "B2", check: windowCase(/insert/i) },
-  { id: "edit.fill-down", win: ["Control+d"], mac: ["Meta+d", "Control+d"], sel: "A1:A3", check: cells({ A1: "10", A2: "10", A3: "10" }) },
-  { id: "edit.fill-right", win: ["Control+r"], mac: ["Meta+r", "Control+r"], sel: "A1:C1", check: cells({ A1: "10", B1: "10", C1: "10" }) },
+  {
+    id: "edit.fill-down", win: ["Control+d"], mac: ["Meta+d", "Control+d"], sel: "A1:A3",
+    check: async ctx => {
+      let result = await cells({ A1: "10", A2: "10", A3: "10" })(ctx);
+      if (result !== true) return result;
+      await builder(`Api.GetActiveSheet().GetRange("D2").SetValue("=A1")`)(ctx);
+      await select(ctx.frame, "D3"); await ctx.page.keyboard.press(ctx.variant); await ctx.frame.waitForTimeout(200);
+      const state = await ctx.st();
+      result = eq(state.formulas.D3, "=A2", "single-cell adjusted formula");
+      return result === true ? eq(state.activeAddr, "D3", "selection after single-cell fill") : result;
+    },
+  },
+  {
+    id: "edit.fill-right", win: ["Control+r"], mac: ["Meta+r", "Control+r"], sel: "A1:C1",
+    check: async ctx => {
+      let result = await cells({ A1: "10", B1: "10", C1: "10" })(ctx);
+      if (result !== true) return result;
+      await builder(`Api.GetActiveSheet().GetRange("D4").SetValue("=A1")`)(ctx);
+      await select(ctx.frame, "E4"); await ctx.page.keyboard.press(ctx.variant); await ctx.frame.waitForTimeout(200);
+      const state = await ctx.st();
+      result = eq(state.formulas.E4, "=B1", "single-cell adjusted formula");
+      return result === true ? eq(state.activeAddr, "E4", "selection after single-cell fill") : result;
+    },
+  },
   { id: "edit.hide-rows", win: ["Control+9"], mac: ["Control+9", "Meta+Shift+Digit9"], sel: "A2", check: async ctx => eq((await ctx.st()).hiddenRows, [2], "hidden rows"), control: async ctx => ctx.js(() => Asc.editor.asc_hideRows()) },
   {
     id: "edit.unhide-rows", win: ["Control+Shift+Digit9"], mac: ["Control+Shift+Digit9"], sel: "A1:A4",

@@ -1,3 +1,4 @@
+import { cancelHtmlDialogs } from "../html-dialogs.mjs";
 // Shared helpers of the Excel keyboard-shortcut suite (Playwright against a running
 // spreadsheet editor). Mirrors tests/shortcuts/lib.mjs (Word).
 //
@@ -100,6 +101,7 @@ export async function focusGrid(frame, keepObjects) {
 
 // Close menus, dialogs, backstage, panels and the cell editor a previous test may have left open
 export async function resetUi(frame, page) {
+  await cancelHtmlDialogs(frame);
   await page.mouse.move(5, 5);
   await frame.evaluate(() => {
     const api = Asc.editor;
@@ -122,7 +124,7 @@ export async function resetUi(frame, page) {
   });
   await page.keyboard.up("Shift"); await page.keyboard.up("Control"); await page.keyboard.up("Alt"); await page.keyboard.up("Meta");
   // windows and panels fade out: wait until nothing is left open
-  await frame.waitForFunction(() => !Array.from(document.querySelectorAll(".asc-window")).some(w => w.getClientRects().length && getComputedStyle(w).display !== "none"), null, { timeout: 3000 }).catch(() => {});
+  await frame.waitForFunction(() => !Array.from(document.querySelectorAll(".asc-window,dialog[open]")).some(w => w.getClientRects().length && getComputedStyle(w).display !== "none"), null, { timeout: 3000 }).catch(() => {});
   await focusGrid(frame);
 }
 

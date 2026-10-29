@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Invoked only in a fresh, caller-owned release folder over verified SSH.
 set -euo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 # Build/audit stages inherit no ambient credentials or GUI capabilities.
 if [ "${EO_RELEASE_CLEAN_ENV:-}" != yes ]; then
   if [ "$(/usr/bin/uname -s)" = Darwin ]; then
@@ -10,11 +11,11 @@ if [ "${EO_RELEASE_CLEAN_ENV:-}" != yes ]; then
       exit 1
     fi
     exec /usr/bin/env -i PATH=/usr/bin:/bin:/usr/local/bin HOME="$HOME" \
-      LANG=C.UTF-8 EO_RELEASE_CLEAN_ENV=yes \
+      LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes \
       /usr/bin/arch -arm64 /bin/bash "${BASH_SOURCE[0]}" "$@"
   fi
   exec /usr/bin/env -i PATH=/usr/bin:/bin:/usr/local/bin HOME="$HOME" \
-    LANG=C.UTF-8 EO_RELEASE_CLEAN_ENV=yes \
+    LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes \
     /bin/bash "${BASH_SOURCE[0]}" "$@"
 fi
 MODE="$1"

@@ -114,3 +114,4 @@ for (const platform of platforms) {
   console.log(`${platform}: editor scope ${count(["editor"], "pass")} pass / ${count(["editor"], "fail")} fail / ${count(["editor"], "untested")} untested; browser-reserved scope ${count(["browser"], "pass")} pass / ${count(["browser"], "fail")} fail (variants)`);
 }
 console.log("results:", outFile);
+process.exitCode = results.some(row => row.status === "fail") ? 1 : 0;

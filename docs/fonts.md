@@ -329,7 +329,7 @@ This dated addendum records the isolated fonts review candidate. Earlier text re
 
 ### Desktop system fonts (0.2.2 S1 candidate)
 
-All existing bundles remain. The desktop-only private index and named-family/style resolver prefer bundled document/metric fonts, then local system fonts, then a small bundled fallback. Default-on applies to unset settings and preserves explicit declines. See [desktop system fonts](desktop-system-fonts.md) for privacy, cache, tests and pending character/PDF/collection gates. No full CJK bundle or new fallback files are added in S1; server font generation is unchanged.
+All existing bundles remain. The desktop-only private index and named-family/style resolver prefer an exact bundled family, then an exact local system family, a bundled metric alias, other system/script candidates and finally a small bundled fallback. Default-on applies to unset settings and preserves explicit declines. See [desktop system fonts](desktop-system-fonts.md) for privacy, cache, tests and pending character/PDF/collection gates. No full CJK bundle or new fallback files are added in S1; server font generation is unchanged.
 
 ## release review r1 scope — 2026-10-16
 This dated candidate addition preserves integrated main41e4fa6f96 in full.
@@ -338,4 +338,4 @@ historical evidence limits and open runtime gates. No integration or release.
 
 ## 2026-10-27 — Pan-CJK offline fallback candidate
 
-Issue 39 adds pinned, unmodified Noto Sans CJK 2.004 Regular and Bold collections to desktop-generated font assets. In 0.4, CJK text displays correctly when Computer fonts is allowed and a CJK font is installed, as on normal Windows/macOS setups. The bundled collections are not applied on initial open when Computer fonts is declined or no CJK font is installed; standalone initial-open fallback remains a known limitation scheduled for 0.5. Generated `Elixir Fallback CJK JP/SC/TC/KR` aliases and the lazy same-origin loader are component capabilities, not proof that the shipped initial-open path activates them under those conditions. The two files add 39,535,544 raw bytes. OFL/notice, source hashes, regional mapping and scoped PDF evidence are documented in [desktop system fonts](desktop-system-fonts.md#pan-cjk-packaged-fallback--04-issue-39-candidate).
+Issue 39 adds pinned, unmodified Noto Sans CJK 2.004 Regular and Bold collections to desktop-generated font assets. System regional families keep priority; generated `Elixir Fallback CJK JP/SC/TC/KR` aliases provide deterministic offline coverage when computer-font access is unavailable or declined. Web local mode receives the metadata initially but fetches the two same-origin collection resources only after CJK content needs them, then reuses the normal font cache. The two files add 39,535,544 raw bytes. OFL/notice, source hashes, regional mapping and PDF evidence are documented in [desktop system fonts](desktop-system-fonts.md#pan-cjk-packaged-fallback--04-issue-39-candidate).

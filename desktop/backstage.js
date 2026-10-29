@@ -143,7 +143,13 @@ window.EODesktopBackstage=async function(win,main,info,action){
  };
  main.api.asc_Print=()=>action('print');
  main.api.asc_DownloadAs=()=>action('save-as');
- main.api.downloadAs=(_action,options)=>options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
+ const localDownloadAs=main.api.downloadAs;
+ main.api.downloadAs=(requested,options)=>{
+  if(requested===win.Asc.c_oAscAsyncAction.MailMergeLoadFile||
+     requested===win.Asc.c_oAscAsyncAction.DownloadMerge||options?.oDocumentMailMerge)
+   return localDownloadAs.call(main.api,requested,options);
+  return options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
+ };
  const link=win.document.createElement('link');link.rel='stylesheet';link.href='/example/local-assets/desktop-home/backstage-home.css';win.document.head.append(link);
  const style=win.document.createElement('style');
  style.textContent='.eo-info-action{width:auto!important;min-width:120px;min-height:36px;padding:6px 16px;justify-self:start;white-space:normal;text-align:start} .eo-desktop-page .file-link{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:start;width:100%;cursor:pointer}.eo-desktop-page .file-link .ic{width:28px;height:28px;flex:none}.eo-desktop-page .file-name{display:block;font-weight:600} body.elx-chrome .elx-docname .elx-docstate{display:none!important} body.elx-chrome #id-box-doc-name.elx-docname-box{padding-right:4px!important} @media(min-width:900px){body.elx-chrome .elx-search{left:60%!important} body.elx-chrome.rtl .elx-search,.rtl body.elx-chrome .elx-search{left:40%!important} body.elx-chrome #id-box-doc-name.elx-docname-box{flex:1 1 auto!important;min-width:160px!important}}';

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { cancelHtmlDialogs } from "../html-dialogs.mjs";
 // PowerPoint keyboard shortcuts suite for the ElixirOffice presentation editor.
 //
 // Usage (on the dev host, Playwright installed in /srv/elixiroffice/pw):
@@ -90,6 +91,7 @@ function helpers(page, f) {
     visible: sel => f.evaluate(sel => $(sel).filter(':visible').length > 0, sel),
     // back to a neutral state between cases: no dialog, menu, backstage or slide show
     closeAll: async () => {
+      await cancelHtmlDialogs(f);
       for (let i = 0; i < 3; i++) { await page.keyboard.press('Escape'); await page.waitForTimeout(150); }
       await f.evaluate(() => {
         try { $('.asc-window:visible .tool.close').each(function () { this.click(); }); } catch (e) {}

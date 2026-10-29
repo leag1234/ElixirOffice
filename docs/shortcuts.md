@@ -1,5 +1,7 @@
 # Keyboard shortcuts, KeyTips and interaction polish (text editor)
 
+Spreadsheet editing follows Excel semantics for Fill Down (`Ctrl+D`, or `Cmd+D` on macOS) and Fill Right (`Ctrl+R`, or `Cmd+R` on macOS). With a range selected, the top row or left column is copied across the selection; with one cell selected, the value or formula is copied from the cell immediately above or to the left. The same commands are available in the spreadsheet ribbon's Fill menu.
+
 Session of 2026-10-05. Branches: `elixir/interact` in web-apps and sdkjs (worktree `/srv/elixiroffice/wt/interact`), `feat/interact` in this repository. Test instance: container `eo-interact`, port **8095** on development host. Nothing is pushed.
 
 ## 1. Source and matrix

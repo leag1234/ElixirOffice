@@ -225,6 +225,20 @@ VISIBLE_ALLOW = [
 VISIBLE_SKIP = ["*package-lock.json", "*npm-shrinkwrap.json", "*.min.js", "*/vendor/*"]
 
 
+# Exact complete source lines approved for attribution or factual comparison.
+# A different file or any changed text receives no exception.
+PRODUCT_EXACT_LINE_ALLOW = {
+    ('CONTRIBUTING.md', 'ElixirOffice is made of this repository and of forks of the ' + (_E.capitalize() + _O.title()) + ' components that we modify. This repository holds what is ours alone: branding (theme, icons, fonts), build and packaging tooling, the desktop app, the WebAssembly build scripts, tests, the evaluation suites and the documentation. `patches/` contains informational exports of our changes to the components.'): 'upstream attribution',
+    ('CONTRIBUTING.md', 'The component repositories (branch `elixiroffice`; `main` follows ' + (_E.capitalize() + _O.title()) + ') are published as `github.com/leag1234/<name>`:'): 'upstream attribution',
+    ('CONTRIBUTING.md', '`sdkjs-forms` is not modified and comes from ' + (_E.capitalize() + _O.title()) + '. Changes that are not specific to ElixirOffice may also be proposed upstream to ' + (_E.capitalize() + _O.title()) + '.'): 'upstream attribution',
+    ('README.md', 'Feature by feature, compared with LibreOffice and ONLYOFFICE: [docs/differences.md](docs/differences.md).'): 'factual comparison',
+}
+
+
+def exact_product_line_allowed(repo_name, path, line):
+    return repo_name == PRODUCT and (path, line) in PRODUCT_EXACT_LINE_ALLOW
+
+
 def visible_findings(root, repo, name, findings):
     scopes = [g for r, g in VISIBLE if r == name]
     if not scopes:
@@ -238,7 +252,7 @@ def visible_findings(root, repo, name, findings):
             continue
         head = header_lines(text.split("\n"))
         for i, line in enumerate(text.split("\n")):
-            if i in head or not _V.search(line):
+            if i in head or exact_product_line_allowed(name, f, line) or not _V.search(line):
                 continue
             for seg in segments(line):
                 if not _V.search(seg) or KEEP_STRICT.search(seg):
@@ -388,7 +402,7 @@ def process_file(repo_name, path, text, apply):
     protects = protects_for(repo_name, path)
     changed, findings = False, []
     for i, line in enumerate(lines):
-        if i in head:
+        if i in head or exact_product_line_allowed(repo_name, path, line):
             continue
         new = "".join(rewrite(seg, rules, protects, repo_name == PRODUCT or "/resources/help/" in path)
                       for seg in segments(line))

@@ -46,6 +46,7 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   closeSaved: attemptId => ipcRenderer.invoke('eo:closed-saved', attemptId),
   initial: () => ipcRenderer.invoke('eo:initial'),
   choose: () => ipcRenderer.invoke('eo:open'),
+  mailMergeRecipients: token => ipcRenderer.invoke('eo:mail-merge-recipients', token),
   recent: id => ipcRenderer.invoke('eo:recent', id),
   recents: () => ipcRenderer.invoke('eo:recents'),
   create: format => ipcRenderer.invoke('eo:new', format),

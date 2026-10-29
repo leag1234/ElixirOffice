@@ -1,3 +1,4 @@
+import { cancelHtmlDialogs } from "../html-dialogs.mjs";
 // Shared helpers of the keyboard-shortcut suites (Playwright against a running editor).
 //
 // Environment:
@@ -79,6 +80,7 @@ export async function focusDoc(frame) {
 
 // Close menus, dialogs, backstage and panels a previous test may have left open
 export async function resetUi(frame, page) {
+  await cancelHtmlDialogs(frame);
   await frame.evaluate(() => {
     try { Common.UI.Menu.Manager.hideAll(); } catch (e) {}
     try { $(".asc-window:visible").each(function () { const b = $(this).find(".tool.close:visible, .dlg-btn[result=cancel]:visible, .dlg-btn[result=close]:visible").first(); b.length ? b.click() : $(this).hide(); }); } catch (e) {}

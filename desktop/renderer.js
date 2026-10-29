@@ -35,6 +35,24 @@ function buttons(busy) {
 }
 
 function script(win,url){return new Promise((resolve,reject)=>{const element=win.document.createElement('script');element.src=url;element.onload=resolve;element.onerror=()=>reject(Error('Cannot load bundled editor asset'));win.document.head.appendChild(element)})}
+async function buildLocalPdf(api,_format,downloadOptions,signal){
+ if(!frame?.AscCommon?.ClientPdf)await script(frame,'/example/local-assets/sdkjs/common/clientpdf/clientpdf.js');
+ if(!frame?.AscCommon?.ClientPdf)throw Error('The bundled PDF exporter is unavailable');
+ return frame.AscCommon.ClientPdf.build(api,Object.assign({},downloadOptions,{signal:signal}));
+}
+async function chooseMailMergeRecipients(){
+ if(!file||operationBusy||choosingSaveAs)return null;
+ const selectedFile=file,selectedController=controller;
+ choosingSaveAs=true;buttons(true);
+ try{
+  const result=await eoDesktop.mailMergeRecipients(file.token);
+  return file===selectedFile&&controller===selectedController?result:null;
+ }finally{
+  choosingSaveAs=false;buttons(false);
+  if(pendingRequested)setTimeout(drainPending,0);
+  if(fontRefreshRequested)setTimeout(refreshFonts,0);
+ }
+}
 const openPerformance=(stage,durationMs,outcome='ok')=>{void eoDesktop.openPerformance({stage,durationMs,outcome}).catch(()=>{});};
 async function recent(){if(!$('home').hidden)await refreshHome();}
 
@@ -199,9 +217,9 @@ async function open(selected) {
             await EODesktopAI(frame);
             const fontsAt=performance.now();await installFonts(frame);openPerformance('font-install',performance.now()-fontsAt);
             main=(kind==='word'?frame.DE:kind==='cell'?frame.SSE:kind==='pdf'?frame.PDFE:frame.PE).getController('Main');
-            frame.Common.ElixirLocal.prepare(main.api,main);
+            frame.Common.ElixirLocal.prepare(main.api,main,{mailMerge:true});
             main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:kind!=='pdf',comment:true,fillForms:true,download:true,print:false,chat:false}}});
-            controller=frame.Common.ElixirLocal.install(main.api,{format,name:file.name,lang:info.language,pdfStrings:info.strings,saveAcknowledgesOriginal:kind==='pdf',operationScope:file.token,onOperation:operationEvent,beforeOperationWork:()=>EOOperationFeedback.paint(window),onExport:exportOutput,getSignal:()=>abort.signal,
+            controller=frame.Common.ElixirLocal.install(main.api,{format,name:file.name,lang:info.language,pdfStrings:info.strings,saveAcknowledgesOriginal:kind==='pdf',operationScope:file.token,onOperation:operationEvent,beforeOperationWork:()=>EOOperationFeedback.paint(window),onExport:exportOutput,buildPdf:buildLocalPdf,chooseMailMergeRecipients:chooseMailMergeRecipients,getSignal:()=>abort.signal,
               onSave:async (bytes,protection)=>{const saved=await nativeWrite(()=>eoDesktop.save(file.token,bytes,savingAs,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved)},
               onProtectionLock:async()=>{const locked=await eoDesktop.passwordLock(file.token);file.recoveryVersion=locked.recoveryVersion;status('AutoRecover is disabled for this session because password protection was used');},
               onBeforeSave:()=>{abort=new AbortController();buttons(true)},onAfterSave:()=>{buttons(false);updateDirty()},
@@ -411,7 +429,10 @@ async function showOptions(){
  homeNote.id='home-tab-requires-tabs';homeNote.textContent=t('homeTabRequiresTabs');home.setAttribute('aria-describedby',homeNote.id);
  tabs.addEventListener('change',()=>{home.disabled=!tabs.checked;});
  tabsLabel.append(tabs,document.createTextNode(t('openDocumentsInTabs')));homeLabel.append(home,document.createTextNode(t('showHomeTab')));
- windowGroup.append(tabsLabel,homeLabel,homeNote);
+ const placementLabel=document.createElement('label'),placement=document.createElement('input');
+ placement.type='checkbox';placement.id='remember-window-placement';placement.checked=windowOptions.rememberWindowPlacement!==false;
+ placementLabel.append(placement,document.createTextNode(t('rememberWindowPlacement')));
+ windowGroup.append(placementLabel,tabsLabel,homeLabel,homeNote);
  const customFrameLabel=document.createElement('label'),customFrame=document.createElement('input'),customFrameDescription=document.createElement('p'),customFrameNote=document.createElement('p');
  customFrame.type='checkbox';customFrame.id='custom-title-bar';customFrame.checked=windowOptions.customTitleBar;
  customFrame.disabled=!windowOptions.customTitleBarAvailable&&!customFrame.checked;
@@ -443,7 +464,7 @@ async function showOptions(){
  displayLanguage.addEventListener('change',refreshRestart);refreshRestart();
  async function saveOptions(restart=false){
   if(savingOptions)return;savingOptions=true;saveButton.disabled=true;restartButton.disabled=true;
-  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
+  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked,rememberWindowPlacement:placement.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
   finally{savingOptions=false;saveButton.disabled=false;restartButton.disabled=false;}
  }
  const saveButton=modalButton(actions,t('save'),()=>saveOptions());

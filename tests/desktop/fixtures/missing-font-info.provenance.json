@@ -1,0 +1,10 @@
+{
+  "source": "https://assets.publishing.service.gov.uk/media/6582e6a223b70a000d234d00/Theory_of_change_model_template_December_2023.docx",
+  "source_sha256": "b0f130340cd955e17e01a752ff62cc57e080fd807953ae4e9dbe0047ff713c24",
+  "license": "Open Government Licence v3.0, subject to the source's stated exceptions",
+  "license_url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+  "purpose": "Public one-page regression fixture whose Word font table declares Marlett, absent from the packaged runtime font-info inventory.",
+  "attribution": "Contains public sector information licensed under the Open Government Licence v3.0. Source: Department for Education, Theory of change model template, December 2023.",
+  "fixture_sha256": "3b8e0b0022f62f30f01f314c90a3b21f73452acea6d61debadf1c466948c8364",
+  "public_source_modification": "Removed optional core-property values and normalized ZIP container metadata. All other eleven package-part bytes and regression-test assertions are unchanged."
+}
