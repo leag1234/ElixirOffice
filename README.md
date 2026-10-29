@@ -14,28 +14,24 @@ They would love an office suite that is open source **and** easy to use. ElixirO
 
 ## What makes it different
 
-- **It behaves like Microsoft Office.** The same ribbon tabs and groups, KeyTips (Alt), mini toolbar, quick access toolbar, contextual tabs, and the same keyboard shortcuts: 228 Word shortcuts work on Windows and 171 on macOS, including Repeat (F4 / Ctrl+Y), Outline, Read and Draft views, fields, block selection, mail merge, Flash Fill, Quick Analysis, sections and the Slide Sorter. Muscle memory keeps working.
-- **Your documents look right.** Layout fidelity to Word is measured on a document corpus, release after release. Free metric-compatible fonts keep line and page breaks without Microsoft fonts, and in Chrome or Edge one click lets the editor use the fonts installed on your computer. School fonts (Marelle and Seyes-ruled cursive substitutes) are included.
-- **Private by design.** No telemetry, nothing sent to the publisher. In the desktop app and in the optional "convert locally" mode, documents never leave your computer: they are converted and edited entirely on your machine.
-- **AI only if you want it.** The suite is complete without AI. If you configure a model (any OpenAI-compatible service, including Ollama on your own computer), it can work on the structure of your document (styles, lists, tables, table of contents, page setup), with every change shown as a tracked change and undone in one step.
-- **Your own cloud: Murena Workspace and Nextcloud.** Connect your Murena Workspace or Nextcloud from the start page (secure Login Flow, revocable app password, nothing stored in the browser): browse, open, save back with conflict protection, recent files, new documents and uploads. Your real name appears on comments, tracked changes and co-editing. An app to edit directly from Nextcloud Files is coming in an upcoming beta, and the connection is coming to the desktop app later.
-- **International.** Every feature works in many languages: 45 interface languages, 49 spelling dictionaries (39 languages), a thesaurus in 17 languages.
+- **It behaves like Microsoft Office.** Same ribbon tabs and groups, KeyTips (Alt), mini toolbar, quick access toolbar and contextual tabs, and the same keyboard shortcuts: 228 Word shortcuts on Windows and 171 on macOS, plus Excel and PowerPoint habits. Muscle memory keeps working.
+- **Your documents look right.** We measure layout against Microsoft Word on a corpus of real public documents and fix what differs. Free metric-compatible fonts keep line and page breaks without Microsoft fonts, and the fonts installed on your computer are used when you allow it. School fonts (Marelle and Seyes-ruled cursive) are included.
+- **Private by design.** No telemetry, no account, nothing sent to the publisher. In the desktop app, documents are converted and edited entirely on your computer.
+- **AI only if you want it.** The suite is complete without AI. Ask Elixir can rewrite and restructure documents, write formulas, build charts and pivot tables, or draft slides, with the service of your choice, including one you host yourself. It is off by default and nothing is sent without your consent and an explicit request.
+- **Your own cloud.** The server version connects to Murena Workspace and Nextcloud (secure Login Flow, revocable app password): browse, open, save with conflict protection, and co-edit under your real name.
+- **International.** 45 interface languages, chosen independently of the document language; 49 spelling dictionaries; a thesaurus in 17 languages; Chinese, Japanese and Korean text.
 
 ### More things you will like
 
-- **A compact title bar when you want it**: opt in on Linux/X11 to combine the title or tabs with Quick Access and command search. It stays off by default; Windows, macOS and Wayland keep native frames. [Behavior and qualification](docs/desktop-compact-titlebar.md).
-- **Less repeated font matching work**: cached normalized font names reduce the demonstrated large-font-list hot path. The effect on the Windows reporter machine remains unmeasured. [Computer fonts](docs/desktop-system-fonts.md).
-- **Release notices under your control**: daily GitHub release metadata, reminders and per-version skipping, with an Options toggle and browser-only release links. [Privacy and checks](docs/desktop-release-notice.md).
-- **PDF made on your computer**: Download as PDF and Print create the PDF locally, with the fonts you see on screen.
-- **Your computer's fonts**: in Chrome or Edge, one click and the editor uses the fonts installed on your computer, nothing uploaded.
-- **Comments in the margin**, like Word: balloons next to the text, reply and resolve in place.
+- **Signed updates**: the Windows installer and the AppImage install verified updates from inside the app; automatic installation stays off unless you turn it on.
+- **Interface size** from 80 % to 200 %, separate from the document zoom.
 - **Mail merge** from a CSV or Excel file to one document, one PDF or one PDF per recipient.
-- **Outline, Read Mode, Draft view, split window, block selection, fields** and the Selection and Reveal Formatting panes.
-- **AutoCorrect while typing** and **spelling suggestions on right-click**, in many languages; an offline **thesaurus** (Shift+F7).
-- **Pictures that stay where you put them**, and tables that behave (grouped shapes stay in their cell, copied cells keep rotated text and colours).
-- **Excel and PowerPoint habits**: Flash Fill (Ctrl+E), Quick Analysis (Ctrl+Q), Auto Fill Options, chart galleries by type, F4 for Repeat and absolute references; Slide Sorter, sections, Selection pane and Presenter View with the next slide.
-- **Office keys the browser normally keeps** (Ctrl+W, Ctrl+N, Ctrl+Tab...): install ElixirOffice as an app or use full screen, or use the documented alternatives.
-- **AI with your own model**: ask from the search box, a right-click or "/" in the text; any OpenAI-compatible service, including a model running on your own computer.
+- **Comments in the margin** like Word, Track Changes, Outline, Read Mode, Draft view, split window, block selection and fields.
+- **AutoCorrect while typing**, spelling suggestions on right-click and an offline thesaurus (Shift+F7).
+- **Excel and PowerPoint habits**: Flash Fill (Ctrl+E), Quick Analysis (Ctrl+Q), Auto Fill Options, chart galleries by type; Slide Sorter, sections, Selection pane and Presenter View.
+- **PDF made on your computer**, with the fonts you see on screen.
+- **Pictures that stay where you put them**, and tables that behave.
+- **An optional compact title bar** on Linux/X11.
 
 The complete list: [docs/features.md](docs/features.md).
 
@@ -43,7 +39,7 @@ The complete list: [docs/features.md](docs/features.md).
 
 The document converter (the C++ engine that reads and writes .docx, .xlsx, .pptx, .odt, .ods and .odp) is compiled to **WebAssembly** and runs inside the browser or the desktop app:
 
-- built with native WebAssembly exceptions and a reworked static initialisation, which cut the module from 106 MB to 53 MB and made large documents open about ten times faster than a plain build;
+- native WebAssembly exceptions and a reworked static initialisation halved the module (106 MB to 53 MB) and made large documents open about ten times faster than a plain build;
 - a 97-page Word document is converted in about **0.4 s**; saving it takes **0.08 s**;
 - the module downloads once, **3.1 MB compressed** (Brotli), then stays in the browser cache;
 - PDF export uses the same native PDF writer as the server, in the browser: same quality and same file size as a server-made PDF, with no upload;
@@ -82,9 +78,9 @@ In your language (here French, German and Japanese):
 | **Desktop app** 0.4.0 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.4.0/ElixirOffice-0.4.0-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.4.0/ElixirOffice-0.4.0-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.4.0/ElixirOffice-0.4.0-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.4.0/ElixirOffice-0.4.0-linux-amd64.deb) |
 | **Server version** 0.1.1 (beta 1.1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1.1` |
 
-Release notes, checksums and source archives: [desktop 0.4.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.4.0), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1). Older versions: [desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1), [desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0), [desktop 0.2.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4), [desktop 0.2.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3), [desktop 0.2.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2), [desktop 0.2.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1), [desktop 0.2.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0), [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
+Release notes, checksums and source archives: [desktop 0.4.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.4.0), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1), [all releases](https://github.com/leag1234/elixiroffice/releases). The installers are not publisher-signed yet: see the first-launch tips in [Try it](#try-it).
 
-Desktop documents stay on your computer. Check for updates is on by default: at most once per day the app requests release metadata from GitHub (including prereleases); GitHub receives normal HTTPS connection metadata, including your IP address. Disable it in File > Options > Updates. No documents, file names, paths, recent files or user identity are sent. Notes and Download open the release page in your system browser; the app does not download or install updates.
+**Updates.** Once a day at most, the desktop app checks GitHub for a new release (GitHub sees a normal HTTPS connection, including your IP address; no documents, file names or identity are sent). On Windows (installer) and Linux (AppImage), it can then download the update, verify its signature and install it when you choose **Install**; other packages open the release page. Turn checks off in File > Options > Updates.
 
 ## Try it
 
@@ -153,32 +149,11 @@ ElixirOffice was initiated and supervised by **Gaël Duval**, and developed with
 
 ## Corresponding source
 
-### 0.4.0 corresponding-source candidate
+Each release ships `elixiroffice-desktop-source.tar.gz` with its complete corresponding source, and the public repositories are tagged at the matching revisions.
 
-This source candidate includes visible Ask Elixir/setup and optional Word,
-Spreadsheet and Presentation actions. AI remains off by default: configuration,
-consent and an explicit request are required. Interface size80–200% stays separate
-from document zoom (#38). Word late-font layout preserves the reading view and
-selection while newer editing/navigation takes priority (#37). CJK text displays
-correctly when Computer fonts is allowed and a CJK font is installed, as on
-normal Windows/macOS setups (#39). Noto Sans CJK resources are bundled, but the
-fallback is not applied on initial open when Computer fonts is declined or no
-CJK font is installed. This known limitation is scheduled for 0.5.
+| Release | Public tag | Original product revision | Original DocumentServer revision |
+|---|---|---|---|
+| 0.4.0 (build 20) | [v0.4.0](https://github.com/leag1234/elixiroffice/tree/v0.4.0) | `52bf9a5426f343efa6b6be22e3d55d7938859c12` | `1bd3bc3989c3ac3ffc53fd6b1204171b8dc4cb4e` |
+| 0.3.3 (build 19) | [v0.3.3](https://github.com/leag1234/elixiroffice/tree/v0.3.3) | `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` | `adc905b591220200bd00907f66cc2d5b9e6144aa` |
 
-These are source features, not a declaration that a new installer was published
-or that every platform/native/performance check passed. The Word observations
-are limited to sampled private Windows views and visible selection retention;
-no micro-freeze/CPU gain or exact relayout overlap was measured. Mac/native,
-provider/model, conversion and CJK typography limits remain separate.
-
-Original product revision:52bf9a5426f343efa6b6be22e3d55d7938859c12.
-Original DocumentServer revision:1bd3bc3989c3ac3ffc53fd6b1204171b8dc4cb4e.
-The corresponding-source records declare all public adaptations and the public
-SDK/Web child revisions. Original package bytes and runtime selections are not
-changed by this source preparation; clean rebuild equivalence is not claimed.
-
-### 0.3.3 corresponding-source snapshot
-
-This source snapshot corresponds to ElixirOffice desktop 0.3.3, build 19, from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` and DocumentServer `adc905b591220200bd00907f66cc2d5b9e6144aa`. Electron is 44.9.1; external build Node stays 22.23.3 and the full/PDF converter pins are unchanged.
-
-This is adapted public corresponding source under independent review. It does not announce publication or certify native platform acceptance. The published release information elsewhere in this document remains historical until the owner completes release review. Original package inputs and public source revisions are recorded separately; rebuilt bytes may differ.
+The public sources are adapted (private test material removed); every adaptation is recorded in the source archive. Rebuilt binaries may differ byte for byte from the published ones.
