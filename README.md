@@ -33,7 +33,7 @@ They would love an office suite that is open source **and** easy to use. ElixirO
 - **Pictures that stay where you put them**, and tables that behave.
 - **An optional compact title bar** on Linux/X11.
 
-The complete list: [docs/features.md](docs/features.md).
+The complete comparison: [docs/differences.md](docs/differences.md).
 
 ## Fast, thanks to an optimised WebAssembly converter
 
@@ -98,7 +98,7 @@ On a Linux host with Docker and a public DNS name, download the deployment bundl
 
 ## Features
 
-The detailed, benefit-oriented list of what has been built (Word, Excel and PowerPoint parity, fidelity, privacy, AI) is kept up to date in [docs/features.md](docs/features.md). A comparison with LibreOffice and ONLYOFFICE is in [docs/differences.md](docs/differences.md).
+The detailed, benefit-oriented list of what has been built (Word, Excel and PowerPoint parity, fidelity, privacy, AI) is kept up to date in [docs/differences.md](docs/differences.md). A comparison with LibreOffice and ONLYOFFICE is in [docs/differences.md](docs/differences.md).
 
 ## Release history
 
