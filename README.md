@@ -1,71 +1,10 @@
 # ElixirOffice
 
-## 0.4.0 corresponding-source candidate
-
-This source candidate includes visible Ask Elixir/setup and optional Word,
-Spreadsheet and Presentation actions. AI remains off by default: configuration,
-consent and an explicit request are required. Interface size80–200% stays separate
-from document zoom (#38). Word late-font layout preserves the reading view and
-selection while newer editing/navigation takes priority (#37). CJK text displays
-correctly when Computer fonts is allowed and a CJK font is installed, as on
-normal Windows/macOS setups (#39). Noto Sans CJK resources are bundled, but the
-fallback is not applied on initial open when Computer fonts is declined or no
-CJK font is installed. This known limitation is scheduled for 0.5.
-
-These are source features, not a declaration that a new installer was published
-or that every platform/native/performance check passed. The Word observations
-are limited to sampled private Windows views and visible selection retention;
-no micro-freeze/CPU gain or exact relayout overlap was measured. Mac/native,
-provider/model, conversion and CJK typography limits remain separate.
-
-Original product revision:52bf9a5426f343efa6b6be22e3d55d7938859c12.
-Original DocumentServer revision:1bd3bc3989c3ac3ffc53fd6b1204171b8dc4cb4e.
-The corresponding-source records declare all public adaptations and the public
-SDK/Web child revisions. Original package bytes and runtime selections are not
-changed by this source preparation; clean rebuild equivalence is not claimed.
-
-
-## 0.3.3 corresponding-source snapshot
-
-This source snapshot corresponds to ElixirOffice desktop 0.3.3, build 19, from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` and DocumentServer `adc905b591220200bd00907f66cc2d5b9e6144aa`. Electron is 44.9.1; external build Node stays 22.23.3 and the full/PDF converter pins are unchanged.
-
-This is adapted public corresponding source under independent review. It does not announce publication or certify native platform acceptance. The published release information elsewhere in this document remains historical until the owner completes release review. Original package inputs and public source revisions are recorded separately; rebuilt bytes may differ.
-
-
 **An open source office suite for people used to Microsoft Office.**
 
 ElixirOffice edits Word, Excel and PowerPoint documents (and their OpenDocument equivalents) with the ribbon, menus, dialogs and keyboard shortcuts of Microsoft Office. It runs as a desktop app that works entirely offline, or in the browser on your own server. It is free software (AGPLv3), private by design, and fast.
 
 > Status: **beta**. Expect rough edges, and please [report them](../../issues). Known limitations are listed in the release notes.
-
-## Get ElixirOffice
-
-| Version | For whom | Why choose it | Get it |
-|---|---|---|---|
-| **Desktop app** 0.3.2 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-linux-amd64.deb) |
-| **Server version** 0.1.1 (beta 1.1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1.1` |
-
-Release notes, checksums and source archives: [desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1). Older versions: [desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1), [desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0), [desktop 0.2.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4), [desktop 0.2.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3), [desktop 0.2.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2), [desktop 0.2.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1), [desktop 0.2.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0), [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
-
-Desktop documents stay on your computer. Check for updates is on by default: at most once per day the app requests release metadata from GitHub (including prereleases); GitHub receives normal HTTPS connection metadata, including your IP address. Disable it in File > Options > Updates. No documents, file names, paths, recent files or user identity are sent. Notes and Download open the release page in your system browser; the app does not download or install updates.
-
-## Release history
-
-| Version | Date | What it is |
-|---|---|---|
-| [Desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2) | 2026-10-23 | Optional Linux/X11 compact title bar, controlled release notices, aligned header icons, faster repeated font-name matching and reliable AppImage release tools |
-| [Desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1) | 2026-10-22 | Separate document windows, optional tabs/Home, Office-style start and File commands, remembered placement, equation/menu fixes and opening diagnostics |
-| [Desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0) | 2026-10-21 | Add document tabs and detach/move; improve dialogs, fonts, ODS chart caches and Linux dependencies |
-| [Desktop 0.2.4 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4) | 2026-10-20 | Improve Windows saving and diagnostics; fix toolbar contrast, page shadows and print feedback |
-| [Desktop 0.2.3 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3) | 2026-10-19 | Fix Debian sandbox permissions on Ubuntu 26.04; clarify platform download links |
-| [Desktop 0.2.2 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2) | 2026-10-19 | Windows save and font fixes, native printing, keyboard and accessibility improvements, RTL Home layouts and converter hardening |
-| [Desktop 0.2.1 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1) | 2026-10-16 | Fixes: opening files after a settings or network-share error, Office-identical shortcuts, Word-like close dialog, Save As redesign, export progress, PDF page rotation |
-| [Desktop 0.2.0 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0) | 2026-10-15 | PDF open, annotate, fill and save; password-protected files; rename and Save a copy folder; computer fonts switch |
-| [Server 0.1.1 beta 1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) | 2026-10-15 | Rename and Save a copy fixes for the server |
-| [Desktop 0.1.0 beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2) | 2026-10-13 | First desktop apps for Windows, macOS and Linux |
-| [Server 0.1.0 beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1) | 2026-10-12 | First public version: self-hosted server |
-
-Details of every change: [CHANGELOG.md](CHANGELOG.md).
 
 ## Why this project
 
@@ -136,6 +75,17 @@ In your language (here French, German and Japanese):
 | Available | 0.1.1 beta 1.1 | 0.3.2 |
 | Install | [docs/install-server.md](docs/install-server.md) | [docs/desktop.md](docs/desktop.md) |
 
+## Get ElixirOffice
+
+| Version | For whom | Why choose it | Get it |
+|---|---|---|---|
+| **Desktop app** 0.3.2 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.3.2/ElixirOffice-0.3.2-linux-amd64.deb) |
+| **Server version** 0.1.1 (beta 1.1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1.1` |
+
+Release notes, checksums and source archives: [desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1). Older versions: [desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1), [desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0), [desktop 0.2.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4), [desktop 0.2.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3), [desktop 0.2.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2), [desktop 0.2.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1), [desktop 0.2.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0), [desktop beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2), [server beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1). The installers are not signed yet: see the first-launch tips in [Try it](#try-it).
+
+Desktop documents stay on your computer. Check for updates is on by default: at most once per day the app requests release metadata from GitHub (including prereleases); GitHub receives normal HTTPS connection metadata, including your IP address. Disable it in File > Options > Updates. No documents, file names, paths, recent files or user identity are sent. Notes and Download open the release page in your system browser; the app does not download or install updates.
+
 ## Try it
 
 **Desktop app (offline, nothing to install on a server)**
@@ -153,6 +103,24 @@ On a Linux host with Docker and a public DNS name, download the deployment bundl
 ## Features
 
 The detailed, benefit-oriented list of what has been built (Word, Excel and PowerPoint parity, fidelity, privacy, AI) is kept up to date in [docs/features.md](docs/features.md). A comparison with LibreOffice and ONLYOFFICE is in [docs/differences.md](docs/differences.md).
+
+## Release history
+
+| Version | Date | What it is |
+|---|---|---|
+| [Desktop 0.3.2](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.2) | 2026-10-23 | Optional Linux/X11 compact title bar, controlled release notices, aligned header icons, faster repeated font-name matching and reliable AppImage release tools |
+| [Desktop 0.3.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.1) | 2026-10-22 | Separate document windows, optional tabs/Home, Office-style start and File commands, remembered placement, equation/menu fixes and opening diagnostics |
+| [Desktop 0.3.0](https://github.com/leag1234/elixiroffice/releases/tag/v0.3.0) | 2026-10-21 | Add document tabs and detach/move; improve dialogs, fonts, ODS chart caches and Linux dependencies |
+| [Desktop 0.2.4 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.4) | 2026-10-20 | Improve Windows saving and diagnostics; fix toolbar contrast, page shadows and print feedback |
+| [Desktop 0.2.3 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.3) | 2026-10-19 | Fix Debian sandbox permissions on Ubuntu 26.04; clarify platform download links |
+| [Desktop 0.2.2 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.2) | 2026-10-19 | Windows save and font fixes, native printing, keyboard and accessibility improvements, RTL Home layouts and converter hardening |
+| [Desktop 0.2.1 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.1) | 2026-10-16 | Fixes: opening files after a settings or network-share error, Office-identical shortcuts, Word-like close dialog, Save As redesign, export progress, PDF page rotation |
+| [Desktop 0.2.0 beta](https://github.com/leag1234/elixiroffice/releases/tag/v0.2.0) | 2026-10-15 | PDF open, annotate, fill and save; password-protected files; rename and Save a copy folder; computer fonts switch |
+| [Server 0.1.1 beta 1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) | 2026-10-15 | Rename and Save a copy fixes for the server |
+| [Desktop 0.1.0 beta 2](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.2) | 2026-10-13 | First desktop apps for Windows, macOS and Linux |
+| [Server 0.1.0 beta 1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.0-beta.1) | 2026-10-12 | First public version: self-hosted server |
+
+Details of every change: [CHANGELOG.md](CHANGELOG.md).
 
 ## Building from source
 
@@ -180,3 +148,35 @@ Feedback from real users, especially anyone who switched from Microsoft Office, 
 ## How it was made
 
 ElixirOffice was initiated and supervised by **Gaël Duval**, and developed with various large language models working as coding agents under his direction. Every change goes through automated test suites, reviews and measurements before it is integrated.
+
+## Corresponding source
+
+### 0.4.0 corresponding-source candidate
+
+This source candidate includes visible Ask Elixir/setup and optional Word,
+Spreadsheet and Presentation actions. AI remains off by default: configuration,
+consent and an explicit request are required. Interface size80–200% stays separate
+from document zoom (#38). Word late-font layout preserves the reading view and
+selection while newer editing/navigation takes priority (#37). CJK text displays
+correctly when Computer fonts is allowed and a CJK font is installed, as on
+normal Windows/macOS setups (#39). Noto Sans CJK resources are bundled, but the
+fallback is not applied on initial open when Computer fonts is declined or no
+CJK font is installed. This known limitation is scheduled for 0.5.
+
+These are source features, not a declaration that a new installer was published
+or that every platform/native/performance check passed. The Word observations
+are limited to sampled private Windows views and visible selection retention;
+no micro-freeze/CPU gain or exact relayout overlap was measured. Mac/native,
+provider/model, conversion and CJK typography limits remain separate.
+
+Original product revision:52bf9a5426f343efa6b6be22e3d55d7938859c12.
+Original DocumentServer revision:1bd3bc3989c3ac3ffc53fd6b1204171b8dc4cb4e.
+The corresponding-source records declare all public adaptations and the public
+SDK/Web child revisions. Original package bytes and runtime selections are not
+changed by this source preparation; clean rebuild equivalence is not claimed.
+
+### 0.3.3 corresponding-source snapshot
+
+This source snapshot corresponds to ElixirOffice desktop 0.3.3, build 19, from original product `6a01f2a0f12e316df3a4ca4a4fdbe6c1bacca8de` and DocumentServer `adc905b591220200bd00907f66cc2d5b9e6144aa`. Electron is 44.9.1; external build Node stays 22.23.3 and the full/PDF converter pins are unchanged.
+
+This is adapted public corresponding source under independent review. It does not announce publication or certify native platform acceptance. The published release information elsewhere in this document remains historical until the owner completes release review. Original package inputs and public source revisions are recorded separately; rebuilt bytes may differ.
