@@ -51,6 +51,44 @@ class DifferentialTests(unittest.TestCase):
         self.assertIsNone(result["text"]["firstPageDivergence"])
         self.assertTrue((self.root / "report/glyphs.json.gz").is_file())
 
+    def test_positioned_word_gaps_are_separators_without_invented_glyphs(self):
+        reference, candidate = self.root / "ref.pdf", self.root / "cand.pdf"
+        pdf(reference, [[(20, 170, "ALPHA BRAVO CHARLIE")]])
+        pdf(candidate, [[(20, 170, "ALPHA"), (62, 170, "BRAVO"), (110, 170, "CHARLIE")]])
+        actual = extract_pdf(candidate)
+        self.assertFalse(any(g["text"].isspace() for g in actual["glyphs"]))
+        self.assertEqual(len(actual["glyphs"]), 17)
+        self.assertEqual(actual["fontGlyphCounts"], {"Helvetica": 17})
+        self.assertEqual(set(actual["tokens"]), {"alpha", "bravo", "charlie"})
+        for token in actual["tokens"].values():
+            item = token[0]
+            glyphs = [g for g in actual["glyphs"]
+                      if g["box"][0] >= item["box"][0] and g["box"][2] <= item["box"][2]]
+            self.assertAlmostEqual(item["advance"], sum(g["advance"] for g in glyphs))
+        measured = text_metrics(extract_pdf(reference), actual)
+        self.assertEqual(measured["matchedUniqueTokens"], 3)
+        self.assertEqual(measured["coverage"], 1)
+        self.assertEqual(measured["agreement"], 1)
+
+    def test_positioned_gaps_reveal_the_earlier_page_divergence(self):
+        reference, candidate = self.root / "ref.pdf", self.root / "cand.pdf"
+        pdf(reference, [[(20, 170, "ALPHA")], [(20, 170, "BRAVO CHARLIE")]])
+        pdf(candidate, [[(20, 170, "ALPHA"), (62, 170, "BRAVO")], [(20, 170, "CHARLIE")]])
+        result = text_metrics(extract_pdf(reference), extract_pdf(candidate))
+        self.assertIsNotNone(result["firstPageDivergence"])
+        self.assertEqual(result["firstPageDivergence"]["word"], "bravo")
+        self.assertEqual(result["firstPageDivergence"]["reference"]["page"], 2)
+        self.assertEqual(result["firstPageDivergence"]["candidate"]["page"], 1)
+
+    def test_inferred_spaces_do_not_make_repeated_words_unique(self):
+        reference, candidate = self.root / "ref.pdf", self.root / "cand.pdf"
+        pdf(reference, [[(20, 170, "REPEAT REPEAT ALPHA")]])
+        pdf(candidate, [[(20, 170, "REPEAT"), (72, 170, "REPEAT"), (124, 170, "ALPHA")]])
+        result = text_metrics(extract_pdf(reference), extract_pdf(candidate))
+        self.assertEqual(result["uniqueReferenceTokens"], 1)
+        self.assertEqual(result["matchedUniqueTokens"], 1)
+        self.assertEqual(result["coverage"], 1)
+
     def test_changed_page_and_wrap_are_reported_separately(self):
         reference, candidate = self.root / "ref.pdf", self.root / "cand.pdf"
         pdf(reference, [[(20, 170, "ALPHA BRAVO")], [(20, 170, "CHARLIE DELTA")]])

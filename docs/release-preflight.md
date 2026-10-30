@@ -77,3 +77,33 @@ exports test support only; it does not enable or package a runtime updater.
 Existing released inputs and their qualification remain immutable. This fix
 applies to newly prepared inputs after independent review and lead integration;
 unit archive checks do not qualify a physical Mac application or DMG.
+
+## Protected Docker images
+
+The [protected image inventory](release-protected-images.json) records concrete
+release and QA prerequisites, including their restoration inputs. Never delete
+those images as task cleanup. Before any image cleanup, reconcile this inventory
+with current recipes and every retained or active release/build/QA preflight.
+Add a newly selected image reference and its resolved content ID before use.
+Images selected through QA environment variables are covered by the same rule.
+
+The checked-in list is a minimum inventory, not an allowlist for deletion of
+other images. A tag, running container or recent use is not required for an image
+to remain necessary. Keep both a registry reference and its resolved content ID
+when they differ. Docker's daemon storage and temporary layers may be on a
+different filesystem from release outputs; measure both before large jobs.
+Do not use unscoped image or builder pruning as release cleanup.
+
+On 29 October 2026, missing font-tool and AppImage-builder images stopped the
+0.5.0 plan before allocation. The font-tool image was restored at its exact
+existing content ID. The original AppImage builder was still present on Hardy:
+its config and six layer diff IDs matched the retained transfer proof.
+Exporting and loading that original restored the exact Fire content ID
+sha256:4ed7b16d6e94e9dd6bd55a1e6123f010e976c5bb6125df5322129173038fbffd;
+no source or tool pin changed. Both transferred archives were removed after
+verification; the protected images and compact receipts were retained.
+
+If an image is missing, restore exact reviewed bytes and check the actual image
+ID, config and layer identity. A different ID requires a separate, reviewed
+equivalence decision and pin change. A tag alone is not proof, and a preflight
+must continue to refuse a missing or mismatched image.

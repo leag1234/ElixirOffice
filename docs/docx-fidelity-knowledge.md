@@ -48,6 +48,92 @@ and [paragraph-spacing reference](https://learn.microsoft.com/en-us/dotnet/api/d
 describe independent constraints. Label observed Word compatibility behavior
 separately from schema rules.
 
+## Widow/orphan control inside body content controls
+
+OOXML widowControl prevents an isolated first or last line of a paragraph.
+Resolve it through the paragraph/style hierarchy; when never specified, the
+default is enabled. A three-line paragraph with room for only two lines must
+move as a whole: splitting it two-plus-one leaves a forbidden widow, while
+moving only one line leaves a forbidden orphan. A four-line paragraph can split
+two-plus-two. Explicit false remains distinct from omitted/inherited true.
+See Microsoft's [OOXML widowControl reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.widowcontrol?view=openxml-3.0.1).
+
+A body-level [structured document tag](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.sdtcontentblock?view=openxml-3.0.1)
+contains ordinary paragraphs and tables; its wrapper does not justify ignoring
+their paragraph pagination properties. Distinguish a body SDT from a table cell,
+text frame, header/footer or footnote before extending a body-flow algorithm.
+
+The integrated 0.5 SDK gates the widow request, final-line backtracking and replay
+in word/Editor/Paragraph_Recalculate.js on immediate Parent instanceof CDocument
+(private_RecalculateMoveLineToNextPage, private_RecalculateLineEnd and
+private_RecalculateLineWidow). A paragraph in a block SDT instead has a
+CDocumentContent parent. Its compiled WidowControl can be true while these
+branches are bypassed. In a public independent-Word comparison, this permits a
+three-line paragraph to split two-plus-one; removing only its SDT wrapper in a
+transient diagnostic enables the existing body logic and restores the expected
+whole-paragraph move. The imported text, spacing, fonts and paragraph count
+remain unchanged. A later heading's apparent page-break error can therefore be
+a downstream consequence of an earlier widow violation.
+
+The 0.6 candidate implements the generic correction: resolve the appropriate
+main-body pagination owner through body SDT containers, and propagate the
+widow/backtracking request and previous-page recalculation through those
+containers. Keep direct-body behavior and explicit false intact. Do not merely
+delete every parent guard, reclassify all document-content containers as body
+flow, strip content controls from documents, or add an unconditional heading
+page break. Container-relative line/page indices and loop termination need
+explicit treatment.
+
+Acceptance matrix: otherwise identical body, single-SDT and nested-SDT cases;
+default/inherited/explicit true and explicit false; three-line two-plus-one and
+one-plus-two boundaries, four-line two-plus-two, repeated recalculation and
+save/reopen. Include adjacent keep-with-next headings, manual page breaks,
+multicolumn/floating-object cases and table/frame/header/footer/footnote controls
+to prove their existing semantics remain unchanged. Compare actual paragraph
+line ranges and PDF word geometry with independent Word references, not just
+total page count. Existing public pagination and broader QUnit baseline
+equivalence remain required before integrating an engine change.
+
+### Candidate qualification (0.6, pending review)
+
+The candidate reuses GetDocumentContentForRecalcInfo to obtain the body flow
+owner and its shared RecalcInfo. It applies this owner consistently to widow
+requests, last-line backtracking and replay. GetPrevDocumentElement reaches
+a preceding body element even when the paragraph is the first child inside
+nested SDTs. DocumentContent and BlockLevel propagate the new previous-page
+result and its column/page flags; enabling the paragraph guards alone would
+lose that rollback request. Existing non-body owners are excluded.
+
+The original synthetic [widow probes](../tools/fidelity/widow_controls.py)
+cover 60 actual Linux native cases: omitted, inherited, explicit true/false;
+three-line two-plus-one and one-plus-two boundaries, four-line two-plus-two;
+direct body, single and nested SDTs. The integrated baseline fails 18 parity
+checks; the compiled candidate passes all 60, with stable repeated recalculation.
+Four save/fresh-reopen cases preserve target text, pagination and wrapper
+structure. These are metamorphic engine tests, not 60 independent Word references.
+[Scope controls](../tools/fidelity/widow_scopes.py) include internal predecessors,
+keep-lines, keep-next, manual breaks, columns, floating tables, frames, cells,
+headers, footers, footnotes and text boxes. Use canonical DrawingML namespace
+prefixes in the text-box fixture: the conversion runtime used here discards the
+noncanonical-prefix probe. Do not count a missing imported object as a passing
+pagination control. All 24 final controls pass the matched comparison:
+body SDTs match direct-body layout, while excluded contexts retain the baseline.
+The broader source QUnit run matches all 69 modules and all 78,564 assertions:
+both arms have 61 passing modules, eight failing modules and five existing
+source-defined disabled modules. This is baseline equivalence, not an all-green
+upstream suite.
+
+On the same public 14-page DOCX and independent Word-web PDF, the declaration
+starts on page 7 after the change, matching Word (baseline: page 6). The corrected
+harness matches 419/419 unique tokens in both arms; page agreement improves
+392/419 to 403/419 (93.56% to 96.18%), with no detected wrap divergence.
+All 3,942 regex-normalized words and their multiplicities remain unchanged.
+Fonts remain bundled Liberation Sans/Elixir Symbols; computer fonts are declined.
+Visual inspection of pages 1 and 7 confirms the corrected boundary and declaration.
+A residual unique-token divergence remains: “flagged” is on page 3 rather than
+Word's page 4. This is not a global fidelity pass or a reason to extend body rules
+to table cells. The earlier 40/419 match count was a tokenizer coverage defect.
+
 ## Missing fonts and metric compatibility
 
 Word also substitutes missing fonts. The result depends on the available fonts,
@@ -167,14 +253,25 @@ paragraph identity or a causal percentage. Retain raw page-box deltas even when
 the exploratory score tolerates decimal serialization noise. Keep partial runs
 visibly pending and preserve the original failure before a corrected rerun.
 
+PDF text may encode a space as a positioned gap instead of a space glyph.
+The original diagnostic built token strings from LTChar only, dropping
+pdfminer's inferred LTAnno whitespace. This concatenated words, sharply
+reduced matched-token coverage and hid an earlier page divergence. Cross-check
+the complete lines with an independent whitespace-aware extractor before
+naming the first divergent paragraph. The corrected harness preserves inferred
+separators in tokenization while
+keeping glyph metrics tied only to actual glyphs. It does not invent advances
+or treat repeated words as unique matches. Three original positioned-gap PDF
+regressions fail before the correction and pass afterwards; all 19 tests pass.
+
 ## Held engine candidates, pending Word references
 
 The explicit floating-table no-break compatibility flag is carried by core's
-Flags2 bit 9. A separate SDK draft reads, writes and applies that
-existing flag through the body's floating-table calculation. Its default remains
-false; ordinary single-column floats still fragment normally. The draft reuses
-the existing whole-table measurement/position correction rather than changing
-all floating tables to indivisible objects.
+Flags2 bit 9. Its read/write/layout policy is integrated for 0.5 (SDK1267b480).
+The default remains false; ordinary single-column floats still fragment
+normally. The policy reuses the existing whole-table measurement/position
+correction rather than making all floating tables indivisible. It does not
+change the paragraph widow/orphan behavior described above.
 
 A second, explicitly opt-in experiment uses the next regular paragraph's
 before-spacing and page-break request for text-relative, single-column body
@@ -183,8 +280,24 @@ The experimental value is transient, defaults false and is not serialized or
 enabled by document input. SDT-contained anchors, complex frame/section cases
 and broader multicolumn semantics need separate references before extending it.
 
-These drafts are not integrated fixes or confirmation of current Word behavior.
+The anchor experiment remains held; it is not an integrated fix or confirmation of Word behavior.
 The public preceding/following-paragraph probes are falsifiable: reject or revise
 the experiment if the Word PDF positions agree with the original engine instead.
 Keep the documented compatibility-policy difference separate from anchor
 hypotheses and from an unrelated document's root-cause attribution.
+
+## Keep-with-next across body content controls
+
+A main-body block SDT is transparent to the keep-with-next paragraph chain.
+Resolve the main-body pagination owner consistently for request, reset and
+replay, and traverse preceding body elements across wrappers. Keep explicit
+page/section breaks, inline/page-count conditions and non-body owner guards.
+A wrapper-wide entry hook can incorrectly override an explicit first-child
+page break; reuse existing paragraph/table flow calls instead.
+
+Tests must separate keep-next from widow control (heading widow=false), include
+leading tables, nested/same/adjacent controls, empty controls and explicit
+breaks, and compare actual incremental edits with full recalculation plus
+Undo/save/reopen. See [the original probes](../tools/fidelity/KEEP-NEXT-CONTROLS.md).
+The real public Word-web improvement still leaves table/repeated-phrase
+pagination differences; unique-token agreement alone cannot certify fidelity.

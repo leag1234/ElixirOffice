@@ -42,7 +42,7 @@ def walk(layout):
 
 def extract_pdf(path, max_pages=300, max_glyphs=1000000):
     from pdfminer.high_level import extract_pages
-    from pdfminer.layout import LTChar, LTTextLine
+    from pdfminer.layout import LTAnno, LTChar, LTTextLine
     from pypdf import PdfReader
 
     reader = PdfReader(str(path))
@@ -68,7 +68,16 @@ def extract_pdf(path, max_pages=300, max_glyphs=1000000):
                 continue
             # Retain the extractor's line sequence; sorting by x breaks RTL.
             text, mapping = "", []
-            for char in chars:
+            for char in walk(line):
+                if isinstance(char, LTAnno):
+                    # Inferred word gaps separate tokens but have no glyph metrics.
+                    separator = "".join(c for c in char.get_text()
+                                        if c.isspace() and c not in "\r\n")
+                    text += separator
+                    mapping.extend([None] * len(separator))
+                    continue
+                if not isinstance(char, LTChar):
+                    continue
                 value = normalize(char.get_text())
                 text += value
                 mapping.extend([char] * len(value))
@@ -82,7 +91,8 @@ def extract_pdf(path, max_pages=300, max_glyphs=1000000):
                     "advance": sum(c.adv for c in chars)}
             lines.append(item)
             for match in TOKEN.finditer(text):
-                token_chars = list(dict.fromkeys(mapping[match.start():match.end()]))
+                token_chars = list(dict.fromkeys(c for c in mapping[match.start():match.end()]
+                                                  if c is not None))
                 tokens[match.group()].append({
                     "word": match.group(), "line": item["id"], "page": index,
                     "box": [min(c.x0 for c in token_chars), min(c.y0 for c in token_chars),

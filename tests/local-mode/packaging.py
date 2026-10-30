@@ -30,10 +30,11 @@ assert manifest["build_flags"]["module_kind"] == "full"
 assert pdf_manifest["build_flags"]["module_kind"] == "pdf"
 for field in ["core_commit", "product_commit", "tools_sha256", "patches", "sources"]:
     assert manifest[field] == pdf_manifest[field], field
-# Overlay numbering skips 0003; the approved inventory contains ten files.
-assert len(manifest["patches"]) == 10
+# Overlay numbering skips 0003; the approved inventory contains eleven files.
+assert len(manifest["patches"]) == 11
 assert "0011-pdf-preserve-creator.patch" in manifest["patches"]
 assert "0010-office-integrity-rejection.patch" in manifest["patches"]
+assert "0012-pptx-external-timing-media.patch" in manifest["patches"]
 assert pdf_manifest["build_flags"]["pdf_original_append"] is True
 for name, expected in pdf_manifest["artifacts"].items():
     data = (pdf_release / name).read_bytes()

@@ -1,0 +1,34 @@
+diff --git a/OOXML/DocxFormat/Media/Media.cpp b/OOXML/DocxFormat/Media/Media.cpp
+index bfd5847b47..0243bb80ab 100644
+--- a/OOXML/DocxFormat/Media/Media.cpp
++++ b/OOXML/DocxFormat/Media/Media.cpp
+@@ -75,3 +75,3 @@ namespace OOX
+ 		m_filename = filename;
+-		m_bExist = NSFile::CFileBinary::Exists(m_filename.GetPath());
++		m_bExist = !m_bExternal && NSFile::CFileBinary::Exists(m_filename.GetPath());
+ 
+@@ -109,5 +109,5 @@ namespace OOX
+ 	{
++		m_bExternal = bExternal;
+ 		read(OOX::CPath(file_path, !bExternal));
+ 			
+-		m_bExternal = bExternal;
+ 		m_sOutputFilename = m_filename.GetFilename();
+@@ -121,3 +121,3 @@ namespace OOX
+ 		
+-		m_bExist = NSFile::CFileBinary::Exists(m_filename.GetPath());
++		m_bExist = !m_bExternal && NSFile::CFileBinary::Exists(m_filename.GetPath());
+ 	}
+diff --git a/OOXML/PPTXFormat/Logic/Timing/TgtEl.cpp b/OOXML/PPTXFormat/Logic/Timing/TgtEl.cpp
+index 21840769f9..8e8322c85d 100644
+--- a/OOXML/PPTXFormat/Logic/Timing/TgtEl.cpp
++++ b/OOXML/PPTXFormat/Logic/Timing/TgtEl.cpp
+@@ -97,6 +97,6 @@ namespace PPTX
+ 
+-					if (pRels != NULL)
++					if (pRels != NULL && !pRels->IsExternal(embed.get()))
+ 						pMedia = pRels->Get<OOX::Media>(embed.get());
+ 
+-					if (pMedia.IsInit())
++					if (pMedia.IsInit() && !pMedia->IsExternal())
+ 					{

@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "updated": "2026-10-29",
+  "policy": "Never delete an image pinned by a release, build, restoration or QA preflight. This list is a minimum inventory, not permission to delete images absent from it.",
+  "coverage": "Concrete pins in tools/branding at Product1de7e6d plus available retained release/QA preflight metadata; also retained builder restoration inputs. Runtime-supplied QA images must be added before their first use.",
+  "images": [
+    {
+      "reference": "debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a",
+      "purpose": "LibreOffice fidelity base (registry manifest digest)",
+      "sources": [
+        "tools/fidelity/Dockerfile.libreoffice"
+      ],
+      "kind": "registry-reference"
+    },
+    {
+      "reference": "debian@sha256:a4672c0cb26fbdde88e38fa2dfb6c681942306680e41e4378b28770b6e79ee91",
+      "purpose": "Flatpak builder base (registry manifest digest)",
+      "sources": [
+        "tools/flatpak/Dockerfile"
+      ],
+      "kind": "registry-reference"
+    },
+    {
+      "reference": "electronuserland/builder@sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff",
+      "purpose": "Windows release/QA builder",
+      "sources": [
+        "beta2-publish-D-work/rebuild-plan-final.json/windows_image",
+        "beta2-publish-D-work/rebuild-plan.json/windows_image",
+        "desktop-021-rc1-D-work/plan.json/windows_image",
+        "desktop-021-rc3-D-work/plan.json/windows_image"
+      ],
+      "kind": "registry-reference"
+    },
+    {
+      "reference": "python:3.12-slim-bookworm@sha256:54c85f3c47607a77f32adec749d3c81d1348bf25833671f512b26a9b6d778cb3",
+      "purpose": "Fidelity tooling base (registry manifest digest)",
+      "sources": [
+        "tools/fidelity/Dockerfile"
+      ],
+      "kind": "registry-reference"
+    },
+    {
+      "reference": "sha256:07532b4fae77d23117c20e694c624aca3f0a3c9ac2db465d041ef7311a4c8d6f",
+      "purpose": "Flatpak compatibility builder input",
+      "sources": [
+        "Retained Flatpak builder compatibility input."
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:100c85028d43286d7b5d1b197f80fedda223a543a0cd3d3616a820b397a2595e",
+      "purpose": "Retained WebAssembly SDK 5.0.4 QA/build image",
+      "sources": [
+        "lead-failclosed-work/hardy-preflight-022-D.result.json/images/command",
+        "lead-failclosed-work/hardy-preflight-022-D.result.json/images/reference",
+        "lead-failclosed-work/hardy-preflight-022-D.result.json/images/stdout",
+        "lead-failclosed-work/hardy-results-L/receipts/read-only-preflight.json/image_id"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:4ed7b16d6e94e9dd6bd55a1e6123f010e976c5bb6125df5322129173038fbffd",
+      "purpose": "AppImage release builder",
+      "sources": [
+        "desktop-021-rc1-D-work/plan.json/appimage_update/image",
+        "desktop-021-rc3-D-work/plan.json/appimage_update/image",
+        "desktop-021-rc3-D-work/preflight-inputs.json/appimage_builder",
+        "desktop-021-rc3-D-work/source-reconstruction-canonical-v3-plan.json/appimage_update/image"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:88c561d6fb2bb8529df467fc0543becc6323e58d18734136e2396c683afeef96",
+      "purpose": "Font/theme generation release tool",
+      "sources": [
+        "beta2-publish-D-work/rebuild-plan-final.json/font_tool_image",
+        "beta2-publish-D-work/rebuild-plan.json/font_tool_image",
+        "desktop-021-rc1-D-work/plan.json/font_tool_image",
+        "desktop-021-rc3-D-work/plan.json/font_tool_image"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:8d19470bee6e5e26a146d0d99d4df3f764d18459224374904738b2aa4ede8765",
+      "purpose": "Original AppImage builder restoration input",
+      "sources": [
+        "Original AppImage/Flatpak builder on Hardy; same six layers/config as normalized Fire image 4ed7b16."
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff",
+      "purpose": "Windows release/QA builder",
+      "sources": [
+        "Retained private restoration receipt for protected image sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff; exact private receipt path is intentionally omitted.",
+        "release-032-D-work/execution-plan-build18.json/host_preflight/docker_images/windows_builder/image_id",
+        "release-032-D-work/pinned-image-preflight-build18.json/docker_images/windows_builder/image_id",
+        "release-032-D-work/plan-build18-proof.json/hostPreflight/docker_images/windows_builder/image_id"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:bb2dfabd7bdd5174eab4385070cc52ee6f2cfa17aef0572d8c837a3bb2e794e3",
+      "purpose": "Desktop template converter",
+      "sources": [
+        "branding/desktop-templates/template-sources.json"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:bc0da26af524ed773a5246340c8811f7681164b3d8051b575d10388e456a665e",
+      "purpose": "DocumentServer development/QA image",
+      "sources": [
+        "Retained private restoration receipt for protected image sha256:bc0da26af524ed773a5246340c8811f7681164b3d8051b575d10388e456a665e; exact private receipt path is intentionally omitted.",
+        "wrapped-tables-05-A-work/owned-image-provenance.json/imageId"
+      ],
+      "kind": "image-content-id"
+    },
+    {
+      "reference": "sha256:c098726dd9b9733f3e885f8de0ef375206a311b0a317eadc40d347b1115fb944",
+      "purpose": "Ubuntu native-DEB QA image",
+      "sources": [
+        "release-030-D-work/native205-startup-preflight.json/image"
+      ],
+      "kind": "image-content-id"
+    }
+  ]
+}

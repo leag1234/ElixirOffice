@@ -1,5 +1,12 @@
 # Changelog
 
+## Desktop 0.6.0
+
+- Improved page breaks in document tables, checked against 31 Microsoft Word reference files.
+- Restored the Mailings tab and Finish & Merge control after document permissions are established.
+- Fixed selection of installed fonts: the editor loads their local font data before applying them.
+- Known limits remain: two strict WebAssembly PDF cases still fail. Missing Word references, CJK/PDF, table geometry, startup performance and shutdown limitations remain disclosed in the release notes, together with the measured platform coverage.
+
 ## Desktop 0.5.0 — build 21, awaiting release qualification
 
 ### Added and fixed

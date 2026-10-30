@@ -23,7 +23,8 @@ class PackagingInventory(unittest.TestCase):
             tools.mkdir(parents=True)
             patches = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                        for p in sorted((ROOT / "tools/wasm/patches").glob("*.patch"))}
-            self.assertEqual(len(patches), 10, "Current tracked overlay inventory changed")
+            self.assertEqual(len(patches), 11, "Current tracked overlay inventory changed")
+            self.assertIn("0012-pptx-external-timing-media.patch", patches)
             if mutation == "missing":
                 patches.pop("0001-fb2file-static-replace-all.patch")
             elif mutation == "extra":

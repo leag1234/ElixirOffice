@@ -18,6 +18,12 @@ const hash = bytes => crypto.createHash('sha256').update(Buffer.from(bytes)).dig
     try {
         env = await launch({file, profile: 'mailings-native-' + Date.now(), executable: process.env.EO_DESKTOP_EXECUTABLE});
         await editable(env);
+        const frame = env.page.frames().find(candidate => candidate.url().includes('/documenteditor/main/'));
+        assert(frame, 'Word editor frame missing');
+        const mailingsTab = frame.locator('#toolbar a[data-tab=mailings]');
+        await mailingsTab.waitFor({state: 'visible', timeout: 10000});
+        await mailingsTab.click();
+        await frame.locator('#elx-mm-finish').waitFor({state: 'visible', timeout: 10000});
         await env.page.evaluate(() => {
             window.EOMailMergeActions = [];
             EOLocalSession.api.asc_registerCallback('asc_onEndAction', (_type, id) => EOMailMergeActions.push(id));

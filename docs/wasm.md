@@ -2,7 +2,7 @@
 
 The x2t WebAssembly runtime provides local document conversion for the desktop app and the browser's local mode. Hosted server mode continues to use DocumentServer conversion services. Local feature detection and runtime failures do not reroute hosted requests.
 
-Detailed measurements, build chronology and superseded validation results through 2026-10-20 are archived in the runtime history. This document records the durable design, release inputs and safety boundaries.
+Detailed measurements, build chronology and superseded validation results through 2026-10-20 are archived in [the runtime history](handoff/wasm-history-through-2026-10-20.md). This document records the durable design, release inputs and safety boundaries.
 
 ## Runtime roles
 
@@ -98,13 +98,13 @@ The ODF converter can derive a missing chart cache from a typed worksheet range 
 
 All series, labels, categories and domains in a chart share one bounded entry budget charged before allocation. Shared domains and categories are charged for each retained OOXML series copy. Oversized worksheet caches keep their source formula; oversized cache-only references are omitted so output has no dangling cache table. An exhausted pivot cache is omitted as a whole.
 
-Source-level and synthetic package evidence lives in the ODS chart packet. A matched WebAssembly release, office-suite reopen and packaged editor remain separate acceptance gates.
+Source-level and synthetic package evidence lives in [the ODS chart packet](handoff/ods-chart-cache-030-D.md). A matched WebAssembly release, office-suite reopen and packaged editor remain separate acceptance gates.
 
 ## ODF CBC aligned-block padding
 
 ODF password export retains the mandatory full W3C padding block when compressed plaintext is already aligned to the CBC block size. This is a writer correction; it does not change the reader, algorithm selection or password UI.
 
-The source and synthetic encrypted-part evidence is in the CBC packet. A source result does not qualify a runtime manifest: the matched full runtime must pass password save and reopen before release.
+The source and synthetic encrypted-part evidence is in [the CBC packet](handoff/odf-cbc-padding-030-D.md). A source result does not qualify a runtime manifest: the matched full runtime must pass password save and reopen before release.
 
 ## Desktop document contexts
 
@@ -128,16 +128,16 @@ A runtime release is acceptable only when all required gates refer to the same m
 
 A passing source test does not qualify a stale runtime. A passing runtime does not qualify an installer or native package built from different assets.
 
-## 0.3.0 matched runtime qualification
+## 0.6 candidate matched runtime qualification
 
 The qualified pair uses core b21f0935c1d733bcdb040d9a80c244ca7e29cd5e and build tools da66e5f4ec49345dd5dfbc8ca8cd7432c3919b42. These immutable build origins remain unchanged when consumer selectors are committed.
 
 | Module | Artifact version | Manifest SHA-256 |
 | --- | --- | --- |
-| Full | b21f0935c1d7-15333a7f58e5-st | 1775c0b076f51884bbe2295a91a1cc27412bdb607ced33b9ef29476d49669200 |
-| PDF | b21f0935c1d7-ece3775f84d9-st | 1387b64c02f3b5808a6a2b897a70616fb94d391d86f3541fe58c94e9087dd0c7 |
+| Full | b21f0935c1d7-abb5697a459c-st | 004e4e8a062192f7a95cbf6c529e50a22356f560abd1f642540da2ac4e5e8df6 |
+| PDF | b21f0935c1d7-f1d4de9820f2-st | 29e316de9440c82ac2e132d2a935ec03ea005b6c0b1e03b827853614282b9fa0 |
 
-Full Wasm is 54,061,087 bytes (Brotli 8,851,442), respectively +0.0531% and +0.0700% against the accepted 0.2.2 baseline. PDF Wasm is 8,898,583 bytes (Brotli 3,147,088), unchanged. All twelve artifacts meet the 2% growth budget.
+Full Wasm is 66,361,912 bytes (Brotli 9,673,034). PDF Wasm is 9,707,340 bytes (Brotli 3,208,440). The fresh full and PDF-only builds reproduce the pre-rebase artifact bytes exactly; only the manifests change because they record the rebased pre-pin product commit.
 
 Actual-runtime checks pass for 30 public baseline conversions, twelve password groups, three integrity controls, eleven RTL fixtures, eight SVG cases and 36 PDF policy controls. Three public ODS chart controls preserve ordered chart values and worksheet identities through plain and protected save/reopen; 24 public encrypted parts pass independent CBC padding, checksum, decompression and XML checks.
 
@@ -189,7 +189,7 @@ source selector, dependency or builder-image pin. [Preflight and retention](rele
 
 ### Desktop 0.3.2 release preparation (2026-10-23)
 
-The preparation branch reuses the unchanged matched full/PDF runtime pins from 0.3.1. No converter or Wasm rebuild is part of this version/notes task. The application baseline is frozen by release review, linguistic review is deferred to0.3.3 and package qualification remains pending; see draft release notes.
+The preparation branch reuses the unchanged matched full/PDF runtime pins from 0.3.1. No converter or Wasm rebuild is part of this version/notes task. The application baseline is frozen by release review reference 224, linguistic review is deferred to0.3.3 and package qualification remains pending; see [draft release notes](handoff/release-notes-0.3.2-draft.md).
 
 ### Closed desktop updater controller (2026-10-24 source candidate)
 
