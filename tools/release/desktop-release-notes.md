@@ -1,29 +1,81 @@
-# ElixirOffice {{VERSION}} (desktop)
+# ElixirOffice {{VERSION}} desktop — build {{BUILD_NUMBER}}
 
-Build {{BUILD_NUMBER}}, application source {{PRODUCT_REVISION}}. {{RELEASE_STATUS}} Exact platform versions, runtime pins, resources, artifact hashes and acceptance limits are recorded in BUILD-INFO.json.
+Prepared from the source freeze candidate for 0.6.1.
+Product source: {{PRODUCT_REVISION}}.
+The final BUILD-INFO.json and corresponding source archive bind the exact
+editor revisions and runtime inputs. {{RELEASE_STATUS}} Package checks, native
+acceptance, owner signatures and publication remain pending.
 
-## Changes
-- About identifies the application version, build number and source revision on every platform.
-- Candidate and final package versions are distinct and ordered for upgrades.
+## What's new
 
-Review this template before publication and list only changes present in the selected source.
+- PDF export of a Word document with tracked changes now shows the final
+  revision: deleted text no longer appears in the PDF.
+- Chinese, Japanese and Korean text in PDF export can use the native
+  WebAssembly path when the runtime declares the capability, for the safe case
+  described under known limitations.
 
-## Security
+AI stays optional and off by default. Sending document context requires your
+configured service, consent and explicit request. Documents are not sent to the
+publisher.
 
-- Hosted/server hardening: downloads retain network filtering when JWT authentication is disabled, require verified WOPI token metadata and reject mismatched signed URL fields; unsigned URLs receive no outbox credentials. AI proxy authentication and destination checks are strengthened.
-- Hosted/server and editor text handling: WOPI conversion status and /baseurl output are escaped or plain text; privileged cache hashes are validated under the C locale; spreadsheet Formula Wizard values are encoded.
-- Document links use an explicit scheme allowlist across main, mobile, embed and forms interfaces, including diagrams. Bare www. targets receive http://; unsupported relative document links show a non-opening warning. Forms integrator-config relative links retain their configured-origin behavior.
-- Imported tracked font/style names are encoded in the Review panel.
+## Installation and updates
 
-Upstream security-fix attribution: server download/WOPI commits [a82922ed](https://github.com/ONLYOFFICE/server/commit/a82922ed2349d06495bfb85bed924be17fb71740), [fba41289](https://github.com/ONLYOFFICE/server/commit/fba41289d55fee1a90d34df41fa115b7de8f4f1d); AI proxy commits [ae8eb764](https://github.com/ONLYOFFICE/server/commit/ae8eb764354f75539fbb3c1ca12e0d967d02cdf0), [b98384e6](https://github.com/ONLYOFFICE/server/commit/b98384e6524fbc0376c8db4332ca0398e00abf67); WOPI text commit [4927e10d](https://github.com/ONLYOFFICE/web-apps/commit/4927e10d44b9f9f2ee6f9656d96be4a950fdd707). Only code hunks dated before 2026-05-14 were ported; original licence headers are retained. Base-URL, cache, Formula Wizard, hyperlink policy and Review-panel corrections are ElixirOffice changes.
+Use the package for your operating system and follow the
+[desktop installation instructions](../desktop.md#using-the-app).
+Exact download links and checksums accompany the qualified release.
 
-Converter and macro-sandbox hardening follows in desktop 0.2.2, with the corresponding server 0.1.2 runtime work. The 0.2.1 build retains its existing converter runtime; the source branch and regression results do not certify the later rebuilt converter.
+Installers remain publisher-unsigned. macOS packages are arm64-only, ad-hoc
+signed and not notarized; Gatekeeper may require the documented manual
+approval. Update signatures authenticate update metadata and bytes; they do
+not provide an OS publisher certificate. Silent updates are not available.
 
-## Verification and limitations
-The final release is rebuilt; candidate test results do not certify final bytes. Native GUI, installation, Gatekeeper, associations and physical printing are unverified unless actual final-artifact evidence is recorded. Keep backups and inspect saved documents and PDF output.
+## Known limitations
 
-Tagged PDFs cannot currently be saved in place; use Save a copy. Automatic recovery is not available for PDF documents. Original PDF text editing, OCR, PDF-to-DOCX, offline digital signatures and real-time co-editing are unavailable. Six template languages use English fallback; bundled font coverage and RTL table layout remain limited. AI is optional and off by default. Release-metadata checks are on by default and can be disabled in File > Options > Updates. At most one bounded daily GitHub check sends no document content, names, paths or user identity; GitHub receives ordinary HTTPS connection metadata, including the IP address. Release notes and Download open the release page in the system browser; the app downloads or installs no update. External AppImageUpdate checks remain user initiated.
+- The table page-break change was tested on Linux and in Chromium. Its effects
+  on macOS, Windows and system print dialogs have not been checked separately.
+  One additional Word reference could not be exported and remains unverified.
+  The measured page allocations do not certify every table type, vertical
+  geometry or all documents.
+- Chinese, Japanese and Korean text in PDF export now uses the native path only
+  for the safe case (one character at a time, from the basic multilingual
+  plane). Rare characters such as CJK Extension B, variation sequences and
+  multi-character clusters still use the JavaScript fallback and can be missing
+  from the PDF. Two existing cases that failed the strict WebAssembly-only PDF
+  check in 0.6.0 are re-measured in the qualification record; a fallback is not
+  counted as native success.
+- Additional footnote-position regression guards remain deferred; the existing
+  omitted position default remains page-bottom.
+- Physical printing, downloaded-installer handling, Gatekeeper and all-users
+  installation require separate native checks. Package construction and source
+  tests do not certify them.
+- On Linux hosts that restrict unprivileged user namespaces, the AppImage can
+  run without Chromium's sandbox. Prefer the DEB on affected systems.
+- Long-session memory growth, Windows CPU spikes/pauses on lower-end computers,
+  and the historical forced-cleanup crash remain unresolved.
+- Display density can affect a spreadsheet's derived noncustom default row
+  height when saving. Explicit custom heights are a separate case.
+- Font substitution cannot reproduce every missing typeface or glyph. CJK
+  coverage is limited to the bundled and available fonts; italic is synthesized.
+- Existing conversion, PDF, ODF, embedded-object and AI tool limits remain.
+  Modern LibreOffice 26.8 encrypted ODS is not supported. AI can make mistakes.
 
-The unsigned Windows installer and ad-hoc-signed, unnotarized Apple Silicon Mac build retain platform security limitations. Flatpak is separate; no installation/native acceptance is implied by static preview checks.
+## Qualification
 
-Source and third-party notices accompany the build. Generic privacy scanner candidates require explicit scope/classification; no secret-free certification is implied.
+Build 23 package and native qualification is pending. The combined web-source
+unit suite passed 23 tests before this build. Earlier build 22 package and Mac
+results are historical evidence only and are not build 23 native acceptance.
+The previous unattended Mac harness failed with SIGKILL (-9), with its source
+unverified; that failure has not been turned into a pass.
+The final release packet must record exact package/source/runtime hashes,
+actual platform results, owner signatures and remaining dispositions.
+Existing failed checks remain failed even where the lead accepts a separately
+documented known limitation for this release. No all-green suite, native
+platform acceptance, performance improvement or Office-layout equivalence is
+claimed here.
+
+## Reporting problems
+
+[Open an issue](https://github.com/leag1234/elixiroffice/issues) with the app
+version, operating system, steps and expected/actual behavior. Prefer a small
+synthetic reproducer; remove personal information, private content and API keys
+before sharing attachments.

@@ -11,8 +11,25 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 python3 "$ROOT/tests/desktop/verify-resources.py" "$ROOT/desktop/assets"
 mkdir -p "$WINDOWS_BUILD_CACHE/home"
 WINDOWS_BUILD_CACHE="$(cd "$WINDOWS_BUILD_CACHE" && pwd)"
+# The container cannot resolve a linked worktree; give the source-selection test a metadata-only index of
+# the exact committed files (no objects, no history, no remotes) instead of exposing the repository.
+GITMETA="$WINDOWS_BUILD_CACHE/gitmeta"
+rm -rf "$GITMETA"; mkdir -p "$GITMETA/template"
+git init --quiet --initial-branch=main --template="$GITMETA/template" "$GITMETA/repo"
+git -C "$ROOT" ls-tree -r -z HEAD | python3 -c '
+import sys
+out=[]
+for row in sys.stdin.buffer.read().split(b"\0"):
+    if not row: continue
+    head,name=row.split(b"\t",1); mode,kind,oid=head.split()
+    assert kind==b"blob", kind
+    out.append(mode+b" "+oid+b"\t"+name+b"\0")
+sys.stdout.buffer.write(b"".join(out))' \
+  | GIT_DIR="$GITMETA/repo/.git" GIT_WORK_TREE="$ROOT" git update-index -z --index-info
 docker run --rm --user "$(id -u):$(id -g)" \
   --mount "type=bind,src=$ROOT,dst=/project" \
+  --mount "type=bind,src=$GITMETA/repo/.git,dst=/gitmeta,readonly" \
+  --env GIT_DIR=/gitmeta --env GIT_WORK_TREE=/project \
   --mount "type=bind,src=$WINDOWS_BUILD_CACHE,dst=/work" \
   --workdir /project/desktop \
   --env HOME=/work/home --env ELECTRON_BUILDER_CACHE=/work/builder-cache \

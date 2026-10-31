@@ -467,7 +467,7 @@ class Build:
         unit_home.mkdir()
         self.save()
         self.run("desktop-units", ["npm", "test"],
-                 env={**self.env, "HOME": str(unit_home), "EO_UPSTREAM": str(self.test_upstream)},
+                 env={**self.env, "HOME": str(unit_home), "EO_UPSTREAM": str(self.test_upstream), "EO_WEBAPPS": str(self.test_upstream / "web-apps")},
                  cwd=self.product / "desktop")
         self.info["tools"] = {"node": capture([self.args.node, "--version"]), "python": capture([python, "--version"]), "fonttools": capture([python, "-c", "import fontTools;print(fontTools.__version__)"]), "pillow": capture([python, "-c", "import PIL;print(PIL.__version__)"])}
         self.info["desktop_manifest_sha256"] = digest(self.product / "desktop/assets/desktop-manifest.json")

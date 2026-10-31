@@ -35,5 +35,21 @@ class ManifestTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 manifest.generate(root, root, root, {})
 
+class CapabilityTest(unittest.TestCase):
+    PATCH = "0013-pdf-cjk-gid-remap.patch"
+
+    def test_capability_requires_pdf_kind_and_exact_patch_hash(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("manifest_mod", Path(__file__).with_name("manifest.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        digest = next(d for (k, p, d) in mod.CAPABILITY_PATCHES if p == self.PATCH)
+        self.assertEqual(mod.capabilities_for("pdf", {self.PATCH: digest}), {"cjk_gid_remap_bmp": 1})
+        self.assertEqual(mod.capabilities_for("full", {self.PATCH: digest}), {})
+        self.assertEqual(mod.capabilities_for("pdf", {self.PATCH: "0" * 64}), {})
+        self.assertEqual(mod.capabilities_for("pdf", {}), {})
+
+
 if __name__ == "__main__":
     unittest.main()
+

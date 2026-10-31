@@ -1,5 +1,12 @@
 # Changelog
 
+## Desktop 0.6.1
+
+### Changed and fixed
+
+- PDF export of Word documents with tracked changes now shows the final revision: deleted text no longer appears in the PDF.
+- Chinese, Japanese and Korean text in PDF export can use the native WebAssembly path when the runtime declares the capability, for the safe case of one character at a time from the basic multilingual plane.
+
 ## Desktop 0.6.0
 
 - Improved page breaks in document tables, checked against 31 Microsoft Word reference files.

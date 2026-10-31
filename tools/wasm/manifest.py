@@ -6,6 +6,17 @@ import json
 import subprocess
 from pathlib import Path
 
+# A capability is declared only when the exact reviewed patch that implements it is part of the build.
+CAPABILITY_PATCHES = {
+    ("pdf", "0013-pdf-cjk-gid-remap.patch", "de0eaa0890d3050e34bca78c38f829c9d585e44efaf72ed6e7cf8376b094b523"): "cjk_gid_remap_bmp",
+}
+
+
+def capabilities_for(kind, patches):
+    return {name: 1 for (k, patch, digest), name in CAPABILITY_PATCHES.items()
+            if k == kind and patches.get(patch) == digest}
+
+
 def generate(output, core, tools, flags):
     artifacts = {}
     for name in ("x2t.js", "x2t.wasm", "x2t.js.br", "x2t.js.gz", "x2t.wasm.br", "x2t.wasm.gz"):
@@ -23,6 +34,9 @@ def generate(output, core, tools, flags):
     manifest = {"schema": 1, "tools_sha256": tools_hash, "sources": sources, "core_commit": revision(core),
                 "product_commit": revision(tools), "build_flags": flags,
                 "patches": patches, "artifacts": artifacts}
+    capabilities = capabilities_for(flags.get("module_kind"), patches)
+    if capabilities:
+        manifest["capabilities"] = capabilities
     release_hash = hashlib.sha256(json.dumps(artifacts, sort_keys=True).encode()).hexdigest()
     manifest["artifact_version"] = (manifest["core_commit"][:12] + "-" + release_hash[:12]
                                     + "-" + flags.get("variant", "st"))

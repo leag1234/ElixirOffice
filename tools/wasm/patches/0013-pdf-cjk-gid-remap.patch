@@ -1,0 +1,128 @@
+diff --git a/DesktopEditor/graphics/MetafileToRenderer.cpp b/DesktopEditor/graphics/MetafileToRenderer.cpp
+index 003e0897ae..4cc8c51516 100644
+--- a/DesktopEditor/graphics/MetafileToRenderer.cpp
++++ b/DesktopEditor/graphics/MetafileToRenderer.cpp
+@@ -33,6 +33,54 @@
+ 
+ // this class needs to be rewritten. should work just like in js
+ // and not just switch on each character if necessary
++class CMetafileFontStateGuard
++{
++private:
++	IRenderer* m_pRenderer;
++	std::wstring m_sName;
++	LONG m_nStyle;
++	int m_nFaceIndex;
++	bool m_bName;
++	bool m_bStyle;
++	bool m_bFaceIndex;
++
++	CMetafileFontStateGuard(const CMetafileFontStateGuard&);
++	CMetafileFontStateGuard& operator=(const CMetafileFontStateGuard&);
++
++public:
++	CMetafileFontStateGuard(IRenderer* pRenderer)
++		: m_pRenderer(pRenderer), m_nStyle(0), m_nFaceIndex(0),
++		  m_bName(false), m_bStyle(false), m_bFaceIndex(false)
++	{
++		m_bName = (S_OK == m_pRenderer->get_FontName(&m_sName));
++		m_bStyle = (S_OK == m_pRenderer->get_FontStyle(&m_nStyle));
++		m_bFaceIndex = (S_OK == m_pRenderer->get_FontFaceIndex(&m_nFaceIndex));
++	}
++
++	~CMetafileFontStateGuard()
++	{
++		try { if (m_bName) m_pRenderer->put_FontName(m_sName); } catch (...) {}
++		try { if (m_bStyle) m_pRenderer->put_FontStyle(m_nStyle); } catch (...) {}
++		try { if (m_bFaceIndex) m_pRenderer->put_FontFaceIndex(m_nFaceIndex); } catch (...) {}
++	}
++
++	const std::wstring& GetName() const { return m_sName; }
++	LONG GetStyle() const { return m_nStyle; }
++};
++
++class CMetafileFontFileGuard
++{
++private:
++	CFontFile* m_pFile;
++
++	CMetafileFontFileGuard(const CMetafileFontFileGuard&);
++	CMetafileFontFileGuard& operator=(const CMetafileFontFileGuard&);
++
++public:
++	CMetafileFontFileGuard(CFontFile* pFile) : m_pFile(pFile) {}
++	~CMetafileFontFileGuard() { RELEASEINTERFACE(m_pFile); }
++};
++
+ class CMetafileFontPicker
+ {
+ private:
+@@ -134,6 +182,56 @@ public:
+ 		RELEASEINTERFACE(pFileNew);
+ 	}
+ 
++	void FillTextCodeGid(unsigned int* pCodePoints, const unsigned int& nCountUnicodes, const unsigned int& nGid,
++	                     const double& x, const double& y, const double& w, const double& h)
++	{
++		if (!pCodePoints || nCountUnicodes != 1 || pCodePoints[0] > 0xFFFF)
++		{
++			m_pRenderer->CommandDrawTextCHAR2(pCodePoints, nCountUnicodes, nGid, x, y, w, h);
++			return;
++		}
++
++		CMetafileFontStateGuard oState(m_pRenderer);
++		SetFont(oState.GetName(), (int)oState.GetStyle());
++
++		NSFonts::IFontFile* pFont = m_pManager->GetFile();
++		unsigned int nCodePoint = pCodePoints[0];
++		if (!pFont)
++		{
++			FillText(std::wstring(1, (wchar_t)nCodePoint), x, y, w, h);
++			return;
++		}
++
++		if (pFont->GetGIDByUnicode(nCodePoint))
++		{
++			m_pRenderer->CommandDrawTextCHAR2(pCodePoints, nCountUnicodes, nGid, x, y, w, h);
++			return;
++		}
++
++		CFontFile* pFileNew = ((CFontManager*)m_pManager)->GetFontFileBySymbol((CFontFile*)m_pManager->GetFile(), nCodePoint);
++		if (!pFileNew)
++		{
++			FillText(std::wstring(1, (wchar_t)nCodePoint), x, y, w, h);
++			return;
++		}
++
++		CMetafileFontFileGuard oFileGuard(pFileNew);
++		unsigned int nFallbackGid = (unsigned int)pFileNew->GetGIDByUnicode(nCodePoint);
++		if (!nFallbackGid)
++		{
++			FillText(std::wstring(1, (wchar_t)nCodePoint), x, y, w, h);
++			return;
++		}
++
++		m_pRenderer->put_FontName(pFileNew->m_sName);
++		int nNewStyle = 0;
++		if (pFileNew->IsBold()) nNewStyle |= 0x01;
++		if (pFileNew->IsItalic()) nNewStyle |= 0x02;
++		m_pRenderer->put_FontStyle(nNewStyle);
++		m_pRenderer->put_FontFaceIndex(pFileNew->m_lFaceIndex);
++		m_pRenderer->CommandDrawTextCHAR2(pCodePoints, nCountUnicodes, nFallbackGid, x, y, w, h);
++	}
++
+ 	void SetRenderer(IRenderer* pRenderer)
+ 	{
+ 		m_pRenderer = pRenderer;
+@@ -846,7 +944,10 @@ namespace NSOnlineOfficeBinToPdf
+ 				for (unsigned int nCodePointIndex = 0; nCodePointIndex < nCountUnicodes; ++nCodePointIndex)
+ 					pCodePoints[nCodePointIndex] = oReader.ReadInt();
+ 
+-				pRenderer->CommandDrawTextCHAR2(pCodePoints, nCountUnicodes, nGid, x, y, 0, 0);
++				if (!pPicker)
++					pRenderer->CommandDrawTextCHAR2(pCodePoints, nCountUnicodes, nGid, x, y, 0, 0);
++				else
++					pPicker->FillTextCodeGid(pCodePoints, nCountUnicodes, nGid, x, y, 0, 0);
+ 
+ 				if (pCodePoints)
+ 					delete [] pCodePoints;
