@@ -1,0 +1,21 @@
+diff --git a/OOXML/Binary/Sheets/Reader/CellFormatController/DigitReader.cpp b/OOXML/Binary/Sheets/Reader/CellFormatController/DigitReader.cpp
+index d9c2be5..b668d2d 100644
+--- a/OOXML/Binary/Sheets/Reader/CellFormatController/DigitReader.cpp
++++ b/OOXML/Binary/Sheets/Reader/CellFormatController/DigitReader.cpp
+@@ -36,6 +36,16 @@ const auto NonDigitcellLimit = 1000;
+ bool DigitReader::ReadDigit(const std::wstring &value, std::wstring &digit, std::wstring &format)
+ {
+     size_t length = value.length();
++    // wcstod accepts C99 hexadecimal literals; identifiers such as 0x1234... must stay text.
++    {
++        const wchar_t *pHex = value.c_str();
++        while (*pHex == L' ' || *pHex == L'\t')
++            pHex++;
++        if (*pHex == L'+' || *pHex == L'-')
++            pHex++;
++        if (pHex[0] == L'0' && (pHex[1] == L'x' || pHex[1] == L'X'))
++            return false;
++    }
+     wchar_t *pEndPtr;
+ 	double dValue = wcstod(value.c_str(), &pEndPtr);
+ 

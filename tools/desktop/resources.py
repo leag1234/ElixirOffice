@@ -34,6 +34,10 @@ copy(args.fonts,out/'fonts')
 copy(args.upstream/'dictionaries',out/'dictionaries')
 copy(args.allfonts,out/'sdkjs/common/AllFonts.js')
 copy(args.font_images,out/'sdkjs/common/Images')
+# The presentation editor stylesheet loads the theme gallery sprites from sdkjs/common/Images (not from slide/themes).
+sprites=sorted(args.themes.glob('themes_thumbnail*.png'))
+if not sprites:raise SystemExit('Missing theme gallery sprites')
+for sprite in sprites:copy(sprite,out/'sdkjs/common/Images'/sprite.name)
 for index,source in enumerate(args.font_source):
     for file in source.rglob('*'):
         if file.is_file() and any(key in file.name.upper() for key in ['LICENSE','COPYING','OFL','NOTICE']):

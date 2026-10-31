@@ -1,5 +1,24 @@
 # Changelog
 
+## Desktop 0.6.2 — preparing build 27, not released
+
+### Changed and fixed
+
+- The theme gallery thumbnails of the presentation editor display again; the
+  desktop packages now ship the gallery sprites where the stylesheet loads them
+  (#42).
+- CSV import keeps values that start with 0x, such as Ethereum addresses, as
+  text instead of reading them as hexadecimal numbers that lost the original
+  value (#45).
+- Spreadsheet text that needs an installed system font (for example Arabic) no
+  longer turns into wrong shapes after scrolling or resizing: the selected
+  system fonts are loaded before the cells are repainted (#44).
+
+### Qualification and limitations
+
+- New packages, the 74-reference comparison and native acceptance are pending.
+  Checks of earlier releases do not certify build 27.
+
 ## Desktop 0.6.1
 
 ### Changed and fixed

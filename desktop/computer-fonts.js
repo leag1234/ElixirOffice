@@ -23,6 +23,35 @@
     const previous=baseline&&resolver.resolve({name:baseline,style,codepoints:[cp]});
     return previous&&A.g_map_font_index[previous.family]!==undefined?previous:null;
    }
+   function invalidateRenderedText(){
+    try{
+     const views=window.Asc?.editor?.wb?.wsViews;
+     if(!views)return;
+     for(const key in views)views[key]?.cache?.reset?.();
+     window.Asc.editor.wb.drawWorksheet?.();
+    }catch{}
+   }
+   function selectedLocalFontsToLoad(){
+    const names=new Set((picker?.Ranges||[]).map(range=>range.Name));
+    const result=[];
+    for(const name of names){
+     if(!LF.isLocal(name))continue;
+     const info=A.g_font_infos[A.g_map_font_index[name]];
+     if(!info)continue;
+     for(const key of ['indexR','indexI','indexB','indexBI']){
+      const loader=A.g_font_files?.[info[key]];
+      if(loader&&loader.Status!==0){result.push(name);break;}
+     }
+    }
+    return result;
+   }
+   function invalidateAfterSelectedFontsLoad(){
+    const names=selectedLocalFontsToLoad();
+    if(!names.length)return invalidateRenderedText();
+    const loader=window.AscCommon?.g_font_loader;
+    if(!loader?.LoadFonts)return;
+    setTimeout(()=>loader.LoadFonts(names,()=>invalidateRenderedText()),0);
+   }
    function rebuildRanges(){
     if(!picker||!originalRanges.length&&!system.length)return;
     const relevant=new Set(originalRanges.map(range=>window.EOFontResolver.normalize(range.Name)));
@@ -148,7 +177,7 @@
       };
      }
      return result;
-    }finally{LF.fonts=list;installPolicy();rebuildRanges();}
+    }finally{LF.fonts=list;installPolicy();rebuildRanges();invalidateAfterSelectedFontsLoad();}
    };
    function resolve(name,style){
     const aliases=app.GetSubstituteList?.(name)||[];

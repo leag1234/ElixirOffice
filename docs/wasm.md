@@ -134,8 +134,8 @@ The qualified pair uses core b21f0935c1d733bcdb040d9a80c244ca7e29cd5e and build 
 
 | Module | Artifact version | Manifest SHA-256 |
 | --- | --- | --- |
-| Full | b21f0935c1d7-e6297e1576ab-st | c96416d861596d9fc14daa0ec7acf263c0624fb5595ce0ceaf0557a8f5c26170 |
-| PDF | b21f0935c1d7-127110ddeb74-st | b72f952c0d09c4729f2200c682480b994d73c78132135f41f8ea24dcea2cf25f |
+| Full | b21f0935c1d7-2b0ed003d5d0-st | f7b5839f92e1e4d6dbd516549a589ae58d6c1bd432379ab113bf9772d839b124 |
+| PDF | b21f0935c1d7-127110ddeb74-st | 8476424b231d3c995ea5255262a8b735335142d5383c218625377097f3b8b68c |
 
 Full Wasm is 66,361,912 bytes (Brotli 9,673,034). PDF Wasm is 9,707,340 bytes (Brotli 3,208,440). The fresh full and PDF-only builds reproduce the pre-rebase artifact bytes exactly; only the manifests change because they record the rebased pre-pin product commit.
 

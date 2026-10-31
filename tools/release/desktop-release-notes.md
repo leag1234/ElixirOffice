@@ -1,6 +1,6 @@
 # ElixirOffice {{VERSION}} desktop — build {{BUILD_NUMBER}}
 
-Prepared from the source freeze candidate for 0.6.1.
+Prepared from the source freeze candidate for 0.6.2.
 Product source: {{PRODUCT_REVISION}}.
 The final BUILD-INFO.json and corresponding source archive bind the exact
 editor revisions and runtime inputs. {{RELEASE_STATUS}} Package checks, native
@@ -8,11 +8,11 @@ acceptance, owner signatures and publication remain pending.
 
 ## What's new
 
-- PDF export of a Word document with tracked changes now shows the final
-  revision: deleted text no longer appears in the PDF.
-- Chinese, Japanese and Korean text in PDF export can use the native
-  WebAssembly path when the runtime declares the capability, for the safe case
-  described under known limitations.
+- The theme gallery thumbnails of the presentation editor display again.
+- CSV import keeps values that start with 0x, such as Ethereum addresses, as
+  text instead of converting them to numbers.
+- Arabic and other text that needs an installed system font no longer turns into
+  wrong shapes in spreadsheets after scrolling or resizing.
 
 AI stays optional and off by default. Sending document context requires your
 configured service, consent and explicit request. Documents are not sent to the
