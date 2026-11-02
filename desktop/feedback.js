@@ -39,7 +39,9 @@
   const view=document.defaultView||globalThis;
   let timer=null,due=0,remaining=8000,hovered=false;
   function quietOpen(event){return event?.kind==='open'&&event.phase==='complete'&&event.outcome==='opened'&&!notice.classList.contains('eo-operation-backstage');}
-  function hasFileActions(event){return event.phase==="ready"&&!!event.artifactId&&!!(actions.open||actions.show);}
+  // An in-place save leaves the open document where it is: only operations that create another file offer file actions.
+  function createsFile(event){return !['save','pdf-save'].includes(event.kind);}
+  function hasFileActions(event){return event.phase==="ready"&&!!event.artifactId&&createsFile(event)&&!!(actions.open||actions.show);}
   function clearTimer(){if(timer!==null)view.clearTimeout(timer);timer=null;}
   function pauseTimer(){if(timer!==null)remaining=Math.max(0,due-view.Date.now());clearTimer();}
   function schedule(){
@@ -81,7 +83,7 @@
     if(!ended&&actions.cancel&&canCancel(event))button('cancel',()=>actions.cancel(event.id));
     if(ended){
      if(event.phase==='error'&&['save','save-as','export','pdf-save','pdf-export'].includes(event.kind)&&actions.diagnostics)button('opCopyDiagnostics',()=>actions.diagnostics());
-     if(event.phase==='ready'&&event.artifactId){
+     if(event.phase==='ready'&&event.artifactId&&createsFile(event)){
       if(actions.open)button('opOpen',()=>actions.open(event.artifactId));
       if(actions.show)button('opShow',()=>actions.show(event.artifactId));
      }

@@ -47,7 +47,7 @@ test('compile-time QA old/new flavors have isolated identities, actual source se
   assert(fs.readFileSync(path.join(e.output,'update-package.cjs'),'utf8').includes('Uninstall elixiroffice.exe'));
   for(const file of ['update-transport.cjs','update-production-qualification.cjs','update-policy.cjs','update-installers.cjs'])
    assert.equal(digest(fs.readFileSync(path.join(e.output,file))),digest(fs.readFileSync(path.join(root,'desktop',file))));
-  const target={platform,packageType:platform==='linux'?'AppImage':'nsis',arch:'x64',electronVersion:'44.9.1'};
+  const target={platform,packageType:platform==='linux'?'AppImage':'nsis',arch:'x64',electronVersion:'44.10.1'};
   assert.deepEqual(require(path.join(e.output,'update-policy.cjs')).production.capability(target),require('../../desktop/update-policy.cjs').production.capability(target));
  }
 });
@@ -89,13 +89,13 @@ test('QA context sets only its own profile/cache and feeds synthetic release wit
  const qa=require(path.join(e.output,'qa/composition.cjs')).load(e.output,e.result.manifestSha256,app);
  assert(calls.some(([k,v])=>k==='name'&&v===PRODUCT));assert(calls.some(([k,v])=>k==='appId'&&v===APP_ID));
  assert(calls.some(([k,v])=>k==='userData'&&v.startsWith(path.join(temp,PRODUCT)+path.sep)));
- const runtime={platform:'linux',packageType:'AppImage',arch:'x64',electronVersion:'44.9.1'};
+ const runtime={platform:'linux',packageType:'AppImage',arch:'x64',electronVersion:'44.10.1'};
  assert.equal(qa.policy.capability(runtime).enabled,true);assert.equal(qa.policy.capability({...runtime,platform:'win32',packageType:'nsis'}).enabled,false);
  let fetched=0;
  const notice=qa.createNotice({version:app.getVersion(),save:async()=>{},fetch:()=>{fetched++;throw Error('production fetch forbidden');}});
  await notice.check();assert.equal(fetched,0);assert.equal(notice.notice().version,'0.0.0-rc.2');notice.dispose();
 });
-test('actual pinned builder selection and metadata normalization survive ASAR under Electron44.9.1',async()=>{
+test('actual pinned builder selection and metadata normalization survive ASAR under Electron44.10.1',async()=>{
  const cp=require('node:child_process');
  const deps=path.join(root,'desktop/node_modules');
  const {getMainFileMatchers}=require(path.join(deps,'app-builder-lib/out/fileMatcher.js'));
@@ -117,7 +117,7 @@ test('actual pinned builder selection and metadata normalization survive ASAR un
  assert.equal(packedPkg.build,undefined);assert.equal(packedPkg.scripts,undefined);
  const archive=path.join(temp,'qa-'+(++serial)+'.asar');await asar.createPackage(stage,archive);
  const electron=require(path.join(deps,'electron'));
- const child=cp.spawnSync(electron,['-e',"if(process.versions.electron!==\'44.9.1\')throw Error(\'wrong Electron\');require(process.argv[1]+'/qa/guard.cjs').verifyPrepared(process.argv[1],process.argv[2]);console.log('SEALED_QA_ASAR_OK');",archive,e.result.manifestSha256],{
+ const child=cp.spawnSync(electron,['-e',"if(process.versions.electron!==\'44.10.1\')throw Error(\'wrong Electron\');require(process.argv[1]+'/qa/guard.cjs').verifyPrepared(process.argv[1],process.argv[2]);console.log('SEALED_QA_ASAR_OK');",archive,e.result.manifestSha256],{
   encoding:'utf8',timeout:15000,env:{PATH:process.env.PATH,HOME:process.env.HOME,ELECTRON_RUN_AS_NODE:'1'}
  });
  assert.equal(child.status,0,child.stderr);assert.match(child.stdout,/SEALED_QA_ASAR_OK/);
@@ -243,7 +243,7 @@ test('sealed QA root verifies its own signature but cannot verify in production,
  assert.equal(qa.policy.verify(request).context.tag,e.m.tag);
  const {production,createPolicy}=require('../../desktop/update-policy.cjs');
  assert.throws(()=>production.verify(request));
- const productionRoot=createPolicy({qualifiedElectronVersion:'44.9.1',trustedKeys:require('../../desktop/update-production-trust.cjs')});
+ const productionRoot=createPolicy({qualifiedElectronVersion:'44.10.1',trustedKeys:require('../../desktop/update-production-trust.cjs')});
  assert.equal(productionRoot.capability(f.runtime).enabled,true,'test must exercise cryptographic rejection beyond closed activation');
  assert.throws(()=>productionRoot.verify(request));
  assert.throws(()=>productionRoot.verify({...request,envelope:sign('eo-2026-1')}));

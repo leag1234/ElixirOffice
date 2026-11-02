@@ -1,0 +1,12 @@
+{
+  "sourceUrl": "https://github.com/leag1234/ElixirOffice",
+  "blocks": [
+    { "text": "Copyright (C) Ascensio System SIA, 2009-2026\nCopyright (C) 2026 Euro-Office contributors\nCopyright (C) 2026 ElixirOffice contributors" },
+    { "text": "ElixirOffice is a modified version of Euro-Office, itself a modified version of ONLYOFFICE, originally developed by Ascensio System SIA. ElixirOffice is not affiliated with, endorsed by, or sponsored by Ascensio System SIA or the Euro-Office project. ONLYOFFICE is a trademark of Ascensio System SIA." },
+    { "text": "This version was built on {buildDate}. The list of modifications is the commit history of the source code: [Modifications]({modificationsUrl})" },
+    { "heading": "Licence" },
+    { "text": "This program is free software, licensed under the GNU Affero General Public License version 3 (AGPL-3.0-only). You may convey and modify this work under the terms of that licence: [View licence]({licenceUrl})" },
+    { "text": "This program is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." },
+    { "text": "The complete corresponding source code for this running version is available at: [Source code]({sourceUrl})" }
+  ]
+}

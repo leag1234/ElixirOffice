@@ -6,7 +6,7 @@ const fs=require('node:fs'),cp=require('node:child_process'),path=require('node:
 const authorities=new Map();
 const WINDOWS_EXCLUSIVE_OPEN=0x10000000;
 function windowsExclusiveFlag(versions=process.versions){
- if(!versions||versions.node!=='24.22.0'||versions.uv!=='1.52.1')refused();
+ if(!versions||versions.node!=='24.22.1'||versions.uv!=='1.52.1')refused();
  return WINDOWS_EXCLUSIVE_OPEN;
 }
 function refused(){throw Error('Update cache refused');}

@@ -9,4 +9,4 @@ assert.match(node,/#define NODE_MAJOR_VERSION 24\b/);assert.match(node,/#define 
 assert.match(uv,/#define UV_VERSION_MAJOR 1\b/);assert.match(uv,/#define UV_VERSION_MINOR 52\b/);assert.match(uv,/#define UV_VERSION_PATCH 1\b/);
 assert.match(win,/#define UV_FS_O_EXLOCK\s+0x10000000\b/);
 const use=impl.indexOf('UV_FS_O_EXLOCK');assert(use>=0);assert.match(impl.slice(use,use+600),/share\s*=\s*0\s*;/);
-console.log(JSON.stringify({verdict:'PASS',node:'24.22.0',uv:'1.52.1',flag:'0x10000000',share:'none'}));
+console.log(JSON.stringify({verdict:'PASS',node:'24.22.1',uv:'1.52.1',flag:'0x10000000',share:'none'}));

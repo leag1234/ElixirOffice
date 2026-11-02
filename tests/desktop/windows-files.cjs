@@ -24,8 +24,8 @@ const files=require('../../desktop/files.cjs');
   const actual=path.join(directory,'actual'),junction=path.join(directory,'junction');
   await fs.mkdir(actual);await fs.writeFile(path.join(actual,'public.docx'),'PK original');
   await fs.symlink(actual,junction,'junction');
-  await assert.rejects(files.atomic(path.join(junction,'public.docx'),Buffer.from('PK unsafe')),/symbolic-link folder/);
-  assert.equal((await fs.readFile(path.join(actual,'public.docx'))).toString(),'PK original');
+  await files.atomic(path.join(junction,'public.docx'),Buffer.from('PK safe'));
+  assert.equal((await fs.readFile(path.join(actual,'public.docx'))).toString(),'PK safe');
   const fileLink=path.join(directory,'linked.docx');
   try{await fs.symlink(target,fileLink,'file')}catch(error){
     if(['EPERM','EACCES'].includes(error.code)) console.error('UNVERIFIED final-file symlink refusal: creating the fixture requires Windows Developer Mode or an elevated test session');

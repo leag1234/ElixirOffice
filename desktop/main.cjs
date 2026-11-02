@@ -146,7 +146,12 @@ function installShellShortcuts(owner){
 function createSession(windowId,{pending=[]}={}){
  const document=tabHost.addDocument(registry.window(windowId),{state:{current:null,dirty:false,busy:false,closing:false,ready:false,pending,closePending:false,finishClosePending:null,destinations:new saveAs.Destinations(),artifacts:new (require('./artifacts.cjs').Artifacts)(),closePromise:null,closeResolve:null,waitingSave:false,closeAttempt:null,initialSelection:null,destinationLease:null,aiJobs:new Map(),openTrace:++openTrace}});
  installInterfaceZoom(document.contents);
- document.contents.setWindowOpenHandler(require('./external.cjs').handler(url=>shell.openExternal(url),()=>{if(document.live)document.contents.send('eo:action','external-error');}));
+ const external=require('./external.cjs'),openExternal=external.handler(url=>shell.openExternal(url),()=>{if(document.live)document.contents.send('eo:action','external-error');});
+ document.contents.setWindowOpenHandler(details=>external.reporter(details,resources.ORIGIN)||openExternal(details));
+ document.contents.on('did-create-window',child=>{
+  child.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+  child.webContents.on('will-navigate',event=>event.preventDefault());
+ });
  require('./shortcuts.cjs').install(document.contents,process.platform,()=>document.state.current?.format,name=>{if(document.live)return dispatchDocumentAction(document,name);},()=>!captureOptions&&document.live);
  return document;
 }

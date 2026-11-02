@@ -27,11 +27,14 @@ const {chromium}=require(process.env.EO_PLAYWRIGHT||'playwright-core');
   {kind:'open',phase:'error',reason:'Public failure'},{kind:'open',phase:'warning'},
   {kind:'pdf-export',phase:'converting',completed:2,total:4},{kind:'print',phase:'awaiting-output'},
   {kind:'print',phase:'complete',outcome:'print-started'},{kind:'export',phase:'complete',outcome:'download-started'},
-  {kind:'save',phase:'ready',artifactId:'public-copy'}
+  {kind:'save-as',phase:'ready',artifactId:'public-copy'}
  ];
  for(let i=0;i<cases.length;i++){await page.evaluate(({event,id})=>send(floating,id,event),{event:cases[i],id:'case-'+i});assert(await notice.isVisible(),JSON.stringify(cases[i]));}
  assert.equal(await notice.getByRole('button',{name:'Open file'}).count(),1);
  assert.equal(await notice.getByRole('button',{name:'Show in folder'}).count(),1);
+ await page.evaluate(()=>send(floating,'in-place',{kind:'save',phase:'ready',artifactId:'same-document'}));assert(await notice.isVisible(),'Save success is shown');
+ assert.equal(await notice.getByRole('button',{name:'Open file'}).count(),0,'An in-place save offers no Open file');
+ assert.equal(await notice.getByRole('button',{name:'Show in folder'}).count(),0);
  assert.deepEqual(errors,[]);console.log('PASS quiet successful Open, retained live announcement, no resurrection, File details,7important feedback cases and file actions');
  await page.close();
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

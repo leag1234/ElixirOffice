@@ -8,6 +8,9 @@ The update cache has one persistent `guard-v2` file. Ownership is the kernel-hel
 
 Electron 44.9.1 embeds Node 24.22.0 and libuv 1.52.1. In that exact libuv source, `UV_FS_O_EXLOCK` is `0x10000000`; `uv_fs_open` maps it to a Windows `CreateFileW` open with no sharing. Node passes numeric filesystem flags to libuv even though it does not export this flag in `fs.constants`. The Windows guard open therefore adds the numeric flag only after an exact Node/libuv runtime check. Any platform, version, open, ownership, inode, link, ACL, flush or close mismatch fails closed. There is no `O_EXCL` pathname lease, retry, stale-file deletion, PID recovery or advisory fallback.
 
+Electron 44.10.1 (0.6.3 security refresh) embeds Node 24.22.1 with the same libuv 1.52.1 (checked with
+process.versions of the 44.10.1 runtime), so the flag value above is unchanged; the runtime check accepts Node 24.22.1.
+
 The flag must be present on the first and only open of `guard-v2`; applying it after `fs.open` would be too late. The existing post-open identity and Windows ACL checks remain mandatory. Releasing closes the held handle once. Process death lets Windows close it automatically.
 
 ## Qualification

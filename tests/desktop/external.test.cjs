@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {validate}=require('../../desktop/external.cjs');
+const {validate,reporter}=require('../../desktop/external.cjs');
 test('external URL validation allowlist table',()=>{
  const cases=[
   ['https://example.org/path?q=1','https://example.org/path?q=1'],
@@ -15,4 +15,15 @@ test('external URL validation allowlist table',()=>{
   ['https://example.org/'+ 'a'.repeat(8192),null],[null,null],[123,null]
  ];
  for(const [input,expected] of cases)assert.equal(validate(input),expected,JSON.stringify(input));
+});
+
+test('only the packaged Presenter View page may open a window',()=>{
+ const origin='eoapp://desktop.elixiroffice.invalid',page=origin+'/example/local-assets/web-apps/apps/presentationeditor/main/index.reporter.html';
+ const ok=reporter({url:page+'?lang=fr'},origin);
+ assert.equal(ok.action,'allow');assert.equal(ok.overrideBrowserWindowOptions.webPreferences.sandbox,true);
+ assert.equal(ok.overrideBrowserWindowOptions.webPreferences.nodeIntegration,false);
+ assert.equal(reporter({url:page},origin).action,'allow');
+ for(const bad of [page.replace('desktop.elixiroffice.invalid','evil.invalid'),origin+'/index.html',page+'?lang=fr&x=1',page+'?lang=a b',page+'#x',
+  'https://example.org/example/local-assets/web-apps/apps/presentationeditor/main/index.reporter.html',origin+'/example/local-assets/web-apps/apps/documenteditor/main/index.reporter.html','x','']) assert.equal(reporter({url:bad},origin),null,bad);
+ assert.equal(reporter({url:page},undefined),null);
 });

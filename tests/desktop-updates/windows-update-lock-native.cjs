@@ -38,7 +38,7 @@ async function qualification({
  stepTimeoutMs=STEP_TIMEOUT_MS,wholeTimeoutMs=WHOLE_TIMEOUT_MS,cleanupTimeoutMs=CLEANUP_TIMEOUT_MS
 }={}){
  assert.equal(platform,'win32','Windows-only native qualification');
- assert.equal(versions.node,'24.22.0');assert.equal(versions.uv,'1.52.1');
+ assert.equal(versions.node,'24.22.1');assert.equal(versions.uv,'1.52.1');
  assert(base&&pathApi.isAbsolute(base)&&pathApi.normalize(base)===base,'Explicit private EO_WINDOWS_LOCK_ROOT required');
  const expires=Date.now()+wholeTimeoutMs,children=new Set(),releases=new Set(),pendingLocks=new Set();let stopping=false;
  const bodyWait=(promise,label)=>timed(promise,Math.min(stepTimeoutMs,expires-Date.now()),label+' exceeded qualification deadline');

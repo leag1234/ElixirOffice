@@ -46,15 +46,21 @@ overlay() {
   [ -f "$f" ] || { echo "error: $f missing" >&2; exit 1; }
   sed -i "s/credentials: 'omit'/credentials: 'same-origin'/" "$f"
   echo "overlay: $(grep -c "credentials: 'same-origin'" "$f") same-origin fetch(es) in elixir-ai/Core.js"
+  # Murena Workspace variant: the interface names the editor type, not ElixirOffice (docs/branding.md).
+  if [ "${THEME:-elixiroffice}" = murenaoffice ]; then python3 "$REPO/tools/rebrand/murena-ui.py" "$DS/web-apps"; fi
 }
 
 base() {
   overlay
+  # Exporting the layer cache to /tmp failed twice on the full core cache ("client connection is closing");
+  # opt in with CACHE_EXPORT=1. The builder keeps its own cache either way.
+  local no_cache_export=(--set '*.cache-to=')
+  [ "${CACHE_EXPORT:-0}" = 1 ] && no_cache_export=()
   local t0=$(date +%s)
   ( cd "$DS/build" && BRAND_DIR="$BRAND" TAG="$TAG-base" REGISTRY="$REGISTRY" DS_VERSION_HASH="$DS_VERSION_HASH" \
       BUILDX_BAKE_ENTITLEMENTS_FS=0 \
       docker buildx bake --builder "$BUILDER" --progress=plain -f docker-bake.hcl -f "$BRAND/build/elixiroffice.hcl" \
-      --allow=fs=/tmp --allow=fs.read=.. --allow=fs.read="$BRAND" --load standalone )
+      --allow=fs=/tmp --allow=fs.read=.. --allow=fs.read="$BRAND" "${no_cache_export[@]}" --load standalone )
   echo $(( $(date +%s) - t0 )) > "$LOGS/image-$TAG.base.sec"
   echo "base: done in $(cat "$LOGS/image-$TAG.base.sec") s"
 }

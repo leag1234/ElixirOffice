@@ -74,7 +74,7 @@ if [ ! -f "$WORK/deps/$BOOST_DIR/lib/libboost_filesystem.a" ]; then
 fi
 
 log "third-party sources used by the core (fetched by its own script)"
-dk "python3 core/Common/3dParty/build_3rdparty.py --only=html,apple,md,socketio /w/third_party/work /w/third_party/install >/w/build/3rdparty.log 2>&1"
+dk "python3 core/Common/3dParty/build_3rdparty.py --only=html,apple,md,socketio,brotli /w/third_party/work /w/third_party/install >/w/build/3rdparty.log 2>&1"
 
 for v in $VARIANTS; do
   log "configure + build: $v"

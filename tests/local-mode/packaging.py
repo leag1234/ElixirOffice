@@ -30,8 +30,9 @@ assert manifest["build_flags"]["module_kind"] == "full"
 assert pdf_manifest["build_flags"]["module_kind"] == "pdf"
 for field in ["core_commit", "product_commit", "tools_sha256", "patches", "sources"]:
     assert manifest[field] == pdf_manifest[field], field
-# Overlay numbering skips 0003; the approved inventory contains eleven files.
-assert len(manifest["patches"]) == 11
+# The runtime is built from exactly the patch inventory in the product tree (numbering skips 0003).
+assert sorted(manifest["patches"]) == sorted(path.name for path in (product / "tools/wasm/patches").glob("*.patch"))
+assert "0015-brotli-1.2.1-cve-2026-111497.patch" in manifest["patches"]
 assert "0011-pdf-preserve-creator.patch" in manifest["patches"]
 assert "0010-office-integrity-rejection.patch" in manifest["patches"]
 assert "0012-pptx-external-timing-media.patch" in manifest["patches"]

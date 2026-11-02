@@ -37,13 +37,16 @@ const formats = Object.keys(require('./formats.cjs').codes);
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const extension = filename => path.extname(filename).slice(1).toLowerCase();
 async function realDirectory(directory) {
-  let cursor=path.parse(directory).root;
-  for(const part of directory.slice(cursor.length).split(path.sep).filter(Boolean)) {
+  // A link the user created in the chosen path (NAS or sync folders) is resolved once; the strict check
+  // and every later step of the write then use the canonical path, where no component may be a link.
+  const resolved=await fs.realpath(directory);
+  let cursor=path.parse(resolved).root;
+  for(const part of resolved.slice(cursor.length).split(path.sep).filter(Boolean)) {
     cursor=path.join(cursor,part);
     const stat=await fs.lstat(cursor);
     if(!stat.isDirectory() || stat.isSymbolicLink()) throw Error('Saving through a symbolic-link folder is unavailable');
   }
-  return fs.realpath(directory);
+  return resolved;
 }
 async function read(filename,options={}) {
   const target = validatePath(path.resolve(filename));
@@ -98,6 +101,7 @@ async function atomicWrite(target, bytes, expected,options) {
   // Old deferred work gets one attempt, never this save's retry budget.
   await cleanupBackups();
   const parent = await run('parent-check',()=>realDirectory(path.dirname(target)));
+  target=validatePath(path.join(parent,path.basename(target)));
   let original;
   try {
     const stat = await run('target-stat',()=>fs.lstat(target));

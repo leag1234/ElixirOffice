@@ -148,7 +148,15 @@
      return faces;
     });
    };
-   const registered=()=>new Map(LF.localNames().map(name=>[window.EOFontResolver.normalize(name),name]));
+   // Registered names only grow (LF.count); rebuilding this map per lookup froze sheets on Macs with many fonts.
+   let registeredMap=null,registeredCount=-1;
+   const registered=()=>{
+    if(registeredCount!==LF.count||!registeredMap){
+     registeredMap=new Map(LF.localNames().map(name=>[window.EOFontResolver.normalize(name),name]));
+     registeredCount=LF.count;
+    }
+    return registeredMap;
+   };
    LF.resolveName=name=>registered().get(window.EOFontResolver.normalize(name))||null;
    LF.isLocal=name=>!!LF.resolveName(name);
    const originalRegister=LF.register;

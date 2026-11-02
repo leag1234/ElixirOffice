@@ -41,8 +41,8 @@ test('Windows store puts the qualified libuv exclusive flag on the first guard o
 });
 test('Windows lock rejects every unqualified runtime before opening and has no fallback',async()=>{
  const lock=require('../../desktop/update-lock.cjs');
- assert.equal(lock.windowsExclusiveFlag({node:'24.22.0',uv:'1.52.1'}),0x10000000);
- for(const versions of [{node:'24.21.0',uv:'1.52.1'},{node:'24.22.0',uv:'1.51.0'},{node:'24.22.0'},null])assert.throws(()=>lock.windowsExclusiveFlag(versions),/Update cache refused/);
+ assert.equal(lock.windowsExclusiveFlag({node:'24.22.1',uv:'1.52.1'}),0x10000000);
+ for(const versions of [{node:'24.21.0',uv:'1.52.1'},{node:'24.22.1',uv:'1.51.0'},{node:'24.22.1'},null])assert.throws(()=>lock.windowsExclusiveFlag(versions),/Update cache refused/);
  const root=path.resolve(os.tmpdir(),'eo-lock-win-closed');let opens=0;
  const directory={dev:1,ino:1,size:0,mtimeMs:1,ctimeMs:1,mode:0o40700,nlink:1,uid:0,isDirectory:()=>true,isFile:()=>false,isSymbolicLink:()=>false};
  const io={realpath:async value=>value,mkdir:async()=>{},lstat:async()=>directory,open:async()=>{opens++;throw Error('must stay closed');}};

@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -14,13 +14,13 @@
     "test:print-viewer": "electron ../tests/desktop/print-viewer-contract.cjs"
   },
   "devDependencies": {
-    "electron": "44.9.1",
+    "electron": "44.10.1",
     "electron-builder": "26.15.3"
   },
   "build": {
     "appId": "org.elixiroffice.desktop",
     "productName": "ElixirOffice",
-    "electronVersion": "44.9.1",
+    "electronVersion": "44.10.1",
     "asar": true,
     "files": [
       "*.cjs",
@@ -126,8 +126,8 @@
   },
   "desktopName": "org.elixiroffice.desktop.desktop",
   "dependencies": {
-    "electron-updater": "6.8.9",
-    "@elixiroffice/lazy-val-shim": "file:vendor/lazy-val-shim"
+    "@elixiroffice/lazy-val-shim": "file:vendor/lazy-val-shim",
+    "electron-updater": "6.8.9"
   },
   "overrides": {
     "electron-updater": {

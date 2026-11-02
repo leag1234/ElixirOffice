@@ -14,7 +14,7 @@ window.EODesktopPdf = async function(api, format, options={}) {
     wasmRuntime:new URL('/example/local-assets/sdkjs/common/clientpdf/runtime/' + runtime.artifact_version + '/', location.origin).href});
   if (['xlsx','ods'].includes(format)) {
     progress({stage:'converting',cancellable:false});await yieldWork();
-    const memory = api.asc_nativePrint(undefined, undefined, {adjustOptions:{printType:Asc.c_oAscPrintType.EntireWorkbook}});
+    const memory = api.asc_nativePrint(undefined, undefined, {adjustOptions:{printType:Asc.c_oAscPrintType.ActiveSheets}});
     await yieldWork();await writer.feed(memory.GetDataUint8(0, memory.GetCurPosition()));
   } else {
     const renderer = new AscCommon.CDocumentRenderer();

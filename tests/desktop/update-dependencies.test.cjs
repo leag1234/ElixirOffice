@@ -39,8 +39,8 @@ test('actual updater import and synthetic construction have no update I/O',()=>{
  }finally{fs.rmSync(profile,{recursive:true,force:true});}
 });
 test('the library enables only reviewed native package policies and does not rewrite app startup',()=>{
- assert.equal(require('../../desktop/update-policy.cjs').production.capability({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.9.1'}).enabled,true);
- assert.equal(require('../../desktop/update-policy.cjs').production.capability({platform:'linux',arch:'x64',packageType:'AppImage',electronVersion:'44.9.1'}).enabled,true);
+ assert.equal(require('../../desktop/update-policy.cjs').production.capability({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.10.1'}).enabled,true);
+ assert.equal(require('../../desktop/update-policy.cjs').production.capability({platform:'linux',arch:'x64',packageType:'AppImage',electronVersion:'44.10.1'}).enabled,true);
  const main=fs.readFileSync(path.join(root,'main.cjs'),'utf8');
  assert.doesNotMatch(main,/require\(['"]electron-updater['"]\)/);
 });

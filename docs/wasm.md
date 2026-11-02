@@ -209,3 +209,18 @@ The held 0.4 [AI guide](ai-features.md) uses the existing runtime and correctly 
 
 ## Desktop interface-size qualification (2026-10-27)
 The0.4 source candidate retains the pinned Wasm runtime. Official SDK JavaScript bootstraps were rebuilt to preserve real desktop fractional density. Private Linux checks cover32preset/editor states, Options save and fresh restart in4formats, plus independent PDF page/text geometry checks. The pre-existing scale-derived noncustom spreadsheet default-height rewrite is recorded for0.5. [Scope and limitations](desktop-interface-size.md).
+
+
+## 0.6.3 security runtimes (Brotli 1.2.1)
+
+Same core b21f0935c1d7 with patch 0015 (Brotli decoder v1.2.1, CVE-2026-111497) and tools/wasm/build.sh fetching
+Brotli itself instead of reusing an older checkout.
+
+| Module | Artifact version | Manifest SHA-256 |
+| --- | --- | --- |
+| Full | b21f0935c1d7-fe7c75a2fe4c-st | 332afc5095904e95161e4a89c642f557ec6cacb9496b0fb9198ec8a3f7c2683c |
+| PDF | b21f0935c1d7-0853043eff5f-st | 91312b56f7bf036244364c72d7f52e45da9e7293eee2f8ef78e05dabf049760f |
+
+Full Wasm is 66,364,520 bytes (Brotli 9,675,959). PDF Wasm is 9,709,935 bytes (Brotli 3,220,511). The PDF runtime was checked in
+the server image (Nextcloud 23 open and save). The runtime qualification set of the 0.6 section has to be run again on
+these runtimes before the 0.6.3 desktop release.

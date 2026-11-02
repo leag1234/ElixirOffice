@@ -16,7 +16,7 @@ test('native qualification failure releases parent locks, stops and reaps its ho
  const spawnProcess=()=>{const kind=children.length===0?'probe-refused':children.length===1?'probe-open':'holder',child=new FakeChild(kind,events);children.push(child);if(kind==='holder'){holderAlive=true;child.once('exit',()=>{holderAlive=false;});}return child;};
  const createStoreFn=()=>({lock:async()=>{const id=++locks;events.push('lock:'+id);return async()=>events.push('release:'+id);}});
  const fsApi={readdir:async value=>value==='C:\\owned'?[]:['guard-v2'],rm:async()=>{events.push('rm:alive='+holderAlive);}};
- await assert.rejects(()=>qualification({platform:'win32',versions:{node:'24.22.0',uv:'1.52.1'},base:'C:\\owned',spawnProcess,createStoreFn,fsApi,pathApi:require('node:path').win32,execPath:'C:\\ElixirOffice.exe',self:'C:\\native.cjs',pid:42,stepTimeoutMs:1000,wholeTimeoutMs:5000}),/Windows lock qualification failed/);
+ await assert.rejects(()=>qualification({platform:'win32',versions:{node:'24.22.1',uv:'1.52.1'},base:'C:\\owned',spawnProcess,createStoreFn,fsApi,pathApi:require('node:path').win32,execPath:'C:\\ElixirOffice.exe',self:'C:\\native.cjs',pid:42,stepTimeoutMs:1000,wholeTimeoutMs:5000}),/Windows lock qualification failed/);
  assert.equal(locks,2,'unexpected competing success must still be tracked');
  assert(events.includes('release:1'));assert(events.includes('release:2'));
  assert(events.includes('kill:holder:SIGKILL'));assert(events.includes('exit:holder'));
@@ -35,7 +35,7 @@ test('holder readiness rejects invalid data, early exit and timeout',async()=>{
 
 test('whole body and shared cleanup deadlines bound total wall-clock time',async()=>{
  const never=()=>new Promise(()=>{}),started=Date.now();
- await assert.rejects(()=>qualification({platform:'win32',versions:{node:'24.22.0',uv:'1.52.1'},base:'C:\\owned',fsApi:{readdir:never,rm:never},pathApi:require('node:path').win32,pid:43,stepTimeoutMs:1000,wholeTimeoutMs:20,cleanupTimeoutMs:30}),/Windows lock qualification failed/);
+ await assert.rejects(()=>qualification({platform:'win32',versions:{node:'24.22.1',uv:'1.52.1'},base:'C:\\owned',fsApi:{readdir:never,rm:never},pathApi:require('node:path').win32,pid:43,stepTimeoutMs:1000,wholeTimeoutMs:20,cleanupTimeoutMs:30}),/Windows lock qualification failed/);
  const elapsed=Date.now()-started;
  assert(elapsed>=35,'both bounded phases must run');assert(elapsed<250,'total time must be body plus one shared cleanup budget');
 });

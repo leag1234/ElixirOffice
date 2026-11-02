@@ -43,8 +43,8 @@ function assertDormantUpdaterDependencies(pkg,lock){
  }
  assert.equal(seen.size,pins.size);
  const production=require('../../desktop/update-policy.cjs').production;
- assert.equal(production.capability({platform:'linux',packageType:'AppImage',arch:'x64',electronVersion:'44.9.1'}).enabled,true);
- assert.equal(production.capability({platform:'win32',packageType:'nsis',arch:'x64',electronVersion:'44.9.1'}).enabled,true);
+ assert.equal(production.capability({platform:'linux',packageType:'AppImage',arch:'x64',electronVersion:'44.10.1'}).enabled,true);
+ assert.equal(production.capability({platform:'win32',packageType:'nsis',arch:'x64',electronVersion:'44.10.1'}).enabled,true);
 }
 function ownRuntimeSources(directory){
  const skip=new Set(['assets','node_modules','dist','mac-licenses','.git']);

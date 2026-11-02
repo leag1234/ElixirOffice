@@ -1,6 +1,36 @@
 # Changelog
 
-## Desktop 0.6.2 — preparing build 27, not released
+## Desktop 0.6.3 — security release in preparation, not released
+
+### Security
+
+- Electron 44.10.1 (Chromium 152.0.7977.169, Node.js 24.22.1): fixes the Brotli
+  decoder vulnerability CVE-2026-111497 in the embedded browser engine and Node.js.
+- The document converters (WebAssembly) are rebuilt with Brotli 1.2.1 for the same
+  vulnerability.
+- October 2026 upstream security fixes in the editors and converters.
+
+### Changed and fixed
+
+- Saving, Save As and PDF export work when the folder path goes through a symbolic
+  link created by the user, such as a NAS or sync folder (#50).
+- A plain Ctrl+S no longer shows a persistent "Open file / Show in folder" notice;
+  the notice disappears like other confirmations (#51).
+- Choosing a font in the font list applies that font, not one a few rows above,
+  after the fonts of the computer have loaded (#47).
+- Presenter View opens its own window again instead of the normal slide show (#48).
+- Spreadsheets no longer freeze for several seconds when switching sheets or scrolling on
+  computers with many installed fonts (the installed-font lookup is now cached).
+- Spreadsheet PDF export prints the active sheet, as Microsoft Excel does.
+- Word layout closer to Microsoft Word: stacked frames, table rows that end at the
+  bottom of a page, and section breaks inside index fields.
+
+### Qualification and limitations
+
+- New packages, the runtime qualification, the 74-reference comparison and native
+  acceptance are pending.
+
+## Desktop 0.6.2 — 2026-10-31
 
 ### Changed and fixed
 
@@ -16,8 +46,7 @@
 
 ### Qualification and limitations
 
-- New packages, the 74-reference comparison and native acceptance are pending.
-  Checks of earlier releases do not certify build 27.
+- Published as build 27 on 2026-10-31.
 
 ## Desktop 0.6.1
 

@@ -60,14 +60,16 @@ test('a concurrent edit after copying the backup is preserved',async()=>{
  }finally{fs.copyFile=copy;await fs.rm(dir,{recursive:true,force:true})}
 });
 
-test('linked destination folders cannot redirect a save',async()=>{
+test('a linked destination folder is resolved once and saved through its canonical path',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'eo-desktop-folders-'));
  try{
   const actual=path.join(dir,'actual'),linked=path.join(dir,'linked');await fs.mkdir(actual);
   const document=path.join(actual,'public.docx');await fs.writeFile(document,'PK original');
   await fs.symlink(actual,linked,process.platform==='win32'?'junction':'dir');
-  await assert.rejects(files.atomic(path.join(linked,'public.docx'),Buffer.from('PK edited')),/symbolic-link folder/);
-  assert.equal((await fs.readFile(document)).toString(),'PK original');
+  const saved=await files.atomic(path.join(linked,'public.docx'),Buffer.from('PK edited'));
+  assert.equal((await fs.readFile(document)).toString(),'PK edited');
+  assert.equal(saved.target,await fs.realpath(document));
+  assert.deepEqual((await fs.readdir(actual)).sort(),['public.docx']);
  }finally{await fs.rm(dir,{recursive:true,force:true})}
 });
 
