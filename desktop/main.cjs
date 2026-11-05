@@ -150,7 +150,8 @@ function createSession(windowId,{pending=[]}={}){
  document.contents.setWindowOpenHandler(details=>external.reporter(details,resources.ORIGIN)||openExternal(details));
  document.contents.on('did-create-window',child=>{
   child.webContents.setWindowOpenHandler(()=>({action:'deny'}));
-  child.webContents.on('will-navigate',event=>event.preventDefault());
+  // The Presenter View window starts on about:blank and must still load its own page; every other navigation stays blocked.
+  child.webContents.on('will-navigate',(event,url)=>{if(!external.reporter({url:event.url||url},resources.ORIGIN))event.preventDefault();});
  });
  require('./shortcuts.cjs').install(document.contents,process.platform,()=>document.state.current?.format,name=>{if(document.live)return dispatchDocumentAction(document,name);},()=>!captureOptions&&document.live);
  return document;
@@ -869,6 +870,8 @@ async function start() {
   handle('author',()=>typeof settings.author==='string'&&settings.author.trim()?settings.author:'ElixirOffice');
   handle('author-save',async value=>{if(typeof value!=='string'||!value.trim()||value.length>200||/[\u0000-\u001f\u007f]/.test(value))throw Error('Invalid author name');settings.author=value.trim();await persist();return settings.author;});
   handle('help',()=>help());
+  const pastedImages=require('./pasted-image.cjs').create({session});
+  handle('pasted-image',url=>pastedImages.fetch(url));
   handle('about',()=>showAbout());
   handle('quit',()=>quitApplication('user'));
   handle('restart',()=>{if(captureOptions||quitPending||systemExiting)return false;return quitApplication('restart',{restart:true});});

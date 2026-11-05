@@ -24,4 +24,7 @@ subprocess.run([sys.executable, str(here.parent / "wasm/install-runtime.py"),
                 str(args.release), str(args.output / "sdkjs")], check=True)
 shutil.copytree(here.parent.parent / "branding/build/wasm-nginx",
                 args.output / "nginx", dirs_exist_ok=True)
+# Plugin runtime (sdkjs-plugins/v1); plugin folders are added by deployments.
+shutil.copytree(here.parent.parent / "branding/sdkjs-plugins",
+                args.output / "sdkjs-plugins", dirs_exist_ok=True)
 print("runtime image context:", args.output)

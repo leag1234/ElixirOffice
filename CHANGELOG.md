@@ -1,6 +1,23 @@
 # Changelog
 
-## Desktop 0.6.3 — security release in preparation, not released
+## Desktop 0.6.4 — in preparation, not released
+
+### Fixed
+
+- Equations show their letters: Cambria Math now uses a math font (STIX Two Math when installed,
+  otherwise the bundled DejaVu Math TeX Gyre) instead of a text font without math glyphs (#56).
+- Presenter View opens its window with the presenter view instead of an empty window (#48).
+- Pictures copied from a web page can be pasted: the app downloads them once and stores them in the
+  document like a picture from a file (#55).
+- The Draw tab sits after Insert, as in Word (#52).
+- Spreadsheet PDF export keeps the sheet at its normal scale instead of shrinking large sheets to one page.
+- Spreadsheets no longer download a Korean font at open for invisible control characters (faster opening).
+
+### Server
+
+- The plugin runtime (sdkjs-plugins/v1) is installed in the image, so plugins can be added.
+
+## Desktop 0.6.3 — security release, published 2026-11-02
 
 ### Security
 
@@ -27,8 +44,8 @@
 
 ### Qualification and limitations
 
-- New packages, the runtime qualification, the 74-reference comparison and native
-  acceptance are pending.
+- Build 29: 1,366 of 1,366 tests on Windows and Linux; macOS 1,297 passed, none failed,
+  69 skipped; six-format packaged smoke passed on macOS.
 
 ## Desktop 0.6.2 — 2026-10-31
 
