@@ -78,7 +78,7 @@ async function readSelected(target,selected,maxBytes){
     if (!stat.isFile() || stat.size > maxBytes) throw Error(maxBytes===20*1024*1024?'Choose a recipient file under 20 MiB':'Choose a regular document under 512 MiB');
     const bytes = await handle.readFile();
     if (bytes.length > maxBytes) throw Error(maxBytes===20*1024*1024?'Recipient file grew beyond 20 MiB during read':'Document grew beyond 512 MiB during read');
-    if(['txt','csv'].includes(extension(target))){try{new TextDecoder('utf-8',{fatal:true}).decode(bytes)}catch{throw Error('Text and CSV documents must use UTF-8');}}
+    if(['txt','csv','md','markdown'].includes(extension(target))){try{new TextDecoder('utf-8',{fatal:true}).decode(bytes)}catch{throw Error('Text documents must use UTF-8');}}
     return {target, bytes, hash: hash(bytes), mode: stat.mode, inode: stat.ino, device: stat.dev, embeddedObjects:['odt','ods','odp'].includes(extension(target))?packageGuard.embeddedObjects(bytes):0};
   } finally { await handle.close(); }
 }

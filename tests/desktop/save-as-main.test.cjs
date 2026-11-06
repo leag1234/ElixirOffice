@@ -15,7 +15,7 @@ test('real-main Save As info includes client PDF per family and preserves conver
  try{
   const info=await env.invoke('save-as-info',env.selected.token);
   assert.equal(info.nativeFormats,false);assert.equal(info.defaultFormat,'docx');
-  assert.deepEqual(Array.from(info.formats,x=>x.value),['docx','odt','rtf','txt','pdf']);
+  assert.deepEqual(Array.from(info.formats,x=>x.value),['docx','odt','rtf','txt','md','pdf']);
   for(const format of ['xlsx','pptx']){
    await env.invoke('return-home');
    const selected=await env.invoke('new',format),options=await env.invoke('save-as-info',selected.token);

@@ -22,7 +22,7 @@ const registry=new DocumentRegistry({documentURL:resources.ORIGIN+'/index.html',
 const documentState=()=>registry.context().state;
 const docContents=()=>registry.context().contents;
 const documentWindow=()=>registry.window(registry.context().windowId).window;
-const pendingPaths=[];let pendingLimitNotice=false;
+const pendingPaths=require('./launch-paths.cjs').createLaunchQueue({max:MAX_DOCUMENTS});let pendingLimitNotice=false;
 registry.on('changed',windowId=>{
  const owner=registry.window(windowId);if(owner.window.isDestroyed())return;
  const document=registry.active(windowId),current=document?.state.current;
@@ -91,12 +91,12 @@ try{
 const printer=require('./printing.cjs').create({BrowserWindow,session,root:path.join(app.getPath('userData'),'print-jobs'),log:code=>safety.log(code),allowOffscreenRetry:process.env.EO_PRINT_OFFSCREEN_RETRY==='1'});
 
 const {documentPath}=require('./document-path.cjs');
-const argument=argv=>argv.map(documentPath).find(Boolean);
-const initial = captureOptions||captureStartupError?null:argument(process.argv.slice(app.isPackaged?1:2)); if(initial)pendingPaths.push(initial);
+const {documentPaths}=require('./launch-paths.cjs');
+const initialPaths = captureOptions||captureStartupError?[]:documentPaths(process.argv.slice(app.isPackaged?1:2),documentPath); for(const initial of initialPaths)pendingPaths.push(initial);
 if(captureStartupError){try{captureConsoleError('ElixirOffice capture startup failed:\n'+captureStartupError.stack);}catch{void safety.log('console-error');}app.exit(1);}
 else if(!app.requestSingleInstanceLock()){if(captureOptions)cleanupCapture().catch(()=>safety.log('capture-cleanup-failure')).then(()=>app.exit(1)).catch(()=>{void safety.log('capture-cleanup-failure');app.exit(1)});else app.quit();}
 else {
-app.on('second-instance',(_event,argv)=>{if(captureOptions)return;const file=argument(argv.slice(1));if(file)enqueueFile(file);win?.show();win?.focus();});
+app.on('second-instance',(_event,argv)=>{if(captureOptions)return;for(const file of documentPaths(argv.slice(1),documentPath))enqueueFile(file);win?.show();win?.focus();});
 app.on('open-file',(event,file)=>{event.preventDefault();if(captureOptions)return;const selected=documentPath(file);if(selected)enqueueFile(selected);});
 app.whenReady().then(start).catch(async error=>{
  if(captureOptions){console.error(error.message);appClosing=true;if(win&&!win.isDestroyed())win.destroy();try{await cleanupCapture()}catch{await safety.log('capture-cleanup-failure')}finally{app.exit(1)}}
@@ -245,9 +245,9 @@ function showTabLimit(document){
 }
 function enqueueFile(filename){
  if(!tabHost||!documentHandlersReady){
-  if(pendingPaths.includes(filename))return true;
-  if(pendingPaths.length>=require('./document-registry.cjs').MAX_DOCUMENTS)return showTabLimit();
-  pendingPaths.push(filename);return true;
+  const result=pendingPaths.push(filename);
+  if(result==='limit')return showTabLimit();
+  return true;
  }
  let owner,source;
  const refused=error=>{
@@ -692,7 +692,7 @@ async function select(filename,prepared) {
     throw Error(require('./errors.js').openMessage(error,languageInfo?.strings,process.platform));
   }
   const {bytes,...metadata}=opened;
-  const sourceFormat=files.extension(opened.target),format=require('./formats.cjs').canonical[sourceFormat]||sourceFormat;
+  const sourceExtension=files.extension(opened.target),sourceFormat=sourceExtension==='markdown'?'md':sourceExtension,format=require('./formats.cjs').canonical[sourceFormat]||sourceFormat;
   documentState().artifacts.clear();clearDestination();
   documentState().current={...metadata,sourceTarget:opened.target,token:crypto.randomUUID(),name:path.basename(opened.target),format,sourceFormat};
   documentState().current.protected=password.encrypted(bytes,sourceFormat);documentState().current.recoveryLocked=documentState().current.protected;
@@ -853,7 +853,7 @@ async function start() {
    },diagnostics:event=>openDiagnostics.record({trace:0,...event})
   });
   const owner=tabHost.createWindow();win=owner.window;await owner.ready;
-  const initialDocument=createSession(owner.id,{pending:pendingPaths.splice(0)});
+  const initialDocument=createSession(owner.id,{pending:pendingPaths.drain()});
   await registry.run(initialDocument,async()=>{
   handle('chrome-mode',()=>({compact:registry.window(registry.context().windowId).frame?.effectiveFrame==='compact'}));
   handle('chrome-state',value=>{const state=require('./compact-state.cjs').normalize(value),document=registry.context();document.state.chromeState=state;registry.changed(document.windowId);return true;});
@@ -987,6 +987,22 @@ async function start() {
     documentState().current={...documentState().current,...saved,sourceTarget:target,sourceFormat:documentState().current.format,protected:password.encrypted(bytes,documentState().current.format),name:path.basename(target),embeddedObjects:['odt','ods','odp'].includes(documentState().current.format)?packageGuard.embeddedObjects(bytes):0};const preferencesSaved=await remember(target);title();
     documentState().current.recoveryVersion=(documentState().current.recoveryVersion||0)+1;
     return {artifactId:documentState().artifacts.register(saved,documentState().current.token),name:documentState().current.name,bytes:saved.bytes,recoveryVersion:documentState().current.recoveryVersion,preferencesSaved,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
+  })));
+  handle('save-source',(token,input,operationId)=>operation(()=>files.scoped({scope:token,id:operationId},async writeOptions=>{
+    active(token);const current=documentState().current;
+    if(current.sourceFormat!=='md'||current.format!=='docx')throw Error('Only Markdown originals use source save');
+    const bytes=output(input,'md'),target=current.sourceTarget;
+    if(!target)throw Error('The Markdown original is no longer selected');
+    if(!current.markdownWarningShown){
+      operationStage(token,operationId,'awaiting-user');
+      const result=await dialog.showMessageBox(documentWindow(),{type:'warning',message:t('saveLossMd'),buttons:[t('cancel'),t('save')],normalizeAccessKeys:true,defaultId:1,cancelId:0});
+      if(result.response!==1)throw Error('Save cancelled: Markdown formatting cannot be fully preserved');
+      current.markdownWarningShown=true;
+    }
+    const saved=await withDestination(target,{adopt:true},()=>files.atomic(target,bytes,current,writeOptions));
+    current.name=path.basename(saved.target);current.hash=saved.hash;current.inode=saved.inode;current.device=saved.device;current.mode=saved.mode;
+    current.recoveryVersion=(current.recoveryVersion||0)+1;
+    return {artifactId:documentState().artifacts.register(saved,current.token),name:path.basename(target),bytes:saved.bytes,recoveryVersion:current.recoveryVersion,preferencesSaved:true,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
   })));
   handle('write-cancel',async(token,id)=>{
     active(token);
@@ -1259,6 +1275,7 @@ async function start() {
   if(process.platform!=="darwin")win.setMenuBarVisibility(false);
 
   documentHandlersReady=true;
+  initialDocument.state.pending.push(...pendingPaths.drain());
   await tabHost.loadDocument(initialDocument);registry.activate(initialDocument.id);
   if(!captureOptions)void releaseNotice.check();
   if(captureOptions){

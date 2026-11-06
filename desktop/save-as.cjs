@@ -3,7 +3,7 @@
 'use strict';
 const path=require('node:path'),crypto=require('node:crypto');
 const formats=require('./formats.cjs'),files=require('./files.cjs');
-const labels={docx:'saveFormatDocx',odt:'saveFormatOdt',rtf:'saveFormatRtf',txt:'saveFormatTxt',xlsx:'saveFormatXlsx',ods:'saveFormatOds',csv:'saveFormatCsv',pptx:'saveFormatPptx',odp:'saveFormatOdp',pdf:'saveFormatPdf'};
+const labels={docx:'saveFormatDocx',odt:'saveFormatOdt',rtf:'saveFormatRtf',txt:'saveFormatTxt',md:'saveFormatMd',xlsx:'saveFormatXlsx',ods:'saveFormatOds',csv:'saveFormatCsv',pptx:'saveFormatPptx',odp:'saveFormatOdp',pdf:'saveFormatPdf'};
 function available(current){
  const result=formats.exports[formats.kind(current.format)];
  if(!result)throw Error('Unsupported Save As document');
@@ -43,7 +43,7 @@ function filters(current,t,explicitFormat){
 function warning(current,format){
  if(!available(current).includes(format))throw extensionError(current);
  if(format===current.format)return null;
- return {rtf:'saveLossRtf',txt:'saveLossTxt',csv:'saveLossCsv',pdf:current.format==='pdf'?null:'saveLossPdf'}[format]||null;
+ return {rtf:'saveLossRtf',txt:'saveLossTxt',md:'saveLossMd',csv:'saveLossCsv',pdf:current.format==='pdf'?null:'saveLossPdf'}[format]||null;
 }
 function nativeFormats(platform=process.platform,enabled=false){return enabled===true&&(platform==='darwin'||platform==='win32');}
 async function destinationState(target){

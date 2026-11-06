@@ -213,14 +213,20 @@ async function open(selected) {
               return new NativeWorker(url,options);
             };
             frame.Worker.prototype=NativeWorker.prototype;
-            Object.assign(frame.EOWasmConvert.formats,{doc:66,xls:258,ppt:130,rtf:68,txt:69,docm:75,dotx:76,csv:260,xlsm:261,xltx:262,ppsx:132,potx:135});
+            Object.assign(frame.EOWasmConvert.formats,{doc:66,xls:258,ppt:130,rtf:68,txt:69,md:92,markdown:92,docm:75,dotx:76,csv:260,xlsm:261,xltx:262,ppsx:132,potx:135});
             await EODesktopAI(frame);
             const fontsAt=performance.now();await installFonts(frame);openPerformance('font-install',performance.now()-fontsAt);
             main=(kind==='word'?frame.DE:kind==='cell'?frame.SSE:kind==='pdf'?frame.PDFE:frame.PE).getController('Main');
             frame.Common.ElixirLocal.prepare(main.api,main,{mailMerge:true});
             main.loadDocument({doc:{fileType:format,title:file.name,url:'_offline_',key:'local-'+crypto.randomUUID(),permissions:{edit:kind!=='pdf',comment:true,fillForms:true,download:true,print:false,chat:false}}});
             controller=frame.Common.ElixirLocal.install(main.api,{format,name:file.name,lang:info.language,pdfStrings:info.strings,saveAcknowledgesOriginal:kind==='pdf',operationScope:file.token,onOperation:operationEvent,beforeOperationWork:()=>EOOperationFeedback.paint(window),onExport:exportOutput,buildPdf:buildLocalPdf,chooseMailMergeRecipients:chooseMailMergeRecipients,getSignal:()=>abort.signal,
-              onSave:async (bytes,protection)=>{const saved=await nativeWrite(()=>eoDesktop.save(file.token,bytes,savingAs,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved)},
+              onSave:async (bytes,protection)=>{
+                if(file.sourceFormat==='md'&&!savingAs){
+                  const markdown=await frame.EOWasmConvert.convert(new frame.Uint8Array(bytes),'docx','md',{signal:abort.signal});
+                  const saved=await nativeWrite(()=>eoDesktop.saveSource(file.token,markdown,lastOperation?.id),file.token,lastOperation?.id);
+                  file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved);
+                }
+                const saved=await nativeWrite(()=>eoDesktop.save(file.token,bytes,savingAs,protection,lastOperation?.id,saveAsTicket),file.token,lastOperation?.id);file.name=saved.name;setDocumentName(saved.name);file.recoveryVersion=saved.recoveryVersion;window.EOLastSave=saved;return outputOutcome(saved)},
               onProtectionLock:async()=>{const locked=await eoDesktop.passwordLock(file.token);file.recoveryVersion=locked.recoveryVersion;status('AutoRecover is disabled for this session because password protection was used');},
               onBeforeSave:()=>{abort=new AbortController();buttons(true)},onAfterSave:()=>{buttons(false);updateDirty()},
               onError:fail});
@@ -510,7 +516,7 @@ async function addFontOptions(box){
 async function drop(event){
   if(!event.dataTransfer?.files.length)return;
   // Only intercept Office documents; other drops retain the editor's behavior.
-  if(!/\.(docx|doc|odt|rtf|txt|docm|dotx|xlsx|xls|ods|csv|xlsm|xltx|pptx|ppt|odp|ppsx|potx|pdf)$/i.test(event.dataTransfer.files[0].name))return;
+ if(!/\.(docx|doc|odt|rtf|txt|md|markdown|docm|dotx|xlsx|xls|ods|csv|xlsm|xltx|pptx|ppt|odp|ppsx|potx|pdf)$/i.test(event.dataTransfer.files[0].name))return;
   event.preventDefault();event.stopImmediatePropagation();document.body.classList.remove('drag');
   await run(()=>eoDesktop.drop(event.dataTransfer.files[0]));
 }

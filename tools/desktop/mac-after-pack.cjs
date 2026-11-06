@@ -5,7 +5,7 @@ const types={pdf:'com.adobe.pdf',
  docx:'org.openxmlformats.wordprocessingml.document',xlsx:'org.openxmlformats.spreadsheetml.sheet',pptx:'org.openxmlformats.presentationml.presentation',
  odt:'org.oasis-open.opendocument.text',ods:'org.oasis-open.opendocument.spreadsheet',odp:'org.oasis-open.opendocument.presentation',
  doc:'com.microsoft.word.doc',xls:'com.microsoft.excel.xls',ppt:'com.microsoft.powerpoint.ppt',
- rtf:'public.rtf',txt:'public.plain-text',csv:'public.comma-separated-values-text',dotx:'org.openxmlformats.wordprocessingml.template',docm:'com.microsoft.word.docm',xltx:'org.openxmlformats.spreadsheetml.template',xlsm:'com.microsoft.excel.xlsm',potx:'org.openxmlformats.presentationml.template',ppsx:'org.openxmlformats.presentationml.slideshow'
+ rtf:'public.rtf',md:'net.daringfireball.markdown',markdown:'net.daringfireball.markdown',txt:'public.plain-text',csv:'public.comma-separated-values-text',dotx:'org.openxmlformats.wordprocessingml.template',docm:'com.microsoft.word.docm',xltx:'org.openxmlformats.spreadsheetml.template',xlsm:'com.microsoft.excel.xlsm',potx:'org.openxmlformats.presentationml.template',ppsx:'org.openxmlformats.presentationml.slideshow'
 };
 const unused=['NSCameraUsageDescription','NSMicrophoneUsageDescription','NSBluetoothAlwaysUsageDescription','NSBluetoothPeripheralUsageDescription','NSAppTransportSecurity'];
 function clean(plist,main=false) {

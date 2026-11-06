@@ -3,13 +3,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const formats=require('../../desktop/formats.cjs'),files=require('../../desktop/files.cjs'),{documentPath}=require('../../desktop/document-path.cjs');
 test('added desktop formats open as converted copies with scoped export lists',()=>{
- for(const [input,to] of [['rtf','docx'],['txt','docx'],['csv','xlsx'],['dotx','docx'],['docm','docx'],['xltx','xlsx'],['xlsm','xlsx'],['potx','pptx'],['ppsx','pptx']]){
+ for(const [input,to] of [['rtf','docx'],['txt','docx'],['md','docx'],['markdown','docx'],['csv','xlsx'],['dotx','docx'],['docm','docx'],['xltx','xlsx'],['xlsm','xlsx'],['potx','pptx'],['ppsx','pptx']]){
   assert(files.formats.includes(input));assert.equal(documentPath('public.'+input),'public.'+input);assert.equal(formats.canonical[input],to);assert(Number.isInteger(formats.codes[input]));
  }
- assert.deepEqual(formats.exports.word,['docx','odt','rtf','txt','pdf']);assert.deepEqual(formats.exports.cell,['xlsx','ods','csv','pdf']);assert.deepEqual(formats.exports.slide,['pptx','odp','pdf']);
+ assert.deepEqual(formats.exports.word,['docx','odt','rtf','txt','md','pdf']);assert.deepEqual(formats.exports.cell,['xlsx','ods','csv','pdf']);assert.deepEqual(formats.exports.slide,['pptx','odp','pdf']);
 });
 test('export output validation accepts real signatures and refuses wrong or unsafe representations',()=>{
- for(const [data,format] of [['PKtest','docx'],['{\\rtf1 test}','rtf'],['é','txt'],['a,b\n1,2','csv'],['%PDF-1.7','pdf']])assert(formats.output(Buffer.from(data),format));
+ for(const [data,format] of [['PKtest','docx'],['{\\rtf1 test}','rtf'],['é','txt'],['# Heading\n','md'],['a,b\n1,2','csv'],['%PDF-1.7','pdf']])assert(formats.output(Buffer.from(data),format));
  for(const [data,format] of [['bad','docx'],['bad','rtf'],['PKtest','exe'],['bad','pdf'],['a\u0000b','txt']])assert.throws(()=>formats.output(Buffer.from(data),format));
  assert.throws(()=>formats.output(new Uint8Array([255]),'csv'),/UTF-8/);
 });

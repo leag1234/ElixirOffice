@@ -1,6 +1,24 @@
 # Changelog
 
-## Desktop 0.6.4 — in preparation, not released
+## Desktop 0.6.5 — in preparation, not released
+
+### New
+
+- Markdown: .md and .markdown files open as formatted documents (headings, lists, tables, code, links);
+  Save writes Markdown back after a one-time warning about formatting Markdown cannot keep; Save As
+  also offers Markdown.
+- Colour accents per module on the Home screen and document tabs: Document blue, Spreadsheet green,
+  Presentation orange, PDF red.
+
+### Fixed
+
+- "Open with ElixirOffice" on several files opens all of them; files that arrive while the app starts
+  are no longer ignored, and can be opened again later.
+- The Draw tab sits after Insert in the Word, Excel and PowerPoint editors, as in Office (#58).
+- Arabic text in cells using a Chinese font (for example SimSun) no longer turns into boxes once
+  installed fonts are loaded (#54).
+
+## Desktop 0.6.4 — published 2026-11-06
 
 ### Fixed
 
@@ -9,7 +27,7 @@
 - Presenter View opens its window with the presenter view instead of an empty window (#48).
 - Pictures copied from a web page can be pasted: the app downloads them once and stores them in the
   document like a picture from a file (#55).
-- The Draw tab sits after Insert, as in Word (#52).
+- The Draw tab was meant to sit after Insert (#52); this did not take effect, see 0.6.5 (#58).
 - Spreadsheet PDF export keeps the sheet at its normal scale instead of shrinking large sheets to one page.
 - Spreadsheets no longer download a Korean font at open for invisible control characters (faster opening).
 

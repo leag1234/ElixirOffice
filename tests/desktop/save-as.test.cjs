@@ -5,13 +5,13 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const policy=require('../../desktop/save-as.cjs');
 const current={token:'document',name:'Report.docx',format:'docx',target:'/documents/Report.docx'};
 test('Save As formats cover each editor including client PDF and preserve supported source defaults',()=>{
- for(const [format,list]of [['docx',['docx','odt','rtf','txt','pdf']],['xlsx',['xlsx','ods','csv','pdf']],['pptx',['pptx','odp','pdf']],['pdf',['pdf']]])
+ for(const [format,list]of [['docx',['docx','odt','rtf','txt','md','pdf']],['xlsx',['xlsx','ods','csv','pdf']],['pptx',['pptx','odp','pdf']],['pdf',['pdf']]])
   assert.deepEqual(policy.available({...current,format}),list);
  assert.equal(policy.preferred({...current,format:'odt',sourceFormat:'odt'}),'odt');
  assert.equal(policy.preferred({...current,sourceFormat:'rtf'}),'rtf');
  assert.equal(policy.preferred({...current,format:'xlsx',sourceFormat:'csv'}),'csv');
  assert.equal(policy.preferred({...current,sourceFormat:'doc'}),'docx');
- assert.deepEqual(policy.choices({...current,format:'odt'}),['odt','docx','rtf','txt','pdf']);
+ assert.deepEqual(policy.choices({...current,format:'odt'}),['odt','docx','rtf','txt','md','pdf']);
 });
 test('suggestions use document/source folders and keep converted source suggestions distinct',()=>{
  assert.equal(policy.suggestion(current),'/documents/Report.docx');
@@ -29,12 +29,12 @@ test('returned suffix determines native output; explicit fallback must match, no
 });
 test('loss warning is scoped to selected lossy output and PDF original uses its existing copy policy',()=>{
  for(const format of ['docx','odt'])assert.equal(policy.warning(current,format),null);
- for(const format of ['rtf','txt','pdf'])assert.match(policy.warning(current,format),/^saveLoss/);
+ for(const format of ['rtf','txt','md','pdf'])assert.match(policy.warning(current,format),/^saveLoss/);
  assert.equal(policy.warning({...current,format:'xlsx'},'csv'),'saveLossCsv');
  assert.equal(policy.warning({...current,format:'pdf'},'pdf'),null);
  for(const platform of ['linux','win32','darwin'])assert.equal(policy.nativeFormats(platform),false);assert.equal(policy.nativeFormats('win32',true),true);assert.equal(policy.nativeFormats('darwin',true),true);assert.equal(policy.nativeFormats('linux',true),false);
  const filters=policy.filters(current,key=>'translated '+key);
- assert.equal(filters.length,5);assert(filters.every(filter=>filter.name.startsWith('translated ')));
+ assert.equal(filters.length,6);assert(filters.every(filter=>filter.name.startsWith('translated ')));
  assert.deepEqual(policy.filters(current,key=>key,'odt').map(item=>item.extensions),[['odt']]);
 });
 async function withFolder(run){

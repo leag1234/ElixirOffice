@@ -100,6 +100,7 @@
     "opDecrypting": "Decrypting {name}…",
     "opEncrypting": "Encrypting {name}…",
     "saveFormat": "File format",
+    "saveLossMd": "Save Markdown? Page layout, colors and image positions cannot be fully preserved.",
     "saveLossPdf": "Save a PDF copy that may lose bookmarks, document properties, password protection and signature validity?",
     "saveReplace": "This file already exists. Replace it?",
     "saveDestinationChanged": "The destination changed. Choose it again.",

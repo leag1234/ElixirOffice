@@ -82,7 +82,7 @@ class ExternalUpdate(unittest.TestCase):
                 desktop = root / 'org.elixiroffice.desktop.desktop'
                 desktop.write_text('[Desktop Entry]\nExec=AppRun --no-sandbox %U\nMimeType=' + ';'.join(x for x in update.MIME_TYPES if x != 'application/pdf') + ';\n')
                 receipt = update.prepare_launcher(root)
-                self.assertEqual(len(receipt['mime_types']), 19)
+                self.assertEqual(len(receipt["mime_types"]), 20)
                 self.assertIn('application/pdf', receipt['mime_types'])
                 self.assertIn('Exec=AppRun %U\n', desktop.read_text())
                 self.assertFalse(any(flag in desktop.read_text() for flag in update.FORBIDDEN_FLAGS))

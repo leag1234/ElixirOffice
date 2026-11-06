@@ -5,3 +5,12 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+:root{--eo-module-word:#2B579A;--eo-module-cell:#217346;--eo-module-slide:#C43E1C;--eo-module-pdf:#B30B00}
+:root[data-eo-theme=dark]{--eo-module-word:#5A82C4;--eo-module-cell:#3E9A6B;--eo-module-slide:#E06A4A;--eo-module-pdf:#D94030}
+.tile-blank .thumb{border-inline-start:3px solid var(--eo-module-word)}
+.tile-blank[data-new=xlsx] .thumb{border-inline-start-color:var(--eo-module-cell)}
+.tile-blank[data-new=pptx] .thumb{border-inline-start-color:var(--eo-module-slide)}
+.file-link .ic.t-word{color:var(--eo-module-word)}
+.file-link .ic.t-cell{color:var(--eo-module-cell)}
+.file-link .ic.t-slide{color:var(--eo-module-slide)}
+.file-link .ic.t-pdf{color:var(--eo-module-pdf)}

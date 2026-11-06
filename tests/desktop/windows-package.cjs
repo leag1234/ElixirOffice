@@ -77,7 +77,7 @@ for(const name of fs.readdirSync(path.join(root,'desktop')).filter(n=>(/\.(cjs|j
 }
 console.log('PASS packaged application sources');
 const extensions=config.build.fileAssociations.flatMap(a=>a.ext).sort();
-assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf'].sort());
+assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf','md','markdown'].sort());
 assert.equal(config.build.nsis.oneClick,false);assert.equal(config.build.nsis.allowToChangeInstallationDirectory,true);
 assert.equal(config.build.win.signExecutable,false);assert.equal(config.build.win.icon,'icon.png');
 console.log('PASS configured nineteen associations/interactive install/unsigned metadata');

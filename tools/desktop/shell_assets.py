@@ -9,13 +9,14 @@ def save_as_strings(translated, extra):
     result={'saveFormat':extra['saveFormat']}
     for suffix,editor,prefix in [
         ('Docx','documenteditor','DE'),('Odt','documenteditor','DE'),
-        ('Rtf','documenteditor','DE'),('Txt','documenteditor','DE'),
+        ('Rtf','documenteditor','DE'),('Txt','documenteditor','DE'),('Md','documenteditor','DE'),
         ('Xlsx','spreadsheeteditor','SSE'),('Ods','spreadsheeteditor','SSE'),
         ('Csv','spreadsheeteditor','SSE'),('Pptx','presentationeditor','PE'),
         ('Odp','presentationeditor','PE'),('Pdf','documenteditor','DE')]:
         key=prefix+'.Views.ElixirBackstage.txtFmt'+suffix
-        result['saveFormat'+suffix]=clean(translated[editor][key])
-        result['saveFormat'+suffix+'Desc']=clean(translated[editor][key+'Desc'])
+        fallback={'Md':('Markdown (.md)','Plain text with simple formatting, for notes and documentation')}.get(suffix)
+        result['saveFormat'+suffix]=clean(translated[editor].get(key) or (fallback and fallback[0]) or translated[editor][key])
+        result['saveFormat'+suffix+'Desc']=clean(translated[editor].get(key+'Desc') or (fallback and fallback[1]) or translated[editor][key+'Desc'])
     for suffix,editor,key in [
         ('Rtf','documenteditor','DE.Controllers.LeftMenu.warnDownloadAsRTF'),
         ('Txt','documenteditor','DE.Controllers.LeftMenu.warnDownloadAs'),
@@ -25,6 +26,7 @@ def save_as_strings(translated, extra):
         if not value:raise ValueError('Missing translated loss disclosure: '+key)
         result['saveLoss'+suffix]=clean(re.split(r'<br\s*/?>',value,flags=re.I)[0])
     result['saveLossPdf']=extra['saveLossPdf']
+    result['saveLossMd']=extra.get('saveLossMd') or 'Save Markdown? Page layout, colors and image positions cannot be fully preserved.'
     if any(not value for value in result.values()):
         raise ValueError('Missing Save As locale field')
     return result
@@ -137,4 +139,3 @@ def assemble(upstream, product, out):
                 title=catalog['help']
             (contents.parent/'index.htm').write_text('<!doctype html><html lang="'+html.escape(language)+'"><meta charset="utf-8"><title>ElixirOffice '+html.escape(title)+'</title><style>body{font:16px/1.6 system-ui;max-width:850px;margin:32px auto;padding:0 24px}a{color:#235f49}</style><h1>ElixirOffice '+html.escape(title)+'</h1><ul>'+''.join(links)+'</ul></html>')
     print('PASS shared home CSS/Fluent assets, four localized templates and',len(supported),'complete desktop locales')
-

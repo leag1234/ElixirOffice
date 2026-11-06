@@ -22,7 +22,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    assert.equal(plist.CFBundleIdentifier,config.build.appId);assert.equal(plist.CFBundleShortVersionString,identity.mac_short_version);assert.equal(plist.CFBundleVersion,identity.mac_bundle_version);assert.equal(plist.CFBundleDisplayName,'ElixirOffice');
    assert.equal(plist.LSApplicationCategoryType,'public.app-category.productivity');
    const extensions=plist.CFBundleDocumentTypes.flatMap(type=>type.CFBundleTypeExtensions||[]).sort();
-   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf'].sort());
+   assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf','md','markdown'].sort());
    const {types,unused}=require('./mac-after-pack.cjs');
    assert.equal(plist.CFBundleDocumentTypes.length,19);
    for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
