@@ -18,6 +18,9 @@
   if(normalizedNames.size>=NORMALIZED_NAME_LIMIT)normalizedNames.delete(normalizedNames.keys().next().value);
   normalizedNames.set(raw,value);return value;
  };
+ // NFKC folds full-width/half-width and compatibility forms so localized family
+ // names (e.g. full-width "ＭＳ ゴシック") can match their en-US primary.
+ const fold=name=>String(name||'').normalize('NFKC').toLocaleLowerCase('en-US');
  function classify(style){
   let bits=0,other=0,alt=0;
   for(const word of String(style||'').toLowerCase().split(/[\s_\-]+/).filter(Boolean)){
@@ -72,7 +75,17 @@
   for(const face of faces)if(!eligible(face)&&face.fullName)safeAliases.set(normalize(face.fullName),face.family);
   faces=prepare(faces);
   const families=new Map();
-  for(const face of faces){const key=normalize(face.family);if(!families.has(key))families.set(key,[]);families.get(key).push({...face});}
+  const addFamily=(key,face)=>{if(!families.has(key))families.set(key,[]);families.get(key).push({...face});};
+  for(const face of faces){
+   addFamily(normalize(face.family),face);
+   const folded=fold(face.family);
+   if(folded!==normalize(face.family))addFamily(folded,face);
+   for(const alias of face.aliases||[]){
+    addFamily(normalize(alias),face);
+    const aliasFolded=fold(alias);
+    if(aliasFolded!==normalize(alias))addFamily(aliasFolded,face);
+   }
+  }
   for(const face of faces){
    const full=face.fullName,c=classify(face.style);
    if(face.source==='bundled'||!full||full===face.family||c.bits||!c.other&&!c.alt||families.has(normalize(full)))continue;
@@ -85,7 +98,7 @@
   }
   for(const [key,values] of families){const selected=[];for(const source of ['bundled','system','fallback'])selected.push(...slots(values.filter(face=>face.source===source)));families.set(key,selected);}
   function choose(name,source,style,codepoints){
-   const candidates=(families.get(normalize(name))||[]).filter(f=>f.source===source);
+   const candidates=(families.get(normalize(name))||families.get(fold(name))||[]).filter(f=>f.source===source);
    for(const slot of order[style]){const found=candidates.find(f=>f.styleCode===slot);if(found){if(!covers(found,codepoints))return null;return {...found,requestedStyle:style,syntheticBold:!!(style&1)&&!(slot&1),syntheticItalic:!!(style&2)&&!(slot&2)};}}
    return null;
   }

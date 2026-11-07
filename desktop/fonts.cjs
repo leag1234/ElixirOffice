@@ -14,7 +14,7 @@ function names(bytes, offset) {
   if (count > 256 || offset+12+count*16 > bytes.length) throw Error('Invalid font tables');
   for(let i=0;i<count;i++) { const at=offset+12+i*16; if(bytes.toString('ascii',at,at+4)==='name')table=bytes.readUInt32BE(at+8); }
   if (table === undefined || table+6 > bytes.length) throw Error('Font has no names');
-  const entries=bytes.readUInt16BE(table+2), start=table+bytes.readUInt16BE(table+4), result={};
+  const entries=bytes.readUInt16BE(table+2), start=table+bytes.readUInt16BE(table+4), result={}, familyNames=new Set();
   if(entries>4096 || table+6+entries*12>bytes.length)throw Error('Invalid font names');
   for(let i=0;i<entries;i++) {
     const at=table+6+i*12, platform=bytes.readUInt16BE(at), lang=bytes.readUInt16BE(at+4), id=bytes.readUInt16BE(at+6);
@@ -24,11 +24,19 @@ function names(bytes, offset) {
     const data=bytes.subarray(position,position+length); let text;
     if(platform===0 || platform===3) { if(length%2)continue; text=Buffer.from(data).swap16().toString('utf16le'); }
     else if(platform===1)text=data.toString('latin1'); else continue;
-    if(text && (!result[id] || lang===0x409))result[id]=text.replace(/\0/g,'');
+    if(!text)continue;
+    text=text.replace(/\0/g,'');
+    if(!result[id] || lang===0x409)result[id]=text;
+    if((id===1||id===16)&&(platform===0||platform===3)&&text)familyNames.add(text);
   }
   const family=result[16]||result[1],style=result[17]||result[2]||'Regular';
   if(!family)return null;
-  return {family,style,fullName:result[4]||family+' '+style,postscriptName:result[6]||family.replace(/\s/g,'')+'-'+style};
+  const aliases=[];
+  for(const name of familyNames){
+    if(name===family||aliases.length>=16||name.length>128)continue;
+    aliases.push(name);
+  }
+  return {family,style,fullName:result[4]||family+' '+style,postscriptName:result[6]||family.replace(/\s/g,'')+'-'+style,aliases};
 }
 function fontPath(filename){
   const resolved=path.resolve(filename);

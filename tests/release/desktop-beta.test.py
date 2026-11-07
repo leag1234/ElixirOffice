@@ -388,7 +388,8 @@ class ReleaseInputs(unittest.TestCase):
 
     def test_build_environment_is_an_allowlist(self):
         env = release.clean_environment("/owned/node/bin/node", "/owned/cache")
-        self.assertEqual(set(env), {"PATH", "HOME", "LANG", "LC_ALL", "npm_config_cache", "PYTHONDONTWRITEBYTECODE", "EO_RELEASE_REQUIRE_BUILDER"})
+        self.assertEqual(set(env), {"PATH", "HOME", "LANG", "LC_ALL", "npm_config_cache", "PYTHONDONTWRITEBYTECODE", "EO_RELEASE_REQUIRE_BUILDER", "EO_TEMP_LOCATION_CHECK"})
+        self.assertEqual(env["EO_TEMP_LOCATION_CHECK"], "0")
         self.assertEqual(env["EO_RELEASE_REQUIRE_BUILDER"], "1")
         self.assertEqual(env["PATH"], "/owned/node/bin:/usr/local/bin:/usr/bin:/bin")
 

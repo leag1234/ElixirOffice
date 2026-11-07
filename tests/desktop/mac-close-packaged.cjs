@@ -27,7 +27,7 @@ async function run({name,format,dirty=false,choice,action='close',fault,password
  const source=format?path.join(folder,'public.'+format):null;
  if(source){if(passwordMode)await fs.writeFile(source,await protectedBytes());else if(corrupt)await fs.writeFile(source,Buffer.from('PKbroken-public-document'));else await fs.copyFile(path.join(root,'fixtures',format==='pdf'?'public-forms.pdf':'sample.'+format),source);}
  const before=source?await fs.readFile(source):null;
- const app=await _electron.launch({executablePath:executable,args:['--user-data-dir='+profile,...(source?[source]:[])],env:{...process.env,EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process();
+ const app=await _electron.launch({executablePath:executable,args:['--user-data-dir='+profile,...(source?[source]:[])],env:{...process.env,EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process();
  let record={name,format,action,pid:child.pid,profile};
  await fs.writeFile(path.join(root,'results/mac-close-current.json'),JSON.stringify(record,null,2));
  try{

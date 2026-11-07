@@ -131,6 +131,10 @@
     "homeTabRequiresTabs": "The Home tab is available when documents open in tabs.",
     "tabMoveOtherWindow": "Move to another window",
     "tabModified": "Unsaved changes",
+    "removeRecent": "Remove from list",
+    "clearRecents": "Clear list",
+    "temporaryLocation": "This file is in a temporary folder. Save a copy to keep your changes.",
+    "saveAs": "Save As",
     "releaseAvailable": "New version available: {version}",
     "releaseNotes": "Release notes",
     "releaseDownload": "Download",
@@ -324,7 +328,11 @@
     "interfaceZoomReset": "Rétablir le zoom de l’interface à 100 %",
     "generalSettings": "Général",
     "viewMenu": "Affichage",
-    "rememberWindowPlacement": "Mémoriser la position et la taille de la fenêtre"
+    "removeRecent": "Retirer de la liste",
+    "clearRecents": "Vider la liste",
+    "rememberWindowPlacement": "Mémoriser la position et la taille de la fenêtre",
+    "temporaryLocation": "Ce fichier se trouve dans un dossier temporaire. Enregistrez une copie pour conserver vos modifications.",
+    "saveAs": "Enregistrer sous"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",

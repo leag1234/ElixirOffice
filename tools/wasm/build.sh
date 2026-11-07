@@ -54,6 +54,8 @@ fi
 git -C "$WORK/core" checkout -q -f -B wasm-build "$CORE_REF"
 git -C "$WORK/core" clean -q -fdx
 for p in "$HERE"/patches/*.patch; do
+  # A patch already merged in the core (it reverses cleanly) is skipped; any other failure stops the build.
+  if git -C "$WORK/core" apply --reverse --check "$p" 2>/dev/null; then echo "already in core: $(basename "$p")"; continue; fi
   git -C "$WORK/core" apply "$p"
   echo "applied $(basename "$p")"
 done

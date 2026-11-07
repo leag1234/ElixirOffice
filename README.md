@@ -68,17 +68,17 @@ In your language (here French, German and Japanese):
 | For | organisations, Murena Workspace / Nextcloud, shared documents | individuals, offline use |
 | How | your own server (Docker), in the browser | Windows, macOS (Apple Silicon), Linux |
 | Documents | real-time co-editing, cloud storage; optional "convert locally" mode | 100 % local, no document server |
-| Available | 0.1.1 beta 1.1 | 0.6.5 |
+| Available | 0.1.1 beta 1.1 | 0.6.6 |
 | Install | [docs/install-server.md](docs/install-server.md) | [docs/desktop.md](docs/desktop.md) |
 
 ## Get ElixirOffice
 
 | Version | For whom | Why choose it | Get it |
 |---|---|---|---|
-| **Desktop app** 0.6.5 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-linux-amd64.deb) |
+| **Desktop app** 0.6.6 | Anyone, on their own computer | Local document editing: no server, no account, documents never leave your computer | [Windows](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-win-x64.exe)<br>[macOS (Apple Silicon)](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-mac-arm64.dmg)<br>[Linux AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-x86_64.AppImage)<br>[Debian/Ubuntu .deb](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-linux-amd64.deb) |
 | **Server version** 0.1.1 (beta 1.1) | Teams, schools, organisations, self-hosters | Editing in the browser, real-time co-editing, Murena Workspace and Nextcloud accounts | [Install guide and files](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1) · Docker image `ghcr.io/leag1234/elixiroffice-server:beta1.1` |
 
-Release notes, checksums and source archives: [desktop 0.6.5](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.5), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1), [all releases](https://github.com/leag1234/elixiroffice/releases). The installers are not publisher-signed yet: see the first-launch tips in [Try it](#try-it).
+Release notes, checksums and source archives: [desktop 0.6.6](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.6), [server 0.1.1](https://github.com/leag1234/elixiroffice/releases/tag/v0.1.1), [all releases](https://github.com/leag1234/elixiroffice/releases). The installers are not publisher-signed yet: see the first-launch tips in [Try it](#try-it).
 
 **Updates.** Once a day at most, the desktop app checks GitHub for a new release (GitHub sees a normal HTTPS connection, including your IP address; no documents, file names or identity are sent). On Windows (installer) and Linux (AppImage), it can then download the update, verify its signature and install it when you choose **Install**; other packages open the release page. Turn checks off in File > Options > Updates.
 
@@ -86,9 +86,9 @@ Release notes, checksums and source archives: [desktop 0.6.5](https://github.com
 
 **Desktop app (offline, nothing to install on a server)**
 
-- **Windows**: download the [installer](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-win-x64.exe) and run it. It is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
-- **macOS** (Apple Silicon): download the [disk image](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-mac-arm64.dmg), open it and drag ElixirOffice to Applications. It is not notarized yet: if macOS blocks it, open **System Settings > Privacy & Security** and click **Open Anyway**.
-- **Linux**: download the [AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-x86_64.AppImage), make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the [.deb](https://github.com/leag1234/elixiroffice/releases/download/v0.6.5/ElixirOffice-0.6.5-linux-amd64.deb) with `sudo apt install ./ElixirOffice-*.deb`.
+- **Windows**: download the [installer](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-win-x64.exe) and run it. It is not signed yet, so Windows SmartScreen shows a warning: click **More info**, then **Run anyway**.
+- **macOS** (Apple Silicon): download the [disk image](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-mac-arm64.dmg), open it and drag ElixirOffice to Applications. It is not notarized yet: if macOS blocks it, open **System Settings > Privacy & Security** and click **Open Anyway**.
+- **Linux**: download the [AppImage](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-x86_64.AppImage), make it executable (`chmod +x ElixirOffice-*.AppImage`) and run it; or install the [.deb](https://github.com/leag1234/elixiroffice/releases/download/v0.6.6/ElixirOffice-0.6.6-linux-amd64.deb) with `sudo apt install ./ElixirOffice-*.deb`.
 
 Then create a document or open a .docx, .xlsx, .pptx, .odt, .ods or .odp file, edit it and save: the file stays on your computer.
 
@@ -104,6 +104,7 @@ Feature by feature, compared with LibreOffice and ONLYOFFICE: [docs/differences.
 
 | Version | Date | What it is |
 |---|---|---|
+| [Desktop 0.6.6](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.6) | 2026-11-07 | ElixirOffice 0.6.6 release. |
 | [Desktop 0.6.5](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.5) | 2026-11-06 | ElixirOffice 0.6.5 release. |
 | [Desktop 0.6.4](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.4) | 2026-11-05 | ElixirOffice 0.6.4 release. |
 | [Desktop 0.6.3](https://github.com/leag1234/elixiroffice/releases/tag/v0.6.3) | 2026-11-02 | Security release: Electron 44.10.1 and converters rebuilt with Brotli 1.2.1; saving through linked folders; quiet Ctrl+S notice; font list applies the clicked font; Presenter View window; spreadsheet PDF prints the active sheet; Word layout fixes. |
@@ -160,6 +161,7 @@ Each release ships `elixiroffice-desktop-source.tar.gz` with its complete corres
 
 | Release | Public tag | Original product revision | Original DocumentServer revision |
 |---|---|---|---|
+| 0.6.6 (build 42) | [v0.6.6](https://github.com/leag1234/elixiroffice/tree/v0.6.6) | `7ccf9ef1d3093bf87659c650a98beef3cc68afa0` | `7292cb959080f6ac5294d52bb1b444a305e655cb` |
 | 0.6.5 (build 38) | [v0.6.5](https://github.com/leag1234/elixiroffice/tree/v0.6.5) | `bb3b5240ab4fe435ef9a42ede1ac9e9b46ccca19` | `afe0c11ec92fc37c00d6add70a6d65454b43991b` |
 | 0.6.4 (build 31) | [v0.6.4](https://github.com/leag1234/elixiroffice/tree/v0.6.4) | `860f11e896007c7f0ba496acef22585909c4e446` | `272ff2a76785b73dcc0310ea035b0b67d9649994` |
 | 0.6.3 (build 29) | [v0.6.3](https://github.com/leag1234/elixiroffice/tree/v0.6.3) | `08b2bca440c20f37b306bd59e640bf592f9cbaac` | `69fb98cd3b41fd4f1ed42991dcba688952fe7105` |

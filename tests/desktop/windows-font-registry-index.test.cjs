@@ -26,7 +26,7 @@ test('configured Windows index keeps per-user and exact registered fonts despite
    assert.deepEqual(Buffer.from(await fonts.read(handle.id)),f.raw);
    fonts.clear();await assert.rejects(fonts.read(handle.id),/Unknown font handle/);
   }finally{fonts.clear()}
-  const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));assert.equal(checkpoint.complete,true);assert.equal(Object.keys(checkpoint.records).length,2);
+  const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));assert.equal(checkpoint.complete,true);assert.equal(Object.keys(checkpoint.records).length,2);
   const {handles,resolvedRoots,...publicIndex}=result;assert(!JSON.stringify(publicIndex).includes(f.folder));
  }finally{await fs.rm(f.folder,{recursive:true,force:true})}
 });

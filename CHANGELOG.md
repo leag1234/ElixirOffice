@@ -1,6 +1,29 @@
 # Changelog
 
-## Desktop 0.6.5 — in preparation, not released
+## Desktop 0.6.6 — published 2026-11-08
+
+### New
+
+- Home: each recent file has a "Remove from list" button and the list a "Clear list" action; the files
+  themselves are not touched (#60).
+- Documents opened from a temporary folder (for example a mail attachment) show a notice, and their
+  first Save opens Save As in the Documents folder so the changes are not lost.
+
+### Fixed
+
+- Text in a font with a Japanese name written in full-width characters (for example "ＭＳ ゴシック")
+  no longer turns into boxes once installed fonts are loaded: every localized family name of an
+  installed font is recognised (#62).
+- Text boxes inside a shape group use the installed font set in the document instead of a fallback,
+  so their lines no longer wrap or overlap (#63).
+- Markdown task lists keep their boxes (☑ / ☐).
+
+### Security
+
+- Converter libraries updated: libxml2 2.15.4, libtiff 4.7.2, FreeType 2.15.0, zlib 1.4, libpng 1.6.59,
+  OpenJPEG 2.5.4, OpenSSL 4.0.3; JasPer removed.
+
+## Desktop 0.6.5 — published 2026-11-06
 
 ### New
 

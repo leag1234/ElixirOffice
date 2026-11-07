@@ -11,7 +11,7 @@ const {_electron}=require(process.env.EO_PLAYWRIGHT||'../../tools/node_modules/p
  cp.execFileSync('python3',[generator,file,'ElixirOffice Consent Test Font']);
  for(const entry of (process.env.EO_FONT_ENTRY||'bar,options').split(',')){
   const profile=path.join(root,'profiles','font-'+entry+'-'+Date.now());await fs.mkdir(profile,{recursive:true});
-  const app=await _electron.launch({executablePath:executable,args:[file],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:profile,LANG:'en_US.UTF-8',LC_ALL:'en_US.UTF-8'},timeout:120000});
+  const app=await _electron.launch({executablePath:executable,args:[file],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile,LANG:'en_US.UTF-8',LC_ALL:'en_US.UTF-8'},timeout:120000});
   const processHandle=app.process();
   try{
    await app.evaluate(({dialog})=>{

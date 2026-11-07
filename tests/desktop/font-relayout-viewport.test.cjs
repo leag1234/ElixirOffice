@@ -80,3 +80,17 @@ test('the actual packaged Word bundle uses the preserving relayout contract', ()
  assert.deepEqual(f.calls.at(-1), ['recalculate', true, true],
   'A standalone source copy does not replace the Core module compiled into Word app.js');
 });
+
+test("relayout also re-measures text inside shape groups (#63)", () => {
+ const f = fixture();
+ const para = name => ({Recalc_CompiledPr: () => f.calls.push(name), Recalc_RunsCompiledPr() {}});
+ const shape = name => ({GetAllParagraphs: (_props, list) => { list.push(para(name)); return list; }});
+ const doc = f.api.WordControl.m_oLogicDocument;
+ doc.GetAllParagraphs = () => [para("body")];
+ doc.GetAllDrawingObjects = () => [
+  {GraphicObj: shape("plain")},
+  {GraphicObj: {spTree: [shape("grouped"), {spTree: [shape("nested")]}]}}
+ ];
+ assert.equal(f.LF.relayout(f.api), true);
+ assert.deepEqual(f.calls.filter(c => typeof c === "string" && c !== "raster" && c !== "pages"), ["body", "grouped", "nested"]);
+});

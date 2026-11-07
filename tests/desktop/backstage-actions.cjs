@@ -7,7 +7,7 @@ const {_electron}=require(process.env.EO_PLAYWRIGHT||'../../tools/node_modules/p
  for(const format of ['docx','xlsx','pptx']){
   const temp=await fs.mkdtemp(path.join(root,'tmp','actions-')),file=path.join(temp,'public-blank.'+format);await fs.copyFile(path.join(assets,'templates','new.'+format),file);
   const profile=path.join(root,'profiles','actions-'+format+'-'+Date.now());
-  const app=await _electron.launch({executablePath:executable,args:[file],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:profile},timeout:120000}),processHandle=app.process();
+  const app=await _electron.launch({executablePath:executable,args:[file],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:120000}),processHandle=app.process();
   try{
    const page=await app.firstWindow();await page.waitForFunction(()=>window.EODesktopReady&&window.EOLocalSession||window.EOLocalFailure,null,{timeout:120000});assert.equal(await page.evaluate(()=>window.EOLocalFailure||null),null);
    const frame=page.frames().find(f=>/\/(documenteditor|spreadsheeteditor|presentationeditor)\/main\//.test(f.url()));assert(frame);

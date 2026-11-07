@@ -16,6 +16,7 @@ function validRecord(record){
      typeof face.variable!=='boolean'||!Number.isSafeInteger(face.embedding)||face.embedding<0||face.embedding>65535||
      face.instanceDefault!==undefined&&typeof face.instanceDefault!=='boolean'||
      face.id!==undefined&&(typeof face.id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(face.id))||
+     face.aliases!==undefined&&(!Array.isArray(face.aliases)||face.aliases.length>16||!face.aliases.every(alias=>typeof alias==='string'&&alias.length>0&&alias.length<=128))||
      !Array.isArray(face.coverage)||face.coverage.length>200000)return false;
   let previous=-1;
   return face.coverage.every(range=>{
@@ -43,7 +44,7 @@ async function load(file,identity){
    if(position!==bytes.length||signature(await handle.stat())!==signature(before))return null;
   }finally{await handle.close();}
   const value=JSON.parse(bytes.toString('utf8'));
-  if(!plain(value)||value.version!==3||value.bundleIdentity!==identity||!plain(value.records)||
+  if(!plain(value)||value.version!==4||value.bundleIdentity!==identity||!plain(value.records)||
      value.complete!==undefined&&typeof value.complete!=='boolean')return null;
   if(!Object.entries(value.records).every(([key,record])=>/^(system|bundled):/.test(key)&&validRecord(record)))return null;
   return value;

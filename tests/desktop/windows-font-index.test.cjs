@@ -14,7 +14,7 @@ test('configured Windows font indexing recovers transient system-font opens and 
    let attempts=0;const target=path.join(f.fonts,'0.ttf'),proxy={...fs,async open(file,...args){if(file===target&&attempts++===0)throw fault(code);return fs.open(file,...args)}};
    const result=await isolatedWorker({},[],{fs:proxy})(f.options);
    assert.equal(attempts,2);assert.equal(result.system.length,2);assert.equal(result.stats.skipped,0);
-   const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));assert.equal(checkpoint.complete,true);assert.equal(Object.keys(checkpoint.records).length,2);
+   const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));assert.equal(checkpoint.complete,true);assert.equal(Object.keys(checkpoint.records).length,2);
   }finally{await fs.rm(f.folder,{recursive:true,force:true})}
  }
 });
@@ -23,7 +23,7 @@ test('permanent configured-font denials keep healthy siblings and publish no una
   const denied=new Set([path.join(f.fonts,'0.ttf'),path.join(f.fonts,'1.ttf')]),proxy={...fs,async open(file,...args){if(denied.has(file))throw fault('EBUSY');return fs.open(file,...args)}};
   const result=await isolatedWorker({},[],{fs:proxy})(f.options);
   assert.equal(result.system.length,1);assert.equal(result.handles.length,1);assert.equal(result.stats.skipped,2);
-  const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));assert.equal(Object.keys(checkpoint.records).length,1);assert.equal(checkpoint.complete,true);
+  const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));assert.equal(Object.keys(checkpoint.records).length,1);assert.equal(checkpoint.complete,true);
  }finally{await fs.rm(f.folder,{recursive:true,force:true})}
 });
 test('configured indexing rejects directory cycles and outside directory targets before traversal',async()=>{
@@ -42,16 +42,16 @@ test('private font cache retries temporary staging/replacement refusals and ackn
  const cacheFile=path.join(root,'desktop/font-index-cache.cjs'),load=createRequire(cacheFile);
  for(const mode of ['open','rename','committed']){
   const f=await fixture(1);try{
-   await fs.mkdir(f.cacheDir);const target=path.join(f.cacheDir,'index-v3.json'),old='original cache';await fs.writeFile(target,old);
+   await fs.mkdir(f.cacheDir);const target=path.join(f.cacheDir,'index-v4.json'),old='original cache';await fs.writeFile(target,old);
    let attempts=0;const proxy={...fs,
     async open(file,...args){if(mode==='open'&&String(file).endsWith('.tmp')&&attempts++===0)throw fault('EACCES');return fs.open(file,...args)},
     async rename(a,b){if(b===target&&mode!=='open'&&attempts++===0){if(mode==='committed')await fs.rename(a,b);throw fault('EPERM')}return fs.rename(a,b)}
    };
    const module={exports:{}},input=id=>id==='node:fs/promises'?proxy:id==='./windows-io.cjs'?(platform,ms)=>load(id)('win32',ms):load(id);
    vm.runInNewContext(sync.readFileSync(cacheFile,'utf8'),{module,require:input,Buffer,process,setTimeout,clearTimeout,JSON});
-   await module.exports.save(target,{version:3,records:{}});
-   assert.deepEqual(JSON.parse(await fs.readFile(target,'utf8')),{version:3,records:{}});
-   assert.equal(attempts,mode==='committed'?1:2);assert.deepEqual(await fs.readdir(f.cacheDir),['index-v3.json']);
+   await module.exports.save(target,{version:4,records:{}});
+   assert.deepEqual(JSON.parse(await fs.readFile(target,'utf8')),{version:4,records:{}});
+   assert.equal(attempts,mode==='committed'?1:2);assert.deepEqual(await fs.readdir(f.cacheDir),['index-v4.json']);
   }finally{await fs.rm(f.folder,{recursive:true,force:true})}
  }
 });
@@ -59,7 +59,7 @@ test('private font cache retries temporary staging/replacement refusals and ackn
 test('optional private font-cache reads retry transient Windows denials and fall back cleanly after a permanent denial',async()=>{
  const cacheFile=path.join(root,'desktop/font-index-cache.cjs'),load=createRequire(cacheFile),f=await fixture(1);
  try{
-  await fs.mkdir(f.cacheDir);const target=path.join(f.cacheDir,'index-v3.json'),value={version:3,bundleIdentity:'fixture',complete:true,records:{}};
+  await fs.mkdir(f.cacheDir);const target=path.join(f.cacheDir,'index-v4.json'),value={version:4,bundleIdentity:'fixture',complete:true,records:{}};
   await fs.writeFile(target,JSON.stringify(value));let attempts=0,permanent=false;
   const proxy={...fs,async open(file,...args){if(file===target&&(permanent||attempts++===0))throw fault('EPERM');return fs.open(file,...args)}};
   const module={exports:{}},input=id=>id==='node:fs/promises'?proxy:id==='./windows-io.cjs'?(platform,ms)=>load(id)('win32',ms):load(id);
@@ -85,7 +85,7 @@ test('a mid-read Windows refusal counts consumed bytes across retries and respec
    assert.equal(result.system.length,allowRetry?1:0);assert.equal(result.handles.length,allowRetry?1:0);
    assert.equal(result.stats.truncated,!allowRetry);
    if(allowRetry)assert.equal(consumed,f.raw.length+chunk);else assert.equal(result.stats.reason,'bytes');
-   const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));
+   const checkpoint=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));
    assert.equal(Object.keys(checkpoint.records).length,allowRetry?1:0);assert.equal(checkpoint.complete,allowRetry);
   }finally{await fs.rm(f.folder,{recursive:true,force:true})}
  }

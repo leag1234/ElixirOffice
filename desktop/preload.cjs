@@ -50,6 +50,8 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   mailMergeRecipients: token => ipcRenderer.invoke('eo:mail-merge-recipients', token),
   recent: id => ipcRenderer.invoke('eo:recent', id),
   recents: () => ipcRenderer.invoke('eo:recents'),
+  removeRecent: id => ipcRenderer.invoke('eo:recent-remove', id),
+  clearRecents: () => ipcRenderer.invoke('eo:recents-clear'),
   create: format => ipcRenderer.invoke('eo:new', format),
   drop: file => ipcRenderer.invoke('eo:drop', webUtils.getPathForFile(file)),
   rename: (token, name) => ipcRenderer.invoke('eo:rename', token, name),

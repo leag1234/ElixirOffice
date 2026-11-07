@@ -316,7 +316,9 @@ def clean_environment(node, cache):
     return {"PATH": str(Path(node).parent) + ":/usr/local/bin:/usr/bin:/bin",
             "HOME": str(Path.home()), "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8",
             "npm_config_cache": str(Path(cache) / "npm"),
-            "PYTHONDONTWRITEBYTECODE": "1", "EO_RELEASE_REQUIRE_BUILDER": "1"}
+            "PYTHONDONTWRITEBYTECODE": "1", "EO_RELEASE_REQUIRE_BUILDER": "1",
+            # Test documents live under the temporary folder; keep their saves in place.
+            "EO_TEMP_LOCATION_CHECK": "0"}
 
 def appimage_tool_cache(root):
     """Manifest-addressed raw inputs live outside disposable release/task caches."""

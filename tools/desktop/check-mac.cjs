@@ -24,7 +24,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    const extensions=plist.CFBundleDocumentTypes.flatMap(type=>type.CFBundleTypeExtensions||[]).sort();
    assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf','md','markdown'].sort());
    const {types,unused}=require('./mac-after-pack.cjs');
-   assert.equal(plist.CFBundleDocumentTypes.length,19);
+   assert.equal(plist.CFBundleDocumentTypes.length,21);
    for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
    function checkPlists(folder){for(const entry of fs.readdirSync(folder,{withFileTypes:true})){
     const file=path.join(folder,entry.name);if(entry.isDirectory())checkPlists(file);else if(entry.name==='Info.plist'){

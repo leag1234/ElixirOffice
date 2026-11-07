@@ -6,6 +6,7 @@ const packageGuard=require('./package-guard.cjs'),password=require('./password.c
 const interfaceSize=require('./interface-size.cjs');
 let refreshInterfaceMenu=()=>{};
 const saveAs=require('./save-as.cjs');
+const tempLocation=require('./temp-location.cjs');
 const files = require('./files.cjs'), resources = require('./resources.cjs'), {Fonts} = require('./fonts.cjs');
 // Keep the existing profile location while correcting the native app identity.
 const defaultProfile=app.getPath('userData');
@@ -694,11 +695,11 @@ async function select(filename,prepared) {
   const {bytes,...metadata}=opened;
   const sourceExtension=files.extension(opened.target),sourceFormat=sourceExtension==='markdown'?'md':sourceExtension,format=require('./formats.cjs').canonical[sourceFormat]||sourceFormat;
   documentState().artifacts.clear();clearDestination();
-  documentState().current={...metadata,sourceTarget:opened.target,token:crypto.randomUUID(),name:path.basename(opened.target),format,sourceFormat};
+  documentState().current={...metadata,sourceTarget:opened.target,token:crypto.randomUUID(),name:path.basename(opened.target),format,sourceFormat,temporary:tempLocation.isTemporaryPath(opened.target)};
   documentState().current.protected=password.encrypted(bytes,sourceFormat);documentState().current.recoveryLocked=documentState().current.protected;
   if(format!==sourceFormat){documentState().current.target=null;documentState().current.name=path.basename(opened.target).replace(/\.[^.]+$/,'.'+format)}
   documentState().dirty=false;title();await remember(opened.target);
-  return {token:documentState().current.token,name:documentState().current.name,bytes:new Uint8Array(bytes),format:documentState().current.format,sourceFormat,runtime:conversionRuntime};
+  return {token:documentState().current.token,name:documentState().current.name,bytes:new Uint8Array(bytes),format:documentState().current.format,sourceFormat,temporary:documentState().current.temporary,runtime:conversionRuntime};
 }
 let homeFontDiscovery,homeFontGeneration;
 let openFontTimer;
@@ -930,6 +931,14 @@ async function start() {
     const target=await savedTarget(id);shell.showItemInFolder(target);return true;
   });
   handle('recents',()=>settings.recents.map(({id,name})=>({id,name})));
+  handle('recent-remove',async id=>{
+    if(typeof id!=='string'||!id)return settings.recents.map(({id,name})=>({id,name}));
+    settings.recents=settings.recents.filter(item=>item.id!==id);
+    await persist();return settings.recents.map(({id,name})=>({id,name}));
+  });
+  handle('recents-clear',async()=>{
+    settings.recents=[];await persist();return [];
+  });
   handle('recent',id=>operation(async()=>{if(captureOptions)throw Error('Capture mode uses generated documents only');const file=settings.recents.find(item=>item.id===id);if(!file)throw Error('Unknown recent file');return openFile(file.target)}));
   handle('new',format=>operation(()=>newBlank(format)));
   handle('state',(token,modified)=>{if(!documentState().current||token!==documentState().current.token)return false;documentState().dirty=modified===true;title();return true});
@@ -962,8 +971,8 @@ async function start() {
       copy=true;
     }
     if(selected&&!copy)target=selected.target;
-    else if(as||!target||copy){
-      const defaultPath=copy?(target||documentState().current.name).replace(/\.[^.]+$/, '-copy.'+documentState().current.format):(target||documentState().current.name);
+    else if(as||!target||copy||documentState().current.temporary){
+      const defaultPath=copy?(target||documentState().current.name).replace(/\.[^.]+$/, '-copy.'+documentState().current.format):documentState().current.temporary&&!target?path.join(app.getPath('documents'),documentState().current.name):(target||documentState().current.name);
       operationStage(token,operationId,'awaiting-user');
       const closingDocument=registry.context(),closingAttempt=pauseCloseSave(closingDocument);let destinationSelected=false;
       try{
@@ -984,7 +993,7 @@ async function start() {
     }
     operationStage(token,operationId,'writing');
     const saved=await withDestination(target,{adopt:true},()=>password.write(files,target,bytes,selected&&!copy?selected.state||{absent:true}:!as&&!copy&&documentState().current.target?documentState().current:undefined,writeOptions));
-    documentState().current={...documentState().current,...saved,sourceTarget:target,sourceFormat:documentState().current.format,protected:password.encrypted(bytes,documentState().current.format),name:path.basename(target),embeddedObjects:['odt','ods','odp'].includes(documentState().current.format)?packageGuard.embeddedObjects(bytes):0};const preferencesSaved=await remember(target);title();
+    documentState().current={...documentState().current,...saved,sourceTarget:target,sourceFormat:documentState().current.format,protected:password.encrypted(bytes,documentState().current.format),name:path.basename(target),temporary:false,embeddedObjects:['odt','ods','odp'].includes(documentState().current.format)?packageGuard.embeddedObjects(bytes):0};const preferencesSaved=await remember(target);title();
     documentState().current.recoveryVersion=(documentState().current.recoveryVersion||0)+1;
     return {artifactId:documentState().artifacts.register(saved,documentState().current.token),name:documentState().current.name,bytes:saved.bytes,recoveryVersion:documentState().current.recoveryVersion,preferencesSaved,durabilityUnconfirmed:saved.durabilityUnconfirmed===true,backupName:saved.backupName||null};
   })));

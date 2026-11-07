@@ -55,6 +55,22 @@ Excel references) before it is integrated.
   that are not part of any release. We triage those separately and say so when a finding does not affect a
   release.
 
+## Security check before each release
+
+### 2026-11-07 (desktop 0.6.6, server 0.6.6)
+
+- Dependency scan (OSV): no new finding; the only high finding in shipped code (request-filtering-agent,
+  GHSA-r3r9-wp5j-pq5g) stays verified not affected.
+- Bundled C/C++ libraries: libxml2 2.9.14 -> 2.15.4, libtiff 3.9.4 -> 4.7.2, FreeType 2.10.4 -> 2.15.0,
+  zlib 1.2.11 -> 1.4, libpng 1.5.26 -> 1.6.59, OpenJPEG 2.4.0 -> 2.5.4, OpenSSL 4.0.1 -> 4.0.3; JasPer
+  1.900.1 removed (JPEG 2000 goes through OpenJPEG). This closes the known CVEs of these copies. The
+  WebAssembly converters of the desktop app are rebuilt with them.
+- Checked and not affected: curl (not built into the desktop app or the server converters; the server
+  image uses the system package, covered by the image scan); FreeType 2.5.x copies (present in the source
+  tree, not built).
+- Still to update: xpdf 4.03, dcraw, V8 8.9, ICU, HarfBuzz (planned for the next releases).
+- Electron 44.10.1: the newer 44.10.2 has the same Chromium and Node.js, so no security change is pending.
+
 ## Status (2026-11-02)
 
 | Item | Status |

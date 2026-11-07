@@ -65,7 +65,7 @@ try:
             if Path('/tmp/.X11-unix/X'+str(n)).exists():break
             time.sleep(.05)
         else:raise RuntimeError('Private Xvfb did not become ready')
-        env={**os.environ,'DISPLAY':':'+str(n),'XAUTHORITY':str(authority),'EO_XVFB_PID':str(display.pid),'EO_DESKTOP_ROOT':str(w),'EO_DESKTOP_PROFILE':str(profile),'XDG_CONFIG_HOME':str(w/'config'),'XDG_DATA_HOME':str(w/'data'),'XDG_CACHE_HOME':str(w/'cache'),'GSETTINGS_BACKEND':'memory','GTK_USE_PORTAL':'0','DBUS_SESSION_BUS_ADDRESS':'unix:path='+str(w/'no-session-bus'),'LANG':'C.UTF-8','LC_ALL':'C.UTF-8'}
+        env={**os.environ,'DISPLAY':':'+str(n),'XAUTHORITY':str(authority),'EO_XVFB_PID':str(display.pid),'EO_DESKTOP_ROOT':str(w),'EO_TEMP_LOCATION_CHECK':'0','EO_DESKTOP_PROFILE':str(profile),'XDG_CONFIG_HOME':str(w/'config'),'XDG_DATA_HOME':str(w/'data'),'XDG_CACHE_HOME':str(w/'cache'),'GSETTINGS_BACKEND':'memory','GTK_USE_PORTAL':'0','DBUS_SESSION_BUS_ADDRESS':'unix:path='+str(w/'no-session-bus'),'LANG':'C.UTF-8','LC_ALL':'C.UTF-8'}
         previous=signal.pthread_sigmask(signal.SIG_BLOCK,{signal.SIGTERM,signal.SIGINT})
         try:
             driver=subprocess.Popen([os.environ['EO_NODE'],str(driver_file)],env=env,stdout=dl,stderr=dl,start_new_session=True)

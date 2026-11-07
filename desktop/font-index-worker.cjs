@@ -17,18 +17,18 @@ async function build(options){
  let old={records:{}},cachePath;
  if(cacheDir){
   await fs.mkdir(cacheDir,{recursive:true,mode:0o700});const st=await fs.lstat(cacheDir);if(!st.isDirectory()||st.isSymbolicLink())throw Error('Invalid private font cache');
-  await fs.chmod(cacheDir,0o700);cachePath=path.join(cacheDir,'index-v3.json');
+  await fs.chmod(cacheDir,0o700);cachePath=path.join(cacheDir,'index-v4.json');
   old=await cache.load(cachePath,bundleIdentity)||{records:{}};
  }
  parentPort?.postMessage({phase:'cache',warm:old.complete===true&&Object.keys(old.records).length>0});
  const records={},handles=[],system=[],bundledFaces=[],stats={files:0,cacheHits:0,readBytes:0,skipped:0,eligibleFaces:0,ineligibleFaces:0,truncated:false,reason:null};
  const visited=new Set(),directories=new Set(),identities=new Map(),retry=retryWindow(undefined,1000);let checkpointFiles=0,lastCheckpoint=0;
- const headerBytes=Buffer.byteLength(JSON.stringify({version:3,bundleIdentity,complete:false,records:{}}));let metadataBytes=headerBytes;
+ const headerBytes=Buffer.byteLength(JSON.stringify({version:4,bundleIdentity,complete:false,records:{}}));let metadataBytes=headerBytes;
  function stop(reason){stats.truncated=true;stats.reason=stats.reason||reason;}
  async function checkpoint(complete=false,force=false){
   if(!cachePath)return;
   if(!force&&checkpointFiles>0&&stats.files-checkpointFiles<16&&Date.now()-lastCheckpoint<1000)return;
-  await cache.save(cachePath,{version:3,bundleIdentity,complete,records});
+  await cache.save(cachePath,{version:4,bundleIdentity,complete,records});
   checkpointFiles=stats.files;lastCheckpoint=Date.now();
  }
  // An empty cold checkpoint survives a deadline before the first file completes.

@@ -33,7 +33,9 @@ function render(container,info,actions,view='home'){
   }
   section.append(tiles);main.append(section);
  }
- const recent=element('section','recent'),head=element('div','recent-head');head.append(element('h2','section-title',t('recent')),element('span','recent-fill'),button(t('browse'),()=>actions('open')));recent.append(head);
+ const recent=element('section','recent'),head=element('div','recent-head');head.append(element('h2','section-title',t('recent')),element('span','recent-fill'),button(t('browse'),()=>actions('open')));
+ if(info.recents.length){const clear=button(t('clearRecents'),()=>actions('recents-clear'),'recent-clear');clear.setAttribute('title',t('clearRecents'));clear.setAttribute('aria-label',t('clearRecents'));head.append(clear);}
+ recent.append(head);
  if(view==='open'){
   const drop=button('',()=>actions('open'),'dropzone');
   drop.setAttribute('role','button');drop.setAttribute('aria-label',t('browse'));
@@ -46,6 +48,7 @@ function render(container,info,actions,view='home'){
   const type=/\.pdf$/i.test(item.name)?'pdf':/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(item.name)?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(item.name)?'slide':'word',symbol=icon(type);symbol.classList.add('t-'+type);
   const label=element('span'),name=element('span','file-name'),where=element('span','file-where');
   name.append(element('bdi','',item.name));where.append(element('bdi','',item.folder));label.append(name,where);b.append(symbol,label);cell.append(b);row.append(cell);
+  const remove=button('×',()=>actions('recent-remove',item.id),'recent-remove');remove.setAttribute('title',t('removeRecent'));remove.setAttribute('aria-label',t('removeRecent'));row.append(element('td','c-remove',remove));
   const date=item.modified?new Intl.DateTimeFormat(info.language,{dateStyle:'medium',timeStyle:'short'}).format(new Date(item.modified)):'—';row.append(element('td','c-date',date));tbody.append(row);
  }
  table.append(tbody);if(info.recents.length)recent.append(table);else recent.append(element('p','recent-empty',t('noRecent')));main.append(recent);

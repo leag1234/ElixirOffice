@@ -31,6 +31,8 @@
   "sdkjs_files": [
     "pdf/src/thumbnails.js",
     "common/GlobalLoaders.js",
-    "common/device_scale.js"
+    "common/device_scale.js",
+    "common/wasm-convert/api.js",
+    "common/wasm-convert/runtime-release.json"
   ]
 }

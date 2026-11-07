@@ -50,7 +50,7 @@ test('private index caches real SFNT coverage, exposes no paths and rejects chan
   const fonts=new Fonts();fonts.allowed=[directory];const options={cacheDir:path.join(temp,'cache'),bundleIdentity:'fixture'};fonts.configure(options);
   const first=await fonts.index();assert.equal(first.system.length,1);assert.equal(first.stats.files,1);assert.equal(first.stats.cacheHits,0);assert(!JSON.stringify(first).includes(directory));assert.deepEqual(Buffer.from(await fonts.read(first.system[0].id)),raw);
   fonts.clear();const second=await fonts.index();assert.equal(second.id,first.id);assert.equal(second.stats.cacheHits,1);assert.equal(second.system[0].id,first.system[0].id);
-  const mode=(await fs.stat(path.join(temp,'cache/index-v3.json'))).mode&511;assert.equal(mode,384);
+  const mode=(await fs.stat(path.join(temp,'cache/index-v4.json'))).mode&511;assert.equal(mode,384);
   raw[raw.length-1]^=1;await fs.writeFile(filename,raw);await assert.rejects(fonts.read(second.system[0].id),/changed/);
   const third=await fonts.index();assert.notEqual(third.id,first.id);assert.notEqual(third.system[0].id,second.system[0].id);await assert.rejects(fonts.read(second.system[0].id),/Unknown font handle/);
   await fs.writeFile(path.join(directory,'broken.ttf'),Buffer.from([0,1,2]));fonts.clear();const broken=await fonts.index();assert.equal(broken.system.length,1);assert.equal(broken.stats.skipped,1);

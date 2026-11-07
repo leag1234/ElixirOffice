@@ -11,11 +11,11 @@ if [ "${EO_RELEASE_CLEAN_ENV:-}" != yes ]; then
       exit 1
     fi
     exec /usr/bin/env -i PATH=/usr/bin:/bin:/usr/local/bin HOME="$HOME" \
-      LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes \
+      LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes EO_TEMP_LOCATION_CHECK=0 \
       /usr/bin/arch -arm64 /bin/bash "${BASH_SOURCE[0]}" "$@"
   fi
   exec /usr/bin/env -i PATH=/usr/bin:/bin:/usr/local/bin HOME="$HOME" \
-    LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes \
+    LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 EO_RELEASE_CLEAN_ENV=yes EO_TEMP_LOCATION_CHECK=0 \
     /bin/bash "${BASH_SOURCE[0]}" "$@"
 fi
 MODE="$1"

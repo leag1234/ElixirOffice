@@ -21,7 +21,7 @@ async function startupQueue(){
    for(let i=0;i<500;i++){try{await fs.lstat(path.join(directory,'SingletonLock'));break}catch(e){if(e.code!=='ENOENT')throw e;await sleep(10)}}
    const runs=['sample.xlsx','sample.pptx'].map(async name=>{
     const log=await fs.open(path.join(root,'results','startup-'+name+'.log'),'w');times.push({name,spawned:Date.now()});
-    const child=cp.spawn(path.join(root,'tools/electron/electron'),[path.join(root,'desktop/main.cjs'),await fixture(name)],{cwd:root,env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:directory},stdio:['ignore',log.fd,log.fd]});
+    const child=cp.spawn(path.join(root,'tools/electron/electron'),[path.join(root,'desktop/main.cjs'),await fixture(name)],{cwd:root,env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:directory},stdio:['ignore',log.fd,log.fd]});
     const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve)});await log.close();assert.equal(code,0);
    });
    await Promise.all(runs);

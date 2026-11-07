@@ -14,7 +14,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const name=theme+'-'+String(scale).replace('.','_'),profile=path.join(out,'profile-'+name);
   await fs.mkdir(profile);await fs.writeFile(path.join(profile,'desktop-settings.json'),JSON.stringify({recents:[],fontConsent:false,fontChoice:'declined'}));
   try{
-   app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(root,'desktop/main.cjs'),'--ozone-platform=x11','--force-device-scale-factor='+scale],env:{...process.env,EO_DESKTOP_PROFILE:profile},timeout:30000});
+   app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(root,'desktop/main.cjs'),'--ozone-platform=x11','--force-device-scale-factor='+scale],env:{...process.env,EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:30000});
    assert(!app.process().spawnargs.includes('--no-sandbox'));
    const context=app.context(),observe=p=>p.on('pageerror',e=>errors.push({profile:name,message:e.message}));context.pages().forEach(observe);context.on('page',observe);
    for(let n=0;n<100&&!page;n++){page=context.pages().find(p=>p.url()===origin+'/index.html');if(!page)await sleep(100);}

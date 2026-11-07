@@ -44,7 +44,7 @@ async function exited(child,ms=3000){
  const rows=[];
  try{
  const number=await new Promise((resolve,reject)=>{display.stdout.once('data',b=>resolve(String(b).trim()));display.once('exit',code=>reject(Error('Xvfb '+code+': '+errors)));setTimeout(()=>reject(Error('Xvfb timeout '+errors)),10000).unref()});
- const env={...process.env,DISPLAY:':'+number,EO_DESKTOP_PROFILE:path.join(run,'profile'),EO_NATIVE_PRODUCT:root};
+ const env={...process.env,DISPLAY:':'+number,EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:path.join(run,'profile'),EO_NATIVE_PRODUCT:root};
  const keypress=key=>execFileSync(process.env.EO_XDOTOOL,['key','--clearmodifiers',key],{env});
  app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(run,'main.cjs')],env,timeout:30000});
  assert(!app.process().spawnargs.includes('--no-sandbox')); const page=await app.firstWindow();await page.waitForFunction(()=>window.EODesktopReady,null,{timeout:60000});

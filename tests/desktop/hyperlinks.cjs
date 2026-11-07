@@ -5,7 +5,7 @@ const {_electron}=require(process.env.EO_PLAYWRIGHT||'../../tools/node_modules/p
 const root=process.env.EO_DESKTOP_ROOT;
 (async()=>{
  const profile=path.join(root,'profiles','links-'+Date.now());await fs.mkdir(profile,{recursive:true});
- const app=await _electron.launch({executablePath:process.env.EO_PACKAGE_EXECUTABLE,args:[],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process();
+ const app=await _electron.launch({executablePath:process.env.EO_PACKAGE_EXECUTABLE,args:[],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process();
  try{
   await app.evaluate(({shell})=>{globalThis.EOOpened=[];shell.openExternal=async url=>{globalThis.EOOpened.push(url)}});
   const page=await app.firstWindow();await page.waitForFunction(()=>window.EODesktopReady);

@@ -5,7 +5,7 @@ const root=path.resolve(process.env.EO_DESKTOP_ROOT),exe=path.resolve(process.en
 assert(exe.startsWith(root+path.sep));assert(!exe.startsWith('/Applications/'));
 (async()=>{
  const profile=path.join(root,'profiles','templates-smoke-'+Date.now());await fs.mkdir(profile,{recursive:true});
- const app=await _electron.launch({executablePath:exe,args:['--user-data-dir='+profile],env:{...process.env,EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process(),rows=[];
+ const app=await _electron.launch({executablePath:exe,args:['--user-data-dir='+profile],env:{...process.env,EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process(),rows=[];
  try{
   assert(cp.execFileSync('/bin/ps',['-ww','-p',String(child.pid),'-o','command='],{encoding:'utf8'}).includes(exe));
   assert.equal(await app.evaluate(({app})=>app.getPath('userData')),profile);

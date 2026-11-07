@@ -11,7 +11,7 @@ async function exited(child,ms=5000){if(child.exitCode!==null||child.signalCode!
  const display=spawn(process.env.EO_XVFB,['-screen','0','1360x960x24','-nolisten','tcp','-displayfd','1'],{stdio:['ignore','pipe','pipe']});let app,success=false,displayError='';const rows=[],errors=[],requests=[];display.stderr.on('data',data=>displayError+=data);
  try{
   const number=await new Promise((resolve,reject)=>{display.stdout.once('data',data=>resolve(String(data).trim()));display.once('exit',code=>reject(Error('Xvfb '+code+': '+displayError)));setTimeout(()=>reject(Error('Xvfb timeout')),10000).unref()});
-  app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(run,'main.cjs')],env:{...process.env,DISPLAY:':'+number,EO_DESKTOP_PROFILE:path.join(run,'profile'),EO_NATIVE_PRODUCT:root,DBUS_SESSION_BUS_ADDRESS:'unix:path='+path.join(run,'no-bus')},timeout:30000});assert(!app.process().spawnargs.includes('--no-sandbox'));
+  app=await _electron.launch({chromiumSandbox:true,executablePath:process.env.EO_ELECTRON,args:[path.join(run,'main.cjs')],env:{...process.env,DISPLAY:':'+number,EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:path.join(run,'profile'),EO_NATIVE_PRODUCT:root,DBUS_SESSION_BUS_ADDRESS:'unix:path='+path.join(run,'no-bus')},timeout:30000});assert(!app.process().spawnargs.includes('--no-sandbox'));
   const page=await app.firstWindow();page.on('pageerror',error=>errors.push(error.message));page.on('request',request=>requests.push(request.url()));await page.waitForFunction(()=>window.EODesktopReady,null,{timeout:60000});
   const calls=()=>app.evaluate(()=>openZoneProbe.calls);
   async function chooser(location,action,runAction){

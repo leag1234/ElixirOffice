@@ -26,23 +26,23 @@ test('byte budget keeps the indexed prefix, checkpoints it and resumes from the 
  const f=await fixture();try{
   const saves=[],build=isolatedWorker({indexReadBytes:f.raw.length+1},saves),partial=await build(f.options);
   assert.equal(partial.system.length,1);assert.equal(partial.stats.reason,'bytes');assert.equal(partial.stats.truncated,true);assert(partial.stats.readBytes<=f.raw.length+1);
-  const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));
+  const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));
   assert.equal(saved.complete,false);assert.equal(Object.keys(saved.records).length,1);
   assert(saves.some(x=>!x.complete&&x.records===1),'A populated checkpoint must exist before finalization');
   const resumed=await isolatedWorker()(f.options);assert.equal(resumed.system.length,3);assert.equal(resumed.stats.cacheHits,1);assert.equal(resumed.stats.truncated,false);
-  assert.equal(JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8')).complete,true);
+  assert.equal(JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8')).complete,true);
  }finally{await fs.rm(f.folder,{recursive:true,force:true});}
 });
 test('eligible-face budget truncates normally instead of discarding already indexed faces',async()=>{
  const f=await fixture();try{
   const result=await isolatedWorker({indexFaces:1})(f.options);
   assert.equal(result.stats.eligibleFaces,1);assert.equal(result.system.length,1);assert.equal(result.stats.reason,'faces');assert.equal(result.stats.truncated,true);
-  const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));assert.equal(saved.complete,false);assert(Object.keys(saved.records).length>=1);
+  const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));assert.equal(saved.complete,false);assert(Object.keys(saved.records).length>=1);
  }finally{await fs.rm(f.folder,{recursive:true,force:true});}
 });
 test('cache schema mismatches rebuild real metadata and private cache directory checks stay strict',async()=>{
  const f=await fixture(1);try{
-  const build=isolatedWorker();await build(f.options);const file=path.join(f.cacheDir,'index-v3.json'),good=JSON.parse(await fs.readFile(file,'utf8'));
+  const build=isolatedWorker();await build(f.options);const file=path.join(f.cacheDir,'index-v4.json'),good=JSON.parse(await fs.readFile(file,'utf8'));
   const mutations=[v=>{v.records=[];},v=>{Object.values(v.records)[0].faces[0].coverage=[[5,3]];},
    v=>{Object.values(v.records)[0].faces[0].family=null;},v=>{Object.values(v.records)[0].faces[0].faceIndex=0x7fffffff;},
    v=>{Object.values(v.records)[0].faces[0].id='not-a-handle';},v=>{Object.values(v.records)[0].faces[0].faceIndex=2**32;},v=>{Object.values(v.records)[0].sha256=[Object.values(v.records)[0].sha256];},v=>{Object.values(v.records)[0].faces[0].id=['11111111-1111-4111-8111-111111111111'];},v=>{Object.values(v.records)[0].bytes=1;}];
@@ -107,7 +107,7 @@ test('a real worker cooperatively stops at its deadline and leaves an atomic par
    worker.once('error',reject);
   });
   assert.equal(result.stats.truncated,true);assert.equal(result.stats.reason,'deadline');
-  const file=path.join(f.cacheDir,'index-v3.json'),value=JSON.parse(await fs.readFile(file,'utf8'));assert.equal(value.complete,false);
+  const file=path.join(f.cacheDir,'index-v4.json'),value=JSON.parse(await fs.readFile(file,'utf8'));assert.equal(value.complete,false);
   assert.equal((await fs.stat(file)).mode&511,384);assert(!(await fs.readdir(f.cacheDir)).some(name=>name.endsWith('.tmp')));
  }finally{await fs.rm(f.folder,{recursive:true,force:true});}
 });
@@ -131,7 +131,7 @@ test('changing files cannot overrun the byte budget or publish unstable metadata
    assert(opened);assert.equal(result.system.length,0);assert.equal(result.handles.length,0);
    assert.equal(result.stats.skipped,1);assert.equal(result.stats.readBytes,actual);
    assert(actual<=f.raw.length);assert(requested<=f.raw.length*2);
-   assert.deepEqual(JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8')).records,{});
+   assert.deepEqual(JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8')).records,{});
   }finally{await fs.rm(f.folder,{recursive:true,force:true});}
  }
 });
@@ -139,7 +139,7 @@ test('metadata cap publishes only the persisted prefix and resumes without dangl
  const f=await fixture(1);
  try{
   await isolatedWorker()(f.options);
-  const file=path.join(f.cacheDir,'index-v3.json'),first=await fs.readFile(file,'utf8');
+  const file=path.join(f.cacheDir,'index-v4.json'),first=await fs.readFile(file,'utf8');
   await fs.writeFile(path.join(f.fonts,'1.ttf'),f.raw);
   const partial=await isolatedWorker({},[],{cache:{MAX_BYTES:Buffer.byteLength(first)+128}})(f.options);
   assert.equal(partial.stats.reason,'metadata');assert.equal(partial.stats.truncated,true);
@@ -161,7 +161,7 @@ test('system font directory/file denials keep readable siblings and valid cache 
    };
    const result=await isolatedWorker({},[],{fs:instrumented})(f.options);
    assert.equal(result.system.length,2);assert.equal(result.handles.length,2);assert(result.stats.skipped>=2);
-   const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v3.json'),'utf8'));assert.equal(saved.complete,true);assert.equal(Object.keys(saved.records).length,2);
+   const saved=JSON.parse(await fs.readFile(path.join(f.cacheDir,'index-v4.json'),'utf8'));assert.equal(saved.complete,true);assert.equal(Object.keys(saved.records).length,2);
    assert(!JSON.stringify(result.system).includes(f.folder));
   }
   const realpath=fs.realpath,outside=path.join(f.folder,'unreadable-root');await fs.mkdir(outside);

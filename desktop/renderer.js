@@ -23,7 +23,7 @@ async function returnHome(){
   compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
  }catch(error){fail(error)}
 }
-function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
+function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),'recent-remove':()=>eoDesktop.removeRecent(value).then(()=>refreshHome()).catch(fail),'recents-clear':()=>eoDesktop.clearRecents().then(()=>refreshHome()).catch(fail),save:()=>save(),'save-as':()=>save(true),rename:()=>rename(),pdf:()=>pdf(),print:()=>pdf(true),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
 
 const fail=(error,saveError=false)=>{if(EODesktopErrors.cancelled(error)){window.EOLocalFailure=null;status('');return}const reason=EODesktopErrors.message(error,info?.strings);window.EOLocalFailure=reason;status(reason);if(!saveError)return;
  const copy=document.createElement('button');copy.type='button';copy.textContent=info?.strings.opCopyDiagnostics||'Copy diagnostics';copy.addEventListener('click',()=>eoDesktop.copySaveDiagnostics().catch(()=>{}));$('message').append(' ',copy);};
@@ -250,7 +250,15 @@ async function open(selected) {
             frame.requestAnimationFrame(()=>frame.requestAnimationFrame(()=>openPerformance('first-paint',performance.now()-timings.contentReady)));
             // Report readiness only after the native file actions have been installed.
             window.EOLocalSession={controller,format,stats,api:main.api,file,win:frame,timings,editableMs:performance.now()};
-            status(kind==='pdf'&&!controller.canSave()?controller.readOnlyMessage():'');openingOperation.finish({kind:'opened'});resolve();
+            status(kind==='pdf'&&!controller.canSave()?controller.readOnlyMessage():'');
+            if(file.temporary){
+              status(t('temporaryLocation'));
+              const saveAsButton=document.createElement('button');
+              saveAsButton.type='button';saveAsButton.textContent=t('saveAs');
+              saveAsButton.addEventListener('click',()=>save(true));
+              $('message').append(' ',saveAsButton);
+            }
+            openingOperation.finish({kind:'opened'});resolve();
           } catch(error){reject(error)}
         },onError:event=>reject(Error(event.data?.errorDescription||'Local editor failed'))}
       });

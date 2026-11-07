@@ -90,6 +90,8 @@ Learn more: [AI features](ai-features.md) and [Passwords](local-passwords.md).
 |---|---|---|---|
 | Local editing | Documents are converted and edited on your computer, with no server and no account. | A desktop application. | — |
 | Save As | A dialog that describes each format and warns before anything is lost or overwritten, in 45 languages; text documents can save Markdown. | Native format and destination controls. | A format-button chooser. |
+| Mail attachments | A document opened from a temporary folder (mail attachment) shows a notice, and its first Save goes to Save As in Documents so changes are not lost. | Saves in place. | Saves in place. |
+| Recent files | Remove one file from the Home list, or clear the list, without touching the files. | Remove from list; clear the list. | A recent list on the start page. |
 | Windows and tabs | One window per document by default, with optional tabs. | — | One document per window. |
 | PDF files | Open, annotate, fill forms and save PDFs. | — | — |
 | Display language | Choose the interface language independently of the document language, with a temporary override at startup. | — | — |
