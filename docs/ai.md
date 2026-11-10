@@ -53,7 +53,7 @@ Suggestions of the "Ask Elixir" menu (the label is sent as is as the instruction
 - several paragraphs: Put in two columns, Harmonize the headings, Turn into a bulleted list;
 - text: Rephrase, Shorten, Fix spelling and grammar, Translate… (prefills "Translate to").
 
-Screenshots (`docs/screenshots/ai2/`): `search-1-commands-then-ask`, `search-2-ask-elixir`, `search-3-bar-running`, `ask-1-mini-toolbar-menu`, `ask-2-context-menu`, `aEXAMPLE_TOKEN_NOT_VALID`, `aEXAMPLE_TOKEN_NOT_VALID`, `slash-1-hint`, `slash-2-menu`, and the `result-*` results (table of contents, 2×A5, refusal with suggestion).
+Screenshots (`docs/screenshots/ai2/`): `search-1-commands-then-ask`, `search-2-ask-elixir`, `search-3-bar-running`, `ask-1-mini-toolbar-menu`, `ask-2-context-menu`, `ask-3-context-menu-suggestions`, `ask-4-picture-suggestions`, `slash-1-hint`, `slash-2-menu`, and the `result-*` results (table of contents, 2×A5, refusal with suggestion).
 
 Test: `node tools/eval/entry-check.mjs [screenshots-folder]` (22 checks: order of the search rows, Enter / Shift+Enter, suggestions by selection type, mini toolbar, right click, hint, "/" menu, Esc, "/" in a text, Alt+I).
 

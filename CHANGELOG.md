@@ -1,5 +1,16 @@
 # Changelog
 
+## Desktop 0.7.1 — published 2026-11-11
+
+### Fixed
+
+- Documents set in fonts that have a bundled metric-compatible clone (Calibri, Calibri Light, Cambria,
+  Arial, Georgia, Segoe UI and others) no longer show "This document uses fonts that are not
+  available": the layout already uses the clone. Fonts without a real equivalent still get the
+  invitation to use the fonts of the computer.
+- Server: the loading skeleton of the editors is centred again with its theme colours; the public
+  source filter had rewritten its CSS variables, and the skeleton CSS now has fallback values.
+
 ## Desktop 0.7.0 — published 2026-11-10
 
 ### Layout

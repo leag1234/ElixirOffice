@@ -107,7 +107,7 @@ if (ctxItem) {
   await frame.click("[data-elx-test='1']");
   await frame.waitForTimeout(500);
   res["context menu: opens the Ask Elixir menu"] = await frame.evaluate(() => !!document.getElementById("elixir-ask-menu"));
-  await shot(page, "aEXAMPLE_TOKEN_NOT_VALID");
+  await shot(page, "ask-3-context-menu-suggestions");
   await page.keyboard.press("Escape");
 }
 // picture selected
@@ -117,7 +117,7 @@ const rp = await frame.evaluate(() => { const ep = Common.ElixirAI.entryPoints.w
 res["suggestions: picture -> inline, center, right of the text"] = rp.length === 3 && rp.some(l => /Centrer|Center/.test(l));
 await frame.evaluate(() => { const ep = Common.ElixirAI.entryPoints.word; ep.openAskMenu(500, 300); });
 await frame.waitForTimeout(300);
-await shot(page, "aEXAMPLE_TOKEN_NOT_VALID");
+await shot(page, "ask-4-picture-suggestions");
 await page.keyboard.press("Escape");
 
 // ---- "/" menu ----

@@ -57,7 +57,16 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
-### 2026-11-09 (desktop 0.7.0, in preparation)
+### 2026-11-10 (desktop 0.7.1, server 0.7.1, in preparation)
+
+- Dependency scan (OSV, nightly) and bundled C/C++ library check of 2026-11-10: no new finding since
+  0.7.0; the pending components (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.
+- Electron 44.10.2 is still the latest 44.x release.
+- Public source packets: the filter that removes secrets matched CSS custom properties starting with
+  `--sk-` as API keys and rewrote them; it now only matches a key that is not part of a longer name,
+  and the packet check fails if a placeholder token remains in the public trees.
+
+### 2026-11-09 (desktop 0.7.0, published 2026-11-10)
 
 - Dependency scan (OSV, nightly): no new finding in shipped JavaScript code. The scan now also lists the
   third-party copies bundled inside the OpenJPEG source tree (libtiff, libpng, zlib, lcms2 under
