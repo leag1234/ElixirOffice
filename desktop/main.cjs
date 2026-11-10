@@ -70,7 +70,7 @@ let captureOptions,captureStartupError;
 let languageInfo,defaultDocumentLanguage;
 function documentLanguage(){return captureOptions?languageInfo.language:defaultDocumentLanguage;}
 const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
-const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json')};
+const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json'),exportTitle:'Export a copy',exportButton:'Export',exportNote:'The document stays open on its original file.'};
 function localizedStrings(){
  const strings={...languageInfo?.strings};
  for(const [key,value] of Object.entries(tabEnglish))if(typeof strings[key]!=='string'||!strings[key].trim())strings[key]=value;
@@ -1024,17 +1024,17 @@ async function start() {
       defaultFormat:saveAs.preferred(documentState().current),nativeFormats:saveAs.nativeFormats(process.platform,process.env.EO_NATIVE_SAVE_AS==='1'),platform:process.platform};
   });
   handle('save-as-cancel',token=>{active(token);clearDestination();return true});
-  handle('save-as-choose',(token,format,pdfCopy=false)=>operation(async()=>{
+  handle('save-as-choose',(token,format,pdfCopy=false,exportCopy=false)=>operation(async()=>{
     active(token);clearDestination();
     const closingDocument=registry.context(),closingAttempt=pauseCloseSave(closingDocument);let destinationSelected=false;
     try{
      if(captureOptions)throw Error('Save As is unavailable in capture mode');
      const multi=saveAs.nativeFormats(process.platform,process.env.EO_NATIVE_SAVE_AS==='1');
      if(!multi&&!saveAs.available(documentState().current).includes(format))throw Error('Choose a Save As format');
-     if(typeof pdfCopy!=='boolean')throw Error('Invalid PDF copy selection');
+     if(typeof pdfCopy!=='boolean'||typeof exportCopy!=='boolean')throw Error('Invalid PDF copy selection');
      let defaultPath=saveAs.suggestion(documentState().current,format||saveAs.preferred(documentState().current),t('saveCopy'));
      for(;;){
-      const result=await dialog.showSaveDialog(documentWindow(),{title:t('saveAs'),defaultPath,
+      const result=await dialog.showSaveDialog(documentWindow(),{title:t(exportCopy?'exportTitle':'saveAs'),...(exportCopy?{buttonLabel:t('exportButton'),message:t('exportNote')}:{}),defaultPath,
         filters:saveAs.filters(documentState().current,t,multi?undefined:format),properties:['showOverwriteConfirmation']});
       active(token);if(result.canceled)return null;
       let selectedFormat;

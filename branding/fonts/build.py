@@ -4,7 +4,7 @@
 Downloads every source listed in sources.json (pinned URLs, sha256-checked),
 copies unmodified fonts as-is and produces the "metric" derivatives described
 in sources.json (static instance of a variable font and/or vertical metrics
-copied from the Microsoft font they stand in for, family renamed as the OFL
+(and the advance of the space) copied from the Microsoft font they stand in for, family renamed as the OFL
 requires for modified versions). Output: <out>/<family-dir>/*.ttf|otf plus the
 licence text of each family. Licences and provenance: LICENSES.md.
 
@@ -76,6 +76,17 @@ def set_names(font, family, style, version_note):
     os2.usWeightClass = 700 if bold else 400
 
 
+def note_modified(font, version_note):
+    """Modified version that keeps the family name (only allowed when the licence has no Reserved Font Name,
+    e.g. Noto Sans under OFL 1.1): record the modification in the version string (nameID 5)."""
+    name = font["name"]
+    old = name.getDebugName(5) or ""
+    name.setName(f"{old}; {version_note}", 5, 3, 1, 0x409)
+    for rec in list(name.names):
+        if rec.nameID == 5 and rec.platformID != 3:
+            name.removeNames(nameID=5, platformID=rec.platformID)
+
+
 def copy_vmetrics(font, ref):
     """Copy vertical metrics (OS/2 win + typo, hhea) of the reference font, scaled to this upm."""
     upm = font["head"].unitsPerEm
@@ -86,6 +97,45 @@ def copy_vmetrics(font, ref):
     hh.ascent = round(ref["hA"] * k); hh.descent = round(ref["hD"] * k); hh.lineGap = round(ref["hG"] * k)
     # USE_TYPO_METRICS must match the reference behaviour (bit 7)
     os2.fsSelection = (os2.fsSelection & ~0x80) | (ref["fsSel"] & 0x80)
+
+
+def subset_unicodes(font, ranges):
+    """Keep only the code points of "keep_unicode" (list of "XXXX-YYYY" hex ranges): the cmap entries and glyphs
+    of every other script (e.g. the partial Arabic of Wine Tahoma) are removed, so that the per-character font
+    picker never selects the font for them. Layout tables, hinting and names are kept."""
+    from fontTools import subset
+    keep = set()
+    for r in ranges:
+        lo, _, hi = r.partition("-")
+        keep.update(range(int(lo, 16), int(hi or lo, 16) + 1))
+    o = subset.Options()
+    o.layout_features = ["*"]
+    o.hinting = True
+    o.notdef_outline = True
+    o.glyph_names = True
+    o.name_IDs = ["*"]
+    o.name_languages = ["*"]
+    o.legacy_kern = True
+    o.drop_tables = [t for t in o.drop_tables if t not in ("DSIG",)]
+    s = subset.Subsetter(o)
+    s.populate(unicodes=sorted(keep & set(font.getBestCmap())))
+    s.subset(font)
+
+
+def set_space_advance(font, ref):
+    """Set the advance of U+0020 / U+00A0 to the one of the reference font ("space", in 1/upm units of the
+    reference): spaces are ~17 % of the characters of a text and have no outline, so this is the cheapest
+    way to remove the largest part of the width gap. No glyph outline is touched."""
+    if "space" not in ref:
+        return
+    cmap = font.getBestCmap(); hmtx = font["hmtx"]
+    adv = round(ref["space"] * font["head"].unitsPerEm / ref["upm"])
+    for cp in (0x20, 0xA0):
+        if cp in cmap:
+            hmtx[cmap[cp]] = (adv, 0)
+    for tag in ("hdmx", "LTSH", "VDMX"):  # per-ppem device widths of the old advance
+        if tag in font:
+            del font[tag]
 
 
 def _empty_program():
@@ -286,6 +336,8 @@ def main():
                 font = TTFont(io.BytesIO(data), recalcTimestamp=False)
             if derive.get("instance"):
                 font = instancer.instantiateVariableFont(font, derive["instance"])
+            if derive.get("keep_unicode"):
+                subset_unicodes(font, derive["keep_unicode"])
             if derive.get("vmetrics") and ("xscale" in refm[derive["vmetrics"]] or "yscale" in refm[derive["vmetrics"]]):
                 r = refm[derive["vmetrics"]]
                 scale_outlines(font, r.get("xscale", 1.0), r.get("yscale", 1.0))
@@ -293,7 +345,11 @@ def main():
                 add_ruled_lines(font, refm[derive["ruled"]]["rules"])
             if derive.get("vmetrics"):
                 copy_vmetrics(font, refm[derive["vmetrics"]])
-            set_names(font, fam["family"], derive["style"], spec["derivative_note"])
+                set_space_advance(font, refm[derive["vmetrics"]])
+            if derive.get("keep_name"):
+                note_modified(font, spec["derivative_note"])
+            else:
+                set_names(font, fam["family"], derive["style"], spec["derivative_note"])
             font.save(out)
         lic = fetch(fam["license_url"], a.cache)
         open(os.path.join(d, fam.get("license_name", "LICENSE.txt")), "wb").write(member(lic, fam.get("license_member")))

@@ -1,5 +1,53 @@
 # Changelog
 
+## Desktop 0.7.0 — published 2026-11-10
+
+### Layout
+
+- Fonts: metric-compatible substitutes for Verdana (Verdana Metric) and Tahoma (Tahoma Metric), the
+  real Noto Sans with Word's metrics, and the Ubuntu and Ubuntu Mono families are bundled, so
+  documents set in these fonts keep their line breaks and page count; measured on the Word reference
+  set with no regression (#66).
+- Tables: a row marked "do not split across pages" in a floating table moves whole to the next page
+  instead of overflowing the footer; auto-fit columns leave room for a first-line indent in every
+  compatibility mode, so short words and two-digit numbers stay on one line; the grid of a nested
+  percent-width table no longer drifts when the document is laid out again (#66).
+- Character borders ("text in a box", w:bdr) are kept on open and save and drawn as one box around
+  adjacent runs (#66).
+- The underline of a superscript run is drawn under the raised text, as in Word (#67).
+- Devanagari text in a font not yet loaded falls back to a bundled Devanagari font; the document is
+  repainted when the installed fonts finish loading; a monochrome emoji fallback is bundled.
+
+### Print and PDF export
+
+- The print panel of the editors (page range or sheets, page size, orientation, margins, scale or fit to width, gridlines and headings, preview) is available in the desktop app. Print and Save as PDF both use the native PDF writer, with an option to open the PDF afterwards; a notice warns when a sheet is set to a tiny scale or has page margins larger than the page.
+- Export of other formats is now an explicit "Export a copy"; the status message after an export is a discreet line at the bottom instead of a card.
+- Spreadsheets: the print range counts only what can be printed, merged cells outside a print area no longer extend it, and unusable page margins fall back to the defaults.
+- ODS files no longer get their bottom and top page margins increased at every save (the footer height was added again each time).
+- The spreadsheet and text mini toolbar opened by a right click closes with its menu like in Office, and can be turned off in the options.
+
+### Markdown
+
+- GitHub-like quotes and code blocks, one 11 pt text size, table alignment kept when a cell starts
+  with bold or a link; the proofing language follows the interface language.
+
+### Ask Elixir
+
+- Local OpenAI-compatible servers (LM Studio, Qwen models) work out of the box: named tool choice
+  retried when rejected, tool calls parsed from the model's reasoning, a longer time limit for local
+  endpoints, clear messages for a wrong URL or a too-small context, a Copy button on answers (#68).
+
+### Fixed
+
+- Fonts referenced by their full name (for example "Open Sans Bold") and by a localized family name
+  resolve to the installed face (#62, #65).
+
+### Security
+
+- PDF viewer engine rebuilt from our converter sources with the updated libraries (libpng 1.6.59,
+  OpenJPEG 2.5.4, zlib 1.4, FreeType 2.15.0, libtiff 4.7.2).
+- Electron 44.10.2 (backported Chromium, V8, Skia, PDFium and WebRTC fixes; Node.js 24.22.2).
+
 ## Desktop 0.6.6 — published 2026-11-08
 
 ### New

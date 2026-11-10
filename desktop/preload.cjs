@@ -66,7 +66,7 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   export: (token, bytes, format, protection, operationId, ticket) => ipcRenderer.invoke('eo:export', token, bytes, format, protection, operationId, ticket),
   pdf: (token, bytes, print, plainCopy, operationId, ticket) => ipcRenderer.invoke('eo:pdf', token, bytes, !!print, plainCopy, operationId, ticket),
   saveAsInfo: token => ipcRenderer.invoke('eo:save-as-info', token),
-  saveAsChoose: (token, format, pdfCopy) => ipcRenderer.invoke('eo:save-as-choose', token, format, pdfCopy),
+  saveAsChoose: (token, format, pdfCopy, exportCopy) => ipcRenderer.invoke('eo:save-as-choose', token, format, pdfCopy, exportCopy === true),
   saveAsCancel: token => ipcRenderer.invoke('eo:save-as-cancel', token),
   chromeMode:()=>ipcRenderer.invoke('eo:chrome-mode'),
   chromeState:value=>ipcRenderer.invoke('eo:chrome-state',value),

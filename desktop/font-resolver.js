@@ -3,7 +3,7 @@
  'use strict';
  // SDK FontStyle bits: bold=1, italic=2. AllFonts positional slots are converted by the index.
  const order={0:[0,2,1,3],1:[1,0,3,2],2:[2,0,3,1],3:[3,1,2,0]};
- const reservedFallbackFamilies=Object.freeze(['Elixir Fallback Arabic','Elixir Fallback Sinhala']);
+ const reservedFallbackFamilies=Object.freeze(['Elixir Fallback Arabic','Elixir Fallback Sinhala','Elixir Fallback Devanagari','Elixir Fallback Emoji']);
  const cjkFallbackFamilies=Object.freeze([
   'Elixir Fallback CJK JP','Elixir Fallback CJK KR','Elixir Fallback CJK SC','Elixir Fallback CJK TC','Elixir Fallback CJK HK',
   'Elixir Fallback Mono CJK JP','Elixir Fallback Mono CJK KR','Elixir Fallback Mono CJK SC','Elixir Fallback Mono CJK TC','Elixir Fallback Mono CJK HK'
@@ -49,7 +49,9 @@
   if(cp>=0xd80&&cp<=0xdff)return ['Noto Sans Sinhala','Iskoola Pota','Sinhala MN','Sinhala Sangam MN',fallbackFamilies[1]];
   if(cp>=0x590&&cp<=0x5ff||cp>=0xfb1d&&cp<=0xfb4f)return ['Noto Sans Hebrew','Arial Hebrew','David'];
   if(cp>=0xe00&&cp<=0xe7f)return ['Noto Sans Thai','Leelawadee UI','Thonburi'];
-  if(cp>=0x900&&cp<=0x97f)return ['Noto Sans Devanagari','Nirmala UI','Devanagari Sangam MN'];
+  if(cp>=0x900&&cp<=0x97f)return ['Noto Sans Devanagari','Nirmala UI','Devanagari Sangam MN',fallbackFamilies[2]];
+  // Emoji: colour emoji fonts (bitmap tables) cannot be drawn by the editor, so only monochrome ones are candidates.
+  if(cp>=0x1f000&&cp<=0x1faff||cp>=0x2600&&cp<=0x27bf||cp>=0x2b00&&cp<=0x2bff)return ['Noto Emoji','Segoe UI Symbol',fallbackFamilies[3]];
   if(cp>=0xe80&&cp<=0xeff)return ['Noto Sans Lao','Lao Sangam MN','Leelawadee UI'];
   const cjk=cp>=0x1100&&cp<=0x11ff||cp>=0xa960&&cp<=0xa97f||cp>=0xd7b0&&cp<=0xd7ff||cp>=0x2e80&&cp<=0x9fff||cp>=0xac00&&cp<=0xd7af||cp>=0xf900&&cp<=0xfaff||cp>=0x20000&&cp<=0x323af;
   if(!cjk)return [];
@@ -62,7 +64,7 @@
  }
  function namedCandidates(name){
   const key=normalize(name);
-  for(const [cp,context] of [[0x633,''],[0xd85,''],[0x4e00,'Noto Sans CJK JP'],[0x4e00,'Noto Sans CJK SC'],[0x4e00,'Noto Sans CJK TC'],[0x4e00,'Noto Sans CJK KR']]){
+  for(const [cp,context] of [[0x633,''],[0xd85,''],[0x915,''],[0x1f600,''],[0x4e00,'Noto Sans CJK JP'],[0x4e00,'Noto Sans CJK SC'],[0x4e00,'Noto Sans CJK TC'],[0x4e00,'Noto Sans CJK KR']]){
    const names=scriptCandidates(cp,context);
    if(names.some(candidate=>normalize(candidate)===key))return names;
   }

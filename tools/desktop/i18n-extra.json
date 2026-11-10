@@ -165,7 +165,12 @@
     "interfaceZoomReset": "Reset interface zoom to 100%",
     "generalSettings": "General",
     "viewMenu": "View",
-    "rememberWindowPlacement": "Remember window position and size"
+    "rememberWindowPlacement": "Remember window position and size",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -332,7 +337,12 @@
     "clearRecents": "Vider la liste",
     "rememberWindowPlacement": "Mémoriser la position et la taille de la fenêtre",
     "temporaryLocation": "Ce fichier se trouve dans un dossier temporaire. Enregistrez une copie pour conserver vos modifications.",
-    "saveAs": "Enregistrer sous"
+    "saveAs": "Enregistrer sous",
+    "exportTitle": "Exporter une copie",
+    "exportButton": "Exporter",
+    "exportNote": "Le document reste ouvert sur son fichier d'origine.",
+    "miniToolbarContext": "Afficher la mini barre d’outils au clic droit",
+    "opExported": "Exporté : {name}"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -495,7 +505,12 @@
     "interfaceZoomReset": "Zoom der Benutzeroberfläche auf 100 % zurücksetzen",
     "generalSettings": "Allgemein",
     "viewMenu": "Ansicht",
-    "rememberWindowPlacement": "Fensterposition und -größe merken"
+    "rememberWindowPlacement": "Fensterposition und -größe merken",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -658,7 +673,12 @@
     "interfaceZoomReset": "Restablecer el zoom de la interfaz al 100 %",
     "generalSettings": "General",
     "viewMenu": "Ver",
-    "rememberWindowPlacement": "Recordar la posición y el tamaño de la ventana"
+    "rememberWindowPlacement": "Recordar la posición y el tamaño de la ventana",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -821,7 +841,12 @@
     "interfaceZoomReset": "Reimposta lo zoom dell’interfaccia al 100%",
     "generalSettings": "Generale",
     "viewMenu": "Visualizza",
-    "rememberWindowPlacement": "Memorizza posizione e dimensioni della finestra"
+    "rememberWindowPlacement": "Memorizza posizione e dimensioni della finestra",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -984,7 +1009,12 @@
     "interfaceZoomReset": "Redefinir o zoom da interface para 100%",
     "generalSettings": "Geral",
     "viewMenu": "Exibir",
-    "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela"
+    "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1147,7 +1177,12 @@
     "interfaceZoomReset": "Repor o zoom da interface a 100%",
     "generalSettings": "Geral",
     "viewMenu": "Ver",
-    "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela"
+    "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1310,7 +1345,12 @@
     "interfaceZoomReset": "Zoom van de interface terugzetten op 100%",
     "generalSettings": "Algemeen",
     "viewMenu": "Beeld",
-    "rememberWindowPlacement": "Vensterpositie en -grootte onthouden"
+    "rememberWindowPlacement": "Vensterpositie en -grootte onthouden",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1473,7 +1513,12 @@
     "interfaceZoomReset": "Zresetuj powiększenie interfejsu do 100%",
     "generalSettings": "Ogólne",
     "viewMenu": "Widok",
-    "rememberWindowPlacement": "Zapamiętaj położenie i rozmiar okna"
+    "rememberWindowPlacement": "Zapamiętaj położenie i rozmiar okna",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1636,7 +1681,12 @@
     "interfaceZoomReset": "Сбросить масштаб интерфейса до 100 %",
     "generalSettings": "Общие",
     "viewMenu": "Вид",
-    "rememberWindowPlacement": "Запоминать положение и размер окна"
+    "rememberWindowPlacement": "Запоминать положение и размер окна",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1799,7 +1849,12 @@
     "interfaceZoomReset": "インターフェイスのズームを 100% にリセット",
     "generalSettings": "全般",
     "viewMenu": "表示",
-    "rememberWindowPlacement": "ウィンドウの位置とサイズを記憶する"
+    "rememberWindowPlacement": "ウィンドウの位置とサイズを記憶する",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -1962,7 +2017,12 @@
     "interfaceZoomReset": "将界面缩放重置为 100%",
     "generalSettings": "常规",
     "viewMenu": "视图",
-    "rememberWindowPlacement": "记住窗口的位置和大小"
+    "rememberWindowPlacement": "记住窗口的位置和大小",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -2128,7 +2188,12 @@
     "interfaceZoomReset": "將介面縮放重設為 100%",
     "generalSettings": "一般",
     "viewMenu": "檢視",
-    "rememberWindowPlacement": "記住視窗的位置與大小"
+    "rememberWindowPlacement": "記住視窗的位置與大小",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -2294,7 +2359,12 @@
     "interfaceZoomReset": "إعادة تعيين تكبير الواجهة إلى 100٪",
     "generalSettings": "عام",
     "viewMenu": "عرض",
-    "rememberWindowPlacement": "تذكّر موضع النافذة وحجمها"
+    "rememberWindowPlacement": "تذكّر موضع النافذة وحجمها",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -2460,7 +2530,12 @@
     "interfaceZoomReset": "İnterfeys miqyasını 100%-ə sıfırla",
     "generalSettings": "Ümumi",
     "viewMenu": "Görünüş",
-    "rememberWindowPlacement": "Pəncərənin mövqeyini və ölçüsünü yadda saxla"
+    "rememberWindowPlacement": "Pəncərənin mövqeyini və ölçüsünü yadda saxla",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2626,7 +2701,12 @@
     "interfaceZoomReset": "Скінуць маштаб інтэрфейсу да 100 %",
     "generalSettings": "Агульныя",
     "viewMenu": "Выгляд",
-    "rememberWindowPlacement": "Запамінаць становішча і памер акна"
+    "rememberWindowPlacement": "Запамінаць становішча і памер акна",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -2795,7 +2875,12 @@
     "interfaceZoomReset": "Нулиране на мащаба на интерфейса до 100%",
     "generalSettings": "Общи",
     "viewMenu": "Изглед",
-    "rememberWindowPlacement": "Запомняне на позицията и размера на прозореца"
+    "rememberWindowPlacement": "Запомняне на позицията и размера на прозореца",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -2961,7 +3046,12 @@
     "interfaceZoomReset": "Restableix el zoom de la interfície al 100%",
     "generalSettings": "General",
     "viewMenu": "Visualització",
-    "rememberWindowPlacement": "Recorda la posició i la mida de la finestra"
+    "rememberWindowPlacement": "Recorda la posició i la mida de la finestra",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -3127,7 +3217,12 @@
     "interfaceZoomReset": "Obnovit přiblížení rozhraní na 100 %",
     "generalSettings": "Obecné",
     "viewMenu": "Zobrazení",
-    "rememberWindowPlacement": "Pamatovat si polohu a velikost okna"
+    "rememberWindowPlacement": "Pamatovat si polohu a velikost okna",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -3293,7 +3388,12 @@
     "interfaceZoomReset": "Nulstil brugerfladens zoom til 100 %",
     "generalSettings": "Generelt",
     "viewMenu": "Vis",
-    "rememberWindowPlacement": "Husk vinduets placering og størrelse"
+    "rememberWindowPlacement": "Husk vinduets placering og størrelse",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -3459,7 +3559,12 @@
     "interfaceZoomReset": "Επαναφορά ζουμ περιβάλλοντος εργασίας στο 100%",
     "generalSettings": "Γενικά",
     "viewMenu": "Προβολή",
-    "rememberWindowPlacement": "Απομνημόνευση θέσης και μεγέθους παραθύρου"
+    "rememberWindowPlacement": "Απομνημόνευση θέσης και μεγέθους παραθύρου",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -3625,7 +3730,12 @@
     "interfaceZoomReset": "Berrezarri interfazearen zooma % 100era",
     "generalSettings": "Orokorra",
     "viewMenu": "Ikusi",
-    "rememberWindowPlacement": "Gogoratu leihoaren kokapena eta tamaina"
+    "rememberWindowPlacement": "Gogoratu leihoaren kokapena eta tamaina",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -3793,7 +3903,12 @@
     "interfaceZoomReset": "Palauta käyttöliittymän zoomaus 100 prosenttiin",
     "generalSettings": "Yleiset",
     "viewMenu": "Näytä",
-    "rememberWindowPlacement": "Muista ikkunan sijainti ja koko"
+    "rememberWindowPlacement": "Muista ikkunan sijainti ja koko",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -3959,7 +4074,12 @@
     "interfaceZoomReset": "Restablecer o zoom da interface ao 100 %",
     "generalSettings": "Xeral",
     "viewMenu": "Ver",
-    "rememberWindowPlacement": "Lembrar a posición e o tamaño da xanela"
+    "rememberWindowPlacement": "Lembrar a posición e o tamaño da xanela",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -4125,7 +4245,12 @@
     "interfaceZoomReset": "איפוס גודל התצוגה של הממשק ל־100%",
     "generalSettings": "כללי",
     "viewMenu": "תצוגה",
-    "rememberWindowPlacement": "זכירת מיקום החלון וגודלו"
+    "rememberWindowPlacement": "זכירת מיקום החלון וגודלו",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -4291,7 +4416,12 @@
     "interfaceZoomReset": "Felület nagyításának visszaállítása 100%-ra",
     "generalSettings": "Általános",
     "viewMenu": "Nézet",
-    "rememberWindowPlacement": "Ablak helyzetének és méretének megjegyzése"
+    "rememberWindowPlacement": "Ablak helyzetének és méretének megjegyzése",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -4457,7 +4587,12 @@
     "interfaceZoomReset": "Վերակայել միջերեսի խոշորացումը 100%-ի",
     "generalSettings": "Ընդհանուր",
     "viewMenu": "Տեսք",
-    "rememberWindowPlacement": "Հիշել պատուհանի դիրքն ու չափը"
+    "rememberWindowPlacement": "Հիշել պատուհանի դիրքն ու չափը",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -4623,7 +4758,12 @@
     "interfaceZoomReset": "Atur ulang zoom antarmuka ke 100%",
     "generalSettings": "Umum",
     "viewMenu": "Tampilan",
-    "rememberWindowPlacement": "Ingat posisi dan ukuran jendela"
+    "rememberWindowPlacement": "Ingat posisi dan ukuran jendela",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -4789,7 +4929,12 @@
     "interfaceZoomReset": "인터페이스 확대/축소를 100%로 재설정",
     "generalSettings": "일반",
     "viewMenu": "보기",
-    "rememberWindowPlacement": "창 위치 및 크기 기억"
+    "rememberWindowPlacement": "창 위치 및 크기 기억",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -4955,7 +5100,12 @@
     "interfaceZoomReset": "ຣີເຊັດການຊູມສ່ວນຕິດຕໍ່ເປັນ 100%",
     "generalSettings": "ທົ່ວໄປ",
     "viewMenu": "ເບິ່ງ",
-    "rememberWindowPlacement": "ຈື່ຕຳແໜ່ງ ແລະ ຂະໜາດຂອງປ່ອງຢ້ຽມ"
+    "rememberWindowPlacement": "ຈື່ຕຳແໜ່ງ ແລະ ຂະໜາດຂອງປ່ອງຢ້ຽມ",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -5121,7 +5271,12 @@
     "interfaceZoomReset": "Atiestatīt saskarnes tālummaiņu uz 100%",
     "generalSettings": "Vispārīgi",
     "viewMenu": "Skats",
-    "rememberWindowPlacement": "Atcerēties loga novietojumu un lielumu"
+    "rememberWindowPlacement": "Atcerēties loga novietojumu un lielumu",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -5287,7 +5442,12 @@
     "interfaceZoomReset": "Tetapkan semula zum antara muka kepada 100%",
     "generalSettings": "Umum",
     "viewMenu": "Paparan",
-    "rememberWindowPlacement": "Ingat kedudukan dan saiz tetingkap"
+    "rememberWindowPlacement": "Ingat kedudukan dan saiz tetingkap",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -5464,7 +5624,12 @@
     "interfaceZoomReset": "Tilbakestill brukergrensesnittets zoom til 100 %",
     "generalSettings": "Generelt",
     "viewMenu": "Vis",
-    "rememberWindowPlacement": "Husk vinduets plassering og størrelse"
+    "rememberWindowPlacement": "Husk vinduets plassering og størrelse",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -5630,7 +5795,12 @@
     "interfaceZoomReset": "Resetați zoomul interfeței la 100%",
     "generalSettings": "General",
     "viewMenu": "Vizualizare",
-    "rememberWindowPlacement": "Memorează poziția și dimensiunea ferestrei"
+    "rememberWindowPlacement": "Memorează poziția și dimensiunea ferestrei",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -5796,7 +5966,12 @@
     "interfaceZoomReset": "අතුරුමුහුණතේ විශාලනය 100%ට යළි සකසන්න",
     "generalSettings": "සාමාන්‍ය",
     "viewMenu": "දසුන",
-    "rememberWindowPlacement": "කවුළුවේ පිහිටීම සහ ප්‍රමාණය මතක තබා ගන්න"
+    "rememberWindowPlacement": "කවුළුවේ පිහිටීම සහ ප්‍රමාණය මතක තබා ගන්න",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -5962,7 +6137,12 @@
     "interfaceZoomReset": "Obnoviť priblíženie rozhrania na 100%",
     "generalSettings": "Všeobecné",
     "viewMenu": "Zobraziť",
-    "rememberWindowPlacement": "Zapamätať si polohu a veľkosť okna"
+    "rememberWindowPlacement": "Zapamätať si polohu a veľkosť okna",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -6132,7 +6312,12 @@
     "interfaceZoomReset": "Ponastavi povečavo vmesnika na 100 %",
     "generalSettings": "Splošno",
     "viewMenu": "Pogled",
-    "rememberWindowPlacement": "Zapomni si položaj in velikost okna"
+    "rememberWindowPlacement": "Zapomni si položaj in velikost okna",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -6298,7 +6483,12 @@
     "interfaceZoomReset": "Rivendos zmadhimin e ndërfaqes në 100%",
     "generalSettings": "Të përgjithshme",
     "viewMenu": "Pamja",
-    "rememberWindowPlacement": "Mbaj mend pozicionin dhe madhësinë e dritares"
+    "rememberWindowPlacement": "Mbaj mend pozicionin dhe madhësinë e dritares",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -6464,7 +6654,12 @@
     "interfaceZoomReset": "Vrati uvećanje interfejsa na 100%",
     "generalSettings": "Opšte",
     "viewMenu": "Prikaz",
-    "rememberWindowPlacement": "Zapamti položaj i veličinu prozora"
+    "rememberWindowPlacement": "Zapamti položaj i veličinu prozora",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -6630,7 +6825,12 @@
     "interfaceZoomReset": "Врати увећање интерфејса на 100%",
     "generalSettings": "Опште",
     "viewMenu": "Приказ",
-    "rememberWindowPlacement": "Запамти положај и величину прозора"
+    "rememberWindowPlacement": "Запамти положај и величину прозора",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -6796,7 +6996,12 @@
     "interfaceZoomReset": "Återställ gränssnittets zoom till 100 %",
     "generalSettings": "Allmänt",
     "viewMenu": "Visa",
-    "rememberWindowPlacement": "Kom ihåg fönstrets position och storlek"
+    "rememberWindowPlacement": "Kom ihåg fönstrets position och storlek",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -6962,7 +7167,12 @@
     "interfaceZoomReset": "Arayüz yakınlaştırmasını %100'e sıfırla",
     "generalSettings": "Genel",
     "viewMenu": "Görünüm",
-    "rememberWindowPlacement": "Pencere konumunu ve boyutunu hatırla"
+    "rememberWindowPlacement": "Pencere konumunu ve boyutunu hatırla",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -7128,7 +7338,12 @@
     "interfaceZoomReset": "Скинути масштаб інтерфейсу до 100%",
     "generalSettings": "Загальні",
     "viewMenu": "Вигляд",
-    "rememberWindowPlacement": "Запам’ятовувати положення та розмір вікна"
+    "rememberWindowPlacement": "Запам’ятовувати положення та розмір вікна",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -7294,7 +7509,12 @@
     "interfaceZoomReset": "انٹرفیس زوم کو 100% پر دوبارہ سیٹ کریں",
     "generalSettings": "عمومی",
     "viewMenu": "دیکھیں",
-    "rememberWindowPlacement": "ونڈو کی جگہ اور سائز یاد رکھیں"
+    "rememberWindowPlacement": "ونڈو کی جگہ اور سائز یاد رکھیں",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -7465,6 +7685,11 @@
     "interfaceZoomReset": "Đặt lại mức thu phóng giao diện về 100%",
     "generalSettings": "Chung",
     "viewMenu": "Xem",
-    "rememberWindowPlacement": "Ghi nhớ vị trí và kích thước cửa sổ"
+    "rememberWindowPlacement": "Ghi nhớ vị trí và kích thước cửa sổ",
+    "exportTitle": "Export a copy",
+    "exportButton": "Export",
+    "exportNote": "The document stays open on its original file.",
+    "miniToolbarContext": "Show the Mini Toolbar on right-click",
+    "opExported": "Exported: {name}"
   }
 }

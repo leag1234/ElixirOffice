@@ -86,7 +86,10 @@ rendered by Word desktop; only aggregates appear here). Pack: `branding/fonts/` 
 | Aptos, Aptos Display | Aptos² | Roboto Metric | Roboto Metric¹ | Roboto Metric | Roboto Metric | Roboto Metric |
 | Arial, Times New Roman, Courier New | originals | originals | originals | originals | Liberation | Liberation |
 | Arial Narrow | Arial Narrow | Liberation Sans Narrow | Arial Narrow | Arial Narrow | Liberation Sans Narrow | Liberation Sans Narrow |
-| Georgia, Verdana, Comic Sans MS, Arial Black | originals | originals | originals | originals | Gelasio Metric, DejaVu Sans, Comic Relief Metric, Archivo Black Metric | same as Linux |
+| Georgia, Verdana, Comic Sans MS, Arial Black | originals | originals | originals | originals | Gelasio Metric, Verdana Metric, Comic Relief Metric, Archivo Black Metric | same as Linux |
+| Tahoma | Tahoma | Tahoma | Tahoma | Tahoma | Tahoma Metric (Wine Tahoma) | same as Linux |
+| Ubuntu, Ubuntu Mono | Ubuntu if installed, else Open Sans | same | same | same | Ubuntu, Ubuntu Mono (shipped unmodified, UFL-1.0) | same as Linux |
+| Noto Sans | Noto Sans if installed, else Carlito | same | same | same | Noto Sans (shipped) | same as Linux |
 | Century Gothic | Century Gothic | URW Gothic Metric | URW Gothic Metric¹ | URW Gothic Metric | URW Gothic Metric | URW Gothic Metric |
 | Segoe UI | Segoe UI | Segoe UI | Selawik | Selawik | Selawik | Selawik |
 | Book Antiqua, Palatino Linotype | originals | originals | Palatino (system) or P052 | same | P052 | P052 |
@@ -120,7 +123,7 @@ Roboto Metric.
 | Times New Roman | t08, t10, s03, s09, a02, a05, a10 | Times New Roman | Liberation Serif | Liberation Serif |
 | Aptos (2023 theme) | s06, a09 | Aptos | Liberation Sans | Roboto Metric |
 | Georgia | s04 | Georgia | Caladea | Gelasio Metric |
-| Verdana | s04 | Verdana | Open Sans | DejaVu Sans |
+| Verdana | s04 | Verdana | Open Sans | Verdana Metric (DejaVu Sans) |
 | Century Gothic | s08 | Century Gothic | Liberation Sans | URW Gothic Metric |
 | Comic Sans MS | t03 | Comic Sans MS | Carlito | Comic Relief Metric |
 | Arial Black | t03, s05 | Arial Black | Liberation Sans | Archivo Black Metric |
@@ -159,7 +162,9 @@ copied into the derivative (sdkjs computes the line height with max(hhea, win), 
 | Script École | URW Gothic | 0.6% | 1.002 | 1.465 → 1.465 (private metrics, see below) |
 | KG Primary Penmanship | Caveat | 3.7% (5.0% on the public file's alphabet) | 1.010 (1.045) | 1.035 → 1.035 |
 | KG Primary Penmanship 2 | Neucha | 2.2% (4.1%) | 0.988 (0.960) | 1.035 → 1.035 |
-| Verdana | DejaVu Sans | 1.1% | 1.003 | 1.215 / 1.164 (not derived) |
+| Verdana | DejaVu Sans (+ Verdana's space advance, "Verdana Metric") | 1.7% / 1.3% / 1.6% (regular / bold / italic; 7 reference PDFs, 88 glyphs, weighted by occurrences, space included; 3.3% without the space fix) | 1.004 | 1.215 → 1.215 (original DejaVu Sans: 1.164) |
+| Tahoma | Wine Tahoma (LGPL-2.1+), script subset | 0.05% (regular and bold; 6 reference PDFs) | 1.000 | 1.207 → 1.207 |
+| Noto Sans | Noto Sans (shipped, win metrics of the Word reference) | 0.4% / 0.3% | 1.001 | 1.362 → 1.362 (upstream 2.015: 1.519) |
 | Cursive standard, Hello… | none < 4% (sample too weak for Cursive standard) | | | default rule |
 
 Teacher fonts (Script École, KG, Cursive standard, Marelle…): gaps measured on the Word desktop
@@ -214,8 +219,8 @@ Andika, OpenDyslexic, Comic Neue. Decision to be confirmed by the test user.
 - The criterion "the document carries the font's alias" (`w:altName` = PostScript name) is a heuristic: it
   separates documents by authors who had the font (rendered by Word with the font) from those whose font Word
   replaced; to be revisited if a corpus measures the opposite.
-- Impact, Tahoma, Trebuchet MS: no free clone retained (Tahoma/Trebuchet not visible in the corpus
-  references).
+- Impact, Trebuchet MS: no free clone retained (not visible in the corpus references). Tahoma is covered by Wine Tahoma
+  (2026-11-09, mission metric-fonts-070). Tahoma Metric is a script subset (`keep_unicode` in `sources.json`): Basic Latin to Latin Extended-B (U+0000-024F), IPA, spacing modifiers, combining marks, Greek (pi only), Cyrillic and supplement (U+0400-052F), general punctuation, currency, letterlike, arrows, math operators, box drawing, geometric shapes, miscellaneous symbols and the private use area; no Arabic, Hebrew or Thai, so these scripts keep falling through to the font picker (Arabic: Elixir Fallback Arabic; Hebrew: DejaVu Sans). Verdana's space advance is now set to the original's.
 
 ## 9. School cursives with Seyès lines and script fonts (2026-10-07)
 

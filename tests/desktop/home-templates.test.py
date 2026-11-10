@@ -16,7 +16,7 @@ font_files=json.loads(re.search(r'window\["__fonts_files"\]\s*=\s*(\[[\s\S]*?\])
 assert all(Path(name).name==name for name in font_files)
 actual={hashlib.sha256((assets/'fonts'/name).read_bytes()).hexdigest():index
         for index,name in enumerate(font_files)}
-assert len(profile['files'])==110 and len(profile['faces'])==49
+assert len(profile['files'])==128 and len(profile['faces'])==54
 assert set(profile['files'].values())<=set(actual),'Shared font payload changed or missing'
 indices={int(index):actual[digest] for index,digest in profile['files'].items()}
 pack=Pack(assets)

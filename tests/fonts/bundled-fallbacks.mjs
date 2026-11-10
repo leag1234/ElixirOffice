@@ -66,7 +66,7 @@ window.AscCommon.g_font_loader.Api={asyncFontsDocumentStartLoaded(){},asyncFonts
 await script(path.join(product,'desktop/assets/desktop-home/localfonts-Core.js'));
 const LF=window.Common.ElixirLocalFonts;LF.setConsent(false);
 const picker=A.FontPickerByCharacter;
-for(const [cp,family] of [[0x633,'Elixir Fallback Arabic'],[0x6d2,'Elixir Fallback Arabic'],[0xd85,'Elixir Fallback Sinhala']]){
+for(const [cp,family] of [[0x633,'Elixir Fallback Arabic'],[0x6d2,'Elixir Fallback Arabic'],[0xd85,'Elixir Fallback Sinhala'],[0x915,'Elixir Fallback Devanagari'],[0x1f600,'Elixir Fallback Emoji']]){
  assert.equal(picker.getFontBySymbol(cp),family);
  const info=A.g_font_infos[A.g_map_font_index[family]];
  assert.equal(info.isLocalFont,undefined);
@@ -96,7 +96,10 @@ const cases=[
  ['urdu-italic','Elixir Fallback Arabic',2,'اردو زبان میں خوش آمدید'],
  ['sinhala-regular','Elixir Fallback Sinhala',0,'සිංහල භාෂාව පාසල'],
  ['sinhala-italic','Elixir Fallback Sinhala',2,'සිංහල භාෂාව පාසල'],
- ['sinhala-bold-italic','Elixir Fallback Sinhala',3,'සිංහල භාෂාව පාසල']
+ ['sinhala-bold-italic','Elixir Fallback Sinhala',3,'සිංහල භාෂාව පාසල'],
+ ['devanagari-regular','Elixir Fallback Devanagari',0,'संस्कृतम् भाषा पाठशाला'],
+ ['devanagari-italic','Elixir Fallback Devanagari',2,'संस्कृतम् भाषा पाठशाला'],
+ ['devanagari-bold-italic','Elixir Fallback Devanagari',3,'संस्कृतम् भाषा पाठशाला']
 ];
 for(const [key,name,style,text] of cases){
  const directory=path.join(work,'wasm-input',key);await fs.mkdir(path.join(directory,'fonts'),{recursive:true});
@@ -121,16 +124,18 @@ assert(A.g_map_font_index['Noto Sans Sinhala']!==undefined);
 assert.equal(A.g_map_font_index['ELIXIR FALLBACK ARABIC'],undefined,'Reserved normalized fallback namespace cannot register system aliases');
 assert.equal(policy.fallback('DejaVu Sans',0,0x633,'').family,'DejaVu Sans','Existing bundled requested face retains priority');
 assert.equal(policy.fallback('Calibri',0,65,'').family,'Carlito','Metric substitute retains priority');
-for(const [cp,name] of [[0x633,'Noto Sans Arabic'],[0xd85,'Noto Sans Sinhala']]){
+for(const [cp,name] of [[0x633,'Noto Sans Arabic'],[0xd85,'Noto Sans Sinhala'],[0x915,'Noto Sans Devanagari']]){
  assert.equal(policy.fallback('',2,cp,'').family,name);
  assert.equal(picker.getFontBySymbol(cp),name,'Ranges must prefer system over small packaged fallback');
 }
 allowed=false;LF.setConsent(false);
 assert.equal(picker.getFontBySymbol(0x633),'Elixir Fallback Arabic');
 assert.equal(picker.getFontBySymbol(0xd85),'Elixir Fallback Sinhala');
+assert.equal(picker.getFontBySymbol(0x915),'Elixir Fallback Devanagari');
+assert.equal(picker.getFontBySymbol(0x1f4ca),'Elixir Fallback Emoji');
 const revoked=await service.ensureFonts([{name:'Elixir Fallback Arabic',style:3}]);
 assert.equal(revoked.missing.length,0);
-await fs.writeFile(path.join(work,'bundled-result.json'),JSON.stringify({existingFaces:110,fallbackFaces:4,
+await fs.writeFile(path.join(work,'bundled-result.json'),JSON.stringify({existingFaces:110,fallbackFaces:8,
  packagedTransports:transports.length,privateBridgeCalls:privateCalls,permissionOffAndRevocation:'PASS',
  systemPriority:'PASS',syntheticItalic:'Actual SDK GetNeedInfo and production FS PASS; real converter follows',
  nativeEditor:'UNVERIFIED'},null,2)+'\n');

@@ -1,0 +1,4 @@
+Noto Emoji — copyright and OFL terms in OFL.txt.
+Desktop derivative: static wdth=100, wght=400/700 instances; family renamed to Elixir Fallback Emoji. No glyph subsetting, metric adjustment or pre-slanted outlines. Italic is synthesized by the editor.
+Source: https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf
+Source SHA256: de6c18832938afc99caf132b39d6a30a19bac7f2e812e28db2535b4608d27551

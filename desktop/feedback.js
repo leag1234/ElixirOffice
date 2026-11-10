@@ -4,7 +4,7 @@
  else window.EOOperationFeedback=factory();
 })(function(){
  'use strict';
- const fallback={opOpening:'Opening {name}…',opOpened:'Opened: {name}',opDecrypting:'Decrypting {name}…',opEncrypting:'Encrypting {name}…',opPreparing:'Preparing…',opRuntime:'Loading conversion engine…',opInitializing:'Initializing…',opConverting:'Converting…',opAwaiting:'Waiting for your choice…',opWriting:'Saving…',opReady:'File ready: {name}',opCancelled:'Cancelled',opFailed:'Could not finish: {reason}',opWarning:'Saved, but disk durability could not be confirmed. Keep the backup and save again before closing.',opDownload:'Download started: {name}',opPrint:'Sent to the print system',opUnconfirmed:'Operation finished; file completion is unconfirmed.',opPages:'Preparing pages: {completed} of {total}',opShow:'Show in folder',opOpen:'Open file',opCopyDiagnostics:'Copy diagnostics',opDismiss:'Dismiss'};
+ const fallback={opOpening:'Opening {name}…',opOpened:'Opened: {name}',opDecrypting:'Decrypting {name}…',opEncrypting:'Encrypting {name}…',opPreparing:'Preparing…',opRuntime:'Loading conversion engine…',opInitializing:'Initializing…',opConverting:'Converting…',opAwaiting:'Waiting for your choice…',opWriting:'Saving…',opReady:'File ready: {name}',opExported:'Exported: {name}',opCancelled:'Cancelled',opFailed:'Could not finish: {reason}',opWarning:'Saved, but disk durability could not be confirmed. Keep the backup and save again before closing.',opDownload:'Download started: {name}',opPrint:'Sent to the print system',opUnconfirmed:'Operation finished; file completion is unconfirmed.',opPages:'Preparing pages: {completed} of {total}',opShow:'Show in folder',opOpen:'Open file',opCopyDiagnostics:'Copy diagnostics',opDismiss:'Dismiss'};
  const terminal=new Set(['ready','warning','complete','error','cancelled']);
  function isolate(value){return '\u2068'+String(value??'').replace(/[\u202a-\u202e\u2066-\u2069]/g,'')+'\u2069';}
  function label(event,strings={}){
@@ -13,6 +13,7 @@
   if(event.kind==='print'&&event.phase==='awaiting-output')key='opPreparing';
   if(event.kind==='open'&&!terminal.has(event.phase))key='opOpening';
   if(event.phase==='converting'&&['decrypting','encrypting'].includes(event.purpose))key=event.purpose==='decrypting'?'opDecrypting':'opEncrypting';
+  if(event.phase==='ready'&&['export','pdf-export'].includes(event.kind))key='opExported';
   if(event.phase==='complete')key=event.outcome==='opened'?'opOpened':event.outcome==='download-started'?'opDownload':['printed','print-started'].includes(event.outcome)?'opPrint':'opUnconfirmed';
   if(!terminal.has(event.phase)&&Number.isInteger(event.completed)&&Number.isInteger(event.total)&&event.total>0)key='opPages';
   return (strings[key]||fallback[key]||fallback.opPreparing).replace(/\{(name|reason|completed|total)\}/g,(_match,key)=>(['name','reason'].includes(key)?isolate(event[key]):String(event[key]??'')));
@@ -45,13 +46,16 @@
   function clearTimer(){if(timer!==null)view.clearTimeout(timer);timer=null;}
   function pauseTimer(){if(timer!==null)remaining=Math.max(0,due-view.Date.now());clearTimer();}
   function schedule(){
-   if(closed||dismissed||obscured||hovered||notice.contains(document.activeElement)||!latest||quietOpen(latest)||hasFileActions(latest)||!["ready","complete","cancelled"].includes(latest.phase)||notice.classList.contains("eo-operation-backstage"))return;
+   if(closed||dismissed||obscured||hovered||notice.contains(document.activeElement)||!latest||quietOpen(latest)||!["ready","complete","cancelled"].includes(latest.phase)||notice.classList.contains("eo-operation-backstage"))return;
    clearTimer();due=view.Date.now()+remaining;
    timer=view.setTimeout(()=>{timer=null;dismissed=true;notice.hidden=true;},remaining);
   }
   notice.addEventListener("mouseenter",()=>{hovered=true;pauseTimer();});
   notice.addEventListener("mouseleave",()=>{hovered=false;schedule();});
   notice.addEventListener("focusin",pauseTimer);
+  // Keyboard: F6 (wired by the shell) moves focus to the message actions, Escape dismisses it and returns focus.
+  function focusActions(){if(notice.hidden||!notice.classList.contains('eo-operation-status'))return false;const first=links.querySelector('button');if(!first)return false;first.focus();return true;}
+  notice.addEventListener("keydown",event=>{if(event.key==='Escape'&&notice.classList.contains('eo-operation-status')){event.preventDefault();clearTimer();dismissed=true;notice.hidden=true;if(previousFocus?.isConnected)previousFocus.focus();}});
   notice.addEventListener("focusout",()=>view.setTimeout(()=>{if(!notice.contains(document.activeElement))schedule();},0));
   function reset(nextScope){clearTimer();remaining=8000;actionKey=null;scope=nextScope;id=null;latest=null;notice.hidden=true;announcement.textContent="";links.replaceChildren();bar.hidden=true;}
   function button(key,run){
@@ -68,6 +72,8 @@
    if(closed||event.scope!==scope)return false;
    if(event.phase==='preparing'){dismissed=false;id=event.id;if(!notice.contains(document.activeElement))previousFocus=document.activeElement;}else if(event.id!==id)return false;
    latest=event;notice.hidden=obscured||dismissed||nativePrintChoice(event)||quietOpen(event);const ended=terminal.has(event.phase),message=label(event,strings);
+   // A finished, non-error operation is a discreet status-bar message (Office style); progress and errors keep the card.
+   notice.classList.toggle('eo-operation-status',ended&&event.phase!=='error'&&event.phase!=='warning');
    notice.setAttribute('aria-busy',String(!ended));announcement.setAttribute('role',event.phase==='error'?'alert':'status');text.textContent=message;
    // Keep visual progress current; throttle page-count announcements for assistive technology.
    if(ended||event.phase!=='converting'||Date.now()-lastAnnouncement>=1000){announcement.textContent=message;lastAnnouncement=Date.now();}
@@ -94,7 +100,7 @@
    if(timer===null)schedule();
    return true;
   }
-  return {update,reset,obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured||nativePrintChoice(latest)||quietOpen(latest);if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
+  return {update,reset,focus:focusActions,dismiss(){clearTimer();dismissed=true;notice.hidden=true;},obscure(value){if(value)pauseTimer();obscured=!!value;notice.hidden=!latest||dismissed||obscured||nativePrintChoice(latest)||quietOpen(latest);if(!obscured)schedule();},dispose(){closed=true;clearTimer();notice.remove();announcement.remove();},element:notice};
  }
  return {mount,label,fallback,paint,canCancel,isolate};
 });

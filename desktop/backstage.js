@@ -137,18 +137,20 @@ window.EODesktopBackstage=async function(win,main,info,action){
  },true);
  const fireEvent=fm.fireEvent;
  fm.fireEvent=function(event,args,...rest){
-  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'close','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'save-as'}[args?.[1]];
+  const command=event==='item:click'&&{save:'save','save-desktop':'save-as',saveas:'save-as',rename:'rename','save-copy':'save-as',print:'print',printpreview:'print',exit:'close','file:open':'open',settings:'settings',opts:'settings',help:'help','elx-export':'export'}[args?.[1]];
   if(command){this.hide();return action(command)}
   return fireEvent.call(this,event,args,...rest);
  };
- main.api.asc_Print=()=>action('print');
- main.api.asc_DownloadAs=()=>action('save-as');
+ // The editor's print panel hands its options (page range, sheets, scaling...) to the native PDF pipeline here.
+ const panelAction=(command,options)=>{fm.hide();return action(command,options)};
+ main.api.asc_Print=options=>options?.advancedOptions?panelAction('print-now',options):action('print');
+ main.api.asc_DownloadAs=options=>options?.fileType===win.Asc.c_oAscFileType.PDF?panelAction('pdf-now',options):action('save-as');
  const localDownloadAs=main.api.downloadAs;
  main.api.downloadAs=(requested,options)=>{
   if(requested===win.Asc.c_oAscAsyncAction.MailMergeLoadFile||
      requested===win.Asc.c_oAscAsyncAction.DownloadMerge||options?.oDocumentMailMerge)
    return localDownloadAs.call(main.api,requested,options);
-  return options?.fileType===win.Asc.c_oAscFileType.PDF?action('pdf'):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
+  return options?.fileType===win.Asc.c_oAscFileType.PDF?action(options.isPdfPrint?'print-now':'pdf-now',options):action(options?.asc_getIsSaveAs?.()?'save-as':'save');
  };
  const link=win.document.createElement('link');link.rel='stylesheet';link.href='/example/local-assets/desktop-home/backstage-home.css';win.document.head.append(link);
  const style=win.document.createElement('style');

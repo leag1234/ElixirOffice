@@ -71,7 +71,7 @@ test('actual Linux and Windows builder contexts validate identity before packagi
  const {build,Platform}=load('app-builder-lib'),before=require('../../desktop/build-identity-before-pack.cjs');
  for(const platform of [Platform.LINUX,Platform.WINDOWS]){
   const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'eo-builder-context-')),v=create();
-  const config={appId:'org.elixiroffice.identity-preflight',productName:'Identity preflight',electronVersion:'44.10.1',buildNumber:'42',buildVersion:v.windows_version,mac:{bundleShortVersion:'0.2.1',bundleVersion:'42'},directories:{output:'out'},npmRebuild:false};
+  const config={appId:'org.elixiroffice.identity-preflight',productName:'Identity preflight',electronVersion:'44.10.2',buildNumber:'42',buildVersion:v.windows_version,mac:{bundleShortVersion:'0.2.1',bundleVersion:'42'},directories:{output:'out'},npmRebuild:false};
   const pkg={name:'identity-preflight',version:v.version,description:'Synthetic packaging identity check',author:'ElixirOffice contributors',license:'AGPL-3.0-only',main:'main.cjs',build:config};
   fs.writeFileSync(path.join(fixture,'package.json'),JSON.stringify(pkg));
   fs.writeFileSync(path.join(fixture,'build-info.json'),JSON.stringify(v));

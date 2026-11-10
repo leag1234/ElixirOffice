@@ -85,13 +85,37 @@ test('desktop policy selects present exact system faces and absent metric aliase
  }
 });
 
+test('computer-font registration relayouts and repaints the document editor',async()=>{
+ const core=await fs.readFile(process.env.UPSTREAM?path.join(process.env.UPSTREAM,'web-apps/apps/common/main/lib/elixir-localfonts/Core.js'):path.join(assets,'desktop-home/localfonts-Core.js'),'utf8');
+ const adapter=await fs.readFile(path.join(root,'desktop/computer-fonts.js'),'utf8');
+ const calls=[],frames=[];let completeLoad;
+ const app={g_fontDictionary:{FD_Substitutes:{}},GetSubstituteList:()=>[],GetFontFile:name=>({m_wsFontName:name}),GetFontFileWeb:name=>({m_wsFontName:name})};
+ const A={DesktopFontPolicyVersion:1,g_map_font_index:{},g_font_infos:[],g_font_files:[],g_fontApplication:app,CFontFileLoader:function(id){this.Id=id;},CFontInfo:function(name){this.name=name;}};
+ const editorWindow={AscFonts:A,AscCommon:{g_font_loader:{LoadDocumentFonts(){},LoadFonts:(_names,callback)=>{completeLoad=callback;}}},
+  Asc:{editor:{WordControl:{m_oLogicDocument:{GetAllParagraphs:()=>[{Recalc_CompiledPr(){},Recalc_RunsCompiledPr(){}}],RecalculateFromStart(){calls.push('recalculate');}},
+   m_oDrawingDocument:{ClearCachePages(){calls.push('pages');}}}}},Common:{},EOFontResolver:resolver,performance:{now:()=>0},
+  localStorage:new Map(),requestAnimationFrame:callback=>{frames.push(callback);return frames.length;},setTimeout,clearTimeout};
+ editorWindow.localStorage.getItem=editorWindow.localStorage.get.bind(editorWindow.localStorage);editorWindow.localStorage.setItem=editorWindow.localStorage.set.bind(editorWindow.localStorage);editorWindow.localStorage.removeItem=editorWindow.localStorage.delete.bind(editorWindow.localStorage);
+ const context={window:editorWindow,AscCommon:editorWindow.AscCommon,performance:editorWindow.performance,define:(_deps,fn)=>fn(),setInterval:()=>0,clearInterval(){},setTimeout,clearTimeout,Blob,Uint8Array,ArrayBuffer};
+ vm.runInNewContext(core,context);const LF=editorWindow.Common.ElixirLocalFonts;LF.install();
+ vm.runInNewContext(adapter,context);
+ const index={id:'repaint',bundled:[],system:[]};editorWindow.EOComputerFonts.install(index);
+ let painted=0;editorWindow.Asc.editor.WordControl.OnRePaintAttack=()=>painted++;
+ LF.fonts=[];LF.register();
+ // Nothing left to load: the document is laid out again at once, then repainted two frames later.
+ assert.deepEqual(calls,['pages','recalculate']);
+ assert.equal(frames.length,1,'relayout must request a paint after recalculation');
+ frames[0]();assert.equal(frames.length,2,'the paint request must survive one animation frame');
+ assert.equal(painted,0);frames[1]();assert.equal(painted,1,'the editor repaints');
+});
+
 test('revocation during private discovery rejects the pending index and leaves no handles',async()=>{
  const temp=await fs.mkdtemp(path.join(os.tmpdir(),'eo-font-revoke-'));try{
   const fonts=new Fonts();fonts.allowed=[];fonts.configure({cacheDir:path.join(temp,'cache'),bundleIdentity:'revoke'});
   const pending=fonts.index();fonts.clear();await assert.rejects(pending,/stopped|changed/);assert.equal(fonts.files.size,0);
  }finally{await fs.rm(temp,{recursive:true,force:true});}
 });
-test('actual bundled metadata preserves all49 shared families and110 faces plus the exact desktop fallbacks',async()=>{
+test('actual bundled metadata preserves all54 shared families and128 faces plus the exact desktop fallbacks',async()=>{
  const fonts=new Fonts();fonts.allowed=[];fonts.configure({bundled:assets,bundleIdentity:'actual-pack'});
  try{
   const index=await fonts.index(),profile=require('./fixtures/shared-font-profile.json'),sha=bytes=>require('node:crypto').createHash('sha256').update(bytes).digest('hex');
@@ -99,16 +123,16 @@ test('actual bundled metadata preserves all49 shared families and110 faces plus 
   for(const [family,variants] of Object.entries(profile.variants))for(const [style,[file,faceIndex]] of Object.entries(variants)){
    if(file>=0)expected.set(family+'|'+styles[style]+'|'+faceIndex,profile.files[String(file).padStart(3,'0')]);
   }
-  assert.equal(expected.size,110);assert.equal(Object.keys(profile.faces).length,49);
+  assert.equal(expected.size,128);assert.equal(Object.keys(profile.faces).length,54);
   const shared=index.bundled.filter(f=>Object.hasOwn(profile.faces,f.family)),extra=index.bundled.filter(f=>!Object.hasOwn(profile.faces,f.family));
-  assert.equal(new Set(shared.map(f=>f.family)).size,49);assert.equal(shared.length,110);
+  assert.equal(new Set(shared.map(f=>f.family)).size,54);assert.equal(shared.length,128);
   for(const f of shared){
    const key=f.family+'|'+f.styleCode+'|'+f.faceIndex;assert(expected.has(key),key);
    assert.equal(sha(await fs.readFile(path.join(assets,'fonts',f.file))),expected.get(key),key);
    expected.delete(key);
   }
   assert.equal(expected.size,0);
-  assert.equal(extra.length,24,'Four small-script faces plus twenty pan-CJK collection faces are required');
+  assert.equal(extra.length,28,'Eight small-script faces (Arabic, Sinhala, Devanagari, Emoji) plus twenty pan-CJK collection faces are required');
   {
    const fallbacks=require('../../tools/desktop/fallback-fonts.json'),seen=new Set(),wire=[160,102,214,32,20,150,71,250,149,105,184,80,176,65,73,72];
    for(const f of extra){
@@ -122,7 +146,7 @@ test('actual bundled metadata preserves all49 shared families and110 faces plus 
      assert.equal(f.faceIndex,0);assert.equal(sha(raw),spec.outputs.find(item=>item.style===style).sha256);
     }
    }
-   assert.equal(seen.size,24);assert.equal(new Set(index.bundled.map(f=>f.family)).size,61);assert.equal(index.bundled.length,134);
+   assert.equal(seen.size,28);assert.equal(new Set(index.bundled.map(f=>f.family)).size,68);assert.equal(index.bundled.length,156);
   }
   const info=shared.find(f=>f.family==='Carlito'&&f.styleCode===0);assert(info);assert(resolver.covers(info,[65]));assert.equal(info.faceIndex,0);assert(!resolver.covers(info,[0x3042]));
   for(const family of ['Elixir Fallback CJK JP','Elixir Fallback CJK SC','Elixir Fallback CJK TC','Elixir Fallback CJK KR']){

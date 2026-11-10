@@ -57,6 +57,25 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-09 (desktop 0.7.0, in preparation)
+
+- Dependency scan (OSV, nightly): no new finding in shipped JavaScript code. The scan now also lists the
+  third-party copies bundled inside the OpenJPEG source tree (libtiff, libpng, zlib, lcms2 under
+  `thirdparty/`); they are not built (OpenJPEG links our own libtiff 4.7.2, libpng 1.6.59 and zlib 1.4),
+  so these findings do not apply.
+- Bundled C/C++ libraries: the inventory used by the nightly CVE check was still describing the versions
+  before the 0.6.6 update; it is corrected (libtiff 4.7.2, libpng 1.6.59, zlib 1.4, libxml2 2.15.4,
+  FreeType 2.15.0, OpenJPEG 2.5.4, OpenSSL 4.0.3; JasPer and the unbuilt FreeType 2.5 copies removed).
+  With the real versions the check reports 33 entries, all in the components already listed as pending
+  (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) plus CVE-2019-0190 matched on OpenSSL 4.0.3 by
+  name only (an Apache httpd mod_ssl issue, not applicable). The pending components stay on the plan
+  for the next releases.
+- PDF viewer engine of the desktop app (the WebAssembly `drawingfile` module, previously a prebuilt
+  binary from upstream) rebuilt from our converter sources with the updated libraries.
+- Electron 44.10.1 -> 44.10.2 (backported Chromium, V8, Skia, PDFium and WebRTC fixes, Node.js 24.22.2).
+- New binary property for character borders (run property type 57): older builds skip unknown
+  properties, so documents saved by 0.7.0 still open in older versions.
+
 ### 2026-11-07 (desktop 0.6.6, server 0.6.6)
 
 - Dependency scan (OSV): no new finding; the only high finding in shipped code (request-filtering-agent,

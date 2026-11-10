@@ -80,6 +80,50 @@ class BuildTransforms(unittest.TestCase):
         self.assertEqual(g.xMin, -10)
 
 
+    def test_subset_unicodes_drops_other_scripts(self):
+        f = synthetic_font()
+        f["cmap"].tables[0].cmap[0x627] = "grave"   # an Arabic letter
+        build.subset_unicodes(f, ["0000-024F"])
+        cm = roundtrip(f).getBestCmap()
+        self.assertIn(97, cm); self.assertIn(0xE0, cm)
+        self.assertNotIn(0x627, cm)
+
+    def test_tahoma_metric_keeps_only_covered_scripts(self):
+        import json
+        spec = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources.json")))
+        fam = [x for x in spec["families"] if x["family"] == "Tahoma Metric"][0]
+        for x in fam["files"]:
+            ranges = [tuple(int(h, 16) for h in r.split("-")) for r in x["derive"]["keep_unicode"]]
+            covered = lambda cp: any(lo <= cp <= hi for lo, hi in ranges)
+            for cp in (0x41, 0xE9, 0x20AC, 0x3C0, 0x416, 0x2019):  # Latin, Latin-1, euro, Greek, Cyrillic, punctuation
+                self.assertTrue(covered(cp), hex(cp))
+            for cp in (0x627, 0x5D0, 0xE01, 0x645):  # Arabic, Hebrew, Thai
+                self.assertFalse(covered(cp), hex(cp))
+        out = os.environ.get("TAHOMA_METRIC_BUILT")  # optional: path of a built TahomaMetric-Regular.ttf
+        if out and os.path.exists(out):
+            cm = TTFont(out).getBestCmap()
+            self.assertFalse([c for c in cm if 0x590 <= c <= 0x6FF or 0xFB50 <= c <= 0xFEFF or 0xE00 <= c <= 0xE7F])
+            self.assertIn(0x41, cm); self.assertIn(0x416, cm); self.assertIn(0x3C0, cm)
+
+    def test_note_modified_keeps_the_name(self):
+        f = synthetic_font()
+        build.note_modified(f, "metrics changed")
+        f = roundtrip(f)
+        self.assertEqual(f["name"].getDebugName(1), "Synthetic")
+        self.assertIn("metrics changed", f["name"].getDebugName(5))
+
+    def test_space_advance_follows_reference_and_scales_with_upm(self):
+        f = synthetic_font()
+        build.set_space_advance(f, {"upm": 2000, "space": 700})
+        f = roundtrip(f)
+        self.assertEqual(f["hmtx"]["space"][0], 350, "700/2000 em on a 1000-unit font")
+        self.assertEqual(f["hmtx"]["a"][0], 500, "other advances untouched")
+        self.assertEqual(f["glyf"]["a"].xMax, 400)
+        g = synthetic_font()
+        build.set_space_advance(g, {"upm": 1000, "winA": 1})
+        self.assertEqual(g["hmtx"]["space"][0], 300, "no 'space' key: nothing changes")
+
+
 class SourcesPinning(unittest.TestCase):
     """sources.json: every file is pinned (https URL + SHA-256); Marelle is shipped unmodified by default."""
 
@@ -95,6 +139,40 @@ class SourcesPinning(unittest.TestCase):
             for f in fam["files"]:
                 self.assertTrue(f["url"].startswith("https://"), f["name"])
                 self.assertRegex(f.get("sha256", ""), r"^[0-9a-f]{64}$", f["name"])
+
+    def test_verdana_tahoma_noto_entries(self):
+        import json
+        refm = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "reference-metrics.json")))
+        for fam, names in (("Verdana Metric", ["Regular", "Bold", "Italic", "Bold Italic"]), ("Tahoma Metric", ["Regular", "Bold"])):
+            f = self.fams[fam]
+            self.assertEqual([x["derive"]["style"] for x in f["files"]], names)
+            for x in f["files"]:
+                r = refm[x["derive"]["vmetrics"]]
+                self.assertEqual(r["upm"], 2048)
+                self.assertGreater(r["space"], 0)
+                self.assertGreater(r["winA"], r["tA"], x["name"])
+        self.assertEqual(self.fams["Tahoma Metric"]["license"].split()[0], "LGPL-2.1-or-later")
+        for x in self.fams["Verdana Metric"]["files"]:
+            self.assertRegex(x["member_sha256"], r"^[0-9a-f]{64}$")
+        noto = self.fams["Noto Sans"]
+        self.assertEqual(noto["license"], "OFL-1.1")
+        for x in noto["files"]:
+            self.assertTrue(x["derive"]["keep_name"], "no Reserved Font Name: the name stays")
+            self.assertIn(x["derive"]["vmetrics"], refm)
+        self.assertEqual(sorted(x["name"] for x in noto["files"]), ["NotoSans-Bold.ttf", "NotoSans-BoldItalic.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"])
+
+    def test_ubuntu_families_unmodified_ufl(self):
+        for name, prefix in (("Ubuntu", "Ubuntu"), ("Ubuntu Mono", "UbuntuMono")):
+            fam = self.fams[name]
+            self.assertTrue(fam["license"].startswith("UFL-1.0"))
+            self.assertEqual(fam["license_member"], "ubuntu-font-family-0.83/LICENCE.txt", "UFL text shipped with the fonts")
+            self.assertRegex(fam["files"][0]["url"], r"ubuntu-font-family-0\.83\.zip$")
+            self.assertEqual(sorted(f["name"] for f in fam["files"]),
+                             sorted("%s-%s.ttf" % (prefix, s) for s in ("Regular", "Bold", "Italic", "BoldItalic")))
+            for f in fam["files"]:
+                self.assertNotIn("derive", f, "UFL: unmodified copies may keep the reserved name, modified ones may not")
+                self.assertRegex(f["member_sha256"], r"^[0-9a-f]{64}$", f["name"])
+                self.assertTrue(f["member"].startswith("ubuntu-font-family-0.83/" + prefix + "-"))
 
     def test_marelle_variants_pinned_unmodified_ofl(self):
         fam = self.fams["Marelle"]

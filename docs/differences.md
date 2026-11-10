@@ -67,6 +67,7 @@ Learn more: [PowerPoint shortcuts](shortcuts.md) and [Interface notes](ui.md).
 | Feature | ElixirOffice | LibreOffice | ONLYOFFICE |
 |---|---|---|---|
 | Layout fidelity | Measured against Microsoft Word on a corpus of public documents, and tracked as changes land. | Not measured publicly. | — |
+| Metric-compatible fonts | Substitutes with the metrics of Verdana and Tahoma, the real Noto Sans and Ubuntu families are bundled, so documents in these fonts keep their line breaks and page count without the original fonts. | Carlito and Caladea for Calibri and Cambria; DejaVu for the rest. | Carlito, Caladea and the DejaVu fonts. |
 | Fonts of your computer | With your consent, documents are laid out with the fonts installed on your computer (Calibri, Cambria, school fonts); nothing is uploaded. | Desktop app only. | Server fonts only in the web editor. |
 | School fonts | The Marelle fonts and Seyes-ruled school cursive are included, so teachers' documents show the real letterforms. | Not shipped. | Not shipped. |
 | PDF export | The PDF is written on your computer (browser or desktop) with the same fonts as on screen, selectable text and embedded fonts; no upload. | Desktop export with its own layout engine. | The server writes the PDF with its own fonts. |
@@ -127,6 +128,7 @@ Learn more: [Thesaurus](thesaurus.md) and [Interface notes](ui.md).
 - **Chinese, Japanese and Korean text** displays correctly when Computer fonts is allowed and such a font is installed; a bundled fallback without it is planned for 0.5.
 - **Mail merge in the desktop app** is planned for 0.5; it works in the server version.
 - **Offline gaps** in the desktop app: document compare and combine, version history, real-time co-editing, macros and plugins.
+- **Fonts embedded in a document** are not read yet (the bundled or installed font of the same name is used), and **picture bullets** are drawn as plain bullets.
 - **PDF**: editing the original text of a PDF, OCR and PDF to Word conversion are not supported.
 - **Beta software.** The server version is 0.1.1 and complex formatting, fonts and embedded objects can still convert differently: check important documents.
 

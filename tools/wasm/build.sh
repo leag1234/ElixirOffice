@@ -47,6 +47,8 @@ docker build -q -t "$IMAGE" "$HERE" >/dev/null
 log "core sources"
 if [ ! -d "$WORK/core/.git" ]; then
   git clone -q "$CORE_REPO" "$WORK/core"
+else
+  git -C "$WORK/core" fetch -q origin   # a reused work dir must see the commits made since its clone
 fi
 if [ -z "$CORE_REF" ]; then
   CORE_REF=$(git -C "$WORK/core" rev-parse -q --verify origin/elixir/dev >/dev/null && echo origin/elixir/dev || echo origin/HEAD)

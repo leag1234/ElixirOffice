@@ -44,7 +44,7 @@ for(const preview of [false,true]){
  });
 }
 test('Export enters the native format chooser, preserving PDF and non-PDF choices',async()=>{
- const f=await fixture();f.fm.fireEvent('item:click',[f.fm,'elx-export']);assert.deepEqual(f.commands,['hide','save-as']);
+ const f=await fixture();f.fm.fireEvent('item:click',[f.fm,'elx-export']);assert.deepEqual(f.commands,['hide','export']);
 });
 test('Info keeps shared properties and exposes native Rename and tab/window move actions',async()=>{
  const f=await fixture();const target={find:selector=>f.nodes.get(selector)||{append(...items){this.items=items;f.nodes.set(selector,this);return this},find(){return this}}};

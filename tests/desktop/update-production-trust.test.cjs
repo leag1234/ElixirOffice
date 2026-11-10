@@ -2,7 +2,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const expected={keyId:'eo-2026-1',spki:'MCowBQYDK2VwAyEAtc5YPgC0XcAMSifWKmwQ6LHkrwslk2Zq226kkNoANK4=',fingerprint:'68be6435459c7a2082aa283c8b2e2726f174691d7d22301330129fe6d9bb84bd'};
-function runtime(platform='win32',packageType='nsis',electronVersion='44.10.1'){return {platform,packageType,electronVersion,arch:'x64',checksEnabled:true};}
+function runtime(platform='win32',packageType='nsis',electronVersion='44.10.2'){return {platform,packageType,electronVersion,arch:'x64',checksEnabled:true};}
 function qualification(nsis){
  const file=path.resolve(__dirname,'../../desktop/update-production-qualification.cjs'),source=fs.readFileSync(file,'utf8'),module={exports:{}};
  vm.runInNewContext('(function(require,module,exports){'+source+'\n})',{},{filename:file})(name=>{
@@ -25,13 +25,13 @@ test('production public trust is the exact owner-approved Ed25519 SPKI, fingerpr
 test('production qualification enables AppImage and NSIS after the reviewed native Windows PASS',()=>{
  const q=require('../../desktop/update-production-qualification.cjs'),{production}=require('../../desktop/update-policy.cjs');
  assert(Object.isFrozen(q)&&Object.isFrozen(q.platforms));
- assert.deepEqual(q,{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:true,AppImage:true}});
+ assert.deepEqual(q,{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:true,AppImage:true}});
  assert.equal(production.capability(runtime('linux','AppImage')).enabled,true);
  assert.equal(production.capability(runtime()).enabled,true);
  for(const [platform,format] of [['darwin','dmg'],['linux','deb'],['linux','flatpak'],['linux','snap']])
   assert.equal(production.capability(runtime(platform,format)).enabled,false);
  for(const version of ['44.7.0','44.10.0'])assert.equal(production.capability(runtime('linux','AppImage',version)).enabled,false);
- const appImageOnly=qualification(false);assert.deepEqual(JSON.parse(JSON.stringify(appImageOnly)),{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:false,AppImage:true}});
+ const appImageOnly=qualification(false);assert.deepEqual(JSON.parse(JSON.stringify(appImageOnly)),{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:false,AppImage:true}});
  const windows=qualification(true);assert.deepEqual(JSON.parse(JSON.stringify(windows)),q);
  const {createPolicy}=require('../../desktop/update-policy.cjs'),pins=require('../../desktop/update-production-trust.cjs');
  assert.equal(createPolicy({trustedKeys:pins,qualifiedElectronVersion:windows.electronVersion,qualification:windows}).capability(runtime()).enabled,true);
@@ -42,12 +42,12 @@ test('production qualification enables AppImage and NSIS after the reviewed nati
 test('runtime, reviewed switch and each native platform are independent qualification gates',()=>{
  const {createPolicy}=require('../../desktop/update-policy.cjs'),pins=require('../../desktop/update-production-trust.cjs');
  for(const [q,win,linux] of [
-  [{reviewed:false,electronVersion:'44.10.1',platforms:{nsis:true,AppImage:true}},false,false],
+  [{reviewed:false,electronVersion:'44.10.2',platforms:{nsis:true,AppImage:true}},false,false],
   [{reviewed:true,electronVersion:null,platforms:{nsis:true,AppImage:true}},false,false],
-  [{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:false,AppImage:false}},false,false],
-  [{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:true,AppImage:false}},true,false],
-  [{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:false,AppImage:true}},false,true],
-  [{reviewed:true,electronVersion:'44.10.1',platforms:{nsis:true,AppImage:true}},true,true],
+  [{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:false,AppImage:false}},false,false],
+  [{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:true,AppImage:false}},true,false],
+  [{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:false,AppImage:true}},false,true],
+  [{reviewed:true,electronVersion:'44.10.2',platforms:{nsis:true,AppImage:true}},true,true],
  ]){
   const p=createPolicy({trustedKeys:pins,qualifiedElectronVersion:q.electronVersion,qualification:q});
   assert.equal(p.capability(runtime()).enabled,win);assert.equal(p.capability(runtime('linux','AppImage')).enabled,linux);
@@ -56,12 +56,12 @@ test('runtime, reviewed switch and each native platform are independent qualific
 });
 test('qualification input is strict and copied, never mutable or coerced approval',()=>{
  const {createPolicy}=require('../../desktop/update-policy.cjs'),pins=require('../../desktop/update-production-trust.cjs');
- const base=()=>({reviewed:true,electronVersion:'44.10.1',platforms:{nsis:true,AppImage:false}});
+ const base=()=>({reviewed:true,electronVersion:'44.10.2',platforms:{nsis:true,AppImage:false}});
  for(const change of [q=>q.reviewed='true',q=>q.platforms.nsis=1,q=>q.extra=true,q=>q.platforms.extra=true,q=>delete q.platforms.AppImage,q=>q.electronVersion='44.10.0']){
-  const q=base();change(q);assert.throws(()=>createPolicy({trustedKeys:pins,qualifiedElectronVersion:'44.10.1',qualification:q}));
+  const q=base();change(q);assert.throws(()=>createPolicy({trustedKeys:pins,qualifiedElectronVersion:'44.10.2',qualification:q}));
  }
  assert.throws(()=>createPolicy({trustedKeys:pins,qualifiedElectronVersion:null,qualification:base()}));
- const q=base(),p=createPolicy({trustedKeys:pins,qualifiedElectronVersion:'44.10.1',qualification:q});
+ const q=base(),p=createPolicy({trustedKeys:pins,qualifiedElectronVersion:'44.10.2',qualification:q});
  q.reviewed=false;q.platforms.nsis=false;q.platforms.AppImage=true;
  assert.equal(p.capability(runtime()).enabled,true);assert.equal(p.capability(runtime('linux','AppImage')).enabled,false);
 });

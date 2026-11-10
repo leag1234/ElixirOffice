@@ -2,7 +2,7 @@
 'use strict';
 const crypto=require('node:crypto');
 const metadata=require('./update-metadata.cjs');
-const QUALIFIED_ELECTRON='44.10.1';
+const QUALIFIED_ELECTRON='44.10.2';
 function refuse(){throw Error('Update policy refused');}
 function disabled(reason){return Object.freeze({enabled:false,reason});}
 // Main-process construction only. No renderer preference or downloaded field

@@ -111,7 +111,8 @@ def build(out, cache, offline=False):
         data = sources[0][1]
         for style, weight in [("Regular", 400), ("Bold", 700)]:
             font = TTFont(io.BytesIO(data), recalcTimestamp=False)
-            font = instantiateVariableFont(font, {"wdth": 100, "wght": weight}, inplace=True)
+            axes = {axis.axisTag for axis in font["fvar"].axes}
+            font = instantiateVariableFont(font, {tag: value for tag, value in {"wdth": 100, "wght": weight}.items() if tag in axes}, inplace=True)
             assert "fvar" not in font and "gvar" not in font
             names = font["name"]
             # Replace all family/full/PostScript aliases; retain copyright/licence/version.

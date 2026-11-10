@@ -703,6 +703,259 @@
     }
    ],
    "group": "metric"
+  },
+  {
+   "family": "Verdana Metric",
+   "dir": "verdana-metric",
+   "replaces": "Verdana (closest free match: DejaVu Sans, widths weighted gap 1.3-1.7 % after the space advance of Verdana, vertical metrics of Verdana)",
+   "license": "Bitstream Vera License (DejaVu additions public domain)",
+   "license_url": "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip",
+   "license_member": "dejavu-fonts-ttf-2.37/LICENSE",
+   "upstream": "https://github.com/dejavu-fonts/dejavu-fonts (release 2.37)",
+   "files": [
+    {
+     "name": "VerdanaMetric-Regular.ttf",
+     "url": "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip",
+     "member": "dejavu-fonts-ttf-2.37/ttf/DejaVuSans.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Verdana"
+     },
+     "sha256": "7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a",
+     "member_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+    },
+    {
+     "name": "VerdanaMetric-Bold.ttf",
+     "url": "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip",
+     "member": "dejavu-fonts-ttf-2.37/ttf/DejaVuSans-Bold.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "Verdana-Bold"
+     },
+     "sha256": "7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a",
+     "member_sha256": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724"
+    },
+    {
+     "name": "VerdanaMetric-Italic.ttf",
+     "url": "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip",
+     "member": "dejavu-fonts-ttf-2.37/ttf/DejaVuSans-Oblique.ttf",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "Verdana-Italic"
+     },
+     "sha256": "7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a",
+     "member_sha256": "4af75fa16ee6d3ad43e1ecec41862c24954af26a55c6bb1ebb27bd486a50f5f4"
+    },
+    {
+     "name": "VerdanaMetric-BoldItalic.ttf",
+     "url": "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip",
+     "member": "dejavu-fonts-ttf-2.37/ttf/DejaVuSans-BoldOblique.ttf",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "Verdana-Bold"
+     },
+     "sha256": "7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a",
+     "member_sha256": "eb436dca0c2594b73d8b603b892e374fdfd8d885d25ffb4f18df4c4c0b49e50f"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Tahoma Metric",
+   "dir": "tahoma-metric",
+   "replaces": "Tahoma (Wine Tahoma, a metric-compatible clone: widths weighted gap 0.05 %; vertical metrics of Tahoma; no italic, as Tahoma); subset: only the scripts the font covers well (Basic Latin to Latin Extended-B, IPA, modifiers, combining marks, Greek, Cyrillic and supplement, punctuation, currency, letterlike, arrows, math, box drawing, geometric shapes, misc symbols, private use); Arabic and other partial scripts removed (derive.keep_unicode)",
+   "license": "LGPL-2.1-or-later (Wine Tahoma; derived from Bitstream Vera Sans)",
+   "license_url": "https://raw.githubusercontent.com/wine-mirror/wine/78e52205d9b9ac1c7e6f55fc613b882f1ad093d9/COPYING.LIB",
+   "license_name": "LICENSE.txt",
+   "upstream": "https://gitlab.winehq.org/wine/wine/-/tree/master/fonts (tahoma.sfd, built tahoma.ttf; commit 78e52205)",
+   "files": [
+    {
+     "name": "TahomaMetric-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/wine-mirror/wine/78e52205d9b9ac1c7e6f55fc613b882f1ad093d9/fonts/tahoma.ttf",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "Tahoma",
+      "keep_unicode": [
+       "0000-024F",
+       "0250-02AF",
+       "02B0-02FF",
+       "0300-036F",
+       "0370-03FF",
+       "0400-052F",
+       "2000-206F",
+       "20A0-20CF",
+       "2100-214F",
+       "2190-21FF",
+       "2200-22FF",
+       "2500-257F",
+       "25A0-25FF",
+       "2600-26FF",
+       "E000-F8FF"
+      ]
+     },
+     "sha256": "90f1abad4da0ce03da5d2277ee75a9600ce812d37c90eab76e0838ffa7937e55"
+    },
+    {
+     "name": "TahomaMetric-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/wine-mirror/wine/78e52205d9b9ac1c7e6f55fc613b882f1ad093d9/fonts/tahomabd.ttf",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "Tahoma-Bold",
+      "keep_unicode": [
+       "0000-024F",
+       "0250-02AF",
+       "02B0-02FF",
+       "0300-036F",
+       "0370-03FF",
+       "0400-052F",
+       "2000-206F",
+       "20A0-20CF",
+       "2100-214F",
+       "2190-21FF",
+       "2200-22FF",
+       "2500-257F",
+       "25A0-25FF",
+       "2600-26FF",
+       "E000-F8FF"
+      ]
+     },
+     "sha256": "83bebdfc5e064642316e0a47a5e73b0095f5d1408bdc7a3ce9d099ff63be2284"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Noto Sans",
+   "dir": "noto-sans",
+   "replaces": "(real font, so that Word documents that use Noto Sans no longer fall back to Carlito; widths within 0.4 % of the Word reference; OS/2 win metrics set to the ones of the Word reference (2.004-era 1069/293 per 1000 em, upstream 2.015 has 1124/395, which would make lines 12 % taller in sdkjs); name kept: OFL 1.1 without Reserved Font Name)",
+   "license": "OFL-1.1",
+   "license_url": "https://raw.githubusercontent.com/google/fonts/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/notosans/OFL.txt",
+   "upstream": "https://github.com/notofonts/latin-greek-cyrillic (Noto Sans 2.015, hinted static)",
+   "files": [
+    {
+     "name": "NotoSans-Regular.ttf",
+     "url": "https://raw.githubusercontent.com/notofonts/notofonts.github.io/4cf78353cd1668040ba8efa13029cd910fcdf9e2/fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf",
+     "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+     "derive": {
+      "style": "Regular",
+      "vmetrics": "NotoSans",
+      "keep_name": true
+     }
+    },
+    {
+     "name": "NotoSans-Bold.ttf",
+     "url": "https://raw.githubusercontent.com/notofonts/notofonts.github.io/4cf78353cd1668040ba8efa13029cd910fcdf9e2/fonts/NotoSans/hinted/ttf/NotoSans-Bold.ttf",
+     "sha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913",
+     "derive": {
+      "style": "Bold",
+      "vmetrics": "NotoSans-Bold",
+      "keep_name": true
+     }
+    },
+    {
+     "name": "NotoSans-Italic.ttf",
+     "url": "https://raw.githubusercontent.com/notofonts/notofonts.github.io/4cf78353cd1668040ba8efa13029cd910fcdf9e2/fonts/NotoSans/hinted/ttf/NotoSans-Italic.ttf",
+     "sha256": "467e3f89eeca4108bb8710a2b9e0cf2281ac56d5b0609211a83776d0505eecb5",
+     "derive": {
+      "style": "Italic",
+      "vmetrics": "NotoSans",
+      "keep_name": true
+     }
+    },
+    {
+     "name": "NotoSans-BoldItalic.ttf",
+     "url": "https://raw.githubusercontent.com/notofonts/notofonts.github.io/4cf78353cd1668040ba8efa13029cd910fcdf9e2/fonts/NotoSans/hinted/ttf/NotoSans-BoldItalic.ttf",
+     "sha256": "1b602a9d6353be42c91df097a4857b69fa2696f26703d7a33b54a15d87c2622c",
+     "derive": {
+      "style": "Bold Italic",
+      "vmetrics": "NotoSans-Bold",
+      "keep_name": true
+     }
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Ubuntu",
+   "dir": "ubuntu",
+   "replaces": "(real font, installed unmodified under its own name: Word documents that use or embed Ubuntu no longer fall back to Open Sans; the licence permits redistribution of unmodified copies)",
+   "license": "UFL-1.0 (Ubuntu Font Licence 1.0, kept name)",
+   "license_url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+   "license_member": "ubuntu-font-family-0.83/LICENCE.txt",
+   "license_name": "LICENCE.txt",
+   "upstream": "https://design.ubuntu.com/font (official static release ubuntu-font-family-0.83)",
+   "files": [
+    {
+     "name": "Ubuntu-Regular.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/Ubuntu-R.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "52c1afa489ae7bfd893af6cdd9f1af258005703600449e70d338caabcff507e5"
+    },
+    {
+     "name": "Ubuntu-Bold.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/Ubuntu-B.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "c90e629e932f768909bdce1481ccd259d8aff1490a4bc1cf94d5413492317336"
+    },
+    {
+     "name": "Ubuntu-Italic.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/Ubuntu-RI.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "0626647f11d9c911f934715d1060b590744887224601abaeb22ac8f582b57118"
+    },
+    {
+     "name": "Ubuntu-BoldItalic.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/Ubuntu-BI.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "2c33de34d51065a5e56bae5e1c7c13cd128268b26569838a38db038e6ac9723d"
+    }
+   ],
+   "group": "metric"
+  },
+  {
+   "family": "Ubuntu Mono",
+   "dir": "ubuntu-mono",
+   "replaces": "(real font, installed unmodified under its own name: Word documents that use or embed Ubuntu Mono)",
+   "license": "UFL-1.0 (Ubuntu Font Licence 1.0, kept name)",
+   "license_url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+   "license_member": "ubuntu-font-family-0.83/LICENCE.txt",
+   "license_name": "LICENCE.txt",
+   "upstream": "https://design.ubuntu.com/font (official static release ubuntu-font-family-0.83)",
+   "files": [
+    {
+     "name": "UbuntuMono-Regular.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/UbuntuMono-R.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "b35dd9d2131d5d83a9b87fe9ad22c6288fa3d17688d43302c14da29812417d63"
+    },
+    {
+     "name": "UbuntuMono-Bold.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/UbuntuMono-B.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "11f15c3a6bbd998a8695fdefb3475931c3789aa035d7546f2efe78e83b352f6b"
+    },
+    {
+     "name": "UbuntuMono-Italic.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/UbuntuMono-RI.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "960b2bc286c2ff7d49073303858c65e1fc9013c17a971b61123b02c39454ef75"
+    },
+    {
+     "name": "UbuntuMono-BoldItalic.ttf",
+     "url": "https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip",
+     "member": "ubuntu-font-family-0.83/UbuntuMono-BI.ttf",
+     "sha256": "456d7d42797febd0d7d4cf1b782a2e03680bb4a5ee43cc9d06bda172bac05b42",
+     "member_sha256": "bd255784bb87b5c41513a12a86f0f9cf061bce4e8256d3bfe7234611002e8f48"
+    }
+   ],
+   "group": "metric"
   }
  ]
 }

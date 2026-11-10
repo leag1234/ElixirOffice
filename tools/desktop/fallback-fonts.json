@@ -52,6 +52,58 @@
     "noticeSha256": "0aad5dafb09d62fd3851b815ab21ffe50f32171ea6168beaaa2c9437bb4f6c77"
   },
   {
+    "family": "Elixir Fallback Devanagari",
+    "upstreamFamily": "Noto Sans Devanagari",
+    "directory": "elixir-fallback-devanagari",
+    "font": {
+      "url": "https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notosansdevanagari/NotoSansDevanagari%5Bwdth%2Cwght%5D.ttf",
+      "sha256": "14ec4af41f27482216d1c2229f417ff9b1425e1babb014e57d1d40d03229853e"
+    },
+    "license": {
+      "url": "https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notosansdevanagari/OFL.txt",
+      "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+    },
+    "outputs": [
+      {
+        "style": "Regular",
+        "bytes": 218180,
+        "sha256": "86fe4006cfbff3feb8667dce62931e0cfa99e34ac2f546a16f71214fe730f46c"
+      },
+      {
+        "style": "Bold",
+        "bytes": 218744,
+        "sha256": "e3c2df14cbeeeb7859cb5ff7f46b00348838294a8ea7df9a6682822d47269208"
+      }
+    ],
+    "noticeSha256": "906cd625c9354e29dc1e1eb8c5c2c61df8f06da221909f4654077bcb779c3b7a"
+  },
+  {
+    "family": "Elixir Fallback Emoji",
+    "upstreamFamily": "Noto Emoji",
+    "directory": "elixir-fallback-emoji",
+    "font": {
+      "url": "https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf",
+      "sha256": "de6c18832938afc99caf132b39d6a30a19bac7f2e812e28db2535b4608d27551"
+    },
+    "license": {
+      "url": "https://raw.githubusercontent.com/google/fonts/94301472b4d809299b4775bc6502592b83dd6934/ofl/notoemoji/OFL.txt",
+      "sha256": "500bb1ccf43df7bbb522112f9133a52b16e1c35e809632f5d8609b179152de5b"
+    },
+    "outputs": [
+      {
+        "style": "Regular",
+        "bytes": 886664,
+        "sha256": "83527dab19799c8b6bbc2174299f5ce3471e45e3f4e069ccb8380f9b76db0f1e"
+      },
+      {
+        "style": "Bold",
+        "bytes": 885200,
+        "sha256": "10cf784edf92e0cb6ae8fa9665e60d09602b001777e011bd3091bc41999ac9fd"
+      }
+    ],
+    "noticeSha256": "80d0f0ea3c32668aafaa1433c0a4f4d1b7aac1c4d878d44e171c5211b390e059"
+  },
+  {
     "family": "Noto Sans CJK",
     "upstreamFamily": "Noto Sans CJK",
     "version": "2.004",

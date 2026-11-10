@@ -25,10 +25,16 @@
    }
    function invalidateRenderedText(){
     try{
-     const views=window.Asc?.editor?.wb?.wsViews;
+     const editor=window.Asc?.editor;
+     if(editor?.WordControl?.m_oLogicDocument){
+      // Lay the document out again with the loaded faces, then repaint: without it the old glyphs stay until the cursor moves.
+      if(LF.relayout(editor))window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>editor.WordControl.OnRePaintAttack?.()));
+      return;
+     }
+     const views=editor?.wb?.wsViews;
      if(!views)return;
      for(const key in views)views[key]?.cache?.reset?.();
-     window.Asc.editor.wb.drawWorksheet?.();
+     editor.wb.drawWorksheet?.();
     }catch{}
    }
    function selectedLocalFontsToLoad(){

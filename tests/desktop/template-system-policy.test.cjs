@@ -27,6 +27,12 @@ test('named regional and small-script document faces resolve to real OS alternat
  const small=face('Elixir Fallback Sinhala','fallback',0,[[0xd80,0xdff]]);
  assert.equal(resolver.create([small]).resolve({name:'Noto Sans Sinhala',codepoints:[0xd85]}).family,small.family);
  assert.equal(resolver.create([small,face('Sinhala MN','system',0,[[0xd80,0xdff]])]).resolve({name:'Noto Sans Sinhala',codepoints:[0xd85]}).family,'Sinhala MN');
+ const devanagari=face('Elixir Fallback Devanagari','fallback',0,[[0x900,0x97f]]);
+ const emoji=face('Elixir Fallback Emoji','fallback',0,[[0x1f300,0x1faff]]);
+ assert.equal(resolver.create([emoji]).resolve({name:'Noto Emoji',codepoints:[0x1f4ca]}).family,emoji.family);
+ assert.equal(resolver.create([emoji,face('Noto Color Emoji','system',0,[[0x1f300,0x1faff]])]).resolve({name:'Noto Emoji',codepoints:[0x1f4ca]}).family,emoji.family,'colour emoji fonts are not candidates');
+ assert.equal(resolver.create([devanagari]).resolve({name:'Noto Sans Devanagari',codepoints:[0x915]}).family,devanagari.family);
+ assert.equal(resolver.create([devanagari,face('Nirmala UI','system',0,[[0x900,0x97f]])]).resolve({name:'Noto Sans Devanagari',codepoints:[0x915]}).family,'Nirmala UI');
 });
 test('actual main Home uses English immediately, shares discovery, refreshes later and respects failure/revocation',async()=>{
  const source=fs.readFileSync(require.resolve('../../desktop/main.cjs'),'utf8');
