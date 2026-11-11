@@ -14,6 +14,37 @@
    const preliminary=window.EOFontResolver.create(bundled,options);
    const system=index.system.filter(face=>!preliminary.protectedName(face.family));
    const resolver=window.EOFontResolver.create([...bundled,...system],options);
+   // Full names of packaged faces ("Open Sans Bold", "Open Sans Bold Italic") exist only in the resolver; the
+   // engine knows the family "Open Sans". Returning such a name to the engine made it fall back to the
+   // document altName or a substitute (regular text, or Carlito). Give the engine a family of that name whose
+   // slots hold the packaged faces, as LF.register does for computer faces.
+   const packagedFullNames=new Set();
+   const SLOT_KEYS=['R','B','I','BI'];// index = SDK style bits (bold=1, italic=2)
+   for(const faces of resolver.families.values()){
+    const named=faces.filter(face=>face.source==='bundled'&&face.baseFamily);
+    if(!named.length)continue;
+    const name=named[0].family;
+    if(A.g_map_font_index[name]!==undefined||packagedFullNames.has(name))continue;
+    const engineSlot=face=>{
+     const info=A.g_font_infos[A.g_map_font_index[face.baseFamily]],key=SLOT_KEYS[face.baseStyleCode];
+     return info&&key&&info['index'+key]>=0?{index:info['index'+key],faceIndex:info['faceIndex'+key]}:null;
+    };
+    // The face named exactly by the full name fills the regular slot (Word draws "Open Sans Bold" bold without w:b).
+    const own=named.find(face=>window.EOFontResolver.normalize(face.fullName)===window.EOFontResolver.normalize(name))||named[0];
+    const slot=bits=>engineSlot(named.find(face=>face.styleCode===bits)||(own.styleCode===(own.styleCode|bits)?own:null)||{});
+    const R=engineSlot(own);
+    if(!R)continue;
+    const B=slot(1),I=slot(2),BI=slot(3),none={index:-1,faceIndex:0};
+    const info=new A.CFontInfo(name,0,R.index,R.faceIndex,(I||none).index,(I||none).faceIndex,(B||none).index,(B||none).faceIndex,(BI||none).index,(BI||none).faceIndex);
+    // Text shaping looks the face up again by a family name: without an identity it takes the one inside the
+    // file ("Open Sans") and draws the regular face over the bold widths. CFontInfo.LoadFont passes this
+    // info's own name as identity for local faces only, so present it as one while it loads (the PDF export
+    // still sees a packaged, not a computer, face).
+    const load=info.LoadFont;
+    info.LoadFont=function(){this.isLocalFont=true;try{return load.apply(this,arguments);}finally{this.isLocalFont=false;}};
+    A.g_font_infos.push(info);A.g_map_font_index[name]=A.g_font_infos.length-1;
+    packagedFullNames.add(name);
+   }
    const picker=A.FontPickerByCharacter,originalRanges=picker?.Ranges?.slice()||[];
    const candidates=window.EOFontResolver.scriptCandidates;
    function fallback(name,style,cp,baseline){
@@ -38,10 +69,16 @@
     }catch{}
    }
    function selectedLocalFontsToLoad(){
-    const names=new Set((picker?.Ranges||[]).map(range=>range.Name));
+    const names=new Set((picker?.Ranges||[]).map(range=>range.Name).filter(name=>LF.isLocal(name)));
+    // The document fonts were loaded before this policy existed (LoadDocumentFonts runs at open, consent comes
+    // later): a name it now sends to another family ("Open Sans SemiBold" -> packaged "Open Sans Semibold",
+    // "Open Sans Bold" -> its bold face) has files nobody loaded, and the editor then measures and draws with
+    // whatever face was loaded last (overlapping glyphs, wrong font in the PDF). Load what the policy picks.
+    for(const name of LF.docFonts||[])for(let style=0;style<4;style++){
+     try{const picked=app.GetFontFileWeb(name,style)?.m_wsFontName;if(picked)names.add(picked);}catch{}
+    }
     const result=[];
     for(const name of names){
-     if(!LF.isLocal(name))continue;
      const info=A.g_font_infos[A.g_map_font_index[name]];
      if(!info)continue;
      for(const key of ['indexR','indexI','indexB','indexBI']){
@@ -201,7 +238,12 @@
    function installPolicy(){
     for(const key of ['GetFontFile','GetFontFileWeb']){
      const original=app[key];if(original?.eoDesktopPolicy)continue;
-     const wrapped=function(name,style){const chosen=resolve(name,style);return original.call(this,chosen?.family||name,style);};
+     const wrapped=function(name,style){
+      const chosen=resolve(name,style);
+      // Not in the SDK font selection list: its dictionary lookup would answer the base family instead.
+      if(chosen&&packagedFullNames.has(chosen.family))return {m_wsFontName:chosen.family};
+      return original.call(this,chosen?.family||name,style);
+     };
      wrapped.eoDesktopPolicy=true;app[key]=wrapped;
     }
     app.FontPickerMap={};

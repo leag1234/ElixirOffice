@@ -57,7 +57,28 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
-### 2026-11-10 (desktop 0.7.1, server 0.7.1, in preparation)
+### 2026-11-11 (desktop 0.7.2, published 2026-11-11)
+
+- Dependency scan (OSV, nightly) of 2026-11-11: 15 new findings, all in JavaScript dependencies of the
+  server (node-forge and fast-xml-parser, advisories published on 2026-11-10 and 2026-11-11). Two are
+  rated high (GHSA-6qrw-m8cv-hcxf, RSA signature forgery; GHSA-rhr8-3pm8-cq29, ASN.1 resource
+  exhaustion), the others medium or low. node-forge in the server dependencies (1.4.2, pulled by
+  win-ca) and fast-xml-parser 5.11.2 (pulled by the Azure storage client) are updated to node-forge 1.4.3
+  and fast-xml-parser 5.12.0. The server code itself does not use node-forge (it verifies certificates with
+  the Node.js crypto module).
+- Findings in the AdminPanel client lock file (node-forge 1.3.1) concern the webpack development server
+  only; the client is built to static files and node-forge is not part of the shipped client. The lock
+  file is updated to 1.4.3 anyway. fast-xml-parser 4.5.0 in the document server example application
+  (a sample, not part of the desktop app) is not changed.
+- Bundled C/C++ libraries (vendored check of 2026-11-11): no new finding; the pending components
+  (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.
+- Electron 44.10.2 -> 44.11.1 (44.11.0 and 44.11.1 carry backported Chromium, V8, PDFium, Skia, ANGLE and
+  FFmpeg fixes).
+- New code in this release reads data from documents: fonts embedded in Word files (the converter
+  de-obfuscates them, checks the font signature, limits sizes and keeps only files inside the document's
+  media folder) and picture bullets. Both run in the WebAssembly converter inside the sandboxed renderer.
+
+### 2026-11-10 (desktop 0.7.1, server 0.7.1, published 2026-11-10)
 
 - Dependency scan (OSV, nightly) and bundled C/C++ library check of 2026-11-10: no new finding since
   0.7.0; the pending components (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.

@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -14,13 +14,13 @@
     "test:print-viewer": "electron ../tests/desktop/print-viewer-contract.cjs"
   },
   "devDependencies": {
-    "electron": "44.10.2",
+    "electron": "44.11.1",
     "electron-builder": "26.15.3"
   },
   "build": {
     "appId": "org.elixiroffice.desktop",
     "productName": "ElixirOffice",
-    "electronVersion": "44.10.2",
+    "electronVersion": "44.11.1",
     "asar": true,
     "files": [
       "*.cjs",

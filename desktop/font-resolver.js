@@ -90,11 +90,13 @@
   }
   for(const face of faces){
    const full=face.fullName,c=classify(face.style);
-   if(face.source==='bundled'||!full||full===face.family||c.bits||!c.other&&!c.alt||families.has(normalize(full)))continue;
+   if(!full||full===face.family||families.has(normalize(full)))continue;
+   if(!c.bits&&!c.other&&!c.alt)continue;
    const aliases=[];
-   for(const [suffix,styleCode] of [['',0],[' Bold',1],[' Italic',2],[' Bold Italic',3]]){
+   for(const [suffix] of [[''],[' Bold'],[' Italic'],[' Bold Italic']]){
     const chosen=faces.find(other=>other.source===face.source&&other.family===face.family&&normalize(other.fullName)===normalize(full+suffix));
-    if(chosen)aliases.push({...chosen,family:full,styleCode});
+    // The engine only knows the real family ("Open Sans"): keep it and its slot so the caller can map the face back.
+    if(chosen)aliases.push({...chosen,family:full,styleCode:classify(chosen.style).bits,baseFamily:chosen.family,baseStyleCode:chosen.styleCode});
    }
    families.set(normalize(full),aliases);
   }

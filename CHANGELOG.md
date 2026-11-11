@@ -1,6 +1,28 @@
 # Changelog
 
-## Desktop 0.7.1 — published 2026-11-11
+## Desktop 0.7.2 — published 2026-11-11
+
+### Layout
+
+- Picture bullets of Word documents are kept when the document is saved and drawn with Word's size
+  rule, instead of plain bullets (#66).
+- Fonts embedded in a Word document are used for that document when no installed or bundled face
+  exists; they are not kept when the document is saved yet (#66).
+- A paragraph whose mark has a font size of 0 gets Word's minimum line height, so anchored blocks no
+  longer drift up on the page (#73).
+
+### Fixed
+
+- Pictures stored as SVG, and WMF or EMF drawings, are no longer blank in the desktop editor (#61).
+- A font named by its full face name, with an alternate name in the document, is now found; the
+  SemiBold, ExtraBold and Light weights of installed font families are used as well (#65).
+
+### Security
+
+- Electron 44.11.1 (backported Chromium, V8, PDFium, Skia, ANGLE and FFmpeg fixes).
+- Server: node-forge 1.4.3 and fast-xml-parser 5.12.0 in the server dependencies.
+
+## Desktop 0.7.1 — published 2026-11-10
 
 ### Fixed
 

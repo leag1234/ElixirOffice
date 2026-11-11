@@ -8,7 +8,7 @@ async function directory(){const p=await fs.realpath(await fs.mkdtemp(path.join(
 function image(){const b=Buffer.alloc(128);b.set([127,69,76,70,2,1,1]);b.set([65,73,2],8);b.writeUInt16LE(62,18);return b;}
 test.after(async()=>{assert.equal(network.calls,0);for(const p of roots)await fs.rm(p,{recursive:true,force:true});});
 test('platform identity cannot qualify macOS, development, Store, DEB, Flatpak, Snap or unknown',()=>{
- const base={arch:'x64',electronVersion:'44.10.2',packaged:true};
+ const base={arch:'x64',electronVersion:'44.11.1',packaged:true};
  for(const options of [{platform:'darwin'},{platform:'win32',windowsStore:true},{platform:'linux'},{platform:'linux',appImage:'/tmp/app',flatpak:'org.synthetic'},{platform:'linux',appImage:'/tmp/app',snap:'/snap/synthetic'},{platform:'win32',packaged:false}])
   assert.equal(runtimeTarget({...base,...options}).packageType,'unknown');
  assert.equal(runtimeTarget({...base,platform:'win32'}).packageType,'nsis');

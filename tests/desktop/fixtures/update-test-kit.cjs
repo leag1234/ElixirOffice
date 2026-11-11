@@ -5,8 +5,8 @@ const wire=require('../../../desktop/update-metadata.cjs'),{createPolicy}=requir
 const key=crypto.createPrivateKey({key:Buffer.from('302e020100300506032b6570042204209d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60','hex'),format:'der',type:'pkcs8'});
 const fingerprint=crypto.createHash('sha256').update(crypto.createPublicKey(golden.publicKeyPem).export({type:'spki',format:'der'})).digest('hex');
 function fixture({platform='win32',payload=Buffer.from('synthetic updater payload'),now=Date.now(),sequence=42,version='0.4.0'}={}){
- const policy=createPolicy({qualifiedElectronVersion:'44.10.2',trustedKeys:[{keyId:'rfc8032-test-only',pem:golden.publicKeyPem,fingerprint}]});
- const runtime=Object.freeze({platform,arch:'x64',packageType:platform==='linux'?'AppImage':'nsis',electronVersion:'44.10.2',checksEnabled:true});
+ const policy=createPolicy({qualifiedElectronVersion:'44.11.1',trustedKeys:[{keyId:'rfc8032-test-only',pem:golden.publicKeyPem,fingerprint}]});
+ const runtime=Object.freeze({platform,arch:'x64',packageType:platform==='linux'?'AppImage':'nsis',electronVersion:'44.11.1',checksEnabled:true});
  const c={...golden.context,tag:'v'+version,version,sequence,issuedAt:now-1000,expiresAt:now+3600000,platform,packageType:runtime.packageType,
  metadataName:platform==='linux'?'latest-linux.yml':'latest.yml',
  artifact:{name:'ElixirOffice-'+version+(platform==='linux'?'-x86_64.AppImage':'-win-x64.exe'),size:payload.length,sha512:crypto.createHash('sha512').update(payload).digest('base64')}};
