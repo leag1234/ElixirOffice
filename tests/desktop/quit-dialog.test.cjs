@@ -7,18 +7,21 @@ const t=key=>words[key],plain=labels=>labels.map(label=>label.replace(/&/g,''));
 test('named quit uses platform button IDs with Save default and Cancel on Escape',()=>{
  for(const platform of ['win32','linux','darwin']){
   const options=decisions.unsaved(t,true,'Public report.docx',platform);
-  assert.equal(options.message,'Do you want to save the changes to "\u2068Public report.docx\u2069"?');
+  // Windows message boxes draw Unicode isolates as boxes (#75): plain name there, isolated elsewhere.
+  assert.equal(options.message,platform==='win32'?'Do you want to save the changes to "Public report.docx"?':'Do you want to save the changes to "\u2068Public report.docx\u2069"?');
   assert.deepEqual(plain(options.buttons),platform==='darwin'?['Save','Cancel',"Don't Save"]:['Save',"Don't Save",'Cancel']);
   assert.equal(options.defaultId,0);assert.equal(plain(options.buttons)[options.cancelId],'Cancel');assert.equal(options.noLink,true);
   for(let response=-1;response<=3;response++)assert.equal(decisions.discard({response},true,platform),plain(options.buttons)[response]==="Don't Save");
  }
 });
 test('name isolation strips injected direction controls and does not treat replacement tokens as templates',()=>{
- const options=decisions.unsaved(t,true,'Public \u202eRTL\u2069 $&\nreport.docx','win32');
+ const options=decisions.unsaved(t,true,'Public \u202eRTL\u2069 $&\nreport.docx','linux');
  assert.equal(options.message,'Do you want to save the changes to "\u2068Public RTL $& report.docx\u2069"?');
  assert.equal((options.message.match(/\u2068/g)||[]).length,1);assert.equal((options.message.match(/\u2069/g)||[]).length,1);
  assert(decisions.unsaved(t,true,'','linux').message.includes('\u2068Untitled\u2069'));
  assert(decisions.unsaved(t,true,'\u202e  \n','linux').message.includes('\u2068Untitled\u2069'));
+ assert.equal(decisions.unsaved(t,true,'Public \u202eRTL\u2069 $&\nreport.docx','win32').message,'Do you want to save the changes to "Public RTL $& report.docx"?');
+ assert(!/[\u2066-\u2069\u202a-\u202e]/.test(decisions.unsaved(t,true,'\u202e\u2068x.docx','win32').message));
 });
 test('busy close names the document and retains only explicit Cancel or Do not Save',()=>{
  const options=decisions.busy(t,'Public.docx');

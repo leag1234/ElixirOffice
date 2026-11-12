@@ -1,5 +1,37 @@
 # Changelog
 
+## Desktop 0.7.3 — published 2026-11-12
+
+### Layout
+
+- Spacing between East Asian and Latin text (autoSpaceDE and autoSpaceDN) follows Word desktop.
+- Header rows of floating tables repeat on the following pages.
+- The footnote separator is placed where Word puts it.
+- SET field results are no longer shown.
+
+### Word files
+
+- Office 2016 extended charts (box and whisker, sunburst...) are displayed and kept on save, including
+  files written by Apache POI; a chart type the editor cannot draw shows its fallback picture (#76).
+- A drawing that follows an extended chart is no longer lost after saving and reopening (#76).
+- Fonts embedded in a Word document are kept when the document is saved.
+- Positional tabs (w:ptab), compatibility settings and the auto spacing properties are kept.
+- No empty document protection element is written.
+- The unused built-in style gallery is no longer written into styles.xml: a file with 14 styles stays
+  at 14 styles instead of growing to about 1850.
+- VML text boxes keep their stroke wrap area, and WordArt watermarks keep Word's size.
+
+### Editors
+
+- Tooltip for the currency format.
+- "More templates" is shown only when templates are available.
+- PDF download in Firefox inside Nextcloud goes through the server.
+- Windows: no stray boxes around file names in the save and close questions and in menus (#75).
+
+### Security
+
+- Electron 44.11.2.
+
 ## Desktop 0.7.2 — published 2026-11-11
 
 ### Layout

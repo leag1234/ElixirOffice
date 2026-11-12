@@ -226,7 +226,7 @@ function showMoveMenu(document){
  if(captureOptions)throw Error('Capture mode unavailable');
  const source=registry.window(document.windowId);
  const move=target=>{void moveSession(document,target).catch(()=>{if(document.live)document.contents.send('eo:action','external-error');});};
- const display=value=>'\u2068'+String(value).replace(/[\u0000-\u001f\u007f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'').replace(/&/g,'&&')+'\u2069';
+ const display=value=>{const clean=String(value).replace(/[\u0000-\u001f\u007f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'').replace(/&/g,'&&');return process.platform==='win32'?clean:'\u2068'+clean+'\u2069';}; // Windows menus draw isolates as boxes (#75)
  const template=[{label:t('tabDetach'),click:()=>move()}];
  for(const owner of registry.windows())if(owner!==source&&!owner.window.isDestroyed()){
   const name=registry.active(owner.id)?.name||t('tabUntitled');

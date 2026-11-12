@@ -17,7 +17,7 @@ function fixture({duplicate=false,single=false,shellReady=true,environment={},ru
  if(duplicate)pages.push(page('document-B'));
  context.pages=()=>pages;
  let detached=0,spawned=0;
- const browser={newBrowserCDPSession:async()=>({send:async method=>{if(method!=='Browser.getVersion')throw Error('Unexpected CDP method');return {userAgent:'Mozilla/5.0 ElixirOffice/'+runtimeVersion+' Chrome/152.0.7977.167 Electron/44.11.1'};},detach:async()=>{detached++;}}),contexts:()=>[context],close:async()=>{app.exitCode=0}};
+ const browser={newBrowserCDPSession:async()=>({send:async method=>{if(method!=='Browser.getVersion')throw Error('Unexpected CDP method');return {userAgent:'Mozilla/5.0 ElixirOffice/'+runtimeVersion+' Chrome/152.0.7977.167 Electron/44.11.2'};},detach:async()=>{detached++;}}),contexts:()=>[context],close:async()=>{app.exitCode=0}};
  const mocks={
   'node:fs/promises':{mkdir:async()=>{},open:async()=>({fd:123,close:async()=>{}}),realpath:async()=>'/synthetic/electron',readFile:async(file,encoding)=>{
    if(String(file).endsWith('/desktop/package.json'))return JSON.stringify({version:packageVersion,main:'main.cjs'});

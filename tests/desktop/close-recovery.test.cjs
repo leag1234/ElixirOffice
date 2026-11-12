@@ -387,7 +387,7 @@ test('named quit maps Cancel, Save and Do not Save correctly on each platform',a
    env.state.dirty=true;env.responses.push(platform==='darwin'?1:2);env.window.close();
    for(let n=0;n<100&&!env.dialogs.length;n++)await new Promise(resolve=>setTimeout(resolve,10));for(let n=0;n<5;n++)await new Promise(resolve=>setTimeout(resolve,10));
    const options=env.dialogs[0],labels=Array.from(options.buttons,label=>label.replace(/&/g,''));
-   assert(options.message.includes('\u2068test.docx\u2069'));assert.equal(labels[options.defaultId],'Save');assert.equal(labels[options.cancelId],'Cancel');
+   assert((platform==='win32'?options.message.includes('"test.docx"')||(options.message.includes('test.docx')&&!/[\u2068\u2069]/.test(options.message)):options.message.includes('\u2068test.docx\u2069')));assert.equal(labels[options.defaultId],'Save');assert.equal(labels[options.cancelId],'Cancel');
    assert.deepEqual(labels,platform==='darwin'?['Save','Cancel',"Don't Save"]:['Save',"Don't Save",'Cancel']);
    assert.equal(env.window.destroyed,undefined);assert.equal(env.removeCalls,0);assert(env.sent.some(a=>a[1]==='resume-close'));
    env.responses.push(0);env.window.close();

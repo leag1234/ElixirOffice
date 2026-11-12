@@ -128,7 +128,7 @@ Learn more: [Thesaurus](thesaurus.md) and [Interface notes](ui.md).
 - **Chinese, Japanese and Korean text** displays correctly when Computer fonts is allowed and such a font is installed; a bundled fallback without it is planned for 0.5.
 - **Mail merge in the desktop app** is planned for 0.5; it works in the server version.
 - **Offline gaps** in the desktop app: document compare and combine, version history, real-time co-editing, macros and plugins.
-- **Fonts embedded in a document** are used for that document when no installed or bundled face exists, but they are not kept when the document is saved yet; **picture bullets** are drawn and kept on save.
+- **Fonts embedded in a document** are used for that document when no installed or bundled face exists, and they are kept when the document is saved; **picture bullets** are drawn and kept on save.
 - **PDF**: editing the original text of a PDF, OCR and PDF to Word conversion are not supported.
 - **Beta software.** The server version is 0.1.1 and complex formatting, fonts and embedded objects can still convert differently: check important documents.
 

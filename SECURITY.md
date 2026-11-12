@@ -57,6 +57,21 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-12 (desktop 0.7.3, published 2026-11-12)
+
+- Dependency scan (OSV, nightly) of 2026-11-12: 18 new findings. Seven are in the libtiff copy under
+  openjpeg-2.4.0/thirdparty (CVE-2023-52355, CVE-2023-52356, CVE-2025-61144, CVE-2025-9900, CVE-2026-4775,
+  CVE-2026-52491, CVE-2026-52492): that folder only serves the openjpeg command-line tools and is not compiled
+  (the converter builds lib/openjp2 only), so the product is not affected. PYSEC-2026-4363 (Pillow) concerns
+  the Python requirements of the test and fidelity tools, not shipped. The remaining findings are medium or low
+  in development dependencies.
+- Bundled C/C++ libraries (vendored check of 2026-11-12): no new finding; the pending components
+  (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.
+- Electron 44.11.1 -> 44.11.2 (stops trusting revoked eMudhra RSA intermediate certificates).
+- New code in this release reads data from documents: positional tabs, compatibility flags, the autoSpaceDE /
+  autoSpaceDN paragraph properties and VML stroke widths. All of it runs in the WebAssembly converter and the
+  editor inside the sandboxed renderer, with fixed-size values only.
+
 ### 2026-11-11 (desktop 0.7.2, published 2026-11-11)
 
 - Dependency scan (OSV, nightly) of 2026-11-11: 15 new findings, all in JavaScript dependencies of the

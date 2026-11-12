@@ -29,7 +29,7 @@ for(const platform of ['linux','win32','darwin']){
    const options=env.dialogs[0],labels=Array.from(options.buttons,value=>value.replace(/&/g,''));
    assert.deepEqual(labels,platform==='darwin'?['Save','Cancel',"Don't Save"]:['Save',"Don't Save",'Cancel']);
    assert.equal(labels[options.defaultId],'Save');assert.equal(labels[options.cancelId],'Cancel');
-   assert(options.message.includes('\u2068test.docx\u2069'));assert.match(options.message,/save the changes/i);
+   assert((platform==='win32'?options.message.includes('"test.docx"')||(options.message.includes('test.docx')&&!/[\u2068\u2069]/.test(options.message)):options.message.includes('\u2068test.docx\u2069')));assert.match(options.message,/save the changes/i);
    assert.equal(env.removeCalls,0);assert.equal(env.window.destroyed,undefined);
    env.responses.push(0);assert.equal(await env.invoke('return-home'),'save');assert.equal(env.removeCalls,0);
    assert(env.sent.some(value=>value[1]==='resume-close'));
