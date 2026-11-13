@@ -38,7 +38,7 @@ function prepare({source,output,manifest,seal}={}){
  const files=new Map();
  for(const name of Object.keys(observed)){const b=regular(source,name);if(hash(b)!==observed[name])fail();if(name.startsWith('desktop/'))files.set(name.slice(8),b);}
  const pkg=JSON.parse(files.get('package.json'));
- if(pkg.build.appId!=='org.elixiroffice.desktop'||pkg.build.productName!=='ElixirOffice'||pkg.main!=='main.cjs'||pkg.build.electronVersion!=='44.11.2')fail();
+ if(pkg.build.appId!=='org.elixiroffice.desktop'||pkg.build.productName!=='ElixirOffice'||pkg.main!=='main.cjs'||pkg.build.electronVersion!=='44.11.3')fail();
  let main=files.get('main.cjs').toString();
  main=replaceExact(main,"const defaultProfile=app.getPath('userData');","const qa=require('./qa/composition.cjs').load(__dirname,require('./package.json').qaManifestSha256);\nconst defaultProfile=app.getPath('userData');");
  main=replaceExact(main,"if (process.env.EO_DESKTOP_PROFILE) app.setPath('userData',path.resolve(process.env.EO_DESKTOP_PROFILE));",'// QA profile is compile-time isolated; no environment profile override.');

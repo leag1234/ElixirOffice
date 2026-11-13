@@ -1,5 +1,51 @@
 # Changelog
 
+## Desktop 0.8.0 — published 2026-11-13
+
+### Interface conformity
+
+- Every ribbon tab of Word, Calc and Slides was checked by an automatic audit in English, French, German and Russian at
+  1360, 1100 and 900 pixels (overlaps, controls outside their group, clipped text, alerts at open), and the defects were
+  fixed.
+- Big ribbon buttons split their caption into two balanced lines ("Mise en forme / conditionnelle").
+- Calc Home: when space runs short, Editing first shows its AutoSum / Fill / Clear buttons as icons, as Excel does, before
+  the group collapses; the cell styles gallery collapses first.
+- Word Review: the order of the groups follows Word and no empty group is shown.
+- Calc in Dutch: about 1660 texts of the interface were shown in English (duplicated translation keys); they are Dutch again.
+- Word: the comment margin is translated.
+
+### Charts
+
+- Sunburst charts: the rings are in the right order (top level in the centre), one colour per top-level branch, labels
+  inside the segments along the radius, and dragging a label no longer stops the editor (#78, #79).
+- Treemap charts: one colour per top-level branch, the branch name as a header and the name of each leaf, with a legend.
+- Waterfall and funnel charts show the names of the leaves on their category axis, as Office does.
+- Sunburst labels never split a word ("Ste / m 2"): a label that is too wide becomes smaller to stay on one line, as in Excel.
+
+### PDF
+
+- The quick access toolbar of the PDF editor has a Print button, as in the other editors; it prints the PDF with the
+  system print dialog, like File > Print.
+
+### Security
+
+- Electron 44.11.3 (fixes backported from Chromium, V8, Skia, ANGLE, Dawn and ICU).
+
+### Files and fixes
+
+- Pictures: lines of SVG pictures (including WMF/EMF drawings saved by Word as SVG) that end up thinner than one
+  pixel are drawn one pixel wide, as Microsoft Word does; they looked missing before (#61).
+- Office 2016 extended charts (sunburst, waterfall, box and whisker) linked as classic charts are now also kept in
+  Excel and PowerPoint files (Word files: 0.7.3, #76).
+- Calc: the Cut / Copy / Format painter and AutoSum / Fill / Clear buttons of the Home tab no longer overlap.
+- Calc, Word, Slides: a hyperlink can point to a file of the computer (a file:// address, an absolute or relative path, as Excel
+  stores it); a click in the desktop app asks first, in the language of the interface, and opens the file with the system,
+  unless it does not exist or is a program, script or installer (#77).
+- Word: saving a DOCX keeps the style ids of the file ("Titre1", "Titre1Car"...) and every reference to them; the editor wrote
+  generated numbers ("724") before, which broke macros, templates and round-trip comparisons. New styles get an id made of their name.
+- Word: a text watermark (VML WordArt, for example "DOCUMENT DE TRAVAIL" turned by 45 degrees) is drawn with the length, height
+  and position Word gives it, for Calibri, Arial, Arial Black and Times New Roman; it was smaller and off centre.
+
 ## Desktop 0.7.3 — published 2026-11-12
 
 ### Layout

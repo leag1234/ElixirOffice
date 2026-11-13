@@ -7,7 +7,7 @@ const root=process.env.EO_DESKTOP_ROOT;
  const profile=path.join(root,'profiles','links-'+Date.now());await fs.mkdir(profile,{recursive:true});
  const app=await _electron.launch({executablePath:process.env.EO_PACKAGE_EXECUTABLE,args:[],env:{...process.env,DISPLAY:':0',XAUTHORITY:path.join(root,'desktop.Xauthority'),EO_TEMP_LOCATION_CHECK:'0',EO_DESKTOP_PROFILE:profile},timeout:120000}),child=app.process();
  try{
-  await app.evaluate(({shell})=>{globalThis.EOOpened=[];shell.openExternal=async url=>{globalThis.EOOpened.push(url)}});
+  await app.evaluate(({shell,dialog})=>{globalThis.EOOpened=[];globalThis.EOPaths=[];globalThis.EOMessages=[];shell.openExternal=async url=>{globalThis.EOOpened.push(url)};shell.openPath=async p=>{globalThis.EOPaths.push(p);return ''};dialog.showMessageBox=async(...args)=>{globalThis.EOMessages.push(args.length);return {response:0}}});
   const page=await app.firstWindow();await page.waitForFunction(()=>window.EODesktopReady);
   await page.locator('[data-new=docx]').click();await page.waitForFunction(()=>window.EOLocalSession||window.EOLocalFailure,null,{timeout:120000});
   assert.equal(await page.evaluate(()=>window.EOLocalFailure||null),null);
@@ -28,6 +28,11 @@ const root=process.env.EO_DESKTOP_ROOT;
   const count=(await app.evaluate(()=>globalThis.EOOpened)).length;
   for(const url of ['file:///tmp/not-opened','javascript:alert(1)','data:text/html,blocked'])await frame.evaluate(url=>window.open(url),url);
   await page.waitForTimeout(300);assert.equal((await app.evaluate(()=>globalThis.EOOpened)).length,count);
+  // a link to a local file that does not exist, or to a program, is refused with a message and never handed to the system
+  for(const url of ['file:///tmp/not-opened','/tmp/not-opened.pdf','/bin/sh','C:\\x\\run.exe'])await frame.evaluate(url=>window.open(url),url);
+  await page.waitForTimeout(500);
+  assert.deepEqual(await app.evaluate(()=>globalThis.EOPaths),[]);
+  assert((await app.evaluate(()=>globalThis.EOMessages)).length>=3,'the user is told why the file was not opened');
   assert.equal(app.windows().length,1);
   console.log('PASS actual Ctrl+click http/https/mailto dispatch, invalid schemes blocked, no embedded windows');
   console.log('Native openExternal intercepted for dispatch evidence; no owner browser/mail client launched. Functional inspector test, not sandbox acceptance.');

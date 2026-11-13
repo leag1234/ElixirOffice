@@ -7,8 +7,8 @@ const golden=require('./fixtures/signed-update-golden.json');
 const key=crypto.createPrivateKey({key:Buffer.from('302e020100300506032b6570042204209d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60','hex'),format:'der',type:'pkcs8'});
 const fingerprint=crypto.createHash('sha256').update(crypto.createPublicKey(golden.publicKeyPem).export({type:'spki',format:'der'})).digest('hex');
 const pin=()=>({keyId:'rfc8032-test-only',pem:golden.publicKeyPem,fingerprint});
-const runtime=()=>({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.2',checksEnabled:true});
-const qualified=()=>policy.createPolicy({qualifiedElectronVersion:'44.11.2',trustedKeys:[pin()]});
+const runtime=()=>({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.3',checksEnabled:true});
+const qualified=()=>policy.createPolicy({qualifiedElectronVersion:'44.11.3',trustedKeys:[pin()]});
 function candidate(override){
  const c=structuredClone(golden.context),a=c.artifact;
  const metadata=Buffer.from(override??('version: '+c.version+'\nfiles:\n  - url: '+a.name+'\n    sha512: '+a.sha512+'\n    size: '+a.size+'\n'));
@@ -34,7 +34,7 @@ test('synthetic qualified policy verifies exact selected candidate without I/O',
 });
 for(const [label,change] of [
  ['old runtime',r=>r.electronVersion='44.7.0'],['unreviewed runtime',r=>r.electronVersion='44.10.0'],
- ['prerelease runtime',r=>r.electronVersion='44.11.2-beta.1'],['Mac',r=>r.platform='darwin'],
+ ['prerelease runtime',r=>r.electronVersion='44.11.3-beta.1'],['Mac',r=>r.platform='darwin'],
  ['arm64',r=>r.arch='arm64'],['DEB',r=>r.packageType='deb'],['Flatpak',r=>r.packageType='flatpak'],
  ['web installer',r=>r.packageType='nsis-web'],['checks disabled',r=>r.checksEnabled=false],
  ['invalid flag',r=>r.checksEnabled='true'],
@@ -44,7 +44,7 @@ for(const [label,change] of [
  assert.throws(()=>p.verify({...candidate(),runtime:r}));
 });
 test('only an explicitly qualified runtime and reviewed key together can enable',()=>{
- for(const args of [{},{qualifiedElectronVersion:'44.11.2'},{trustedKeys:[pin()]}]){
+ for(const args of [{},{qualifiedElectronVersion:'44.11.3'},{trustedKeys:[pin()]}]){
   const p=policy.createPolicy(args);assert.equal(p.capability(runtime()).enabled,false);assert.throws(()=>p.verify(candidate()));
  }
  assert.throws(()=>policy.createPolicy({qualifiedElectronVersion:'44.7.0',trustedKeys:[pin()]}));
@@ -56,14 +56,14 @@ for(const [label,change] of [
 ])test('public trust refuses '+label,()=>{
  const k=pin();change(k);
  if(label==='unknown key'){
-  const p=policy.createPolicy({qualifiedElectronVersion:'44.11.2',trustedKeys:[k]});assert.throws(()=>p.verify(candidate()));
- }else assert.throws(()=>policy.createPolicy({qualifiedElectronVersion:'44.11.2',trustedKeys:[k]}));
+  const p=policy.createPolicy({qualifiedElectronVersion:'44.11.3',trustedKeys:[k]});assert.throws(()=>p.verify(candidate()));
+ }else assert.throws(()=>policy.createPolicy({qualifiedElectronVersion:'44.11.3',trustedKeys:[k]}));
 });
 test('key pins are copied; caller mutation never changes trust',()=>{
- const k=pin(),keys=[k],p=policy.createPolicy({qualifiedElectronVersion:'44.11.2',trustedKeys:keys});
+ const k=pin(),keys=[k],p=policy.createPolicy({qualifiedElectronVersion:'44.11.3',trustedKeys:keys});
  k.pem='bad';k.fingerprint='0'.repeat(64);keys.length=0;
  assert.equal(wire.describeUpdate(p.verify(candidate())).version,'0.4.0');
- assert.throws(()=>policy.createPolicy({qualifiedElectronVersion:'44.11.2',trustedKeys:[pin(),pin()]}));
+ assert.throws(()=>policy.createPolicy({qualifiedElectronVersion:'44.11.3',trustedKeys:[pin(),pin()]}));
 });
 for(const [label,change] of [
  ['wrong tag',v=>v.selectedTag='v9.0.0'],['changed metadata',v=>v.metadata=Buffer.from('bad')],
@@ -87,8 +87,8 @@ test('production primitives import and reject invalid candidates with all I/O mo
  "Module._load=function(name,...args){if(/^(?:node:)?(?:electron(?:-updater)?|https?|net|tls|fs(?:\\/promises)?|child_process)$/.test(name))throw Error('Unexpected I/O '+name);return load.call(this,name,...args);};",
  "const p=require(process.argv[1]+'/desktop/update-policy.cjs');",
  "require(process.argv[1]+'/desktop/update-handoff.cjs');",
- "if(!p.production.capability({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.2'}).enabled)throw Error('production disabled');",
- "try{p.production.verify({runtime:{platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.2'}});throw Error('accepted');}catch(e){if(e.message!=='Invalid signed update')throw e;}",
+ "if(!p.production.capability({platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.3'}).enabled)throw Error('production disabled');",
+ "try{p.production.verify({runtime:{platform:'win32',arch:'x64',packageType:'nsis',electronVersion:'44.11.3'}});throw Error('accepted');}catch(e){if(e.message!=='Invalid signed update')throw e;}",
  "console.log('PASS production has no update I/O');"
  ].join('\n');
  const result=spawnSync(process.execPath,['-e',script,path.resolve(__dirname,'../..')],{encoding:'utf8',timeout:10000});

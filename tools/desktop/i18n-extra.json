@@ -170,7 +170,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "The file does not exist or cannot be reached.",
+    "linkDenied": "A link cannot open programs, scripts or installers.",
+    "linkRelative": "This link is relative to the document: save the document first.",
+    "linkFailed": "The file could not be opened.",
+    "linkConfirm": "Open this file with its default application?",
+    "linkOpen": "Open"
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -342,7 +348,13 @@
     "exportButton": "Exporter",
     "exportNote": "Le document reste ouvert sur son fichier d'origine.",
     "miniToolbarContext": "Afficher la mini barre d’outils au clic droit",
-    "opExported": "Exporté : {name}"
+    "opExported": "Exporté : {name}",
+    "linkMissing": "Le fichier n'existe pas ou est inaccessible.",
+    "linkDenied": "Un lien ne peut pas ouvrir de programmes, de scripts ni d'installateurs.",
+    "linkRelative": "Ce lien est relatif au document : enregistrez d'abord le document.",
+    "linkFailed": "Impossible d'ouvrir le fichier.",
+    "linkConfirm": "Ouvrir ce fichier avec son application par défaut ?",
+    "linkOpen": "Ouvrir"
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -510,7 +522,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Die Datei existiert nicht oder ist nicht erreichbar.",
+    "linkDenied": "Ein Link kann keine Programme, Skripte oder Installationsprogramme öffnen.",
+    "linkRelative": "Dieser Link ist relativ zum Dokument: Speichern Sie zuerst das Dokument.",
+    "linkFailed": "Die Datei konnte nicht geöffnet werden.",
+    "linkConfirm": "Diese Datei mit der Standardanwendung öffnen?",
+    "linkOpen": "Öffnen"
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -678,7 +696,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "El archivo no existe o no se puede acceder a él.",
+    "linkDenied": "Un vínculo no puede abrir programas, scripts ni instaladores.",
+    "linkRelative": "Este vínculo es relativo al documento: guarde primero el documento.",
+    "linkFailed": "No se pudo abrir el archivo.",
+    "linkConfirm": "¿Abrir este archivo con su aplicación predeterminada?",
+    "linkOpen": "Abrir"
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -846,7 +870,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Il file non esiste o non è raggiungibile.",
+    "linkDenied": "Un collegamento non può aprire programmi, script o programmi di installazione.",
+    "linkRelative": "Questo collegamento è relativo al documento: salvare prima il documento.",
+    "linkFailed": "Impossibile aprire il file.",
+    "linkConfirm": "Aprire questo file con l'applicazione predefinita?",
+    "linkOpen": "Apri"
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1014,7 +1044,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "O arquivo não existe ou não pode ser acessado.",
+    "linkDenied": "Um link não pode abrir programas, scripts ou instaladores.",
+    "linkRelative": "Este link é relativo ao documento: salve o documento primeiro.",
+    "linkFailed": "Não foi possível abrir o arquivo.",
+    "linkConfirm": "Abrir este arquivo com o aplicativo padrão?",
+    "linkOpen": "Abrir"
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1182,7 +1218,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "O ficheiro não existe ou não está acessível.",
+    "linkDenied": "Uma ligação não pode abrir programas, scripts ou instaladores.",
+    "linkRelative": "Esta ligação é relativa ao documento: guarde primeiro o documento.",
+    "linkFailed": "Não foi possível abrir o ficheiro.",
+    "linkConfirm": "Abrir este ficheiro com a aplicação predefinida?",
+    "linkOpen": "Abrir"
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1350,7 +1392,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Het bestand bestaat niet of is niet bereikbaar.",
+    "linkDenied": "Een koppeling kan geen programma's, scripts of installatieprogramma's openen.",
+    "linkRelative": "Deze koppeling is relatief aan het document: sla het document eerst op.",
+    "linkFailed": "Het bestand kan niet worden geopend.",
+    "linkConfirm": "Dit bestand openen met de standaardtoepassing?",
+    "linkOpen": "Openen"
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1518,7 +1566,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Plik nie istnieje lub jest niedostępny.",
+    "linkDenied": "Hiperłącze nie może otwierać programów, skryptów ani instalatorów.",
+    "linkRelative": "To hiperłącze jest względne wobec dokumentu: najpierw zapisz dokument.",
+    "linkFailed": "Nie można otworzyć pliku.",
+    "linkConfirm": "Otworzyć ten plik w aplikacji domyślnej?",
+    "linkOpen": "Otwórz"
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1686,7 +1740,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Файл не существует или недоступен.",
+    "linkDenied": "Ссылка не может открывать программы, сценарии или установщики.",
+    "linkRelative": "Эта ссылка задана относительно документа: сначала сохраните документ.",
+    "linkFailed": "Не удалось открыть файл.",
+    "linkConfirm": "Открыть этот файл в приложении по умолчанию?",
+    "linkOpen": "Открыть"
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1854,7 +1914,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "ファイルが存在しないか、アクセスできません。",
+    "linkDenied": "リンクからプログラム、スクリプト、インストーラーを開くことはできません。",
+    "linkRelative": "このリンクはドキュメントからの相対パスです。先にドキュメントを保存してください。",
+    "linkFailed": "ファイルを開けませんでした。",
+    "linkConfirm": "このファイルを既定のアプリで開きますか?",
+    "linkOpen": "開く"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -2022,7 +2088,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "文件不存在或无法访问。",
+    "linkDenied": "链接不能打开程序、脚本或安装程序。",
+    "linkRelative": "此链接是相对于文档的路径:请先保存文档。",
+    "linkFailed": "无法打开该文件。",
+    "linkConfirm": "要使用默认应用程序打开此文件吗?",
+    "linkOpen": "打开"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -2193,7 +2265,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "檔案不存在或無法存取。",
+    "linkDenied": "連結無法開啟程式、指令碼或安裝程式。",
+    "linkRelative": "此連結是相對於文件的路徑:請先儲存文件。",
+    "linkFailed": "無法開啟檔案。",
+    "linkConfirm": "要使用預設應用程式開啟此檔案嗎?",
+    "linkOpen": "開啟"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -2364,7 +2442,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "الملف غير موجود أو يتعذر الوصول إليه.",
+    "linkDenied": "لا يمكن للارتباط فتح البرامج أو البرامج النصية أو برامج التثبيت.",
+    "linkRelative": "هذا الارتباط نسبي إلى المستند: احفظ المستند أولاً.",
+    "linkFailed": "تعذر فتح الملف.",
+    "linkConfirm": "هل تريد فتح هذا الملف باستخدام التطبيق الافتراضي؟",
+    "linkOpen": "فتح"
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -2535,7 +2619,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Fayl mövcud deyil və ya əlçatan deyil.",
+    "linkDenied": "Keçid proqramları, skriptləri və ya quraşdırıcıları aça bilməz.",
+    "linkRelative": "Bu keçid sənədə nisbidir: əvvəlcə sənədi saxlayın.",
+    "linkFailed": "Fayl açıla bilmədi.",
+    "linkConfirm": "Bu fayl defolt tətbiqlə açılsın?",
+    "linkOpen": "Aç"
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2706,7 +2796,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Файл не існуе або недаступны.",
+    "linkDenied": "Спасылка не можа адкрываць праграмы, сцэнарыі або ўсталёўшчыкі.",
+    "linkRelative": "Гэта спасылка зададзена адносна дакумента: спачатку захавайце дакумент.",
+    "linkFailed": "Не ўдалося адкрыць файл.",
+    "linkConfirm": "Адкрыць гэты файл у праграме па змаўчанні?",
+    "linkOpen": "Адкрыць"
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -2880,7 +2976,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Файлът не съществува или не е достъпен.",
+    "linkDenied": "Връзка не може да отваря програми, скриптове или инсталатори.",
+    "linkRelative": "Тази връзка е относителна спрямо документа: първо запазете документа.",
+    "linkFailed": "Файлът не можа да бъде отворен.",
+    "linkConfirm": "Да се отвори ли този файл с приложението по подразбиране?",
+    "linkOpen": "Отвори"
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -3051,7 +3153,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "El fitxer no existeix o no és accessible.",
+    "linkDenied": "Un enllaç no pot obrir programes, scripts ni instal·ladors.",
+    "linkRelative": "Aquest enllaç és relatiu al document: deseu primer el document.",
+    "linkFailed": "No s'ha pogut obrir el fitxer.",
+    "linkConfirm": "Voleu obrir aquest fitxer amb l'aplicació predeterminada?",
+    "linkOpen": "Obre"
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -3222,7 +3330,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Soubor neexistuje nebo není dostupný.",
+    "linkDenied": "Odkaz nemůže otevírat programy, skripty ani instalační soubory.",
+    "linkRelative": "Tento odkaz je relativní k dokumentu: nejprve dokument uložte.",
+    "linkFailed": "Soubor se nepodařilo otevřít.",
+    "linkConfirm": "Otevřít tento soubor ve výchozí aplikaci?",
+    "linkOpen": "Otevřít"
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -3393,7 +3507,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Filen findes ikke eller kan ikke nås.",
+    "linkDenied": "Et link kan ikke åbne programmer, scripts eller installationsprogrammer.",
+    "linkRelative": "Dette link er relativt til dokumentet: gem dokumentet først.",
+    "linkFailed": "Filen kunne ikke åbnes.",
+    "linkConfirm": "Vil du åbne denne fil med standardprogrammet?",
+    "linkOpen": "Åbn"
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -3564,7 +3684,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Το αρχείο δεν υπάρχει ή δεν είναι προσβάσιμο.",
+    "linkDenied": "Ένας σύνδεσμος δεν μπορεί να ανοίξει προγράμματα, σενάρια ή προγράμματα εγκατάστασης.",
+    "linkRelative": "Αυτός ο σύνδεσμος είναι σχετικός με το έγγραφο: αποθηκεύστε πρώτα το έγγραφο.",
+    "linkFailed": "Δεν ήταν δυνατό το άνοιγμα του αρχείου.",
+    "linkConfirm": "Να ανοίξει αυτό το αρχείο με την προεπιλεγμένη εφαρμογή;",
+    "linkOpen": "Άνοιγμα"
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -3735,7 +3861,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Fitxategia ez da existitzen edo ezin da atzitu.",
+    "linkDenied": "Esteka batek ezin ditu programak, scriptak edo instalatzaileak ireki.",
+    "linkRelative": "Esteka hau dokumentuarekiko erlatiboa da: gorde dokumentua lehenengo.",
+    "linkFailed": "Ezin izan da fitxategia ireki.",
+    "linkConfirm": "Fitxategi hau aplikazio lehenetsiarekin ireki nahi duzu?",
+    "linkOpen": "Ireki"
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -3908,7 +4040,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Tiedostoa ei ole tai sitä ei voi avata.",
+    "linkDenied": "Linkki ei voi avata ohjelmia, komentosarjoja eikä asennusohjelmia.",
+    "linkRelative": "Tämä linkki on suhteellinen asiakirjaan: tallenna asiakirja ensin.",
+    "linkFailed": "Tiedostoa ei voitu avata.",
+    "linkConfirm": "Avataanko tämä tiedosto oletussovelluksella?",
+    "linkOpen": "Avaa"
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -4079,7 +4217,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "O ficheiro non existe ou non está accesible.",
+    "linkDenied": "Unha ligazón non pode abrir programas, scripts nin instaladores.",
+    "linkRelative": "Esta ligazón é relativa ao documento: garde primeiro o documento.",
+    "linkFailed": "Non se puido abrir o ficheiro.",
+    "linkConfirm": "Abrir este ficheiro coa aplicación predeterminada?",
+    "linkOpen": "Abrir"
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -4250,7 +4394,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "הקובץ אינו קיים או שאי אפשר להגיע אליו.",
+    "linkDenied": "קישור אינו יכול לפתוח תוכניות, סקריפטים או מתקינים.",
+    "linkRelative": "הקישור הזה יחסי למסמך: שמור תחילה את המסמך.",
+    "linkFailed": "לא ניתן היה לפתוח את הקובץ.",
+    "linkConfirm": "לפתוח את הקובץ הזה באמצעות יישום ברירת המחדל?",
+    "linkOpen": "פתיחה"
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -4421,7 +4571,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "A fájl nem létezik, vagy nem érhető el.",
+    "linkDenied": "A hivatkozás nem nyithat meg programokat, szkripteket vagy telepítőket.",
+    "linkRelative": "Ez a hivatkozás a dokumentumhoz képest relatív: először mentse a dokumentumot.",
+    "linkFailed": "A fájlt nem sikerült megnyitni.",
+    "linkConfirm": "Megnyitja ezt a fájlt az alapértelmezett alkalmazással?",
+    "linkOpen": "Megnyitás"
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -4592,7 +4748,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Ֆայլը գոյություն չունի կամ անհասանելի է։",
+    "linkDenied": "Հղումը չի կարող բացել ծրագրեր, սկրիպտներ կամ տեղադրիչներ։",
+    "linkRelative": "Այս հղումը փաստաթղթի նկատմամբ հարաբերական է․ նախ պահպանեք փաստաթուղթը։",
+    "linkFailed": "Չհաջողվեց բացել ֆայլը։",
+    "linkConfirm": "Բացե՞լ այս ֆայլը լռելյայն հավելվածով։",
+    "linkOpen": "Բացել"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -4763,7 +4925,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "File tidak ada atau tidak dapat diakses.",
+    "linkDenied": "Tautan tidak dapat membuka program, skrip, atau penginstal.",
+    "linkRelative": "Tautan ini relatif terhadap dokumen: simpan dokumen terlebih dahulu.",
+    "linkFailed": "File tidak dapat dibuka.",
+    "linkConfirm": "Buka file ini dengan aplikasi default?",
+    "linkOpen": "Buka"
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -4934,7 +5102,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "파일이 없거나 접근할 수 없습니다.",
+    "linkDenied": "링크로 프로그램, 스크립트 또는 설치 프로그램을 열 수 없습니다.",
+    "linkRelative": "이 링크는 문서를 기준으로 한 상대 경로입니다. 먼저 문서를 저장하세요.",
+    "linkFailed": "파일을 열 수 없습니다.",
+    "linkConfirm": "기본 응용 프로그램으로 이 파일을 여시겠습니까?",
+    "linkOpen": "열기"
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -5105,7 +5279,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "ບໍ່ມີໄຟລ໌ນີ້ ຫຼື ເຂົ້າເຖິງບໍ່ໄດ້.",
+    "linkDenied": "ລິ້ງບໍ່ສາມາດເປີດໂປຣແກຣມ, ສະຄຣິບ ຫຼື ຕົວຕິດຕັ້ງໄດ້.",
+    "linkRelative": "ລິ້ງນີ້ອ້າງອີງກັບເອກະສານ: ກະລຸນາບັນທຶກເອກະສານກ່ອນ.",
+    "linkFailed": "ບໍ່ສາມາດເປີດໄຟລ໌ໄດ້.",
+    "linkConfirm": "ເປີດໄຟລ໌ນີ້ດ້ວຍແອັບພລິເຄຊັນເລີ່ມຕົ້ນບໍ?",
+    "linkOpen": "ເປີດ"
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -5276,7 +5456,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Fails neeksistē vai nav pieejams.",
+    "linkDenied": "Saite nevar atvērt programmas, skriptus vai instalēšanas programmas.",
+    "linkRelative": "Šī saite ir relatīva pret dokumentu: vispirms saglabājiet dokumentu.",
+    "linkFailed": "Failu neizdevās atvērt.",
+    "linkConfirm": "Vai atvērt šo failu ar noklusējuma lietojumprogrammu?",
+    "linkOpen": "Atvērt"
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -5447,7 +5633,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Fail tidak wujud atau tidak dapat dicapai.",
+    "linkDenied": "Pautan tidak boleh membuka atur cara, skrip atau pemasang.",
+    "linkRelative": "Pautan ini adalah relatif kepada dokumen: simpan dokumen dahulu.",
+    "linkFailed": "Fail tidak dapat dibuka.",
+    "linkConfirm": "Buka fail ini dengan aplikasi lalai?",
+    "linkOpen": "Buka"
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -5629,7 +5821,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Filen finnes ikke eller kan ikke nås.",
+    "linkDenied": "En kobling kan ikke åpne programmer, skript eller installasjonsprogrammer.",
+    "linkRelative": "Denne koblingen er relativ til dokumentet: lagre dokumentet først.",
+    "linkFailed": "Filen kunne ikke åpnes.",
+    "linkConfirm": "Vil du åpne denne filen med standardprogrammet?",
+    "linkOpen": "Åpne"
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -5800,7 +5998,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Fișierul nu există sau nu poate fi accesat.",
+    "linkDenied": "O legătură nu poate deschide programe, scripturi sau programe de instalare.",
+    "linkRelative": "Această legătură este relativă la document: salvați mai întâi documentul.",
+    "linkFailed": "Fișierul nu a putut fi deschis.",
+    "linkConfirm": "Deschideți acest fișier cu aplicația implicită?",
+    "linkOpen": "Deschide"
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -5971,7 +6175,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "ගොනුව නොපවතී හෝ ළඟා විය නොහැක.",
+    "linkDenied": "සබැඳියකට වැඩසටහන්, ස්ක්‍රිප්ට් හෝ ස්ථාපකයන් විවෘත කළ නොහැක.",
+    "linkRelative": "මෙම සබැඳිය ලේඛනයට සාපේක්ෂයි: පළමුව ලේඛනය සුරකින්න.",
+    "linkFailed": "ගොනුව විවෘත කළ නොහැකි විය.",
+    "linkConfirm": "මෙම ගොනුව පෙරනිමි යෙදුම සමඟ විවෘත කරන්නද?",
+    "linkOpen": "විවෘත කරන්න"
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -6142,7 +6352,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Súbor neexistuje alebo nie je dostupný.",
+    "linkDenied": "Odkaz nemôže otvárať programy, skripty ani inštalačné súbory.",
+    "linkRelative": "Tento odkaz je relatívny k dokumentu: najprv dokument uložte.",
+    "linkFailed": "Súbor sa nepodarilo otvoriť.",
+    "linkConfirm": "Otvoriť tento súbor v predvolenej aplikácii?",
+    "linkOpen": "Otvoriť"
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -6317,7 +6533,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Datoteka ne obstaja ali ni dosegljiva.",
+    "linkDenied": "Povezava ne more odpirati programov, skriptov ali namestitvenih programov.",
+    "linkRelative": "Ta povezava je relativna glede na dokument: najprej shranite dokument.",
+    "linkFailed": "Datoteke ni bilo mogoče odpreti.",
+    "linkConfirm": "Ali želite to datoteko odpreti s privzetim programom?",
+    "linkOpen": "Odpri"
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -6488,7 +6710,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Skedari nuk ekziston ose nuk mund të arrihet.",
+    "linkDenied": "Një lidhje nuk mund të hapë programe, skripte ose instalues.",
+    "linkRelative": "Kjo lidhje është relative me dokumentin: ruajeni më parë dokumentin.",
+    "linkFailed": "Skedari nuk mund të hapej.",
+    "linkConfirm": "Ta hapni këtë skedar me aplikacionin e parazgjedhur?",
+    "linkOpen": "Hap"
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -6659,7 +6887,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Datoteka ne postoji ili nije dostupna.",
+    "linkDenied": "Veza ne može da otvara programe, skripte ili instalacione programe.",
+    "linkRelative": "Ova veza je relativna u odnosu na dokument: prvo sačuvajte dokument.",
+    "linkFailed": "Datoteku nije moguće otvoriti.",
+    "linkConfirm": "Otvoriti ovu datoteku podrazumevanom aplikacijom?",
+    "linkOpen": "Otvori"
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -6830,7 +7064,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Датотека не постоји или није доступна.",
+    "linkDenied": "Веза не може да отвара програме, скрипте или инсталационе програме.",
+    "linkRelative": "Ова веза је релативна у односу на документ: прво сачувајте документ.",
+    "linkFailed": "Датотеку није могуће отворити.",
+    "linkConfirm": "Отворити ову датотеку подразумеваном апликацијом?",
+    "linkOpen": "Отвори"
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -7001,7 +7241,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Filen finns inte eller kan inte nås.",
+    "linkDenied": "En länk kan inte öppna program, skript eller installationsprogram.",
+    "linkRelative": "Den här länken är relativ till dokumentet: spara dokumentet först.",
+    "linkFailed": "Det gick inte att öppna filen.",
+    "linkConfirm": "Vill du öppna den här filen med standardprogrammet?",
+    "linkOpen": "Öppna"
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -7172,7 +7418,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Dosya yok veya erişilemiyor.",
+    "linkDenied": "Bir bağlantı programları, betikleri veya yükleyicileri açamaz.",
+    "linkRelative": "Bu bağlantı belgeye göredir: önce belgeyi kaydedin.",
+    "linkFailed": "Dosya açılamadı.",
+    "linkConfirm": "Bu dosya varsayılan uygulamayla açılsın mı?",
+    "linkOpen": "Aç"
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -7343,7 +7595,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Файл не існує або недоступний.",
+    "linkDenied": "Посилання не може відкривати програми, сценарії чи інсталятори.",
+    "linkRelative": "Це посилання задано відносно документа: спершу збережіть документ.",
+    "linkFailed": "Не вдалося відкрити файл.",
+    "linkConfirm": "Відкрити цей файл у програмі за замовчуванням?",
+    "linkOpen": "Відкрити"
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -7514,7 +7772,13 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "فائل موجود نہیں ہے یا اس تک رسائی ممکن نہیں۔",
+    "linkDenied": "لنک پروگرام، اسکرپٹ یا انسٹالر نہیں کھول سکتا۔",
+    "linkRelative": "یہ لنک دستاویز کے نسبت سے ہے: پہلے دستاویز محفوظ کریں۔",
+    "linkFailed": "فائل کھولی نہیں جا سکی۔",
+    "linkConfirm": "کیا اس فائل کو ڈیفالٹ ایپلیکیشن سے کھولنا ہے؟",
+    "linkOpen": "کھولیں"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -7690,6 +7954,12 @@
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
     "miniToolbarContext": "Show the Mini Toolbar on right-click",
-    "opExported": "Exported: {name}"
+    "opExported": "Exported: {name}",
+    "linkMissing": "Tệp không tồn tại hoặc không thể truy cập.",
+    "linkDenied": "Liên kết không thể mở chương trình, tập lệnh hoặc trình cài đặt.",
+    "linkRelative": "Liên kết này là tương đối so với tài liệu: hãy lưu tài liệu trước.",
+    "linkFailed": "Không thể mở tệp.",
+    "linkConfirm": "Mở tệp này bằng ứng dụng mặc định?",
+    "linkOpen": "Mở"
   }
 }

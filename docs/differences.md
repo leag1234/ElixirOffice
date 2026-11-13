@@ -129,6 +129,12 @@ Learn more: [Thesaurus](thesaurus.md) and [Interface notes](ui.md).
 - **Mail merge in the desktop app** is planned for 0.5; it works in the server version.
 - **Offline gaps** in the desktop app: document compare and combine, version history, real-time co-editing, macros and plugins.
 - **Fonts embedded in a document** are used for that document when no installed or bundled face exists, and they are kept when the document is saved; **picture bullets** are drawn and kept on save.
+- **Hairlines in pictures**: lines of SVG pictures (also WMF/EMF drawings saved by Word as SVG) that would be thinner than one pixel are drawn one pixel wide, as in Microsoft Word; browser-based editors draw them almost invisible.
+- **Office 2016 extended charts** (sunburst, waterfall, box and whisker) are kept on save in Word, Excel and PowerPoint files, also when a generator links them as classic charts, and show the picture Office stored for them.
+- **Sunburst and treemap charts** are drawn like Office: levels in the right order, one colour per top-level branch, labels inside the segments; waterfall and funnel show the leaf names.
+- **DOCX style ids** ("Heading1", "Titre1Car") are kept on save with every reference to them, so macros, templates and round-trip comparisons keep working.
+- **Local file hyperlinks** (file://, absolute or relative paths) are accepted in Calc, Word and Slides; the desktop app asks natively and opens the file with the system, never a program or script.
+- **Ribbon conformity audit**: an automatic check of every ribbon tab in four languages and three widths runs on every test build.
 - **PDF**: editing the original text of a PDF, OCR and PDF to Word conversion are not supported.
 - **Beta software.** The server version is 0.1.1 and complex formatting, fonts and embedded objects can still convert differently: check important documents.
 

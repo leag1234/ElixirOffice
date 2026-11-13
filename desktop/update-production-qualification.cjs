@@ -6,6 +6,6 @@ if(typeof nsisQualified!=='boolean')throw Error('Update qualification refused');
 // switch until the lead records the reviewed native Windows QA result.
 module.exports=Object.freeze({
  reviewed:true,
- electronVersion:'44.11.2',
+ electronVersion:'44.11.3',
  platforms:Object.freeze({nsis:nsisQualified,AppImage:true})
 });

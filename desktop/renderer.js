@@ -240,6 +240,8 @@ async function open(selected) {
               onProtectionLock:async()=>{const locked=await eoDesktop.passwordLock(file.token);file.recoveryVersion=locked.recoveryVersion;status('AutoRecover is disabled for this session because password protection was used');},
               onBeforeSave:()=>{abort=new AbortController();buttons(true)},onAfterSave:()=>{buttons(false);updateDirty()},
               onError:fail});
+            // a PDF has no editor print panel here (permissions.print is false): the quick access Print button asks for the native print
+            if(kind==='pdf')frame.Common.NotificationCenter.on('eo:native-print',()=>openPrint(true));
             let input=new Uint8Array(file.bytes).buffer;
             if(!input.byteLength&&['txt','csv'].includes(file.sourceFormat))input=new Uint8Array([10]).buffer;
             if(file.sourceFormat && file.sourceFormat!==format)input=(await frame.EOWasmConvert.convert(new frame.Uint8Array(input),file.sourceFormat,format,{signal:abort.signal,onProgress:openingOperation.progress})).buffer;

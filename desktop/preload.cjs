@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('eoDesktop', Object.freeze({
   languageSettings: value => ipcRenderer.invoke('eo:language-settings', value),
   help: () => ipcRenderer.invoke('eo:help'),
   pastedImage: url => ipcRenderer.invoke('eo:pasted-image', url),
+  openLocalLink: url => ipcRenderer.invoke('eo:open-local-link', url),
   locale: () => ipcRenderer.invoke('eo:locale'),
   identity: () => ipcRenderer.invoke('eo:identity'),
   desktopReady: () => ipcRenderer.invoke('eo:desktop-ready'),

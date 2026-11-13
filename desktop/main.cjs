@@ -70,7 +70,7 @@ let captureOptions,captureStartupError;
 let languageInfo,defaultDocumentLanguage;
 function documentLanguage(){return captureOptions?languageInfo.language:defaultDocumentLanguage;}
 const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
-const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json'),exportTitle:'Export a copy',exportButton:'Export',exportNote:'The document stays open on its original file.'};
+const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json'),exportTitle:'Export a copy',exportButton:'Export',exportNote:'The document stays open on its original file.',linkMissing:'The file does not exist or cannot be reached.',linkDenied:'A link cannot open programs, scripts or installers.',linkRelative:'This link is relative to the document: save the document first.',linkFailed:'The file could not be opened.',linkConfirm:'Open this file with its default application?',linkOpen:'Open',cancel:'Cancel'};
 function localizedStrings(){
  const strings={...languageInfo?.strings};
  for(const [key,value] of Object.entries(tabEnglish))if(typeof strings[key]!=='string'||!strings[key].trim())strings[key]=value;
@@ -133,6 +133,27 @@ for(const method of ['showMessageBox','showSaveDialog','showOpenDialog'])dialog[
  return documentDialogs.run(document.windowId,validate,()=>registry.run(document,()=>{focusDocument(document.id);return nativeDialog[method](parent,options);}));
 };
 
+// A click on a link to a file of this computer (the editor asked the user first): the file is opened with the system handler
+// when it exists and is not a program; otherwise the user gets a message.
+async function openLocalLink(document,url){
+ const external=require('./external.cjs'),current=document.state.current;
+ const result=await external.resolveLocal(url,{baseDir:current?.target?path.dirname(current.target):null,platform:process.platform});
+ let problem=result.error&&(result.error==='invalid'?'failed':result.error);
+ if(!problem){
+  // the question is asked here, natively, so that no code of the page can open a file without it (default: Cancel)
+  const window=registry.window(document.windowId)?.window;
+  const ask={type:'question',message:t('linkConfirm'),detail:result.path,buttons:[t('linkOpen'),t('cancel')],defaultId:1,cancelId:1,noLink:true};
+  const answer=await (window?nativeDialog.showMessageBox(window,ask):nativeDialog.showMessageBox(ask)).catch(()=>({response:1}));
+  if(answer.response!==0)return;
+  const failure=await shell.openPath(result.path);if(failure)problem='failed';
+ }
+ if(problem&&document.live&&!document.contents.isDestroyed()){
+  const parsed=external.parseLocal(url,{baseDir:current?.target?path.dirname(current.target):null,platform:process.platform});
+  const window=registry.window(document.windowId)?.window;
+  const options={type:'warning',message:t({missing:'linkMissing',denied:'linkDenied',relative:'linkRelative',failed:'linkFailed'}[problem]),detail:parsed.path||url,buttons:[t('close')]};
+  void (window?nativeDialog.showMessageBox(window,options):nativeDialog.showMessageBox(options)).catch(()=>{});
+ }
+}
 function dispatchDocumentAction(document,name){
  const failed=()=>{void safety.log('tab-action-failure');if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:action','external-error');return false;};
  try{focusDocument(document.id);return Promise.resolve(registry.run(document,()=>sendAction(name))).catch(failed);}
@@ -147,7 +168,7 @@ function installShellShortcuts(owner){
 function createSession(windowId,{pending=[]}={}){
  const document=tabHost.addDocument(registry.window(windowId),{state:{current:null,dirty:false,busy:false,closing:false,ready:false,pending,closePending:false,finishClosePending:null,destinations:new saveAs.Destinations(),artifacts:new (require('./artifacts.cjs').Artifacts)(),closePromise:null,closeResolve:null,waitingSave:false,closeAttempt:null,initialSelection:null,destinationLease:null,aiJobs:new Map(),openTrace:++openTrace}});
  installInterfaceZoom(document.contents);
- const external=require('./external.cjs'),openExternal=external.handler(url=>shell.openExternal(url),()=>{if(document.live)document.contents.send('eo:action','external-error');});
+ const external=require('./external.cjs'),openExternal=external.handler(url=>shell.openExternal(url),()=>{if(document.live)document.contents.send('eo:action','external-error');},url=>openLocalLink(document,url));
  document.contents.setWindowOpenHandler(details=>external.reporter(details,resources.ORIGIN)||openExternal(details));
  document.contents.on('did-create-window',child=>{
   child.webContents.setWindowOpenHandler(()=>({action:'deny'}));
@@ -873,6 +894,8 @@ async function start() {
   handle('help',()=>help());
   const pastedImages=require('./pasted-image.cjs').create({session});
   handle('pasted-image',url=>pastedImages.fetch(url));
+  // local file links of the editor: Chromium never lets the page open a file: URL itself; the native question is asked in openLocalLink
+  handle('open-local-link',url=>{const document=registry.context();if(!document||!require('./external.cjs').isLocalLink(url))return false;void openLocalLink(document,url).catch(()=>safety.log('local-link-failure'));return true;});
   handle('about',()=>showAbout());
   handle('quit',()=>quitApplication('user'));
   handle('restart',()=>{if(captureOptions||quitPending||systemExiting)return false;return quitApplication('restart',{restart:true});});

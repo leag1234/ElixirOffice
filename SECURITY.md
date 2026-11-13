@@ -57,6 +57,20 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-13 (desktop 0.8.0, published 2026-11-13)
+
+- Dependency scan (OSV, nightly) of 2026-11-13: 6 new findings. The high ones (GHSA-xcvg-w56q-r89m, Pillow) concern
+  the Python requirements of the desktop and fidelity test tools, which are not shipped. The shipped high finding
+  (request-filtering-agent 1.0.5 in the server) stays reviewed as not affected.
+- Bundled C/C++ libraries (vendored check of 2026-11-13): no new finding; the pending components
+  (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.
+- Electron 44.11.2 -> 44.11.3 (fixes backported from Chromium, V8, Skia, ANGLE, Dawn and ICU).
+- Local file links (#77): the editor page cannot open a file itself; it asks the application through a dedicated
+  bridge, which accepts local links only, refuses programs, scripts, installers and disk images (also behind a
+  symbolic link), and asks a native question (Cancel by default) before the system opens the file.
+- New code in this release that reads document data (style ids, WordArt text paths, extended chart data and labels)
+  runs in the WebAssembly converter and the editor inside the sandboxed renderer.
+
 ### 2026-11-12 (desktop 0.7.3, published 2026-11-12)
 
 - Dependency scan (OSV, nightly) of 2026-11-12: 18 new findings. Seven are in the libtiff copy under
