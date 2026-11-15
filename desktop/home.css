@@ -14,3 +14,7 @@
 .file-link .ic.t-cell{color:var(--eo-module-cell)}
 .file-link .ic.t-slide{color:var(--eo-module-slide)}
 .file-link .ic.t-pdf{color:var(--eo-module-pdf)}
+.recent-remove{background:none;border:0;border-radius:4px;color:var(--text-2);cursor:pointer;font-size:16px;line-height:1;padding:4px 8px;opacity:0}
+.files tr:hover .recent-remove,.recent-remove:focus-visible{opacity:1}
+.recent-remove:hover{background:var(--hover);color:var(--text)}
+@media (hover:none){.recent-remove{opacity:1}}

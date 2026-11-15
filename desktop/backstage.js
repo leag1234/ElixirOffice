@@ -78,7 +78,10 @@ window.EODesktopBackstage=async function(win,main,info,action){
   }
   return fm.panels[name];
  };
- const homePage=page=>{page.refresh=async()=>{
+ // sdkjs _correctEmbeddedWork() cancels every unmodified legacy mousewheel/DOMMouseScroll event on #viewport, which also kills native wheel scrolling of these pages; stop those events before they reach it (no preventDefault, so the page scrolls normally).
+ const guardWheel=el=>{if(!el||!el.addEventListener||el.eoWheelGuard)return;el.eoWheelGuard=true;for(const type of ['mousewheel','DOMMouseScroll'])el.addEventListener(type,event=>event.stopPropagation(),{passive:true})};
+ bs.guardDesktopWheel=guardWheel;
+ const homePage=page=>{guardWheel(page&&page.$el&&page.$el[0]);page.refresh=async()=>{
   const data=await parent.eoDesktop.home();Object.assign(data,{language:info.language,strings:info.strings,embedded:true});
   parent.EODesktopHome.render(page.$el[0],data,action,page===bs.pages['elx-open']?'open':'home');
  };return page};
@@ -88,6 +91,7 @@ window.EODesktopBackstage=async function(win,main,info,action){
   const panel=ensurePanel('new');if(!panel)return;
   panel.$el.off('.eoDesktopNew').on('show.eoDesktopNew',()=>{});
   this._newDesktopPanel=panel;
+  guardWheel(panel.$el[0]);
   panel.refresh=async()=>{const data=await parent.eoDesktop.home();Object.assign(data,{language:info.language,strings:info.strings,embedded:true});parent.EODesktopHome.render(panel.$el[0],data,action,'new')};
   const show=panel.show;if(!panel.eoDesktopShow){panel.eoDesktopShow=true;panel.show=function(){show.apply(this,arguments);this.refresh()};}
  };

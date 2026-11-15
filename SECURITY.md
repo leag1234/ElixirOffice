@@ -57,6 +57,28 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-16 (desktop 0.9.0, published 2026-11-16)
+
+- Dependency scan (OSV, nightly) of 2026-11-15: 1 new finding since 2026-11-13, CVE-2026-85091 (zlib gzwrite, high) in the
+  zlib copy under openjpeg-2.4.0/thirdparty. That folder only serves the openjpeg command-line tools and is not compiled
+  (the converter builds lib/openjp2 only), and the bug is in the gz* file API, so the product is not affected. The
+  libtiff findings of the same folder (15 on 2026-11-13) are gone from the database since 2026-11-14. The shipped high
+  finding (request-filtering-agent 1.0.5 in the server) stays reviewed as not affected.
+- Bundled C/C++ libraries (vendored check of 2026-11-15): no new finding; the pending components
+  (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz) stay on the plan.
+- Electron stays at 44.11.3, the latest release of the 44 line (Chromium 152.0.7977.169, V8 15.2). Electron 45.3.2 exists
+  (Chromium 156) but is a major update, planned after qualification, not taken in this release.
+- Node.js: Electron 44.11.3 embeds Node 24.22.2; Node 24.22.3 (security release of 2026-11-10) is not yet in an Electron
+  release. Windows opening documents run sandboxed with Node integration off; we take the fix with the next Electron release.
+- npm audit of desktop/package-lock.json: 8 findings (1 high, 7 moderate), all in build tools (undici 6.29.0 under
+  node-gyp and 7.30.0 under @electron/get; minimatch, fast-uri, electron-builder 26.15.3 and its helpers). They run on
+  the build machine only and are not part of the packaged application; the undici and electron-builder updates are kept
+  for a separate toolchain change.
+- New code in this release: Read Aloud uses the speech voices of the operating system and writes nothing to the
+  document; the graphics acceleration option only adds a Chromium command line switch read at start; the new Word, Excel and
+  PowerPoint ribbon features (Sort, Thesaurus, Workbook Statistics, WordArt, charts, tables) run in the editor inside the
+  sandboxed renderer; the PPTX reader change (no-fill table borders) runs in the same renderer.
+
 ### 2026-11-13 (desktop 0.8.0, published 2026-11-13)
 
 - Dependency scan (OSV, nightly) of 2026-11-13: 6 new findings. The high ones (GHSA-xcvg-w56q-r89m, Pillow) concern

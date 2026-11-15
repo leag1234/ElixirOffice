@@ -52,3 +52,14 @@ test('Home retains localized previews, all blank families, recent type/folder/da
  f.all(node=>node.dataset.view==='open')[0].onclick();assert.equal(f.cls('tile-blank').length,0);
  f.all(node=>node.dataset.view==='new')[0].onclick();assert.equal(f.cls('tile-blank').length,3);
 });
+test("recent list cells hold the date and the remove button, never a stringified element",()=>{
+ const f=fixture({recents:[{id:"r1",name:"A.docx",folder:"/x",modified:"2026-10-22T10:00:00Z"}]});
+ const row=f.all(node=>node.tagName==="tr"&&node.children.some(c=>c.className.includes("c-date")))[0];
+ assert(row);
+ assert.deepEqual(row.children.map(c=>c.className.split(" ")[0]),["c-name","c-date","c-remove"]);
+ assert(!f.container.textContent.includes("[object"));
+ const header=f.all(node=>node.tagName==="tr"&&node.children.some(c=>c.tagName==="th"))[0];
+ assert.equal(header.children.length,row.children.length);
+ const remove=f.all(node=>node.tagName==="button"&&node.className==="recent-remove")[0];
+ remove.onclick();assert.deepEqual(f.actions.at(-1),["recent-remove","r1"]);
+});

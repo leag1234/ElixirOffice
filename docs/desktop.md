@@ -691,3 +691,16 @@ qualification is inferred. Tests: `tests/desktop/home-content.test.cjs`,
 ### Compact title bar (0.3.2 candidate)
 
 Options > Window offers a compact title bar on qualified Linux/X11. It applies to new windows; turning it off restores the system frame for subsequent windows. Windows/macOS/Wayland keep the native frame. [Behavior, tests and limits](desktop-compact-titlebar.md).
+
+## Troubleshooting: flicker or trembling window (Linux, Wayland)
+
+On some Linux systems (for example GNOME on Wayland with certain graphics drivers) the window may flicker or tremble
+while scrolling or when the window is dragged. Hardware graphics acceleration can be turned off, like the equivalent
+option in Microsoft Office:
+
+- Settings > "Use hardware graphics acceleration (restart required)": clear the box and restart ElixirOffice. The choice
+  is stored in the user profile (`desktop-settings.json`, key `hardwareAcceleration`) and needs no administrator rights.
+- Or start with `--disable-gpu`, or with the environment variable `ELIXIROFFICE_DISABLE_GPU=1` (for example
+  `ELIXIROFFICE_DISABLE_GPU=1 ./ElixirOffice.AppImage`). The command line and the environment variable take priority
+  over the setting.
+- Help > About shows whether acceleration is on or off and the display backend in use.

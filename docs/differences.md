@@ -32,6 +32,7 @@ Learn more: [Keyboard shortcuts](shortcuts.md) and [Interface notes](ui.md).
 | Document views | Read Mode, Print Layout, Outline view with level controls, and Draft view, with Word's keys. | Print, Web and outline views (Navigator); no Read Mode. | Print Layout and a read-only mode; no outline or draft view. |
 | Fields | Insert an empty field (Ctrl+F9), show codes (Alt+F9), update (F9) and lock fields; locks are saved in .docx. | A Fields dialog. | A field dialog with a code toggle; no empty field or lock. |
 | Task panes | Reveal Formatting (Shift+F1), Selection pane (Alt+F10) and an offline Thesaurus (Shift+F7). | A sidebar (Properties, Navigator) and a thesaurus dialog. | No Reveal Formatting or Selection pane; the thesaurus is a plugin. |
+| Read Aloud | Review > Read Aloud (Ctrl+Alt+Space) reads the selection, or the document from the cursor, with the voices of the operating system; Pause, Stop, speed and voice in a bar. Nothing leaves the computer. | Needs an extension or a text-to-speech service. | A plugin. |
 | Design tab | Themes, Style Sets, theme colors and fonts, paragraph spacing, watermark, page color and page borders. | Page and paragraph styles with limited document themes. | Color schemes and watermark only. |
 | References | Cover pages, Quick Tables, citations and bibliography (APA, MLA), and an index. | A bibliography database and an index with its own interface. | No citations and no index. |
 | AutoCorrect | Word's "Replace text as you type" with a typo list per language, plus capitals, quotes and symbols; Ctrl+Z restores what you typed. | An AutoCorrect replacement table. | First letter, quotes and dashes; no typo list. |
@@ -48,6 +49,10 @@ Learn more: [Interface notes](ui.md) and [Keyboard shortcuts](shortcuts.md).
 | Flash Fill and Quick Analysis | Ctrl+E fills a column from examples; Ctrl+Q offers data bars, color scales, icon sets, charts and totals. | No Flash Fill, no Quick Analysis. | None. |
 | Auto Fill Options | After a drag, a button next to the filled cells offers Copy Cells, Fill Series, Fill Formatting Only and more. | The fill handle uses the default, with no options button. | None. |
 | Chart galleries | Insert > Charts has one gallery button per chart family, with previews by sub-type. | A single Chart button with one long gallery. | — |
+| Chart Design ribbon | Chart Design (Word, Excel, PowerPoint) has Add Chart Element (axes, titles, labels, error bars, gridlines, legend, trendline), Quick Layout, Change Colors (Colorful and six Monochromatic palettes) and Chart Styles, as in Office. | Chart elements by menu and dialogs. | Chart elements in the side panel and a floating button. |
+| Sort in Word | Sort (Home > Paragraph and Table Layout > Data) orders paragraphs or table rows by up to three keys, as text, number or date, ascending or descending, with a header-row choice, tab or comma separated fields and a case option; one undo step, formatting stays with each paragraph or row. | Sort in Writer for selected paragraphs and tables, no field separators. | No sort for paragraphs or tables. |
+| Review tab | Review has Spelling (F7), an offline Thesaurus for the text of the active cell, Workbook Statistics, and New, Delete, Previous, Next and Show Comments, like Excel. | Spelling and Thesaurus under Tools; no workbook statistics. | A spell-check pane and a Comments pane; no thesaurus or statistics. |
+| PivotTable grouping | PivotTable Analyze > Group Selection, Ungroup and Group Field: dates by days, months, quarters and years, numbers by ranges, or items by hand. | Group in the PivotTable context menu. | Group in the context menu; no ribbon buttons. |
 
 Learn more: [Excel shortcuts](shortcuts-excel.md).
 
@@ -59,6 +64,9 @@ Learn more: [Excel shortcuts](shortcuts-excel.md).
 | Sections | Add, rename, collapse and remove sections, in the thumbnails and in the Slide Sorter; saved in PowerPoint files. | No sections: the slides are one list. | — |
 | Slide Sorter and Presenter View | A thumbnail grid with drag reorder, and a Presenter View that shows the next slide beside the notes. | Impress has a Slide Sorter. | Neither the sorter nor the next-slide preview. |
 | PowerPoint keyboard | PowerPoint keys in text, regroup, pane cycling, and pen, eraser and laser during the show. | Its own defaults. | Several PowerPoint keys missing. |
+| Table ribbon | Table Design and Layout tabs with Borders (presets, pen weight and color), Cell Size (row height, column width, distribute), Cell Margins presets and Text Direction. | A table toolbar with border and cell dialogs. | Table properties in a side panel. |
+| Design: Fonts and Background Styles | Design > Fonts (the Office list of theme font pairs) and Background Styles (12 solid and gradient styles of the theme colors), applied to all slides. | Master Slide fonts and backgrounds by hand. | Colors only. |
+| WordArt Styles | Shape Format (PowerPoint, Word) has Quick Styles, Text Fill, Text Outline and Text Effects (Transform), like Office. | Fontwork gallery and toolbar. | Text Art settings in a side panel. |
 
 Learn more: [PowerPoint shortcuts](shortcuts.md) and [Interface notes](ui.md).
 

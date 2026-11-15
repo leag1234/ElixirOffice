@@ -12,8 +12,13 @@ const files = require('./files.cjs'), resources = require('./resources.cjs'), {F
 const defaultProfile=app.getPath('userData');
 app.setName?.('ElixirOffice');app.setPath('userData',defaultProfile);
 if (process.env.EO_DESKTOP_PROFILE) app.setPath('userData',path.resolve(process.env.EO_DESKTOP_PROFILE));
+// Hardware graphics acceleration can only change before the app is ready.
+const graphicsState=require('./graphics.cjs').decide({argv:process.argv,env:process.env,userData:app.getPath('userData')});
+if(graphicsState.disabled)app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('disable-background-networking');
 app.commandLine.appendSwitch('disable-component-update');
+// Linux Read Aloud: Chromium needs the switch and a running speech-dispatcher before its first voice request.
+if(process.platform==='linux'){app.commandLine.appendSwitch('enable-speech-dispatcher');if(app.isPackaged)void require('./speech.cjs').ensureDaemon();}
 protocol.registerSchemesAsPrivileged([{scheme:resources.SCHEME,privileges:{standard:true,secure:true,supportFetchAPI:true,codeCache:true,corsEnabled:true}}]);
 const assets = app.isPackaged ? path.join(process.resourcesPath,'assets') : path.join(__dirname,'assets');
 let conversionRuntime;
@@ -801,7 +806,7 @@ async function start() {
   catch(error){if(app.isPackaged||error.code!=='ENOENT')throw error;}
   const aboutText=buildIdentity?require('./build-identity.cjs').label(buildIdentity):'Development';
   app.setAboutPanelOptions(buildIdentity?require('./build-identity.cjs').aboutOptions(buildIdentity):{applicationName:'ElixirOffice',applicationVersion:aboutText});
-  const showAbout=()=>process.platform==='darwin'?app.showAboutPanel():dialog.showMessageBox(documentWindow(),{type:'info',title:t('about')+' ElixirOffice',message:'ElixirOffice',detail:aboutText,buttons:['OK'],defaultId:0,cancelId:0});
+  const showAbout=()=>process.platform==='darwin'?app.showAboutPanel():dialog.showMessageBox(documentWindow(),{type:'info',title:t('about')+' ElixirOffice',message:'ElixirOffice',detail:aboutText+'\n\n'+require('./graphics.cjs').summary(graphicsState,t,chromeOptions().displayBackend),buttons:['OK'],defaultId:0,cancelId:0});
 
   if(captureOptions&&captureOptions.locales.some(value=>!languageInfo.supported.includes(value)))throw Error('Unsupported capture locale');
 
@@ -1155,15 +1160,16 @@ async function start() {
     customTitleBar:settings.customTitleBar===true,
     rememberWindowPlacement:settings.rememberWindowPlacement!==false,
     openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true,
+    hardwareAcceleration:settings.hardwareAcceleration!==false,hardwareAccelerationActive:!graphicsState.disabled,
     customTitleBarAvailable:tabHost.compactAvailable(),
     effectiveFrame:registry.window(registry.context().windowId).frame?.effectiveFrame||'native'
   }));
   handle('window-settings',async value=>{
     if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid window settings');
-    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
-    if(!['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'].some(key=>key in value))throw Error('Invalid window settings');
+    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
+    if(!['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'].some(key=>key in value))throw Error('Invalid window settings');
     if(value.customTitleBar&&settings.customTitleBar!==true&&!tabHost.compactAvailable())throw Error(t('nativeTitleBarUnavailable'));
-    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement'])if(key in value)settings[key]=value[key];
+    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value)settings[key]=value[key];
     if('rememberWindowPlacement' in value){
       clearTimeout(geometryTimer);geometryTimer=null;
       if(!value.rememberWindowPlacement)delete settings.windowState;

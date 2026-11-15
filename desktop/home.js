@@ -41,15 +41,15 @@ function render(container,info,actions,view='home'){
   drop.setAttribute('role','button');drop.setAttribute('aria-label',t('browse'));
   drop.append(icon('open'),element('span','btn btn-primary',t('browse')));main.append(drop);
  }
- const table=element('table','files'),thead=element('thead'),tr=element('tr');for(const text of [t('name'),t('modified')])tr.append(element('th','',text));thead.append(tr);table.append(thead);
+ const table=element('table','files'),thead=element('thead'),tr=element('tr');for(const [text,cls] of [[t('name'),''],[t('modified'),'c-mod'],['','c-act']]){const th=element('th',cls,text);if(!text)th.setAttribute('aria-hidden','true');tr.append(th)}thead.append(tr);table.append(thead);
  const tbody=element('tbody');
  for(const item of info.recents){
   const row=element('tr'),cell=element('td','c-name'),b=button('',()=>actions('recent',item.id),'file-link');
   const type=/\.pdf$/i.test(item.name)?'pdf':/\.(xlsx|xls|ods|csv|xltx|xlsm)$/i.test(item.name)?'cell':/\.(pptx|ppt|odp|potx|ppsx)$/i.test(item.name)?'slide':'word',symbol=icon(type);symbol.classList.add('t-'+type);
   const label=element('span'),name=element('span','file-name'),where=element('span','file-where');
   name.append(element('bdi','',item.name));where.append(element('bdi','',item.folder));label.append(name,where);b.append(symbol,label);cell.append(b);row.append(cell);
-  const remove=button('×',()=>actions('recent-remove',item.id),'recent-remove');remove.setAttribute('title',t('removeRecent'));remove.setAttribute('aria-label',t('removeRecent'));row.append(element('td','c-remove',remove));
-  const date=item.modified?new Intl.DateTimeFormat(info.language,{dateStyle:'medium',timeStyle:'short'}).format(new Date(item.modified)):'—';row.append(element('td','c-date',date));tbody.append(row);
+  const remove=button('×',()=>actions('recent-remove',item.id),'recent-remove');remove.setAttribute('title',t('removeRecent'));remove.setAttribute('aria-label',t('removeRecent'));
+  const date=item.modified?new Intl.DateTimeFormat(info.language,{dateStyle:'medium',timeStyle:'short'}).format(new Date(item.modified)):'—';row.append(element('td','c-date c-mod',date));const removeCell=element('td','c-remove c-act');removeCell.append(remove);row.append(removeCell);tbody.append(row);
  }
  table.append(tbody);if(info.recents.length)recent.append(table);else recent.append(element('p','recent-empty',t('noRecent')));main.append(recent);
  const footer=element('footer','desktop-footer',t('privacy'));container.append(footer);

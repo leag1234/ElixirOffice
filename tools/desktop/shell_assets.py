@@ -45,7 +45,7 @@ def assemble(upstream, product, out):
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-localfonts/Core.js',destination/'localfonts-Core.js')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/Operation.js',destination/'operation.js')
     shutil.copy2(upstream/'web-apps/apps/common/main/lib/elixir-local/FormatDialog.js',destination/'format-dialog.js')
-    (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:start;border:0;background:transparent;padding:0}\n')
+    (destination/'backstage-home.css').write_text('@scope (.eo-desktop-page) {\n'+css.replace(':root',':scope')+'\n}\n.eo-desktop-page {font:14px/20px var(--font);color:var(--text);background:var(--bg)}\n.eo-desktop-page .desktop-footer {padding:16px 40px;color:var(--text-2);font-size:12px}\n.eo-desktop-page .topbar {grid-template-columns:1fr}\n.eo-desktop-page .tiles {margin-top:20px}\n.eo-desktop-page button.tile {text-align:start;border:0;background:transparent;padding:0}\n#file-menu-panel .elx-page.eo-desktop-page {overflow-y:auto!important;overflow-x:hidden!important}\n')
     brand=product/'branding/example/nodejs/public/elixir/brand/templates'
     catalog=json.loads((brand/'templates.json').read_text())
     templates=[]

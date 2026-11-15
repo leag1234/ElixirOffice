@@ -106,12 +106,18 @@ const DETECTOR = `(() => {
     const rect = rectOf(element), groupRect = rectOf(group);
     if (${isOutsideGroup.name}(rect, groupRect, 1)) push('outside-group', element, rect, { groupRect });
   }
+  // The group label (::after of the first group of a run, as wide as the whole run) overhangs that group when the run
+  // has several groups: it is not clipped text, so the groups are measured without it.
+  const noLabel = document.createElement('style');
+  noLabel.textContent = '.group.group-label-owner::after { display: none !important; }';
+  document.head.appendChild(noLabel);
   for (const element of panel.querySelectorAll('*')) {
     if (!element.offsetParent || !${visible.name}(element)) continue;
     if (element.scrollWidth > element.clientWidth + 1 && element.clientWidth > 0) {
       push('clipped-text', element, rectOf(element), { scrollWidth: element.scrollWidth, clientWidth: element.clientWidth });
     }
   }
+  noLabel.remove();
   for (const group of groups) {
     const label = group.querySelector('.group-name, .elx-group-label, .elx-group-title') ||
       [...group.querySelectorAll('*')].reverse().find(e => {

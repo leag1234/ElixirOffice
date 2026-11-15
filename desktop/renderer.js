@@ -495,6 +495,13 @@ async function showOptions(){
  customFrameDescription.id='custom-title-bar-description';customFrameDescription.textContent=t('customTitleBarDesc');
  customFrameNote.id='custom-title-bar-note';customFrameNote.textContent=windowOptions.customTitleBarAvailable?t('customTitleBarRestart'):t('nativeTitleBarUnavailable');
  customFrame.setAttribute('aria-describedby',customFrameDescription.id+' '+customFrameNote.id);customFrameLabel.append(customFrame,document.createTextNode(t('customTitleBar')));windowGroup.append(customFrameLabel,customFrameDescription,customFrameNote);
+ const gpuLabel=document.createElement('label'),gpu=document.createElement('input'),gpuNote=document.createElement('p'),gpuRestart=document.createElement('p');
+ gpu.type='checkbox';gpu.id='hardware-acceleration';gpu.checked=windowOptions.hardwareAcceleration!==false;
+ gpuNote.id='hardware-acceleration-note';gpuNote.textContent=t('hardwareAccelerationNote');
+ gpuRestart.id='hardware-acceleration-restart';gpuRestart.textContent=t('hardwareAccelerationRestart');
+ gpu.setAttribute('aria-describedby',gpuNote.id+' '+gpuRestart.id);
+ gpuLabel.append(gpu,document.createTextNode(t('hardwareAcceleration')));windowGroup.append(gpuLabel,gpuNote,gpuRestart);
+ const gpuChanged=()=>gpu.checked!==(windowOptions.hardwareAcceleration!==false);
  await addFontOptions(fontGroup);
  const releaseHeading=document.createElement('h3');releaseHeading.textContent=t('releaseUpdates');releaseGroup.append(releaseHeading);
  const releaseLabel=document.createElement('label'),releaseEnabled=document.createElement('input'),releasePrivacy=document.createElement('p');
@@ -515,11 +522,11 @@ async function showOptions(){
  displayLanguage.value=languageOptions.value;languageLabel.append(displayLanguage);languageGroup.append(languageHeading,languageLabel,restartNotice);
  let savingOptions=false;
  const restartButton=modalButton(languageGroup,t('displayLanguageRestartNow'),()=>saveOptions(true));restartButton.id='display-language-restart-now';restartButton.className='btn';
- const refreshRestart=()=>{const changed=(displayLanguage.value||languageOptions.system)!==languageOptions.active;restartNotice.hidden=!changed;restartButton.hidden=!changed;};
- displayLanguage.addEventListener('change',refreshRestart);refreshRestart();
+ const refreshRestart=()=>{const changed=(displayLanguage.value||languageOptions.system)!==languageOptions.active;restartNotice.hidden=!changed;gpuRestart.hidden=!gpuChanged();restartButton.hidden=!changed&&!gpuChanged();};
+ displayLanguage.addEventListener('change',refreshRestart);gpu.addEventListener('change',refreshRestart);refreshRestart();
  async function saveOptions(restart=false){
   if(savingOptions)return;savingOptions=true;saveButton.disabled=true;restartButton.disabled=true;
-  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked,rememberWindowPlacement:placement.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
+  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked,rememberWindowPlacement:placement.checked,hardwareAcceleration:gpu.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
   finally{savingOptions=false;saveButton.disabled=false;restartButton.disabled=false;}
  }
  const saveButton=modalButton(actions,t('save'),()=>saveOptions());

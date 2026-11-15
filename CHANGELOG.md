@@ -1,5 +1,66 @@
 # Changelog
 
+## Desktop 0.9.0 — published 2026-11-16
+
+### Word
+
+- Word Sort: Home > Paragraph and Table Layout > Data have a Sort button that sorts paragraphs or table rows by text, number or
+  date, on up to three keys, in one undo step.
+- Review has the Word proofing layout: a big Spelling button with Thesaurus and Word Count next to it. The Thesaurus button opens
+  the synonyms pane (Shift+F7).
+- Read Aloud (Review > Speech, Ctrl+Alt+Space) reads the selection, or the document from the cursor, with the voices of the
+  operating system, with Pause, Stop, speed and voice. The sentence being read is highlighted and kept in view; nothing is
+  written to the document. It starts from the beginning of the document when no text follows the cursor.
+- The Word Count dialog closes with its Close button (#82).
+- Pictures anchored to a paragraph inside a column that ends with an empty paragraph are drawn where Word draws them, not at the
+  bottom of the page (#57).
+- Split view: the lower pane has a dark page in the dark theme, the application scrollbar and a visible caret; clicking or typing
+  in it no longer scrolls the upper pane (#85). Limitation: the mouse cannot select text in the lower pane yet.
+
+### Excel
+
+- The Review tab follows Excel: a big Spelling button (opens the spell checking pane, like F7) with Thesaurus and Workbook
+  Statistics (worksheets, cells with data, formulas, tables, PivotTables, charts, pictures, shapes, comments); Comments has
+  Previous, Next and Show Comments. Previous and Next Comment select the commented cell and scroll to it.
+- PivotTable Analyze has Group Selection, Ungroup and Group Field buttons (dates by days, months, quarters, years; numbers by ranges; items by hand).
+
+### PowerPoint
+
+- Table Design and Layout tabs follow PowerPoint: Draw Borders (pen weight, pen colour, border presets), Cell Size, Text
+  Direction and Cell Margins.
+- Design > Variants has Fonts (the Office pairs of theme fonts) and Background Styles (12 solid and gradient styles of the theme
+  colours, applied to all slides).
+- A table with No Border is saved without lines and reopens without lines; before, it came back with default-coloured borders.
+
+### Word and PowerPoint
+
+- Shape Format has a WordArt Styles group: Quick Styles, Text Fill, Text Outline and Text Effects (Transform).
+
+### Charts
+
+- Chart Design ribbon in Word, Excel and PowerPoint: Add Chart Element, Quick Layout, Change Colors and Chart Styles.
+- Office 2016 charts: the waterfall legend lists Increase, Decrease and Total, and the bars use the same colours; funnel labels
+  are white on the bars; titles of these charts are no longer bold, as in Office.
+
+### Home
+
+- The Recent list of File > Home scrolls while a document is open, with the mouse wheel and the keyboard, and so does File > Open (#83).
+- The Modified column of the Recent list shows the date of each document (it showed "[object HTMLButtonElement]"); the remove
+  button has its own column (#83).
+
+### Linux
+
+- New option "Use hardware graphics acceleration (restart required)" in Settings. Turn it off if the window flickers or
+  trembles while scrolling or dragging (seen on Wayland with some graphics drivers, #84). It can also be turned off with
+  `--disable-gpu` or `ELIXIROFFICE_DISABLE_GPU=1`. About shows the current state and display backend.
+- Read Aloud finds the system voices: ElixirOffice starts speech-dispatcher when it is installed but not running.
+
+### Translations
+
+- The graphics acceleration option is translated in all 45 interface languages.
+- The new Word, Excel and PowerPoint ribbon texts (Sort, Read Aloud, Thesaurus, WordArt Styles, Chart Design, table and Design
+  groups) are translated in English, French, German, Spanish, Italian, Russian, Dutch and both Portuguese variants.
+
 ## Desktop 0.8.0 — published 2026-11-13
 
 ### Interface conformity

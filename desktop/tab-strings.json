@@ -20,6 +20,11 @@
   "tabSaveWaitTimeout": "Saving has not finished and may still complete. This document will stay open. Wait for saving to finish, then try closing it again.",
   "openDocumentsInTabs": "Open documents in tabs",
   "showHomeTab": "Show Home tab",
+  "hardwareAcceleration": "Use hardware graphics acceleration (restart required)",
+  "hardwareAccelerationNote": "Turn off if the window flickers or trembles.",
+  "hardwareAccelerationRestart": "Restart ElixirOffice for this change to take effect.",
+  "graphicsOn": "On",
+  "graphicsOff": "Off",
   "homeTabRequiresTabs": "The Home tab is available when documents open in tabs.",
   "tabMoveOtherWindow": "Move to another window",
   "tabModified": "Unsaved changes"
