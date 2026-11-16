@@ -1,5 +1,14 @@
 # Changelog
 
+## Desktop 0.9.1 — published 2026-11-16
+
+- Fix: starting the application with several files at once (command line, or a file manager opening several documents when the application is not running) no longer shows "Error" in the first window; every file opens in its own window.
+- Fix: an Excel workbook whose modern charts (waterfall, sunburst, treemap, ...) read their data from another sheet no longer loses the sheets after the chart sheet when opened, and so no longer loses them on save.
+- Fix: Chart Design Quick Layout is one undo step in Word and PowerPoint (it took up to four), like Add Chart Element, Change Colors and Chart Styles.
+- Fix: the Word Chart Styles gallery shows its previews (it was empty).
+- Fix: French (and any non-English) Markdown and text documents no longer show nearly every word as a spelling error. A spell check answer for the language used before the document language was set at open was applied to the new language; such stale answers are now ignored (since 0.7.0).
+- Fix: update notices and signed updates no longer stop when the letter case of the GitHub repository name changes (this happened for a few days before 0.9.0): release links are matched regardless of case and always opened in canonical form.
+
 ## Desktop 0.9.0 — published 2026-11-16
 
 ### Word

@@ -29,8 +29,10 @@ function validReleaseURL(value){
  try{
   const url=new URL(value);
   if(url.protocol!=='https:'||url.host!=='github.com'||url.username||url.password||url.search||url.hash)return null;
+  // GitHub treats owner/repo case-insensitively (the repository was renamed to
+  // leag1234/ElixirOffice); match that, but always emit the canonical PAGE form.
   const prefix='/leag1234/elixiroffice/releases/tag/';
-  if(!url.pathname.startsWith(prefix))return null;
+  if(!url.pathname.toLowerCase().startsWith(prefix))return null;
   const tag=decodeURIComponent(url.pathname.slice(prefix.length));
   return parseVersion(tag)?PAGE+encodeURIComponent(tag):null;
  }catch{return null}

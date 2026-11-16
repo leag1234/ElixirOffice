@@ -29,6 +29,12 @@ function environment(options={}){
  return {c,calls,exit,get ack(){return ack;}};
 }
 test.after(()=>assert.equal(network.calls,0));
+test('a notice selected from a capitalised html_url decorates and a foreign repository is refused',()=>{
+ const {selectRelease}=require('../../desktop/release-notice.cjs'),e=environment();
+ const picked=selectRelease([{tag_name:'v0.4.0',html_url:'https://github.com/leag1234/ElixirOffice/releases/tag/v0.4.0',draft:false}],'0.3.0');
+ assert.deepEqual(picked,notice);assert.deepEqual({...e.c.decorate(picked)},{...notice});
+ assert.equal(e.c.decorate({version:'0.4.0',url:'https://github.com/other/ElixirOffice/releases/tag/v0.4.0'}),null);e.c.dispose();
+});
 test('explicitly closed policy refuses before eligibility, dependency/session construction or I/O',async()=>{
  let eligibility=0;const e=environment({policy:createPolicy(),eligible:async()=>{eligibility++;return true;},initial:{automatic:true}});
  await e.c.offer(notice);assert.equal(e.c.options().installationAvailable,false);assert.equal(e.c.options().automatic,false);

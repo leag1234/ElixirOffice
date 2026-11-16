@@ -180,7 +180,9 @@ async function refreshFonts(){
 async function drainPending(){
   if(!pendingRequested||pendingRunning||opening||operationBusy||choosingSaveAs||closeCheck)return;
   pendingRequested=false;pendingRunning=true;
-  try{await run(async()=>{const selected=await eoDesktop.initial();if(selected?.morePending)pendingRequested=true;return selected})}
+  try{await run(async()=>{const selected=await eoDesktop.initial();if(selected?.morePending)pendingRequested=true;
+  // A queued file opened in its own window leaves nothing to open here: the reply then only carries morePending, and opening it would tear down the document already shown in this window.
+  return selected?.token?selected:null})}
   finally{pendingRunning=false;if(pendingRequested)setTimeout(drainPending,0)}
 }
 async function open(selected) {

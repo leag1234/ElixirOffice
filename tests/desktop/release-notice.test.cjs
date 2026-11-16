@@ -23,6 +23,15 @@ test('release URL allowlist rejects credentials, extra hosts, ports, routes and 
  for(const bad of ['http://github.com/leag1234/elixiroffice/releases/tag/v0.4.0','https://github.com.evil.invalid/leag1234/elixiroffice/releases/tag/v0.4.0','https://user@github.com/leag1234/elixiroffice/releases/tag/v0.4.0','https://github.com:444/leag1234/elixiroffice/releases/tag/v0.4.0','https://github.com/leag1234/other/releases/tag/v0.4.0','https://github.com/leag1234/elixiroffice/releases/download/v0.4.0/app.exe',url('v0.4.0')+'?url=evil',url('v0.4.0')+'#evil','https://github.com/leag1234/elixiroffice/releases/tag/v0.4.0%2f..%2fevil'])
   assert.equal(validReleaseURL(bad),null,bad);
 });
+test('capitalised owner/repo from the renamed repository is accepted and canonicalised; other repos stay rejected',()=>{
+ const cap=tag=>'https://github.com/leag1234/ElixirOffice/releases/tag/'+encodeURIComponent(tag);
+ assert.equal(validReleaseURL(cap('v0.4.0')),url('v0.4.0'));
+ assert.equal(validReleaseURL('https://github.com/LEAG1234/ELIXIROFFICE/releases/tag/v0.4.0'),url('v0.4.0'));
+ assert.deepEqual(selectRelease([{tag_name:'v0.4.0',html_url:cap('v0.4.0'),draft:false}],'0.3.1'),{version:'0.4.0',url:url('v0.4.0')});
+ for(const bad of ['https://github.com/leag1234/ElixirOffice2/releases/tag/v0.4.0','https://github.com/other/ElixirOffice/releases/tag/v0.4.0','http://github.com/leag1234/ElixirOffice/releases/tag/v0.4.0','https://GitHub.com.evil.invalid/leag1234/ElixirOffice/releases/tag/v0.4.0','https://github.com/leag1234/ElixirOffice/releases/download/v0.4.0/a'])
+  assert.equal(validReleaseURL(bad),null,bad);
+ assert.equal(selectRelease([{tag_name:'v0.4.0',html_url:'https://github.com/other/ElixirOffice/releases/tag/v0.4.0',draft:false}],'0.3.1'),null);
+});
 function mockHTTP({status=200,headers={},body='[]',stall=false}={}){
  const calls=[],response=new EventEmitter();response.statusCode=status;response.headers={'content-type':'application/json',...headers};response.destroy=()=>{response.destroyed=true};
  const request=(target,options,callback)=>{

@@ -187,7 +187,7 @@ test('host preparer CLI creates only a reviewed exclusive output and refuses ove
 test('QA next-target discovery refreshes only synthetic changed-target state; ordinary cadence stays byte-pinned',async()=>{
  const e=compile(manifest({currentBuild:2,nextBuild:3,tag:'v0.0.0-rc.3'}));
  const original=fs.readFileSync(path.join(root,'desktop/release-notice.cjs'));
- assert.equal(digest(original),'b5a3226df9af69a80b165c7dfeb0bf8c88314cd62b45bb97fd873a6a52e7f9df');
+ assert.equal(digest(original),'69a0a6f28f7cdec4d68741cf69edc1dea99f7a8f8d0fd7de464a6db3e56f23ec');
  assert.deepEqual(fs.readFileSync(path.join(e.output,'release-notice.cjs')),original);
  const app={getVersion:()=> '0.0.0-rc.2',getPath:()=>temp,setPath(){},setName(){},setAppUserModelId(){}};
  const qa=require(path.join(e.output,'qa/composition.cjs')).load(e.output,e.result.manifestSha256,app);

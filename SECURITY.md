@@ -57,6 +57,25 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-16 (desktop 0.9.1, published 2026-11-16)
+
+- Dependency scan (OSV, nightly) of 2026-11-16: 0 new findings since 2026-11-15; one finding (a zlib copy under openjpeg
+  thirdparty, not compiled) left the database. The shipped high finding (request-filtering-agent 1.0.5 in the server)
+  stays reviewed as not affected. The vendored C/C++ check is unchanged (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2,
+  HarfBuzz stay on the plan).
+- Electron stays at 44.11.3, still the latest release of the 44 line (Chromium 152.0.7977.169). Electron 45 is a major
+  update planned after qualification. Node.js 24.22.3 (security release of 2026-11-10) is not yet in an Electron release;
+  documents open in a sandboxed renderer with Node integration off.
+- npm audit of desktop/package-lock.json: the same 8 findings as for 0.9.0 (1 high, 7 moderate), all in build tools
+  (undici, minimatch, fast-uri, electron-builder and helpers); they run on the build machine only and are not part of the
+  packaged application.
+- New code in this release: the release-link check now matches the repository name regardless of letter case and opens links
+  in canonical form only (it still accepts only github.com release URLs of the project); the Markdown spell check ignores
+  stale answers; the chart ribbon change groups edits into one undo step; the workbook reader fix only changes how the end of a
+  drawing item is found while reading a file already opened in the sandboxed renderer; opening several files at start uses the
+  existing file-open path and adds no new access. All run in the sandboxed renderer or the
+  existing main-process update check, and add no new network access or file access.
+
 ### 2026-11-16 (desktop 0.9.0, published 2026-11-16)
 
 - Dependency scan (OSV, nightly) of 2026-11-15: 1 new finding since 2026-11-13, CVE-2026-85091 (zlib gzwrite, high) in the

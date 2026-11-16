@@ -199,7 +199,7 @@ In particular, comparing with the running version would miss the reproduced
 case: consumed candidate rc.2 equals running rc.2 while the next target is rc.3.
 
 Production release-notice source SHA256 remains
-b5a3226df9af69a80b165c7dfeb0bf8c88314cd62b45bb97fd873a6a52e7f9df.
+69a0a6f28f7cdec4d68741cf69edc1dea99f7a8f8d0fd7de464a6db3e56f23ec.
 A literal pinned-hash regression checks ordinary bytes and exact generated-copy
 equality, and confirms that ordinary discovery with the same stale state still
 honors the daily throttle. This is a QA composition seam, not a production
