@@ -57,6 +57,22 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-17 (desktop 0.9.2, published 2026-11-17)
+
+- Corrective release on top of 0.9.1 with two product-only fixes; the DocumentServer pins and the engine are unchanged.
+- Dependency scan (OSV, nightly) of 2026-11-17: 0 new findings since 2026-11-16 (917 findings against 919, two left
+  the database). The shipped high finding (request-filtering-agent 1.0.5 in the server) stays reviewed as not
+  affected. The vendored C/C++ check of 2026-11-17 is unchanged (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2,
+  HarfBuzz stay on the plan).
+- Electron stays at 44.11.3, still the latest release of the 44 line (Chromium 152.0.7977.169). Electron 45 is a major
+  update planned after qualification. Documents open in a sandboxed renderer with Node integration off.
+- npm audit of desktop/package-lock.json: the same 8 findings as for 0.9.1 (1 high, 7 moderate), all in build tools
+  (undici, minimatch, fast-uri, electron-builder and helpers); they run on the build machine only and are not part of the
+  packaged application.
+- New code in this release: the File menu shows the Print item that the print command opens (renderer only), and the
+  save path skips a refused chmod on mounted volumes such as NTFS or FAT (only EPERM on the permission step of the
+  temporary file, which is created with the original mode; other errors still fail the save). No new network access.
+
 ### 2026-11-16 (desktop 0.9.1, published 2026-11-16)
 
 - Dependency scan (OSV, nightly) of 2026-11-16: 0 new findings since 2026-11-15; one finding (a zlib copy under openjpeg

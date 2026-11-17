@@ -1,5 +1,10 @@
 # Changelog
 
+## Desktop 0.9.2 — published 2026-11-17
+
+- Fix: Export as PDF, Save As PDF and Print opened the Info page instead of the print and PDF panel in Word documents on Linux and Windows (#87).
+- Fix: on Linux, saving to a mounted Windows disk (NTFS, FAT) no longer fails with "the file is open elsewhere or cannot be replaced" (#88).
+
 ## Desktop 0.9.1 — published 2026-11-16
 
 - Fix: starting the application with several files at once (command line, or a file manager opening several documents when the application is not running) no longer shows "Error" in the first window; every file opens in its own window.

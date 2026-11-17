@@ -44,8 +44,12 @@ window.EODesktopBackstage=async function(win,main,info,action){
    event.preventDefault();event.stopImmediatePropagation();fm.hide();return action('help');
   });
   fm.miInfo?.show();fm.miInfo?.setCaption(t('info'));fm.$el.find('#fm-btn-info').insertAfter(fm.$el.find('#fm-btn-elx-open'));
-  for(const item of [fm.miNew,fm.miSave,fm.miDownload,fm.miPrint]){item?.show();item?.setDisabled(false)}
-  if(fm.miPrint)fm.miPrintWithPreview?.hide();else{fm.miPrintWithPreview?.show();fm.miPrintWithPreview?.setDisabled(false);fm.miPrintWithPreview?.setCaption(t('print'));}
+  // The editors create both Print items; show the one the editor's print command opens (#87):
+  // Print, Ctrl+P and PDF export open the preview panel, which cannot be selected while its item is hidden.
+  const printPreview=!!fm.miPrintWithPreview&&(fm.mode?fm.mode.canPreviewPrint===true:!fm.miPrint);
+  for(const item of [fm.miNew,fm.miSave,fm.miDownload]){item?.show();item?.setDisabled(false)}
+  if(printPreview){fm.miPrint?.hide();fm.miPrintWithPreview.show();fm.miPrintWithPreview.setDisabled(false);fm.miPrintWithPreview.setCaption(t('print'));}
+  else{fm.miPrintWithPreview?.hide();fm.miPrint?.show();fm.miPrint?.setDisabled(false);}
   fm.miRename?.hide();
   if(win.PDFE)fm.miSave?.setDisabled(!main.api.elixirPdfSaveAllowed?.());
   fm.miSave?.setCaption(t('save'));fm.miDownload?.setCaption(t('saveAs'));

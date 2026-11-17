@@ -8,7 +8,7 @@ module.exports.create=function create(root,info={}){
  const header={app:'ElixirOffice',version:version(info.version),electron:version(info.electron),node:version(info.node),platform:['win32','linux','darwin'].includes(info.platform)?info.platform:'unknown',windowsBuild:info.platform==='win32'?version(info.windowsBuild):'not-windows'};
  const records=[];let pending=Promise.resolve();
  function record(input={}){
-  const event={step:steps.has(input.step)?input.step:'save',code:codes.has(input.code)?input.code:'UNKNOWN',retries:Number.isInteger(input.retries)&&input.retries>=0&&input.retries<=1000?input.retries:0,outcome:['failure','deferred','success'].includes(input.outcome)?input.outcome:'failure'};
+  const event={step:steps.has(input.step)?input.step:'save',code:codes.has(input.code)?input.code:'UNKNOWN',retries:Number.isInteger(input.retries)&&input.retries>=0&&input.retries<=1000?input.retries:0,outcome:['failure','deferred','skipped','success'].includes(input.outcome)?input.outcome:'failure'};
   records.push(event);if(records.length>128)records.shift();
   const text=JSON.stringify(header)+'\n'+records.map(x=>JSON.stringify(x)).join('\n')+'\n';
   pending=pending.then(async()=>{

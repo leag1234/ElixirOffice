@@ -25,7 +25,8 @@ async function fixture(preview=false){
  const item=(id)=>{const el=element(id);return {$el:el,show:()=>el.show(),hide:()=>el.hide(),setDisabled(){},setCaption(value){el.text(value)}}};
  const fm={items:[],$el:{find:select},hide(){commands.push('hide')},fireEvent(){commands.push('web')}};
  for(const [name,id]of Object.entries({miNew:'create',miRecent:'recent',miInfo:'info',miSave:'save',miDownload:'download',miRename:'rename',miProtect:'protect',miHistory:'history',miAccess:'rights',miSaveCopyAs:'save-copy',miSettings:'settings',miHelp:'help'}))fm[name]=item('fm-btn-'+id);
- if(preview)fm.miPrintWithPreview=item('fm-btn-print-with-preview');else{fm.miPrint=item('fm-btn-print');fm.miPrintWithPreview=item('fm-btn-print-with-preview');}
+ // Like the real editors, both Print items exist; the editor mode says which one its print command opens.
+ fm.miPrint=item('fm-btn-print');fm.miPrintWithPreview=item('fm-btn-print-with-preview');fm.mode={canPreviewPrint:preview};
  const bs={rendered:true,fm,items:{},txtExport:'Exporter',txtRename:'Renommer',afterApplyMode(){},refreshInfoTiles(){}};
  for(const id of ['elx-home','elx-open','elx-export','elx-share','elx-close','elx-about','elx-ai'])bs.items[id]=item('fm-btn-'+id);
  const main={api:{}},chrome={backstage:bs},window={dispatchEvent(){},CustomEvent:class{}};
@@ -54,4 +55,10 @@ test('Info keeps shared properties and exposes native Rename and tab/window move
  assert(text.includes('Renommer'));assert(text.includes('Move to another window'));
  for(const button of actions.items)button[0].events.click();
  assert(f.commands.includes('rename'));assert(f.commands.includes('move-menu'));
+});
+
+test('#87: with a preview editor the hidden preview item would send Print and PDF export to Info',async()=>{
+ const f=await fixture(true);
+ assert.equal(f.nodes.get('fm-btn-print-with-preview')[0].visible,true,'the panel the print command opens is selectable');
+ assert.equal(f.nodes.get('fm-btn-print')[0].visible,false,'only one Print entry');
 });

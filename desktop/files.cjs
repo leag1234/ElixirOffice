@@ -11,6 +11,7 @@ const writes=require('./write-scope.cjs')();
 const {validatePath,saveFailure}=require('./file-policy.cjs');
 const deferredBackups=new Map();
 let diagnostic=()=>{};
+const modeUnsupported=error=>process.platform!=='win32'&&['EPERM','ENOTSUP','EOPNOTSUPP','ENOSYS'].includes(error?.code);
 function report(step,error,retries=0,outcome='failure'){
   try{diagnostic({step,code:error?.code,retries,outcome});}catch{}
 }
@@ -124,7 +125,9 @@ async function atomicWrite(target, bytes, expected,options) {
     retryWindow.check(options);
     // Do not repeat writeFile: a partially advanced handle is not idempotent.
     try{await handle.writeFile(bytes);}catch(error){report('temporary-write',error);throw error;}
-    await run('temporary-mode',()=>handle.chmod((original?.mode || 0o600) & 0o777));
+    // Mounted NTFS/FAT/SMB volumes fix permissions at mount time and refuse chmod;
+    // the file was already created with this mode, so a refusal there must not fail the save.
+    await run('temporary-mode',async()=>{try{await handle.chmod((original?.mode || 0o600) & 0o777)}catch(error){if(!modeUnsupported(error))throw error;report('temporary-mode',error,0,'skipped');}});
     await run('temporary-sync',()=>handle.sync());staged=await run('temporary-stat',()=>handle.stat());await run('temporary-close',()=>handle.close());handle=null;
     retryWindow.check(options);
     if (original) {

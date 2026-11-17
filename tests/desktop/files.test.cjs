@@ -105,3 +105,20 @@ test('locked or inaccessible replacement reports recovery and preserves original
   }finally{fs.rename=rename;await fs.rm(dir,{recursive:true,force:true})}
  }
 });
+
+test('a volume that refuses chmod (mounted NTFS/FAT) still saves; other chmod errors still fail',{skip:process.platform==='win32'},async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'eo-desktop-chmod-')),open=fs.open;
+ const target=path.join(dir,'sheet.xlsx');
+ let code='EPERM';
+ try{
+  await fs.writeFile(target,'PK original');
+  fs.open=async(...args)=>{const handle=await open(...args);if(String(args[0]).endsWith('.tmp'))handle.chmod=async()=>{const error=Error('operation not permitted');error.code=code;throw error};return handle;};
+  const before=await files.read(target);
+  await files.atomic(target,new TextEncoder().encode('PK saved'),before);
+  assert.equal(await fs.readFile(target,'utf8'),'PK saved');
+  code='EIO';
+  const again=await files.read(target);
+  await assert.rejects(files.atomic(target,new TextEncoder().encode('PK lost'),again));
+  assert.equal(await fs.readFile(target,'utf8'),'PK saved');
+ }finally{fs.open=open;await fs.rm(dir,{recursive:true,force:true})}
+});
