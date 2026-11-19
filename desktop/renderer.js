@@ -17,7 +17,7 @@ function plainTextLanguage(frame,main){
 function blockDuringClose(event){if(closeCheck||info?.capture){event.preventDefault();event.stopImmediatePropagation()}}
 for(const name of ['keydown','beforeinput','click','drop'])document.addEventListener(name,blockDuringClose,true);
 let fontRefreshRequested=false,fontRefreshRunning=false,fontRefreshNotify=false;
-let compactChrome,compactMode=false;
+let compactChrome,compactMode=false,showQuickAccess=true;
 let info,operationBusy=false,backstage,recoveryBusy=false,pdfCompatibility,recoveryNotified=false,feedback,lastOperation,statusOperation;
 const t=key=>info?.strings[key]||({recoveryFailed:'AutoRecover could not keep a recovery copy. Save your document manually.',pdfRecoveryOff:'AutoRecover is not available for PDF files. Save manually; these settings apply to Office files.'})[key]||key;
 const status=(text,operationId)=>{statusOperation=operationId||null;const recovery=controller?.isRecoveryLocked?.()?'AutoRecover is disabled for this session because password protection was used':'';const message=[...new Set([text,recovery,frame?.EOComputerFontWarning].filter(Boolean))].join(' — ');$('message').textContent=message;$('message').hidden=!message;};
@@ -30,7 +30,7 @@ async function returnHome(){
    decision=await eoDesktop.returnHome();
   }
   if(decision!==true)return;
-  compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
+  compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;lastRecovery=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;status('');await refreshHome();
  }catch(error){fail(error)}
 }
 function desktopAction(action,value){if(choosingSaveAs)return;return ({open:()=>run(()=>eoDesktop.choose()),new:()=>run(()=>eoDesktop.create(value)),template:()=>run(()=>eoDesktop.template(value)),recent:()=>run(()=>eoDesktop.recent(value)),'recent-remove':()=>eoDesktop.removeRecent(value).then(()=>refreshHome()).catch(fail),'recents-clear':()=>eoDesktop.clearRecents().then(()=>refreshHome()).catch(fail),save:()=>save(),'save-as':()=>save(true),export:()=>exportCopy(),rename:()=>rename(),pdf:()=>openPrint(false),print:()=>openPrint(true),'pdf-now':()=>pdf(false,undefined,value),'print-now':()=>pdf(true,undefined,value),help:()=>eoDesktop.help(),about:()=>eoDesktop.about(),quit:()=>eoDesktop.quit(),settings:()=>showOptions(),fonts:()=>fontConsent(),'move-menu':()=>eoDesktop.moveMenu().catch(fail),close:()=>info?.capture?returnHome():eoDesktop.closeTab().catch(fail),home:()=>returnHome(),cancel:()=>abort?.abort()}[action]||(()=>{}))();}
@@ -263,7 +263,7 @@ async function open(selected) {
              frame.AscCommon.History.ForceSave=true;main.api.SetDocumentModified(true);
             }
             await updateDirty();backstage=await EODesktopBackstage(frame,main,info,desktopAction);
-            compactChrome=EOCompactChrome.create({win:frame,main,bridge:eoDesktop,isBusy:()=>opening||operationBusy||choosingSaveAs||closeCheck});compactChrome.configure(compactMode);
+            compactChrome=EOCompactChrome.create({win:frame,main,bridge:eoDesktop,isBusy:()=>opening||operationBusy||choosingSaveAs||closeCheck});compactChrome.configure(compactMode);await applyQuickAccess(true);
             frame.requestAnimationFrame(()=>frame.requestAnimationFrame(()=>openPerformance('first-paint',performance.now()-timings.contentReady)));
             // Report readiness only after the native file actions have been installed.
             window.EOLocalSession={controller,format,stats,api:main.api,file,win:frame,timings,editableMs:performance.now()};
@@ -280,7 +280,7 @@ async function open(selected) {
         },onError:event=>reject(Error(event.data?.errorDescription||'Local editor failed'))}
       });
     });
-  } catch(error){openingOperation?.fail(error);compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;await refreshHome();fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;openingOperation=null;buttons(false);recent().catch(fail)}
+  } catch(error){openingOperation?.fail(error);compactChrome?.dispose();compactChrome=null;pdfCompatibility?.dispose();pdfCompatibility=null;controller?.dispose();controller=null;feedback?.dispose();feedback=null;lastOperation=null;lastRecovery=null;editor?.destroyEditor();editor=null;file=null;frame=null;main=null;window.EOLocalSession=null;$('workspace').hidden=true;$('home').hidden=false;await refreshHome();fail(error)}finally{abort.signal.removeEventListener('abort',cancelPreparation);cancelPreparation();opening=false;openingOperation=null;buttons(false);recent().catch(fail)}
 }
 window.addEventListener('eo:backstage-visibility',event=>feedback?.obscure(event.detail));
 window.addEventListener('eo:saved-open',event=>run(()=>eoDesktop.savedOpen(event.detail)));
@@ -414,13 +414,35 @@ async function pdf(print=false,ticket,printOptions){
 
   }catch(error){operation?.fail(error);fail(error,!print)}finally{buttons(false);if(openAfter)setTimeout(()=>{feedback?.dismiss();run(()=>eoDesktop.savedOpen(openAfter))},0)}
 }
+let lastRecovery=null;
+// The editor's undo history tells whether the document changed since the last recovery copy: the same current
+// history point at the same position means no edit, undo or redo happened. A .docx snapshot cannot be compared
+// by bytes because it carries a new modification date each time. A copy is still refreshed every 10 minutes.
+const RECOVERY_REFRESH_MS=10*60*1000;
+function historyMark(win){
+ try{const h=win?.AscCommon?.History;if(!h||!Array.isArray(h.Points)||typeof h.Index!=='number')return null;return {point:h.Points[h.Index]||null,index:h.Index,length:h.Points.length};}catch{return null}
+}
+function recoveryUnchanged(last,token,version,mark,now){
+ return !!(last&&mark&&last.mark&&last.token===token&&last.version===version&&last.mark.point===mark.point&&last.mark.index===mark.index&&last.mark.length===mark.length&&now-last.at<RECOVERY_REFRESH_MS);
+}
+async function recoveryDigest(snap){
+ const view=part=>typeof part==='string'?new TextEncoder().encode(part):ArrayBuffer.isView(part)?new Uint8Array(part.buffer,part.byteOffset,part.byteLength):new Uint8Array(part||0);
+ const parts=[snap.format||'',snap.bytes];for(const resource of snap.resources||[])parts.push(resource.path||'',resource.bytes);
+ const views=parts.map(view),data=new Uint8Array(views.reduce((size,bytes)=>size+8+bytes.length,0)),lengths=new DataView(data.buffer);let offset=0;
+ for(const bytes of views){lengths.setFloat64(offset,bytes.length);data.set(bytes,offset+8);offset+=8+bytes.length;}
+ const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+}
 async function recoveryCopy(){
  if(!controller||file?.format==='pdf'||opening||operationBusy||choosingSaveAs||recoveryBusy||closeCheck||info.capture||controller.isRecoveryLocked?.()||!controller.isModified())return;
  recoveryBusy=true;const selected=file,local=controller,editorWindow=frame,version=file.recoveryVersion||0;
  try{
+  const mark=historyMark(editorWindow);
+  if(recoveryUnchanged(lastRecovery,selected.token,version,mark,Date.now()))return;
   const snap=await local.snapshot();
+  const digest=await recoveryDigest(snap);
+  if(lastRecovery&&lastRecovery.token===selected.token&&lastRecovery.version===version&&lastRecovery.digest===digest){lastRecovery.mark=mark;return;}
   const result=selected.format==='pdf'?snap.bytes:await editorWindow.EOWasmConvert.convert(snap.bytes,snap.format,selected.format,{resources:snap.resources});
-  if(controller===local&&file===selected)await eoDesktop.recoverySave(selected.token,version,result);
+  if(controller===local&&file===selected){await eoDesktop.recoverySave(selected.token,version,result);lastRecovery={token:selected.token,version,digest,mark,at:Date.now()};}
  }catch(error){await eoDesktop.recoveryFailure().catch(()=>{});if(!recoveryNotified){recoveryNotified=true;status(t('recoveryFailed'));}}finally{recoveryBusy=false}
 }
 function scheduleRecovery(){
@@ -431,6 +453,16 @@ function scheduleRecovery(){
  };
  schedule().catch(fail);
  window.addEventListener('unload',()=>clearTimeout(timer),{once:true});
+}
+// Show Quick Access Toolbar: the host setting is applied to this document's editor; a change made in the editor (right-click menu) goes back to the host, which saves it and updates every window and tab.
+async function applyQuickAccess(fresh){
+ if(fresh)showQuickAccess=(await eoDesktop.windowOptions()).showQuickAccess!==false;
+ compactChrome?.setQuickAccess(showQuickAccess);
+ try{frame?.ElixirQuickAccess?.set(showQuickAccess,{host:true});}catch{}
+ if(frame&&!frame.EOQuickAccessBound){
+  frame.EOQuickAccessBound=true;
+  frame.addEventListener('elixir:quickaccess',event=>{const visible=event.detail?.visible!==false;showQuickAccess=visible;compactChrome?.setQuickAccess(visible);eoDesktop.windowSettings({showQuickAccess:visible}).catch(fail);});
+ }
 }
 let dialogSerial=0;
 function modal(title){
@@ -486,10 +518,12 @@ async function showOptions(){
  homeNote.id='home-tab-requires-tabs';homeNote.textContent=t('homeTabRequiresTabs');home.setAttribute('aria-describedby',homeNote.id);
  tabs.addEventListener('change',()=>{home.disabled=!tabs.checked;});
  tabsLabel.append(tabs,document.createTextNode(t('openDocumentsInTabs')));homeLabel.append(home,document.createTextNode(t('showHomeTab')));
+ const quickLabel=document.createElement('label'),quick=document.createElement('input');
+ quick.type='checkbox';quick.id='show-quick-access';quick.checked=windowOptions.showQuickAccess!==false;quickLabel.append(quick,document.createTextNode(t('showQuickAccess')));
  const placementLabel=document.createElement('label'),placement=document.createElement('input');
  placement.type='checkbox';placement.id='remember-window-placement';placement.checked=windowOptions.rememberWindowPlacement!==false;
  placementLabel.append(placement,document.createTextNode(t('rememberWindowPlacement')));
- windowGroup.append(placementLabel,tabsLabel,homeLabel,homeNote);
+ windowGroup.append(quickLabel,placementLabel,tabsLabel,homeLabel,homeNote);
  const customFrameLabel=document.createElement('label'),customFrame=document.createElement('input'),customFrameDescription=document.createElement('p'),customFrameNote=document.createElement('p');
  customFrame.type='checkbox';customFrame.id='custom-title-bar';customFrame.checked=windowOptions.customTitleBar;
  customFrame.disabled=!windowOptions.customTitleBarAvailable&&!customFrame.checked;
@@ -528,7 +562,7 @@ async function showOptions(){
  displayLanguage.addEventListener('change',refreshRestart);gpu.addEventListener('change',refreshRestart);refreshRestart();
  async function saveOptions(restart=false){
   if(savingOptions)return;savingOptions=true;saveButton.disabled=true;restartButton.disabled=true;
-  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked,rememberWindowPlacement:placement.checked,hardwareAcceleration:gpu.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
+  try{await eoDesktop.releaseSettings({enabled:releaseEnabled.checked,automatic:automatic.checked});await eoDesktop.windowSettings({showQuickAccess:quick.checked,customTitleBar:customFrame.checked,openInTabs:tabs.checked,showHomeTab:home.checked,rememberWindowPlacement:placement.checked,hardwareAcceleration:gpu.checked});await eoDesktop.recoverySettings({enabled:enabled.checked,seconds:Number(interval.value)});const name=await eoDesktop.authorSave(author.value);if(main?.api){main.api.User?.setUserName(name);main.api.DocInfo?.get_UserInfo()?.put_FullName(name);frame.AscCommon.UserInfoParser.setCurrentName(name);if(main.appOptions.user)main.appOptions.user.fullname=name;if(main.editorConfig.user)main.editorConfig.user.name=name;(frame.DE||frame.SSE||frame.PE||frame.PDFE).getController('Viewport').getView('Common.Views.Header')?.setUserName(frame.AscCommon.UserInfoParser.getParsedName(name));}await eoDesktop.interfaceSizeSet(Number(interfaceSelect.value));await eoDesktop.languageSettings(displayLanguage.value);box.close();if(restart)await eoDesktop.restart();}
   finally{savingOptions=false;saveButton.disabled=false;restartButton.disabled=false;}
  }
  const saveButton=modalButton(actions,t('save'),()=>saveOptions());
@@ -598,6 +632,7 @@ document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includ
 document.addEventListener('dragleave',()=>document.body.classList.remove('drag'));document.addEventListener('drop',drop,true);
 (async()=>{
  Object.defineProperty(window,'EODocumentId',{value:(await eoDesktop.identity()).documentId});
+ eoDesktop.onQuickAccess(value=>{showQuickAccess=value===true;applyQuickAccess(false).catch(fail)});
  compactMode=(await eoDesktop.chromeMode()).compact===true;eoDesktop.onChromeMode(value=>{compactMode=value?.compact===true;compactChrome?.configure(compactMode)});
  info=await eoDesktop.locale();window.EODesktopStrings=Object.freeze(info.strings);document.documentElement.lang=info.language;document.documentElement.dir=['ar','he','ur'].includes(info.language)?'rtl':'ltr';
  releaseBanner=EOReleaseBanner.create({document,bridge:eoDesktop,t});

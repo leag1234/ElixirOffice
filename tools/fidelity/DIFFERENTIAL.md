@@ -5,6 +5,12 @@ reference. It opens a temporary input copy in the packaged desktop, waits for
 editor/font readiness and exports through the actual Wasm PDF writer. It uses
 an owned display/profile, never a running desktop session or hosted instance.
 
+The renderer exports the PDF only after the layout is stable: the page count is
+unchanged and no recalculation, long action or page calculation is pending for
+12 consecutive polls of 250 ms (`layout-stable.cjs`), within a 180-second limit.
+Exporting while the editor is still paginating gave truncated documents and
+scores that varied between runs.
+
 The output is an exploratory diagnostic, **not a percentage of compatibility
 with Microsoft Office**. Word desktop/web, Excel and PowerPoint PDF references
 must be supplied separately with their application/build, font environment and

@@ -57,6 +57,35 @@ Excel references) before it is integrated.
 
 ## Security check before each release
 
+### 2026-11-19 (desktop 0.9.3, published 2026-11-19)
+
+- Release with the fixes and changes listed in the changelog since 0.9.2; the DocumentServer pins carry the editor and
+  converter changes (sdkjs, web-apps; core unchanged).
+- Dependency scan (OSV, nightly) of 2026-11-19: 15 findings new since 2026-11-18 (932 findings against 923, 6 left the
+  database), all libtiff entries (CVE-2023-3164, CVE-2023-40745, CVE-2023-41175, CVE-2023-52355, CVE-2023-52356,
+  CVE-2024-13978, CVE-2025-8176, CVE-2025-8851, CVE-2025-9900, CVE-2025-61143 to CVE-2025-61145, CVE-2026-4775,
+  CVE-2026-52491, CVE-2026-52492) in the libtiff copy under openjpeg-2.4.0/thirdparty. That folder only serves the openjpeg
+  command-line tools and is not compiled (the converter builds lib/openjp2 only), so the product is not affected. The shipped
+  high finding (request-filtering-agent 1.0.5 in the server) stays reviewed as not affected. The vendored C/C++ check of
+  2026-11-19 is unchanged (xpdf 4.03, dcraw 8.93, V8 8.9, ICU 74.2, HarfBuzz stay on the plan).
+- Electron stays at 44.11.3 (Chromium 152.0.7977.169). Electron 44.11.4 and 44.11.5 now exist; 44.11.4 updates the embedded
+  Node.js to 24.22.3 (security release of 2026-11-10), the other changes in both are fixes unrelated to document
+  rendering. Changing the Electron version also changes the runtime that the signed update policy is qualified for, so
+  it is a separate change that needs its own qualification and is not taken in this release. Documents open in a
+  sandboxed renderer with Node integration off.
+- npm audit of desktop/package-lock.json: production dependencies 0 findings; the full tree has the same 8 findings as for
+  0.9.2 (1 high, 7 moderate), all in build tools (undici, minimatch, fast-uri, electron-builder and helpers); they run on
+  the build machine only and are not part of the packaged application. The advisory GHSA-fc5q-39xc-vjpf (picomatch,
+  4.0.7 in the lock file, a development-only dependency pulled in by tinyglobby) is not part of the packaged application.
+- New code in this release (all in the sandboxed renderer unless noted): the spreadsheet Print entry and the printer list
+  of the print page; the OpenDocument reader and writer fixes; the East Asian document grid and line height tables;
+  Word character styles; per-family document icons; the macOS secondary click mapping; the tab throttle for idle
+  documents; AutoRecover skipping unchanged documents; the Quick Access Toolbar option. In the main process: the Linux
+  start check that no longer enables speech-dispatcher without its daemon, and the AI connection, which now accepts plain
+  HTTP only for private-network host names and addresses (with a warning in the settings) and also trusts the certificate
+  authorities of the operating system; certificate verification is never switched off, and public hosts still need HTTPS.
+  No other new network access or file access.
+
 ### 2026-11-17 (desktop 0.9.2, published 2026-11-17)
 
 - Corrective release on top of 0.9.1 with two product-only fixes; the DocumentServer pins and the engine are unchanged.

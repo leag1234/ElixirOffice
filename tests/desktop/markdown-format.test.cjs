@@ -13,6 +13,6 @@ test('renderer accepts Markdown drops and package associations register both ext
  assert.match(renderer,/\\\.\(docx\|doc\|odt\|rtf\|txt\|md\|markdown\|/);
  const pkg=JSON.parse(await fs.readFile(path.join(__dirname,'../../desktop/package.json'),'utf8'));
  const association=pkg.build.fileAssociations.find(item=>item.ext.includes('md'));
- assert.deepEqual(association,{ext:['md','markdown'],name:'Markdown document',role:'Editor'});
+ assert.deepEqual(association,{ext:['md','markdown'],name:'Markdown document',role:'Editor',icon:'build/doc-icons/eo-doc-markdown'});
  assert(pkg.build.linux.desktop.entry.MimeType.includes('text/markdown'));
 });

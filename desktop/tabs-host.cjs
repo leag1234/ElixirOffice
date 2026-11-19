@@ -132,7 +132,7 @@ function createTabHost({BrowserWindow,WebContentsView,ipcMain,registry,session,r
    const previous=owner.window,previousFrame=owner.frame,placement=placementOf(previous,initialPlacement),activeId=owner.activeId;
    const documents=registry.documents(owner.id),moving=new Map(documents.map(document=>[document,document.state.moving===true])),detached=[];
    let replacement,swapped=false;
-   owner.replacingFrame=true;for(const document of documents)document.state.moving=true;
+   owner.replacingFrame=true;for(const document of documents)document.state.moving=true;registry.syncThrottle(owner.id);
    try{
     replacement=construct(policy({platform,customTitleBar:false}),placement,true);bindWindow(owner,replacement);
     for(const document of documents){previous.contentView.removeChildView(document.view);detached.push(document);replacement.contentView.addChildView(document.view);}

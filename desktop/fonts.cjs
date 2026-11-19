@@ -38,6 +38,23 @@ function names(bytes, offset) {
   }
   return {family,style,fullName:result[4]||family+' '+style,postscriptName:result[6]||family.replace(/\s/g,'')+'-'+style,aliases};
 }
+// Word symbol fonts store their glyphs under a (3,0) "symbol" cmap (U+F020-U+F0FF, e.g. the U+F0B7 bullet).
+// A font with the same family name but no such cmap (macOS ships a Unicode-only "Symbol") cannot draw them:
+// registering it would hide the substitute that maps those characters, and bullets would show as empty boxes.
+const SYMBOL_FAMILIES=new Set(['symbol','wingdings','wingdings 2','wingdings 3','webdings']);
+function hasSymbolCmap(bytes, offset) {
+  const count=bytes.readUInt16BE(offset+4); let table;
+  if (count > 256 || offset+12+count*16 > bytes.length) return false;
+  for(let i=0;i<count;i++) { const at=offset+12+i*16; if(bytes.toString('ascii',at,at+4)==='cmap')table=bytes.readUInt32BE(at+8); }
+  if (table === undefined || table+4 > bytes.length) return false;
+  const subtables=bytes.readUInt16BE(table+2);
+  if (subtables > 256 || table+4+subtables*8 > bytes.length) return false;
+  for(let i=0;i<subtables;i++) { const at=table+4+i*8; if(bytes.readUInt16BE(at)===3&&bytes.readUInt16BE(at+2)===0)return true; }
+  return false;
+}
+function unusableSymbolFace(face, bytes, offset) {
+  return !!face && SYMBOL_FAMILIES.has(String(face.family).toLowerCase()) && !hasSymbolCmap(bytes, offset);
+}
 function fontPath(filename){
   const resolved=path.resolve(filename);
   return process.platform==='win32'?path.toNamespacedPath(resolved).toLowerCase():resolved;
@@ -132,7 +149,7 @@ class Fonts {
           const offsets=bytes.toString('ascii',0,4)==='ttcf'?Array.from({length:Math.min(bytes.readUInt32BE(8),64)},(_,i)=>bytes.readUInt32BE(12+i*4)):[0];
           for(const offset of offsets) {
             if(next.size>=5000)break;
-            try{const face=names(bytes,offset);if(face){const prior=previous.get(real+'|'+offset),id=prior?.hash===identity.hash?prior.id:crypto.randomUUID();next.set(id,{real,offset,identity});found.push({...face,id});}}
+            try{const face=names(bytes,offset);if(face&&!unusableSymbolFace(face,bytes,offset)){const prior=previous.get(real+'|'+offset),id=prior?.hash===identity.hash?prior.id:crypto.randomUUID();next.set(id,{real,offset,identity});found.push({...face,id});}}
             catch(error){await this.report(error)}
           }
         } catch(error) { await this.report(error); }
@@ -234,4 +251,4 @@ async function canonicalRoots(allowed,report=()=>{}) {
   }
   return result;
 }
-module.exports={Fonts,names,roots,canonicalRoots,fontPath,inside};
+module.exports={Fonts,names,roots,canonicalRoots,fontPath,inside,hasSymbolCmap,unusableSymbolFace};

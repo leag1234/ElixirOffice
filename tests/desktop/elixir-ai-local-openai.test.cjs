@@ -55,6 +55,43 @@ test('named tool_choice 400 retries once as required with only that tool', async
   assert.deepEqual(requests[1].tools.map(t => t.function.name), ['submit_plan']);
 });
 
+test('LM Studio plain-string tool_choice rejection is retried as required (issue 68 regression)', async () => {
+  const requests = [];
+  const AI = load(async (url, init) => {
+    requests.push(JSON.parse(init.body));
+    if (requests.length === 1) return response({error: "Invalid tool_choice type: 'object'. Supported string values: none, auto, required"}, {status: 400});
+    return response({choices: [{message: {role: 'assistant', content: '', reasoning_content: '<tool_call>\n{"name":"submit_plan","arguments":{"goal":"x"}}\n</tool_call>'}, finish_reason: 'stop'}]});
+  });
+  const result = await AI.Connector.chat({settings, messages: [], tools: [{type: 'function', function: {name: 'submit_plan'}}, {type: 'function', function: {name: 'other'}}], toolChoice: {type: 'function', function: {name: 'submit_plan'}}});
+  assert.equal(requests.length, 2);
+  assert.equal(requests[1].tool_choice, 'required');
+  assert.equal(result.message.tool_calls[0].function.name, 'submit_plan');
+});
+
+test('an endpoint without /v1 answering HTTP 200 "Unexpected endpoint" gives the /v1 hint (issue 68 regression)', async () => {
+  const AI = load(async () => response({error: 'Unexpected endpoint or method. (POST /chat/completions)'}));
+  await assert.rejects(AI.Connector.chat({settings: {...settings, endpoint: 'http://localhost:1234'}, messages: []}), /must end with \/v1/);
+});
+
+test('an untrusted certificate reported by the desktop process explains how to fix it', async () => {
+  const AI = load(async () => { throw new Error("Error invoking remote method 'eo:ai-request': Error: AI certificate not trusted"); });
+  await assert.rejects(AI.Connector.chat({settings: {...settings, endpoint: 'https://gemma.lan/v1'}, messages: []}), /certificate authority in your operating system/);
+  AI.Strings = {fr: {certUntrusted: 'Certificat non approuvé.'}};
+  AI.getLang = () => 'fr';
+  await assert.rejects(AI.Connector.chat({settings: {...settings, endpoint: 'https://gemma.lan/v1'}, messages: []}), /Certificat non approuvé/);
+});
+
+test('private-network HTTP endpoints get the long local-model time limits in the desktop app', async () => {
+  const timers = new Map(), delays = [], set = timers.set.bind(timers);
+  timers.set = (id, value) => { delays.push(value.delay); return set(id, value); };
+  const AI = load(async () => response({choices: [{message: {role: 'assistant', content: 'ok'}, finish_reason: 'stop'}]}), timers);
+  await AI.Connector.chat({settings: {...settings, endpoint: 'http://10.168.0.22:11434/v1'}, messages: []});
+  assert(delays.includes(20 * 60 * 1000), JSON.stringify(delays));
+  delays.length = 0;
+  await AI.Connector.chat({settings: {...settings, endpoint: 'https://api.example.org/v1'}, messages: []});
+  assert(delays.includes(5 * 60 * 1000) && !delays.includes(20 * 60 * 1000), JSON.stringify(delays));
+});
+
 test('parses Qwen XML tool blocks only when tool_calls is empty', async () => {
   const AI = load(async () => response({choices: [{message: {role: 'assistant', content: '<function=replace_text><parameter=text>hi</parameter></function>'}}]}));
   const one = await AI.Connector.chat({settings, messages: []});

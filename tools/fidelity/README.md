@@ -193,3 +193,7 @@ and self-reference smoke results are not Word-equivalence claims.
 DOCX export with delegated Files.Read, a protected token cache and verified
 resume. The agent does not log in or upload. Graph/cloud outputs have a distinct
 reference source; an owner pilot and separate Word-web UI controls are required.
+
+## OpenDocument (.odt, .ods, .odp)
+
+`odf-roundtrip.sh` measures what a Save loses in OpenDocument files (corpus generator, desktop round trip, LibreOffice rendering, loss table). See [ODF-ROUNDTRIP.md](ODF-ROUNDTRIP.md) and [docs/opendocument.md](../../docs/opendocument.md).

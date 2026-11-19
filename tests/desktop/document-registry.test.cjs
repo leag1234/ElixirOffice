@@ -119,3 +119,49 @@ test('sixteen-document cap is global across windows and removing a tab releases 
  registry.registerDocument(owner.id,view());
  assert.equal(registry.documents(owner.id).length+registry.documents(other.id).length,16);
 });
+function throttleFixture(){
+ const registry=new DocumentRegistry({documentURL,shellURL});
+ const owner=registry.registerWindow({webContents:contents(shellURL)});
+ const view=()=>{const v={webContents:contents(documentURL),setVisible(value){this.visible=value;}};v.webContents.calls=[];v.webContents.setBackgroundThrottling=function(value){this.calls.push(value);};return v;};
+ const make=name=>{const d=registry.registerDocument(owner.id,view(),{name,state:{busy:false,moving:false,closePending:false}});registry.status(d.id,"ready");return d;};
+ return {registry,owner,a:make("A"),b:make("B"),make};
+}
+test("idle inactive tabs are throttled and the active tab never is",()=>{
+ const {registry,a,b}=throttleFixture();
+ registry.activate(a.id);assert.equal(a.throttled,false);assert.equal(b.throttled,true);assert.deepEqual(b.contents.calls,[true]);
+ registry.activate(b.id);assert.equal(b.throttled,false);assert.equal(a.throttled,true);assert.deepEqual(b.contents.calls,[true,false]);
+});
+test("a busy or closing inactive tab stays unthrottled until the operation ends",()=>{
+ const {registry,a,b}=throttleFixture();registry.activate(a.id);assert.equal(b.throttled,true);
+ b.state.busy=true;registry.syncThrottle(b);assert.equal(b.throttled,false);
+ b.state.busy=false;registry.changed(b.windowId);assert.equal(b.throttled,true);
+ for(const flag of ["moving","closePending"]){b.state[flag]=true;registry.syncThrottle(b);assert.equal(b.throttled,false,flag);b.state[flag]=false;registry.syncThrottle(b);assert.equal(b.throttled,true);}
+ b.closing=true;registry.syncThrottle(b);assert.equal(b.throttled,false);b.closing=false;registry.syncThrottle(b);
+ registry.window(b.windowId).closeAllPending=true;registry.syncThrottle(b.windowId);assert.equal(b.throttled,false);
+});
+test("tabs that are not ready yet are not throttled",()=>{
+ const {registry,owner,a,make}=throttleFixture();registry.activate(a.id);
+ const c=registry.registerDocument(owner.id,{webContents:Object.assign(contents(documentURL),{calls:[],setBackgroundThrottling(v){this.calls.push(v);}}),setVisible(){}},{state:{}});
+ registry.changed(owner.id);assert.equal(c.throttled,false);registry.status(c.id,"ready");assert.equal(c.throttled,true);
+});
+test("moving a tab to another window unthrottles it and rebalances the source window",()=>{
+ const {registry,a,b,owner}=throttleFixture(),other=registry.registerWindow({webContents:contents(shellURL+"?2")});
+ registry.activate(a.id);assert.equal(b.throttled,true);
+ registry.move(b.id,other.id);registry.activate(b.id);
+ assert.equal(b.throttled,false);assert.equal(a.throttled,false);
+ const c=registry.registerDocument(other.id,{webContents:Object.assign(contents(documentURL),{setBackgroundThrottling(){}}),setVisible(){}},{state:{}});registry.status(c.id,"ready");
+ assert.equal(c.throttled,true);registry.remove(b.id);assert.equal(registry.active(owner.id),a);
+});
+test("closing a tab leaves the remaining state consistent",()=>{
+ const {registry,owner,a,b}=throttleFixture();registry.activate(a.id);registry.remove(a.id);registry.activate(b.id);
+ assert.equal(b.throttled,false);assert.equal(registry.active(owner.id),b);
+});
+test("ELIXIROFFICE_NO_TAB_THROTTLE=1 keeps every tab unthrottled",()=>{
+ process.env.ELIXIROFFICE_NO_TAB_THROTTLE="1";
+ try{const {registry,a,b}=throttleFixture();registry.activate(a.id);assert.equal(b.throttled,false);assert.deepEqual(b.contents.calls,[]);}
+ finally{delete process.env.ELIXIROFFICE_NO_TAB_THROTTLE;}
+});
+test("operation() in main unthrottles before work starts",()=>{
+ const source=require("node:fs").readFileSync(require("node:path").join(__dirname,"../../desktop/main.cjs"),"utf8");
+ assert.match(source,/state\.busy=true;registry\.syncThrottle\(document\);try\{const result=await run\(\)/);
+});

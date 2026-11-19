@@ -9,7 +9,7 @@ function inventory(source){
  const out={};
  function walk(folder,nested=false){
   for(const entry of fs.readdirSync(path.join(source,folder),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name,'en'))){
-   if(!nested&&['assets','node_modules','dist','mac-licenses','build-info.json'].includes(entry.name))continue;
+   if(!nested&&['assets','build','node_modules','dist','mac-licenses','build-info.json'].includes(entry.name))continue;
    const name=folder+'/'+entry.name;
    // Select public source formats before any open/stat through a candidate.
    // Never consume environment files, npm credentials, keys or build caches.

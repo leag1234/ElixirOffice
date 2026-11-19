@@ -182,7 +182,7 @@ def main():
         raise ValueError("Manifest contains no cases")
     atomic_json(output / "manifest-identity.json", {"sha256": manifest_sha, "expected": expected})
     aggregate([], output, expected, "running")
-    own_sources = [HERE / name for name in ("differential.py", "differential-batch.py", "render-desktop.cjs")]
+    own_sources = [HERE / name for name in ("differential.py", "differential-batch.py", "render-desktop.cjs", "layout-stable.cjs")]
     own_sources += [HERE.parent.parent / "tests/desktop" / name for name in ("harness.cjs", "document-pages.cjs", "observe-browser.cjs")]
     identity = {"tools": {p.name: sha256(p) for p in own_sources},
                 "python": sys.version, "dpi": args.dpi, "maxPages": args.max_pages,

@@ -44,7 +44,7 @@ async function load(file,identity){
    if(position!==bytes.length||signature(await handle.stat())!==signature(before))return null;
   }finally{await handle.close();}
   const value=JSON.parse(bytes.toString('utf8'));
-  if(!plain(value)||value.version!==4||value.bundleIdentity!==identity||!plain(value.records)||
+  if(!plain(value)||value.version!==5||value.bundleIdentity!==identity||!plain(value.records)||
      value.complete!==undefined&&typeof value.complete!=='boolean')return null;
   if(!Object.entries(value.records).every(([key,record])=>/^(system|bundled):/.test(key)&&validRecord(record)))return null;
   return value;

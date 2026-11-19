@@ -3,15 +3,16 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),cp=require('node:child_process');
 const upstream=process.env.EO_UPSTREAM;if(!upstream)throw Error('EO_UPSTREAM is required');
 const script=path.join(upstream,'build/scripts/standalone/elixir-ai-conf.sh');
-function core(){
+function core(desktop){
  const store=new Map(),requests=[];let ai;
  const fetch=async(url,options)=>{requests.push({url,options});return{ok:true,status:200,headers:{get:()=> 'application/json'},json:async()=>({choices:[{message:{content:'public reply'},finish_reason:'stop'}]})}};
  const window={localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},fetch};
+ if(desktop){window.eoDesktopAI={configured:()=>true,get:()=>({}),configure:async value=>{desktop.saved.push(value);return true}}}
  vm.runInNewContext(fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-ai/Core.js'),'utf8'),{window,define:(_deps,f)=>{ai=f()},URL,fetch,performance,AbortController,TextDecoder,setTimeout,clearTimeout,console});
  return{ai,store,requests};
 }
-const allowed=['http://LOCALHOST:11434/v1','http://localhost:00080/v1','http://[::1]/v1','https://[2001:db8::1]:8443/v1','https://api.example.org/v1','https://192.0.2.10:8443/v1','http://localhost:11434/v1','http://127.0.0.1:11434/v1','http://[::1]:11434/v1'];
-const denied=['https://@example.org/v1','https://example.org:/v1','http://localhost.localdomain/v1','http://127.0.0.2/v1','https://[:::]/v1','https://example.org:0/v1','http://localhost:0/v1','http://api.example.org/v1','http://192.0.2.10:11434/v1','http://100.64.1.2:11434/v1','http://localhost.example.org/v1','http://127.0.0.1.example.org/v1','http://127.1/v1','http://2130706433/v1','http://0177.0.0.1/v1','http://%6cocalhost/v1','http://[0:0:0:0:0:0:0:1]/v1','https://user:pass@example.org/v1','http://localhost@remote.example/v1','//remote.example/v1','http://localhost:65536/v1','http://localhost:notaport/v1','https://example.org/v1?query=value','https://example.org/v1#fragment','https://example.org\\@remote.example/v1'];
+const allowed=['http://LOCALHOST:11434/v1','http://localhost:00080/v1','http://[::1]/v1','https://[2001:db8::1]:8443/v1','https://api.example.org/v1','https://10.168.0.22:8443/v1','http://localhost:11434/v1','http://127.0.0.1:11434/v1','http://[::1]:11434/v1'];
+const denied=['https://@example.org/v1','https://example.org:/v1','http://localhost.localdomain/v1','http://127.0.0.2/v1','https://[:::]/v1','https://example.org:0/v1','http://localhost:0/v1','http://api.example.org/v1','http://10.168.0.22:11434/v1','http://100.64.1.2:11434/v1','http://localhost.example.org/v1','http://127.0.0.1.example.org/v1','http://127.1/v1','http://2130706433/v1','http://0177.0.0.1/v1','http://%6cocalhost/v1','http://[0:0:0:0:0:0:0:1]/v1','https://user:pass@example.org/v1','http://localhost@remote.example/v1','//remote.example/v1','http://localhost:65536/v1','http://localhost:notaport/v1','https://example.org/v1?query=value','https://example.org/v1#fragment','https://example.org\\@remote.example/v1'];
 for(const endpoint of allowed)test('web settings accept '+endpoint,()=>{const {ai}=core();assert.equal(ai.Settings.isConfigured({endpoint,model:'public-model'}),true)});
 for(const endpoint of denied)test('web rejects '+endpoint+' before persistence and transport',async()=>{
  const {ai,store,requests}=core(),settings={endpoint,model:'public-model'};
@@ -19,6 +20,32 @@ for(const endpoint of denied)test('web rejects '+endpoint+' before persistence a
  assert.equal(await ai.Settings.save(settings),false);assert.equal(store.size,0);
  await assert.rejects(ai.Connector.chat({settings,messages:[{role:'user',content:'public probe'}]}));
  assert.equal(requests.length,0);
+});
+const lanAllowed=['http://10.0.0.5:11434/v1','http://172.16.0.1/v1','http://172.31.255.254:1234/v1','http://10.168.0.22:11434/v1','http://169.254.10.20/v1','http://gemma.lan/v1','http://GEMMA.LAN:11434/v1','http://my-box.local:1234/v1','http://nas.home.arpa/v1','http://[fd12:3456::1]:11434/v1','http://[fe80::1]/v1'];
+const lanDenied=['http://172.15.0.1/v1','http://172.32.0.1/v1','http://192.169.0.1/v1','http://8.8.8.8/v1','http://100.64.1.2:11434/v1','http://example.org/v1','http://lan/v1','http://gemma/v1','http://gemma.lan.example.org/v1','http://gemma.lan./v1','http://010.0.0.1/v1','http://10.168.00.1/v1','http://10.168.0.256/v1','http://3232235521/v1','http://192.168.1/v1','http://[2001:db8::1]/v1','http://[::ffff:10.168.0.1]/v1','http://gemma.lan@evil.example/v1','http://10.168.0.22@evil.example/v1','http://user:pw@10.168.0.22/v1','http://10.168.0.22:0/v1','http://10.168.0.22/v1?x=1','http://10.168.0.22/v1#x','http://%67emma.lan/v1','http://10.168.0.22:/v1'];
+for(const endpoint of lanAllowed)test('desktop settings accept plain HTTP on a private network: '+endpoint,async()=>{
+ const desktop={saved:[]},{ai}=core(desktop);assert.equal(ai.Settings.endpointAllowed(endpoint,false),true);
+ assert.equal(await ai.Settings.save({endpoint,model:'m'}),true);assert.equal(desktop.saved.length,1);assert.equal(ai.isInsecureLanEndpoint(endpoint),true);
+ const web=core().ai;assert.equal(web.Settings.endpointAllowed(endpoint,false),false);assert.equal(web.Settings.isConfigured({endpoint,model:'m'}),false);
+});
+for(const endpoint of lanDenied)test('desktop settings still refuse plain HTTP to '+endpoint,async()=>{
+ const desktop={saved:[]},{ai}=core(desktop);assert.equal(ai.Settings.endpointAllowed(endpoint,false),false);
+ assert.equal(await ai.Settings.save({endpoint,model:'m'}),false);assert.equal(desktop.saved.length,0);
+});
+test('the insecure-network warning applies only to plain HTTP on another machine of a private network',()=>{
+ const {ai}=core({saved:[]});
+ for(const endpoint of ['http://localhost:11434/v1','http://127.0.0.1:11434/v1','http://[::1]:11434/v1','https://gemma.lan/v1','https://10.168.0.22/v1','https://api.example.org/v1','http://example.org/v1',''])assert.equal(ai.isInsecureLanEndpoint(endpoint),false,endpoint);
+ assert.equal(ai.isInsecureLanEndpoint('http://10.168.0.22:11434/v1'),true);
+});
+test('the plain-HTTP warning exists in every interface language table and says the connection is not encrypted',()=>{
+ const {ai}=core(),window={Common:{ElixirAI:ai}};
+ vm.runInNewContext(fs.readFileSync(path.join(upstream,'web-apps/apps/common/main/lib/elixir-ai/Strings.js'),'utf8'),{window,define:(_deps,f)=>f()});
+ const tables=Object.keys(ai.Strings);assert(tables.length>=12);
+ for(const name of tables)assert.equal(typeof ai.Strings[name].lanHttp,'string',name);
+ assert.equal(ai.Strings.en.lanHttp,'This connection is not encrypted. Use it only on a network you trust.');
+ const extra=JSON.parse(fs.readFileSync(path.join(__dirname,'../../tools/desktop/i18n-extra.json'),'utf8'));
+ assert.equal(Object.keys(extra).length,45);for(const [language,strings] of Object.entries(extra))assert(strings.aiPrivateHttp&&strings.aiPrivateHttp.trim(),language);
+ assert.equal(extra.en.aiPrivateHttp,ai.Strings.en.lanHttp);
 });
 test('only the exact managed same-origin proxy is accepted',()=>{
  const {ai}=core();assert.equal(ai.Settings.isConfigured({managed:true,endpoint:'/elixir-ai/v1',model:'public-model'}),true);
@@ -55,7 +82,7 @@ test('administrator connectivity check rejects remote HTTP before invoking curl'
  try{
   const marker=path.join(directory,'called');
   fs.writeFileSync(path.join(directory,'curl'),'#!/bin/sh\n: > "$EO_POLICY_CURL_MARKER"\nprintf 200\n',{mode:0o700});
-  for(const endpoint of ['http://192.0.2.10:11434/v1','http://100.64.1.2:11434/v1','http://localhost.example.org/v1']){
+  for(const endpoint of ['http://10.168.0.22:11434/v1','http://100.64.1.2:11434/v1','http://localhost.example.org/v1']){
    fs.rmSync(marker,{force:true});
    const result=cp.spawnSync('/bin/bash',[path.join(__dirname,'../../tools/ai-proxy/check.sh'),'http://127.0.0.1:1'],{encoding:'utf8',env:{PATH:directory+':'+process.env.PATH,ELIXIR_AI_ENV:'/dev/null',ELIXIR_AI_BASE_URL:endpoint,ELIXIR_AI_MODEL:'public-model',EO_POLICY_CURL_MARKER:marker}});
    assert.equal(result.status,1);assert.equal(fs.existsSync(marker),false,endpoint);assert.match(result.stdout+result.stderr,/HTTPS/);
@@ -69,7 +96,7 @@ test('historical configuration harness exposes a working private HTTPS mock',asy
  const state=await vm.runInNewContext('(async()=>{'+source.slice(start,end)+'\nreturn {mock,tlsMock,tlsDirectory,calls};})()',context);
  try{
   const native=require('../../desktop/ai.cjs'),count=state.calls.length;
-  await assert.rejects(native.request({endpoint:'https://127.0.0.1:'+state.tlsMock.address().port+'/v1',model:'public-model',consented:true},JSON.stringify({model:'public-model',messages:[{role:'user',content:'public TLS probe'}]}),''),/AI endpoint unavailable/);
+  await assert.rejects(native.request({endpoint:'https://127.0.0.1:'+state.tlsMock.address().port+'/v1',model:'public-model',consented:true},JSON.stringify({model:'public-model',messages:[{role:'user',content:'public TLS probe'}]}),''),/AI certificate not trusted/);
   assert.equal(state.calls.length,count,'A rejected certificate must stop before document data reaches the provider');
   for(const [server,transport,tls] of [[state.mock,context.http,false],[state.tlsMock,context.https,true]]){
    const body=JSON.stringify({model:'public-model',messages:[{role:'user',content:'public probe'}]});

@@ -7,12 +7,15 @@ const types={pdf:'com.adobe.pdf',
  doc:'com.microsoft.word.doc',xls:'com.microsoft.excel.xls',ppt:'com.microsoft.powerpoint.ppt',
  rtf:'public.rtf',md:'net.daringfireball.markdown',markdown:'net.daringfireball.markdown',txt:'public.plain-text',csv:'public.comma-separated-values-text',dotx:'org.openxmlformats.wordprocessingml.template',docm:'com.microsoft.word.docm',xltx:'org.openxmlformats.spreadsheetml.template',xlsm:'com.microsoft.excel.xlsm',potx:'org.openxmlformats.presentationml.template',ppsx:'org.openxmlformats.presentationml.slideshow'
 };
+// Per-family document icons (desktop/build/doc-icons): the same mapping as the fileAssociations of desktop/package.json.
+const associations=require('../../desktop/package.json').build.fileAssociations||[];
+const icons=Object.fromEntries(associations.flatMap(entry=>[].concat(entry.ext||[]).map(ext=>[ext,entry.icon?path.basename(entry.icon)+'.icns':null])));
 const unused=['NSCameraUsageDescription','NSMicrophoneUsageDescription','NSBluetoothAlwaysUsageDescription','NSBluetoothPeripheralUsageDescription','NSAppTransportSecurity'];
 function clean(plist,main=false) {
  for(const key of unused)delete plist[key];
  if(main)plist.CFBundleDocumentTypes=Object.entries(types).map(([ext,uti])=>({
   CFBundleTypeExtensions:[ext],CFBundleTypeName:ext.toUpperCase()+' document',CFBundleTypeRole:'Editor',
-  CFBundleTypeIconFile:plist.CFBundleIconFile,LSItemContentTypes:[uti],LSHandlerRank:'Alternate'
+  CFBundleTypeIconFile:icons[ext]||plist.CFBundleIconFile,LSItemContentTypes:[uti],LSHandlerRank:'Alternate'
  }));
  return plist;
 }
@@ -50,6 +53,6 @@ async function afterPack(context) {
  if(needsAdHoc(context))await sealAdHoc(bundle);
 }
 module.exports=afterPack;
-module.exports.types=types;module.exports.unused=unused;module.exports.clean=clean;
+module.exports.types=types;module.exports.icons=icons;module.exports.unused=unused;module.exports.clean=clean;
 
 module.exports.needsAdHoc=needsAdHoc;

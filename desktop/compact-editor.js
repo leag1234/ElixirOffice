@@ -3,7 +3,7 @@
 window.EOCompactChrome=Object.freeze({create({win,main,bridge,isBusy=()=>false}){
  const app=main.getApplication(),viewport=app.getController('Viewport'),header=viewport?.header||viewport?.getView?.('Common.Views.Header');
  const bar=app.getController('ElixirChrome')?.titleBar,doc=win.document,title=doc.getElementById('app-title'),layout=viewport?.viewport?.vlayout;
- let compact=false,disposed=false,last='',saved,observer,searchFrame;
+ let compact=false,disposed=false,last='',saved,observer,searchFrame,quickAccess=true;
  const clean=value=>String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200);
  const node=button=>button?.$el?.[0]||button?.el;
  function control(name){
@@ -13,7 +13,7 @@ window.EOCompactChrome=Object.freeze({create({win,main,bridge,isBusy=()=>false})
    return {visible,enabled:visible&&!button.isDisabled()&&!isBusy(),label:clean(button?.hint||header?.tipSearch||'Search')};
   }
   const button=header?.[{save:'btnSave',undo:'btnUndo',redo:'btnRedo'}[name]],element=node(button);
-  const visible=!!element&&element.nodeType===1&&!element.classList.contains('hidden')&&win.getComputedStyle(element).display!=='none';
+  const visible=quickAccess&&!!element&&element.nodeType===1&&!element.classList.contains('hidden')&&win.getComputedStyle(element).display!=='none';
   return {visible,enabled:visible&&!button.isDisabled()&&!isBusy(),label:clean(button?.hint||header?.[{save:'tipSave',undo:'tipUndo',redo:'tipRedo'}[name]]||name)};
  }
  function attachSearch(){
@@ -29,6 +29,7 @@ window.EOCompactChrome=Object.freeze({create({win,main,bridge,isBusy=()=>false})
   const state=Object.fromEntries(['save','undo','redo','search'].map(name=>[name,control(name)])),key=JSON.stringify(state);
   if(key===last)return;last=key;void bridge.chromeState(state).catch(()=>{last=''});
  }
+ function setQuickAccess(value){quickAccess=value!==false;publish();}
  function layoutChanged(){layout?.doLayout();win.Common?.NotificationCenter?.trigger('layout:changed','header');}
  function configure(value){
   if(disposed)return;
@@ -50,7 +51,7 @@ window.EOCompactChrome=Object.freeze({create({win,main,bridge,isBusy=()=>false})
    }
    compact=false;saved=null;
   }
-  layoutChanged();publish();
+  layoutChanged();win.ElixirQuickAccess?.refresh?.();publish();
  }
  const style=doc.createElement('style');
  // Center the native header logo in its full-height box, independently of inline font metrics.
@@ -59,7 +60,7 @@ window.EOCompactChrome=Object.freeze({create({win,main,bridge,isBusy=()=>false})
  if(header){observer=new win.MutationObserver(publish);const container=doc.getElementById('box-document-title');if(container)observer.observe(container,{attributes:true,subtree:true,childList:true,attributeFilter:['disabled','style','class','title','aria-label']});}
  publish();
  return Object.freeze({
-  configure,refresh:publish,
+  configure,setQuickAccess,refresh:publish,
   perform(name){
    if(disposed||!compact||!['save','undo','redo','search'].includes(name))return false;
    attachSearch();const state=control(name);if(!state.visible||!state.enabled)return false;

@@ -1,5 +1,37 @@
 # Changelog
 
+## Desktop 0.9.3 — published 2026-11-19
+
+- Changed: files now have their own document icons per family (text documents, spreadsheets, presentations, PDF, Markdown), in each module colour, instead of the ElixirOffice application icon, on macOS and Windows.
+- Fix: on macOS, Control+click (secondary click with the trackpad) now opens the context menu in documents, spreadsheets and presentations, like a right click with a mouse (#90).
+- Fix: Word character styles (#91): clicking a character style in the Styles pane or the Apply Styles box now applies it to the selection, or to the word at the cursor, instead of doing nothing; Update to Match Selection works for character styles and no longer turns them into paragraph styles; Create New Style from Formatting can create a character style (Style type); the sample of the style dialog follows the dark document mode.
+- Fix: spreadsheets: Ctrl+P, File > Print and Export as PDF opened the File menu Info page instead of the print / PDF export page, because the Print entry was hidden (#87, #69). Documents and presentations already worked.
+- Fix: the print page of documents and presentations no longer shows "Waiting for printers" forever (#92): it lists the system printers (default first), or shows "Printers not found" when there are none or the print system does not answer.
+- Fix: Linux: no more crash report at every launch when libspeechd is installed without the speech-dispatcher daemon (#89). Read Aloud is only enabled when the daemon is installed or running.
+- Fix: manual line breaks (Shift+Enter) were removed when an .odt file was saved.
+- Fix: headings in an .odt file opened one level too deep and moved down one more level at every save.
+- Fix: links that LibreOffice opens in a new window lost their first character (https:// became #ttps://) when an .odt file was opened.
+- Fix: comments in an .odt file (author, date, text and the commented range) were dropped when the file was saved; they are kept now, and so are comments typed without a text selection.
+- Fix: an .odt file whose text switches page style (a landscape page between portrait pages) opens with the page break and the page size of each page instead of running on one page, and text sections with columns keep their columns when the file is opened and saved.
+- New page: [OpenDocument support](docs/opendocument.md), what is kept, changed or lost when ElixirOffice saves .odt, .ods and .odp files.
+- Fix: spreadsheets and presentations no longer use more and more memory with every edit, undo, redo and paste. A large workbook with a chart could reach 4 GB and crash after about a quarter of an hour of editing.
+- Split view: the mouse now selects text in the lower pane (click, double click for a word, triple click for a paragraph, Shift+click, drag with automatic scrolling), and the selection is shown there.
+- Chinese and Japanese documents: the East Asian document grid (lines and characters per page) is laid out like Word, so pages break where Word breaks them (#39). The grid settings survive open and save.
+- Corrected line heights for MS Gothic, MS Mincho, PMingLiU and Yu fonts when they are substituted.
+- Pictures converted from WMF/EMF drawings: lines are drawn at Word's thickness, finer on screen and visible (0.14 pt) in the PDF export (#61).
+- A picture placed in the paragraph after a text paragraph no longer pushes that paragraph's last line below it (#61).
+- Saving a .docx keeps the compatibility setting for table style font size and justification, so older files keep their table text size in Word (#66).
+- Chinese and Japanese text in a substituted font uses the line height Word uses for the requested font (SimSun, MS Mincho, Microsoft YaHei...), so pages break closer to Word (#39).
+- Performance: document tabs that are not in front and not doing anything now stop running in the background, so many open documents no longer use CPU when idle (about 8 open documents went from 13% to 2% of one CPU core while idle in our Linux test). A tab that is saving, exporting, printing, recovering or being closed is never slowed down. Set ELIXIROFFICE_NO_TAB_THROTTLE=1 to turn this off.
+- Word Pages pane: only the page thumbnails near the visible area are drawn; thumbnails far away free their memory (large documents open the pane faster and use less memory).
+- AutoRecover no longer re-converts and rewrites an unsaved document every minute when nothing changed since its last recovery copy (less CPU and disk use on large documents left open).
+- Fix: on macOS, Word bullets (the standard Symbol bullet) no longer show as empty boxes. macOS has its own Symbol font without the symbol characters Word uses; it is no longer used for them.
+- Fix: in AI settings, Test connection now works before you click Save (it saves the form first); it said the AI was not configured.
+- Local AI on another machine of your network (#43): plain HTTP is now accepted for private-network hosts (192.168.x.x, 10.x.x.x, 172.16-31.x.x, link-local, `*.local`, `*.lan`, `*.home.arpa`), with a clear warning that the connection is not encrypted. Public hosts still need HTTPS.
+- Fix: the AI connection now trusts certificate authorities installed in the operating system (for example a private CA behind Caddy or nginx on your LAN, #43); it only trusted its bundled list and failed with "AI endpoint unavailable". Certificate verification is never switched off, and an untrusted certificate now gets its own message.
+- Local AI servers (Ollama, LM Studio, llama.cpp, #68): re-checked and covered by tests (named tool choice rejected by LM Studio, tool calls written as `<tool_call>` blocks, endpoint without `/v1`), and the new docs section "Local AI" lists the endpoints and the 16K context minimum.
+- New option "Show Quick Access Toolbar" (#81, also for #23 and #64): turn it off to hide the quick access buttons (Save, Undo, Redo, Print, ...) and the AutoSave switch in Word, Excel, PowerPoint and PDF; the title row becomes 8 pixels shorter and keeps the file name, the search box and the account button. Right-click the quick access toolbar or the ribbon tab row (Hide / Show Quick Access Toolbar) or use Options > Window; the choice is saved and applies at once to every open document, window and tab.
+
 ## Desktop 0.9.2 — published 2026-11-17
 
 - Fix: Export as PDF, Save As PDF and Print opened the Info page instead of the print and PDF panel in Word documents on Linux and Windows (#87).

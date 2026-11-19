@@ -66,12 +66,14 @@ process.once('SIGINT',()=>cleanup().finally(()=>process.exit(130)));
    if(warning)throw Error('Computer font bridge reported a failure');
    return{mode,permission,choice:await eoDesktop.fontChoice()};
   },fontMode);
-  await env.page.waitForFunction(()=>{
+  const stableSource=require("node:fs").readFileSync(path.join(__dirname,"layout-stable.cjs"),"utf8");
+  await env.page.waitForFunction(({source,required})=>{
    const w=window.EOLocalSession?.win,e=w?.Asc?.editor;
    if(!e)return false;
-   const l=e.WordControl?.m_oLogicDocument;
-   return !e.isLongAction?.()&&!(l?.FullRecalc?.Id);
-  },null,{timeout:120000});
+   if(!window.__eoStableStep){const m={exports:{}};new Function("module","exports",source)(m,m.exports);window.__eoStableStep=m.exports.step}
+   window.__eoStableState=window.__eoStableStep(e,window.__eoStableState);
+   return window.__eoStableState.streak>=required;
+  },{source:stableSource,required:require("./layout-stable.cjs").REQUIRED},{timeout:180000,polling:250});
   const pdf=await env.page.evaluate(async()=>{
    const session=EOLocalSession,w=session.win;
    const load=url=>new Promise((ok,no)=>{const tag=w.document.createElement('script');tag.src=url;tag.onload=ok;tag.onerror=()=>no(Error('Local PDF script unavailable'));w.document.head.append(tag)});

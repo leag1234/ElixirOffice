@@ -171,6 +171,7 @@
     "generalSettings": "General",
     "viewMenu": "View",
     "rememberWindowPlacement": "Remember window position and size",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -181,7 +182,8 @@
     "linkRelative": "This link is relative to the document: save the document first.",
     "linkFailed": "The file could not be opened.",
     "linkConfirm": "Open this file with its default application?",
-    "linkOpen": "Open"
+    "linkOpen": "Open",
+    "aiPrivateHttp": "This connection is not encrypted. Use it only on a network you trust."
   },
   "fr": {
     "privacy": "Les documents restent sur cet ordinateur",
@@ -352,6 +354,7 @@
     "removeRecent": "Retirer de la liste",
     "clearRecents": "Vider la liste",
     "rememberWindowPlacement": "Mémoriser la position et la taille de la fenêtre",
+    "showQuickAccess": "Afficher la barre d’outils Accès rapide",
     "temporaryLocation": "Ce fichier se trouve dans un dossier temporaire. Enregistrez une copie pour conserver vos modifications.",
     "saveAs": "Enregistrer sous",
     "exportTitle": "Exporter une copie",
@@ -364,7 +367,8 @@
     "linkRelative": "Ce lien est relatif au document : enregistrez d'abord le document.",
     "linkFailed": "Impossible d'ouvrir le fichier.",
     "linkConfirm": "Ouvrir ce fichier avec son application par défaut ?",
-    "linkOpen": "Ouvrir"
+    "linkOpen": "Ouvrir",
+    "aiPrivateHttp": "Cette connexion n’est pas chiffrée. Ne l’utilisez que sur un réseau de confiance."
   },
   "de": {
     "privacy": "Dokumente bleiben auf diesem Computer",
@@ -533,6 +537,7 @@
     "generalSettings": "Allgemein",
     "viewMenu": "Ansicht",
     "rememberWindowPlacement": "Fensterposition und -größe merken",
+    "showQuickAccess": "Symbolleiste für den Schnellzugriff anzeigen",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -543,7 +548,8 @@
     "linkRelative": "Dieser Link ist relativ zum Dokument: Speichern Sie zuerst das Dokument.",
     "linkFailed": "Die Datei konnte nicht geöffnet werden.",
     "linkConfirm": "Diese Datei mit der Standardanwendung öffnen?",
-    "linkOpen": "Öffnen"
+    "linkOpen": "Öffnen",
+    "aiPrivateHttp": "Diese Verbindung ist nicht verschlüsselt. Verwenden Sie sie nur in einem vertrauenswürdigen Netzwerk."
   },
   "es": {
     "privacy": "Los documentos permanecen en este equipo",
@@ -712,6 +718,7 @@
     "generalSettings": "General",
     "viewMenu": "Ver",
     "rememberWindowPlacement": "Recordar la posición y el tamaño de la ventana",
+    "showQuickAccess": "Mostrar la barra de herramientas de acceso rápido",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -722,7 +729,8 @@
     "linkRelative": "Este vínculo es relativo al documento: guarde primero el documento.",
     "linkFailed": "No se pudo abrir el archivo.",
     "linkConfirm": "¿Abrir este archivo con su aplicación predeterminada?",
-    "linkOpen": "Abrir"
+    "linkOpen": "Abrir",
+    "aiPrivateHttp": "Esta conexión no está cifrada. Úsela solo en una red de confianza."
   },
   "it": {
     "privacy": "I documenti restano su questo computer",
@@ -891,6 +899,7 @@
     "generalSettings": "Generale",
     "viewMenu": "Visualizza",
     "rememberWindowPlacement": "Memorizza posizione e dimensioni della finestra",
+    "showQuickAccess": "Mostra barra di accesso rapido",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -901,7 +910,8 @@
     "linkRelative": "Questo collegamento è relativo al documento: salvare prima il documento.",
     "linkFailed": "Impossibile aprire il file.",
     "linkConfirm": "Aprire questo file con l'applicazione predefinita?",
-    "linkOpen": "Apri"
+    "linkOpen": "Apri",
+    "aiPrivateHttp": "Questa connessione non è cifrata. Usala solo su una rete di cui ti fidi."
   },
   "pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1070,6 +1080,7 @@
     "generalSettings": "Geral",
     "viewMenu": "Exibir",
     "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela",
+    "showQuickAccess": "Mostrar a Barra de Ferramentas de Acesso Rápido",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1080,7 +1091,8 @@
     "linkRelative": "Este link é relativo ao documento: salve o documento primeiro.",
     "linkFailed": "Não foi possível abrir o arquivo.",
     "linkConfirm": "Abrir este arquivo com o aplicativo padrão?",
-    "linkOpen": "Abrir"
+    "linkOpen": "Abrir",
+    "aiPrivateHttp": "Esta ligação não está cifrada. Utilize-a apenas numa rede de confiança."
   },
   "pt-pt": {
     "privacy": "Os documentos ficam neste computador",
@@ -1249,6 +1261,7 @@
     "generalSettings": "Geral",
     "viewMenu": "Ver",
     "rememberWindowPlacement": "Memorizar a posição e o tamanho da janela",
+    "showQuickAccess": "Mostrar a Barra de Ferramentas de Acesso Rápido",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1259,7 +1272,8 @@
     "linkRelative": "Esta ligação é relativa ao documento: guarde primeiro o documento.",
     "linkFailed": "Não foi possível abrir o ficheiro.",
     "linkConfirm": "Abrir este ficheiro com a aplicação predefinida?",
-    "linkOpen": "Abrir"
+    "linkOpen": "Abrir",
+    "aiPrivateHttp": "Esta ligação não está cifrada. Utilize-a apenas numa rede de confiança."
   },
   "nl": {
     "privacy": "Documenten blijven op deze computer",
@@ -1428,6 +1442,7 @@
     "generalSettings": "Algemeen",
     "viewMenu": "Beeld",
     "rememberWindowPlacement": "Vensterpositie en -grootte onthouden",
+    "showQuickAccess": "Werkbalk Snelle toegang weergeven",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1438,7 +1453,8 @@
     "linkRelative": "Deze koppeling is relatief aan het document: sla het document eerst op.",
     "linkFailed": "Het bestand kan niet worden geopend.",
     "linkConfirm": "Dit bestand openen met de standaardtoepassing?",
-    "linkOpen": "Openen"
+    "linkOpen": "Openen",
+    "aiPrivateHttp": "Deze verbinding is niet versleuteld. Gebruik haar alleen op een netwerk dat u vertrouwt."
   },
   "pl": {
     "privacy": "Dokumenty pozostają na tym komputerze",
@@ -1607,6 +1623,7 @@
     "generalSettings": "Ogólne",
     "viewMenu": "Widok",
     "rememberWindowPlacement": "Zapamiętaj położenie i rozmiar okna",
+    "showQuickAccess": "Pokaż pasek narzędzi Szybki dostęp",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1617,7 +1634,8 @@
     "linkRelative": "To hiperłącze jest względne wobec dokumentu: najpierw zapisz dokument.",
     "linkFailed": "Nie można otworzyć pliku.",
     "linkConfirm": "Otworzyć ten plik w aplikacji domyślnej?",
-    "linkOpen": "Otwórz"
+    "linkOpen": "Otwórz",
+    "aiPrivateHttp": "To połączenie nie jest szyfrowane. Używaj go tylko w zaufanej sieci."
   },
   "ru": {
     "privacy": "Документы остаются на этом компьютере",
@@ -1786,6 +1804,7 @@
     "generalSettings": "Общие",
     "viewMenu": "Вид",
     "rememberWindowPlacement": "Запоминать положение и размер окна",
+    "showQuickAccess": "Показать панель быстрого доступа",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1796,7 +1815,8 @@
     "linkRelative": "Эта ссылка задана относительно документа: сначала сохраните документ.",
     "linkFailed": "Не удалось открыть файл.",
     "linkConfirm": "Открыть этот файл в приложении по умолчанию?",
-    "linkOpen": "Открыть"
+    "linkOpen": "Открыть",
+    "aiPrivateHttp": "Это соединение не зашифровано. Используйте его только в сети, которой вы доверяете."
   },
   "ja": {
     "privacy": "文書はこのコンピューターに保存されます",
@@ -1965,6 +1985,7 @@
     "generalSettings": "全般",
     "viewMenu": "表示",
     "rememberWindowPlacement": "ウィンドウの位置とサイズを記憶する",
+    "showQuickAccess": "クイック アクセス ツール バーを表示する",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -1975,7 +1996,8 @@
     "linkRelative": "このリンクはドキュメントからの相対パスです。先にドキュメントを保存してください。",
     "linkFailed": "ファイルを開けませんでした。",
     "linkConfirm": "このファイルを既定のアプリで開きますか?",
-    "linkOpen": "開く"
+    "linkOpen": "開く",
+    "aiPrivateHttp": "この接続は暗号化されていません。信頼できるネットワークでのみ使用してください。"
   },
   "zh": {
     "privacy": "文档保留在此计算机上",
@@ -2144,6 +2166,7 @@
     "generalSettings": "常规",
     "viewMenu": "视图",
     "rememberWindowPlacement": "记住窗口的位置和大小",
+    "showQuickAccess": "显示快速访问工具栏",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -2154,7 +2177,8 @@
     "linkRelative": "此链接是相对于文档的路径:请先保存文档。",
     "linkFailed": "无法打开该文件。",
     "linkConfirm": "要使用默认应用程序打开此文件吗?",
-    "linkOpen": "打开"
+    "linkOpen": "打开",
+    "aiPrivateHttp": "此连接未加密。请仅在您信任的网络中使用。"
   },
   "zh-tw": {
     "privacy": "文件保留在此電腦上",
@@ -2326,6 +2350,7 @@
     "generalSettings": "一般",
     "viewMenu": "檢視",
     "rememberWindowPlacement": "記住視窗的位置與大小",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -2336,7 +2361,8 @@
     "linkRelative": "此連結是相對於文件的路徑:請先儲存文件。",
     "linkFailed": "無法開啟檔案。",
     "linkConfirm": "要使用預設應用程式開啟此檔案嗎?",
-    "linkOpen": "開啟"
+    "linkOpen": "開啟",
+    "aiPrivateHttp": "此連線未加密。請僅在您信任的網路中使用。"
   },
   "ar": {
     "privacy": "تبقى المستندات على هذا الكمبيوتر",
@@ -2508,6 +2534,7 @@
     "generalSettings": "عام",
     "viewMenu": "عرض",
     "rememberWindowPlacement": "تذكّر موضع النافذة وحجمها",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -2518,7 +2545,8 @@
     "linkRelative": "هذا الارتباط نسبي إلى المستند: احفظ المستند أولاً.",
     "linkFailed": "تعذر فتح الملف.",
     "linkConfirm": "هل تريد فتح هذا الملف باستخدام التطبيق الافتراضي؟",
-    "linkOpen": "فتح"
+    "linkOpen": "فتح",
+    "aiPrivateHttp": "هذا الاتصال غير مشفّر. استخدمه فقط على شبكة تثق بها."
   },
   "az": {
     "privacy": "Sənədlər bu kompüterdə qalır",
@@ -2690,6 +2718,7 @@
     "generalSettings": "Ümumi",
     "viewMenu": "Görünüş",
     "rememberWindowPlacement": "Pəncərənin mövqeyini və ölçüsünü yadda saxla",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -2700,7 +2729,8 @@
     "linkRelative": "Bu keçid sənədə nisbidir: əvvəlcə sənədi saxlayın.",
     "linkFailed": "Fayl açıla bilmədi.",
     "linkConfirm": "Bu fayl defolt tətbiqlə açılsın?",
-    "linkOpen": "Aç"
+    "linkOpen": "Aç",
+    "aiPrivateHttp": "Bu bağlantı şifrələnməyib. Ondan yalnız etibar etdiyiniz şəbəkədə istifadə edin."
   },
   "be": {
     "privacy": "Дакументы застаюцца на гэтым камп’ютары",
@@ -2872,6 +2902,7 @@
     "generalSettings": "Агульныя",
     "viewMenu": "Выгляд",
     "rememberWindowPlacement": "Запамінаць становішча і памер акна",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -2882,7 +2913,8 @@
     "linkRelative": "Гэта спасылка зададзена адносна дакумента: спачатку захавайце дакумент.",
     "linkFailed": "Не ўдалося адкрыць файл.",
     "linkConfirm": "Адкрыць гэты файл у праграме па змаўчанні?",
-    "linkOpen": "Адкрыць"
+    "linkOpen": "Адкрыць",
+    "aiPrivateHttp": "Гэта злучэнне не зашыфравана. Выкарыстоўвайце яго толькі ў сетцы, якой вы давяраеце."
   },
   "bg": {
     "privacy": "Документите остават на този компютър",
@@ -3057,6 +3089,7 @@
     "generalSettings": "Общи",
     "viewMenu": "Изглед",
     "rememberWindowPlacement": "Запомняне на позицията и размера на прозореца",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3067,7 +3100,8 @@
     "linkRelative": "Тази връзка е относителна спрямо документа: първо запазете документа.",
     "linkFailed": "Файлът не можа да бъде отворен.",
     "linkConfirm": "Да се отвори ли този файл с приложението по подразбиране?",
-    "linkOpen": "Отвори"
+    "linkOpen": "Отвори",
+    "aiPrivateHttp": "Тази връзка не е криптирана. Използвайте я само в мрежа, на която имате доверие."
   },
   "ca": {
     "privacy": "Els documents romanen en aquest ordinador",
@@ -3239,6 +3273,7 @@
     "generalSettings": "General",
     "viewMenu": "Visualització",
     "rememberWindowPlacement": "Recorda la posició i la mida de la finestra",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3249,7 +3284,8 @@
     "linkRelative": "Aquest enllaç és relatiu al document: deseu primer el document.",
     "linkFailed": "No s'ha pogut obrir el fitxer.",
     "linkConfirm": "Voleu obrir aquest fitxer amb l'aplicació predeterminada?",
-    "linkOpen": "Obre"
+    "linkOpen": "Obre",
+    "aiPrivateHttp": "Aquesta connexió no està xifrada. Feu-la servir només en una xarxa de confiança."
   },
   "cs": {
     "privacy": "Dokumenty zůstávají v tomto počítači",
@@ -3421,6 +3457,7 @@
     "generalSettings": "Obecné",
     "viewMenu": "Zobrazení",
     "rememberWindowPlacement": "Pamatovat si polohu a velikost okna",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3431,7 +3468,8 @@
     "linkRelative": "Tento odkaz je relativní k dokumentu: nejprve dokument uložte.",
     "linkFailed": "Soubor se nepodařilo otevřít.",
     "linkConfirm": "Otevřít tento soubor ve výchozí aplikaci?",
-    "linkOpen": "Otevřít"
+    "linkOpen": "Otevřít",
+    "aiPrivateHttp": "Toto spojení není šifrované. Používejte ho pouze v síti, které důvěřujete."
   },
   "da": {
     "privacy": "Dokumenter bliver på denne computer",
@@ -3603,6 +3641,7 @@
     "generalSettings": "Generelt",
     "viewMenu": "Vis",
     "rememberWindowPlacement": "Husk vinduets placering og størrelse",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3613,7 +3652,8 @@
     "linkRelative": "Dette link er relativt til dokumentet: gem dokumentet først.",
     "linkFailed": "Filen kunne ikke åbnes.",
     "linkConfirm": "Vil du åbne denne fil med standardprogrammet?",
-    "linkOpen": "Åbn"
+    "linkOpen": "Åbn",
+    "aiPrivateHttp": "Denne forbindelse er ikke krypteret. Brug den kun på et netværk, du stoler på."
   },
   "el": {
     "privacy": "Τα έγγραφα παραμένουν σε αυτόν τον υπολογιστή",
@@ -3785,6 +3825,7 @@
     "generalSettings": "Γενικά",
     "viewMenu": "Προβολή",
     "rememberWindowPlacement": "Απομνημόνευση θέσης και μεγέθους παραθύρου",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3795,7 +3836,8 @@
     "linkRelative": "Αυτός ο σύνδεσμος είναι σχετικός με το έγγραφο: αποθηκεύστε πρώτα το έγγραφο.",
     "linkFailed": "Δεν ήταν δυνατό το άνοιγμα του αρχείου.",
     "linkConfirm": "Να ανοίξει αυτό το αρχείο με την προεπιλεγμένη εφαρμογή;",
-    "linkOpen": "Άνοιγμα"
+    "linkOpen": "Άνοιγμα",
+    "aiPrivateHttp": "Αυτή η σύνδεση δεν είναι κρυπτογραφημένη. Χρησιμοποιήστε την μόνο σε δίκτυο που εμπιστεύεστε."
   },
   "eu": {
     "privacy": "Dokumentuak ordenagailu honetan geratzen dira",
@@ -3967,6 +4009,7 @@
     "generalSettings": "Orokorra",
     "viewMenu": "Ikusi",
     "rememberWindowPlacement": "Gogoratu leihoaren kokapena eta tamaina",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -3977,7 +4020,8 @@
     "linkRelative": "Esteka hau dokumentuarekiko erlatiboa da: gorde dokumentua lehenengo.",
     "linkFailed": "Ezin izan da fitxategia ireki.",
     "linkConfirm": "Fitxategi hau aplikazio lehenetsiarekin ireki nahi duzu?",
-    "linkOpen": "Ireki"
+    "linkOpen": "Ireki",
+    "aiPrivateHttp": "Konexio hau ez dago zifratuta. Erabili soilik fidagarria den sare batean."
   },
   "fi": {
     "privacy": "Asiakirjat pysyvät tällä tietokoneella",
@@ -4151,6 +4195,7 @@
     "generalSettings": "Yleiset",
     "viewMenu": "Näytä",
     "rememberWindowPlacement": "Muista ikkunan sijainti ja koko",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -4161,7 +4206,8 @@
     "linkRelative": "Tämä linkki on suhteellinen asiakirjaan: tallenna asiakirja ensin.",
     "linkFailed": "Tiedostoa ei voitu avata.",
     "linkConfirm": "Avataanko tämä tiedosto oletussovelluksella?",
-    "linkOpen": "Avaa"
+    "linkOpen": "Avaa",
+    "aiPrivateHttp": "Tämä yhteys ei ole salattu. Käytä sitä vain verkossa, johon luotat."
   },
   "gl": {
     "privacy": "Os documentos quedan neste ordenador",
@@ -4333,6 +4379,7 @@
     "generalSettings": "Xeral",
     "viewMenu": "Ver",
     "rememberWindowPlacement": "Lembrar a posición e o tamaño da xanela",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -4343,7 +4390,8 @@
     "linkRelative": "Esta ligazón é relativa ao documento: garde primeiro o documento.",
     "linkFailed": "Non se puido abrir o ficheiro.",
     "linkConfirm": "Abrir este ficheiro coa aplicación predeterminada?",
-    "linkOpen": "Abrir"
+    "linkOpen": "Abrir",
+    "aiPrivateHttp": "Esta conexión non está cifrada. Úsaa só nunha rede de confianza."
   },
   "he": {
     "privacy": "המסמכים נשארים במחשב זה",
@@ -4515,6 +4563,7 @@
     "generalSettings": "כללי",
     "viewMenu": "תצוגה",
     "rememberWindowPlacement": "זכירת מיקום החלון וגודלו",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -4525,7 +4574,8 @@
     "linkRelative": "הקישור הזה יחסי למסמך: שמור תחילה את המסמך.",
     "linkFailed": "לא ניתן היה לפתוח את הקובץ.",
     "linkConfirm": "לפתוח את הקובץ הזה באמצעות יישום ברירת המחדל?",
-    "linkOpen": "פתיחה"
+    "linkOpen": "פתיחה",
+    "aiPrivateHttp": "חיבור זה אינו מוצפן. השתמשו בו רק ברשת שאתם סומכים עליה."
   },
   "hu": {
     "privacy": "A dokumentumok ezen a számítógépen maradnak",
@@ -4697,6 +4747,7 @@
     "generalSettings": "Általános",
     "viewMenu": "Nézet",
     "rememberWindowPlacement": "Ablak helyzetének és méretének megjegyzése",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -4707,7 +4758,8 @@
     "linkRelative": "Ez a hivatkozás a dokumentumhoz képest relatív: először mentse a dokumentumot.",
     "linkFailed": "A fájlt nem sikerült megnyitni.",
     "linkConfirm": "Megnyitja ezt a fájlt az alapértelmezett alkalmazással?",
-    "linkOpen": "Megnyitás"
+    "linkOpen": "Megnyitás",
+    "aiPrivateHttp": "Ez a kapcsolat nem titkosított. Csak megbízható hálózaton használja."
   },
   "hy": {
     "privacy": "Փաստաթղթերը մնում են այս համակարգչում",
@@ -4879,6 +4931,7 @@
     "generalSettings": "Ընդհանուր",
     "viewMenu": "Տեսք",
     "rememberWindowPlacement": "Հիշել պատուհանի դիրքն ու չափը",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -4889,7 +4942,8 @@
     "linkRelative": "Այս հղումը փաստաթղթի նկատմամբ հարաբերական է․ նախ պահպանեք փաստաթուղթը։",
     "linkFailed": "Չհաջողվեց բացել ֆայլը։",
     "linkConfirm": "Բացե՞լ այս ֆայլը լռելյայն հավելվածով։",
-    "linkOpen": "Բացել"
+    "linkOpen": "Բացել",
+    "aiPrivateHttp": "Այս կապը գաղտնագրված չէ։ Օգտագործեք այն միայն վստահելի ցանցում։"
   },
   "id": {
     "privacy": "Dokumen tetap berada di komputer ini",
@@ -5061,6 +5115,7 @@
     "generalSettings": "Umum",
     "viewMenu": "Tampilan",
     "rememberWindowPlacement": "Ingat posisi dan ukuran jendela",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5071,7 +5126,8 @@
     "linkRelative": "Tautan ini relatif terhadap dokumen: simpan dokumen terlebih dahulu.",
     "linkFailed": "File tidak dapat dibuka.",
     "linkConfirm": "Buka file ini dengan aplikasi default?",
-    "linkOpen": "Buka"
+    "linkOpen": "Buka",
+    "aiPrivateHttp": "Koneksi ini tidak terenkripsi. Gunakan hanya di jaringan yang Anda percayai."
   },
   "ko": {
     "privacy": "문서는 이 컴퓨터에 보관됩니다",
@@ -5243,6 +5299,7 @@
     "generalSettings": "일반",
     "viewMenu": "보기",
     "rememberWindowPlacement": "창 위치 및 크기 기억",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5253,7 +5310,8 @@
     "linkRelative": "이 링크는 문서를 기준으로 한 상대 경로입니다. 먼저 문서를 저장하세요.",
     "linkFailed": "파일을 열 수 없습니다.",
     "linkConfirm": "기본 응용 프로그램으로 이 파일을 여시겠습니까?",
-    "linkOpen": "열기"
+    "linkOpen": "열기",
+    "aiPrivateHttp": "이 연결은 암호화되어 있지 않습니다. 신뢰할 수 있는 네트워크에서만 사용하세요."
   },
   "lo": {
     "privacy": "ເອກະສານຢູ່ໃນຄອມພິວເຕີນີ້",
@@ -5425,6 +5483,7 @@
     "generalSettings": "ທົ່ວໄປ",
     "viewMenu": "ເບິ່ງ",
     "rememberWindowPlacement": "ຈື່ຕຳແໜ່ງ ແລະ ຂະໜາດຂອງປ່ອງຢ້ຽມ",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5435,7 +5494,8 @@
     "linkRelative": "ລິ້ງນີ້ອ້າງອີງກັບເອກະສານ: ກະລຸນາບັນທຶກເອກະສານກ່ອນ.",
     "linkFailed": "ບໍ່ສາມາດເປີດໄຟລ໌ໄດ້.",
     "linkConfirm": "ເປີດໄຟລ໌ນີ້ດ້ວຍແອັບພລິເຄຊັນເລີ່ມຕົ້ນບໍ?",
-    "linkOpen": "ເປີດ"
+    "linkOpen": "ເປີດ",
+    "aiPrivateHttp": "ການເຊື່ອມຕໍ່ນີ້ບໍ່ໄດ້ເຂົ້າລະຫັດ. ໃຊ້ສະເພາະໃນເຄືອຂ່າຍທີ່ທ່ານເຊື່ອຖືເທົ່ານັ້ນ."
   },
   "lv": {
     "privacy": "Dokumenti paliek šajā datorā",
@@ -5607,6 +5667,7 @@
     "generalSettings": "Vispārīgi",
     "viewMenu": "Skats",
     "rememberWindowPlacement": "Atcerēties loga novietojumu un lielumu",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5617,7 +5678,8 @@
     "linkRelative": "Šī saite ir relatīva pret dokumentu: vispirms saglabājiet dokumentu.",
     "linkFailed": "Failu neizdevās atvērt.",
     "linkConfirm": "Vai atvērt šo failu ar noklusējuma lietojumprogrammu?",
-    "linkOpen": "Atvērt"
+    "linkOpen": "Atvērt",
+    "aiPrivateHttp": "Šis savienojums nav šifrēts. Izmantojiet to tikai tīklā, kuram uzticaties."
   },
   "ms": {
     "privacy": "Dokumen kekal pada komputer ini",
@@ -5789,6 +5851,7 @@
     "generalSettings": "Umum",
     "viewMenu": "Paparan",
     "rememberWindowPlacement": "Ingat kedudukan dan saiz tetingkap",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5799,7 +5862,8 @@
     "linkRelative": "Pautan ini adalah relatif kepada dokumen: simpan dokumen dahulu.",
     "linkFailed": "Fail tidak dapat dibuka.",
     "linkConfirm": "Buka fail ini dengan aplikasi lalai?",
-    "linkOpen": "Buka"
+    "linkOpen": "Buka",
+    "aiPrivateHttp": "Sambungan ini tidak disulitkan. Gunakannya hanya pada rangkaian yang anda percayai."
   },
   "no": {
     "privacy": "Dokumenter blir på denne datamaskinen",
@@ -5982,6 +6046,7 @@
     "generalSettings": "Generelt",
     "viewMenu": "Vis",
     "rememberWindowPlacement": "Husk vinduets plassering og størrelse",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -5992,7 +6057,8 @@
     "linkRelative": "Denne koblingen er relativ til dokumentet: lagre dokumentet først.",
     "linkFailed": "Filen kunne ikke åpnes.",
     "linkConfirm": "Vil du åpne denne filen med standardprogrammet?",
-    "linkOpen": "Åpne"
+    "linkOpen": "Åpne",
+    "aiPrivateHttp": "Denne tilkoblingen er ikke kryptert. Bruk den bare på et nettverk du stoler på."
   },
   "ro": {
     "privacy": "Documentele rămân pe acest computer",
@@ -6164,6 +6230,7 @@
     "generalSettings": "General",
     "viewMenu": "Vizualizare",
     "rememberWindowPlacement": "Memorează poziția și dimensiunea ferestrei",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -6174,7 +6241,8 @@
     "linkRelative": "Această legătură este relativă la document: salvați mai întâi documentul.",
     "linkFailed": "Fișierul nu a putut fi deschis.",
     "linkConfirm": "Deschideți acest fișier cu aplicația implicită?",
-    "linkOpen": "Deschide"
+    "linkOpen": "Deschide",
+    "aiPrivateHttp": "Această conexiune nu este criptată. Folosiți-o doar într-o rețea de încredere."
   },
   "si": {
     "privacy": "ලේඛන මෙම පරිගණකයේ රැඳේ",
@@ -6346,6 +6414,7 @@
     "generalSettings": "සාමාන්‍ය",
     "viewMenu": "දසුන",
     "rememberWindowPlacement": "කවුළුවේ පිහිටීම සහ ප්‍රමාණය මතක තබා ගන්න",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -6356,7 +6425,8 @@
     "linkRelative": "මෙම සබැඳිය ලේඛනයට සාපේක්ෂයි: පළමුව ලේඛනය සුරකින්න.",
     "linkFailed": "ගොනුව විවෘත කළ නොහැකි විය.",
     "linkConfirm": "මෙම ගොනුව පෙරනිමි යෙදුම සමඟ විවෘත කරන්නද?",
-    "linkOpen": "විවෘත කරන්න"
+    "linkOpen": "විවෘත කරන්න",
+    "aiPrivateHttp": "මෙම සම්බන්ධතාව සංකේතනය කර නැත. ඔබ විශ්වාස කරන ජාලයක පමණක් භාවිතා කරන්න."
   },
   "sk": {
     "privacy": "Dokumenty zostávajú v tomto počítači",
@@ -6528,6 +6598,7 @@
     "generalSettings": "Všeobecné",
     "viewMenu": "Zobraziť",
     "rememberWindowPlacement": "Zapamätať si polohu a veľkosť okna",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -6538,7 +6609,8 @@
     "linkRelative": "Tento odkaz je relatívny k dokumentu: najprv dokument uložte.",
     "linkFailed": "Súbor sa nepodarilo otvoriť.",
     "linkConfirm": "Otvoriť tento súbor v predvolenej aplikácii?",
-    "linkOpen": "Otvoriť"
+    "linkOpen": "Otvoriť",
+    "aiPrivateHttp": "Toto pripojenie nie je šifrované. Používajte ho iba v sieti, ktorej dôverujete."
   },
   "sl": {
     "privacy": "Dokumenti ostanejo v tem računalniku",
@@ -6714,6 +6786,7 @@
     "generalSettings": "Splošno",
     "viewMenu": "Pogled",
     "rememberWindowPlacement": "Zapomni si položaj in velikost okna",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -6724,7 +6797,8 @@
     "linkRelative": "Ta povezava je relativna glede na dokument: najprej shranite dokument.",
     "linkFailed": "Datoteke ni bilo mogoče odpreti.",
     "linkConfirm": "Ali želite to datoteko odpreti s privzetim programom?",
-    "linkOpen": "Odpri"
+    "linkOpen": "Odpri",
+    "aiPrivateHttp": "Ta povezava ni šifrirana. Uporabljajte jo samo v omrežju, ki mu zaupate."
   },
   "sq": {
     "privacy": "Dokumentet mbeten në këtë kompjuter",
@@ -6896,6 +6970,7 @@
     "generalSettings": "Të përgjithshme",
     "viewMenu": "Pamja",
     "rememberWindowPlacement": "Mbaj mend pozicionin dhe madhësinë e dritares",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -6906,7 +6981,8 @@
     "linkRelative": "Kjo lidhje është relative me dokumentin: ruajeni më parë dokumentin.",
     "linkFailed": "Skedari nuk mund të hapej.",
     "linkConfirm": "Ta hapni këtë skedar me aplikacionin e parazgjedhur?",
-    "linkOpen": "Hap"
+    "linkOpen": "Hap",
+    "aiPrivateHttp": "Ky lidhje nuk është e enkriptuar. Përdoreni vetëm në një rrjet që besoni."
   },
   "sr": {
     "privacy": "Dokumenti ostaju na ovom računaru",
@@ -7078,6 +7154,7 @@
     "generalSettings": "Opšte",
     "viewMenu": "Prikaz",
     "rememberWindowPlacement": "Zapamti položaj i veličinu prozora",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7088,7 +7165,8 @@
     "linkRelative": "Ova veza je relativna u odnosu na dokument: prvo sačuvajte dokument.",
     "linkFailed": "Datoteku nije moguće otvoriti.",
     "linkConfirm": "Otvoriti ovu datoteku podrazumevanom aplikacijom?",
-    "linkOpen": "Otvori"
+    "linkOpen": "Otvori",
+    "aiPrivateHttp": "Ova veza nije šifrovana. Koristite je samo na mreži kojoj verujete."
   },
   "sr-cyrl": {
     "privacy": "Документи остају на овом рачунару",
@@ -7260,6 +7338,7 @@
     "generalSettings": "Опште",
     "viewMenu": "Приказ",
     "rememberWindowPlacement": "Запамти положај и величину прозора",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7270,7 +7349,8 @@
     "linkRelative": "Ова веза је релативна у односу на документ: прво сачувајте документ.",
     "linkFailed": "Датотеку није могуће отворити.",
     "linkConfirm": "Отворити ову датотеку подразумеваном апликацијом?",
-    "linkOpen": "Отвори"
+    "linkOpen": "Отвори",
+    "aiPrivateHttp": "Ова веза није шифрована. Користите је само на мрежи којој верујете."
   },
   "sv": {
     "privacy": "Dokument stannar på den här datorn",
@@ -7442,6 +7522,7 @@
     "generalSettings": "Allmänt",
     "viewMenu": "Visa",
     "rememberWindowPlacement": "Kom ihåg fönstrets position och storlek",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7452,7 +7533,8 @@
     "linkRelative": "Den här länken är relativ till dokumentet: spara dokumentet först.",
     "linkFailed": "Det gick inte att öppna filen.",
     "linkConfirm": "Vill du öppna den här filen med standardprogrammet?",
-    "linkOpen": "Öppna"
+    "linkOpen": "Öppna",
+    "aiPrivateHttp": "Den här anslutningen är inte krypterad. Använd den bara i ett nätverk du litar på."
   },
   "tr": {
     "privacy": "Belgeler bu bilgisayarda kalır",
@@ -7624,6 +7706,7 @@
     "generalSettings": "Genel",
     "viewMenu": "Görünüm",
     "rememberWindowPlacement": "Pencere konumunu ve boyutunu hatırla",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7634,7 +7717,8 @@
     "linkRelative": "Bu bağlantı belgeye göredir: önce belgeyi kaydedin.",
     "linkFailed": "Dosya açılamadı.",
     "linkConfirm": "Bu dosya varsayılan uygulamayla açılsın mı?",
-    "linkOpen": "Aç"
+    "linkOpen": "Aç",
+    "aiPrivateHttp": "Bu bağlantı şifrelenmemiştir. Yalnızca güvendiğiniz bir ağda kullanın."
   },
   "uk": {
     "privacy": "Документи залишаються на цьому комп’ютері",
@@ -7806,6 +7890,7 @@
     "generalSettings": "Загальні",
     "viewMenu": "Вигляд",
     "rememberWindowPlacement": "Запам’ятовувати положення та розмір вікна",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7816,7 +7901,8 @@
     "linkRelative": "Це посилання задано відносно документа: спершу збережіть документ.",
     "linkFailed": "Не вдалося відкрити файл.",
     "linkConfirm": "Відкрити цей файл у програмі за замовчуванням?",
-    "linkOpen": "Відкрити"
+    "linkOpen": "Відкрити",
+    "aiPrivateHttp": "Це з’єднання не зашифроване. Використовуйте його лише в мережі, якій ви довіряєте."
   },
   "ur": {
     "privacy": "دستاویزات اس کمپیوٹر پر رہتی ہیں",
@@ -7988,6 +8074,7 @@
     "generalSettings": "عمومی",
     "viewMenu": "دیکھیں",
     "rememberWindowPlacement": "ونڈو کی جگہ اور سائز یاد رکھیں",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -7998,7 +8085,8 @@
     "linkRelative": "یہ لنک دستاویز کے نسبت سے ہے: پہلے دستاویز محفوظ کریں۔",
     "linkFailed": "فائل کھولی نہیں جا سکی۔",
     "linkConfirm": "کیا اس فائل کو ڈیفالٹ ایپلیکیشن سے کھولنا ہے؟",
-    "linkOpen": "کھولیں"
+    "linkOpen": "کھولیں",
+    "aiPrivateHttp": "یہ کنکشن خفیہ نہیں ہے۔ اسے صرف ایسے نیٹ ورک پر استعمال کریں جس پر آپ بھروسا کرتے ہیں۔"
   },
   "vi": {
     "privacy": "Tài liệu ở lại trên máy tính này",
@@ -8175,6 +8263,7 @@
     "generalSettings": "Chung",
     "viewMenu": "Xem",
     "rememberWindowPlacement": "Ghi nhớ vị trí và kích thước cửa sổ",
+    "showQuickAccess": "Show Quick Access Toolbar",
     "exportTitle": "Export a copy",
     "exportButton": "Export",
     "exportNote": "The document stays open on its original file.",
@@ -8185,6 +8274,7 @@
     "linkRelative": "Liên kết này là tương đối so với tài liệu: hãy lưu tài liệu trước.",
     "linkFailed": "Không thể mở tệp.",
     "linkConfirm": "Mở tệp này bằng ứng dụng mặc định?",
-    "linkOpen": "Mở"
+    "linkOpen": "Mở",
+    "aiPrivateHttp": "Kết nối này không được mã hóa. Chỉ sử dụng trên mạng mà bạn tin cậy."
   }
 }

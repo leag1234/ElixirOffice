@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 'use strict';
-const path=require('node:path'),net=require('node:net'),childProcess=require('node:child_process');
+const path=require('node:path'),fs=require('node:fs'),net=require('node:net'),childProcess=require('node:child_process');
 // Read Aloud uses the Web Speech API. On Linux Chromium only talks to speech-dispatcher when
 // enable-speech-dispatcher is set, and it never starts the daemon itself. The stock daemon also
 // quits five seconds after its last client, and Chromium asks for the voices only once, so the
@@ -45,4 +45,14 @@ async function ensureDaemon({platform=process.platform,env=process.env,connect,s
  }catch{}
  return true;
 }
-module.exports={socketPath,open,ensureDaemon};
+// Synchronous: true when a daemon is running (its socket exists) or the speech-dispatcher executable can be found.
+// Without either, libspeechd tries to autospawn a daemon from inside the multithreaded browser process and the forked
+// child crashes (#89), so the caller must not enable Chromium's speech-dispatcher support.
+function daemonAvailable({env=process.env,exists=file=>{try{return fs.existsSync(file);}catch{return false;}},executable=file=>{try{fs.accessSync(file,fs.constants.X_OK);return fs.statSync(file).isFile();}catch{return false;}}}={}){
+ const file=socketPath(env);
+ if(file&&exists(file))return true;
+ const dirs=String(env.PATH||'').split(path.delimiter).filter(Boolean);
+ for(const dir of ['/usr/bin','/usr/local/bin'])if(!dirs.includes(dir))dirs.push(dir);
+ return dirs.some(dir=>executable(path.join(dir,'speech-dispatcher')));
+}
+module.exports={socketPath,open,ensureDaemon,daemonAvailable};

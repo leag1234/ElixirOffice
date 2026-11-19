@@ -25,7 +25,8 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
    assert.deepEqual(extensions,['doc','docx','odp','ods','odt','ppt','pptx','xls','xlsx','rtf','txt','csv','dotx','docm','xltx','xlsm','potx','ppsx','pdf','md','markdown'].sort());
    const {types,unused}=require('./mac-after-pack.cjs');
    assert.equal(plist.CFBundleDocumentTypes.length,21);
-   for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
+   const {icons}=require('./mac-after-pack.cjs');
+   for(const entry of plist.CFBundleDocumentTypes){assert.equal(entry.LSHandlerRank,'Alternate');assert.equal(entry.CFBundleTypeIconFile,icons[entry.CFBundleTypeExtensions[0]]);assert(fs.existsSync(path.join(contents,'Resources',entry.CFBundleTypeIconFile)),entry.CFBundleTypeIconFile);assert.deepEqual(entry.LSItemContentTypes,[types[entry.CFBundleTypeExtensions[0]]]);}
    function checkPlists(folder){for(const entry of fs.readdirSync(folder,{withFileTypes:true})){
     const file=path.join(folder,entry.name);if(entry.isDirectory())checkPlists(file);else if(entry.name==='Info.plist'){
      const info=JSON.parse(run('/usr/bin/plutil',['-convert','json','-o','-',file]));

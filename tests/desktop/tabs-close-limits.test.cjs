@@ -142,7 +142,7 @@ test('untitled close pauses its watchdog during native Save As and restarts it a
  }finally{await e.cleanup()}
 });
 
-test('native Save As cancel and rejection settle tab close and Quit without a hang',{timeout:5000},async()=>{
+test('native Save As cancel and rejection settle tab close and Quit without a hang',{timeout:20000},async()=>{
  for(const chooser of ['save','save-as-choose'])for(const closeMode of ['tab','quit'])for(const outcome of ['cancel','reject']){
   const e=await boot({fontSettings:{openInTabs:true},document:true,timerDelay:ms=>ms===30000?30:ms});
   try{

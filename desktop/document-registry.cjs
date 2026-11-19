@@ -3,6 +3,9 @@
 const {EventEmitter}=require('node:events'),{AsyncLocalStorage}=require('node:async_hooks'),{randomUUID}=require('node:crypto');
 const MAX_DOCUMENTS=16;
 const LIMIT_MESSAGE='You can open up to 16 documents at a time. Close a tab before opening another document.';
+// Inactive tabs that are idle stop costing CPU (Chromium throttles hidden pages); any tab that is
+// active or doing work keeps running at full rate. ELIXIROFFICE_NO_TAB_THROTTLE=1 keeps every tab unthrottled.
+const throttleDisabled=()=>process.env.ELIXIROFFICE_NO_TAB_THROTTLE==='1';
 class DocumentRegistry extends EventEmitter{
  #windows=new Map();#documents=new Map();#senders=new Map();#context=new AsyncLocalStorage();#report;
  constructor({documentURL,shellURL,report=()=>{}}){super();this.documentURL=documentURL;this.shellURL=shellURL;this.#report=report;}
@@ -20,9 +23,23 @@ class DocumentRegistry extends EventEmitter{
   this.assertCapacity();
   const owner=this.window(windowId),contents=view.webContents;
   if(this.#senders.has(contents)||[...this.#windows.values()].some(item=>item.window.webContents===contents))throw Error('Document contents already registered');
-  const document={id:randomUUID(),generation:randomUUID(),windowId,view,contents,name,dirty:false,status:'opening',state,live:true,closing:false};
+  const document={id:randomUUID(),generation:randomUUID(),windowId,view,contents,name,dirty:false,status:'opening',state,live:true,closing:false,throttled:false};
   this.#documents.set(document.id,document);this.#senders.set(contents,document);owner.documents.push(document.id);
   this.changed(windowId);return document;
+ }
+ #throttleWanted(document,owner){
+  return !throttleDisabled()&&owner.activeId!==document.id&&document.status==='ready'&&!document.closing&&!document.state.busy&&!document.state.moving&&!document.state.closePending&&!owner.closeAllPending&&!owner.replacingFrame;
+ }
+ // Apply the desired throttling state to one document (or every document of a window). Safe to call at any time.
+ syncThrottle(target){
+  const documents=typeof target==='string'?(this.#windows.get(target)?.documents||[]).map(id=>this.#documents.get(id)):[target];
+  for(const document of documents){
+   if(!document?.live||document.contents.isDestroyed())continue;
+   const owner=this.#windows.get(document.windowId);if(!owner)continue;
+   const wanted=this.#throttleWanted(document,owner);
+   if(document.throttled===wanted)continue;
+   try{document.contents.setBackgroundThrottling?.(wanted);document.throttled=wanted;}catch{}
+  }
  }
  document(id){const document=this.#documents.get(id);if(!document?.live||document.contents.isDestroyed())throw Error('Document unavailable');return document;}
  documents(windowId){return this.window(windowId).documents.map(id=>this.document(id));}
@@ -103,6 +120,7 @@ class DocumentRegistry extends EventEmitter{
  #notificationFailure(error){try{Promise.resolve(this.#report(error)).catch(()=>{});}catch{}}
  changed(windowId){
   this.window(windowId).revision++;
+  this.syncThrottle(windowId);
   for(const listener of this.rawListeners('changed')){
    try{
     const result=listener.call(this,windowId);

@@ -4,7 +4,7 @@ const {parentPort,workerData}=require('node:worker_threads'),fs=require('node:fs
 const {fallbackFamilies,eligible}=require('./font-resolver.js');
 const retryWindow=require('./windows-io.cjs');
 const registryFonts=require('./font-registry.cjs');
-const {names,canonicalRoots,inside,fontPath}=require('./fonts.cjs'),sfnt=require('./font-sfnt.cjs'),limits=require('./font-limits.cjs'),cache=require('./font-index-cache.cjs');
+const {names,canonicalRoots,inside,fontPath,unusableSymbolFace}=require('./fonts.cjs'),sfnt=require('./font-sfnt.cjs'),limits=require('./font-limits.cjs'),cache=require('./font-index-cache.cjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const wire=[160,102,214,32,20,150,71,250,149,105,184,80,176,65,73,72];
 let stopRequested=false;
@@ -17,18 +17,18 @@ async function build(options){
  let old={records:{}},cachePath;
  if(cacheDir){
   await fs.mkdir(cacheDir,{recursive:true,mode:0o700});const st=await fs.lstat(cacheDir);if(!st.isDirectory()||st.isSymbolicLink())throw Error('Invalid private font cache');
-  await fs.chmod(cacheDir,0o700);cachePath=path.join(cacheDir,'index-v4.json');
+  await fs.chmod(cacheDir,0o700);cachePath=path.join(cacheDir,'index-v5.json');
   old=await cache.load(cachePath,bundleIdentity)||{records:{}};
  }
  parentPort?.postMessage({phase:'cache',warm:old.complete===true&&Object.keys(old.records).length>0});
  const records={},handles=[],system=[],bundledFaces=[],stats={files:0,cacheHits:0,readBytes:0,skipped:0,eligibleFaces:0,ineligibleFaces:0,truncated:false,reason:null};
  const visited=new Set(),directories=new Set(),identities=new Map(),retry=retryWindow(undefined,1000);let checkpointFiles=0,lastCheckpoint=0;
- const headerBytes=Buffer.byteLength(JSON.stringify({version:4,bundleIdentity,complete:false,records:{}}));let metadataBytes=headerBytes;
+ const headerBytes=Buffer.byteLength(JSON.stringify({version:5,bundleIdentity,complete:false,records:{}}));let metadataBytes=headerBytes;
  function stop(reason){stats.truncated=true;stats.reason=stats.reason||reason;}
  async function checkpoint(complete=false,force=false){
   if(!cachePath)return;
   if(!force&&checkpointFiles>0&&stats.files-checkpointFiles<16&&Date.now()-lastCheckpoint<1000)return;
-  await cache.save(cachePath,{version:4,bundleIdentity,complete,records});
+  await cache.save(cachePath,{version:5,bundleIdentity,complete,records});
   checkpointFiles=stats.files;lastCheckpoint=Date.now();
  }
  // An empty cold checkpoint survives a deadline before the first file completes.
@@ -59,7 +59,7 @@ async function build(options){
    }finally{await handle.close();}
    const bytes=decode?Buffer.from(raw):raw;if(decode)for(let i=0;i<Math.min(bytes.length,32);i++)bytes[i]^=wire[i%16];
    const faces=sfnt.offsets(bytes).flatMap((offset,faceIndex)=>{
-    const face=names(bytes,offset);if(!face)return [];
+    const face=names(bytes,offset);if(!face||unusableSymbolFace(face,bytes,offset))return [];
     const inspected=sfnt.inspect(bytes,offset),base={...face,...inspected};
     return [{...base,faceIndex},...sfnt.instances(bytes,offset).map(instance=>({...base,style:instance.style,fullName:face.family+' '+instance.style,postscriptName:instance.postscriptName||face.postscriptName,instanceDefault:instance.isDefault,faceIndex:faceIndex|(instance.instance<<16)}))];
    });

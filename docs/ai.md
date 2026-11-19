@@ -470,6 +470,26 @@ CORS: the browser calls the endpoint directly, so the endpoint must allow this s
 
 Strings: `Strings.js`, 12 languages (en, fr, de, es, it, pt, pt-pt, nl, ru, pl, ja, zh).
 
+### 7.3.1 Local AI (Ollama, LM Studio, llama.cpp)
+
+The desktop application talks to any OpenAI-compatible server that is reachable from the computer. Elixir Office adds `/chat/completions` to the URL you enter, so the URL must be the **base URL ending in `/v1`**. A URL without `/v1` makes some servers answer "Unexpected endpoint"; the panel then says that the URL must end with `/v1`.
+
+| Server | Endpoint to enter | Model name |
+|---|---|---|
+| Ollama on this computer | `http://localhost:11434/v1` | the name shown by `ollama list`, for example `qwen3:8b` |
+| LM Studio (local server) | `http://localhost:1234/v1` | the identifier shown in LM Studio's server tab |
+| llama.cpp `llama-server` | `http://localhost:8080/v1` | any name (the loaded model answers) |
+
+**Another machine on your network.** Enter the address of that machine, for example `http://10.168.0.22:11434/v1` or `http://gemma.lan:11434/v1`. Plain HTTP is accepted, in the desktop application only, for these private-network hosts: `10.0.0.0/8`, `172.16.0.0/12`, `10.168.0.0/16`, link-local `169.254.0.0/16`, IPv6 unique-local (`fc00::/7`) and link-local (`fe80::/10`) addresses, and names ending in `.local`, `.lan` or `.home.arpa`. A name must also resolve to a private address when the request is made. Anything else (public hosts, `100.64.0.0/10` VPN addresses, bare names such as `gemma`) needs HTTPS. The server must listen on the network (for Ollama, `OLLAMA_HOST=0.0.0.0`).
+
+Plain HTTP to another machine is not encrypted. The settings form shows "This connection is not encrypted. Use it only on a network you trust." under the URL, the same sentence is added to the permission dialog the first time you save the endpoint, and it is repeated after Save. The web and server editors keep refusing such endpoints, because the browser calls the service itself and a page served over HTTPS cannot call plain HTTP.
+
+**Certificates.** For HTTPS the application verifies the server certificate against the roots it ships plus the operating system certificate store (and `NODE_EXTRA_CA_CERTS`), so a private certificate authority works once it is installed on the computer: on Linux `sudo trust anchor ca.crt` or `update-ca-certificates`, on Windows the "Trusted Root Certification Authorities" store, on macOS the login or system keychain with "Always Trust". The application re-reads the store at most once a minute, so no restart is needed. If the certificate is not trusted the panel says so. Verification cannot be switched off.
+
+**Model and context.** Use a model that supports tool calling and a context of at least **16K tokens** (set `OLLAMA_CONTEXT_LENGTH=16384` or the "Context Length" slider in LM Studio); a smaller context makes the server reject the request and the panel reports it. Reasoning models are slow on a CPU: add `{"reasoning_effort":"none"}` in Advanced > extra parameters to skip the thinking phase where the server supports it. Requests to local and private-network servers may take up to 20 minutes.
+
+**Compatibility with LM Studio and Qwen.** LM Studio rejects a named `tool_choice`; Elixir Office retries once with `"required"`. Tool calls that a model writes as `<tool_call>` blocks in the reasoning or the text are recognised. Both are covered by `tests/desktop/elixir-ai-local-openai.test.cjs`.
+
 ### 7.4 Public demo
 
 Unchanged: `tools/demo/container-setup.sh` writes its own `ds-elixir-ai.conf` (client configuration `{"endpoint":"/elixir-ai/v1","model":...,"managed":true}`, no `enabled` field, read as enabled), the gateway in front holds the key and the limits. The new image entrypoint keeps an include that already exists. Checked by `tests/ai-config/config.mjs` (a configuration without `enabled` is a server configuration) and by the generator's tests.
@@ -490,8 +510,11 @@ Browser requests refuse redirects, so an approved endpoint cannot redirect a
 document request to a plaintext service. The same-origin managed proxy remains
 /elixir-ai/v1; the generator validates its upstream endpoint before enabling it.
 
-There is no plaintext exception for an administrator's private LAN or VPN.
-Publish a remote Ollama, vLLM or gateway through an HTTPS endpoint instead. In
+There is no plaintext exception for an administrator's private LAN or VPN in the
+browser, the generated server proxy or the connectivity probe. Publish a remote
+Ollama, vLLM or gateway through an HTTPS endpoint instead. The desktop application
+alone accepts plain HTTP to private-network hosts (section 7.3.1) because its main
+process, not a web page, makes the request. In
 server configuration, loopback means the server/container, not the user's
 computer. Existing insecure browser settings stay stored until edited or
 removed, but AI stays off and makes no provider request. An invalid generated
@@ -505,7 +528,9 @@ the actual production AMD form handlers in an isolated browser, with rejected
 Save/Test, a synthetic local provider and a refused redirect.
 The desktop native bridge also checks the raw authority before URL parsing can
 canonicalize numeric IPv4 or encoded-host aliases. Direct preload callers and
-the shared form both require the explicit loopback spellings.
+the shared form both require the explicit loopback spellings or a literal
+private-network host (dotted-quad addresses without leading zeros, or a
+.local, .lan or .home.arpa name).
 
 
 ### Authenticating a self-hosted AI service
@@ -530,4 +555,8 @@ uses the same setting with curl certificate verification; when container and hos
 paths differ, override EO_AI_CA_FILE for the check with the checking host's path.
 The desktop native connector explicitly retains HTTPS certificate verification,
 as does the browser; a private CA must be trusted by the corresponding client.
+The desktop connector verifies against the bundled roots, the operating system
+store and NODE_EXTRA_CA_CERTS (Node's tls.getCACertificates; the previous
+connector used the bundled roots only, so a private CA installed in the system
+store was rejected, issue 43).
 Neither client offers an insecure-certificate switch.

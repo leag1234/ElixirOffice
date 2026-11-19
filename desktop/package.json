@@ -1,6 +1,6 @@
 {
   "name": "elixiroffice-desktop",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Local ElixirOffice desktop editors",
   "main": "main.cjs",
   "license": "AGPL-3.0-only",
@@ -65,27 +65,49 @@
       {
         "ext": [
           "docx",
-          "xlsx",
-          "pptx",
-          "odt",
-          "ods",
-          "odp",
           "doc",
-          "xls",
-          "ppt",
-          "rtf",
-          "txt",
-          "csv",
-          "dotx",
           "docm",
-          "xltx",
+          "dotx",
+          "odt",
+          "rtf",
+          "txt"
+        ],
+        "name": "ElixirOffice Text Document",
+        "role": "Editor",
+        "icon": "build/doc-icons/eo-doc-text"
+      },
+      {
+        "ext": [
+          "xlsx",
+          "xls",
           "xlsm",
+          "xltx",
+          "ods",
+          "csv"
+        ],
+        "name": "ElixirOffice Spreadsheet",
+        "role": "Editor",
+        "icon": "build/doc-icons/eo-doc-sheet"
+      },
+      {
+        "ext": [
+          "pptx",
+          "ppt",
           "potx",
           "ppsx",
+          "odp"
+        ],
+        "name": "ElixirOffice Presentation",
+        "role": "Editor",
+        "icon": "build/doc-icons/eo-doc-slides"
+      },
+      {
+        "ext": [
           "pdf"
         ],
-        "name": "Office document",
-        "role": "Editor"
+        "name": "PDF document",
+        "role": "Editor",
+        "icon": "build/doc-icons/eo-doc-pdf"
       },
       {
         "ext": [
@@ -93,7 +115,8 @@
           "markdown"
         ],
         "name": "Markdown document",
-        "role": "Editor"
+        "role": "Editor",
+        "icon": "build/doc-icons/eo-doc-markdown"
       }
     ],
     "win": {

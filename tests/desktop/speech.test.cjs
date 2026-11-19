@@ -46,5 +46,17 @@ test('failures to start never throw',async()=>{
 });
 test('main enables speech dispatcher on Linux only and starts the daemon before ready when packaged',()=>{
  const main=fs.readFileSync(path.join(__dirname,'../../desktop/main.cjs'),'utf8');
- assert.match(main,/process\.platform==='linux'\)\{[^}]*enable-speech-dispatcher[^}]*isPackaged\)void require\('\.\/speech\.cjs'\)\.ensureDaemon/);
+ assert.match(main,/process\.platform==='linux'&&require\('\.\/speech\.cjs'\)\.daemonAvailable\(\)\)\{[^}]*enable-speech-dispatcher[^}]*isPackaged\)void require\('\.\/speech\.cjs'\)\.ensureDaemon/);
+});
+test('the daemon counts as available when its socket exists or the executable is installed',()=>{
+ const env={XDG_RUNTIME_DIR:'/run/user/9',PATH:'/opt/bin'},sock='/run/user/9/speech-dispatcher/speechd.sock';
+ assert.equal(speech.daemonAvailable({env,exists:f=>f===sock,executable:()=>false}),true);
+ assert.equal(speech.daemonAvailable({env,exists:()=>false,executable:f=>f==='/opt/bin/speech-dispatcher'}),true);
+ assert.equal(speech.daemonAvailable({env,exists:()=>false,executable:f=>f==='/usr/bin/speech-dispatcher'}),true);
+ assert.equal(speech.daemonAvailable({env,exists:()=>false,executable:f=>f==='/usr/local/bin/speech-dispatcher'}),true);
+});
+test('without a socket or an executable the daemon is not available, and failing checks do not escape',()=>{
+ assert.equal(speech.daemonAvailable({env:{XDG_RUNTIME_DIR:'/r',PATH:'/opt/bin'},exists:()=>false,executable:()=>false}),false);
+ assert.equal(speech.daemonAvailable({env:{SPEECHD_ADDRESS:'inet_socket:localhost:6560'},exists:()=>false,executable:()=>false}),false);
+ assert.equal(typeof speech.daemonAvailable({env:{PATH:''}}),'boolean');
 });

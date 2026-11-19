@@ -106,6 +106,7 @@ Learn more: [AI features](ai-features.md) and [Passwords](local-passwords.md).
 | Display language | Choose the interface language independently of the document language, with a temporary override at startup. | — | — |
 | Updates | A daily check for new releases on GitHub (turn it off in Options); signed updates install from inside the app on Windows and Linux AppImage. | — | — |
 | Compact title bar | Optional, on Linux/X11. | — | — |
+| Hide the Quick Access Toolbar | Optional, like Word: right-click the quick access toolbar or the ribbon tab row, or Options > Window; the title row is 8 px shorter and the choice applies at once to every open document. | — | — |
 
 Learn more: [Desktop app](desktop.md) and [Display language](desktop-display-language.md).
 
@@ -144,6 +145,7 @@ Learn more: [Thesaurus](thesaurus.md) and [Interface notes](ui.md).
 - **Local file hyperlinks** (file://, absolute or relative paths) are accepted in Calc, Word and Slides; the desktop app asks natively and opens the file with the system, never a program or script.
 - **Ribbon conformity audit**: an automatic check of every ribbon tab in four languages and three widths runs on every test build.
 - **PDF**: editing the original text of a PDF, OCR and PDF to Word conversion are not supported.
+- **OpenDocument files are converted, not edited natively**: line breaks, heading levels and links are kept, but comments in text, sections and columns, computed fields (date, title, caption numbers), slide transitions and sheet tab colours are not kept on save. Embedded objects are protected by the save guard. [What is kept, changed, lost](opendocument.md).
 - **Beta software.** The server version is 0.1.1 and complex formatting, fonts and embedded objects can still convert differently: check important documents.
 
 Detailed engineering notes: historical engineering log.

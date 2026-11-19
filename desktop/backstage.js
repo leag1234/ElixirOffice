@@ -44,9 +44,10 @@ window.EODesktopBackstage=async function(win,main,info,action){
    event.preventDefault();event.stopImmediatePropagation();fm.hide();return action('help');
   });
   fm.miInfo?.show();fm.miInfo?.setCaption(t('info'));fm.$el.find('#fm-btn-info').insertAfter(fm.$el.find('#fm-btn-elx-open'));
-  // The editors create both Print items; show the one the editor's print command opens (#87):
-  // Print, Ctrl+P and PDF export open the preview panel, which cannot be selected while its item is hidden.
-  const printPreview=!!fm.miPrintWithPreview&&(fm.mode?fm.mode.canPreviewPrint===true:!fm.miPrint);
+  // Show the Print item the editor's print command opens (#87, #69): Print, Ctrl+P and PDF export open the
+  // preview panel, which cannot be selected while its item is hidden. Word and Slides create both items and
+  // say which one in the mode; the spreadsheet editor only has the preview item and never sets canPreviewPrint.
+  const printPreview=!!fm.miPrintWithPreview&&(!fm.miPrint||fm.mode?.canPreviewPrint===true);
   for(const item of [fm.miNew,fm.miSave,fm.miDownload]){item?.show();item?.setDisabled(false)}
   if(printPreview){fm.miPrint?.hide();fm.miPrintWithPreview.show();fm.miPrintWithPreview.setDisabled(false);fm.miPrintWithPreview.setCaption(t('print'));}
   else{fm.miPrintWithPreview?.hide();fm.miPrint?.show();fm.miPrint?.setDisabled(false);}
@@ -110,6 +111,25 @@ window.EODesktopBackstage=async function(win,main,info,action){
   return result;
  };
  bs.enhancePrint=function(){};
+ // The print panel shows "Waiting for printers" until the host sends its printer list (#92). Always end that wait:
+ // a list, an empty list (no printer or no print system) or, if the host does not answer, an empty list.
+ const feedPrinters=async()=>{
+  // Word and Slides always build the printer combo box; the spreadsheet print panel only does when its mode has isDesktopApp, which the local mode lacks, and its list update would throw.
+  const controller=app.getController('Print');if(!controller?.setPrintersInfo||win.SSE)return;
+  let result=null,timer;
+  try{result=await Promise.race([parent.eoDesktop.printers(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),6000)})]);}catch{result=null}
+  finally{clearTimeout(timer)}
+  const printers=(Array.isArray(result?.printers)?result.printers:[]).filter(p=>p&&typeof p.name==='string'&&p.name).map(p=>({name:p.name,isDefault:p.isDefault===true,color_supported:true,duplex_supported:true}));
+  const current=(printers.find(p=>p.isDefault)||printers[0]||{}).name||null;
+  const known=controller._state;if(known)known.printersList=[];
+  controller.setPrintersInfo(current,printers,false);
+ };
+ bs.refreshPrinters=feedPrinters;
+ {
+  const view=app.getController('Print')?.printSettings;
+  view?.on?.('show',()=>{feedPrinters()});
+  feedPrinters();
+ }
  bs.onAbout=()=>{fm.hide();return action('about')};
  bs.onClose=()=>action('close');
  // Controller callbacks were bound before this desktop extension was installed.

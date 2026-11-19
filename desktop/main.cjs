@@ -18,7 +18,8 @@ if(graphicsState.disabled)app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('disable-background-networking');
 app.commandLine.appendSwitch('disable-component-update');
 // Linux Read Aloud: Chromium needs the switch and a running speech-dispatcher before its first voice request.
-if(process.platform==='linux'){app.commandLine.appendSwitch('enable-speech-dispatcher');if(app.isPackaged)void require('./speech.cjs').ensureDaemon();}
+// Without the daemon installed, libspeechd autospawns it from a browser thread and the forked child crashes (#89): leave the switch off, Read Aloud then has no voices.
+if(process.platform==='linux'&&require('./speech.cjs').daemonAvailable()){app.commandLine.appendSwitch('enable-speech-dispatcher');if(app.isPackaged)void require('./speech.cjs').ensureDaemon();}
 protocol.registerSchemesAsPrivileged([{scheme:resources.SCHEME,privileges:{standard:true,secure:true,supportFetchAPI:true,codeCache:true,corsEnabled:true}}]);
 const assets = app.isPackaged ? path.join(process.resourcesPath,'assets') : path.join(__dirname,'assets');
 let conversionRuntime;
@@ -75,7 +76,7 @@ let captureOptions,captureStartupError;
 let languageInfo,defaultDocumentLanguage;
 function documentLanguage(){return captureOptions?languageInfo.language:defaultDocumentLanguage;}
 const fatalFallback={fatalMessage:'ElixirOffice encountered an unexpected problem and needs to close.',fatalDetail:'Changes not yet saved may be lost. Open the app again to continue.',close:'Close'};
-const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json'),exportTitle:'Export a copy',exportButton:'Export',exportNote:'The document stays open on its original file.',linkMissing:'The file does not exist or cannot be reached.',linkDenied:'A link cannot open programs, scripts or installers.',linkRelative:'This link is relative to the document: save the document first.',linkFailed:'The file could not be opened.',linkConfirm:'Open this file with its default application?',linkOpen:'Open',cancel:'Cancel'};
+const tabEnglish={...require('./tab-strings.json'),...require('./update-strings.cjs'),...require('./display-language-strings.cjs'),...require('./interface-size-strings.json'),exportTitle:'Export a copy',exportButton:'Export',exportNote:'The document stays open on its original file.',linkMissing:'The file does not exist or cannot be reached.',linkDenied:'A link cannot open programs, scripts or installers.',linkRelative:'This link is relative to the document: save the document first.',linkFailed:'The file could not be opened.',linkConfirm:'Open this file with its default application?',linkOpen:'Open',aiPrivateHttp:'This connection is not encrypted. Use it only on a network you trust.',cancel:'Cancel'};
 function localizedStrings(){
  const strings={...languageInfo?.strings};
  for(const [key,value] of Object.entries(tabEnglish))if(typeof strings[key]!=='string'||!strings[key].trim())strings[key]=value;
@@ -508,7 +509,7 @@ async function performClose(document){
 function closeWindow(owner){
  if(owner.replacingFrame)return owner.nativeRecoveryPromise.then(()=>closeWindow(owner),()=>false);
  if(owner.closePromise)return owner.closePromise;
- owner.closeAllPending=true;
+ owner.closeAllPending=true;registry.syncThrottle(owner.id);
  owner.closePromise=(async()=>{
   await rememberGeometry(owner.window,{flush:true});
   for(const id of [...owner.documents]){
@@ -530,7 +531,7 @@ function closeWindow(owner){
   }
   if(!owner.window.isDestroyed()){owner.allowClose=true;owner.window.destroy();}
   return true;
- })().catch(()=>{owner.allowClose=false;void safety.log('window-close-failure');return false;}).finally(()=>{owner.closePromise=null;owner.closeAllPending=false;if(registry.windows().includes(owner)&&!owner.window.isDestroyed())registry.changed(owner.id);});
+ })().catch(()=>{owner.allowClose=false;void safety.log('window-close-failure');return false;}).finally(()=>{owner.closePromise=null;owner.closeAllPending=false;if(registry.windows().includes(owner))registry.syncThrottle(owner.id);if(registry.windows().includes(owner)&&!owner.window.isDestroyed())registry.changed(owner.id);});
  return owner.closePromise;
 }
 let quitPending;
@@ -576,6 +577,14 @@ function broadcastReleaseNotice(){
  if(notice&&updateController)notice=updateController.decorate(notice);
  for(const owner of registry.windows())for(const document of registry.documents(owner.id)){
   try{if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:release-notice',notice);}catch{}
+ }
+}
+
+// Show Quick Access Toolbar (default on): pushed live to every open document, in every window and tab.
+function broadcastQuickAccess(){
+ const visible=settings.showQuickAccess!==false;
+ for(const owner of registry.windows())for(const document of registry.documents(owner.id)){
+  try{if(document.live&&!document.contents.isDestroyed())document.contents.send('eo:quick-access',visible);}catch{}
  }
 }
 
@@ -770,7 +779,7 @@ async function operation(run){
  const closeSave=['save','save-as-choose','save-as-info','save-as-cancel','password-lock','recovery-clear','export','pdf'];
  if(state.closePending&&!(state.waitingSave&&closeSave.includes(command)))throw Error('Document close is pending');
  const document=registry.context(),validate=registry.capture(document.id);
- state.busy=true;try{const result=await run();validate();return result;}catch(error){if(['save','save-as-choose','export','pdf','rename'].includes(command))clearDestination();if(error.code==='DOCUMENT_DESTINATION_OPEN')throw Error(t('tabDestinationBusy'));throw error;}finally{state.busy=false;if(document.live)registry.changed(document.windowId);}
+ state.busy=true;registry.syncThrottle(document);try{const result=await run();validate();return result;}catch(error){if(['save','save-as-choose','export','pdf','rename'].includes(command))clearDestination();if(error.code==='DOCUMENT_DESTINATION_OPEN')throw Error(t('tabDestinationBusy'));throw error;}finally{state.busy=false;if(document.live)registry.changed(document.windowId);}
 }
 function operationStage(scope,id,phase){
  if(typeof id==='string'&&/^local-operation-[0-9]+$/.test(id))docContents().send('eo:operation-stage',{scope,id,phase});
@@ -897,6 +906,8 @@ async function start() {
   handle('author',()=>typeof settings.author==='string'&&settings.author.trim()?settings.author:'ElixirOffice');
   handle('author-save',async value=>{if(typeof value!=='string'||!value.trim()||value.length>200||/[\u0000-\u001f\u007f]/.test(value))throw Error('Invalid author name');settings.author=value.trim();await persist();return settings.author;});
   handle('help',()=>help());
+  // Printer names for the print panel's combo box; always resolves (empty list without a print system).
+  handle('printers',()=>require('./printers.cjs').list(docContents()));
   const pastedImages=require('./pasted-image.cjs').create({session});
   handle('pasted-image',url=>pastedImages.fetch(url));
   // local file links of the editor: Chromium never lets the page open a file: URL itself; the native question is asked in openLocalLink
@@ -1158,6 +1169,7 @@ async function start() {
   });
   handle('window-options',()=>({
     customTitleBar:settings.customTitleBar===true,
+    showQuickAccess:settings.showQuickAccess!==false,
     rememberWindowPlacement:settings.rememberWindowPlacement!==false,
     openInTabs:settings.openInTabs===true,showHomeTab:settings.showHomeTab===true,
     hardwareAcceleration:settings.hardwareAcceleration!==false,hardwareAccelerationActive:!graphicsState.disabled,
@@ -1166,10 +1178,10 @@ async function start() {
   }));
   handle('window-settings',async value=>{
     if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid window settings');
-    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
-    if(!['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'].some(key=>key in value))throw Error('Invalid window settings');
+    for(const key of ['showQuickAccess','customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value&&typeof value[key]!=='boolean')throw Error('Invalid window settings');
+    if(!['showQuickAccess','customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'].some(key=>key in value))throw Error('Invalid window settings');
     if(value.customTitleBar&&settings.customTitleBar!==true&&!tabHost.compactAvailable())throw Error(t('nativeTitleBarUnavailable'));
-    for(const key of ['customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value)settings[key]=value[key];
+    for(const key of ['showQuickAccess','customTitleBar','openInTabs','showHomeTab','rememberWindowPlacement','hardwareAcceleration'])if(key in value)settings[key]=value[key];
     if('rememberWindowPlacement' in value){
       clearTimeout(geometryTimer);geometryTimer=null;
       if(!value.rememberWindowPlacement)delete settings.windowState;
@@ -1178,7 +1190,7 @@ async function start() {
         if(placement)settings.windowState=placement;
       }
     }
-    await persist();for(const owner of registry.windows())registry.changed(owner.id);return true;
+    await persist();for(const owner of registry.windows())registry.changed(owner.id);if('showQuickAccess' in value)broadcastQuickAccess();return true;
   });
   handle('recovery-options',()=>({enabled:settings.recoveryEnabled!==false,seconds:[15,30,60,120,300].includes(settings.recoverySeconds)?settings.recoverySeconds:60}));
   handle('recovery-settings',async(value)=>{
@@ -1220,7 +1232,7 @@ async function start() {
     const config=ai.configuration(value);
     if(!config){cancelAllAI();settings.ai=null;await persist();return {};}
     const selected=ai.endpoint(config.endpoint);
-    const result=await dialog.showMessageBox(documentWindow(),{type:'question',message:t('aiConsent'),detail:config.endpoint+'\n\n'+t(selected.local?'aiLocal':'aiRemote'),buttons:decisions.buttons([t('cancel'),t('allow')]),normalizeAccessKeys:true,defaultId:0,cancelId:0});
+    const result=await dialog.showMessageBox(documentWindow(),{type:'question',message:t('aiConsent'),detail:config.endpoint+'\n\n'+t(selected.local?'aiLocal':'aiRemote')+(selected.insecure?'\n\n'+t('aiPrivateHttp'):''),buttons:decisions.buttons([t('cancel'),t('allow')]),normalizeAccessKeys:true,defaultId:0,cancelId:0});
     if(result.response!==1)return false;
     if(value.apiKey){
       const storage=require('electron').safeStorage;
