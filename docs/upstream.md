@@ -222,7 +222,7 @@ The `en.json` locales of documenteditor main/mobile contain neither "ONLYOFFICE"
 - Windows packaging downloads `download.onlyoffice.com/.../FireDaemon-OpenSSL` (`document-server-package/Makefile:582`).
 - No "check update" call was found in server/web-apps/sdkjs.
 - License: `server/Common/sources/license.js` always returns success (`branding:true`, `customization:true`, `connections: LICENSE_CONNECTIONS = 99999`, `constants.js:84`). This is commit `075a3f3b` "feat: remove edition/license feature gates".
-- The file headers remain "(c) Copyright Ascensio System SIA 2010-2024", without the clause 7(b) logo nor the LV-1050 address, removed by the `strip-logo-clause.yml` workflow.
+- The file headers remain "(c) Copyright Ascensio System SIA 2010-2024", without the clause 7(b) logo or the LV-1050 address, removed by the `strip-logo-clause.yml` workflow.
 
 ## 6. Desktop
 
